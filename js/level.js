@@ -204,6 +204,7 @@ const level = {
   },
   //empty map for testing mobs
   intro() {
+    b.giveGuns(0, 1000)
     game.zoomScale = 1000 //1400 is normal
     game.zoomTransition(1600, 1)
 

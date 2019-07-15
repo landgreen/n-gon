@@ -230,28 +230,53 @@ const b = {
     {
       name: "laser",
       ammo: 0,
-      ammoPack: 350,
+      // ammoPack: 350,
+      ammoPack: Infinity,
       have: false,
       fire() {
         //mech.fireCDcycle = game.cycle + 1
-        let best;
-        const color = "#f00";
-        const range = 3000;
-        const path = [{
-            x: mech.pos.x + 20 * Math.cos(mech.angle),
-            y: mech.pos.y + 20 * Math.sin(mech.angle)
-          },
-          {
-            x: mech.pos.x + range * Math.cos(mech.angle),
-            y: mech.pos.y + range * Math.sin(mech.angle)
-          }
-        ];
-        const vertexCollision = function (v1, v1End, domain) {
-          for (let i = 0; i < domain.length; ++i) {
-            let vertices = domain[i].vertices;
-            const len = vertices.length - 1;
-            for (let j = 0; j < len; j++) {
-              results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+
+        //laser drains energy as well as bullets
+        const FIELD_DRAIN = 0.006
+        if (mech.fieldMeter < FIELD_DRAIN) {
+          mech.fireCDcycle = game.cycle + 120; // cool down if out of energy
+        } else {
+          mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
+          let best;
+          const color = "#f00";
+          const range = 3000;
+          const path = [{
+              x: mech.pos.x + 20 * Math.cos(mech.angle),
+              y: mech.pos.y + 20 * Math.sin(mech.angle)
+            },
+            {
+              x: mech.pos.x + range * Math.cos(mech.angle),
+              y: mech.pos.y + range * Math.sin(mech.angle)
+            }
+          ];
+          const vertexCollision = function (v1, v1End, domain) {
+            for (let i = 0; i < domain.length; ++i) {
+              let vertices = domain[i].vertices;
+              const len = vertices.length - 1;
+              for (let j = 0; j < len; j++) {
+                results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                if (results.onLine1 && results.onLine2) {
+                  const dx = v1.x - results.x;
+                  const dy = v1.y - results.y;
+                  const dist2 = dx * dx + dy * dy;
+                  if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                    best = {
+                      x: results.x,
+                      y: results.y,
+                      dist2: dist2,
+                      who: domain[i],
+                      v1: vertices[j],
+                      v2: vertices[j + 1]
+                    };
+                  }
+                }
+              }
+              results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
               if (results.onLine1 && results.onLine2) {
                 const dx = v1.x - results.x;
                 const dy = v1.y - results.y;
@@ -262,78 +287,48 @@ const b = {
                     y: results.y,
                     dist2: dist2,
                     who: domain[i],
-                    v1: vertices[j],
-                    v2: vertices[j + 1]
+                    v1: vertices[0],
+                    v2: vertices[len]
                   };
                 }
               }
             }
-            results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-            if (results.onLine1 && results.onLine2) {
-              const dx = v1.x - results.x;
-              const dy = v1.y - results.y;
-              const dist2 = dx * dx + dy * dy;
-              if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                best = {
-                  x: results.x,
-                  y: results.y,
-                  dist2: dist2,
-                  who: domain[i],
-                  v1: vertices[0],
-                  v2: vertices[len]
-                };
-              }
+          };
+          const checkforCollisions = function () {
+            best = {
+              x: null,
+              y: null,
+              dist2: Infinity,
+              who: null,
+              v1: null,
+              v2: null
+            };
+            vertexCollision(path[path.length - 2], path[path.length - 1], mob);
+            vertexCollision(path[path.length - 2], path[path.length - 1], map);
+            vertexCollision(path[path.length - 2], path[path.length - 1], body);
+          };
+          const laserHitMob = function (dmg) {
+            if (best.who.alive) {
+              dmg *= b.dmgScale * 0.05;
+              best.who.damage(dmg);
+              best.who.locatePlayer();
+              //draw mob damage circle
+              ctx.fillStyle = color;
+              ctx.beginPath();
+              ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
+              ctx.fill();
             }
-          }
-        };
-        const checkforCollisions = function () {
-          best = {
-            x: null,
-            y: null,
-            dist2: Infinity,
-            who: null,
-            v1: null,
-            v2: null
           };
-          vertexCollision(path[path.length - 2], path[path.length - 1], mob);
-          vertexCollision(path[path.length - 2], path[path.length - 1], map);
-          vertexCollision(path[path.length - 2], path[path.length - 1], body);
-        };
-        const laserHitMob = function (dmg) {
-          if (best.who.alive) {
-            dmg *= b.dmgScale * 0.065;
-            best.who.damage(dmg);
-            best.who.locatePlayer();
-            //draw mob damage circle
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
-            ctx.fill();
-          }
-        };
 
-        const reflection = function () {
-          // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-          const n = Matter.Vector.perp(Matter.Vector.normalise(Matter.Vector.sub(best.v1, best.v2)));
-          const d = Matter.Vector.sub(path[path.length - 1], path[path.length - 2]);
-          const nn = Matter.Vector.mult(n, 2 * Matter.Vector.dot(d, n));
-          const r = Matter.Vector.normalise(Matter.Vector.sub(d, nn));
-          path[path.length] = Matter.Vector.add(Matter.Vector.mult(r, range), path[path.length - 1]);
-        };
-        //beam before reflection
-        checkforCollisions();
-        if (best.dist2 != Infinity) {
-          //if hitting something
-          path[path.length - 1] = {
-            x: best.x,
-            y: best.y
+          const reflection = function () {
+            // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+            const n = Matter.Vector.perp(Matter.Vector.normalise(Matter.Vector.sub(best.v1, best.v2)));
+            const d = Matter.Vector.sub(path[path.length - 1], path[path.length - 2]);
+            const nn = Matter.Vector.mult(n, 2 * Matter.Vector.dot(d, n));
+            const r = Matter.Vector.normalise(Matter.Vector.sub(d, nn));
+            path[path.length] = Matter.Vector.add(Matter.Vector.mult(r, range), path[path.length - 1]);
           };
-          laserHitMob(1);
-
-          //1st reflection beam
-          reflection();
-          //ugly bug fix: this stops the reflection on a bug where the beam gets trapped inside a body
-          let who = best.who;
+          //beam before reflection
           checkforCollisions();
           if (best.dist2 != Infinity) {
             //if hitting something
@@ -341,41 +336,55 @@ const b = {
               x: best.x,
               y: best.y
             };
-            laserHitMob(0.75);
+            laserHitMob(1);
 
-            //2nd reflection beam
+            //1st reflection beam
+            reflection();
             //ugly bug fix: this stops the reflection on a bug where the beam gets trapped inside a body
-            if (who !== best.who) {
-              reflection();
-              checkforCollisions();
-              if (best.dist2 != Infinity) {
-                //if hitting something
-                path[path.length - 1] = {
-                  x: best.x,
-                  y: best.y
-                };
-                laserHitMob(0.5);
+            let who = best.who;
+            checkforCollisions();
+            if (best.dist2 != Infinity) {
+              //if hitting something
+              path[path.length - 1] = {
+                x: best.x,
+                y: best.y
+              };
+              laserHitMob(0.75);
+
+              //2nd reflection beam
+              //ugly bug fix: this stops the reflection on a bug where the beam gets trapped inside a body
+              if (who !== best.who) {
+                reflection();
+                checkforCollisions();
+                if (best.dist2 != Infinity) {
+                  //if hitting something
+                  path[path.length - 1] = {
+                    x: best.x,
+                    y: best.y
+                  };
+                  laserHitMob(0.5);
+                }
               }
             }
           }
-        }
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.lineDashOffset = 300 * Math.random()
-        // ctx.setLineDash([200 * Math.random(), 250 * Math.random()]);
+          ctx.fillStyle = color;
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.lineDashOffset = 300 * Math.random()
+          // ctx.setLineDash([200 * Math.random(), 250 * Math.random()]);
 
-        ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
-        for (let i = 1, len = path.length; i < len; ++i) {
-          ctx.beginPath();
-          ctx.moveTo(path[i - 1].x, path[i - 1].y);
-          ctx.lineTo(path[i].x, path[i].y);
-          ctx.stroke();
-          ctx.globalAlpha *= 0.5; //reflections are less intense
-          // ctx.globalAlpha -= 0.1; //reflections are less intense
+          ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
+          for (let i = 1, len = path.length; i < len; ++i) {
+            ctx.beginPath();
+            ctx.moveTo(path[i - 1].x, path[i - 1].y);
+            ctx.lineTo(path[i].x, path[i].y);
+            ctx.stroke();
+            ctx.globalAlpha *= 0.5; //reflections are less intense
+            // ctx.globalAlpha -= 0.1; //reflections are less intense
+          }
+          ctx.setLineDash([0, 0]);
+          ctx.globalAlpha = 1;
         }
-        ctx.setLineDash([0, 0]);
-        ctx.globalAlpha = 1;
       }
     },
     {

@@ -72,8 +72,14 @@ const powerUps = {
       //ammo given scales as mobs take more hits to kill
       const ammo = Math.ceil((target.ammoPack * (0.60 + 0.5 * Math.random())) / b.dmgScale);
       target.ammo += ammo;
-      game.updateGunHUD();
-      game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
+      if (target.ammo === Infinity) {
+        mech.fieldMeter = 1;
+        game.makeTextLog("+energy", 180);
+      } else {
+        game.updateGunHUD();
+        game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
+      }
+
     }
   },
   gun: {
