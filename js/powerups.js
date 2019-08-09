@@ -62,20 +62,24 @@ const powerUps = {
     effect() {
       //only get ammo for guns player has
       let target;
+      console.log(b.inventory.length)
       if (b.inventory.length > 0) {
         //add ammo to a gun in inventory
         target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
+        //try twice to give ammo to a gun with ammo, not Infinity
+        if (target.ammo === Infinity) target = b.guns[Math.floor(Math.random() * b.guns.length)];
+        if (target.ammo === Infinity) target = b.guns[Math.floor(Math.random() * b.guns.length)];
       } else {
-        //if you don't have a gun just add ammo to a random gun
+        //if you don't have any guns just add ammo to a random gun you don't have yet
         target = b.guns[Math.floor(Math.random() * b.guns.length)];
       }
-      //ammo given scales as mobs take more hits to kill
-      const ammo = Math.ceil((target.ammoPack * (0.60 + 0.5 * Math.random())) / b.dmgScale);
-      target.ammo += ammo;
       if (target.ammo === Infinity) {
         mech.fieldMeter = 1;
         game.makeTextLog("+energy", 180);
       } else {
+        //ammo given scales as mobs take more hits to kill
+        const ammo = Math.ceil((target.ammoPack * (0.60 + 0.5 * Math.random())) / b.dmgScale);
+        target.ammo += ammo;
         game.updateGunHUD();
         game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
       }
