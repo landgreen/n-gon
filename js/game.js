@@ -282,7 +282,7 @@ const game = {
         document.getElementById(b.inventory[i]).style.opacity = "0.3";
       }
       // document.getElementById(b.activeGun).style.fontSize = "30px";
-      document.getElementById(b.activeGun).style.opacity = "1";
+      if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
     }
   },
   updateGunHUD() {
