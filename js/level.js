@@ -12,7 +12,7 @@ const level = {
   start() {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
-      this.intro();
+      this.intro(); //starting level
       // spawn.setSpawnList();
       // game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
       // this.bosses();

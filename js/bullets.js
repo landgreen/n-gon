@@ -563,23 +563,23 @@ const b = {
     {
       name: "flak",
       ammo: 0,
-      ammoPack: 9,
+      ammoPack: 18,
       have: false,
       fire() {
         b.muzzleFlash(30);
-        const totalBullets = 7
+        const totalBullets = 5
         const angleStep = 0.08 / totalBullets
         let dir = mech.angle - angleStep * totalBullets / 2;
         for (let i = 0; i < totalBullets; i++) { //5 -> 7
           dir += angleStep
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 17, 4, b.fireAttributes(dir));
-          b.fireProps(35, 25 + 25 * Math.random(), dir, me); //cd , speed
+          b.fireProps(20, 24 + 30 * Math.random() - i, dir, me); //cd , speed
           //Matter.Body.setDensity(bullet[me], 0.00001);
-          bullet[me].endCycle = game.cycle + 16 + Math.ceil(7 * Math.random())
+          bullet[me].endCycle = game.cycle + 20 + i //16 + Math.ceil(8 * Math.random()
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
-          bullet[me].explodeRad = 90 + (Math.random() - 0.5) * 50;
+          bullet[me].explodeRad = 70 + (Math.random() - 0.5) * 50;
           bullet[me].onEnd = b.explode;
           bullet[me].onDmg = function () {
             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -644,6 +644,110 @@ const b = {
             ctx.fill();
           }
         };
+      }
+    },
+    {
+      name: "swarm",
+      ammo: 0,
+      ammoPack: 4,
+      have: false,
+      fire() {
+        const me = bullet.length;
+        const dir = mech.angle;
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir));
+        bullet[me].radius = 22; //used from drawing timer
+        b.fireProps(50, 12, dir, me); //cd , speed
+        b.drawOneBullet(bullet[me].vertices);
+        Matter.Body.setDensity(bullet[me], 0.000001);
+        bullet[me].endCycle = game.cycle + 160;
+        bullet[me].frictionAir = 0.01;
+        bullet[me].friction = 0;
+        bullet[me].restitution = 0.5;
+        // Matter.Body.setDensity(bullet[me], 0.000001);
+        // bullet[me].friction = 0.15;
+        // bullet[me].restitution = 0;
+
+        // bullet[me].explodeRad = 350 + Math.floor(Math.random() * 60);
+        bullet[me].minDmgSpeed = 1;
+        bullet[me].onDmg = function () {
+          this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
+        };
+        bullet[me].do = function () {
+          //extra gravity for harder arcs
+          this.force.y += this.mass * 0.002;
+        };
+
+        //spawn bullets on end
+        bullet[me].onEnd = function () {
+          const NUM = 12
+          for (let i = 0; i < NUM; i++) {
+            const bIndex = bullet.length;
+            bullet[bIndex] = Bodies.circle(this.position.x, this.position.y, 5, {
+              // density: 0.0015,			//frictionAir: 0.01,			
+              restitution: 1,
+              angle: dir,
+              friction: 0,
+              frictionAir: 0.01,
+              dmg: 0, //damage done in addition to the damage from momentum
+              classType: "bullet",
+              collisionFilter: {
+                category: 0x000100,
+                mask: 0x000011 //mask: 0x000101,  //for self collision
+              },
+              minDmgSpeed: 1,
+              onDmg() {
+                this.endCycle = 0; //bullet ends cycle after doing damage 
+              },
+              onEnd() {},
+              lookFrequency: 20 + Math.floor(12 * Math.random()),
+              do() {
+                this.force.y += this.mass * 0.00025; // high gravity because of the high friction
+
+                if (!(game.cycle % this.lookFrequency)) {
+                  this.close = null;
+                  this.lockedOn = null;
+                  let closeDist = Infinity;
+                  for (let i = 0, len = mob.length; i < len; ++i) {
+                    if (
+                      mob[i].alive &&
+                      mob[i].dropPowerUp &&
+                      Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                      Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                    ) {
+                      const targetVector = Matter.Vector.sub(this.position, mob[i].position)
+                      const dist = Matter.Vector.magnitude(targetVector);
+                      if (dist < closeDist) {
+                        this.close = mob[i].position;
+                        closeDist = dist;
+                        this.lockedOn = Matter.Vector.normalise(targetVector);
+                      }
+                    }
+                  }
+                }
+                //accelerate towards mobs
+                if (this.lockedOn) {
+                  const THRUST = this.mass * 0.001
+                  this.force.x -= THRUST * this.lockedOn.x
+                  this.force.y -= THRUST * this.lockedOn.y
+                }
+              },
+            });
+            bullet[bIndex].endCycle = game.cycle + 300 + Math.floor(Math.random() * 120);
+            bullet[bIndex].dmg = 1.6;
+            // bullet[bIndex].explodeRad = 100 + Math.floor(Math.random() * 30);
+            // bullet[bIndex].onEnd = b.explode; //makes bullet do explosive damage before despawn
+
+            const SPEED = 9;
+            const ANGLE = 2 * Math.PI * Math.random()
+            Matter.Body.setVelocity(bullet[bIndex], {
+              x: SPEED * Math.cos(ANGLE),
+              y: SPEED * Math.sin(ANGLE)
+            });
+            World.add(engine.world, bullet[bIndex]); //add bullet to world
+
+          }
+        }
+
       }
     },
     {
