@@ -121,7 +121,7 @@ function mobCollisionChecks(event) {
           //bullet mob collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             mob[k].foundPlayer();
-            let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
+            const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
             mob[k].damage(dmg);
             obj.onDmg(); //some bullets do actions when they hits things, like despawn
             game.drawList.push({

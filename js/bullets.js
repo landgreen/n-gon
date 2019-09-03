@@ -668,7 +668,7 @@ const b = {
       }
     },
     {
-      name: "grenade",
+      name: "grenades",
       ammo: 0,
       ammoPack: 4,
       have: false,
@@ -825,32 +825,41 @@ const b = {
       }
     },
     {
-      name: "bees",
+      name: "drones",
       ammo: 0,
-      ammoPack: 29,
+      ammoPack: 21,
       have: false,
       fire() {
-        const MAX_SPEED = 10
-        const dir = mech.angle + 0.5 * (Math.random() - 0.5);
+        const MAX_SPEED = 7
+        const dir = mech.angle + 0.7 * (Math.random() - 0.5);
         const me = bullet.length;
         const RADIUS = 6 + 2.5 * (Math.random() - 0.5)
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, b.fireAttributes(dir));
-        b.fireProps(8, MAX_SPEED, dir, me); //cd , speed
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
+          angle: dir,
+          friction: 0,
+          frictionAir: 0.002,
+          restitution: 0.6,
+          dmg: 0.4, //damage done in addition to the damage from momentum
+          lookFrequency: 27 + Math.floor(17 * Math.random()),
+          endCycle: game.cycle + 480,
+          classType: "bullet",
+          collisionFilter: {
+            category: 0x000100,
+            mask: 0x000111
+          },
+          minDmgSpeed: 0,
+          onDmg() {}, //this.endCycle = 0  //triggers despawn
+          onEnd() {}
+        })
+        //  b.fireAttributes(dir));
+        b.fireProps(4, MAX_SPEED, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         // Matter.Body.setDensity(bullet[me], 0.000001);
-        bullet[me].endCycle = game.cycle + 360;
-        // bullet[me].frictionAir = 0.001;
-        bullet[me].friction = 0;
-        bullet[me].restitution = 0.4;
-        bullet[me].dmg = 2;
-        bullet[me].minDmgSpeed = 0;
-        bullet[me].lookFrequency = 27 + Math.floor(17 * Math.random())
-
-        bullet[me].onDmg = function () {
-          this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
-        };
+        // bullet[me].onDmg = function () {
+        // this.endCycle = 0; //bullet ends cycle after doing damage
+        // };
         bullet[me].do = function () {
-          this.force.y += this.mass * 0.0006;
+          this.force.y += this.mass * 0.0002;
 
           //find mob targets
           if (!(game.cycle % this.lookFrequency)) {
@@ -876,15 +885,15 @@ const b = {
           }
           //accelerate towards mobs
           if (this.lockedOn) {
-            const THRUST = this.mass * 0.0013
+            const THRUST = this.mass * 0.0015
             this.force.x -= THRUST * this.lockedOn.x
             this.force.y -= THRUST * this.lockedOn.y
 
             // speed cap instead of friction to give more agility
             if (this.speed > MAX_SPEED) {
               Matter.Body.setVelocity(this, {
-                x: this.velocity.x * 0.99,
-                y: this.velocity.y * 0.99
+                x: this.velocity.x * 0.97,
+                y: this.velocity.y * 0.97
               });
             }
           }
