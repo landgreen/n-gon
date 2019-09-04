@@ -721,20 +721,19 @@ const b = {
     {
       name: "swarm",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 7,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir));
-        bullet[me].radius = 22; //used from drawing timer
-        b.fireProps(50, 8, dir, me); //cd , speed
+        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir));
+        b.fireProps(40, 15, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
-        bullet[me].endCycle = game.cycle + 140;
-        bullet[me].frictionAir = 0.006;
-        bullet[me].friction = 0;
-        bullet[me].restitution = 0.5;
+        bullet[me].endCycle = game.cycle + 250;
+        bullet[me].frictionAir = 0.001;
+        bullet[me].friction = 0.5;
+        bullet[me].restitution = 0.3;
         // Matter.Body.setDensity(bullet[me], 0.000001);
         // bullet[me].friction = 0.15;
         // bullet[me].restitution = 0;
@@ -742,16 +741,18 @@ const b = {
         // bullet[me].explodeRad = 350 + Math.floor(Math.random() * 60);
         bullet[me].minDmgSpeed = 0;
         bullet[me].onDmg = function () {
-          this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
+          // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
         };
         bullet[me].do = function () {
-          //extra gravity for harder arcs
-          this.force.y += this.mass * 0.002;
+          const SCALE = 1.007
+          Matter.Body.scale(this, SCALE, SCALE);
+
+          this.force.y += this.mass * 0.0005;
         };
 
         //spawn bullets on end
         bullet[me].onEnd = function () {
-          const NUM = 12
+          const NUM = 11;
           for (let i = 0; i < NUM; i++) {
             const bIndex = bullet.length;
             const RADIUS = 5 + 2 * (Math.random() - 0.5)
@@ -761,12 +762,13 @@ const b = {
               angle: dir,
               friction: 0,
               frictionAir: 0.01,
-              dmg: 0, //damage done in addition to the damage from momentum
+              dmg: 1.25, //damage done in addition to the damage from momentum
               classType: "bullet",
               collisionFilter: {
                 category: 0x000100,
                 mask: 0x000011 //mask: 0x000101,  //for self collision
               },
+              endCycle: game.cycle + 300 + Math.floor(Math.random() * 120),
               minDmgSpeed: 0,
               onDmg() {
                 this.endCycle = 0; //bullet ends cycle after doing damage 
@@ -794,6 +796,7 @@ const b = {
                         this.close = mob[i].position;
                         closeDist = dist;
                         this.lockedOn = Matter.Vector.normalise(targetVector);
+                        if (0.3 > Math.random()) break //doesn't always target the closest mob
                       }
                     }
                   }
@@ -806,8 +809,6 @@ const b = {
                 }
               },
             });
-            bullet[bIndex].endCycle = game.cycle + 300 + Math.floor(Math.random() * 120);
-            bullet[bIndex].dmg = 1.6;
             // bullet[bIndex].explodeRad = 100 + Math.floor(Math.random() * 30);
             // bullet[bIndex].onEnd = b.explode; //makes bullet do explosive damage before despawn
 
@@ -818,7 +819,6 @@ const b = {
               y: SPEED * Math.sin(ANGLE)
             });
             World.add(engine.world, bullet[bIndex]); //add bullet to world
-
           }
         }
 
@@ -827,7 +827,7 @@ const b = {
     {
       name: "drones",
       ammo: 0,
-      ammoPack: 21,
+      ammoPack: 40,
       have: false,
       fire() {
         const MAX_SPEED = 7
@@ -839,7 +839,7 @@ const b = {
           friction: 0,
           frictionAir: 0.002,
           restitution: 0.6,
-          dmg: 0.4, //damage done in addition to the damage from momentum
+          dmg: 0.2, //damage done in addition to the damage from momentum
           lookFrequency: 27 + Math.floor(17 * Math.random()),
           endCycle: game.cycle + 480,
           classType: "bullet",
@@ -879,6 +879,7 @@ const b = {
                   this.close = mob[i].position;
                   closeDist = dist;
                   this.lockedOn = Matter.Vector.normalise(targetVector);
+                  if (0.3 > Math.random()) break //doesn't always target the closest mob
                 }
               }
             }
