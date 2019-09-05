@@ -785,8 +785,8 @@ const b = {
                   let closeDist = Infinity;
                   for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
-                      mob[i].alive &&
-                      mob[i].dropPowerUp &&
+                      // mob[i].alive &&
+                      // mob[i].dropPowerUp &&
                       Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                       Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     ) {
@@ -827,29 +827,72 @@ const b = {
     {
       name: "drones",
       ammo: 0,
-      ammoPack: 40,
+      ammoPack: 27,
       have: false,
       fire() {
-        const MAX_SPEED = 7
+        const MAX_SPEED = 6 //+ 2 * (Math.random() - 0.5)
+        const THRUST = 0.0015 //+ 0.0004 * (Math.random() - 0.5)
         const dir = mech.angle + 0.7 * (Math.random() - 0.5);
         const me = bullet.length;
         const RADIUS = 6 + 2.5 * (Math.random() - 0.5)
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
           angle: dir,
           friction: 0,
-          frictionAir: 0.002,
-          restitution: 0.6,
-          dmg: 0.2, //damage done in addition to the damage from momentum
-          lookFrequency: 27 + Math.floor(17 * Math.random()),
-          endCycle: game.cycle + 480,
+          frictionAir: 0.0005,
+          restitution: 1,
+          dmg: 0.15, //damage done in addition to the damage from momentum
+          lookFrequency: 67 + Math.floor(23 * Math.random()),
+          endCycle: game.cycle + 540 + 120 * Math.random(),
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
             mask: 0x000111
           },
           minDmgSpeed: 0,
-          onDmg() {}, //this.endCycle = 0  //triggers despawn
-          onEnd() {}
+          lockedOn: null,
+          onDmg() {
+            this.lockedOn = null
+          }, //this.endCycle = 0  //triggers despawn
+          onEnd() {},
+          do() {
+            this.force.y += this.mass * 0.0002;
+
+            //find mob targets
+            if (!(game.cycle % this.lookFrequency)) {
+              this.close = null;
+              this.lockedOn = null;
+              let closeDist = Infinity;
+              for (let i = 0, len = mob.length; i < len; ++i) {
+                if (
+                  // mob[i].alive &&  
+                  // mob[i].dropPowerUp && //don't target mob bullets
+                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                  Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                ) {
+                  const TARGET_VECTOR = Matter.Vector.sub(this.position, mob[i].position)
+                  const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+                  if (DIST < closeDist) {
+                    this.close = mob[i].position;
+                    closeDist = DIST;
+                    this.lockedOn = mob[i]
+                  }
+                }
+              }
+            }
+            //accelerate towards mobs
+            if (this.lockedOn) {
+              const UNIT_VECTOR = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position))
+              this.force = Matter.Vector.mult(UNIT_VECTOR, -this.mass * THRUST)
+
+              // speed cap instead of friction to give more agility
+              if (this.speed > MAX_SPEED) {
+                Matter.Body.setVelocity(this, {
+                  x: this.velocity.x * 0.97,
+                  y: this.velocity.y * 0.97
+                });
+              }
+            }
+          }
         })
         //  b.fireAttributes(dir));
         b.fireProps(4, MAX_SPEED, dir, me); //cd , speed
@@ -858,47 +901,6 @@ const b = {
         // bullet[me].onDmg = function () {
         // this.endCycle = 0; //bullet ends cycle after doing damage
         // };
-        bullet[me].do = function () {
-          this.force.y += this.mass * 0.0002;
-
-          //find mob targets
-          if (!(game.cycle % this.lookFrequency)) {
-            this.close = null;
-            this.lockedOn = null;
-            let closeDist = Infinity;
-            for (let i = 0, len = mob.length; i < len; ++i) {
-              if (
-                mob[i].alive &&
-                mob[i].dropPowerUp &&
-                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0
-              ) {
-                const targetVector = Matter.Vector.sub(this.position, mob[i].position)
-                const dist = Matter.Vector.magnitude(targetVector);
-                if (dist < closeDist) {
-                  this.close = mob[i].position;
-                  closeDist = dist;
-                  this.lockedOn = Matter.Vector.normalise(targetVector);
-                  if (0.3 > Math.random()) break //doesn't always target the closest mob
-                }
-              }
-            }
-          }
-          //accelerate towards mobs
-          if (this.lockedOn) {
-            const THRUST = this.mass * 0.0015
-            this.force.x -= THRUST * this.lockedOn.x
-            this.force.y -= THRUST * this.lockedOn.y
-
-            // speed cap instead of friction to give more agility
-            if (this.speed > MAX_SPEED) {
-              Matter.Body.setVelocity(this, {
-                x: this.velocity.x * 0.97,
-                y: this.velocity.y * 0.97
-              });
-            }
-          }
-        }
       }
     },
     {

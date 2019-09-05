@@ -105,7 +105,8 @@ const powerUps = {
         if (b.activeGun === null) {
           b.activeGun = newGun //if no active gun switch to new gun
           game.makeTextLog(
-            "<br><br><br><br><div class='wrapper'> <div class = 'grid-box'><strong>left mouse</strong>: fire weapon</div> <div class = 'grid-box'> <span class = 'mouse'>️<span class='mouse-line'></span></span> </div></div>",
+            // "<br><br><br><br><div class='wrapper'> <div class = 'grid-box'><strong>left mouse</strong>: fire weapon</div> <div class = 'grid-box'> <span class = 'mouse'>️<span class='mouse-line'></span></span> </div></div>",
+            "<strong>left mouse</strong>: fire weapon",
             Infinity
           );
         } else {
