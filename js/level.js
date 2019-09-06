@@ -223,7 +223,7 @@ const level = {
 
     game.makeTextLog(
       // "<br><br><br><br><div class='wrapper'> <div class = 'grid-box'><strong>right mouse / space bar:</strong><br>pick up things</div> <div class = 'grid-box'> <span class = 'mouse'>️<span class='mouse-line'></span></span> </div></div>",
-      "<strong>right mouse / space bar</strong>: pick up things",
+      "Use <strong>right mouse</strong> or <strong>space bar</strong> to pick up things.",
       Infinity
     );
     level.fill.push({

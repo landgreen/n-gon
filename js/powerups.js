@@ -106,8 +106,15 @@ const powerUps = {
           b.activeGun = newGun //if no active gun switch to new gun
           game.makeTextLog(
             // "<br><br><br><br><div class='wrapper'> <div class = 'grid-box'><strong>left mouse</strong>: fire weapon</div> <div class = 'grid-box'> <span class = 'mouse'>️<span class='mouse-line'></span></span> </div></div>",
-            "<strong>left mouse</strong>: fire weapon",
+            "Use <strong>left mouse</strong> to fire weapon.",
             Infinity
+          );
+        }
+        if (b.inventory.length === 1) {
+          game.makeTextLog(
+            // "<div style='font-size:120%;' >new gun: " + b.guns[newGun].name + "</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>",
+            "<div style='font-size:120%;' >new gun: " + b.guns[newGun].name + "</div> <br> Use <strong>Q</strong>, <strong>E</strong>, or <strong>mouse wheel</strong> to change weapons.",
+            360
           );
         } else {
           game.makeTextLog(
