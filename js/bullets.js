@@ -719,35 +719,29 @@ const b = {
       }
     },
     {
-      name: "swarm",
+      name: "spores",
       ammo: 0,
-      ammoPack: 7,
+      ammoPack: 6,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir));
-        b.fireProps(40, 15, dir, me); //cd , speed
+        b.fireProps(25, 20, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
-        bullet[me].endCycle = game.cycle + 250;
-        bullet[me].frictionAir = 0.001;
+        bullet[me].endCycle = game.cycle + 100;
+        bullet[me].frictionAir = 0;
         bullet[me].friction = 0.5;
         bullet[me].restitution = 0.3;
-        // Matter.Body.setDensity(bullet[me], 0.000001);
-        // bullet[me].friction = 0.15;
-        // bullet[me].restitution = 0;
-
-        // bullet[me].explodeRad = 350 + Math.floor(Math.random() * 60);
         bullet[me].minDmgSpeed = 0;
-        bullet[me].onDmg = function () {
-          // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
-        };
+        bullet[me].onDmg = function () {};
         bullet[me].do = function () {
-          const SCALE = 1.007
+          const SCALE = 1.017
           Matter.Body.scale(this, SCALE, SCALE);
+          this.frictionAir += 0.00021;
 
-          this.force.y += this.mass * 0.0005;
+          this.force.y += this.mass * 0.00045;
         };
 
         //spawn bullets on end
@@ -755,26 +749,26 @@ const b = {
           const NUM = 11;
           for (let i = 0; i < NUM; i++) {
             const bIndex = bullet.length;
-            const RADIUS = 5 + 2 * (Math.random() - 0.5)
+            const RADIUS = 4 + 2 * Math.random();
             bullet[bIndex] = Bodies.circle(this.position.x, this.position.y, RADIUS, {
               // density: 0.0015,			//frictionAir: 0.01,			
-              restitution: 1,
+              restitution: 0.9,
               angle: dir,
               friction: 0,
               frictionAir: 0.01,
-              dmg: 1.25, //damage done in addition to the damage from momentum
+              dmg: 1.3, //damage done in addition to the damage from momentum
               classType: "bullet",
               collisionFilter: {
                 category: 0x000100,
                 mask: 0x000011 //mask: 0x000101,  //for self collision
               },
-              endCycle: game.cycle + 300 + Math.floor(Math.random() * 120),
+              endCycle: game.cycle + 300 + Math.floor(Math.random() * 240),
               minDmgSpeed: 0,
               onDmg() {
                 this.endCycle = 0; //bullet ends cycle after doing damage 
               },
               onEnd() {},
-              lookFrequency: 27 + Math.floor(17 * Math.random()),
+              lookFrequency: 57 + Math.floor(37 * Math.random()),
               do() {
                 this.force.y += this.mass * 0.00025; // high gravity because of the high friction
 
@@ -809,9 +803,6 @@ const b = {
                 }
               },
             });
-            // bullet[bIndex].explodeRad = 100 + Math.floor(Math.random() * 30);
-            // bullet[bIndex].onEnd = b.explode; //makes bullet do explosive damage before despawn
-
             const SPEED = 9;
             const ANGLE = 2 * Math.PI * Math.random()
             Matter.Body.setVelocity(bullet[bIndex], {
@@ -827,22 +818,22 @@ const b = {
     {
       name: "drones",
       ammo: 0,
-      ammoPack: 27,
+      ammoPack: 23,
       have: false,
       fire() {
-        const MAX_SPEED = 6 //+ 2 * (Math.random() - 0.5)
-        const THRUST = 0.0015 //+ 0.0004 * (Math.random() - 0.5)
+        const MAX_SPEED = 6
+        const THRUST = 0.0015
         const dir = mech.angle + 0.7 * (Math.random() - 0.5);
         const me = bullet.length;
-        const RADIUS = 6 + 2.5 * (Math.random() - 0.5)
+        const RADIUS = 4 + 4 * Math.random()
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
           angle: dir,
           friction: 0,
           frictionAir: 0.0005,
           restitution: 1,
-          dmg: 0.15, //damage done in addition to the damage from momentum
-          lookFrequency: 67 + Math.floor(23 * Math.random()),
-          endCycle: game.cycle + 540 + 120 * Math.random(),
+          dmg: 0.18, //damage done in addition to the damage from momentum
+          lookFrequency: 79 + Math.floor(32 * Math.random()),
+          endCycle: game.cycle + 720 + 300 * Math.random(),
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -850,6 +841,7 @@ const b = {
           },
           minDmgSpeed: 0,
           lockedOn: null,
+          isFollowMouse: true,
           onDmg() {
             this.lockedOn = null
           }, //this.endCycle = 0  //triggers despawn
@@ -861,6 +853,7 @@ const b = {
             if (!(game.cycle % this.lookFrequency)) {
               this.close = null;
               this.lockedOn = null;
+              this.isFollowMouse = true; //if no target is found default to follow mouse
               let closeDist = Infinity;
               for (let i = 0, len = mob.length; i < len; ++i) {
                 if (
@@ -875,27 +868,28 @@ const b = {
                     this.close = mob[i].position;
                     closeDist = DIST;
                     this.lockedOn = mob[i]
+                    this.isFollowMouse = false;
                   }
                 }
               }
             }
-            //accelerate towards mobs
-            if (this.lockedOn) {
-              const UNIT_VECTOR = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position))
-              this.force = Matter.Vector.mult(UNIT_VECTOR, -this.mass * THRUST)
+            if (this.lockedOn) { //accelerate towards mobs
+              this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+            } else if (this.isFollowMouse) { //accelerate towards mouse
+              this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, game.mouseInGame)), -this.mass * THRUST)
+            }
 
-              // speed cap instead of friction to give more agility
-              if (this.speed > MAX_SPEED) {
-                Matter.Body.setVelocity(this, {
-                  x: this.velocity.x * 0.97,
-                  y: this.velocity.y * 0.97
-                });
-              }
+            // speed cap instead of friction to give more agility
+            if (this.speed > MAX_SPEED) {
+              Matter.Body.setVelocity(this, {
+                x: this.velocity.x * 0.97,
+                y: this.velocity.y * 0.97
+              });
             }
           }
         })
         //  b.fireAttributes(dir));
-        b.fireProps(4, MAX_SPEED, dir, me); //cd , speed
+        b.fireProps(10, MAX_SPEED, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         // Matter.Body.setDensity(bullet[me], 0.000001);
         // bullet[me].onDmg = function () {
@@ -903,6 +897,74 @@ const b = {
         // };
       }
     },
+    // {
+    //   name: "flock", // shards
+    //   ammo: 0,
+    //   ammoPack: 1027,
+    //   have: false,
+    //   fire() {
+    //     const me = bullet.length;
+    //     const dir = mech.angle + 0.7 * (Math.random() - 0.5);
+    //     const RADIUS = 6 + 2.5 * (Math.random() - 0.5)
+    //     // bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31, 2, b.fireAttributes(dir));
+    //     // bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
+    //     bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31, 2, {
+    //       angle: dir,
+    //       friction: 0,
+    //       frictionAir: 0.02,
+    //       restitution: 0.2,
+    //       dmg: 0.15, //damage done in addition to the damage from momentum
+    //       lookFrequency: 67 + Math.floor(23 * Math.random()),
+    //       endCycle: game.cycle + 540 + 120 * Math.random(),
+    //       classType: "bullet",
+    //       collisionFilter: {
+    //         category: 0x000100,
+    //         mask: 0x000111
+    //       },
+    //       minDmgSpeed: 0,
+    //       onDmg() {
+    //         this.endCycle = 0 //triggers despawn
+    //         // this.explodeRad = this.speed * 10
+    //       },
+    //       // explodeRad: 10,
+    //       // onEnd: b.explode,
+    //       onEnd() {},
+    //       do() {
+    //         // drain ammo
+    //         // if (!(game.cycle % this.lookFrequency)) {
+    //         //   if (b.guns[b.activeGun].ammo > 0) {
+    //         //     b.guns[b.activeGun].ammo--;
+    //         //     game.updateGunHUD();
+    //         //   }
+    //         // }
+
+
+    //         this.force.y += this.mass * 0.0002; //gravity
+
+    //         //accelerate towards mouse
+    //         const THRUST = 0.0015
+    //         const UNIT_VECTOR = Matter.Vector.normalise(Matter.Vector.sub(this.position, game.mouseInGame))
+    //         this.force = Matter.Vector.mult(UNIT_VECTOR, -this.mass * THRUST)
+
+    //         // speed cap
+    //         if (this.speed > 16) {
+    //           Matter.Body.setVelocity(this, {
+    //             x: this.velocity.x * 0.97,
+    //             y: this.velocity.y * 0.97
+    //           });
+    //         }
+    //       }
+    //     })
+    //     // bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
+    //     //  b.fireAttributes(dir));
+    //     b.fireProps(4, 4, dir, me); //cd , speed
+    //     b.drawOneBullet(bullet[me].vertices);
+    //     // Matter.Body.setDensity(bullet[me], 0.000001);
+    //     // bullet[me].onDmg = function () {
+    //     // this.endCycle = 0; //bullet ends cycle after doing damage
+    //     // };
+    //   }
+    // },
     {
       name: "wave beam",
       ammo: 0,

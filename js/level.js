@@ -13,7 +13,7 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       this.intro(); //starting level
-      // b.giveGuns(11) // set a starting gun for testing
+      // b.giveGuns(10) // set a starting gun for testing
       // game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
       // this.bosses();
       // this.testingMap();
@@ -1385,11 +1385,11 @@ const level = {
     }
   },
   levelAnnounce() {
-    let text = "L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
-    if (game.levelsCleared === 0) text = "";
+    let text = (game.levelsCleared) + " " + level.levels[level.onLevel];
+    document.title = "n-gon: L" + text;
+    game.makeTextLog("level " + text, 300);
+    // if (game.levelsCleared === 0) text = "";
     // text = "Level " + (game.levelsCleared + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";
-    game.makeTextLog(text, 300);
-    document.title = "n-gon: " + text;
 
     // text = text + " with population: ";
     // for (let i = 0, len = spawn.pickList.length; i < len; ++i) {
