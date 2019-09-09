@@ -913,7 +913,7 @@ const b = {
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.1, //damage done in addition to the damage from momentum
+          dmg: 0.11, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -927,7 +927,7 @@ const b = {
           },
           onEnd() {},
           do() {
-            //wiggle wiggle wiggle
+            //wiggle
             this.cycle++
             const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
             this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST)
