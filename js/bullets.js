@@ -900,21 +900,20 @@ const b = {
     {
       name: "wave beam",
       ammo: 0,
-      ammoPack: 70,
+      ammoPack: 100,
       have: false,
       fire() {
         const me = bullet.length;
         const DIR = mech.angle
-        const DIR_90 = mech.angle + Math.PI / 2
-        const MAG_90 = -26
-        bullet[me] = Bodies.circle(mech.pos.x + MAG_90 * Math.cos(DIR_90), mech.pos.y + MAG_90 * Math.sin(DIR_90), 5, {
+        const wiggleMag = (mech.flipLegs === 1) ? 0.0045 : -0.0045
+        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 5, {
           angle: DIR,
-          cycle: -0.45, //adjust this number until the bullets line up with the cross hairs
+          cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
           endCycle: game.cycle + 300,
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.09, //damage done in addition to the damage from momentum
+          dmg: 0.1, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -924,19 +923,19 @@ const b = {
             // this.endCycle = 0; //bullet ends cycle after doing damage 
 
             //recalculate the direction of wiggle
-            this.direction = Matter.Vector.perp(this.velocity)
+            // this.direction = Matter.Vector.perp(this.velocity)
           },
           onEnd() {},
           do() {
             //wiggle wiggle wiggle
             this.cycle++
-            const THRUST = 0.003 * Math.cos(this.cycle * 0.3)
+            const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
             this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST)
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = game.cycle + 4; // cool down
-        const SPEED = 5;
+        mech.fireCDcycle = game.cycle + 3; // cool down
+        const SPEED = 4.5;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(DIR),
           y: SPEED * Math.sin(DIR)
