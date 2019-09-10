@@ -900,20 +900,20 @@ const b = {
     {
       name: "wave beam",
       ammo: 0,
-      ammoPack: 100,
+      ammoPack: 110,
       have: false,
       fire() {
         const me = bullet.length;
         const DIR = mech.angle
         const wiggleMag = (mech.flipLegs === 1) ? 0.0045 : -0.0045
-        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 5, {
+        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 9, {
           angle: DIR,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
-          endCycle: game.cycle + 300,
+          endCycle: game.cycle + 150,
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.11, //damage done in addition to the damage from momentum
+          dmg: 0.06, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -931,6 +931,12 @@ const b = {
             this.cycle++
             const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
             this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST)
+
+            //shrink
+            if (this.cycle > 75) {
+              const SCALE = 0.98
+              Matter.Body.scale(this, SCALE, SCALE);
+            }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
