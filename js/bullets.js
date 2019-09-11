@@ -721,7 +721,7 @@ const b = {
     {
       name: "spores",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 7,
       have: false,
       fire() {
         const me = bullet.length;
@@ -818,7 +818,7 @@ const b = {
     {
       name: "drones",
       ammo: 0,
-      ammoPack: 22,
+      ammoPack: 25,
       have: false,
       fire() {
         const MAX_SPEED = 6
@@ -851,7 +851,7 @@ const b = {
 
             //find mob targets
             if (!(game.cycle % this.lookFrequency)) {
-              this.close = null;
+              // this.close = null;
               this.lockedOn = null;
               this.isFollowMouse = true; //if no target is found default to follow mouse
               let closeDist = Infinity;
@@ -865,7 +865,7 @@ const b = {
                   const TARGET_VECTOR = Matter.Vector.sub(this.position, mob[i].position)
                   const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
-                    this.close = mob[i].position;
+                    // this.close = mob[i].position;
                     closeDist = DIST;
                     this.lockedOn = mob[i]
                     this.isFollowMouse = false;
@@ -900,7 +900,7 @@ const b = {
     {
       name: "wave beam",
       ammo: 0,
-      ammoPack: 110,
+      ammoPack: 120,
       have: false,
       fire() {
         const me = bullet.length;

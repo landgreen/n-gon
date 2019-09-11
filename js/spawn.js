@@ -143,6 +143,63 @@ const spawn = {
       this.attraction();
     };
   },
+  healer(x, y, radius = 20) {
+    //easy mob for on level 1
+    mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
+    let me = mob[mob.length - 1];
+    me.frictionAir = 0.01;
+    me.accelMag = 0.0004;
+    me.lookFrequency = 100 + Math.floor(37 * Math.random())
+    me.lockedOn = null;
+    Matter.Body.setDensity(me, 0.003) // normal density is 0.001
+
+    me.do = function () {
+      this.healthBar();
+
+      if (!(game.cycle % this.seePlayerFreq)) {
+        //slow self heal
+        // this.health += 0.03;
+        // if (this.health > 1) this.health = 1;
+
+        //target mobs with low health
+        let closeDist = Infinity;
+        for (let i = 0; i < mob.length; i++) {
+          if (mob[i] != this && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+            const TARGET_VECTOR = Matter.Vector.sub(this.position, mob[i].position)
+            const DIST = Matter.Vector.magnitude(TARGET_VECTOR) * mob[i].health * mob[i].health * mob[i].health; //distance is multiplied by mob health to prioritize low health mobs
+            if (DIST < closeDist) {
+              closeDist = DIST;
+              this.lockedOn = mob[i]
+            }
+          }
+        }
+      }
+      //move towards and heal locked on target
+      if (this.lockedOn) { //accelerate towards mobs
+        const TARGET_VECTOR = Matter.Vector.sub(this.position, this.lockedOn.position)
+        const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+        if (DIST > 200) {
+          this.force = Matter.Vector.mult(Matter.Vector.normalise(TARGET_VECTOR), -this.mass * this.accelMag)
+        } else {
+          if (this.lockedOn.health < 1) {
+            this.lockedOn.health += 0.002;
+            if (this.lockedOn.health > 1) this.lockedOn.health = 1;
+            //draw heal
+            ctx.beginPath();
+            ctx.moveTo(this.position.x, this.position.y);
+            ctx.lineTo(this.lockedOn.position.x, this.lockedOn.position.y);
+            ctx.lineWidth = 10
+            ctx.strokeStyle = "rgba(50,255,200,0.4)"
+            ctx.stroke();
+          }
+        }
+      }
+
+      //wander if no heal targets
+
+
+    };
+  },
   chaser(x, y, radius = 35 + Math.ceil(Math.random() * 40)) {
     mobs.spawn(x, y, 8, radius, "#2c9790");
     let me = mob[mob.length - 1];
