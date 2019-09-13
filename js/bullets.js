@@ -906,14 +906,14 @@ const b = {
         const me = bullet.length;
         const DIR = mech.angle
         const wiggleMag = (mech.flipLegs === 1) ? 0.0045 : -0.0045
-        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 9, {
+        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 10, {
           angle: DIR,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
-          endCycle: game.cycle + 150,
+          endCycle: game.cycle + 125,
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.06, //damage done in addition to the damage from momentum
+          dmg: 0.1, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -933,14 +933,14 @@ const b = {
             this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST)
 
             //shrink
-            if (this.cycle > 75) {
-              const SCALE = 0.98
+            if (this.cycle > 0 && !(Math.floor(this.cycle) % 6)) {
+              const SCALE = 0.95
               Matter.Body.scale(this, SCALE, SCALE);
             }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = game.cycle + 3; // cool down
+        mech.fireCDcycle = game.cycle + 4; // cool down
         const SPEED = 4.5;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(DIR),

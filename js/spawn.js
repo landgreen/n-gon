@@ -1,6 +1,6 @@
 //main object for spawning things in a level
 const spawn = {
-  pickList: ["starter", "starter"],
+  pickList: ["healer", "healer"],
   fullPickList: [
     "chaser", "chaser", "chaser",
     "striker", "striker",
@@ -147,19 +147,20 @@ const spawn = {
     //easy mob for on level 1
     mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
     let me = mob[mob.length - 1];
-    me.frictionAir = 0.01;
+    me.frictionAir = 0.02;
     me.accelMag = 0.0004;
-    me.lookFrequency = 100 + Math.floor(37 * Math.random())
+    if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
+    me.lookFrequency = 160 + Math.floor(57 * Math.random())
     me.lockedOn = null;
     Matter.Body.setDensity(me, 0.003) // normal density is 0.001
 
     me.do = function () {
       this.healthBar();
 
-      if (!(game.cycle % this.seePlayerFreq)) {
+      if (!(game.cycle % this.lookFrequency)) {
         //slow self heal
-        // this.health += 0.03;
-        // if (this.health > 1) this.health = 1;
+        this.health += 0.02;
+        if (this.health > 1) this.health = 1;
 
         //target mobs with low health
         let closeDist = Infinity;
@@ -174,16 +175,24 @@ const spawn = {
           }
         }
       }
-      //move towards and heal locked on target
-      if (this.lockedOn) { //accelerate towards mobs
+
+      //move away from player if too close
+      if (this.distanceToPlayer2() < 400000) {
+        const TARGET_VECTOR = Matter.Vector.sub(this.position, player.position)
+        this.force = Matter.Vector.mult(Matter.Vector.normalise(TARGET_VECTOR), this.mass * this.accelMag * 1.4)
+        if (this.lockedOn) this.lockedOn = null
+      } else if (this.lockedOn && this.lockedOn.alive) {
+        //move towards and heal locked on target
         const TARGET_VECTOR = Matter.Vector.sub(this.position, this.lockedOn.position)
         const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
-        if (DIST > 200) {
+        if (DIST > 250) {
           this.force = Matter.Vector.mult(Matter.Vector.normalise(TARGET_VECTOR), -this.mass * this.accelMag)
         } else {
           if (this.lockedOn.health < 1) {
             this.lockedOn.health += 0.002;
             if (this.lockedOn.health > 1) this.lockedOn.health = 1;
+            //spin when healing
+            this.torque = 0.000005 * this.inertia;
             //draw heal
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
@@ -193,11 +202,32 @@ const spawn = {
             ctx.stroke();
           }
         }
+      } else {
+        //wander if no heal targets visible
+        //be sure to declare searchTarget in mob spawn
+        const newTarget = function (that) {
+          that.searchTarget = mob[Math.floor(Math.random() * (mob.length - 1))].position;
+        };
+
+        const sub = Matter.Vector.sub(this.searchTarget, this.position);
+        if (Matter.Vector.magnitude(sub) > this.radius * 2) {
+          ctx.beginPath();
+          ctx.strokeStyle = "#aaa";
+          ctx.moveTo(this.position.x, this.position.y);
+          ctx.lineTo(this.searchTarget.x, this.searchTarget.y);
+          ctx.stroke();
+          //accelerate at 0.6 of normal acceleration
+          this.force = Matter.Vector.mult(Matter.Vector.normalise(sub), this.accelMag * this.mass * 0.6);
+        } else {
+          //after reaching random target switch to new target
+          newTarget(this);
+        }
+        //switch to a new target after a while
+        if (!(game.cycle % (this.lookFrequency * 15))) {
+          newTarget(this);
+        }
+
       }
-
-      //wander if no heal targets
-
-
     };
   },
   chaser(x, y, radius = 35 + Math.ceil(Math.random() * 40)) {

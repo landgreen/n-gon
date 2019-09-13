@@ -13,7 +13,7 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       this.intro(); //starting level
-      b.giveGuns(11) // set a starting gun for testing
+      b.giveGuns(0) // set a starting gun for testing
       // game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
       // this.bosses();
       // this.testingMap();
@@ -353,12 +353,12 @@ const level = {
     spawn.wireKnee();
     spawn.wireKneeLeft();
     spawn.wireHead();
-
+    spawn.mapRect(1400, -700, 50, 300); //ground
     spawn.healer(1600, -500)
-    spawn.healer(1600, -500)
-    spawn.healer(1900, -500)
-    spawn.healer(1000, -500)
-    spawn.healer(1000, -400)
+    // spawn.healer(1600, -500)
+    // spawn.healer(1900, -500)
+    // spawn.healer(1000, -500)
+    // spawn.healer(1000, -400)
   },
 
   rooftops() {
