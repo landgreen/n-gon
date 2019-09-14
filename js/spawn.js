@@ -1,6 +1,6 @@
 //main object for spawning things in a level
 const spawn = {
-  pickList: ["healer", "healer"],
+  pickList: ["starter", "starter"],
   fullPickList: [
     "chaser", "chaser", "chaser",
     "striker", "striker",

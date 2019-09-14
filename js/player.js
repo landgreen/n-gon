@@ -263,7 +263,7 @@ const mech = {
       }
       //come to a stop if fast or if no move key is pressed
       if (player.speed > 4) {
-        const stoppingFriction = (this.crouch) ? 0.7 : 0.89;
+        const stoppingFriction = (this.crouch) ? 0.65 : 0.89; // this controls speed when crouched
         Matter.Body.setVelocity(player, {
           x: player.velocity.x * stoppingFriction,
           y: player.velocity.y * stoppingFriction
@@ -333,7 +333,7 @@ const mech = {
       }
       //come to a stop if fast or if no move key is pressed
       if (player.speed > 4) {
-        const stoppingFriction = (this.crouch) ? 0.7 : 0.89;
+        const stoppingFriction = (this.crouch) ? 0.65 : 0.89;
         Matter.Body.setVelocity(player, {
           x: player.velocity.x * stoppingFriction,
           y: player.velocity.y * stoppingFriction

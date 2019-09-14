@@ -4,6 +4,7 @@
 
 run fast when shift is pressed
   drains fieldMeter
+  walking animation isn't going to look good
 
 give mobs more animal-like behaviors
   like rainworld
@@ -15,45 +16,37 @@ give mobs more animal-like behaviors
     when low on life or after taking a large hit
   mobs can fight each other
     this might be hard to code
-  when not near other mobs they try to group up.
+  isolated mobs try to group up.
     
-gun power ups
+general gun power ups
   +explosion radius
   +dmg
   life steal
+  ice bullets  (reduce mob velocity on dmg)
   +bullet size
   get bonus ammo / reduced ammo use
-  bullets pass through walls
-  unlimited ammo capacity
-    add in a max ammo capacity
-
-
-
-mutators (as a power up)
-  infinite ammo
-    or just more ammo from drops?
-    or 50% chance to not use up a bullet?
-  increased fire rate for guns
-    how to make laser fire faster?
+  +reduced cs on fire  (faster fire rate)
   orbiting orb fires at random targets
     missiles at random targets
 
-  low gravity
-  double jumps
-  higher horizontal run speed?
+specific gun power ups
+  laser: less energy use
+  rapid fire: less drag, less gravity, less randomness
+  one shot: larger bullet
+  super balls: fire 4 balls
+  spray: less drag +range
+  needles: +dmg, or faster fire rate
+  missiles: larger explosion radius
+  flak: + more projectiles per shot
+  M80: larger explosion radius
+  grenades: larger explosion radius
+  spore: quicker hatching, more spores spawn, +dmg
+  drones: last longer
+  wave beam: longer range
 
-  vampire damage
-  shield (recharges fast, but only upto 10% of life)
+down key to modify gun
+  needles: +dmg, slower fire rate
 
-Active use abilities (can get ideas from spacetime)
-  blink (short distance teleport)
-    would reverse if they end up in solid wall
-  beacon teleport
-  push (push blocks, mobs, and bullets away from player)
-  invulnerability (force field that stops mobs and bullets)
-  burst of speed
-  intangible (can move through bodies, bullets, and mobs.  Not map elements)
-  
 game mechanics
   mechanics that support the physics engine
     add rope/constraint

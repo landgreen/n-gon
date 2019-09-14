@@ -234,12 +234,11 @@ const b = {
       ammoPack: Infinity,
       have: false,
       fire() {
-        //mech.fireCDcycle = game.cycle + 1
-
+        // mech.fireCDcycle = game.cycle + 1
         //laser drains energy as well as bullets
         const FIELD_DRAIN = 0.006
         if (mech.fieldMeter < FIELD_DRAIN) {
-          mech.fireCDcycle = game.cycle + 120; // cool down if out of energy
+          mech.fireCDcycle = game.cycle + 100; // cool down if out of energy
         } else {
           mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
           let best;
@@ -396,7 +395,7 @@ const b = {
         const me = bullet.length;
         b.muzzleFlash(15);
         // if (Math.random() > 0.2) mobs.alert(500);
-        const dir = (Math.random() - 0.5) * 0.15 + mech.angle;
+        const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.05 : 0.15);
         bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 17, 5, b.fireAttributes(dir));
         b.fireProps(5, 40, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + 60;
@@ -416,12 +415,17 @@ const b = {
         // mobs.alert(800);
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 60, 25, b.fireAttributes(dir));
-        b.fireProps(30, 54, dir, me); //cd , speed
+        bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 70, 30, b.fireAttributes(dir));
+        b.fireProps(mech.crouch ? 40 : 30, 54, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + 180;
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0005;
         };
+
+        //knock back
+        const KNOCK = (mech.crouch) ? 0.015 : 0.15
+        player.force.x -= KNOCK * Math.cos(dir)
+        player.force.y -= 0.5 * KNOCK * Math.sin(dir)
       }
     },
     {
@@ -432,11 +436,12 @@ const b = {
       fire() {
         b.muzzleFlash(20);
         // mobs.alert(450);
-        let dir = mech.angle - 0.05;
+        const SPREAD = mech.crouch ? 0.03 : 0.14
+        let dir = mech.angle - SPREAD;
         for (let i = 0; i < 3; i++) {
           const me = bullet.length;
           bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 7, b.fireAttributes(dir));
-          b.fireProps(20, 30, dir, me); //cd , speed
+          b.fireProps(mech.crouch ? 30 : 20, mech.crouch ? 34 : 27, dir, me); //cd , speed
           Matter.Body.setDensity(bullet[me], 0.0001);
           bullet[me].endCycle = game.cycle + 360;
           bullet[me].dmg = 0.5;
@@ -446,7 +451,7 @@ const b = {
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
           };
-          dir += 0.05;
+          dir += SPREAD;
         }
       }
     },
@@ -460,7 +465,7 @@ const b = {
         // mobs.alert(650);
         for (let i = 0; i < 9; i++) {
           const me = bullet.length;
-          const dir = (Math.random() - 0.5) * 0.6 + mech.angle;
+          const dir = mech.angle + (Math.random() - 0.5) * (mech.crouch ? 0.1 : 0.6)
           bullet[me] = Bodies.rectangle(
             mech.pos.x + 35 * Math.cos(mech.angle) + 15 * (Math.random() - 0.5),
             mech.pos.y + 35 * Math.sin(mech.angle) + 15 * (Math.random() - 0.5),
@@ -468,7 +473,7 @@ const b = {
             11,
             b.fireAttributes(dir)
           );
-          b.fireProps(30, 36 + Math.random() * 11, dir, me); //cd , speed
+          b.fireProps(mech.crouch ? 40 : 30, 36 + Math.random() * 11, dir, me); //cd , speed
           bullet[me].endCycle = game.cycle + 60;
           bullet[me].frictionAir = 0.02;
           bullet[me].do = function () {
@@ -486,7 +491,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31, 2, b.fireAttributes(dir));
-        b.fireProps(20, 45, dir, me); //cd , speed
+        b.fireProps((mech.crouch ? 17 : 23), 45, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + 180;
         bullet[me].dmg = 1;
         b.drawOneBullet(bullet[me].vertices);
@@ -518,10 +523,10 @@ const b = {
           this.ammoLoaded--
 
           const thrust = 0.0003;
-          let dir = mech.angle + 0.1 * (0.5 - Math.random());
+          let dir = mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.1);
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30, 4, b.fireAttributes(dir));
-          b.fireProps(6, -5 - 3 * (0.5 - Math.random()), dir, me); //cd , speed
+          b.fireProps(mech.crouch ? 25 : 6, -3 * (0.5 - Math.random()) + (mech.crouch ? 15 : -8), dir, me); //cd , speed
           b.drawOneBullet(bullet[me].vertices);
           // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
           bullet[me].force.y += 0.00045; //a small push down at first to make it seem like the missile is briefly falling
@@ -618,9 +623,9 @@ const b = {
           dir += angleStep
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 17, 4, b.fireAttributes(dir));
-          b.fireProps(20, 24 + 30 * Math.random() - i, dir, me); //cd , speed
+          b.fireProps(mech.crouch ? 30 : 20, 24 + 30 * Math.random() - i, dir, me); //cd , speed
           //Matter.Body.setDensity(bullet[me], 0.00001);
-          bullet[me].endCycle = game.cycle + 20 + i //16 + Math.ceil(8 * Math.random()
+          bullet[me].endCycle = i + game.cycle + (mech.crouch ? 29 : 18)
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
           bullet[me].explodeRad = 70 + (Math.random() - 0.5) * 50;
@@ -648,7 +653,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, b.fireAttributes(dir));
-        b.fireProps(8, 26, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 15 : 8, mech.crouch ? 32 : 24, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].totalCycles = 120;
@@ -677,7 +682,7 @@ const b = {
         const dir = mech.angle;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 22, b.fireAttributes(dir));
         bullet[me].radius = 22; //used from drawing timer
-        b.fireProps(40, 32, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 60 : 40, mech.crouch ? 38 : 30, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = game.cycle + 140;
@@ -727,7 +732,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir));
-        b.fireProps(25, 20, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 26 : 17, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = game.cycle + 100;
@@ -739,9 +744,15 @@ const b = {
         bullet[me].do = function () {
           const SCALE = 1.017
           Matter.Body.scale(this, SCALE, SCALE);
-          this.frictionAir += 0.00021;
+          this.frictionAir += 0.00023;
 
           this.force.y += this.mass * 0.00045;
+
+          //draw green glow
+          ctx.fillStyle = "rgba(0,200,125,0.16)";
+          ctx.beginPath();
+          ctx.arc(this.position.x, this.position.y, 26, 0, 2 * Math.PI);
+          ctx.fill();
         };
 
         //spawn bullets on end
@@ -821,9 +832,8 @@ const b = {
       ammoPack: 25,
       have: false,
       fire() {
-        const MAX_SPEED = 6
         const THRUST = 0.0015
-        const dir = mech.angle + 0.7 * (Math.random() - 0.5);
+        const dir = mech.angle + (Math.random() - 0.5) * 0.7;
         const me = bullet.length;
         const RADIUS = 4 + 4 * Math.random()
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
@@ -844,11 +854,10 @@ const b = {
           isFollowMouse: true,
           onDmg() {
             this.lockedOn = null
-          }, //this.endCycle = 0  //triggers despawn
+          },
           onEnd() {},
           do() {
             this.force.y += this.mass * 0.0002;
-
             //find mob targets
             if (!(game.cycle % this.lookFrequency)) {
               // this.close = null;
@@ -878,9 +887,8 @@ const b = {
             } else if (this.isFollowMouse) { //accelerate towards mouse
               this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, game.mouseInGame)), -this.mass * THRUST)
             }
-
             // speed cap instead of friction to give more agility
-            if (this.speed > MAX_SPEED) {
+            if (this.speed > 6) {
               Matter.Body.setVelocity(this, {
                 x: this.velocity.x * 0.97,
                 y: this.velocity.y * 0.97
@@ -888,8 +896,7 @@ const b = {
             }
           }
         })
-        //  b.fireAttributes(dir));
-        b.fireProps(10, MAX_SPEED, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 15 : 10, mech.crouch ? 26 : 2, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         // Matter.Body.setDensity(bullet[me], 0.000001);
         // bullet[me].onDmg = function () {
@@ -905,7 +912,7 @@ const b = {
       fire() {
         const me = bullet.length;
         const DIR = mech.angle
-        const wiggleMag = (mech.flipLegs === 1) ? 0.0045 : -0.0045
+        const wiggleMag = ((mech.flipLegs === 1) ? 1 : -1) * ((mech.crouch) ? 0.0025 : 0.0045)
         bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 10, {
           angle: DIR,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
@@ -913,7 +920,7 @@ const b = {
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.1, //damage done in addition to the damage from momentum
+          dmg: 0.15, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -940,8 +947,8 @@ const b = {
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = game.cycle + 4; // cool down
-        const SPEED = 4.5;
+        mech.fireCDcycle = game.cycle + (mech.crouch ? 6 : 4); // cool down
+        const SPEED = mech.crouch ? 6 : 4.5;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(DIR),
           y: SPEED * Math.sin(DIR)
