@@ -44,9 +44,6 @@ specific gun power ups
   drones: last longer
   wave beam: longer range
 
-down key to modify gun
-  needles: +dmg, slower fire rate
-
 game mechanics
   mechanics that support the physics engine
     add rope/constraint

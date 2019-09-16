@@ -884,7 +884,7 @@ const mobs = {
         Matter.Body.setAngle(this, angle - Math.PI);
       },
       explode() {
-        mech.damage(Math.min(Math.max(0.02 * Math.sqrt(this.mass), 0.05), 0.35) * game.dmgScale);
+        mech.damage(Math.min(Math.max(0.02 * Math.sqrt(this.mass), 0.01), 0.35) * game.dmgScale);
         this.dropPowerUp = false;
         this.death(); //death with no power up or body
       },

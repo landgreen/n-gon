@@ -66,9 +66,14 @@ const powerUps = {
       if (b.inventory.length > 0) {
         //add ammo to a gun in inventory
         target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
-        //try twice to give ammo to a gun with ammo, not Infinity
-        if (target.ammo === Infinity) target = b.guns[Math.floor(Math.random() * b.guns.length)];
-        if (target.ammo === Infinity) target = b.guns[Math.floor(Math.random() * b.guns.length)];
+        //try 3 more times to give ammo to a gun with ammo, not Infinity
+        if (target.ammo === Infinity) {
+          target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+          if (target.ammo === Infinity) {
+            target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+            if (target.ammo === Infinity) target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+          }
+        }
       } else {
         //if you don't have any guns just add ammo to a random gun you don't have yet
         target = b.guns[Math.floor(Math.random() * b.guns.length)];
@@ -78,12 +83,11 @@ const powerUps = {
         game.makeTextLog("+energy", 180);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.60 + 0.5 * Math.random())) / b.dmgScale);
+        const ammo = Math.ceil((target.ammoPack * (0.70 + 0.2 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
         game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
       }
-
     }
   },
   gun: {

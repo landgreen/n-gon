@@ -13,8 +13,8 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       this.intro(); //starting level
-      // b.giveGuns(11) // set a starting gun for testing
-      // game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
+      // b.giveGuns(0) // set a starting gun for testing
+      // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
       // this.bosses();
       // this.testingMap();
       // this.skyscrapers();
@@ -37,8 +37,8 @@ const level = {
     game.zoomScale = 1400 //1400 is normal
     game.zoomTransition(1400)
     spawn.setSpawnList();
-    game.levelsCleared = 7; //for testing to simulate all possible mobs spawns
-    for (let i = 0; i < 7; i++) {
+    game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
+    for (let i = 0; i < game.levelsCleared; i++) {
       game.dmgScale += 0.4; //damage done by mobs increases each level
       b.dmgScale *= 0.9; //damage done by player decreases each level
     }
@@ -109,15 +109,15 @@ const level = {
     // spawn.bodyRect(600, -150, 140, 100);
     // spawn.bodyRect(400, -150, 140, 160);
     // spawn.bodyRect(500, -150, 110, 110);
-    powerUps.spawn(400, -400, "field", false, '4');
+    // powerUps.spawn(400, -400, "field", false, '4');
     // powerUps.spawn(400, -400, "gun", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.starter(800, -1150);
     // spawn.groupBoss(-600, -550);
     // for (let i = 0; i < 1; ++i) {
-    //   spawn.chaser(800, -1150);
+    spawn.shooter(800, -1150);
     // }
-    spawn.groupBoss(900, -1070);
+    // spawn.groupBoss(900, -1070);
     // for (let i = 0; i < 20; i++) {
     //   spawn.randomBoss(-100, -1470);
     // }
@@ -497,13 +497,14 @@ const level = {
     spawn.boost(1800, -1000, 1200);
     spawn.bodyRect(1625, -1100, 100, 75);
     spawn.bodyRect(1350, -1025, 400, 25); // ground plank
-    spawn.mapRect(-700, -1000, 2100, 100); //lower left ledge
+    spawn.mapRect(-725, -1000, 2150, 100); //lower left ledge
     spawn.bodyRect(350, -1100, 200, 100, 0.8);
     spawn.bodyRect(370, -1200, 100, 100, 0.8);
     spawn.bodyRect(360, -1300, 100, 100, 0.8);
     spawn.bodyRect(950, -1050, 300, 50, 0.8);
     spawn.bodyRect(-600, -1250, 400, 250, 0.8);
-    spawn.mapRect(1600, -1000, 1650, 100); //middle ledge
+    spawn.mapRect(1575, -1000, 1700, 100); //middle ledge
+    spawn.mapRect(3400, -1000, 75, 25);
     spawn.bodyRect(2600, -1950, 100, 250, 0.8);
     spawn.bodyRect(2700, -1125, 125, 125, 0.8);
     spawn.bodyRect(2710, -1250, 125, 125, 0.8);

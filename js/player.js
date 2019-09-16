@@ -415,9 +415,6 @@ const mech = {
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
   damage(dmg) {
-    if (dmg * player.mass > 0.35) {
-      this.drop(); //drop block if holding
-    }
     this.health -= dmg;
     if (this.health < 0) {
       this.health = 0;
@@ -425,6 +422,13 @@ const mech = {
       return;
     }
     this.displayHealth();
+    document.getElementById("dmg").style.transition = "opacity 0s";
+    document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
+
+    //drop block if holding
+    if (dmg > 0.07) {
+      this.drop();
+    }
 
     // freeze game and display a full screen red color
     if (dmg > 0.05) {
@@ -434,9 +438,8 @@ const mech = {
       game.fpsCap = 72
       game.fpsInterval = 1000 / game.fpsCap;
     }
-    document.getElementById("dmg").style.transition = "opacity 0s";
-    document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
     mech.defaultFPSCycle = game.cycle
+
     const normalFPS = function () {
       if (mech.defaultFPSCycle < game.cycle) { //back to default values
         game.fpsCap = 72
