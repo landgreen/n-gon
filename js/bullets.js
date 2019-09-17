@@ -773,7 +773,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 60 : 35, mech.crouch ? 30 : 17, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 60 : 35, mech.crouch ? 25 : 14, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = game.cycle + 100;

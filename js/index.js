@@ -2,9 +2,20 @@
 /* TODO:  *******************************************
 *****************************************************
 
-run fast when shift is pressed
-  drains fieldMeter
-  walking animation isn't going to look good
+general gun power ups
+  +explosion radius
+  +dmg
+  life steal
+  ice bullets  (reduce mob velocity on dmg)
+  +bullet size
+  get bonus ammo / reduced ammo use
+  +reduced cs on fire  (faster fire rate)
+  orbiting orb fires at random targets
+    missiles at random targets
+
+have mob acceleration and look frequency scale with difficulty level
+  this will speed up the responses of later mobs
+  this should provide a feeling of difficulty without inflating the life of mobs
 
 give mobs more animal-like behaviors
   like rainworld
@@ -18,32 +29,6 @@ give mobs more animal-like behaviors
     this might be hard to code
   isolated mobs try to group up.
     
-general gun power ups
-  +explosion radius
-  +dmg
-  life steal
-  ice bullets  (reduce mob velocity on dmg)
-  +bullet size
-  get bonus ammo / reduced ammo use
-  +reduced cs on fire  (faster fire rate)
-  orbiting orb fires at random targets
-    missiles at random targets
-
-specific gun power ups
-  laser: less energy use
-  rapid fire: less drag, less gravity, less randomness
-  one shot: larger bullet
-  super balls: fire 4 balls
-  spray: less drag +range
-  needles: +dmg, or faster fire rate
-  missiles: larger explosion radius
-  flak: + more projectiles per shot
-  M80: larger explosion radius
-  grenades: larger explosion radius
-  spore: quicker hatching, more spores spawn, +dmg
-  drones: last longer
-  wave beam: longer range
-
 game mechanics
   mechanics that support the physics engine
     add rope/constraint
