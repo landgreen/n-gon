@@ -815,7 +815,7 @@ const mech = {
     },
     () => {
       mech.fieldMode = 1;
-      game.makeTextLog("<h2>Time Dilation Field</h2> field emitter slows time around the player", 1000);
+      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (left mouse or space bar)<p> field emitter slows objects in range</p>", 1000);
       mech.setHoldDefaults();
       mech.fieldArc = 1; //field covers full 360 degrees
       mech.calculateFieldThreshold();
@@ -825,7 +825,7 @@ const mech = {
           mech.drawHold(mech.holdingTarget);
           mech.holding();
           mech.throw();
-        } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //both mouse keys down
+        } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
           const DRAIN = 0.0035 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
@@ -870,7 +870,7 @@ const mech = {
     },
     () => {
       mech.fieldMode = 2;
-      game.makeTextLog("<h2>Kinetic Energy Field</h2> field emitter does damage on contact <br> blocks are thrown at a higher velocity", 1000);
+      game.makeTextLog("<strong style='font-size:30px;'>Kinetic Energy Field</strong><br> (left mouse or space bar)<p> field emitter does damage on contact <br> blocks are thrown at a higher velocity</p>", 1000);
       mech.setHoldDefaults();
       //throw quicker and harder
       mech.throwChargeRate = 3; //0.5
@@ -920,7 +920,7 @@ const mech = {
     },
     () => {
       mech.fieldMode = 3;
-      game.makeTextLog("<h2>Negative Mass Field</h2> field emitter nullifies gravity around player<br> field emitter can hold more massive objects", 1000);
+      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (left mouse or space bar)<p> field emitter nullifies gravity around player<br> field emitter can hold more massive objects</p>", 1000);
       mech.setHoldDefaults();
       mech.holdingMassScale = 0.05; //can hold heavier blocks
       mech.fieldArc = 1; //field covers full 360 degrees
@@ -932,7 +932,7 @@ const mech = {
           mech.drawHold(mech.holdingTarget);
           mech.holding();
           mech.throw();
-        } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //both mouse keys down           //push away
+        } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //push away
           const DRAIN = 0.0025 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
@@ -948,11 +948,12 @@ const mech = {
                 }
               }
             }
-            // zeroG(powerUp);
+            // zeroG(powerUp);  /no point to zero G power ups because the field just sucks them in.
             zeroG(body);
 
             player.force.y -= player.mass * mech.gravity; // + 0.005 * Math.sin(game.cycle / 10); //wobble
-            //add player vertical friction to reduce map jump craziness
+
+            //add player vertical friction to reduce map jump exploits
             Matter.Body.setVelocity(player, {
               x: player.velocity.x,
               y: player.velocity.y * 0.99
@@ -967,7 +968,7 @@ const mech = {
             ctx.globalCompositeOperation = "source-over";
 
           } else {
-            //trigger cooldown
+            //trigger cool down
             mech.fieldCDcycle = game.cycle + 120;
           }
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle && mech.fieldCDcycle < game.cycle) { //holding, but field button is released
@@ -980,7 +981,7 @@ const mech = {
     },
     () => {
       mech.fieldMode = 4;
-      game.makeTextLog("<h2>Zero-Point Energy Field</h2> energy regeneration is improved<br> field emitter is extended to a circle around the player", 1000);
+      game.makeTextLog("<strong style='font-size:30px;'>Zero-Point Energy Field</strong><br> (left mouse or space bar) <p>improved energy regeneration<br> field emitter surrounds player</p>", 1000);
       mech.setHoldDefaults();
       mech.fieldRegen = 0.01; //0.0015
       mech.fieldArc = 1; //field covers full 360 degrees
@@ -1016,7 +1017,7 @@ const mech = {
     //       mech.drawHold(mech.holdingTarget);
     //       mech.holding();
     //       mech.throw();
-    //     } else if (game.mouseDown && (keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //both mouse keys down
+    //     } else if (game.mouseDown && (keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
     //       if (mech.fieldMeter > mech.fieldRegen * 1.15) {
     //         mech.fieldMeter -= mech.fieldRegen * 1.15;
     //         const range = 900;
@@ -1130,7 +1131,7 @@ const mech = {
     //       mech.drawHold(mech.holdingTarget);
     //       mech.holding();
     //       mech.throw();
-    //     } else if (game.mouseDown && (keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //both mouse keys down
+    //     } else if (game.mouseDown && (keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
     //       if (mech.fieldMeter > mech.fieldRegen) {
     //         // mech.fieldMeter -= mech.fieldRegen
     //         const range = 165;
@@ -1191,7 +1192,7 @@ const mech = {
     //       mech.drawHold(mech.holdingTarget);
     //       mech.holding();
     //       mech.throw();
-    //     } else if (game.mouseDown && (keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //both mouse keys down           //push away
+    //     } else if (game.mouseDown && (keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {           //push away
     //       if (mech.fieldMeter > 0.005) {
     //         mech.fieldMeter -= 0.005;
 
