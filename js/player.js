@@ -708,7 +708,7 @@ const mech = {
     // push all mobs in range
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (this.lookingAt(mob[i]) && Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < this.grabRange && Matter.Query.ray(map, mob[i].position, this.pos).length === 0) {
-        const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.02)
+        const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.015)
         if (this.fieldMeter > fieldBlockCost) {
           this.fieldMeter -= fieldBlockCost;
           if (this.fieldDamage) mob[i].damage(b.dmgScale * this.fieldDamage);
@@ -870,7 +870,7 @@ const mech = {
     },
     () => {
       mech.fieldMode = 2;
-      game.makeTextLog("<strong style='font-size:30px;'>Kinetic Energy Field</strong><br> (left mouse or space bar)<p> field emitter does damage on contact <br> blocks are thrown at a higher velocity</p>", 1000);
+      game.makeTextLog("<strong style='font-size:30px;'>Kinetic Energy Field</strong><br> (left mouse or space bar)<p> field emitter does damage on contact<br> blocks are thrown at a higher velocity</p>", 1000);
       mech.setHoldDefaults();
       //throw quicker and harder
       mech.throwChargeRate = 3; //0.5
@@ -920,7 +920,7 @@ const mech = {
     },
     () => {
       mech.fieldMode = 3;
-      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (left mouse or space bar)<p> field emitter nullifies gravity around player<br> field emitter can hold more massive objects</p>", 1000);
+      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (left mouse or space bar)<p> field emitter nullifies gravity around player<br> field emitter holds more massive objects</p>", 1000);
       mech.setHoldDefaults();
       mech.holdingMassScale = 0.05; //can hold heavier blocks
       mech.fieldArc = 1; //field covers full 360 degrees
@@ -989,6 +989,34 @@ const mech = {
 
       mech.hold = function () {
         mech.grabRange = 200 + 35 * Math.sin(game.cycle / 20)
+
+        if (mech.isHolding) {
+          mech.drawHold(mech.holdingTarget);
+          mech.holding();
+          mech.throw();
+        } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1)) { //not hold but field button is pressed
+          mech.drawField();
+          mech.grabPowerUp();
+          mech.pushMobs();
+          mech.lookForPickUp();
+        } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
+          mech.pickUp();
+        } else {
+          mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        }
+        mech.drawFieldMeter()
+      }
+    },
+    () => {
+      mech.fieldMode = 5;
+      game.makeTextLog("<strong style='font-size:30px;'>Nano-Scale Manufacturing</strong><br> (passive effect) <p>when energy is full, build a drone using 10 energy<br> reduced energy regeneration</p>", 1000);
+      mech.setHoldDefaults();
+      mech.fieldRegen = 0.0005 //0.0015;
+      mech.hold = function () {
+        if (mech.fieldMeter === 1) {
+          mech.fieldMeter -= 0.1;
+          b.guns[12].fire() //spawn drone
+        }
 
         if (mech.isHolding) {
           mech.drawHold(mech.holdingTarget);

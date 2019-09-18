@@ -207,7 +207,7 @@ const b = {
           knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 18);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
-          damageScale *= 0.7 //reduced damage for each additional explosion target 
+          damageScale *= 0.8 //reduced damage for each additional explosion target 
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
           knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 35);

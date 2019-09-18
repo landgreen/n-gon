@@ -12,9 +12,10 @@ const level = {
   start() {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
+      document.title = "n-gon";
       this.intro(); //starting level
       // b.giveGuns(0) // set a starting gun for testing
-      // mech.fieldUpgrades[2]() //give a field power up for testing
+      mech.fieldUpgrades[5]() //give a field power up for testing
       // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
       // this.bosses();
       // this.testingMap();

@@ -858,7 +858,6 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
-      console.log(this.mass)
       this.explode();
     };
     Matter.Body.setDensity(me, 0.001); //normal is 0.001
