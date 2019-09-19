@@ -470,6 +470,7 @@ const mech = {
     index: 0
   },
   isHolding: false,
+  isStealth: false,
   throwCharge: 0,
   fireCDcycle: 0,
   fieldCDcycle: 0,
@@ -493,6 +494,7 @@ const mech = {
     this.fieldMeter = 1;
     this.fieldRegen = 0.0015;
     this.fieldCDcycle = 0;
+    this.isStealth = false;
     this.holdingMassScale = 0.5;
     this.throwChargeRate = 2;
     this.throwChargeMax = 50;
@@ -1027,6 +1029,49 @@ const mech = {
           mech.grabPowerUp();
           mech.pushMobs();
           mech.lookForPickUp();
+        } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
+          mech.pickUp();
+        } else {
+          mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        }
+        mech.drawFieldMeter()
+      }
+    },
+    () => {
+      mech.fieldMode = 6;
+      game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (left mouse or space bar) <p>localized invisibility field</p>", 1000);
+      mech.setHoldDefaults();
+      mech.fieldArc = 1; //field covers full 360 degrees
+      mech.calculateFieldThreshold();
+
+      mech.hold = function () {
+        mech.isStealth = false //isStealth is checked in mob foundPlayer()
+
+        if (mech.isHolding) {
+          mech.drawHold(mech.holdingTarget);
+          mech.holding();
+          mech.throw();
+        } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
+          const DRAIN = 0.0015 //mech.fieldRegen = 0.0015
+          if (mech.fieldMeter > DRAIN) {
+            mech.fieldMeter -= DRAIN;
+            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
+
+            //draw stealth field
+            // ctx.fillStyle = "rgba(255,255,155,0.9)";
+            // ctx.fillStyle = "rgba(255,255,255,1)";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mech.pos.x, mech.pos.y + 25, 110, 0, 2 * Math.PI);
+            ctx.globalCompositeOperation = "destination-in";
+            ctx.fill();
+            ctx.globalCompositeOperation = "source-over";
+
+            mech.grabPowerUp();
+            mech.lookForPickUp();
+          } else {
+            mech.fieldCDcycle = game.cycle + 120;
+          }
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
           mech.pickUp();
         } else {

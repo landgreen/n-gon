@@ -98,10 +98,12 @@ const mobs = {
       },
       seePlayerFreq: 20 + Math.round(Math.random() * 20), //how often NPC checks to see where player is, lower numbers have better vision
       foundPlayer() {
-        this.locatePlayer();
-        if (!this.seePlayer.yes) {
-          this.alertNearByMobs();
-          this.seePlayer.yes = true;
+        if (!mech.isStealth) {
+          this.locatePlayer();
+          if (!this.seePlayer.yes) {
+            this.alertNearByMobs();
+            this.seePlayer.yes = true;
+          }
         }
       },
       lostPlayer() {

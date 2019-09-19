@@ -2,17 +2,6 @@
 /* TODO:  *******************************************
 *****************************************************
 
-general gun power ups
-  +explosion radius
-  +dmg
-  life steal
-  ice bullets  (reduce mob velocity on dmg)
-  +bullet size
-  get bonus ammo / reduced ammo use
-  +reduced cs on fire  (faster fire rate)
-  orbiting orb fires at random targets
-    missiles at random targets
-
 have mob acceleration and look frequency scale with difficulty level
   this will speed up the responses of later mobs
   this should provide a feeling of difficulty without inflating the life of mobs
@@ -46,15 +35,11 @@ game mechanics
     low friction ground
     bouncy ground
 
- give each foot a sensor to check for ground collisions
-  	feet with not go into the ground even on slanted ground
- 	this might be not worth it, but it might look really cool
-
 track foot positions with velocity better as the player walks/crouch/runs
 
 add bullet on damage effects
 	effects could:
-		add to the array mod.do new mob behaviors
+		add to the array mob.do new mob behaviors
 			add a damage over time
 			add a freeze
 		change mob traits
@@ -74,10 +59,6 @@ add bullet on damage effects
 				or only heal if the mob dies (might be tricky)
 		remove standing on player actions
 			replace with check if player feet are in an area.
-
-unused ideas
-passive: walk through blocks  (difficult to implement)
-
 
 
 
