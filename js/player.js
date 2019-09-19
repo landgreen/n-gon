@@ -710,7 +710,7 @@ const mech = {
     // push all mobs in range
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (this.lookingAt(mob[i]) && Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < this.grabRange && Matter.Query.ray(map, mob[i].position, this.pos).length === 0) {
-        const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.015)
+        const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.012)
         if (this.fieldMeter > fieldBlockCost) {
           this.fieldMeter -= fieldBlockCost;
           if (this.fieldDamage) mob[i].damage(b.dmgScale * this.fieldDamage);
@@ -718,7 +718,7 @@ const mech = {
           this.drawHold(mob[i]);
           //mob and player knock back
           const angle = Math.atan2(player.position.y - mob[i].position.y, player.position.x - mob[i].position.x);
-          const mass = Math.min(Math.sqrt(mob[i].mass), 6);
+          const mass = Math.min(Math.sqrt(mob[i].mass), 4);
           // console.log(mob[i].mass, Math.sqrt(mob[i].mass), mass)
           Matter.Body.setVelocity(mob[i], {
             x: player.velocity.x - (15 * Math.cos(angle)) / mass,
@@ -985,12 +985,12 @@ const mech = {
       mech.fieldMode = 4;
       game.makeTextLog("<strong style='font-size:30px;'>Zero-Point Energy Field</strong><br> (left mouse or space bar) <p>improved energy regeneration<br> field emitter surrounds player</p>", 1000);
       mech.setHoldDefaults();
-      mech.fieldRegen = 0.01; //0.0015
+      mech.fieldRegen = 0.02; //0.0015
       mech.fieldArc = 1; //field covers full 360 degrees
       mech.calculateFieldThreshold();
 
       mech.hold = function () {
-        mech.grabRange = 200 + 35 * Math.sin(game.cycle / 20)
+        mech.grabRange = 250 + 35 * Math.sin(game.cycle / 20)
 
         if (mech.isHolding) {
           mech.drawHold(mech.holdingTarget);
