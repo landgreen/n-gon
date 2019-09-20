@@ -1057,7 +1057,8 @@ const mech = {
       mech.fieldMode = 6;
       game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>localized invisibility field</p>", 1000);
       mech.setHoldDefaults();
-      mech.fieldArc = 1; //field covers full 360 degrees
+      // mech.grabRange = 100;
+      // mech.fieldArc = 1; //field covers full 360 degrees
       mech.calculateFieldThreshold();
 
       mech.hold = function () {
@@ -1074,12 +1075,11 @@ const mech = {
             mech.isStealth = true //isStealth is checked in mob foundPlayer() 
 
             //draw stealth field
-            // ctx.fillStyle = "rgba(255,255,155,0.9)";
-            // ctx.fillStyle = "rgba(255,255,255,1)";
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(mech.pos.x, mech.pos.y + 25, 110, 0, 2 * Math.PI);
-            ctx.globalCompositeOperation = "destination-in";
+            ctx.arc(mech.pos.x, mech.pos.y + 25, mech.grabRange, 0, 2 * Math.PI);
+            ctx.globalCompositeOperation = "destination-in"; //in or atop
             ctx.fill();
             ctx.globalCompositeOperation = "source-over";
 
