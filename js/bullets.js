@@ -767,13 +767,13 @@ const b = {
     {
       name: "spores",
       ammo: 0,
-      ammoPack: 7,
+      ammoPack: 6,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 60 : 35, mech.crouch ? 25 : 14, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 70 : 50, mech.crouch ? 25 : 14, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = game.cycle + 100;
@@ -798,7 +798,7 @@ const b = {
 
         //spawn bullets on end
         bullet[me].onEnd = function () {
-          const NUM = 12;
+          const NUM = 9;
           for (let i = 0; i < NUM; i++) {
             const bIndex = bullet.length;
             const RADIUS = 4 + 2 * Math.random();
@@ -808,7 +808,7 @@ const b = {
               angle: dir,
               friction: 0,
               frictionAir: 0.01,
-              dmg: 1, //damage done in addition to the damage from momentum
+              dmg: 1.65, //damage done in addition to the damage from momentum
               classType: "bullet",
               collisionFilter: {
                 category: 0x000100,
@@ -820,7 +820,7 @@ const b = {
                 this.endCycle = 0; //bullet ends cycle after doing damage 
               },
               onEnd() {},
-              lookFrequency: 57 + Math.floor(37 * Math.random()),
+              lookFrequency: 67 + Math.floor(47 * Math.random()),
               do() {
                 this.force.y += this.mass * 0.00025; // high gravity because of the high friction
 
