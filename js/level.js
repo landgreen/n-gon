@@ -13,12 +13,12 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       document.title = "n-gon";
-      // this.intro(); //starting level\
+      this.intro(); //starting level
       // this.testingMap();
       // this.bosses();
       // this.skyscrapers();
       // this.rooftops();
-      this.warehouse();
+      // this.warehouse();
       // this.highrise();
       // this.towers();
 
