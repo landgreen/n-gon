@@ -793,7 +793,7 @@ const spawn = {
     me.collisionFilter.mask = 0x001100; //move through walls
     spawn.shield(me, x, y);
     me.onDeath = function () {
-      if (Math.random() < 0.2 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //bosss spawn field upgrades
+      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //bosss spawn field upgrades
     };
     me.do = function () {
       this.healthBar();
@@ -844,7 +844,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
     me.onDeath = function () {
-      if (Math.random() < 0.2 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
     };
     me.do = function () {
       this.healthBar();
@@ -944,7 +944,7 @@ const spawn = {
     spawn.shield(me, x, y);
     if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.onDeath = function () {
-      if (Math.random() < 0.2 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
     };
     me.do = function () {
       this.healthBar();
@@ -988,7 +988,7 @@ const spawn = {
     if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
 
     me.onDeath = function () {
-      if (Math.random() < 0.2 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
       this.removeCons(); //remove constraint
     };
     me.do = function () {
@@ -1649,7 +1649,7 @@ const spawn = {
   propsHoist: {
     inertia: Infinity, //prevents rotation
     frictionAir: 0.001,
-    friction: 0,
+    friction: 0.0001,
     frictionStatic: 0,
     restitution: 0,
     isNotHoldable: true

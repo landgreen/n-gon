@@ -448,9 +448,17 @@ const game = {
       //only in testing mode
       if (keys[70]) {
         // f for power ups
-        for (let i = 0; i < 16; ++i) {
-          powerUps.spawnRandomPowerUp(game.mouseInGame.x, game.mouseInGame.y, 0, 0);
-        }
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+
+        // for (let i = 0; i < 16; ++i) { 
+        //   powerUps.spawnRandomPowerUp(game.mouseInGame.x, game.mouseInGame.y, 0, 0);
+        // }
       }
       if (keys[82]) {
         // r to teleport to mouse
@@ -555,15 +563,10 @@ const game = {
     player.force.y += player.mass * mech.gravity;
   },
   reset() {
-    //removes guns and ammo
-    b.inventory = [];
+    b.inventory = []; //removes guns and ammo  
     for (let i = 0, len = b.guns.length; i < len; ++i) {
-      if (b.guns[i].ammo != Infinity) {
-        b.guns[i].ammo = 0;
-        b.guns[i].have = false;
-      } else {
-        b.inventory.push(i);
-      }
+      b.guns[i].have = false;
+      if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
     }
     game.paused = false;
     engine.timing.timeScale = 1;
@@ -573,14 +576,14 @@ const game = {
     game.makeGunHUD();
     mech.drop();
     mech.addHealth(1);
-    mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
     mech.alive = true;
     level.onLevel = 0;
     game.levelsCleared = 0;
-    // level.onLevel = Math.floor(Math.random() * level.levels.length); //picks a random starting level
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
     document.getElementById("fade-out").style.opacity = 0;
+    // mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
+    if (!mech.fieldMode) mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
   },
   firstRun: true,
   splashReturn() {

@@ -13,17 +13,18 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       document.title = "n-gon";
-      this.intro(); //starting level
-      // b.giveGuns(0) // set a starting gun for testing
-      mech.fieldUpgrades[6]() //give a field power up for testing
-      // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
-      // this.bosses();
+      // this.intro(); //starting level\
       // this.testingMap();
+      // this.bosses();
       // this.skyscrapers();
       // this.rooftops();
-      // this.warehouse();
+      this.warehouse();
       // this.highrise();
       // this.towers();
+
+      // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
+      // b.giveGuns(0) // set a starting gun for testing
+      // mech.fieldUpgrades[1]() //give a field power up for testing
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       this[this.levels[this.onLevel]](); //picks the current map from the the levels array
@@ -117,9 +118,9 @@ const level = {
     // spawn.starter(800, -1150);
     // spawn.groupBoss(-600, -550);
     // for (let i = 0; i < 1; ++i) {
-    spawn.shooter(800, -1150);
+    // spawn.shooter(800, -1150);
     // }
-    // spawn.groupBoss(900, -1070);
+    spawn.groupBoss(900, -1070);
     // for (let i = 0; i < 20; i++) {
     //   spawn.randomBoss(-100, -1470);
     // }
@@ -222,12 +223,6 @@ const level = {
     //   "<br><br><div class='wrapper'> <div class = 'grid-box'> <span class = 'box'>W</span><br> <span class = 'box'>A</span> <span class = 'box'>S</span> <span class = 'box'>D</span></div> <div class = 'grid-box'> <span class = 'mouse'>️<span class='mouse-line'></span></span> </div></div>",
     //   Infinity
     // );
-
-    game.makeTextLog(
-      // "<br><br><br><br><div class='wrapper'> <div class = 'grid-box'><strong>right mouse / space bar:</strong><br>pick up things</div> <div class = 'grid-box'> <span class = 'mouse'>️<span class='mouse-line'></span></span> </div></div>",
-      "Use <strong>right mouse</strong> or <strong>space bar</strong> to pick up things.",
-      Infinity
-    );
     level.fill.push({
       x: -150,
       y: -1150,
@@ -875,7 +870,7 @@ const level = {
   },
   warehouse() {
     game.zoomTransition(1300)
-    document.body.style.backgroundColor = "#bbb";
+    document.body.style.backgroundColor = "#f2f5f3";
     mech.setPosToSpawn(25, -60); //normal spawn
     //mech.setPosToSpawn(-2000, -1700); // left ledge spawn
     level.enter.x = mech.spawnPos.x - 50;
@@ -895,33 +890,33 @@ const level = {
     // level.fill.push({ x: -1800, y: -500, width: 1975, height: 550, color: "rgba(0,0,0,0.05)"});
     // level.fill.push({ x: -2600, y: -150, width: 700, height: 200, color: "rgba(0,0,0,0.05)"});
     //background
-    const BGColor = "#f3f3ea";
-    level.fillBG.push({
+    const BGColor = "rgba(0,0,0,0.1)";
+    level.fill.push({
       x: -3025,
       y: 50,
       width: 4125,
       height: 1350,
       color: BGColor
     });
-    level.fillBG.push({
+    level.fill.push({
       x: -1800,
       y: -500,
       width: 1625,
-      height: 555,
+      height: 550,
       color: BGColor
     });
-    level.fillBG.push({
-      x: -177,
+    level.fill.push({
+      x: -175,
       y: -250,
       width: 350,
       height: 300,
-      color: "#e3e3da"
+      color: BGColor
     });
-    level.fillBG.push({
+    level.fill.push({
       x: -2600,
       y: -150,
       width: 700,
-      height: 205,
+      height: 200,
       color: BGColor
     });
     level.fillBG.push({
@@ -986,8 +981,9 @@ const level = {
       length: 1
     });
 
-    spawn.bodyRect(-2775, 1150, 190, 150, 1, spawn.propsSlide); //weight
-    spawn.bodyRect(-2575, 1150, 200, 150, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(-2775, 1150, 180, 160, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(-2550, 1150, 200, 150, 1, spawn.propsSlide); //weight
+
     spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
     cons[cons.length] = Constraint.create({
       pointA: {
@@ -995,8 +991,8 @@ const level = {
         y: 150
       },
       bodyB: body[body.length - 1],
-      stiffness: 0.000076,
-      length: 220
+      stiffness: 0.0002,
+      length: 566
     });
 
     //blocks

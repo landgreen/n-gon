@@ -543,8 +543,12 @@ const b = {
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31, 2, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 45 : 37, dir, me); //cd , speed
+        if (mech.crouch) {
+          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 40, 3, b.fireAttributes(dir));
+        } else {
+          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31, 2, b.fireAttributes(dir));
+        }
+        b.fireProps(mech.crouch ? 50 : 20, mech.crouch ? 45 : 37, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + 180;
         bullet[me].dmg = mech.crouch ? 1.35 : 1;
         b.drawOneBullet(bullet[me].vertices);
@@ -870,7 +874,7 @@ const b = {
     {
       name: "drones",
       ammo: 0,
-      ammoPack: 27,
+      ammoPack: 23,
       have: false,
       fire() {
         const THRUST = 0.0015
@@ -884,7 +888,7 @@ const b = {
           restitution: 1,
           dmg: 0.15, //damage done in addition to the damage from momentum
           lookFrequency: 79 + Math.floor(32 * Math.random()),
-          endCycle: game.cycle + 720 + 300 * Math.random(),
+          endCycle: game.cycle + 780 + 360 * Math.random(),
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -937,7 +941,7 @@ const b = {
             }
           }
         })
-        b.fireProps(mech.crouch ? 15 : 10, mech.crouch ? 26 : 2, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 22 : 15, mech.crouch ? 26 : 1, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         // Matter.Body.setDensity(bullet[me], 0.000001);
         // bullet[me].onDmg = function () {
@@ -954,7 +958,8 @@ const b = {
         game.updateGunHUD();
       } else {
         mech.fireCDcycle = game.cycle + 30; //cooldown
-        game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>", 200);
+        // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>", 200);
+        game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
     }
   },
@@ -966,7 +971,7 @@ const b = {
         game.updateGunHUD();
       } else {
         mech.fireCDcycle = game.cycle + 30; //cooldown
-        game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>", 200);
+        game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
     }
   },
