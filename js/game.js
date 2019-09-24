@@ -644,7 +644,6 @@ const game = {
     game.fpsInterval = 1000 / game.fpsCap;
     game.then = Date.now();
     requestAnimationFrame(cycle); //starts game loop
-    game.lastLogTime = game.cycle + 360;
   },
   clearNow: false,
   clearMap() {

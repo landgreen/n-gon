@@ -796,7 +796,7 @@ const mech = {
   fieldUpgrades: [
     () => {
       mech.fieldMode = 0;
-      game.makeTextLog("<strong style='font-size:30px;'>Field Emitter</strong><br> (right click or spacebar)<p>lets you pick up and throw objects<br>shields you from damage</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Field Emitter</strong><br> (right click or space bar)<p>lets you pick up and throw objects<br>shields you from damage</p>", Infinity);
       mech.setHoldDefaults();
       mech.hold = function () {
         if (mech.isHolding) {
@@ -1062,7 +1062,7 @@ const mech = {
       mech.fieldMode = 6;
       game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>localized invisibility field</p>", 1200);
       mech.setHoldDefaults();
-      mech.grabRange = 200;
+      mech.grabRange = 150;
       mech.fieldArc = 0.1; //0.2 is normal
       // mech.fieldArc = 1; //field covers full 360 degrees
       mech.calculateFieldThreshold();
@@ -1081,13 +1081,18 @@ const mech = {
             mech.isStealth = true //isStealth is checked in mob foundPlayer() 
 
             //draw stealth field
-            ctx.fillStyle = "rgba(255,255,255,0.4)";
+            ctx.fillStyle = "rgba(255,255,255,0.6)";
             ctx.fill();
             ctx.beginPath();
             ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange - 20, 0, 2 * Math.PI);
             ctx.globalCompositeOperation = "destination-in"; //in or atop
             ctx.fill();
             ctx.globalCompositeOperation = "source-over";
+
+            ctx.beginPath();
+            ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange - 20, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(210,230,255,0.5)";
+            ctx.fill();
 
             mech.drawField();
             mech.grabPowerUp();
