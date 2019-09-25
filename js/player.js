@@ -818,7 +818,8 @@ const mech = {
     },
     () => {
       mech.fieldMode = 1;
-      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right mouse or space bar)<p> field slows objects in range<br> field does <span style='color:#a00;'>not</span> shield player</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right mouse or space bar)<p> field slows objects in range</p>", 1200);
+      // <br> field does <span style='color:#a00;'>not</span> shield player
       mech.setHoldDefaults();
       mech.fieldArc = 1; //field covers full 360 degrees
       mech.calculateFieldThreshold();
@@ -924,11 +925,11 @@ const mech = {
     },
     () => {
       mech.fieldMode = 3;
-      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> nullifies gravity around player<br> can hold more massive objects<br> field does <span style='color:#a00;'>not</span> shield player</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects</p>", 1200);
       mech.setHoldDefaults();
       mech.holdingMassScale = 0.05; //can hold heavier blocks
       // mech.fieldArc = 1; //field covers full 360 degrees
-      mech.grabRange = 150;
+      mech.grabRange = 160;
       mech.fieldArc = 0.1;
       mech.calculateFieldThreshold();
 
@@ -939,7 +940,7 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //push away
-          const DRAIN = 0.0025 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.002 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
             mech.grabPowerUp();
@@ -950,12 +951,13 @@ const mech = {
                 sub = Matter.Vector.sub(who[i].position, mech.pos);
                 dist = Matter.Vector.magnitude(sub);
                 if (dist < range) {
-                  who[i].force.y -= who[i].mass * game.g;
+                  who[i].force.y -= who[i].mass * (game.g * 1.03); //add a bit more then standard gravity
                 }
               }
             }
-            // zeroG(powerUp);  /no point to zero G power ups because the field just sucks them in.
+            zeroG(powerUp);
             zeroG(body);
+            // zeroG(mob);  //mobs are too irregular to make this work?
 
             player.force.y -= player.mass * mech.gravity; // + 0.005 * Math.sin(game.cycle / 10); //wobble
 
@@ -975,7 +977,6 @@ const mech = {
 
             mech.drawField();
             mech.pushMobs();
-
           } else {
             //trigger cool down
             mech.fieldCDcycle = game.cycle + 120;
@@ -1111,11 +1112,12 @@ const mech = {
     },
     () => {
       mech.fieldMode = 7;
-      game.makeTextLog("<strong style='font-size:30px;'>Thermal Radiation Field</strong><br> (right mouse or space bar) <p>field damages all targets within range, <span style='color:#a00;'>including player</span><br>field does <span style='color:#a00;'>not</span> shield player</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Thermal Radiation Field</strong><br> (right mouse or space bar) <p>field size grows while field is active<br>damages all targets within range, <span style='color:#a00;'>including player</span></p>", 1200);
+      // <br>field does <span style='color:#a00;'>not</span> shield player</br>
       // game.makeTextLog("<strong style='font-size:30px;'>Thermal Radiation Field</strong><br> (right mouse or space bar) <p>field damages and pushes all targets within range<br> <span style='color:#a00;'>field damages player</span><br>field does <span style='color:#a00;'>not</span> shield player</p>", 1200);
       mech.setHoldDefaults();
-      mech.grabRange = 160;
-      mech.fieldArc = 0.11; //0.2 is normal
+      // mech.grabRange = 160;
+      mech.fieldArc = 1; //0.2 is normal
       mech.rangeSmoothing = 0
       // mech.fieldRegen = 0.0008 //0.0015;
       mech.hold = function () {
@@ -1126,17 +1128,17 @@ const mech = {
         } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < game.cycle)) { //not hold but field button is pressed
           mech.grabPowerUp();
           mech.lookForPickUp();
-          //draw grab field
-          ctx.beginPath();
-          ctx.arc(this.pos.x, this.pos.y, this.grabRange - 20, this.angle - Math.PI * this.fieldArc, this.angle + Math.PI * this.fieldArc, false);
-          let EYE_RADIUS = 13;
-          ctx.lineTo(mech.pos.x + EYE_RADIUS * Math.cos(this.angle), mech.pos.y + EYE_RADIUS * Math.sin(this.angle));
-          if (this.holdingTarget) {
-            ctx.fillStyle = "rgba(150,150,150," + (0.05 + 0.1 * Math.random()) + ")";
-          } else {
-            ctx.fillStyle = "rgba(150,150,150," + (0.15 + 0.15 * Math.random()) + ")";
-          }
-          ctx.fill();
+          // //draw grab field
+          // ctx.beginPath();
+          // ctx.arc(this.pos.x, this.pos.y, this.grabRange - 20, this.angle - Math.PI * this.fieldArc, this.angle + Math.PI * this.fieldArc, false);
+          // let EYE_RADIUS = 13;
+          // ctx.lineTo(mech.pos.x + EYE_RADIUS * Math.cos(this.angle), mech.pos.y + EYE_RADIUS * Math.sin(this.angle));
+          // if (this.holdingTarget) {
+          //   ctx.fillStyle = "rgba(150,150,150," + (0.05 + 0.1 * Math.random()) + ")";
+          // } else {
+          //   ctx.fillStyle = "rgba(150,150,150," + (0.15 + 0.15 * Math.random()) + ")";
+          // }
+          // ctx.fill();
 
           if (mech.health > 0.1) {
             const DRAIN = 0.0011 //mech.fieldRegen = 0.0015
@@ -1145,13 +1147,13 @@ const mech = {
               mech.damage(0.0001)
 
               //draw damage field
-              mech.rangeSmoothing = mech.rangeSmoothing * 0.997 + (1350 + 60 * Math.cos(game.cycle / 20)) * 0.003
-              let gradient = ctx.createRadialGradient(this.pos.x, this.pos.y, 0, this.pos.x, this.pos.y, mech.rangeSmoothing);
+              mech.grabRange = mech.grabRange * 0.997 + (1350 + 150 * Math.cos(game.cycle / 30)) * 0.003
+              let gradient = ctx.createRadialGradient(this.pos.x, this.pos.y, 0, this.pos.x, this.pos.y, mech.grabRange);
               gradient.addColorStop(0, 'rgba(255,255,255,0)');
               gradient.addColorStop(1, 'rgba(255,0,50,0.5)');
               // gradient.addColorStop(1, 'rgba(255,0,0,0.05)');
               ctx.beginPath();
-              ctx.arc(this.pos.x, this.pos.y, mech.rangeSmoothing, 0, 2 * Math.PI);
+              ctx.arc(this.pos.x, this.pos.y, mech.grabRange, 0, 2 * Math.PI);
               ctx.fillStyle = gradient //rgba(255,0,0,0.2)
               ctx.fill();
 
@@ -1160,7 +1162,7 @@ const mech = {
                 if (mob[i].alive) {
                   sub = Matter.Vector.sub(this.pos, mob[i].position);
                   dist = Matter.Vector.magnitude(sub);
-                  if (dist < mech.rangeSmoothing) {
+                  if (dist < mech.grabRange) {
                     mob[i].damage(0.01);
                     mob[i].locatePlayer();
                     // mech.fieldMeter -= DRAIN * 0.1;  //extra drain for each additional target
@@ -1174,10 +1176,10 @@ const mech = {
             }
           }
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
-          mech.rangeSmoothing = 0
+          mech.grabRange = 0
           mech.pickUp();
         } else {
-          mech.rangeSmoothing = 0
+          mech.grabRange = 0
           mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
         }
         mech.drawFieldMeter()
