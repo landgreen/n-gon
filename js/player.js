@@ -934,7 +934,7 @@ const mech = {
       mech.calculateFieldThreshold();
 
       mech.hold = function () {
-        const range = 400
+        const range = 500
         if (mech.isHolding) {
           mech.drawHold(mech.holdingTarget);
           mech.holding();
@@ -957,15 +957,34 @@ const mech = {
             }
             zeroG(powerUp);
             zeroG(body);
+            // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
             // zeroG(mob);  //mobs are too irregular to make this work?
 
             player.force.y -= player.mass * mech.gravity; // + 0.005 * Math.sin(game.cycle / 10); //wobble
 
-            //add player vertical friction to reduce map jump exploits
-            Matter.Body.setVelocity(player, {
-              x: player.velocity.x,
-              y: player.velocity.y * 0.99
-            });
+            //allow player to fly up and down a bit
+            flyForce = 0.003;
+            if (keys[83] || keys[40]) {
+              player.force.y += flyForce
+              Matter.Body.setVelocity(player, { //friction, only when flying
+                x: player.velocity.x,
+                y: player.velocity.y * 0.96
+              });
+            } else if (keys[87] || keys[38]) {
+              player.force.y -= flyForce
+              Matter.Body.setVelocity(player, { //friction, only when flying
+                x: player.velocity.x,
+                y: player.velocity.y * 0.96
+              });
+            }
+
+            //add extra friction for horizontal motion
+            if (keys[65] || keys[68] || keys[37] || keys[39]) {
+              Matter.Body.setVelocity(player, {
+                x: player.velocity.x * 0.95,
+                y: player.velocity.y
+              });
+            }
 
             //draw zero-G range
             ctx.beginPath();
