@@ -881,9 +881,12 @@ const mech = {
       mech.throwChargeRate = 3; //0.5
       mech.throwChargeMax = 150; //50
       //passive field does extra damage
-      // mech.grabRange = 200;
-      mech.fieldArc = 0.01;
       mech.fieldDamage = 2;
+
+      // const startingArc = 0.
+      mech.fieldArc = 0.05
+      const STARTING_RANGE = 30
+      mech.grabRange = STARTING_RANGE;
 
       mech.hold = function () {
         if (mech.isHolding) {
@@ -891,6 +894,10 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldMeter > 0.15) { //not hold but field button is pressed
+
+          //smoothing function to grow range
+          mech.grabRange = mech.grabRange * 0.94 + 200 * 0.06
+
           //draw field
           const range = mech.grabRange - 20;
           ctx.beginPath();
@@ -917,8 +924,10 @@ const mech = {
           mech.lookForPickUp();
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
           mech.pickUp();
+          mech.grabRange = STARTING_RANGE;
         } else {
           mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+          mech.grabRange = STARTING_RANGE;
         }
         mech.drawFieldMeter()
       }
