@@ -881,8 +881,8 @@ const mech = {
       mech.throwChargeRate = 3; //0.5
       mech.throwChargeMax = 150; //50
       //passive field does extra damage
-      mech.grabRange = 180;
-      mech.fieldArc = 0.08;
+      // mech.grabRange = 200;
+      mech.fieldArc = 0.01;
       mech.fieldDamage = 2;
 
       mech.hold = function () {
@@ -925,12 +925,12 @@ const mech = {
     },
     () => {
       mech.fieldMode = 3;
-      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects<br> field does <span style='color:#a00;'>not</span> shield player</p>", 1200);
       mech.setHoldDefaults();
-      mech.holdingMassScale = 0.05; //can hold heavier blocks
+      mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
       // mech.fieldArc = 1; //field covers full 360 degrees
-      mech.grabRange = 160;
-      mech.fieldArc = 0.1;
+      mech.grabRange = 155;
+      mech.fieldArc = 0.08;
       mech.calculateFieldThreshold();
 
       mech.hold = function () {
@@ -940,9 +940,22 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) { //push away
-          const DRAIN = 0.002 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.0006 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
+
+            //draw field
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.grabRange - 20, this.angle - Math.PI * this.fieldArc, this.angle + Math.PI * this.fieldArc, false);
+            let eye = 13;
+            ctx.lineTo(mech.pos.x + eye * Math.cos(this.angle), mech.pos.y + eye * Math.sin(this.angle));
+            if (this.holdingTarget) {
+              ctx.fillStyle = "rgba(150,150,150," + (0.05 + 0.1 * Math.random()) + ")";
+            } else {
+              ctx.fillStyle = "rgba(150,150,150," + (0.15 + 0.15 * Math.random()) + ")";
+            }
+            ctx.fill();
+
             mech.grabPowerUp();
             mech.lookForPickUp();
             //look for nearby objects to make zero-g
@@ -964,18 +977,19 @@ const mech = {
 
             //allow player to fly up and down a bit
             flyForce = 0.003;
-            if (keys[83] || keys[40]) {
+            if (keys[83] || keys[40]) { //down
               player.force.y += flyForce
               Matter.Body.setVelocity(player, { //friction, only when flying
                 x: player.velocity.x,
                 y: player.velocity.y * 0.96
               });
-            } else if (keys[87] || keys[38]) {
+            } else if (keys[87] || keys[38]) { //up
               player.force.y -= flyForce
               Matter.Body.setVelocity(player, { //friction, only when flying
                 x: player.velocity.x,
                 y: player.velocity.y * 0.96
               });
+              // mech.fieldMeter -= DRAIN; //extra energy used to fly upwards
             }
 
             //add extra friction for horizontal motion
@@ -994,8 +1008,8 @@ const mech = {
             ctx.fill();
             ctx.globalCompositeOperation = "source-over";
 
-            mech.drawField();
-            mech.pushMobs();
+            // mech.drawField();
+            // mech.pushMobs();
           } else {
             //trigger cool down
             mech.fieldCDcycle = game.cycle + 120;
