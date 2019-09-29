@@ -38,11 +38,11 @@ const game = {
       mobs.draw();
       game.draw.cons();
       game.draw.body();
+      mobs.loop();
       mech.draw();
       mech.hold();
       level.drawFills();
       game.draw.drawMapPath();
-      mobs.loop();
       b.draw();
       b.fire();
       game.drawCircle();
@@ -222,7 +222,8 @@ const game = {
   paused: false,
   testing: false, //testing mode: shows wireframe and some variables
   cycle: 0, //total cycles, 60 per second
-  fpsCap: 72, //limits frames per second to 144/2=72+1=73,  on most monitors the fps is capped at 60fps by the hardware
+  fpsCap: 72, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
+  fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
   cyclePaused: 0,
   fallHeight: 3000, //below this y position the player dies
   lastTimeStamp: 0, //tracks time stamps for measuring delta

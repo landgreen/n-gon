@@ -308,7 +308,7 @@ const b = {
           };
           const laserHitMob = function (dmg) {
             if (best.who.alive) {
-              dmg *= b.dmgScale * 0.045;
+              dmg *= b.dmgScale * 0.06;
               best.who.damage(dmg);
               best.who.locatePlayer();
               //draw mob damage circle

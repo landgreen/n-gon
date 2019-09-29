@@ -146,15 +146,15 @@ const powerUps = {
       powerUps.spawn(x, y, "heal");
       return;
     }
-    if (Math.random() < 0.18) {
+    if (Math.random() < 0.19) {
       if (b.inventory.length > 0) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.005 * (8 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    if (Math.random() < 0.006 * (6 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.006) {
+    if (Math.random() < 0.005) {
       powerUps.spawn(x, y, "field");
       return;
     }
