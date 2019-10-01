@@ -521,7 +521,7 @@ const spawn = {
       this.seePlayerByLookingAt();
       const dist2 = this.distanceToPlayer2();
       //laser Tracking
-      if (this.seePlayer.yes && dist2 < 4000000) {
+      if (this.seePlayer.yes && dist2 < 4000000 && !mech.isStealth) {
         this.attraction();
         const rangeWidth = 2000; //this is sqrt of 4000000 from above if()
         //targeting laser will slowly move from the mob to the player's position

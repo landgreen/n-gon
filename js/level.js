@@ -24,7 +24,7 @@ const level = {
 
       // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
       // b.giveGuns(0) // set a starting gun for testing
-      mech.fieldUpgrades[7]() //give a field power up for testing
+      // mech.fieldUpgrades[4]() //give a field power up for testing
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       this[this.levels[this.onLevel]](); //picks the current map from the the levels array
@@ -115,12 +115,12 @@ const level = {
     // powerUps.spawn(400, -400, "field", false, '4');
     // powerUps.spawn(400, -400, "gun", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.starter(800, -1150);
+    spawn.focuser(800, -1150);
     // spawn.groupBoss(-600, -550);
     // for (let i = 0; i < 1; ++i) {
     // spawn.shooter(800, -1150);
     // }
-    spawn.groupBoss(900, -1070);
+    // spawn.groupBoss(900, -1070);
     // for (let i = 0; i < 20; i++) {
     //   spawn.randomBoss(-100, -1470);
     // }
