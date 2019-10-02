@@ -1130,7 +1130,7 @@ const mech = {
       mech.fieldMode = 6;
       game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>localized invisibility field<br> greatly <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
       mech.setHoldDefaults();
-      mech.fieldShieldingScale = 100;
+      mech.fieldShieldingScale = 10;
       // mech.grabRange = 160;
 
       mech.hold = function () {
@@ -1144,7 +1144,6 @@ const mech = {
           const DRAIN = 0.0003 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
-            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
 
             if (mech.crouch) {
               mech.grabRange = mech.grabRange * 0.96 + 100 * 0.04;
@@ -1161,7 +1160,9 @@ const mech = {
             ctx.fillStyle = `rgba(0,30,50,${0.5+0.07*Math.random()})` //"rgba(210,230," + HUE + ",0.5)";
             ctx.fill();
 
+            mech.isStealth = false //isStealth is checked in mob foundPlayer() 
             mech.pushMobs360(130);
+            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
             mech.grabPowerUp();
             mech.lookForPickUp();
           } else {
