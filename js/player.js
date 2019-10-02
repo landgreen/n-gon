@@ -1087,7 +1087,7 @@ const mech = {
           ctx.fill();
           mech.grabPowerUp();
           mech.pushMobs360(mech.grabRange + 25);
-          mech.lookForPickUp();
+          mech.lookForPickUp(180);
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
           mech.pickUp();
         } else {
@@ -1146,9 +1146,9 @@ const mech = {
             mech.fieldMeter -= DRAIN;
 
             if (mech.crouch) {
-              mech.grabRange = mech.grabRange * 0.96 + 100 * 0.04;
+              mech.grabRange = mech.grabRange * 0.96 + 240 * 0.04;
             } else {
-              mech.grabRange = mech.grabRange * 0.96 + 220 * 0.04;
+              mech.grabRange = mech.grabRange * 0.96 + 160 * 0.04;
             }
 
             ctx.beginPath();
