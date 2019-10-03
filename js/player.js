@@ -970,10 +970,11 @@ const mech = {
     },
     () => {
       mech.fieldMode = 3;
-      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects</p>", 1200);
+      //<br> <span style='color:#a00;'>decreased</span> field shielding efficiency
       mech.setHoldDefaults();
       mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
-      mech.fieldShieldingScale = 4;
+      mech.fieldShieldingScale = 2;
       // mech.fieldArc = 1; //field covers full 360 degrees
       // mech.grabRange = 150;
       // mech.fieldArc = 1 //0.08;
@@ -1122,7 +1123,7 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>player is invisible while field is active.<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
       // <br>player <span style='color:#a00;'>can't see</span> while field is active</p>", 1200);
       mech.setHoldDefaults();
-      mech.fieldShieldingScale = 5;
+      mech.fieldShieldingScale = 3;
       // mech.grabRange = 160;
 
       mech.hold = function () {
