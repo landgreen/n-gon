@@ -973,7 +973,7 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
       mech.setHoldDefaults();
       mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
-      mech.fieldShieldingScale = 20;
+      mech.fieldShieldingScale = 4;
       // mech.fieldArc = 1; //field covers full 360 degrees
       // mech.grabRange = 150;
       // mech.fieldArc = 1 //0.08;
@@ -1007,29 +1007,20 @@ const mech = {
             // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
             // zeroG(mob);  //mobs are too irregular to make this work?
 
-            player.force.y -= player.mass * mech.gravity; // + 0.005 * Math.sin(game.cycle / 10); //wobble
+            player.force.y -= 0.0009 + player.mass * mech.gravity; //constant upward drift
+            Matter.Body.setVelocity(player, {
+              x: player.velocity.x,
+              y: player.velocity.y * 0.97
+            });
 
-            //allow player to fly up and down a bit
-            flyForce = 0.003;
             if (keys[83] || keys[40]) { //down
-              player.force.y += flyForce
-              Matter.Body.setVelocity(player, { //friction, only when flying
-                x: player.velocity.x,
-                y: player.velocity.y * 0.97
-              });
-            } else if (keys[87] || keys[38]) { //up
-              player.force.y -= flyForce
-              Matter.Body.setVelocity(player, { //friction, only when flying
-                x: player.velocity.x,
-                y: player.velocity.y * 0.95
-              });
-              // mech.fieldMeter -= DRAIN; //extra energy used to fly upwards
+              player.force.y += 0.003
             }
 
             //add extra friction for horizontal motion
             if (keys[65] || keys[68] || keys[37] || keys[39]) {
               Matter.Body.setVelocity(player, {
-                x: player.velocity.x * 0.95,
+                x: player.velocity.x * 0.88,
                 y: player.velocity.y
               });
             }
@@ -1128,9 +1119,10 @@ const mech = {
     },
     () => {
       mech.fieldMode = 6;
-      game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>localized invisibility field<br> greatly <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>player is invisible while field is active.<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
+      // <br>player <span style='color:#a00;'>can't see</span> while field is active</p>", 1200);
       mech.setHoldDefaults();
-      mech.fieldShieldingScale = 10;
+      mech.fieldShieldingScale = 5;
       // mech.grabRange = 160;
 
       mech.hold = function () {
@@ -1141,14 +1133,15 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
-          const DRAIN = 0.0003 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.0002 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
+            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
 
             if (mech.crouch) {
-              mech.grabRange = mech.grabRange * 0.96 + 240 * 0.04;
+              mech.grabRange = mech.grabRange * 0.96 + 360 * 0.04;
             } else {
-              mech.grabRange = mech.grabRange * 0.96 + 160 * 0.04;
+              mech.grabRange = mech.grabRange * 0.96 + 180 * 0.04;
             }
 
             ctx.beginPath();
@@ -1160,9 +1153,8 @@ const mech = {
             ctx.fillStyle = `rgba(0,30,50,${0.5+0.07*Math.random()})` //"rgba(210,230," + HUE + ",0.5)";
             ctx.fill();
 
-            mech.isStealth = false //isStealth is checked in mob foundPlayer() 
-            mech.pushMobs360(130);
-            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
+            // mech.isStealth = false //isStealth is checked in mob foundPlayer() 
+            mech.pushMobs360(150);
             mech.grabPowerUp();
             mech.lookForPickUp();
           } else {

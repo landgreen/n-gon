@@ -24,7 +24,7 @@ const level = {
 
       // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
       // b.giveGuns(0) // set a starting gun for testing
-      mech.fieldUpgrades[4]() //give a field power up for testing
+      mech.fieldUpgrades[3]() //give a field power up for testing
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       this[this.levels[this.onLevel]](); //picks the current map from the the levels array

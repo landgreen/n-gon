@@ -98,12 +98,10 @@ const mobs = {
       },
       seePlayerFreq: 20 + Math.round(Math.random() * 20), //how often NPC checks to see where player is, lower numbers have better vision
       foundPlayer() {
-        if (!mech.isStealth) {
-          this.locatePlayer();
-          if (!this.seePlayer.yes) {
-            this.alertNearByMobs();
-            this.seePlayer.yes = true;
-          }
+        this.locatePlayer();
+        if (!this.seePlayer.yes) {
+          this.alertNearByMobs();
+          this.seePlayer.yes = true;
         }
       },
       lostPlayer() {
@@ -113,16 +111,18 @@ const mobs = {
       },
       memory: 120, //default time to remember player's location
       locatePlayer() {
-        // updates mob's memory of player location
-        this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
-        this.seePlayer.position.x = player.position.x;
-        this.seePlayer.position.y = player.position.y;
-      },
-      locatePlayerByDist() {
-        if (this.distanceToPlayer2() < this.locateRange) {
-          this.locatePlayer();
+        if (!mech.isStealth) {
+          // updates mob's memory of player location
+          this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
+          this.seePlayer.position.x = player.position.x;
+          this.seePlayer.position.y = player.position.y;
         }
       },
+      // locatePlayerByDist() {
+      //   if (this.distanceToPlayer2() < this.locateRange) {
+      //     this.locatePlayer();
+      //   }
+      // },
       seePlayerCheck() {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
