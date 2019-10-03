@@ -518,12 +518,7 @@ const mech = {
       ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
       ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range, 10);
       ctx.fillStyle = "rgb(50,220,255)";
-      ctx.fillRect(
-        this.pos.x - this.radius,
-        this.pos.y - 50,
-        range * this.fieldMeter,
-        10
-      );
+      ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range * this.fieldMeter, 10);
     } else {
       mech.fieldMeter = 1
     }
@@ -582,6 +577,7 @@ const mech = {
   },
   holding() {
     this.fieldMeter -= this.fieldRegen;
+    if (this.fieldMeter < 0) this.fieldMeter = 0;
     Matter.Body.setPosition(this.holdingTarget, {
       x: mech.pos.x + 70 * Math.cos(this.angle),
       y: mech.pos.y + 70 * Math.sin(this.angle)
@@ -716,6 +712,7 @@ const mech = {
         const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.012) //0.012
         if (this.fieldMeter > fieldBlockCost) {
           this.fieldMeter -= fieldBlockCost * this.fieldShieldingScale;
+          if (this.fieldMeter < 0) this.fieldMeter = 0;
           if (this.fieldDamage) mob[i].damage(b.dmgScale * this.fieldDamage);
           mob[i].locatePlayer();
           this.drawHold(mob[i]);
@@ -981,7 +978,6 @@ const mech = {
       // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
 
       mech.hold = function () {
-        const range = 500
         if (mech.isHolding) {
           mech.drawHold(mech.holdingTarget);
           mech.holding();
@@ -990,7 +986,7 @@ const mech = {
           const DRAIN = 0.001 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
-            mech.pushMobs360();
+            mech.pushMobs360(200);
             mech.grabPowerUp();
             mech.lookForPickUp();
             //look for nearby objects to make zero-g
@@ -998,7 +994,7 @@ const mech = {
               for (let i = 0, len = who.length; i < len; ++i) {
                 sub = Matter.Vector.sub(who[i].position, mech.pos);
                 dist = Matter.Vector.magnitude(sub);
-                if (dist < range) {
+                if (dist < mech.grabRange) {
                   who[i].force.y -= who[i].mass * (game.g * 1.06); //add a bit more then standard gravity
                 }
               }
@@ -1008,6 +1004,8 @@ const mech = {
             // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
             // zeroG(mob);  //mobs are too irregular to make this work?
 
+
+
             player.force.y -= 0.0009 + player.mass * mech.gravity; //constant upward drift
             Matter.Body.setVelocity(player, {
               x: player.velocity.x,
@@ -1016,6 +1014,9 @@ const mech = {
 
             if (keys[83] || keys[40]) { //down
               player.force.y += 0.003
+              mech.grabRange = mech.grabRange * 0.97 + 300 * 0.03;
+            } else {
+              mech.grabRange = mech.grabRange * 0.97 + 500 * 0.03;
             }
 
             //add extra friction for horizontal motion
@@ -1028,7 +1029,7 @@ const mech = {
 
             //draw zero-G range
             ctx.beginPath();
-            ctx.arc(mech.pos.x, mech.pos.y + 15, range, 0, 2 * Math.PI);
+            ctx.arc(mech.pos.x, mech.pos.y + 15, mech.grabRange, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(150,160,180," + (0.3 + 0.1 * Math.random()) + ")";
             ctx.fill();
             ctx.strokeStyle = "#000"
@@ -1040,8 +1041,10 @@ const mech = {
           }
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
           mech.pickUp();
+          mech.grabRange = 0
         } else {
           mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+          mech.grabRange = 0
         }
         mech.drawFieldMeter()
       }
