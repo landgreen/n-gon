@@ -1127,42 +1127,43 @@ const mech = {
     },
     () => {
       mech.fieldMode = 6;
-      game.makeTextLog("<strong style='font-size:30px;'>Metamaterial Refractive Optics</strong><br> (right mouse or space bar) <p>player is invisible while field is active.<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
-      // <br>player <span style='color:#a00;'>can't see</span> while field is active</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Dimensional Phasing</strong><br> (right mouse or space bar) <p>player can pass through enemies while field is active.<br>player is invisible while field is active.</p>", 1200);
       mech.setHoldDefaults();
-      mech.fieldShieldingScale = 3;
-      // mech.grabRange = 160;
+      // mech.fieldShieldingScale = 3;
+      // mech.grabRange = 220
 
       mech.hold = function () {
         mech.isStealth = false //isStealth is checked in mob foundPlayer()
-
+        player.collisionFilter.mask = 0x010011 //0x010011 is normal
         if (mech.isHolding) {
           mech.drawHold(mech.holdingTarget);
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
-          const DRAIN = 0.0002 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.004 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
-            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
 
-            if (mech.crouch) {
-              mech.grabRange = mech.grabRange * 0.96 + 360 * 0.04;
-            } else {
-              mech.grabRange = mech.grabRange * 0.96 + 180 * 0.04;
-            }
+            mech.isStealth = true //isStealth is checked in mob foundPlayer() 
+            player.collisionFilter.mask = 0x010001 //0x010011 is normals
+
+            // if (mech.crouch) {
+            //   mech.grabRange = mech.grabRange * 0.96 + 400 * 0.04;
+            // } else {
+            //   mech.grabRange = mech.grabRange * 0.96 + 220 * 0.04;
+            // }
 
             ctx.beginPath();
             ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
             ctx.globalCompositeOperation = "destination-in"; //in or atop
-            ctx.fillStyle = "rgba(255,255,255,0.6)";
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
             ctx.fill();
             ctx.globalCompositeOperation = "source-over";
-            ctx.fillStyle = `rgba(0,30,50,${0.5+0.07*Math.random()})` //"rgba(210,230," + HUE + ",0.5)";
-            ctx.fill();
+            ctx.strokeStyle = "#000"
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-            // mech.isStealth = false //isStealth is checked in mob foundPlayer() 
-            mech.pushMobs360(150);
+            // mech.pushMobs360(150);
             mech.grabPowerUp();
             mech.lookForPickUp();
           } else {
