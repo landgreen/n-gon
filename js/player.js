@@ -849,6 +849,7 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Inertia Negation Field</strong><br> (right mouse or space bar)<p> field slows objects in range<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
       // <br> field does <span style='color:#a00;'>not</span> shield player
       mech.setHoldDefaults();
+      mech.grabRange = 900
       mech.fieldShieldingScale = 12;
       // mech.fieldArc = 1; //field covers full 360 degrees
       // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -859,27 +860,27 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
-          const DRAIN = 0.002 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.001 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
             mech.grabPowerUp();
             // mech.pushMobs();
-            mech.pushMobs360();
+            mech.pushMobs360(180);
             mech.lookForPickUp(130);
 
-            const range = 900;
             //draw slow field
             ctx.beginPath();
-            ctx.arc(mech.pos.x, mech.pos.y, range, 0, 2 * Math.PI);
-            ctx.fillStyle = "#f5f5ff";
-            ctx.globalCompositeOperation = "difference";
+            ctx.arc(mech.pos.x, mech.pos.y + 15, mech.grabRange, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255,255,255," + (0.5 + 0.17 * Math.random()) + ")";
             ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
+            ctx.strokeStyle = "#000"
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
             function slow(who, friction = 0) {
               for (let i = 0, len = who.length; i < len; ++i) {
                 dist = Matter.Vector.magnitude(Matter.Vector.sub(who[i].position, mech.pos))
-                if (dist < range) {
+                if (dist < mech.grabRange) {
                   Matter.Body.setAngularVelocity(who[i], who[i].angularVelocity * friction)
                   Matter.Body.setVelocity(who[i], {
                     x: who[i].velocity.x * friction,
@@ -1014,9 +1015,9 @@ const mech = {
 
             if (keys[83] || keys[40]) { //down
               player.force.y += 0.003
-              mech.grabRange = mech.grabRange * 0.97 + 300 * 0.03;
+              mech.grabRange = mech.grabRange * 0.97 + 350 * 0.03;
             } else {
-              mech.grabRange = mech.grabRange * 0.97 + 500 * 0.03;
+              mech.grabRange = mech.grabRange * 0.97 + 650 * 0.03;
             }
 
             //add extra friction for horizontal motion
@@ -1029,12 +1030,15 @@ const mech = {
 
             //draw zero-G range
             ctx.beginPath();
-            ctx.arc(mech.pos.x, mech.pos.y + 15, mech.grabRange, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(150,160,180," + (0.3 + 0.1 * Math.random()) + ")";
+            ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
+            ctx.fillStyle = "#f5f5ff";
+            ctx.globalCompositeOperation = "difference";
+            // ctx.strokeStyle = "#888"
+            // ctx.stroke();
             ctx.fill();
-            ctx.strokeStyle = "#000"
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.globalCompositeOperation = "source-over";
+
+
           } else {
             //trigger cool down
             mech.fieldCDcycle = game.cycle + 120;

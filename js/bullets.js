@@ -548,9 +548,9 @@ const b = {
         } else {
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31, 2, b.fireAttributes(dir));
         }
-        b.fireProps(mech.crouch ? 50 : 20, mech.crouch ? 45 : 37, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 45 : 37, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + 180;
-        bullet[me].dmg = mech.crouch ? 1.35 : 1;
+        bullet[me].dmg = mech.crouch ? 1.4 : 1;
         b.drawOneBullet(bullet[me].vertices);
         bullet[me].do = function () {
           //low gravity
