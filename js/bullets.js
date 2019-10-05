@@ -40,7 +40,7 @@ const b = {
       classType: "bullet",
       collisionFilter: {
         category: 0x000100,
-        mask: 0x000011 //mask: 0x000101,  //for self collision
+        mask: 0x010011 //mask: 0x000101,  //for self collision
       },
       minDmgSpeed: 10,
       onDmg() {}, //this.endCycle = 0  //triggers despawn
@@ -236,7 +236,7 @@ const b = {
       fire() {
         // mech.fireCDcycle = game.cycle + 1
         //laser drains energy as well as bullets
-        const FIELD_DRAIN = 0.004
+        const FIELD_DRAIN = 0.003
         if (mech.fieldMeter < FIELD_DRAIN) {
           mech.fireCDcycle = game.cycle + 100; // cool down if out of energy
         } else {
@@ -777,7 +777,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 70 : 50, mech.crouch ? 25 : 14, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 75 : 55, mech.crouch ? 25 : 14, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = game.cycle + 100;
@@ -816,7 +816,7 @@ const b = {
               classType: "bullet",
               collisionFilter: {
                 category: 0x000100,
-                mask: 0x000011 //mask: 0x000101,  //for self collision
+                mask: 0x000011 //no collide with body
               },
               endCycle: game.cycle + 300 + Math.floor(Math.random() * 240),
               minDmgSpeed: 0,
@@ -892,7 +892,7 @@ const b = {
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
-            mask: 0x000111
+            mask: 0x010111 //self collide
           },
           minDmgSpeed: 0,
           lockedOn: null,
@@ -951,7 +951,7 @@ const b = {
     },
   ],
   fire() {
-    if (game.mouseDown && mech.fireCDcycle < game.cycle && !(keys[32] || game.mouseDownRight) && !mech.isHolding && b.inventory.length) {
+    if (game.mouseDown && mech.fireCDcycle < game.cycle && !(keys[32] || game.mouseDownRight) && b.inventory.length) {
       if (b.guns[this.activeGun].ammo > 0) {
         b.guns[this.activeGun].fire();
         b.guns[this.activeGun].ammo--;
@@ -960,6 +960,9 @@ const b = {
         mech.fireCDcycle = game.cycle + 30; //cooldown
         // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>", 200);
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
+      }
+      if (mech.isHolding) {
+        mech.drop();
       }
     }
   },

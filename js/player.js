@@ -543,7 +543,7 @@ const mech = {
     if (this.isHolding) {
       this.isHolding = false;
       this.definePlayerMass()
-      this.holdingTarget.collisionFilter.category = 0x000001;
+      this.holdingTarget.collisionFilter.category = 0x010000;
       this.holdingTarget.collisionFilter.mask = 0x011111;
       this.holdingTarget = null;
       this.throwCharge = 0;
@@ -621,13 +621,13 @@ const mech = {
       this.isHolding = false;
       //bullet-like collisions
       this.holdingTarget.collisionFilter.category = 0x000100;
-      this.holdingTarget.collisionFilter.mask = 0x111111;
+      this.holdingTarget.collisionFilter.mask = 0x110111;
       //check every second to see if player is away from thrown body, and make solid
       const solid = function (that) {
         const dx = that.position.x - player.position.x;
         const dy = that.position.y - player.position.y;
         if (dx * dx + dy * dy > 10000 && that.speed < 3 && that !== mech.holdingTarget) {
-          that.collisionFilter.category = 0x000001; //make solid
+          that.collisionFilter.category = 0x010000; //make solid
           that.collisionFilter.mask = 0x011111;
         } else {
           setTimeout(solid, 50, that);
@@ -806,8 +806,8 @@ const mech = {
     //triggers when a hold target exits and field button is released
     this.isHolding = true;
     if (this.holdingTarget) {
-      this.holdingTarget.collisionFilter.category = 0x000001;
-      this.holdingTarget.collisionFilter.mask = 0x111111;
+      this.holdingTarget.collisionFilter.category = 0x010000;
+      this.holdingTarget.collisionFilter.mask = 0x011111;
     }
     //combine momentum
     const px = player.velocity.x * player.mass + this.holdingTarget.velocity.x * this.holdingTarget.mass;
@@ -907,16 +907,11 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Kinetic Energy Field</strong><br> (right mouse or space bar)<p> field does damage on contact<br> blocks are thrown at a higher velocity</p>", 1200);
       mech.setHoldDefaults();
       //throw quicker and harder
-      mech.throwChargeRate = 3; //0.5
-      mech.throwChargeMax = 140; //50
-      //passive field does extra damage
-      mech.fieldDamage = 2;
-
-      // const startingArc = 0.
+      mech.throwChargeRate = 3;
+      mech.throwChargeMax = 140;
+      mech.fieldDamage = 2.5; //passive field does extra damage
       mech.fieldArc = 0.09
       mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
-      const STARTING_RANGE = 30
-      mech.grabRange = STARTING_RANGE;
 
       mech.hold = function () {
         if (mech.isHolding) {
@@ -924,10 +919,6 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldMeter > 0.15) { //not hold but field button is pressed
-
-          //smoothing function to grow range
-          mech.grabRange = mech.grabRange * 0.94 + 12 //200 * 0.08
-
           //draw field
           const range = mech.grabRange - 20;
           ctx.beginPath();
@@ -940,15 +931,14 @@ const mech = {
             ctx.fillStyle = "rgba(255,50,150," + (0.13 + 0.18 * Math.random()) + ")";
           }
           ctx.fill();
+
           //draw random lines in field for cool effect
           eye = 15;
-
           ctx.beginPath();
           ctx.moveTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
           const offAngle = mech.angle + 2 * Math.PI * mech.fieldArc * (Math.random() - 0.5);
           ctx.lineTo(mech.pos.x + range * Math.cos(offAngle), mech.pos.y + range * Math.sin(offAngle));
           ctx.strokeStyle = "rgba(100,20,50,0.2)";
-          // ctx.strokeStyle = "rgba(0,0,0,0.4)";
           ctx.stroke();
 
           mech.grabPowerUp();
@@ -956,10 +946,8 @@ const mech = {
           mech.lookForPickUp();
         } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
           mech.pickUp();
-          mech.grabRange = STARTING_RANGE;
         } else {
           mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-          mech.grabRange = STARTING_RANGE;
         }
         mech.drawFieldMeter()
       }
@@ -1053,12 +1041,12 @@ const mech = {
     },
     () => {
       mech.fieldMode = 4;
-      game.makeTextLog("<strong style='font-size:30px;'>Standing Wave Harmonics</strong><br> (right mouse or space bar) <p>oscillating shields surround player<br>improved energy regeneration<br>improved field shielding efficiency</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Standing Wave Harmonics</strong><br> (right mouse or space bar) <p>oscillating shields surround player<br>improved field shielding efficiency</p>", 1200);
       mech.setHoldDefaults();
-      mech.fieldShieldingScale = 0.3;
-      mech.fieldRegen = 0.007; //0.0015
+      mech.fieldShieldingScale = 0.15;
+      // mech.fieldRegen = 0.005; //0.0015
       // mech.fieldArc = 1; //field covers full 360 degrees
-      mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+      // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
 
       mech.hold = function () {
         grabRange1 = 100 + 95 * Math.sin(game.cycle / 23)
@@ -1125,10 +1113,9 @@ const mech = {
     },
     () => {
       mech.fieldMode = 6;
-      game.makeTextLog("<strong style='font-size:30px;'>Phase Decoherence Field</strong><br> (right mouse or space bar) <p>phase through enemies while field is active<br>can't see or be seen outside field while field is active</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Phase Decoherence Field</strong><br> (right mouse or space bar) <p>intangible while field is active<br>can't see or be seen outside field</p>", 1200);
       mech.setHoldDefaults();
-      // mech.fieldShieldingScale = 3;
-      mech.grabRange = 220
+      // mech.grabRange = 230
 
       mech.hold = function () {
         mech.isStealth = false //isStealth is checked in mob foundPlayer()
@@ -1138,18 +1125,12 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
-          const DRAIN = 0.002 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.0035 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
 
             mech.isStealth = true //isStealth is checked in mob foundPlayer() 
             player.collisionFilter.mask = 0x000001 //0x010011 is normals
-
-            // if (mech.crouch) {
-            //   mech.grabRange = mech.grabRange * 0.96 + 400 * 0.04;
-            // } else {
-            //   mech.grabRange = mech.grabRange * 0.96 + 220 * 0.04;
-            // }
 
             ctx.beginPath();
             ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
@@ -1251,68 +1232,6 @@ const mech = {
         mech.drawFieldMeter()
       }
     },
-    // () => {
-    //   mech.fieldMode = 8;
-    //   game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right click or space bar)<p>slows time while field is active</p>", Infinity);
-    //   mech.setHoldDefaults();
-
-    //   mech.isTimeDilated = false
-    //   // mech.mobMasses = []
-    //   mech.hold = function () {
-    //     if (!mech.isTimeDilated) {
-    //       engine.timing.timeScale = 1
-    //       // for (let i = 0, len = body.length; i < len; i++) {
-    //       //   // Matter.Body.setStatic(body[i], false)
-    //       //   // if (!body[i].isNotHoldable) body[i].timeScale = 1
-    //       // }
-    //       // for (let i = 0, len = mob.length; i < len; i++) {
-    //       //   // mob[i].timeScale = 1
-    //       //   // Matter.Body.setStatic(mob[i], false)
-    //       // }
-    //     }
-
-    //     if (mech.isHolding) {
-    //       mech.drawHold(mech.holdingTarget);
-    //       mech.holding();
-    //       mech.throw();
-    //     } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1)) { //not hold but field button is pressed
-    //       mech.drawField();
-    //       mech.grabPowerUp();
-    //       mech.pushMobs();
-    //       mech.lookForPickUp();
-
-
-    //       //set time to slow
-    //       // mech.look(); //still works when fps is slow
-    //       // game.fpsCap = 30
-    //       // game.fpsInterval = 1000 / game.fpsCap;
-    //       // for (let i = 0, len = mob.length; i < len; i++) {
-    //       //   Matter.Body.update(mob[i], 1, 1, 0)
-    //       // }
-    //       if (!mech.isTimeDilated) {
-    //         mech.isTimeDilated = true
-    //         engine.timing.timeScale = 0.01
-    //         // for (let i = 0, len = body.length; i < len; i++) {
-    //         //   // if (!body[i].isNotHoldable) body[i].timeScale = 0.01
-    //         //   // mech.mobMasses.push(body[i].mass)
-    //         //   // Matter.Body.setStatic(body[i], true)
-    //         // }
-    //         // for (let i = 0, len = mob.length; i < len; i++) {
-    //         //   // Matter.Body.setStatic(mob[i], true)
-    //         //   // mob[i].timeScale = 0.01
-    //         // }
-    //       }
-
-    //     } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
-    //       mech.pickUp();
-    //       mech.isTimeDilated = false
-    //     } else {
-    //       mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-    //       mech.isTimeDilated = false
-    //     }
-    //     mech.drawFieldMeter()
-    //   }
-    // },
   ],
   drawLeg(stroke) {
     // if (game.mouseInGame.x > this.pos.x) {

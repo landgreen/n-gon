@@ -99,9 +99,9 @@ const level = {
     // spawn.bodyRect(-140, -200, 50, 50);
     // spawn.bodyRect(-95, -50, 40, 50);
     // spawn.bodyRect(-90, -100, 60, 50);
-    // spawn.bodyRect(300, -150, 140, 50);
-    // spawn.bodyRect(300, -150, 30, 30);
-    // spawn.bodyRect(300, -150, 20, 20);
+    spawn.bodyRect(300, -150, 140, 50);
+    spawn.bodyRect(300, -150, 30, 30);
+    spawn.bodyRect(300, -150, 20, 20);
     // spawn.bodyRect(300, -150, 40, 100);
     // spawn.bodyRect(300, -150, 40, 90);
     // spawn.bodyRect(300, -150, 30, 60);
@@ -115,10 +115,21 @@ const level = {
     // powerUps.spawn(400, -400, "field", false, '4');
     // powerUps.spawn(400, -400, "gun", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.focuser(800, -1150);
+    // spawn.focuser(800, -1150);
     // spawn.groupBoss(-600, -550);
     // for (let i = 0; i < 1; ++i) {
-    // spawn.shooter(800, -1150);
+    spawn.shooter(800, -150, 10);
+    spawn.shooter(800, -150, 10);
+    spawn.shooter(800, -100, 10);
+    spawn.shooter(800, -50, 10);
+    spawn.shooter(800, -150, 10);
+    spawn.shooter(800, -150, 10);
+    spawn.shooter(800, -100, 10);
+    spawn.shooter(800, -50, 10);
+    spawn.shooter(800, -150, 10);
+    spawn.shooter(800, -150, 10);
+    spawn.shooter(800, -100, 10);
+    spawn.shooter(800, -50, 10);
     // }
     // spawn.groupBoss(900, -1070);
     // for (let i = 0; i < 20; i++) {
@@ -1409,7 +1420,7 @@ const level = {
     //needs to be run to put bodies into the world
     for (let i = 0; i < body.length; i++) {
       //body[i].collisionFilter.group = 0;
-      body[i].collisionFilter.category = 0x0000001;
+      body[i].collisionFilter.category = 0x010000;
       body[i].collisionFilter.mask = 0x011111;
       body[i].classType = "body";
       World.add(engine.world, body[i]); //add to world

@@ -58,7 +58,7 @@ const mobs = {
       collisionFilter: {
         group: 0,
         category: 0x000010,
-        mask: 0x001111
+        mask: 0x011111
       },
       onHit: undefined,
       alive: true,
@@ -231,7 +231,8 @@ const mobs = {
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange) {
             //if (Math.random()>0.2 && this.seePlayer.yes && this.distanceToPlayer2()<800000) {
-            mech.damage(0.0004 * game.dmgScale);
+            mech.damage(0.0003 * game.dmgScale);
+            if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.005
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
             ctx.lineTo(mech.pos.x, mech.pos.y);
@@ -980,14 +981,14 @@ const mobs = {
           body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, this.vertices);
           Matter.Body.setVelocity(body[len], this.velocity);
           Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
-          body[len].collisionFilter.category = 0x000001;
+          body[len].collisionFilter.category = 0x010000;
           body[len].collisionFilter.mask = 0x011111;
           // body[len].collisionFilter.category = body[len].collisionFilter.category //0x000001;
           // body[len].collisionFilter.mask = body[len].collisionFilter.mask //0x011111;
 
-          //large mobs or too many bodyes go intangible and fall until removed from game to help performance
+          //large mobs or too many bodies go intangible and fall until removed from game to help performance
           if (body[len].mass > 10 || 40 + 30 * Math.random() < body.length) {
-            body[len].collisionFilter.mask = 0x000100;
+            body[len].collisionFilter.mask = 0x000000;
           }
           body[len].classType = "body";
           World.add(engine.world, body[len]); //add to world

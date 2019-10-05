@@ -12,7 +12,7 @@ const spawn = {
     "beamer",
     "focuser",
     "laser", "laser",
-    "blinker",
+    // "blinker", //make blinker a boss
     "sucker",
     "exploder", "exploder", "exploder",
     "spawner",
@@ -424,7 +424,6 @@ const spawn = {
     // me.frictionAir = 0.005;
     me.memory = 600;
     Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
-    // me.collisionFilter.mask = 0x001100; //move through walls
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
       if (this.speed > 5) {
@@ -619,7 +618,7 @@ const spawn = {
     me.alpha = 1; //used in drawSneaker
     // me.leaveBody = false;
     me.canTouchPlayer = false; //used in drawSneaker
-    me.collisionFilter.mask = 0x000111; //can't touch player
+    me.collisionFilter.mask = 0x010111; //can't touch player
     // me.memory = 420;
     // me.seePlayerFreq = 60 + Math.round(Math.random() * 30);
     me.do = function () {
@@ -637,7 +636,7 @@ const spawn = {
           this.healthBar();
           if (!this.canTouchPlayer) {
             this.canTouchPlayer = true;
-            this.collisionFilter.mask = 0x001111; //can   touch player
+            this.collisionFilter.mask = 0x011111; //can touch player
           }
         }
         //draw body
@@ -692,7 +691,7 @@ const spawn = {
           this.healthBar();
           if (!this.canTouchPlayer) {
             this.canTouchPlayer = true;
-            this.collisionFilter.mask = 0x001110; //can   touch player but not walls
+            this.collisionFilter.mask = 0x001100; //can touch player but not walls
           }
         }
         //draw body
@@ -708,7 +707,7 @@ const spawn = {
         ctx.stroke();
       } else if (this.canTouchPlayer) {
         this.canTouchPlayer = false;
-        this.collisionFilter.mask = 0x000110; //can't   touch player or walls
+        this.collisionFilter.mask = 0x000100; //can't touch player or walls
       }
     };
   },
@@ -720,9 +719,7 @@ const spawn = {
     Matter.Body.rotate(me, Math.random() * 2 * Math.PI);
     me.blinkRate = 40 + Math.round(Math.random() * 60); //required for blink
     me.blinkLength = 150 + Math.round(Math.random() * 200); //required for blink
-    // me.collisionFilter.mask = 0x001100; //move through walls
     me.isStatic = true;
-    // me.leaveBody = false;
     me.memory = 360;
     me.seePlayerFreq = 40 + Math.round(Math.random() * 30);
     me.isBig = false;
@@ -754,23 +751,6 @@ const spawn = {
       }
     };
   },
-  // drifter(x, y, radius = 15 + Math.ceil(Math.random() * 40)) {
-  //   mobs.spawn(x, y, 4.5, radius, "transparent");
-  //   let me = mob[mob.length - 1];
-  //   me.stroke = "rgb(0,200,255)"; //used for drawGhost
-  //   Matter.Body.rotate(me, Math.random() * 2 * Math.PI);
-  //   me.blinkRate = 30 + Math.round(Math.random() * 30); //required for blink/drift
-  //   me.blinkLength = 160; //required for blink/drift
-  //   //me.collisionFilter.mask = 0x001100; //move through walls
-  //   me.isStatic = true;
-  //   me.memory = 360;
-  //   me.seePlayerFreq = 40 + Math.round(Math.random() * 30);
-  //   me.do = function () {
-  //     this.healthBar();
-  //     this.seePlayerCheck();
-  //     this.drift();
-  //   };
-  // },
   bomber(x, y, radius = 120 + Math.ceil(Math.random() * 70)) {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
@@ -867,8 +847,8 @@ const spawn = {
     me.restitution = 0.8;
     me.leaveBody = false;
     me.dropPowerUp = false;
-    // me.collisionFilter.mask = 0x001000;
-    me.collisionFilter.category = 0x010000;
+    me.collisionFilter.category = 0x000010;
+    me.collisionFilter.mask = 0x011101;
     me.do = function () {
       this.gravity();
       this.timeLimit();
@@ -1005,7 +985,7 @@ const spawn = {
       me.stroke = "rgb(220,220,255)";
       Matter.Body.setDensity(me, 0.0001) //very low density to not mess with the original mob's motion
       me.shield = true;
-      me.collisionFilter.mask = 0x000100; //don't collide with bodies, map, player, and mobs, only bullets
+      me.collisionFilter.mask = 0x001100; //don't collide with bodies, map, player, and mobs, only bullets
       consBB[consBB.length] = Constraint.create({
         //attach shield to last spawned mob
         bodyA: me,
@@ -1032,7 +1012,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.00005) //very low density to not mess with the original mob's motion
     me.frictionAir = 0;
     me.shield = true;
-    me.collisionFilter.mask = 0x000100; //don't collide with bodies, map, and mobs, only bullets and player
+    me.collisionFilter.mask = 0x001100; //don't collide with bodies, map, and mobs, only bullets and player
     //constrain to all mob nodes in boss
     for (let i = 0; i < nodes; ++i) {
       consBB[consBB.length] = Constraint.create({
@@ -1218,9 +1198,9 @@ const spawn = {
     const breakingPoint = 1300
     mobs.spawn(breakingPoint, -100, 0, 7.5, "transparent");
     let me = mob[mob.length - 1];
-    //touch only walls
-    me.collisionFilter.category = 0x100000;
-    me.collisionFilter.mask = 0x100001;
+    //touch nothing
+    me.collisionFilter.category = 0x000000;
+    me.collisionFilter.mask = 0x000000;
     me.inertia = Infinity;
     me.g = 0.0004; //required for gravity
     me.restitution = 0;
@@ -1282,9 +1262,9 @@ const spawn = {
     const breakingPoint = 1425
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
-    //touch only walls
-    me.collisionFilter.category = 0x100000;
-    me.collisionFilter.mask = 0x100001;
+    //touch nothing
+    me.collisionFilter.category = 0x000000;
+    me.collisionFilter.mask = 0x000000;
     me.g = 0.0003; //required for gravity
     // me.restitution = 0;
     me.stroke = "transparent"
@@ -1330,9 +1310,9 @@ const spawn = {
     const breakingPoint = 1400
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
-    //touch only walls
-    me.collisionFilter.category = 0x100000;
-    me.collisionFilter.mask = 0x100001;
+    //touch nothing
+    me.collisionFilter.category = 0x000000;
+    me.collisionFilter.mask = 0x000000;
     me.g = 0.0003; //required for gravity
     // me.restitution = 0;
     me.stroke = "transparent"
@@ -1378,9 +1358,9 @@ const spawn = {
     const breakingPoint = 1350
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
-    //touch only walls
-    me.collisionFilter.category = 0x100000;
-    me.collisionFilter.mask = 0x100001;
+    //touch nothing
+    me.collisionFilter.category = 0x000000;
+    me.collisionFilter.mask = 0x000000;
     me.g = 0.0003; //required for gravity
     me.restitution = 0;
     me.stroke = "transparent"
@@ -1425,9 +1405,9 @@ const spawn = {
     const breakingPoint = 1325
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
-    //touch only walls
-    me.collisionFilter.category = 0x100000;
-    me.collisionFilter.mask = 0x100001;
+    //touch nothing
+    me.collisionFilter.category = 0x000000;
+    me.collisionFilter.mask = 0x000000;
     me.g = 0.0003; //required for gravity
     me.restitution = 0;
     me.stroke = "transparent"
