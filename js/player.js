@@ -497,6 +497,7 @@ const mech = {
     this.fieldRegen = 0.0015;
     this.fieldCDcycle = 0;
     this.isStealth = false;
+    player.collisionFilter.mask = 0x010011 //0x010011 is normal
     this.holdingMassScale = 0.5;
     this.throwChargeRate = 2;
     this.throwChargeMax = 50;
@@ -873,9 +874,6 @@ const mech = {
             ctx.arc(mech.pos.x, mech.pos.y + 15, mech.grabRange, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(255,255,255," + (0.5 + 0.17 * Math.random()) + ")";
             ctx.fill();
-            ctx.strokeStyle = "#000"
-            ctx.lineWidth = 2;
-            ctx.stroke();
 
             function slow(who, friction = 0) {
               for (let i = 0, len = who.length; i < len; ++i) {
@@ -1127,10 +1125,10 @@ const mech = {
     },
     () => {
       mech.fieldMode = 6;
-      game.makeTextLog("<strong style='font-size:30px;'>Dimensional Phasing</strong><br> (right mouse or space bar) <p>player can pass through enemies while field is active.<br>player is invisible while field is active.</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Phase Decoherence Field</strong><br> (right mouse or space bar) <p>phase through enemies while field is active<br>can't see or be seen outside field while field is active</p>", 1200);
       mech.setHoldDefaults();
       // mech.fieldShieldingScale = 3;
-      // mech.grabRange = 220
+      mech.grabRange = 220
 
       mech.hold = function () {
         mech.isStealth = false //isStealth is checked in mob foundPlayer()
@@ -1140,12 +1138,12 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < game.cycle) {
-          const DRAIN = 0.004 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.002 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
 
             mech.isStealth = true //isStealth is checked in mob foundPlayer() 
-            player.collisionFilter.mask = 0x010001 //0x010011 is normals
+            player.collisionFilter.mask = 0x000001 //0x010011 is normals
 
             // if (mech.crouch) {
             //   mech.grabRange = mech.grabRange * 0.96 + 400 * 0.04;
@@ -1162,6 +1160,7 @@ const mech = {
             ctx.strokeStyle = "#000"
             ctx.lineWidth = 2;
             ctx.stroke();
+
 
             // mech.pushMobs360(150);
             mech.grabPowerUp();
