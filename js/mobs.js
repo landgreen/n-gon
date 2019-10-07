@@ -96,7 +96,7 @@ const mobs = {
       gravity() {
         this.force.y += this.mass * this.g;
       },
-      seePlayerFreq: 20 + Math.round(Math.random() * 20), //how often NPC checks to see where player is, lower numbers have better vision
+      seePlayerFreq: Math.round((30 + 30 * Math.random()) * game.lookFreqScale), //how often NPC checks to see where player is, lower numbers have better vision
       foundPlayer() {
         this.locatePlayer();
         if (!this.seePlayer.yes) {

@@ -8,9 +8,10 @@ const powerUps = {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
     effect() {
-      let heal = this.size / 40;
-      mech.addHealth(heal * heal);
-      //game.makeTextLog('heal for '+(heal*100).toFixed(0)+'%',80)
+      let heal = (this.size / 40) ** 2
+      heal = Math.min(1 - mech.health, heal)
+      mech.addHealth(heal);
+      if (!game.lastLogTime && heal > 0) game.makeTextLog('heal for ' + (heal * 100).toFixed(0) + '%', 180)
     }
   },
   field: {
@@ -37,20 +38,6 @@ const powerUps = {
         mech.fieldCDcycle = game.cycle + 60; //trigger fieldCD to stop power up grab automatic pick up of spawn
         powerUps.spawn(mech.pos.x, mech.pos.y, "field", false, previousMode);
       }
-
-
-      // mech.fieldUpgrades[3]();
-
-      //pause game so player can read above the new field
-      // game.fpsCap = 0 //40 - Math.min(25, 100 * dmg)
-      // game.fpsInterval = 1000 / game.fpsCap;
-
-      // function unpause() {
-      //   game.fpsCap = 72
-      //   game.fpsInterval = 1000 / game.fpsCap;
-      //   document.body.removeEventListener("keydown", unpause);
-      // }
-      // document.body.addEventListener("keydown", unpause);
     }
   },
   ammo: {
@@ -80,13 +67,13 @@ const powerUps = {
       }
       if (target.ammo === Infinity) {
         mech.fieldMeter = 1;
-        game.makeTextLog("+energy", 180);
+        if (!game.lastLogTime) game.makeTextLog("+energy", 180);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.70 + 0.2 * Math.random())) / b.dmgScale);
+        const ammo = Math.ceil((target.ammoPack * (0.55 + 0.1 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
-        game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
+        if (!game.lastLogTime) game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
       }
     }
   },
@@ -114,18 +101,10 @@ const powerUps = {
             Infinity
           );
         }
-        if (b.inventory.length === 1) {
-          game.makeTextLog(
-            // "<div style='font-size:120%;' >new gun: " + b.guns[newGun].name + "</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>",
-            "<div style='font-size:170%;'>" + b.guns[newGun].name + "</div> (left click) <br> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>",
-            500
-          );
+        if (b.inventory.length === 1) { //on the second gun pick up tell player how to change guns
+          game.makeTextLog(`<strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br>(left click)<br>(<strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons)<p>${b.guns[newGun].description}</p>`, 1000);
         } else {
-          game.makeTextLog(
-            // "<div style='font-size:120%;' >new gun: " + b.guns[newGun].name + "</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>",
-            "<div style='font-size:170%;'>" + b.guns[newGun].name + "</div> (left click)",
-            400
-          );
+          game.makeTextLog(`<strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br> (left click)<p>${b.guns[newGun].description}</p>`, 1000);
         }
         b.guns[newGun].have = true;
         b.inventory.push(newGun);
@@ -150,7 +129,7 @@ const powerUps = {
       if (b.inventory.length > 0) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.006 * (6 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    if (Math.random() < 0.005 * (6 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun");
       return;
     }

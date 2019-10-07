@@ -218,6 +218,9 @@ const game = {
   levelsCleared: 0,
   g: 0.001,
   dmgScale: 1,
+  accelScale: 1,
+  CDScale: 1,
+  lookFreqScale: 1,
   onTitlePage: true,
   paused: false,
   testing: false, //testing mode: shows wireframe and some variables
@@ -345,6 +348,21 @@ const game = {
     game.boldActiveGunHUD();
     // mech.drop();
   },
+  // tips = [
+  //   "You can throw blocks at dangerous speeds by holding the right mouse or spacebar.",
+  //   "You can use your field to block damage. (right mouse or spacebar)",
+  //   "Explosive weapons, like the grenade are good at clearing groups.",
+  //   "Larger and faster bullets do more damage.",
+  //   "You take more damage from colliding with larger baddies",
+  //   "Holding large blocks slows down the player.",
+  //   "holding blocks prevents the field energy from regenerating.",
+  //   `There are ${mech.fieldUpgrades.length-1} possible field upgrades.`,
+  //   `There are ${b.guns.length} different guns.`,
+  //   "You keep field upgrades after you die.",
+  //   "Unique level bosses always drop a field upgrade if you don't have one.",
+  //   "You jump higher if you hold down the jump button.",
+  //   "Crouching while firing makes bullets go faster, but slows the rate of fire.",
+  // ]
   keyPress() {
     //runs on key press event
     // if (keys[49]) {
@@ -447,8 +465,18 @@ const game = {
       }
     } else if (this.testing) {
       //only in testing mode
-      if (keys[70]) {
-        // f for power ups
+
+      if (keys[70]) { //cycle fields with F
+        if (mech.fieldMode === mech.fieldUpgrades.length - 1) {
+          mech.fieldUpgrades[0]()
+        } else {
+          mech.fieldUpgrades[mech.fieldMode + 1]()
+        }
+      }
+      if (keys[71]) { // give all guns with G
+        b.giveGuns("all", 1000)
+      }
+      if (keys[72]) { // power ups with H
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
@@ -456,13 +484,9 @@ const game = {
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
-
-        // for (let i = 0; i < 16; ++i) { 
-        //   powerUps.spawnRandomPowerUp(game.mouseInGame.x, game.mouseInGame.y, 0, 0);
-        // }
       }
-      if (keys[82]) {
-        // r to teleport to mouse
+
+      if (keys[82]) { // teleport to mouse with R
         Matter.Body.setPosition(player, this.mouseInGame);
         Matter.Body.setVelocity(player, {
           x: 0,
@@ -745,7 +769,11 @@ const game = {
     line += 20;
     ctx.fillText("R: teleport to mouse", x, line);
     line += 20;
-    ctx.fillText("F: spawn power ups", x, line);
+    ctx.fillText("F: cycle field", x, line);
+    line += 20;
+    ctx.fillText("G: give all guns", x, line);
+    line += 20;
+    ctx.fillText("H: spawn power ups", x, line);
     line += 30;
 
     ctx.fillText("cycle: " + game.cycle, x, line);

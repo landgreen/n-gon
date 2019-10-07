@@ -670,6 +670,7 @@ const mech = {
     ctx.moveTo(mech.pos.x + eye * Math.cos(this.angle), mech.pos.y + eye * Math.sin(this.angle));
     ctx.lineTo(this.pos.x + range * Math.cos(offAngle), this.pos.y + range * Math.sin(offAngle));
     ctx.strokeStyle = "rgba(120,170,255,0.4)";
+    ctx.lineWidth = 1;
     ctx.stroke();
   },
   grabPowerUp() {
@@ -825,7 +826,7 @@ const mech = {
   fieldUpgrades: [
     () => {
       mech.fieldMode = 0;
-      game.makeTextLog("<strong style='font-size:30px;'>Field Emitter</strong><br> (right click or space bar)<p>lets you pick up and throw objects<br>shields you from damage</p>", Infinity);
+      game.makeTextLog("<strong style='font-size:30px;'>Field Emitter</strong><br> (right click or space bar)<p>lets you pick up and throw objects<br>shields you from damage</p>", 1200);
       mech.setHoldDefaults();
       mech.hold = function () {
         if (mech.isHolding) {
@@ -867,7 +868,7 @@ const mech = {
             mech.grabPowerUp();
             // mech.pushMobs();
             mech.pushMobs360(180);
-            mech.lookForPickUp(130);
+            mech.lookForPickUp(160);
 
             //draw slow field
             ctx.beginPath();
@@ -973,9 +974,9 @@ const mech = {
           const DRAIN = 0.001 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
-            mech.pushMobs360(200);
+            mech.pushMobs360(170);
             mech.grabPowerUp();
-            mech.lookForPickUp();
+            mech.lookForPickUp(170);
             //look for nearby objects to make zero-g
             function zeroG(who) {
               for (let i = 0, len = who.length; i < len; ++i) {
@@ -1135,7 +1136,7 @@ const mech = {
             ctx.beginPath();
             ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
             ctx.globalCompositeOperation = "destination-in"; //in or atop
-            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.fillStyle = "rgba(255,255,255,0.25)";
             ctx.fill();
             ctx.globalCompositeOperation = "source-over";
             ctx.strokeStyle = "#000"
@@ -1145,7 +1146,7 @@ const mech = {
 
             // mech.pushMobs360(150);
             mech.grabPowerUp();
-            mech.lookForPickUp();
+            mech.lookForPickUp(110);
           } else {
             mech.fieldCDcycle = game.cycle + 120;
           }

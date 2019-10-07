@@ -23,8 +23,8 @@ const level = {
       // this.towers();
 
       // game.levelsCleared = 3; //for testing to simulate possible mobs spawns
-      // b.giveGuns(0) // set a starting gun for testing
-      mech.fieldUpgrades[6]() //give a field power up for testing
+      // b.giveGuns(11) // set a starting gun for testing
+      // mech.fieldUpgrades[6]() //give a field power up for testing
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       this[this.levels[this.onLevel]](); //picks the current map from the the levels array
@@ -34,6 +34,13 @@ const level = {
     this.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
   },
+  difficultyIncrease() {
+    game.dmgScale += 0.35; //damage done by mobs increases each level
+    b.dmgScale *= 0.92; //damage done by player decreases each level
+    game.accelScale *= 1.05 //mob acceleration increases each level
+    game.lookFreqScale *= 0.95 //mob cycles between looks decreases each level
+    game.CDScale *= 0.95 //mob CD time decreases each level
+  },
   //******************************************************************************************************************
   //******************************************************************************************************************
   testingMap() {
@@ -42,8 +49,7 @@ const level = {
     spawn.setSpawnList();
     game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
     for (let i = 0; i < game.levelsCleared; i++) {
-      game.dmgScale += 0.4; //damage done by mobs increases each level
-      b.dmgScale *= 0.9; //damage done by player decreases each level
+      level.difficultyIncrease()
     }
     mech.setPosToSpawn(-75, -60); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
@@ -1298,12 +1304,8 @@ const level = {
     nextLevel() {
       //enter when player isn't falling
       if (player.velocity.y < 0.1) {
-        //increases difficulty
         game.levelsCleared++;
-        if (game.levelsCleared > 1) {
-          game.dmgScale += 0.25; //damage done by mobs increases each level
-          b.dmgScale *= 0.93; //damage done by player decreases each level
-        }
+        if (game.levelsCleared > 1) level.difficultyIncrease()
         //cycles map to next level
         level.onLevel++;
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
@@ -1401,9 +1403,8 @@ const level = {
     }
   },
   levelAnnounce() {
-    let text = (game.levelsCleared) + " " + level.levels[level.onLevel];
-    document.title = "n-gon: L" + text;
-    game.makeTextLog("level " + text, 300);
+    document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
+    game.makeTextLog(`<div style='font-size: 25px;'>level ${game.levelsCleared} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
     // if (game.levelsCleared === 0) text = "";
     // text = "Level " + (game.levelsCleared + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";
 

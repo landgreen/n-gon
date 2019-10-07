@@ -27,19 +27,16 @@ const spawn = {
     spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
   },
   randomMob(x, y, chance = 1) {
-    if (Math.random() < chance + 0.1 * (game.levelsCleared - 1) && mob.length < 4 + game.levelsCleared * 2) {
+    if (Math.random() < chance + 0.09 * (game.levelsCleared - 1) && mob.length < 4 + game.levelsCleared * 1.7) {
       const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       this[pick](x, y);
     }
   },
-  randomSmallMob(
-    x,
-    y,
-    num = Math.max(Math.min(Math.round(Math.random() * (game.levelsCleared - 1) * 0.5 - 0.4), 4), 0),
+  randomSmallMob(x, y,
+    num = Math.max(Math.min(Math.round(Math.random() * (game.levelsCleared - 1) * 0.45 - 0.4), 4), 0),
     size = 16 + Math.ceil(Math.random() * 15),
-    chance = 1
-  ) {
-    if (Math.random() < chance + (game.levelsCleared - 1) * 0.03 && mob.length < 4 + game.levelsCleared * 2) {
+    chance = 1) {
+    if (Math.random() < chance + (game.levelsCleared - 1) * 0.03 && mob.length < 4 + game.levelsCleared * 1.7) {
       for (let i = 0; i < num; ++i) {
         const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
         this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
@@ -47,7 +44,7 @@ const spawn = {
     }
   },
   randomBoss(x, y, chance = 1) {
-    if (Math.random() < chance + (game.levelsCleared - 1) * 0.15 && game.levelsCleared !== 1 && mob.length < 4 + game.levelsCleared * 2.1 || chance == Infinity) {
+    if (Math.random() < chance + (game.levelsCleared - 1) * 0.14 && game.levelsCleared !== 1 && mob.length < 4 + game.levelsCleared * 2 || chance == Infinity) {
       //choose from the possible picklist
       let pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       //is the pick able to be a boss?
@@ -93,7 +90,7 @@ const spawn = {
     mobs.spawn(x, y, 4, radius, "#777");
     let me = mob[mob.length - 1];
     me.g = 0.0002; //required if using 'gravity'
-    me.accelMag = 0.0007;
+    me.accelMag = 0.0007 * game.accelScale;
     me.groupingRangeMax = 250000 + Math.random() * 100000;
     me.groupingRangeMin = (radius * 8) * (radius * 8);
     me.groupingStrength = 0.0005
@@ -133,7 +130,7 @@ const spawn = {
     //easy mob for on level 1
     mobs.spawn(x, y, 8, radius, "#9ccdc6");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.00055;
+    me.accelMag = 0.00055 * game.accelScale;
     me.memory = 60;
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
 
@@ -148,7 +145,7 @@ const spawn = {
     mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
     let me = mob[mob.length - 1];
     me.frictionAir = 0.02;
-    me.accelMag = 0.0004;
+    me.accelMag = 0.0004 * game.accelScale;
     if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     me.lookFrequency = 160 + Math.floor(57 * Math.random())
     me.lockedOn = null;
@@ -236,7 +233,7 @@ const spawn = {
     // Matter.Body.setDensity(me, 0.0007); //extra dense //normal is 0.001 //makes effective life much lower
     me.friction = 0;
     me.frictionAir = 0;
-    me.accelMag = 0.001;
+    me.accelMag = 0.001 * game.accelScale;;
     me.g = me.accelMag * 0.6; //required if using 'gravity'
     me.memory = 50;
     if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
@@ -251,7 +248,7 @@ const spawn = {
     mobs.spawn(x, y, 7, radius, "hsl(144, 15%, 50%)");
     let me = mob[mob.length - 1];
     me.big = false; //required for grow
-    me.accelMag = 0.00045;
+    me.accelMag = 0.00045 * game.accelScale;
     me.do = function () {
       this.healthBar();
       this.seePlayerByLookingAt();
@@ -266,7 +263,7 @@ const spawn = {
     me.frictionAir = 0.1;
     me.lookTorque = 0.000005;
     me.g = 0.0002; //required if using 'gravity'
-    me.seePlayerFreq = Math.ceil(40 + 25 * Math.random());
+    me.seePlayerFreq = Math.round((40 + 25 * Math.random()) * game.lookFreqScale);
     const springStiffness = 0.002;
     const springDampening = 0.1;
 
@@ -316,7 +313,7 @@ const spawn = {
     me.trailFill = "#ff00f0";
     me.g = 0.001; //required if using 'gravity'
     me.frictionAir = 0.02;
-    me.accelMag = 0.004;
+    me.accelMag = 0.004 * game.accelScale;
     me.memory = 30;
     me.zoomMode = 150;
     me.onHit = function () {
@@ -332,7 +329,7 @@ const spawn = {
   hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
     mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.04;
+    me.accelMag = 0.04 * game.accelScale;
     me.g = 0.0015; //required if using 'gravity'
     me.frictionAir = 0.018;
     me.restitution = 0;
@@ -368,7 +365,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    me.accelMag = 0.16;
+    me.accelMag = 0.16 * game.accelScale;
     me.frictionAir = 0.022;
     me.lookTorque = 0.0000014;
     me.restitution = 0;
@@ -420,7 +417,7 @@ const spawn = {
     me.stroke = "transparent"; //used for drawSneaker
     me.eventHorizon = radius * 23; //required for blackhole
     me.seeAtDistance2 = (me.eventHorizon + 500) * (me.eventHorizon + 500); //vision limit is event horizon
-    me.accelMag = 0.00009;
+    me.accelMag = 0.00009 * game.accelScale;
     // me.frictionAir = 0.005;
     me.memory = 600;
     Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
@@ -485,8 +482,7 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.repulsionRange = 73000; //squared
     me.laserRange = 370;
-    // me.seePlayerFreq = 2 + Math.round(Math.random() * 5);
-    me.accelMag = 0.0005;
+    me.accelMag = 0.0005 * game.accelScale;
     me.frictionStatic = 0;
     me.friction = 0;
     if (Math.random() < Math.min(0.2 + (game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
@@ -507,8 +503,7 @@ const spawn = {
     me.restitution = 0;
     me.laserPos = me.position; //required for laserTracking
     me.repulsionRange = 1200000; //squared
-    //me.seePlayerFreq = 2 + Math.round(Math.random() * 5);
-    me.accelMag = 0.0002;
+    me.accelMag = 0.0002 * game.accelScale;
     me.frictionStatic = 0;
     me.friction = 0;
     me.onDamage = function () {
@@ -576,7 +571,7 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-    me.accelMag = 0.00007;
+    me.accelMag = 0.00007 * game.accelScale;
     me.onHit = function () {
       //run this function on hitting player
       this.explode();
@@ -591,7 +586,7 @@ const spawn = {
   striker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {
     mobs.spawn(x, y, 5, radius, "rgb(221,102,119)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.0004;
+    me.accelMag = 0.0004 * game.accelScale;
     me.g = 0.0002; //required if using 'gravity'
     me.frictionStatic = 0;
     me.friction = 0;
@@ -612,7 +607,7 @@ const spawn = {
     let me;
     mobs.spawn(x, y, 5, radius, "transparent");
     me = mob[mob.length - 1];
-    me.accelMag = 0.0007;
+    me.accelMag = 0.0007 * game.accelScale;
     me.g = 0.0002; //required if using 'gravity'
     me.stroke = "transparent"; //used for drawSneaker
     me.alpha = 1; //used in drawSneaker
@@ -620,7 +615,6 @@ const spawn = {
     me.canTouchPlayer = false; //used in drawSneaker
     me.collisionFilter.mask = 0x010111; //can't touch player
     // me.memory = 420;
-    // me.seePlayerFreq = 60 + Math.round(Math.random() * 30);
     me.do = function () {
       this.seePlayerCheck();
       this.attraction();
@@ -660,7 +654,7 @@ const spawn = {
     mobs.spawn(x, y, 7, radius, "transparent");
     me = mob[mob.length - 1];
     me.seeAtDistance2 = 1000000;
-    me.accelMag = 0.00014;
+    me.accelMag = 0.00014 * game.accelScale;
     if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     Matter.Body.setDensity(me, 0.00065); //normal is 0.001 //makes effective life much lower
     me.stroke = "transparent"; //used for drawGhost
@@ -721,7 +715,7 @@ const spawn = {
     me.blinkLength = 150 + Math.round(Math.random() * 200); //required for blink
     me.isStatic = true;
     me.memory = 360;
-    me.seePlayerFreq = 40 + Math.round(Math.random() * 30);
+    me.seePlayerFreq = Math.round((40 + 30 * Math.random()) * game.lookFreqScale);
     me.isBig = false;
     me.scaleMag = Math.max(5 - me.mass, 1.75);
     me.onDeath = function () {
@@ -763,7 +757,7 @@ const spawn = {
     me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     me.hoverElevation = 400 + (Math.random() - 0.5) * 200; //squared
     me.hoverXOff = (Math.random() - 0.5) * 100;
-    me.accelMag = Math.floor(10 * (Math.random() + 5)) * 0.00001;
+    me.accelMag = Math.floor(10 * (Math.random() + 5)) * 0.00001 * game.accelScale;
     me.g = 0.0002; //required if using 'gravity'   // gravity called in hoverOverPlayer
     me.frictionStatic = 0;
     me.friction = 0;
@@ -791,7 +785,7 @@ const spawn = {
     me.fireFreq = 0.007 + Math.random() * 0.005;
     me.noseLength = 0;
     me.fireAngle = 0;
-    me.accelMag = 0.0005;
+    me.accelMag = 0.0005 * game.accelScale;
     me.frictionAir = 0.05;
     me.lookTorque = 0.0000025 * (Math.random() > 0.5 ? -1 : 1);
     me.fireDir = {
@@ -814,7 +808,7 @@ const spawn = {
     me.fireFreq = 0.02;
     me.noseLength = 0;
     me.fireAngle = 0;
-    me.accelMag = 0.005;
+    me.accelMag = 0.005 * game.accelScale;
     me.frictionAir = 0.1;
     me.lookTorque = 0.000005 * (Math.random() > 0.5 ? -1 : 1);
     me.fireDir = {
@@ -886,10 +880,10 @@ const spawn = {
       this.explode();
     };
     me.g = 0.0001; //required if using 'gravity'
-    me.accelMag = 0.0003;
+    me.accelMag = 0.0003 * game.accelScale;
     me.memory = 30;
     me.leaveBody = false;
-    me.seePlayerFreq = 80 + Math.round(Math.random() * 50);
+    me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * game.lookFreqScale);
     me.frictionAir = 0.002;
     me.do = function () {
       this.healthBar();
@@ -917,7 +911,7 @@ const spawn = {
     //snake boss with a laser head
     mobs.spawn(x, y, 8, radius, "rgb(255,50,130)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.0012;
+    me.accelMag = 0.0012 * game.accelScale;
     me.memory = 200;
     me.laserRange = 500;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
@@ -961,7 +955,7 @@ const spawn = {
     mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");
     let me = mob[mob.length - 1];
     me.g = 0.0001; //required if using 'gravity'
-    me.accelMag = 0.002;
+    me.accelMag = 0.002 * game.accelScale;
     me.memory = 20;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
@@ -1199,8 +1193,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 7.5, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x000000;
-    me.collisionFilter.mask = 0x000000;
+    me.collisionFilter.category = 0x010000; //act like a body
+    me.collisionFilter.mask = 0x000001; //only collide with map
     me.inertia = Infinity;
     me.g = 0.0004; //required for gravity
     me.restitution = 0;
@@ -1263,8 +1257,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x000000;
-    me.collisionFilter.mask = 0x000000;
+    me.collisionFilter.category = 0x010000; //act like a body
+    me.collisionFilter.mask = 0x000001; //only collide with map
     me.g = 0.0003; //required for gravity
     // me.restitution = 0;
     me.stroke = "transparent"
@@ -1311,8 +1305,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x000000;
-    me.collisionFilter.mask = 0x000000;
+    me.collisionFilter.category = 0x010000; //act like a body
+    me.collisionFilter.mask = 0x000001; //only collide with map
     me.g = 0.0003; //required for gravity
     // me.restitution = 0;
     me.stroke = "transparent"
@@ -1359,8 +1353,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x000000;
-    me.collisionFilter.mask = 0x000000;
+    me.collisionFilter.category = 0x010000; //act like a body
+    me.collisionFilter.mask = 0x000001; //only collide with map
     me.g = 0.0003; //required for gravity
     me.restitution = 0;
     me.stroke = "transparent"
@@ -1406,8 +1400,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x000000;
-    me.collisionFilter.mask = 0x000000;
+    me.collisionFilter.category = 0x010000; //act like a body
+    me.collisionFilter.mask = 0x000001; //only collide with map
     me.g = 0.0003; //required for gravity
     me.restitution = 0;
     me.stroke = "transparent"
