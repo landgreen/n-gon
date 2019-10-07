@@ -13,10 +13,10 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       document.title = "n-gon";
-      this.intro(); //starting level
+      // this.intro(); //starting level
       // this.testingMap();
       // this.bosses();
-      // this.skyscrapers();
+      this.excavation();
       // this.rooftops();
       // this.warehouse();
       // this.highrise();
@@ -374,7 +374,6 @@ const level = {
     // spawn.healer(1000, -500)
     // spawn.healer(1000, -400)
   },
-
   rooftops() {
     game.zoomTransition(1700) //1400 is normal
 
@@ -567,6 +566,47 @@ const level = {
     spawn.randomBoss(4900, -1200, 0);
     //spawn.randomBoss(4850, -1250,0.7);
     if (game.levelsCleared > 4) spawn.bomber(2500, -2400, 100);
+  },
+  excavation() {
+    game.zoomTransition(2200) //1400 is normal
+    mech.setPosToSpawn(-50, -50); //normal spawn
+    level.enter.x = mech.spawnPos.x - 50;
+    level.enter.y = mech.spawnPos.y + 20;
+    level.exit.x = 1500;
+    level.exit.y = -1875;
+    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    // powerUps.spawnStartingPowerUps(1475, -1175);
+    // spawn.debris(0, -2200, 4500, 20); //20 debris per level
+    document.body.style.backgroundColor = "#dcdcde";
+
+    // //foreground
+    // level.fill.push({
+    //   x: 2500,
+    //   y: -1100,
+    //   width: 450,
+    //   height: 250,
+    //   color: "rgba(0,0,0,0.1)"
+    // });
+
+    // //background
+    // level.fillBG.push({
+    //   x: 1300,
+    //   y: -1800,
+    //   width: 750,
+    //   height: 1800,
+    //   color: "#d4d4d7"
+    // });
+
+    // starting room
+    spawn.mapRect(-200, 0, 500, 1500);
+    spawn.mapRect(-200, -300, 500, 50);
+    spawn.mapRect(-200, -300, 50, 350);
+    spawn.bodyRect(100, -250, 200, 240);
+
+    //top of building
+    spawn.mapRect(600, 0, 800, 100);
+    spawn.mapRect(200, 1100, 800, 400);
+    spawn.mapRect(1250, 1100, 800, 400);
   },
   skyscrapers() {
     game.zoomTransition(2000) //1400 is normal

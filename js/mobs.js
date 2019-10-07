@@ -597,8 +597,8 @@ const mobs = {
       pullPlayer() {
         if (this.seePlayer.yes && Matter.Vector.magnitudeSquared(Matter.Vector.sub(this.position, player.position)) < 1000000) {
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-          player.force.x -= 1.3 * Math.cos(angle) * (mech.onGround ? 2 * player.mass * game.g : player.mass * game.g);
-          player.force.y -= 0.97 * player.mass * game.g * Math.sin(angle);
+          player.force.x -= game.accelScale * 1.13 * Math.cos(angle) * (mech.onGround ? 2 * player.mass * game.g : player.mass * game.g);
+          player.force.y -= game.accelScale * 0.84 * player.mass * game.g * Math.sin(angle);
 
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
