@@ -1516,34 +1516,20 @@ const spawn = {
       }
     }
   },
-  bodyRect(
-    x,
-    y,
-    width,
-    height,
-    chance = 1,
-    properties = {
-      friction: 0.05,
-      frictionAir: 0.01
-    }
-  ) {
-    if (Math.random() < chance) {
-      body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
-    }
+  bodyRect(x, y, width, height, chance = 1, properties = {
+    friction: 0.05,
+    frictionAir: 0.01
+  }) {
+    if (Math.random() < chance) body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
   },
-  bodyVertex(x, y, vector, properties) {
-    //addes shape to body array
+  bodyVertex(x, y, vector, properties) { //adds shape to body array
     body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
   },
-  mapRect(x, y, width, height, properties) {
-    //addes reactangles to map array
-    var len = map.length;
-    map[len] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
+  mapRect(x, y, width, height, properties) { //adds rectangle to map array
+    map[map.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
   },
-  mapVertex(x, y, vector, properties) {
-    //addes shape to map array
-    var len = map.length;
-    map[len] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+  mapVertex(x, y, vector, properties) { //adds shape to map array
+    map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
   },
   //complex map templates
   spawnBuilding(x, y, w, h, leftDoor, rightDoor, walledSide) {
@@ -1578,7 +1564,7 @@ const spawn = {
       }
     }
   },
-  //premade property options*************************************************************************************
+  //pre-made property options*************************************************************************************
   //*************************************************************************************************************
   //Object.assign({}, propsHeavy, propsBouncy, propsNoRotation)      //will combine properties into a new object
   propsFriction: {

@@ -16,7 +16,7 @@ const level = {
       // this.intro(); //starting level
       // this.testingMap();
       // this.bosses();
-      this.excavation();
+      this.corridors();
       // this.rooftops();
       // this.warehouse();
       // this.highrise();
@@ -567,26 +567,35 @@ const level = {
     //spawn.randomBoss(4850, -1250,0.7);
     if (game.levelsCleared > 4) spawn.bomber(2500, -2400, 100);
   },
-  excavation() {
-    game.zoomTransition(2200) //1400 is normal
-    mech.setPosToSpawn(-50, -50); //normal spawn
+  corridors() {
+    // game.zoomTransition(1500) //1400 is normal
+    game.setZoom(3000);
+    // mech.setPosToSpawn(-50, -1050); //normal spawn
+    mech.setPosToSpawn(2250, -900); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
     level.exit.x = 1500;
-    level.exit.y = -1875;
+    level.exit.y = -4875;
     this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
-    // powerUps.spawnStartingPowerUps(1475, -1175);
+    powerUps.spawnStartingPowerUps(1075, -550);
     // spawn.debris(0, -2200, 4500, 20); //20 debris per level
     document.body.style.backgroundColor = "#dcdcde";
 
     // //foreground
-    // level.fill.push({
-    //   x: 2500,
-    //   y: -1100,
-    //   width: 450,
-    //   height: 250,
-    //   color: "rgba(0,0,0,0.1)"
-    // });
+    level.fill.push({
+      x: -100,
+      y: -1000,
+      width: 1450,
+      height: 1400,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fill.push({
+      x: 2000,
+      y: -1110,
+      width: 450,
+      height: 1550,
+      color: "rgba(0,0,0,0.1)"
+    });
 
     // //background
     // level.fillBG.push({
@@ -598,15 +607,35 @@ const level = {
     // });
 
     // starting room
-    spawn.mapRect(-200, 0, 500, 1500);
-    spawn.mapRect(-200, -300, 500, 50);
-    spawn.mapRect(-200, -300, 50, 350);
-    spawn.bodyRect(100, -250, 200, 240);
+    spawn.mapRect(-300, -1000, 600, 50);
+    spawn.mapRect(-100, -975, 100, 975);
+    spawn.mapRect(-300, -1300, 450, 50);
+    spawn.mapRect(-300, -1300, 50, 350);
+    spawn.bodyRect(100, -1250, 200, 240);
 
     //top of building
-    spawn.mapRect(600, 0, 800, 100);
-    spawn.mapRect(200, 1100, 800, 400);
-    spawn.mapRect(1250, 1100, 800, 400);
+    spawn.mapRect(600, -1000, 750, 50);
+    spawn.mapRect(900, -500, 550, 50);
+    spawn.mapRect(1250, -975, 100, 375);
+    spawn.bodyRect(1250, -600, 100, 100);
+    spawn.mapRect(1250, -450, 100, 450);
+    spawn.bodyRect(1250, -1225, 100, 200);
+    spawn.bodyRect(1200, -1025, 350, 25);
+    spawn.bodyRect(1750, -800, 700, 50);
+
+    // spawn.mapRect(2000, -3600, 450, 2500);
+    spawn.mapVertex(2225, -2150, "0 0 450 0 300 -2500 150 -2500")
+    spawn.mapRect(2000, -750, 450, 300);
+    spawn.bodyRect(2175, -450, 100, 300);
+    spawn.mapRect(2000, -150, 450, 350);
+    spawn.bodyRect(2450, 150, 150, 150);
+    // spawn.laserZone(2150, -2800, 5, 1800, 0.1)
+
+
+    //pit
+    spawn.mapRect(-500, 100, 1950, 400);
+    spawn.boost(-425, 100, 1400);
+    spawn.mapRect(1550, 300, 1400, 200);
   },
   skyscrapers() {
     game.zoomTransition(2000) //1400 is normal
