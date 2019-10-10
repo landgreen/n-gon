@@ -477,17 +477,20 @@ const spawn = {
       }
     }
   },
-  suckerBoss(x, y, radius = 120 + Math.ceil(Math.random() * 70)) {
+  suckerBoss(x, y, radius = 180 + Math.ceil(Math.random() * 70)) {
     radius = 9 + radius / 8; //extra small
     mobs.spawn(x, y, 12, radius, "#000");
     let me = mob[mob.length - 1];
     me.stroke = "transparent"; //used for drawSneaker
-    me.eventHorizon = radius * 33; //required for blackhole
+    me.eventHorizon = radius * 30; //required for blackhole
     me.seeAtDistance2 = (me.eventHorizon + 500) * (me.eventHorizon + 500); //vision limit is event horizon
-    me.accelMag = 0.00013 * game.accelScale;
+    me.accelMag = 0.00011 * game.accelScale;
     // me.frictionAir = 0.005;
     me.memory = 1000;
-    Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.0055); //extra dense //normal is 0.001 //makes effective life much larger
+    me.onDeath = function () {
+      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+    };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
       if (this.speed > 7) {
