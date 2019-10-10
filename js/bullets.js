@@ -897,7 +897,7 @@ const b = {
       name: "drones",
       description: "release drones that seek out targets<br>waits at crosshairs if no targets are available",
       ammo: 0,
-      ammoPack: 23,
+      ammoPack: 21,
       have: false,
       fire() {
         const THRUST = 0.0015
@@ -929,31 +929,48 @@ const b = {
             this.force.y += this.mass * 0.0002;
             //find mob targets
             if (!(game.cycle % this.lookFrequency)) {
-              // this.close = null;
               this.lockedOn = null;
-              this.isFollowMouse = true; //if no target is found default to follow mouse
               let closeDist = Infinity;
               for (let i = 0, len = mob.length; i < len; ++i) {
                 if (
-                  // mob[i].alive &&  
-                  // mob[i].dropPowerUp && //don't target mob bullets
                   Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                   Matter.Query.ray(body, this.position, mob[i].position).length === 0
                 ) {
                   const TARGET_VECTOR = Matter.Vector.sub(this.position, mob[i].position)
                   const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
-                    // this.close = mob[i].position;
                     closeDist = DIST;
                     this.lockedOn = mob[i]
-                    this.isFollowMouse = false;
+                  }
+                }
+              }
+              if (!this.lockedOn) {
+                //grab a power up if it is ammo or a heal when player is low
+                let closeDist = Infinity;
+                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                  if (
+                    (powerUp[i].name === "ammo" || powerUp[i].name === "gun" || (powerUp[i].name === "heal" && mech.health < 0.8)) &&
+                    Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
+                    Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                  ) {
+                    const TARGET_VECTOR = Matter.Vector.sub(this.position, powerUp[i].position)
+                    const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+                    if (DIST < closeDist) {
+                      if (DIST < 50) { //eat the power up if close enough
+                        powerUp[i].effect();
+                        powerUp.splice(i, 1)
+                        break;
+                      }
+                      closeDist = DIST;
+                      this.lockedOn = powerUp[i]
+                    }
                   }
                 }
               }
             }
             if (this.lockedOn) { //accelerate towards mobs
               this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
-            } else if (this.isFollowMouse) { //accelerate towards mouse
+            } else { //accelerate towards mouse
               this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, game.mouseInGame)), -this.mass * THRUST)
             }
             // speed cap instead of friction to give more agility

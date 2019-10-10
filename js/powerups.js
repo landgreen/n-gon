@@ -168,9 +168,7 @@ const powerUps = {
         category: 0x100000,
         mask: 0x100001
       },
-      endCycle: game.cycle + 1080, //if change time also update color fade out
       color: target.color,
-      sat: 1,
       effect: target.effect,
       mode: mode,
       name: target.name,
@@ -182,31 +180,6 @@ const powerUps = {
         y: Math.random() * -9 - 3
       });
     }
-    World.add(engine.world, powerUp[i]); //add to world
-  },
-  spawnHeal(x, y, size) { //used by the mass recycler power up
-    let i = powerUp.length;
-    const target = powerUps["heal"];
-    powerUp[i] = Matter.Bodies.polygon(x, y, 0, size, {
-      density: 0.001,
-      frictionAir: 0.01,
-      restitution: 0.8,
-      collisionFilter: {
-        group: 0,
-        category: 0x100000,
-        mask: 0x100001
-      },
-      endCycle: game.cycle + 1080, //if change time also update color fade out
-      color: target.color,
-      sat: 1,
-      effect: target.effect,
-      name: target.name,
-      size: size
-    });
-    // Matter.Body.setVelocity(powerUp[i], {
-    //   x: (Math.random() - 0.5) * 3,
-    //   y: -7 * Math.random() - 5
-    // });
     World.add(engine.world, powerUp[i]); //add to world
   },
   attractionLoop() {
