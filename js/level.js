@@ -13,16 +13,16 @@ const level = {
     // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
       document.title = "n-gon";
-      this.intro(); //starting level
+      // this.intro(); //starting level
       // this.testingMap();
       // this.bosses();
-      // this.aerie();
+      this.aerie();
       // this.rooftops();
       // this.warehouse();
       // this.highrise();
       // this.office();
-      // b.giveGuns(11) // set a starting gun for testing
-      // mech.fieldUpgrades[5]() //give a field power up for testing
+      b.giveGuns(1) // set a starting gun for testing
+      mech.fieldUpgrades[5]() //give a field power up for testing
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       this[this.levels[this.onLevel]](); //picks the current map from the the levels array
@@ -567,8 +567,8 @@ const level = {
   },
   aerie() {
     // game.setZoom(3000);
-    // game.levelsCleared = 116; //for testing to simulate possible mobs spawns
-    game.zoomTransition(1700) //1400 is normal
+    game.levelsCleared = 5; //for testing to simulate possible mobs spawns
+    game.zoomTransition(2100) //1400 is normal
 
     const backwards = (Math.random() < 0.75) ? false : true;
     if (backwards) {

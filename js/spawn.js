@@ -477,61 +477,75 @@ const spawn = {
       }
     }
   },
-  suckerBoss(x, y, radius = 180 + Math.ceil(Math.random() * 70)) {
-    radius = 9 + radius / 8; //extra small
+  suckerBoss(x, y, radius = 20) {
     mobs.spawn(x, y, 12, radius, "#000");
     let me = mob[mob.length - 1];
     me.stroke = "transparent"; //used for drawSneaker
-    me.eventHorizon = radius * 30; //required for blackhole
+    me.eventHorizon = 900; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 500) * (me.eventHorizon + 500); //vision limit is event horizon
     me.accelMag = 0.00011 * game.accelScale;
+    me.collisionFilter.mask = 0x001101
     // me.frictionAir = 0.005;
     me.memory = 1000;
-    Matter.Body.setDensity(me, 0.0055); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.3); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
+      //applying forces to player doesn't seem to work inside this method, not sure why
       if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      // for (let i = 0; i < 70; i++) {
+      //   const index = body.length
+      //   spawn.bodyRect(this.position.x + 30 * (Math.random() - 0.5), this.position.y + 30 * (Math.random() - 0.5), 15 + 40 * Math.random(), 15 + 40 * Math.random());
+      //   body[index].collisionFilter.category = 0x010000;
+      //   body[index].collisionFilter.mask = 0x111000;
+      //   body[index].classType = "body";
+      //   World.add(engine.world, body[index]); //add to world
+      // }
     };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
-      if (this.speed > 7) {
+      if (this.speed > 6) {
         Matter.Body.setVelocity(this, {
-          x: this.velocity.x * 0.99,
-          y: this.velocity.y * 0.99
+          x: this.velocity.x * 0.95,
+          y: this.velocity.y * 0.95
         });
       }
       this.seePlayerByDistOrLOS();
       if (this.seePlayer.recall) {
-        //eventHorizon waves in and out
-        eventHorizon = this.eventHorizon * (0.93 + 0.25 * Math.sin(game.cycle * 0.017))
-
         //accelerate towards the player
         const forceMag = this.accelMag * this.mass;
         const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
         this.force.x += forceMag * Math.cos(angle);
         this.force.y += forceMag * Math.sin(angle);
 
+        //eventHorizon waves in and out
+        eventHorizon = this.eventHorizon * (1 + 0.5 * Math.sin(game.cycle * 0.006))
         //draw darkness
         ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, eventHorizon * 0.25, 0, 2 * Math.PI);
+        ctx.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
         ctx.fillStyle = "rgba(0,0,0,0.9)";
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, eventHorizon * 0.55, 0, 2 * Math.PI);
+        ctx.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
         ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
         ctx.fillStyle = "rgba(0,0,0,0.1)";
         ctx.fill();
-
-        this.healthBar();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
-          mech.damage(0.0003 * game.dmgScale);
+          mech.damage(0.0002 * game.dmgScale);
           if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-          player.force.x -= 1.25 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.8 : 1);
-          player.force.y -= 0.97 * player.mass * game.g * Math.sin(angle);
+          player.force.x -= 1.5 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
+          player.force.y -= 1.5 * Math.sin(angle) * player.mass * game.g;
           //draw line to player
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
@@ -544,6 +558,7 @@ const spawn = {
           ctx.fillStyle = "rgba(0,0,0,0.3)";
           ctx.fill();
         }
+        this.healthBar();
       }
     }
   },

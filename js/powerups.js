@@ -32,11 +32,9 @@ const powerUps = {
       } else {
         mech.fieldUpgrades[this.mode](); //set a predetermined power up
       }
-
       if (previousMode !== 0) { //pop the old field out in case player wants to swap back
-        // mech.fieldMeter = 0 //drop field meter to zero to prevent automatic pickup
         mech.fieldCDcycle = game.cycle + 60; //trigger fieldCD to stop power up grab automatic pick up of spawn
-        powerUps.spawn(mech.pos.x, mech.pos.y, "field", false, previousMode);
+        powerUps.spawn(mech.pos.x, mech.pos.y - 15, "field", false, previousMode);
       }
     }
   },
