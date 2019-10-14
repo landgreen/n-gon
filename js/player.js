@@ -1042,25 +1042,31 @@ const mech = {
     },
     () => {
       mech.fieldMode = 4;
-      game.makeTextLog("<strong style='font-size:30px;'>Standing Wave Harmonics</strong><br> (right mouse or space bar) <p>oscillating shields surround player<br>improved field shielding efficiency</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Standing Wave Harmonics</strong><br> (right mouse or space bar) <p>oscillating shields always surround player<br> <span style='color:#a00;'>decreased</span> field regeneration</p>", 1200);
       mech.setHoldDefaults();
-      mech.fieldShieldingScale = 0.15;
-      // mech.fieldRegen = 0.005; //0.0015
-      // mech.fieldArc = 1; //field covers full 360 degrees
+      // mech.fieldShieldingScale = 0.5;
+      mech.fieldRegen = 0.0008; //0.0015
+      // mech.fieldArc = 0.1; //field covers full 360 degrees
       // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
 
       mech.hold = function () {
-        grabRange1 = 100 + 95 * Math.sin(game.cycle / 23)
-        grabRange2 = 105 + 85 * Math.sin(game.cycle / 37)
-        grabRange3 = 90 + 90 * Math.sin(game.cycle / 47)
-        mech.grabRange = Math.max(grabRange1, grabRange2, grabRange3)
-
         if (mech.isHolding) {
           mech.drawHold(mech.holdingTarget);
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1)) { //not hold but field button is pressed
-
+          mech.grabPowerUp();
+          mech.lookForPickUp(180);
+        } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
+          mech.pickUp();
+        } else {
+          mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        }
+        if (mech.fieldMeter > 0.1) {
+          const grabRange1 = 100 + 95 * Math.sin(game.cycle / 23)
+          const grabRange2 = 105 + 85 * Math.sin(game.cycle / 37)
+          const grabRange3 = 90 + 90 * Math.sin(game.cycle / 47)
+          mech.grabRange = Math.max(grabRange1, grabRange2, grabRange3)
           ctx.fillStyle = "rgba(110,170,200," + (0.15 + 0.15 * Math.random()) + ")";
           ctx.beginPath();
           ctx.arc(mech.pos.x, mech.pos.y, grabRange1, 0, 2 * Math.PI);
@@ -1071,13 +1077,7 @@ const mech = {
           ctx.beginPath();
           ctx.arc(mech.pos.x, mech.pos.y, grabRange3, 0, 2 * Math.PI);
           ctx.fill();
-          mech.grabPowerUp();
-          mech.pushMobs360(mech.grabRange + 25);
-          mech.lookForPickUp(180);
-        } else if (mech.holdingTarget && mech.fireCDcycle < game.cycle) { //holding, but field button is released
-          mech.pickUp();
-        } else {
-          mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+          mech.pushMobs360(mech.grabRange);
         }
         mech.drawFieldMeter()
       }
