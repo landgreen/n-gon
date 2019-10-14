@@ -5,18 +5,10 @@
 field power up effects
   field produces a whirlpool effect of force around player
   field allows player to hold and throw living mobs
-  field puts a circle of "something" each time right click is pressed
-    null gravity
-    damage
-    high friction
 
 other power up ideas
   killing a mob triggers:  a spore bullet
     maybe you could replace the power method with a new one to get this to work
-
-have mob acceleration and look frequency scale with difficulty level
-  this will speed up the responses of later mobs
-  this should provide a feeling of difficulty without inflating the life of mobs
 
 give mobs more animal-like behaviors
   like rainworld
@@ -33,7 +25,6 @@ give mobs more animal-like behaviors
 game mechanics
   mechanics that support the physics engine
     add rope/constraint
-  store/spawn bodies in player (like the game Starfall)
   get ideas from game: limbo / inside
   environmental hazards
     laser
