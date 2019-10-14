@@ -21,8 +21,9 @@ const level = {
       // this.warehouse();
       // this.highrise();
       // this.office();
-      b.giveGuns(1) // set a starting gun for testing
-      mech.fieldUpgrades[5]() //give a field power up for testing
+      // b.giveGuns(1) // set a starting gun for testing
+      b.giveGuns("all", 1000)
+      // mech.fieldUpgrades[5]() //give a field power up for testing
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       this[this.levels[this.onLevel]](); //picks the current map from the the levels array
@@ -724,7 +725,7 @@ const level = {
     spawn.randomBoss(350, -500, 1)
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
-    if (game.levelsCleared > 2) spawn.suckerBoss(3000, -1000);
+    if (game.levelsCleared > 2) spawn.suckerBoss(3000 + 1000 * Math.random(), -500 * Math.random());
 
     //add mini boss, giant hopper?   or a black hole that spawns hoppers?
   },

@@ -554,10 +554,8 @@ const mobs = {
       //   ctx.fillStyle = "rgba(0,0,0,0.1)";
       //   ctx.fill();
       // },
-      curl() {
+      curl(range = 1000) {
         //cause all mobs, and bodies to rotate in a circle
-        const range = 1000
-
         applyCurl = function (center, array) {
           for (let i = 0; i < array.length; ++i) {
             const sub = Matter.Vector.sub(center, array[i].position)
@@ -570,8 +568,8 @@ const mobs = {
               //apply curl force
               const mag = Matter.Vector.mult(curlVector, 10)
               Matter.Body.setVelocity(array[i], {
-                x: array[i].velocity.x * 0.99 + mag.x * 0.01,
-                y: array[i].velocity.y * 0.99 + mag.y * 0.01
+                x: array[i].velocity.x * 0.94 + mag.x * 0.06,
+                y: array[i].velocity.y * 0.94 + mag.y * 0.06
               })
 
               //draw curl
@@ -586,13 +584,12 @@ const mobs = {
         }
         applyCurl(this.position, mob);
         applyCurl(this.position, body);
-
-
+        applyCurl(this.position, [player]);
         //draw limit
-        ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(55,255,255, 0.1)";
-        ctx.fill();
+        // ctx.beginPath();
+        // ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
+        // ctx.fillStyle = "rgba(55,255,255, 0.1)";
+        // ctx.fill();
       },
       pullPlayer() {
         if (this.seePlayer.yes && Matter.Vector.magnitudeSquared(Matter.Vector.sub(this.position, player.position)) < 1000000) {

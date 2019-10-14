@@ -487,7 +487,7 @@ const spawn = {
     me.collisionFilter.mask = 0x001101
     // me.frictionAir = 0.005;
     me.memory = 1000;
-    Matter.Body.setDensity(me, 0.3); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
@@ -499,6 +499,15 @@ const spawn = {
       //   body[index].classType = "body";
       //   World.add(engine.world, body[index]); //add to world
       // }
+      if (game.levelsCleared > 6) {
+        for (let i = 0; i < 4; ++i) {
+          spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 20);
+          Matter.Body.setVelocity(mob[mob.length - 1], {
+            x: (Math.random() - 0.5) * 25,
+            y: (Math.random() - 0.5) * 25
+          });
+        }
+      }
     };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
@@ -518,34 +527,36 @@ const spawn = {
 
         //eventHorizon waves in and out
         eventHorizon = this.eventHorizon * (1 + 0.5 * Math.sin(game.cycle * 0.006))
+        //  zoom camera in and out with the event horizon
+
         //draw darkness
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(0,0,0,0.9)";
+        ctx.fillStyle = "rgba(0,20,40,0.6)";
         ctx.fill();
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.fillStyle = "rgba(0,20,40,0.4)";
         ctx.fill();
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillStyle = "rgba(0,20,40,0.3)";
         ctx.fill();
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillStyle = "rgba(0,20,40,0.2)";
         ctx.fill();
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(0,0,0,0.1)";
+        ctx.fillStyle = "rgba(0,20,40,0.05)";
         ctx.fill();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
           mech.damage(0.0002 * game.dmgScale);
           if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-          player.force.x -= 1.5 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
-          player.force.y -= 1.5 * Math.sin(angle) * player.mass * game.g;
+          player.force.x -= 1.3 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
+          player.force.y -= 1.2 * Math.sin(angle) * player.mass * game.g;
           //draw line to player
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
@@ -559,6 +570,7 @@ const spawn = {
           ctx.fill();
         }
         this.healthBar();
+        this.curl(eventHorizon);
       }
     }
   },
@@ -939,8 +951,7 @@ const spawn = {
     me.g = 0.0004; //required if using 'gravity'
     me.leaveBody = false;
     // me.dropPowerUp = false;
-    me.onDeath = function () {
-      //run this function on death
+    me.onDeath = function () { //run this function on death
       for (let i = 0; i < Math.ceil(this.mass * 0.2 + Math.random() * 3); ++i) {
         spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2);
         Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -1010,7 +1021,6 @@ const spawn = {
       this.seePlayerCheck();
       this.attraction();
       this.laserBeam();
-      // this.curl();
     };
 
     //snake tail
