@@ -482,25 +482,18 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.stroke = "transparent"; //used for drawSneaker
     me.eventHorizon = 900; //required for black hole
-    me.seeAtDistance2 = (me.eventHorizon + 500) * (me.eventHorizon + 500); //vision limit is event horizon
-    me.accelMag = 0.00011 * game.accelScale;
-    me.collisionFilter.mask = 0x001101
+    me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
+    me.accelMag = 0.00006 * game.accelScale;
+    me.collisionFilter.mask = 0x001100
     // me.frictionAir = 0.005;
-    me.memory = 1000;
+    me.memory = 1600;
     Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
-      // for (let i = 0; i < 70; i++) {
-      //   const index = body.length
-      //   spawn.bodyRect(this.position.x + 30 * (Math.random() - 0.5), this.position.y + 30 * (Math.random() - 0.5), 15 + 40 * Math.random(), 15 + 40 * Math.random());
-      //   body[index].collisionFilter.category = 0x010000;
-      //   body[index].collisionFilter.mask = 0x111000;
-      //   body[index].classType = "body";
-      //   World.add(engine.world, body[index]); //add to world
-      // }
+
       if (game.levelsCleared > 6) {
-        for (let i = 0; i < 4; ++i) {
+        for (let i = 0; i < (game.levelsCleared - 5); ++i) {
           spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 20);
           Matter.Body.setVelocity(mob[mob.length - 1], {
             x: (Math.random() - 0.5) * 25,
@@ -511,7 +504,7 @@ const spawn = {
     };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
-      if (this.speed > 6) {
+      if (this.speed > 2) {
         Matter.Body.setVelocity(this, {
           x: this.velocity.x * 0.95,
           y: this.velocity.y * 0.95
@@ -526,7 +519,7 @@ const spawn = {
         this.force.y += forceMag * Math.sin(angle);
 
         //eventHorizon waves in and out
-        eventHorizon = this.eventHorizon * (1 + 0.5 * Math.sin(game.cycle * 0.006))
+        eventHorizon = this.eventHorizon * (1 + 0.4 * Math.sin(game.cycle * 0.006))
         //  zoom camera in and out with the event horizon
 
         //draw darkness
@@ -552,7 +545,7 @@ const spawn = {
         ctx.fill();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
-          mech.damage(0.0002 * game.dmgScale);
+          mech.damage(0.00015 * game.dmgScale);
           if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 1.3 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
@@ -1074,7 +1067,7 @@ const spawn = {
       me.stroke = "rgb(220,220,255)";
       Matter.Body.setDensity(me, 0.0001) //very low density to not mess with the original mob's motion
       me.shield = true;
-      me.collisionFilter.mask = 0x001100; //don't collide with bodies, map, player, and mobs, only bullets
+      me.collisionFilter.mask = 0x000100; //don't collide with bodies, map, player, and mobs, only bullets
       consBB[consBB.length] = Constraint.create({
         //attach shield to last spawned mob
         bodyA: me,
@@ -1101,7 +1094,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.00005) //very low density to not mess with the original mob's motion
     me.frictionAir = 0;
     me.shield = true;
-    me.collisionFilter.mask = 0x001100; //don't collide with bodies, map, and mobs, only bullets and player
+    me.collisionFilter.mask = 0x000100; //don't collide with bodies, map, and mobs, only bullets and player
     //constrain to all mob nodes in boss
     for (let i = 0; i < nodes; ++i) {
       consBB[consBB.length] = Constraint.create({

@@ -851,7 +851,7 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Inertia Negation Field</strong><br> (right mouse or space bar)<p> field slows objects in range<br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
       // <br> field does <span style='color:#a00;'>not</span> shield player
       mech.setHoldDefaults();
-      mech.grabRange = 900
+      mech.grabRange = 900;
       mech.fieldShieldingScale = 12;
       // mech.fieldArc = 1; //field covers full 360 degrees
       // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -1063,10 +1063,10 @@ const mech = {
           mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
         }
         if (mech.fieldMeter > 0.1) {
-          const grabRange1 = 100 + 95 * Math.sin(game.cycle / 23)
-          const grabRange2 = 105 + 85 * Math.sin(game.cycle / 37)
-          const grabRange3 = 90 + 90 * Math.sin(game.cycle / 47)
-          mech.grabRange = Math.max(grabRange1, grabRange2, grabRange3)
+          const grabRange1 = 80 + 80 * Math.sin(game.cycle / 23)
+          const grabRange2 = 80 + 80 * Math.sin(game.cycle / 37)
+          const grabRange3 = 80 + 80 * Math.sin(game.cycle / 47)
+          const netGrabRange = Math.max(grabRange1, grabRange2, grabRange3)
           ctx.fillStyle = "rgba(110,170,200," + (0.15 + 0.15 * Math.random()) + ")";
           ctx.beginPath();
           ctx.arc(mech.pos.x, mech.pos.y, grabRange1, 0, 2 * Math.PI);
@@ -1077,7 +1077,7 @@ const mech = {
           ctx.beginPath();
           ctx.arc(mech.pos.x, mech.pos.y, grabRange3, 0, 2 * Math.PI);
           ctx.fill();
-          mech.pushMobs360(mech.grabRange);
+          mech.pushMobs360(netGrabRange);
         }
         mech.drawFieldMeter()
       }
