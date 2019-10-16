@@ -89,9 +89,9 @@ function mobCollisionChecks(event) {
         function collide(obj) {
           //player and mob collision
           if (obj === playerBody || obj === playerHead) {
-            if (mech.damageImmune < game.cycle) {
+            if (mech.damageImmune < mech.cycle) {
               //player is immune to mob collision damage for 30 cycles
-              mech.damageImmune = game.cycle + 30;
+              mech.damageImmune = mech.cycle + 30;
               mob[k].foundPlayer();
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);

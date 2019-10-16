@@ -602,58 +602,60 @@ const spawn = {
     // if (Math.random() < Math.min(0.2 + game.levelsCleared * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
-      this.seePlayerByLookingAt();
-      const dist2 = this.distanceToPlayer2();
-      //laser Tracking
-      if (this.seePlayer.yes && dist2 < 4000000 && !mech.isStealth) {
-        this.attraction();
-        const rangeWidth = 2000; //this is sqrt of 4000000 from above if()
-        //targeting laser will slowly move from the mob to the player's position
-        this.laserPos = Matter.Vector.add(this.laserPos, Matter.Vector.mult(Matter.Vector.sub(player.position, this.laserPos), 0.1));
-        let targetDist = Matter.Vector.magnitude(Matter.Vector.sub(this.laserPos, mech.pos));
-        const r = 10;
+      if (!mech.isBodiesAsleep) {
+        this.seePlayerByLookingAt();
+        const dist2 = this.distanceToPlayer2();
+        //laser Tracking
+        if (this.seePlayer.yes && dist2 < 4000000 && !mech.isStealth) {
+          this.attraction();
+          const rangeWidth = 2000; //this is sqrt of 4000000 from above if()
+          //targeting laser will slowly move from the mob to the player's position
+          this.laserPos = Matter.Vector.add(this.laserPos, Matter.Vector.mult(Matter.Vector.sub(player.position, this.laserPos), 0.1));
+          let targetDist = Matter.Vector.magnitude(Matter.Vector.sub(this.laserPos, mech.pos));
+          const r = 10;
 
-        // ctx.setLineDash([15, 200]);
-        // ctx.lineDashOffset = 20*(game.cycle % 215);
-        ctx.beginPath();
-        ctx.moveTo(this.position.x, this.position.y);
-        if (targetDist < r + 15) {
-          // || dist2 < 80000
-          targetDist = r + 10;
-          //charge at player
-          const forceMag = this.accelMag * 40 * this.mass;
-          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-          this.force.x += forceMag * Math.cos(angle);
-          this.force.y += forceMag * Math.sin(angle);
+          // ctx.setLineDash([15, 200]);
+          // ctx.lineDashOffset = 20*(game.cycle % 215);
+          ctx.beginPath();
+          ctx.moveTo(this.position.x, this.position.y);
+          if (targetDist < r + 15) {
+            // || dist2 < 80000
+            targetDist = r + 10;
+            //charge at player
+            const forceMag = this.accelMag * 40 * this.mass;
+            const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+            this.force.x += forceMag * Math.cos(angle);
+            this.force.y += forceMag * Math.sin(angle);
+          } else {
+            //high friction if can't lock onto player
+            Matter.Body.setVelocity(this, {
+              x: this.velocity.x * 0.96,
+              y: this.velocity.y * 0.96
+            });
+          }
+          if (dist2 > 80000) {
+            const laserWidth = 0.002;
+            let laserOffR = Matter.Vector.rotateAbout(this.laserPos, (targetDist - r) * laserWidth, this.position);
+            let sub = Matter.Vector.normalise(Matter.Vector.sub(laserOffR, this.position));
+            laserOffR = Matter.Vector.add(laserOffR, Matter.Vector.mult(sub, rangeWidth));
+            ctx.lineTo(laserOffR.x, laserOffR.y);
+
+            let laserOffL = Matter.Vector.rotateAbout(this.laserPos, (targetDist - r) * -laserWidth, this.position);
+            sub = Matter.Vector.normalise(Matter.Vector.sub(laserOffL, this.position));
+            laserOffL = Matter.Vector.add(laserOffL, Matter.Vector.mult(sub, rangeWidth));
+            ctx.lineTo(laserOffL.x, laserOffL.y);
+            // ctx.fillStyle = "rgba(0,0,255,0.15)";
+            var gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, rangeWidth);
+            gradient.addColorStop(0, `rgba(0,0,255,${((r + 5) * (r + 5)) / (targetDist * targetDist)})`);
+            gradient.addColorStop(1, "transparent");
+            ctx.fillStyle = gradient;
+            ctx.fill();
+          }
         } else {
-          //high friction if can't lock onto player
-          Matter.Body.setVelocity(this, {
-            x: this.velocity.x * 0.96,
-            y: this.velocity.y * 0.96
-          });
+          this.laserPos = this.position;
         }
-        if (dist2 > 80000) {
-          const laserWidth = 0.002;
-          let laserOffR = Matter.Vector.rotateAbout(this.laserPos, (targetDist - r) * laserWidth, this.position);
-          let sub = Matter.Vector.normalise(Matter.Vector.sub(laserOffR, this.position));
-          laserOffR = Matter.Vector.add(laserOffR, Matter.Vector.mult(sub, rangeWidth));
-          ctx.lineTo(laserOffR.x, laserOffR.y);
-
-          let laserOffL = Matter.Vector.rotateAbout(this.laserPos, (targetDist - r) * -laserWidth, this.position);
-          sub = Matter.Vector.normalise(Matter.Vector.sub(laserOffL, this.position));
-          laserOffL = Matter.Vector.add(laserOffL, Matter.Vector.mult(sub, rangeWidth));
-          ctx.lineTo(laserOffL.x, laserOffL.y);
-          // ctx.fillStyle = "rgba(0,0,255,0.15)";
-          var gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, rangeWidth);
-          gradient.addColorStop(0, `rgba(0,0,255,${((r + 5) * (r + 5)) / (targetDist * targetDist)})`);
-          gradient.addColorStop(1, "transparent");
-          ctx.fillStyle = gradient;
-          ctx.fill();
-        }
-      } else {
-        this.laserPos = this.position;
-      }
-    };
+      };
+    }
   },
   laser(x, y, radius = 30) {
     //only on level 1
@@ -706,14 +708,17 @@ const spawn = {
     me.collisionFilter.mask = 0x010111; //can't touch player
     // me.memory = 420;
     me.do = function () {
+
       this.seePlayerCheck();
       this.attraction();
       this.gravity();
       //draw
-      if (this.seePlayer.yes) {
-        if (this.alpha < 1) this.alpha += 0.01;
-      } else {
-        if (this.alpha > 0) this.alpha -= 0.03;
+      if (!mech.isBodiesAsleep) {
+        if (this.seePlayer.yes) {
+          if (this.alpha < 1) this.alpha += 0.01;
+        } else {
+          if (this.alpha > 0) this.alpha -= 0.03;
+        }
       }
       if (this.alpha > 0) {
         if (this.alpha > 0.95) {

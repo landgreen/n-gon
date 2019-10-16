@@ -16,13 +16,13 @@ const level = {
       // game.levelsCleared = 4; //for testing to simulate possible mobs spawns
       // b.giveGuns(1) // set a starting gun for testing
       // b.giveGuns("all", 1000)
-      // mech.fieldUpgrades[5]() //give a field power up for testing
-      this.intro(); //starting level
+      mech.fieldUpgrades[1]() //give a field power up for testing
+      // this.intro(); //starting level
       // this.testingMap();
       // this.bosses();
       // this.aerie();
       // this.rooftops();
-      // this.warehouse();
+      this.warehouse();
       // this.highrise();
       // this.office();
     } else {
@@ -44,8 +44,9 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   testingMap() {
+    //start with all guns
+    b.giveGuns("all", 1000)
     game.zoomScale = 1400 //1400 is normal
-    game.zoomTransition(1400)
     spawn.setSpawnList();
     game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
     for (let i = 0; i < game.levelsCleared; i++) {
@@ -58,9 +59,9 @@ const level = {
     level.exit.x = 3500;
     level.exit.y = -870;
     this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    document.body.style.backgroundColor = "#dcdcde";
 
-    //start with all guns
-    b.giveGuns("all", 1000)
+
 
 
     // this.addZone(250, -1000, 500, 1500, "laser");
@@ -68,13 +69,6 @@ const level = {
     // setTimeout(function() {
     //   document.body.style.backgroundColor = "#eee";
     // }, 1);
-    document.body.style.backgroundColor = "#fff";
-    // document.body.style.backgroundColor = "#fafcff";
-    // document.body.style.backgroundColor = "#bbb";
-    // document.body.style.backgroundColor = "#eee4e4";
-    // document.body.style.backgroundColor = "#dcdcde";
-    // document.body.style.backgroundColor = "#e0e5e0";
-
     // this.addQueryRegion(550, -25, 100, 50, "bounce", { Vx: 0, Vy: -25 });
     // level.fillBG.push({ x: 550, y: -25, width: 100, height: 50, color: "#ff0" });
 
@@ -123,20 +117,9 @@ const level = {
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.focuser(800, -1150);
     // spawn.groupBoss(-600, -550);
-    // for (let i = 0; i < 1; ++i) {
-    spawn.shooter(800, -150, 10);
-    spawn.shooter(800, -150, 10);
-    spawn.shooter(800, -100, 10);
-    spawn.shooter(800, -50, 10);
-    spawn.shooter(800, -150, 10);
-    spawn.shooter(800, -150, 10);
-    spawn.shooter(800, -100, 10);
-    spawn.shooter(800, -50, 10);
-    spawn.shooter(800, -150, 10);
-    spawn.shooter(800, -150, 10);
-    spawn.shooter(800, -100, 10);
-    spawn.shooter(800, -50, 10);
-    // }
+    spawn.starter(800, -150, 100);
+    // spawn.grower(800, -250);
+    // spawn.blinker(800, -250, 40);
     // spawn.groupBoss(900, -1070);
     // for (let i = 0; i < 20; i++) {
     //   spawn.randomBoss(-100, -1470);

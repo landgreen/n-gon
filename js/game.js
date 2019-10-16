@@ -4,6 +4,7 @@ const game = {
   loop() {},
   mouseLoop() {
     game.cycle++; //tracks game cycles
+    mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
     if (game.clearNow) {
       game.clearNow = false;
       game.clearMap();
@@ -52,6 +53,7 @@ const game = {
   },
   gamepadLoop() {
     game.cycle++; //tracks game cycles
+    mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
     // game.polGamepad();
     if (game.clearNow) {
       game.clearNow = false;
@@ -313,10 +315,10 @@ const game = {
   makeTextLog(text, time = 180) {
     document.getElementById("text-log").innerHTML = text;
     document.getElementById("text-log").style.opacity = 1;
-    game.lastLogTime = game.cycle + time;
+    game.lastLogTime = mech.cycle + time;
   },
   textLog() {
-    if (game.lastLogTime && game.lastLogTime < game.cycle) {
+    if (game.lastLogTime && game.lastLogTime < mech.cycle) {
       game.lastLogTime = 0;
       // document.getElementById("text-log").innerHTML = " ";
       document.getElementById("text-log").style.opacity = 0;
@@ -745,7 +747,7 @@ const game = {
     // if 4000px deep
     if (mech.pos.y > game.fallHeight) mech.death();
 
-    if (!(game.cycle % 420)) {
+    if (!(mech.cycle % 420)) {
       remove = function (who) {
         let i = who.length;
         while (i--) {
@@ -777,6 +779,8 @@ const game = {
     line += 30;
 
     ctx.fillText("cycle: " + game.cycle, x, line);
+    line += 20;
+    ctx.fillText("player cycle: " + mech.cycle, x, line);
     line += 20;
     ctx.fillText("x: " + player.position.x.toFixed(0), x, line);
     line += 20;
@@ -814,7 +818,7 @@ const game = {
   draw: {
     powerUp() {
       // draw power up
-      // ctx.globalAlpha = 0.4 * Math.sin(game.cycle * 0.15) + 0.6;
+      // ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
       // for (let i = 0, len = powerUp.length; i < len; ++i) {
       //   let vertices = powerUp[i].vertices;
       //   ctx.beginPath();
@@ -827,7 +831,7 @@ const game = {
       //   ctx.fill();
       // }
       // ctx.globalAlpha = 1;
-      ctx.globalAlpha = 0.4 * Math.sin(game.cycle * 0.15) + 0.6;
+      ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
       for (let i = 0, len = powerUp.length; i < len; ++i) {
         ctx.beginPath();
         ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);

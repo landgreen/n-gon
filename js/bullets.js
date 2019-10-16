@@ -23,7 +23,7 @@ const b = {
     game.makeGunHUD();
   },
   fireProps(cd, speed, dir, me) {
-    mech.fireCDcycle = game.cycle + cd; // cool down
+    mech.fireCDcycle = mech.cycle + cd; // cool down
     Matter.Body.setVelocity(bullet[me], {
       x: mech.Vx / 2 + speed * Math.cos(dir),
       y: mech.Vy / 2 + speed * Math.sin(dir)
@@ -191,7 +191,7 @@ const b = {
     //         sub = Matter.Vector.sub(bullet[me].position, bullet[i].position);
     //         dist = Matter.Vector.magnitude(sub);
     //         if (dist < bullet[me].explodeRad) {
-    //             bullet[i].endCycle = game.cycle;
+    //             bullet[i].endCycle = mech.cycle;
     //         }
     //     }
     // }
@@ -247,11 +247,11 @@ const b = {
       ammoPack: Infinity,
       have: false,
       fire() {
-        // mech.fireCDcycle = game.cycle + 1
+        // mech.fireCDcycle = mech.cycle + 1
         //laser drains energy as well as bullets
         const FIELD_DRAIN = 0.003
         if (mech.fieldMeter < FIELD_DRAIN) {
-          mech.fireCDcycle = game.cycle + 100; // cool down if out of energy
+          mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
           mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
           let best;
@@ -406,11 +406,11 @@ const b = {
       //   ammoPack: Infinity,
       //   have: false,
       //   fire() {
-      //     // mech.fireCDcycle = game.cycle + 1
+      //     // mech.fireCDcycle = mech.cycle + 1
       //     //laser drains energy as well as bullets
       //     const FIELD_DRAIN = 0.0001 //should be 0.001
       //     if (mech.fieldMeter < FIELD_DRAIN) {
-      //       mech.fireCDcycle = game.cycle + 100; // cool down if out of energy
+      //       mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
       //     } else {
       //       mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
       //       let best;
@@ -508,7 +508,7 @@ const b = {
       //           x: path[i].x - path[i - 1].x,
       //           y: path[i].y - path[i - 1].y
       //         }
-      //         const a = game.cycle * 5
+      //         const a = mech.cycle * 5
       //         p1 = {
       //           x: d.x / 2 * Math.cos(a) - d.y / 2 * Math.sin(a),
       //           y: d.x / 2 * Math.sin(a) + d.y / 2 * Math.cos(a),
@@ -592,19 +592,17 @@ const b = {
           onDmg() {},
           onEnd() {},
           do() {
-            //wiggle
-            this.cycle++
-            const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
-            this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST)
+            if (!mech.isBodiesAsleep) {
+              this.cycle++
+              const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
+              this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST) //wiggle
 
-            //shrink
-            if (this.cycle > 0 && !(Math.floor(this.cycle) % 6)) {
-              Matter.Body.scale(this, SCALE, SCALE);
+              if (this.cycle > 0 && !(Math.floor(this.cycle) % 6)) Matter.Body.scale(this, SCALE, SCALE); //shrink
             }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = game.cycle + (mech.crouch ? 8 : 4); // cool down
+        mech.fireCDcycle = mech.cycle + (mech.crouch ? 8 : 4); // cool down
         const SPEED = mech.crouch ? 5.2 : 4.5;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(DIR),
@@ -726,70 +724,80 @@ const b = {
         };
         bullet[me].lockedOn = null;
         bullet[me].do = function () {
-          if (!(game.cycle % this.lookFrequency)) {
-            this.close = null;
-            this.lockedOn = null;
-            let closeDist = Infinity;
-            for (let i = 0, len = mob.length; i < len; ++i) {
-              if (
-                mob[i].alive &&
-                mob[i].dropPowerUp &&
-                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0
-              ) {
-                const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[i].position));
-                if (dist < closeDist) {
-                  this.close = mob[i].position;
-                  closeDist = dist;
-                  this.lockedOn = mob[i];
+          if (!mech.isBodiesAsleep) {
+            if (!(mech.cycle % this.lookFrequency)) {
+              this.closestTarget = null;
+              this.lockedOn = null;
+              let closeDist = Infinity;
+
+              //look for targets
+              for (let i = 0, len = mob.length; i < len; ++i) {
+                if (
+                  mob[i].alive &&
+                  mob[i].dropPowerUp &&
+                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                  Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                ) {
+                  const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[i].position));
+                  if (dist < closeDist) {
+                    this.closestTarget = mob[i].position;
+                    closeDist = dist;
+                    this.lockedOn = mob[i];
+                  }
+                }
+              }
+              //explode when bullet is close enough to target
+              if (this.closestTarget && closeDist < this.explodeRad * 0.7) {
+                this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
+              }
+
+              if (this.lockedOn) {
+                this.frictionAir = 0.04; //extra friction
+
+                //draw locked on targeting
+                ctx.beginPath();
+                const vertices = this.lockedOn.vertices;
+                ctx.moveTo(this.position.x, this.position.y);
+                const mod = Math.floor((game.cycle / 3) % vertices.length);
+                ctx.lineTo(vertices[mod].x, vertices[mod].y);
+                ctx.strokeStyle = "rgba(0,0,155,0.35)"; //"#2f6";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+              }
+            }
+
+            //rotate missile towards the target
+            if (this.closestTarget) {
+              const face = {
+                x: Math.cos(this.angle),
+                y: Math.sin(this.angle)
+              };
+              const target = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.closestTarget));
+              if (Matter.Vector.dot(target, face) > -0.98) {
+                if (Matter.Vector.cross(target, face) > 0) {
+                  Matter.Body.rotate(this, 0.08);
+                } else {
+                  Matter.Body.rotate(this, -0.08);
                 }
               }
             }
-            //explode when bullet is close enough to target
-            if (this.close && closeDist < this.explodeRad * 0.7) {
-              this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
-            }
+            //accelerate in direction bullet is facing
+            const dir = this.angle; // + (Math.random() - 0.5);
+            this.force.x += Math.cos(dir) * thrust;
+            this.force.y += Math.sin(dir) * thrust;
 
-            if (this.lockedOn) {
-              this.frictionAir = 0.04; //extra friction
-
-              //draw locked on targeting
-              ctx.beginPath();
-              const vertices = this.lockedOn.vertices;
-              ctx.moveTo(this.position.x, this.position.y);
-              const mod = Math.floor((game.cycle / 3) % vertices.length);
-              ctx.lineTo(vertices[mod].x, vertices[mod].y);
-              ctx.strokeStyle = "rgba(0,0,155,0.35)"; //"#2f6";
-              ctx.lineWidth = 1;
-              ctx.stroke();
-            }
+            //draw rocket
+            ctx.beginPath();
+            ctx.arc(this.position.x - Math.cos(this.angle) * 27 + (Math.random() - 0.5) * 4, this.position.y - Math.sin(this.angle) * 27 + (Math.random() - 0.5) * 4, 11, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255,155,0,0.5)";
+            ctx.fill();
+          } else {
+            //draw rocket  with time stop
+            ctx.beginPath();
+            ctx.arc(this.position.x - Math.cos(this.angle) * 27, this.position.y - Math.sin(this.angle) * 27, 11, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255,155,0,0.5)";
+            ctx.fill();
           }
-
-          //rotate missile towards the target
-          if (this.close) {
-            const face = {
-              x: Math.cos(this.angle),
-              y: Math.sin(this.angle)
-            };
-            const target = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.close));
-            if (Matter.Vector.dot(target, face) > -0.98) {
-              if (Matter.Vector.cross(target, face) > 0) {
-                Matter.Body.rotate(this, 0.08);
-              } else {
-                Matter.Body.rotate(this, -0.08);
-              }
-            }
-          }
-          //accelerate in direction bullet is facing
-          const dir = this.angle; // + (Math.random() - 0.5);
-          this.force.x += Math.cos(dir) * thrust;
-          this.force.y += Math.sin(dir) * thrust;
-
-          //draw rocket
-          ctx.beginPath();
-          ctx.arc(this.position.x - Math.cos(this.angle) * 27 + (Math.random() - 0.5) * 4, this.position.y - Math.sin(this.angle) * 27 + (Math.random() - 0.5) * 4, 11, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(255,155,0,0.5)";
-          ctx.fill();
         }
       }
     },
@@ -934,9 +942,11 @@ const b = {
         bullet[me].minDmgSpeed = 0;
         bullet[me].onDmg = function () {};
         bullet[me].do = function () {
-          const SCALE = 1.017
-          Matter.Body.scale(this, SCALE, SCALE);
-          this.frictionAir += 0.00023;
+          if (!mech.isBodiesAsleep) {
+            const SCALE = 1.017
+            Matter.Body.scale(this, SCALE, SCALE);
+            this.frictionAir += 0.00023;
+          }
 
           this.force.y += this.mass * 0.00045;
 
@@ -978,7 +988,7 @@ const b = {
 
                 //find mob targets
                 if (!(game.cycle % this.lookFrequency)) {
-                  this.close = null;
+                  this.closestTarget = null;
                   this.lockedOn = null;
                   let closeDist = Infinity;
                   for (let i = 0, len = mob.length; i < len; ++i) {
@@ -987,7 +997,7 @@ const b = {
                       const targetVector = Matter.Vector.sub(this.position, mob[i].position)
                       const dist = Matter.Vector.magnitude(targetVector);
                       if (dist < closeDist) {
-                        this.close = mob[i].position;
+                        this.closestTarget = mob[i].position;
                         closeDist = dist;
                         this.lockedOn = Matter.Vector.normalise(targetVector);
                         if (0.3 > Math.random()) break //doesn't always target the closest mob
@@ -1110,13 +1120,13 @@ const b = {
     },
   ],
   fire() {
-    if (game.mouseDown && mech.fireCDcycle < game.cycle && !(keys[32] || game.mouseDownRight) && b.inventory.length) {
+    if (game.mouseDown && mech.fireCDcycle < mech.cycle && !(keys[32] || game.mouseDownRight) && b.inventory.length) {
       if (b.guns[this.activeGun].ammo > 0) {
         b.guns[this.activeGun].fire();
         b.guns[this.activeGun].ammo--;
         game.updateGunHUD();
       } else {
-        mech.fireCDcycle = game.cycle + 30; //cooldown
+        mech.fireCDcycle = mech.cycle + 30; //cooldown
         // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>", 200);
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
@@ -1126,13 +1136,13 @@ const b = {
     }
   },
   gamepadFire() {
-    if (game.gamepad.rightTrigger && mech.fireCDcycle < game.cycle && !(keys[32] || game.gamepad.leftTrigger) && !mech.isHolding && b.inventory.length) {
+    if (game.gamepad.rightTrigger && mech.fireCDcycle < mech.cycle && !(keys[32] || game.gamepad.leftTrigger) && !mech.isHolding && b.inventory.length) {
       if (b.guns[this.activeGun].ammo > 0) {
         b.guns[this.activeGun].fire();
         b.guns[this.activeGun].ammo--;
         game.updateGunHUD();
       } else {
-        mech.fireCDcycle = game.cycle + 30; //cooldown
+        mech.fireCDcycle = mech.cycle + 30; //cooldown
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
     }
