@@ -837,6 +837,7 @@ const mech = {
               x: who[i].storeVelocity.x,
               y: who[i].storeVelocity.y
             })
+            Matter.Body.setAngularVelocity(who[i], who[i].storeAngularVelocity)
           }
         }
       }
@@ -877,45 +878,41 @@ const mech = {
     },
     () => {
       mech.fieldMode = 1;
-      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right mouse or space bar)<p> field stops all objects except player</p>", 1200);
-      // <br> field does <span style='color:#a00;'>not</span> shield player
+      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right mouse or space bar)<p> stop time while field is active</p>", 1200);
       mech.setHoldDefaults();
-      // mech.grabRange = 900;
-      mech.fieldShieldingScale = 12;
-      // mech.fieldArc = 1; //field covers full 360 degrees
-      // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
-
+      mech.grabRange = 130
       mech.isBodiesAsleep = false;
       mech.hold = function () {
-
-        function sleep(who) {
-          for (let i = 0, len = who.length; i < len; ++i) {
-            if (!who[i].isSleeping) who[i].storeVelocity = who[i].velocity
-            Matter.Sleeping.set(who[i], true)
-          }
-        }
-
         if (mech.isHolding) {
           mech.wakeCheck();
           mech.drawHold(mech.holdingTarget);
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-          const DRAIN = 0.002 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.0015 //mech.fieldRegen = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
-            mech.grabPowerUp();
-            mech.lookForPickUp(180);
 
             //draw field everywhere
-            ctx.fillStyle = "rgba(255,255,255," + (0.5 + 0.17 * Math.random()) + ")";
+            ctx.fillStyle = "rgba(110,170,200," + (0.19 + 0.16 * Math.random()) + ")";
             ctx.fillRect(-100000, -100000, 200000, 200000)
 
             //stop time
             mech.isBodiesAsleep = true;
+
+            function sleep(who) {
+              for (let i = 0, len = who.length; i < len; ++i) {
+                if (!who[i].isSleeping) {
+                  who[i].storeVelocity = who[i].velocity
+                  who[i].storeAngularVelocity = who[i].angularVelocity
+                }
+                Matter.Sleeping.set(who[i], true)
+              }
+            }
             sleep(mob);
             sleep(body);
             sleep(bullet);
+            //doesn't really work, just slows down constraints
             for (let i = 0, len = cons.length; i < len; i++) {
               if (cons[i].stiffness !== 0) {
                 cons[i].storeStiffness = cons[i].stiffness;
@@ -923,6 +920,9 @@ const mech = {
               }
             }
             game.cycle--; //pause all functions that depend on game cycle increasing
+
+            mech.grabPowerUp();
+            mech.lookForPickUp(180);
           } else {
             mech.wakeCheck();
             mech.fieldCDcycle = mech.cycle + 120;

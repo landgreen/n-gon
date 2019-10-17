@@ -68,15 +68,15 @@ add bullet on damage effects
 
 
 // collision info:
-         category    mask
-powerUp: 0x100000   0x100001
-body:    0x010000   0x011111
-player:  0x001000   0x010011
-bullet:  0x000100   0x010011
-mob:     0x000010   0x011111
-mobBull: 0x000010   0x011101
-mobshld: 0x000010   0x001100
-map:     0x000001   0x111111
+            category    mask
+powerUp:    0x100000   0x100001
+body:       0x010000   0x011111
+player:     0x001000   0x010011
+bullet:     0x000100   0x010011
+mob:        0x000010   0x011111
+mobBullet:  0x000010   0x011101
+mobShield:  0x000010   0x001100
+map:        0x000001   0x111111
 
 
 

@@ -1029,7 +1029,7 @@ const b = {
       name: "drones",
       description: "release drones that seek out targets<br>if no targets, drones move to mouse<br>",
       ammo: 0,
-      ammoPack: 21,
+      ammoPack: 20,
       have: false,
       fire() {
         const THRUST = 0.0015
@@ -1042,8 +1042,8 @@ const b = {
           friction: 0,
           frictionAir: 0.0005,
           restitution: 1,
-          dmg: 0.15, //damage done in addition to the damage from momentum
-          lookFrequency: 79 + Math.floor(32 * Math.random()),
+          dmg: 0.14, //damage done in addition to the damage from momentum
+          lookFrequency: 79 + Math.floor(37 * Math.random()),
           endCycle: game.cycle + 780 + 360 * Math.random(),
           classType: "bullet",
           collisionFilter: {

@@ -989,7 +989,7 @@ const mobs = {
 
           //large mobs or too many bodies go intangible and fall until removed from game to help performance
           if (body[len].mass > 10 || 40 + 30 * Math.random() < body.length) {
-            body[len].collisionFilter.mask = 0x000000;
+            body[len].collisionFilter.mask = 0x001100;
           }
           body[len].classType = "body";
           World.add(engine.world, body[len]); //add to world
