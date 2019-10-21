@@ -481,17 +481,16 @@ const spawn = {
     mobs.spawn(x, y, 12, radius, "#000");
     let me = mob[mob.length - 1];
     me.stroke = "transparent"; //used for drawSneaker
-    me.eventHorizon = 900; //required for black hole
+    me.eventHorizon = 1100; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
-    me.accelMag = 0.00006 * game.accelScale;
+    me.accelMag = 0.00003 * game.accelScale;
     me.collisionFilter.mask = 0x001100
     // me.frictionAir = 0.005;
     me.memory = 1600;
     Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
-      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
-
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       if (game.levelsCleared > 6) {
         for (let i = 0; i < (game.levelsCleared - 5); ++i) {
           spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 20);
@@ -504,7 +503,7 @@ const spawn = {
     };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
-      if (this.speed > 2) {
+      if (this.speed > 1) {
         Matter.Body.setVelocity(this, {
           x: this.velocity.x * 0.95,
           y: this.velocity.y * 0.95
@@ -519,7 +518,7 @@ const spawn = {
         this.force.y += forceMag * Math.sin(angle);
 
         //eventHorizon waves in and out
-        eventHorizon = this.eventHorizon * (1 + 0.4 * Math.sin(game.cycle * 0.006))
+        eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(game.cycle * 0.008))
         //  zoom camera in and out with the event horizon
 
         //draw darkness
@@ -862,7 +861,7 @@ const spawn = {
     me.collisionFilter.mask = 0x001100; //move through walls
     spawn.shield(me, x, y);
     me.onDeath = function () {
-      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //bosss spawn field upgrades
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
       this.healthBar();
@@ -913,7 +912,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
     me.onDeath = function () {
-      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
       this.healthBar();
@@ -1012,7 +1011,7 @@ const spawn = {
     spawn.shield(me, x, y);
     if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.onDeath = function () {
-      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
       this.healthBar();
@@ -1055,7 +1054,7 @@ const spawn = {
     if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
 
     me.onDeath = function () {
-      if (Math.random() < 0.35 || mech.fieldMode === 0) powerUps.spawn(this.position.x, this.position.y, "field"); //boss spawns field upgrades
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       this.removeCons(); //remove constraint
     };
     me.do = function () {
