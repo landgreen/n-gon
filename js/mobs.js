@@ -532,28 +532,6 @@ const mobs = {
         }
         ctx.globalAlpha = 1;
       },
-      // darkness() {
-      //   // var grd = ctx.createRadialGradient(this.position.x, this.position.y, this.eventHorizon/3, this.position.x, this.position.y, this.eventHorizon);
-      //   // grd.addColorStop(0, "rgba(0,0,0,1)");
-      //   // grd.addColorStop(1, "rgba(0,0,0,0)");
-      //   // ctx.fillStyle=grd;
-      //   // ctx.beginPath();
-      //   // ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-      //   // ctx.fill();
-
-      //   ctx.beginPath();
-      //   ctx.arc(this.position.x, this.position.y, this.eventHorizon * 0.33, 0, 2 * Math.PI);
-      //   ctx.fillStyle = "rgba(0,0,0,0.7)";
-      //   ctx.fill();
-      //   ctx.beginPath();
-      //   ctx.arc(this.position.x, this.position.y, this.eventHorizon * 0.66, 0, 2 * Math.PI);
-      //   ctx.fillStyle = "rgba(0,0,0,0.4)";
-      //   ctx.fill();
-      //   ctx.beginPath();
-      //   ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-      //   ctx.fillStyle = "rgba(0,0,0,0.1)";
-      //   ctx.fill();
-      // },
       curl(range = 1000, mag = -10) {
         //cause all mobs, and bodies to rotate in a circle
         applyCurl = function (center, array) {
@@ -582,7 +560,9 @@ const mobs = {
         applyCurl(this.position, mob);
         applyCurl(this.position, body);
         applyCurl(this.position, powerUp);
+        // applyCurl(this.position, bullet);  // too powerful, just stops all bullets need to write a curl function just for bullets
         // applyCurl(this.position, [player]);
+
         //draw limit
         // ctx.beginPath();
         // ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
