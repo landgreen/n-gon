@@ -918,6 +918,8 @@ const mobs = {
         //this.fill = this.color + this.health + ')';
         if (this.health < 0.1) this.death();
         this.onDamage(this); //custom damage effects
+        if (b.modEnergySiphon) mech.fieldMeter += dmg * b.modEnergySiphon
+        if (b.modHealthDrain) mech.addHealth(dmg * b.modHealthDrain)
       },
       onDamage() {
         // a placeholder for custom effects on mob damage

@@ -6,10 +6,6 @@ field power up effects
   field produces a whirlpool effect of force around player
   field allows player to hold and throw living mobs
 
-other power up ideas
-  killing a mob triggers:  a spore bullet
-    maybe you could replace the power method with a new one to get this to work
-
 give mobs more animal-like behaviors
   like rainworld
   give mobs something to do when they don't see player
@@ -40,30 +36,23 @@ game mechanics
 
 track foot positions with velocity better as the player walks/crouch/runs
 
-add bullet on damage effects
-	effects could:
-		add to the array mob.do new mob behaviors
-			add a damage over time
-			add a freeze
-		change mob traits
-			mass
-			friction
-			damage done
-		change things about the bullet
-			bounce the bullet again in a new direction
-			fire several bullets as shrapnel
-			increase the bullet size to do AOE dmg?? (how)
-				just run a for loop over all mobs, and do damage to the one that are close
-			bullets return to player
-				use a constraint? does bullet just start with a constraint or is it added on damage?
-		change the player
-			vampire bullets heal for the damage done
-				or give the player a shield??
-				or only heal if the mob dies (might be tricky)
-		remove standing on player actions
-			replace with check if player feet are in an area.
-
-
+gun mod power ups
+  higher damage when crouched
+  can fire while field is active
+  bullet on mob damage effects
+    add to the array mob.do new mob behaviors
+        add a damage over time
+        add a freeze
+  fire a few smaller bullets
+  killing a mob triggers:  a spore bullet
+    maybe you could replace the power method with a new one to get this to work
+negative mods for balancing
+  self damage on fire
+  knock back
+  lower fire rate
+  smaller bullets
+  smaller explosions
+  shorter lasting bullets
 
 
 
@@ -156,40 +145,6 @@ document.body.addEventListener("wheel", (e) => {
 }, {
   passive: true
 });
-
-
-// window.addEventListener("gamepadconnected", function (e) {
-//   console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-//     e.gamepad.index, e.gamepad.id,
-//     e.gamepad.buttons.length, e.gamepad.axes.length);
-
-// });
-
-game.loop = game.mouseLoop;
-window.addEventListener("gamepadconnected", function (e) {
-  console.log('gamepad connected')
-  document.getElementById("gamepad").style.display = "inline";
-  game.gamepad.connected = true;
-  polGamepadCycle();
-  game.loop = game.gamepadLoop;
-});
-window.addEventListener("gamepaddisconnected", function (e) {
-  disconnectGamepad()
-});
-
-function disconnectGamepad() {
-  console.log('gamepad disconnected')
-  document.getElementById("gamepad").style.display = "none";
-  game.gamepad.connected = false;
-  game.loop = game.mouseLoop;
-}
-
-//this runs to get gamepad data even when paused
-function polGamepadCycle() {
-  game.gamepad.cycle++
-  if (game.gamepad.connected) requestAnimationFrame(polGamepadCycle);
-  game.polGamepad()
-}
 
 
 // function playSound(id) {

@@ -1,8 +1,7 @@
 // game Object ********************************************************
 //*********************************************************************
 const game = {
-  loop() {},
-  mouseLoop() {
+  loop() {
     game.cycle++; //tracks game cycles
     mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
     if (game.clearNow) {
@@ -50,164 +49,6 @@ const game = {
       ctx.restore();
     }
     game.drawCursor();
-  },
-  gamepadLoop() {
-    game.cycle++; //tracks game cycles
-    mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
-    // game.polGamepad();
-    if (game.clearNow) {
-      game.clearNow = false;
-      game.clearMap();
-      level.start();
-    }
-    game.gravity();
-    Engine.update(engine, game.delta);
-    game.wipe();
-    game.textLog();
-    mech.gamepadMove();
-    level.checkZones();
-    level.checkQuery();
-    mech.move();
-    mech.gamepadLook();
-    game.fallChecks();
-    ctx.save();
-    game.gamepadCamera();
-    if (game.testing) {
-      mech.draw();
-      game.draw.wireFrame();
-      game.draw.cons();
-      game.draw.testing();
-      game.drawCircle();
-      ctx.restore();
-      game.getCoords.out();
-      game.testingOutput();
-    } else {
-      level.drawFillBGs();
-      level.exit.draw();
-      level.enter.draw();
-      game.draw.powerUp();
-      mobs.draw();
-      game.draw.cons();
-      game.draw.body();
-      mech.draw();
-      mech.hold();
-      level.drawFills();
-      game.draw.drawMapPath();
-      mobs.loop();
-      b.draw();
-      b.gamepadFire();
-      game.drawCircle();
-      ctx.restore();
-    }
-    // game.drawCursor();
-  },
-  gamepad: {
-    connected: false,
-    cycle: 0,
-    leftTrigger: false,
-    rightTrigger: false,
-    leftAxisThreshold: 0.6,
-    leftAxis: {
-      x: 0,
-      y: 0
-    },
-    rightAxis: {
-      x: 0,
-      y: 0
-    },
-    cycleWeaponCD: 0
-  },
-  polGamepad: function () {
-    const gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
-    if (!gamepads) return;
-    gp = gamepads[0];
-    // console.log(gp) 
-
-    if (game.onTitlePage) {
-      if (gp.buttons[6].pressed || gp.buttons[7].pressed) game.startGame(); //triggers start of game
-    } else {
-      //left d-pad
-      if (gp.axes[0] > game.gamepad.leftAxisThreshold) {
-        game.gamepad.leftAxis.x = 1
-      } else if (gp.axes[0] < -game.gamepad.leftAxisThreshold) {
-        game.gamepad.leftAxis.x = -1
-      } else {
-        game.gamepad.leftAxis.x = 0
-      }
-      if (gp.axes[1] > game.gamepad.leftAxisThreshold) {
-        game.gamepad.leftAxis.y = -1
-      } else if (gp.axes[1] < -game.gamepad.leftAxisThreshold) {
-        game.gamepad.leftAxis.y = 1
-      } else {
-        game.gamepad.leftAxis.y = 0
-      }
-      //right d-pad
-      const limit = 0.08
-      if (Math.abs(gp.axes[2]) > limit) game.gamepad.rightAxis.x = gp.axes[2] * 0.08 + game.gamepad.rightAxis.x * 0.92 //smoothing the input
-      if (Math.abs(gp.axes[3]) > limit) game.gamepad.rightAxis.y = gp.axes[3] * 0.08 + game.gamepad.rightAxis.y * 0.92 //smoothing the input
-      // if (Math.abs(gp.axes[0]) > limit) game.gamepad.rightAxis.x = gp.axes[0] * 0.2 + game.gamepad.rightAxis.x * 0.8 //smoothing the input
-      // if (Math.abs(gp.axes[1]) > limit) game.gamepad.rightAxis.y = gp.axes[1] * 0.2 + game.gamepad.rightAxis.y * 0.8 //smoothing the input
-      // if (Math.abs(gp.axes[2]) > limit) game.gamepad.rightAxis.x = gp.axes[2]
-      // if (Math.abs(gp.axes[3]) > limit) game.gamepad.rightAxis.y = gp.axes[3]
-
-      // left and right trigger
-      if (gp.buttons[6].pressed) {
-        game.gamepad.leftTrigger = true;
-        game.mouseDownRight = true
-      } else {
-        game.gamepad.leftTrigger = false;
-        game.mouseDownRight = false
-      }
-      if (gp.buttons[7].pressed) {
-        game.gamepad.rightTrigger = true;
-        game.mouseDown = true
-      } else {
-        game.gamepad.rightTrigger = false;
-        game.mouseDown = false
-      }
-      //jump
-      if (gp.buttons[0].pressed) { //gp.axes[1] < -0.8 ||
-        game.gamepad.jump = true;
-      } else {
-        game.gamepad.jump = false;
-      }
-      //buttons that trigger a button CD
-      if (game.gamepad.cycleWeaponCD < game.gamepad.cycle) {
-        if (gp.buttons[4].pressed || gp.buttons[12].pressed) {
-          game.gamepad.cycleWeaponCD = game.gamepad.cycle + 15
-          game.previousGun();
-        }
-        if (gp.buttons[5].pressed || gp.buttons[13].pressed) {
-          game.gamepad.cycleWeaponCD = game.gamepad.cycle + 15
-          game.nextGun();
-        }
-
-        if (gp.buttons[9].pressed) {
-          game.gamepad.cycleWeaponCD = game.gamepad.cycle + 60
-          if (game.paused) {
-            game.paused = false;
-            requestAnimationFrame(cycle);
-          } else {
-            game.paused = true;
-            game.makeTextLog("<h1>PAUSED</h1>", 1);
-          }
-        }
-        // if (gp.buttons[14].pressed) {
-        //   game.zoomScale /= 0.995;
-        //   game.setZoom();
-        // } else if (gp.buttons[15].pressed) {
-        //   game.zoomScale *= 0.995;
-        //   game.setZoom();
-        // }
-      }
-    }
-    // // logs button numbers
-    // for (let i = 0, len = gp.buttons.length; i < len; i++) {
-    //   if (gp.buttons[i].pressed) {
-    //     console.log(i)
-    //     // console.log(game.gamepad)
-    //   }
-    // }
   },
   mouse: {
     x: canvas.width / 2,
@@ -366,50 +207,6 @@ const game = {
   //   "Crouching while firing makes bullets go faster, but slows the rate of fire.",
   // ]
   keyPress() {
-    //runs on key press event
-    // if (keys[49]) {
-    //   // press 1
-    //   b.inventoryGun = 0;
-    //   game.switchGun();
-    // } else if (keys[50]) {
-    //   // press 2
-    //   b.inventoryGun = 1;
-    //   game.switchGun();
-    // } else if (keys[51]) {
-    //   // press 3
-    //   b.inventoryGun = 2;
-    //   game.switchGun();
-    // } else if (keys[52]) {
-    //   // press 4
-    //   b.inventoryGun = 3;
-    //   game.switchGun();
-    // } else if (keys[53]) {
-    //   // press 5
-    //   b.inventoryGun = 4;
-    //   game.switchGun();
-    // } else if (keys[54]) {
-    //   // press 6
-    //   b.inventoryGun = 5;
-    //   game.switchGun();
-    // } else if (keys[55]) {
-    //   // press 7
-    //   b.inventoryGun = 6;
-    //   game.switchGun();
-    // } else if (keys[56]) {
-    //   // press 8
-    //   b.inventoryGun = 7;
-    //   game.switchGun();
-    // } else if (keys[57]) {
-    //   // press 9
-    //   b.inventoryGun = 8;
-    //   game.switchGun();
-    // } else if (keys[48]) {
-    //   // press 0
-    //   b.inventoryGun = 9;
-    //   game.switchGun();
-    // }
-
-
     if (keys[189]) {
       // - key
       game.zoomScale /= 0.9;
@@ -453,7 +250,10 @@ const game = {
         requestAnimationFrame(cycle);
       } else {
         game.paused = true;
-        game.makeTextLog("<h1>PAUSED</h1>", 1);
+        let text = "<h1>PAUSED</h1>"
+        // if (b.mod !== null) text+=
+        //output current mod, field, and gun info when paused
+        game.makeTextLog(text);
       }
     }
 
@@ -482,12 +282,18 @@ const game = {
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
       }
-
+      if (keys[89]) { //cycle fields with F
+        if (b.mod === b.mods.length - 1) {
+          b.mods[0]()
+        } else {
+          b.mods[b.mod + 1]()
+        }
+      }
       if (keys[82]) { // teleport to mouse with R
         Matter.Body.setPosition(player, this.mouseInGame);
         Matter.Body.setVelocity(player, {
@@ -536,14 +342,6 @@ const game = {
     //calculate in game mouse position by undoing the zoom and translations
     game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom + canvas.width2 - mech.transX;
     game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom + canvas.height2 - mech.transY;
-  },
-  gamepadCamera() {
-    ctx.translate(canvas.width2, canvas.height2); //center
-    ctx.scale(game.zoom, game.zoom); //zoom in once centered
-    ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
-    //calculate in game mouse position by undoing the zoom and translations
-    game.mouseInGame.x = (game.gamepad.rightAxis.x * canvas.width2) / game.zoom + canvas.width2 - mech.transX;
-    game.mouseInGame.y = (game.gamepad.rightAxis.y * canvas.height2) / game.zoom + canvas.height2 - mech.transY;
   },
   zoomInFactor: 0,
   startZoomIn(time = 180) {
@@ -627,10 +425,6 @@ const game = {
   },
   fpsInterval: 0, //set in startGame
   then: null,
-  startGameWithMouse() {
-    disconnectGamepad();
-    game.startGame();
-  },
   startGame() {
     game.onTitlePage = false;
     document.getElementById("controls").style.display = "none";
@@ -660,6 +454,7 @@ const game = {
     document.body.style.cursor = "none";
     if (this.firstRun) {
       mech.spawn(); //spawns the player
+      b.setModDefaults(); //doesn't run on reset so that gun mods carry over to new runs
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
     }

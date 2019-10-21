@@ -412,7 +412,6 @@ const mech = {
   addHealth(heal) {
     this.health += heal;
     if (this.health > 1) this.health = 1;
-    // document.getElementById("health").setAttribute("width", 225 * this.health);
     this.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
@@ -495,7 +494,7 @@ const mech = {
   },
   setHoldDefaults() {
     this.fieldMeter = 1;
-    this.fieldRegen = 0.0015;
+    this.fieldRegen = 0.001;
     this.fieldCDcycle = 0;
     this.isStealth = false;
     player.collisionFilter.mask = 0x010011 //0x010011 is normal
@@ -889,7 +888,7 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-          const DRAIN = 0.0015 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.0015
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
 
@@ -1010,7 +1009,7 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
-          const DRAIN = 0.001 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.001
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
             mech.pushMobs360(170);
@@ -1084,9 +1083,7 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Standing Wave Harmonics</strong><br> (right mouse or space bar) <p>oscillating shields always surround player<br> <span style='color:#a00;'>decreased</span> field regeneration</p>", 1200);
       mech.setHoldDefaults();
       // mech.fieldShieldingScale = 0.5;
-      mech.fieldRegen = 0.0008; //0.0015
-      // mech.fieldArc = 0.1; //field covers full 360 degrees
-      // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+      mech.fieldRegen *= 0.33;
 
       mech.hold = function () {
         if (mech.isHolding) {
@@ -1102,9 +1099,9 @@ const mech = {
           mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
         }
         if (mech.fieldMeter > 0.1) {
-          const grabRange1 = 80 + 80 * Math.sin(mech.cycle / 23)
-          const grabRange2 = 80 + 80 * Math.sin(mech.cycle / 37)
-          const grabRange3 = 80 + 80 * Math.sin(mech.cycle / 47)
+          const grabRange1 = 85 + 60 * Math.sin(mech.cycle / 23)
+          const grabRange2 = 80 + 70 * Math.sin(mech.cycle / 37)
+          const grabRange3 = 70 + 70 * Math.sin(mech.cycle / 47)
           const netGrabRange = Math.max(grabRange1, grabRange2, grabRange3)
           ctx.fillStyle = "rgba(110,170,200," + (0.15 + 0.15 * Math.random()) + ")";
           ctx.beginPath();
@@ -1165,7 +1162,7 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-          const DRAIN = 0.0035 //mech.fieldRegen = 0.0015
+          const DRAIN = 0.0035
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
 
@@ -1214,7 +1211,7 @@ const mech = {
     //       mech.pushMobs360(140);
 
     //       if (mech.health > 0.1) {
-    //         const DRAIN = 0.0008 //mech.fieldRegen = 0.0015
+    //         const DRAIN = 0.0008 
     //         if (mech.fieldMeter > DRAIN) {
     //           mech.fieldMeter -= DRAIN;
     //           mech.damage(0.00005 + 0.00000012 * mech.grabRange)

@@ -32,9 +32,34 @@ const powerUps = {
       } else {
         mech.fieldUpgrades[this.mode](); //set a predetermined power up
       }
-      if (previousMode !== 0) { //pop the old field out in case player wants to swap back
+      //pop the old field out in case player wants to swap back
+      if (previousMode !== 0) {
         mech.fieldCDcycle = mech.cycle + 40; //trigger fieldCD to stop power up grab automatic pick up of spawn
         powerUps.spawn(mech.pos.x, mech.pos.y - 15, "field", false, previousMode);
+      }
+    }
+  },
+  mod: {
+    name: "mod",
+    color: "#479",
+    size() {
+      return 42;
+    },
+    effect() {
+      const previousMode = b.mod
+
+      if (this.mode === null) { //this.mode is set if the power up has been ejected from player
+        mode = b.mod //start with current mob
+        while (mode === b.mod) {
+          mode = Math.floor(Math.random() * b.mods.length)
+        }
+        b.mods[mode](); //choose random upgrade that you don't already have
+      } else {
+        b.mods[this.mode](); //set a predetermined power up
+      }
+      if (previousMode != null) { //pop the old field out in case player wants to swap back
+        mech.fieldCDcycle = mech.cycle + 40; //trigger fieldCD to stop power up grab automatic pick up of spawn
+        powerUps.spawn(mech.pos.x, mech.pos.y - 15, "mod", false, previousMode);
       }
     }
   },
@@ -68,7 +93,7 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("+energy", 180);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.55 + 0.1 * Math.random())) / b.dmgScale);
+        const ammo = Math.ceil((target.ammoPack * (0.6 + 0.05 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
         if (!game.lastLogTime) game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
@@ -127,13 +152,34 @@ const powerUps = {
       if (b.inventory.length > 0) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.005 * (6 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    if (Math.random() < 0.004 * (5 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun");
       return;
     }
     if (Math.random() < 0.005) {
       powerUps.spawn(x, y, "field");
       return;
+    }
+    if (Math.random() < 0.005) {
+      powerUps.spawn(x, y, "mod");
+      return;
+    }
+  },
+  spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
+    if (mech.fieldMode === 0) {
+      powerUps.spawn(x, y, "field")
+    } else if (b.mod === null) {
+      powerUps.spawn(x, y, "mod")
+    } else if (Math.random() < 0.2) {
+      powerUps.spawn(x, y, "mod")
+    } else if (Math.random() < 0.2) {
+      powerUps.spawn(x, y, "field");
+    } else if (Math.random() < 0.15) {
+      powerUps.spawn(x, y, "gun")
+    } else if (mech.health < 0.5) {
+      powerUps.spawn(x, y, "heal");
+    } else {
+      powerUps.spawn(x, y, "ammo");
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
@@ -144,7 +190,7 @@ const powerUps = {
     }
   },
   spawnStartingPowerUps(x, y) {
-    if (b.inventory.length < 3) {
+    if (b.inventory.length < 2) {
       powerUps.spawn(x, y, "gun", false); //starting gun
     } else {
       powerUps.spawnRandomPowerUp(x, y);
@@ -153,7 +199,7 @@ const powerUps = {
       powerUps.spawnRandomPowerUp(x, y);
     }
   },
-  spawn(x, y, target, moving = true, mode) {
+  spawn(x, y, target, moving = true, mode = null) {
     let i = powerUp.length;
     target = powerUps[target];
     size = target.size();
@@ -161,6 +207,7 @@ const powerUps = {
       density: 0.001,
       frictionAir: 0.01,
       restitution: 0.8,
+      inertia: Infinity, //prevents rotation
       collisionFilter: {
         group: 0,
         category: 0x100000,
