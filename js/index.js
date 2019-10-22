@@ -2,9 +2,61 @@
 /* TODO:  *******************************************
 *****************************************************
 
+remove tediousness of puzzle mechanics
+  on highrise
+    add a block on the platform below the exit  on the far right
+    in the basement, move the two blocks to the left a bit, so they are closer to the left wall player have to get over
+  on warehouse
+    only have one block holding the platform down, and put it near the right side to make it faster to push off
+
+Find a diegetic way to see player damage  (and or field meter too)
+  a health meter, like the field meter above player?  (doesn't work with the field meter)
+
+Add field upgrade, and mod to a permanent display
+  left side
+    separate box below guns
+ 
+
+cap guns to 3
+  can up the drop rate on guns, and lower ammo amount or drop rate
+cap mods to 2
+  can up the drop rate a bit
+  check if there are any double mod compatibility issues
+cap field to 1
+
+what about no cap to mods?
+  more upgrades are OK as long as they change game play
+    no flat damage, or defense buffs
+
+  do I want to support a power climb game play
+    
+  This makes skipping content a bad idea
+    Is that maybe good?  No need to nerf content skipping buffs
+      content skipping is a cool play style, but not core game play
+
+
 field power up effects
   field produces a whirlpool effect of force around player
   field allows player to hold and throw living mobs
+
+Move mods, to power up object
+  mods can be about more than the gun, defensive, traversal mods
+gun mod power ups
+  can fire while field is active
+  bullet on mob damage effects
+    add to the array mob.do new mob behaviors
+        add a damage over time
+        add a freeze
+  fire a few smaller bullets
+  killing a mob triggers:  a spore bullet
+    maybe you could replace the power method with a new one to get this to work
+negative mods for balancing
+  self damage on fire
+  knock back
+  lower fire rate
+  smaller bullets
+  smaller explosions
+  shorter lasting bullets
 
 give mobs more animal-like behaviors
   like rainworld
@@ -36,23 +88,6 @@ game mechanics
 
 track foot positions with velocity better as the player walks/crouch/runs
 
-gun mod power ups
-  higher damage when crouched
-  can fire while field is active
-  bullet on mob damage effects
-    add to the array mob.do new mob behaviors
-        add a damage over time
-        add a freeze
-  fire a few smaller bullets
-  killing a mob triggers:  a spore bullet
-    maybe you could replace the power method with a new one to get this to work
-negative mods for balancing
-  self damage on fire
-  knock back
-  lower fire rate
-  smaller bullets
-  smaller explosions
-  shorter lasting bullets
 
 
 

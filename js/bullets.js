@@ -27,6 +27,8 @@ const b = {
       game.makeTextLog("<strong style='font-size:30px;'>Auto-Loading Heuristics</strong><br> (left click)<p>your <strong>rate of fire</strong> 20% is faster</p>", 1200);
       b.setModDefaults(); //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
       b.modFireRate = 0.8
+      //ADD: need to add in something that changes game play
+      //take damage if fire is held down too long?
     },
     () => {
       b.mod = 1;
@@ -34,6 +36,7 @@ const b = {
       b.setModDefaults(); //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
       //testing at 1.3: grenade(+0.3), missiles, flak, M80
       b.modExplosionRadius = 1.25; //good for guns with explosions:
+      //ADD: take no damage from explosions, explosive guns use double ammo, 1.5 radius
     },
     () => {
       b.mod = 2;
@@ -42,6 +45,8 @@ const b = {
       //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
       //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
       b.modBulletSize = 1.08;
+      //ADD: give knock back to all guns, up damage
+
     },
     () => {
       b.mod = 3;
@@ -54,12 +59,14 @@ const b = {
       game.makeTextLog("<strong style='font-size:30px;'>Entropy Transfer</strong><br> (left click)<p><strong>heal</strong> proportional to your damage done</p>", 1200);
       b.setModDefaults(); //good with guns that overkill: one shot, grenade
       b.modHealthDrain = 0.015;
+      //ADD: health power ups can no longer drop
     },
     () => {
       b.mod = 5;
       game.makeTextLog("<strong style='font-size:30px;'>Desublimated Ammunition</strong><br> (left click)<p>25% chance you will not consume <strong>ammo</strong> when firing</p>", 1200);
       b.setModDefaults(); //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
       b.modNoAmmoChance = 0.25
+      //ADD: only works when crouched, higher chance, maybe 50%
     },
     () => {
       b.mod = 6;
@@ -69,16 +76,11 @@ const b = {
     },
     // () => {
     //   b.mod = 7;
-    //   game.makeTextLog("<strong style='font-size:30px;'>Inertia Accumulator</strong><br> (left click)<p>your crouched shots have a higher <strong>velocity</strong><br>Your crouched shots reduce your health</p>", 1200);
-    //   b.setModDefaults(); //good with: one shot, rapid fire, spray, needles, super balls
-    // },
-    // () => {
-    //   b.mod = 8;
     //   game.makeTextLog("<strong style='font-size:30px;'>Two Phase Processing</strong><br> (left click)<p>You can fire your gun while your <strong>field</strong> is active</p>", 1200);
     //   b.setModDefaults(); //good with: default field, Time Dilation Field, Negative Mass Field, Phase Decoherence Field
     // },
     // () => {
-    //   b.mod = 9;
+    //   b.mod = 8;
     //   game.makeTextLog("<strong style='font-size:30px;'>Relativistic Velocity</strong><br> (left click)<p>Your bullets are effected extra by your own velocity</p>", 1200);
     //   b.setModDefaults(); //good with: one shot, rapid fire, spray, super balls
     // },
