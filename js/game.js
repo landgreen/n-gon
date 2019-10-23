@@ -407,6 +407,7 @@ const game = {
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
     document.getElementById("fade-out").style.opacity = 0;
+    document.title = "n-gon";
     // mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
     if (!mech.fieldMode) mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
   },

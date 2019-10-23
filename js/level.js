@@ -11,10 +11,8 @@ const level = {
   levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie"],
   onLevel: 0,
   start() {
-    // game.zoomScale = 1400 //1400
     if (game.levelsCleared === 0) {
-      document.title = "n-gon";
-      // game.levelsCleared = 4; //for testing to simulate possible mobs spawns
+      // game.levelsCleared = 5; //for testing to simulate possible mobs spawns
       // b.giveGuns(1) // set a starting gun for testing
       // b.giveGuns("all", 1000)
       // mech.fieldUpgrades[1]() //give a field power up for testing
@@ -500,12 +498,12 @@ const level = {
     spawn.bodyRect(3925, -1400, 100, 150, 0.8);
     spawn.mapRect(3450, -1250, 1100, 50);
     spawn.mapRect(3450, -1225, 50, 75);
-    spawn.mapRect(4500, -1225, 50, 350);
+    spawn.mapRect(4500, -1225, 50, 390);
     spawn.mapRect(3450, -725, 1500, 50);
     spawn.mapRect(5100, -725, 400, 50);
-    spawn.mapRect(4500, -700, 50, 600);
+    spawn.mapRect(4500, -735, 50, 635);
     spawn.bodyRect(4510, -100, 30, 100, 0.8);
-    spawn.mapRect(4500, -925, 100, 50);
+    spawn.mapRect(4500, -885, 100, 50);
     spawn.spawnStairs(3800, 0, 3, 150, 206); //stairs top exit
     spawn.mapRect(3400, -275, 450, 275); //exit platform
 
@@ -870,7 +868,8 @@ const level = {
 
     // spawn.debris(-3950, -2575, 1050, 4); //20 debris per level
     spawn.debris(-2325, -1825, 2400); //20 debris per level
-    spawn.debris(-2625, -600, 925); //20 debris per level
+    spawn.debris(-2625, -600, 600, 6); //20 debris per level
+    spawn.debris(-2000, -60, 1200, 6); //20 debris per level
     // if (!game.levelsCleared) powerUps.spawn(2450, -1675, "gun", false);
     //background
     level.fillBG.push({
@@ -956,10 +955,16 @@ const level = {
 
     spawn.mapRect(-1850, -1150, 1050, 175);
     spawn.bodyRect(-1907, -1600, 550, 25);
-    spawn.bodyRect(-1400, -125, 125, 125);
-    spawn.bodyRect(-1100, -125, 150, 125);
-    spawn.bodyRect(-1360, -200, 75, 75);
-    spawn.bodyRect(-1200, -75, 75, 75);
+    if (game.levelsCleared < 4) {
+      spawn.bodyRect(-1600, -125, 125, 125);
+      spawn.bodyRect(-1560, -200, 75, 75);
+    } else {
+      spawn.bodyRect(-1200, -125, 125, 125);
+      spawn.bodyRect(-1160, -200, 75, 75);
+    }
+    // spawn.bodyRect(-1100, -125, 150, 125);
+
+    // spawn.bodyRect(-1200, -75, 75, 75);
 
     //building 2
     spawn.mapRect(-4450, -600, 2300, 750);
@@ -984,6 +989,9 @@ const level = {
     spawn.bodyRect(-3715, -2050, 50, 50);
     spawn.bodyRect(-3570, -1800, 50, 50);
     spawn.bodyRect(-2970, -2250, 50, 50);
+
+    if (game.levelsCleared < 4) spawn.bodyRect(-3760, -2400, 50, 50);
+
     spawn.bodyRect(-3080, -2250, 40, 40);
     spawn.bodyRect(-3420, -650, 50, 50);
 
@@ -1098,9 +1106,9 @@ const level = {
     // spawn.mapRect(-1900, 600, 2700, 100);
     spawn.mapRect(1100, 0, 150, 1500);
     spawn.mapRect(-2850, 1400, 4100, 100);
-    spawn.mapRect(-2375, 875, 1775, 100);
-    spawn.mapRect(-1450, 950, 75, 346);
-    spawn.mapRect(-1433, 662, 41, 111);
+    spawn.mapRect(-2375, 875, 1775, 75);
+    spawn.mapRect(-1450, 865, 75, 435);
+    spawn.mapRect(-1450, 662, 75, 100);
     spawn.bodyRect(-1418, 773, 11, 102, 1, spawn.propsFriction); //blocking path
     spawn.mapRect(-2950, 1250, 175, 250);
     spawn.mapRect(-3050, 1100, 150, 400);
@@ -1134,8 +1142,8 @@ const level = {
       length: 1
     });
 
-    spawn.bodyRect(-2775, 1150, 180, 160, 1, spawn.propsSlide); //weight
-    spawn.bodyRect(-2550, 1150, 200, 150, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
 
     spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
     cons[cons.length] = Constraint.create({
@@ -1156,7 +1164,7 @@ const level = {
     spawn.bodyRect(-165, -45, 30, 35, 1);
 
     spawn.bodyRect(-750, 400, 150, 150, 0.5);
-    spawn.bodyRect(-200, 1175, 250, 225, 1); //block to get to top path on bottom level
+    spawn.bodyRect(-400, 1175, 100, 250, 1); //block to get to top path on bottom level
     // spawn.bodyRect(-1450, 737, 75, 103, 0.5); //blocking path
 
     spawn.bodyRect(-2525, -50, 145, 100, 0.5);

@@ -10,7 +10,7 @@ const b = {
   modBulletSize: null,
   modEnergySiphon: null,
   modHealthDrain: null,
-  modNoAmmoChance: null,
+  modNoAmmo: null,
   modBulletsLastLonger: null,
   setModDefaults() {
     b.modFireRate = 1;
@@ -18,17 +18,16 @@ const b = {
     b.modBulletSize = 1;
     b.modEnergySiphon = 0;
     b.modHealthDrain = 0;
-    b.modNoAmmoChance = 0;
+    b.modNoAmmo = 0;
     b.modBulletsLastLonger = 1;
   },
   mods: [
     () => {
       b.mod = 0;
-      game.makeTextLog("<strong style='font-size:30px;'>Auto-Loading Heuristics</strong><br> (left click)<p>your <strong>rate of fire</strong> 20% is faster</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Auto-Loading Heuristics</strong><br> (left click)<p>your <strong>rate of fire</strong> 15% is faster</p>", 1200);
       b.setModDefaults(); //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
-      b.modFireRate = 0.8
+      b.modFireRate = 0.85
       //ADD: need to add in something that changes game play
-      //take damage if fire is held down too long?
     },
     () => {
       b.mod = 1;
@@ -40,39 +39,36 @@ const b = {
     },
     () => {
       b.mod = 2;
-      game.makeTextLog("<strong style='font-size:30px;'>High Caliber Bullets</strong><br> (left click)<p>your bullets are 8% <strong>larger</strong> and do more physical damage</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>High Caliber Bullets</strong><br> (left click)<p>your bullets are 7% <strong>larger</strong> and do more physical damage</p>", 1200);
       b.setModDefaults(); //good for guns that do mostly projectile damage:
       //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
       //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
-      b.modBulletSize = 1.08;
-      //ADD: give knock back to all guns, up damage
-
+      b.modBulletSize = 1.07;
+      //ADD: need to add in something that changes game play
     },
     () => {
       b.mod = 3;
       game.makeTextLog("<strong style='font-size:30px;'>Energy Siphon</strong><br> (left click)<p>regenerate <strong>energy</strong> proportional to your damage done</p>", 1200);
       b.setModDefaults(); //good with laser, Nano-Scale Manufacturing, Standing Wave Harmonics, Phase Decoherence Field
-      b.modEnergySiphon = 0.3;
+      b.modEnergySiphon = 0.2;
     },
     () => {
       b.mod = 4;
       game.makeTextLog("<strong style='font-size:30px;'>Entropy Transfer</strong><br> (left click)<p><strong>heal</strong> proportional to your damage done</p>", 1200);
       b.setModDefaults(); //good with guns that overkill: one shot, grenade
-      b.modHealthDrain = 0.015;
-      //ADD: health power ups can no longer drop
+      b.modHealthDrain = 0.01;
     },
     () => {
       b.mod = 5;
-      game.makeTextLog("<strong style='font-size:30px;'>Desublimated Ammunition</strong><br> (left click)<p>25% chance you will not consume <strong>ammo</strong> when firing</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Desublimated Ammunition</strong><br> (left click)<p>1 out of 3 shots will not consume <strong>ammo</strong> when crouching</p>", 1200);
       b.setModDefaults(); //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
-      b.modNoAmmoChance = 0.25
-      //ADD: only works when crouched, higher chance, maybe 50%
+      b.modNoAmmo = 1
     },
     () => {
       b.mod = 6;
-      game.makeTextLog("<strong style='font-size:30px;'>Anti-Decay Coating</strong><br> (left click)<p>your bullets <strong>last 30% longer</strong></p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Anti-Decay Coating</strong><br> (left click)<p>your bullets <strong>last 25% longer</strong></p>", 1200);
       b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
-      b.modBulletsLastLonger = 1.3
+      b.modBulletsLastLonger = 1.25
     },
     // () => {
     //   b.mod = 7;
@@ -109,7 +105,13 @@ const b = {
       if (b.guns[this.activeGun].ammo > 0) {
         b.guns[this.activeGun].fire();
 
-        if (!(b.modNoAmmoChance && b.modNoAmmoChance > Math.random())) {
+        if (b.modNoAmmo && mech.crouch) {
+          if (b.modNoAmmo % 3) {
+            b.guns[this.activeGun].ammo--;
+            game.updateGunHUD();
+          }
+          b.modNoAmmo++ //makes the no ammo toggle off and on
+        } else {
           b.guns[this.activeGun].ammo--;
           game.updateGunHUD();
         }

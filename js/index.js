@@ -2,12 +2,7 @@
 /* TODO:  *******************************************
 *****************************************************
 
-remove tediousness of puzzle mechanics
-  on highrise
-    add a block on the platform below the exit  on the far right
-    in the basement, move the two blocks to the left a bit, so they are closer to the left wall player have to get over
-  on warehouse
-    only have one block holding the platform down, and put it near the right side to make it faster to push off
+when paused show details on field, mods, guns?
 
 Find a diegetic way to see player damage  (and or field meter too)
   a health meter, like the field meter above player?  (doesn't work with the field meter)
@@ -25,12 +20,11 @@ cap mods to 2
 cap field to 1
 
 what about no cap to mods?
+  mods without caps can't have major negatives
+  do I want to support a power ramping game play?
   more upgrades are OK as long as they change game play
-    no flat damage, or defense buffs
-
-  do I want to support a power climb game play
-    
-  This makes skipping content a bad idea
+    no flat damage, or flat defense buffs
+  This makes skipping content a bad idea for the player
     Is that maybe good?  No need to nerf content skipping buffs
       content skipping is a cool play style, but not core game play
 
