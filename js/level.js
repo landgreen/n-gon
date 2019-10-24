@@ -13,9 +13,10 @@ const level = {
   start() {
     if (game.levelsCleared === 0) {
       // game.levelsCleared = 5; //for testing to simulate possible mobs spawns
-      // b.giveGuns(1) // set a starting gun for testing
       // b.giveGuns("all", 1000)
-      // mech.fieldUpgrades[1]() //give a field power up for testing
+      // b.giveGuns(3) // set a starting gun for testing
+      // mech.fieldUpgrades[1](); //give a field power up for testing
+      // b.mods[6](); //give specific mod
 
       this.intro(); //starting level
       // this.testingMap();

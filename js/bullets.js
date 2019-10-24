@@ -31,7 +31,7 @@ const b = {
     },
     () => {
       b.mod = 1;
-      game.makeTextLog("<strong style='font-size:30px;'>Anti-Matter Cores</strong><br> (left click)<p>your <strong>explosions</strong> are 25% larger and do more damage</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Anti-Matter Cores</strong><br> (left click)<p>your <strong>explosions</strong> are larger and do more damage</p>", 1200);
       b.setModDefaults(); //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
       //testing at 1.3: grenade(+0.3), missiles, flak, M80
       b.modExplosionRadius = 1.25; //good for guns with explosions:
@@ -39,7 +39,7 @@ const b = {
     },
     () => {
       b.mod = 2;
-      game.makeTextLog("<strong style='font-size:30px;'>High Caliber Bullets</strong><br> (left click)<p>your bullets are 7% <strong>larger</strong> and do more physical damage</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>High Caliber Bullets</strong><br> (left click)<p>your bullets are <strong>larger</strong> and do more physical damage</p>", 1200);
       b.setModDefaults(); //good for guns that do mostly projectile damage:
       //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
       //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
@@ -71,11 +71,6 @@ const b = {
       b.modBulletsLastLonger = 1.25
     },
     // () => {
-    //   b.mod = 7;
-    //   game.makeTextLog("<strong style='font-size:30px;'>Two Phase Processing</strong><br> (left click)<p>You can fire your gun while your <strong>field</strong> is active</p>", 1200);
-    //   b.setModDefaults(); //good with: default field, Time Dilation Field, Negative Mass Field, Phase Decoherence Field
-    // },
-    // () => {
     //   b.mod = 8;
     //   game.makeTextLog("<strong style='font-size:30px;'>Relativistic Velocity</strong><br> (left click)<p>Your bullets are effected extra by your own velocity</p>", 1200);
     //   b.setModDefaults(); //good with: one shot, rapid fire, spray, super balls
@@ -101,7 +96,7 @@ const b = {
     game.makeGunHUD();
   },
   fire() {
-    if (game.mouseDown && mech.fireCDcycle < mech.cycle && !(keys[32] || game.mouseDownRight) && b.inventory.length) {
+    if (game.mouseDown && mech.fireCDcycle < mech.cycle && (!(keys[32] || game.mouseDownRight) || mech.fieldFire) && b.inventory.length) {
       if (b.guns[this.activeGun].ammo > 0) {
         b.guns[this.activeGun].fire();
 
@@ -1062,7 +1057,7 @@ const b = {
       name: "spores",
       description: "release an orb that discharges spores after 2 seconds<br>spores seek out targets<br>spores can pass through blocks",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 5,
       have: false,
       fire() {
         const me = bullet.length;

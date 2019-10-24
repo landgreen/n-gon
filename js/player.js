@@ -480,6 +480,7 @@ const mech = {
   fieldMeter: 0,
   fieldRegen: 0,
   fieldMode: 0,
+  fieldFire: false,
   holdingMassScale: 0,
   throwChargeRate: 0,
   throwChargeMax: 0,
@@ -495,6 +496,7 @@ const mech = {
   setHoldDefaults() {
     this.fieldMeter = 1;
     this.fieldRegen = 0.001;
+    this.fieldFire = false;
     this.fieldCDcycle = 0;
     this.isStealth = false;
     player.collisionFilter.mask = 0x010011 //0x010011 is normal
@@ -877,8 +879,9 @@ const mech = {
     },
     () => {
       mech.fieldMode = 1;
-      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right mouse or space bar)<p> stop time while field is active</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Time Dilation Field</strong><br> (right mouse or space bar)<p> stop time while field is active<br> can fire while field is active</p>", 1200);
       mech.setHoldDefaults();
+      mech.fieldFire = true;
       mech.grabRange = 130
       mech.isBodiesAsleep = false;
       mech.hold = function () {
@@ -888,7 +891,7 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-          const DRAIN = 0.0015
+          const DRAIN = 0.0022
           if (mech.fieldMeter > DRAIN) {
             mech.fieldMeter -= DRAIN;
 
@@ -993,9 +996,10 @@ const mech = {
     },
     () => {
       mech.fieldMode = 3;
-      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Negative Mass Field</strong><br> (right mouse or space bar)<p> field nullifies gravity<br> player can hold more massive objects<br>can fire while field is active</p>", 1200);
       //<br> <span style='color:#a00;'>decreased</span> field shielding efficiency
       mech.setHoldDefaults();
+      mech.fieldFire = true;
       mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
       mech.fieldShieldingScale = 2;
       // mech.fieldArc = 1; //field covers full 360 degrees
@@ -1083,7 +1087,7 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Standing Wave Harmonics</strong><br> (right mouse or space bar) <p>oscillating shields always surround player<br> <span style='color:#a00;'>decreased</span> field regeneration</p>", 1200);
       mech.setHoldDefaults();
       // mech.fieldShieldingScale = 0.5;
-      mech.fieldRegen *= 0.33;
+      mech.fieldRegen *= 0.2;
 
       mech.hold = function () {
         if (mech.isHolding) {

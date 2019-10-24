@@ -93,7 +93,7 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("+energy", 180);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.6 + 0.05 * Math.random())) / b.dmgScale);
+        const ammo = Math.ceil((target.ammoPack * (0.5 + 0.04 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
         if (!game.lastLogTime) game.makeTextLog("+" + ammo + " ammo: " + target.name, 180);
