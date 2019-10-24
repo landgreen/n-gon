@@ -36,7 +36,6 @@ field power up effects
 Move mods, to power up object
   mods can be about more than the gun, defensive, traversal mods
 gun mod power ups
-  can fire while field is active
   bullet on mob damage effects
     add to the array mob.do new mob behaviors
         add a damage over time
@@ -82,6 +81,13 @@ game mechanics
 
 track foot positions with velocity better as the player walks/crouch/runs
 
+Boss ideas
+  boss grows and spilt, if you don't kill it fast
+    sensor that locks you in after you enter the boss room
+  boss that eats other mobs and gains stats from them
+    chance to spawn on any level (past level 5)
+  boss that knows how to shoot (player) bullets that collide with player 
+    overwrite custom engine collision bullet mob function.
 
 
 
