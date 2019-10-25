@@ -949,10 +949,12 @@ const mech = {
       game.makeTextLog("<strong style='font-size:30px;'>Kinetic Energy Field</strong><br> (right mouse or space bar)<p> field does damage on contact<br> blocks are thrown at a higher velocity</p>", 1200);
       mech.setHoldDefaults();
       //throw quicker and harder
+      mech.fieldShieldingScale = 3;
+      mech.fieldRegen *= 3;
       mech.throwChargeRate = 3;
       mech.throwChargeMax = 140;
-      mech.fieldDamage = 2.5; //passive field does extra damage
-      mech.fieldArc = 0.09
+      mech.fieldDamage = 3; //passive field does extra damage
+      mech.fieldArc = 0.11
       mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
 
       mech.hold = function () {
@@ -962,7 +964,7 @@ const mech = {
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldMeter > 0.15) { //not hold but field button is pressed
           //draw field
-          const range = mech.grabRange - 20;
+          const range = mech.grabRange - 15;
           ctx.beginPath();
           ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
           let eye = 13;
@@ -1013,9 +1015,8 @@ const mech = {
           mech.holding();
           mech.throw();
         } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
-          const DRAIN = 0.001
+          const DRAIN = 0.0007
           if (mech.fieldMeter > DRAIN) {
-            mech.fieldMeter -= DRAIN;
             mech.pushMobs360(170);
             mech.grabPowerUp();
             mech.lookForPickUp(170);
@@ -1034,25 +1035,28 @@ const mech = {
             // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
             // zeroG(mob);  //mobs are too irregular to make this work?
 
-
-
-            player.force.y -= 0.0009 + player.mass * mech.gravity; //constant upward drift
             Matter.Body.setVelocity(player, {
               x: player.velocity.x,
               y: player.velocity.y * 0.97
             });
 
             if (keys[83] || keys[40]) { //down
-              player.force.y += 0.003
-              mech.grabRange = mech.grabRange * 0.97 + 350 * 0.03;
+              player.force.y -= 0.8 * player.mass * mech.gravity;
+              mech.grabRange = mech.grabRange * 0.97 + 400 * 0.03;
+            } else if (keys[87] || keys[38]) { //up
+              mech.fieldMeter -= 3 * DRAIN;
+              mech.grabRange = mech.grabRange * 0.97 + 750 * 0.03;
+              player.force.y -= 1.2 * player.mass * mech.gravity;
             } else {
+              mech.fieldMeter -= DRAIN;
               mech.grabRange = mech.grabRange * 0.97 + 650 * 0.03;
+              player.force.y -= 1.07 * player.mass * mech.gravity; // slow upward drift
             }
 
             //add extra friction for horizontal motion
             if (keys[65] || keys[68] || keys[37] || keys[39]) {
               Matter.Body.setVelocity(player, {
-                x: player.velocity.x * 0.88,
+                x: player.velocity.x * 0.85,
                 y: player.velocity.y
               });
             }

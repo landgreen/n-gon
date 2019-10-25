@@ -27,15 +27,14 @@ const b = {
       game.makeTextLog("<strong style='font-size:30px;'>Auto-Loading Heuristics</strong><br> (left click)<p>your <strong>rate of fire</strong> 15% is faster</p>", 1200);
       b.setModDefaults(); //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
       b.modFireRate = 0.85
-      //ADD: need to add in something that changes game play
+      //ADD: maybe add in something that changes game play
     },
     () => {
       b.mod = 1;
       game.makeTextLog("<strong style='font-size:30px;'>Anti-Matter Cores</strong><br> (left click)<p>your <strong>explosions</strong> are larger and do more damage</p>", 1200);
       b.setModDefaults(); //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
       //testing at 1.3: grenade(+0.3), missiles, flak, M80
-      b.modExplosionRadius = 1.25; //good for guns with explosions:
-      //ADD: take no damage from explosions, explosive guns use double ammo, 1.5 radius
+      b.modExplosionRadius = 2; //good for guns with explosions:
     },
     () => {
       b.mod = 2;
@@ -44,7 +43,7 @@ const b = {
       //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
       //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
       b.modBulletSize = 1.07;
-      //ADD: need to add in something that changes game play
+      //ADD: maybe add in something that changes game play
     },
     () => {
       b.mod = 3;
@@ -60,7 +59,7 @@ const b = {
     },
     () => {
       b.mod = 5;
-      game.makeTextLog("<strong style='font-size:30px;'>Desublimated Ammunition</strong><br> (left click)<p>1 out of 3 shots will not consume <strong>ammo</strong> when crouching</p>", 1200);
+      game.makeTextLog("<strong style='font-size:30px;'>Desublimated Ammunition</strong><br> (left click)<p>1 out of 2 shots will not consume <strong>ammo</strong> when <strong>crouching</strong></p>", 1200);
       b.setModDefaults(); //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
       b.modNoAmmo = 1
     },
@@ -97,17 +96,16 @@ const b = {
   },
   fire() {
     if (game.mouseDown && mech.fireCDcycle < mech.cycle && (!(keys[32] || game.mouseDownRight) || mech.fieldFire) && b.inventory.length) {
-      if (b.guns[this.activeGun].ammo > 0) {
-        b.guns[this.activeGun].fire();
-
+      if (b.guns[b.activeGun].ammo > 0) {
+        b.guns[b.activeGun].fire();
         if (b.modNoAmmo && mech.crouch) {
-          if (b.modNoAmmo % 3) {
-            b.guns[this.activeGun].ammo--;
+          if (b.modNoAmmo % 2) {
+            b.guns[b.activeGun].ammo--;
             game.updateGunHUD();
           }
           b.modNoAmmo++ //makes the no ammo toggle off and on
         } else {
-          b.guns[this.activeGun].ammo--;
+          b.guns[b.activeGun].ammo--;
           game.updateGunHUD();
         }
       } else {
@@ -263,6 +261,7 @@ const b = {
       player.force.y += knock.y;
       mech.drop();
     }
+
 
     //body knock backs
     for (let i = 0, len = body.length; i < len; ++i) {
@@ -839,6 +838,7 @@ const b = {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30 * b.modBulletSize, 4 * b.modBulletSize, b.fireAttributes(dir));
         b.fireProps(mech.crouch ? 70 : 30, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
+
         b.drawOneBullet(bullet[me].vertices);
         // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
         bullet[me].force.y += 0.00045; //a small push down at first to make it seem like the missile is briefly falling
@@ -931,7 +931,7 @@ const b = {
     },
     {
       name: "flak",
-      description: "fire a cluster of high speed explosive projectiles<br>explode on contact or after half a second",
+      description: "fire a cluster of explosive projectiles<br>explode on contact or after half a second",
       ammo: 0,
       ammoPack: 18,
       have: false,
@@ -945,11 +945,13 @@ const b = {
         let dir = mech.angle - angleStep * totalBullets / 2;
         const side1 = 17 * b.modBulletSize
         const side2 = 4 * b.modBulletSize
+
         for (let i = 0; i < totalBullets; i++) { //5 -> 7
           dir += angleStep
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), side1, side2, b.fireAttributes(dir));
           b.fireProps(CD, SPEED + 25 * Math.random() - i, dir, me); //cd , speed
+
           //Matter.Body.setDensity(bullet[me], 0.00001);
           bullet[me].endCycle = i + game.cycle + END
           bullet[me].restitution = 0;
@@ -1011,6 +1013,7 @@ const b = {
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 22 * b.modBulletSize, b.fireAttributes(dir, false));
         bullet[me].radius = 22; //used from drawing timer
         b.fireProps(mech.crouch ? 60 : 40, mech.crouch ? 38 : 30, dir, me); //cd , speed
+
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = game.cycle + Math.floor(140 * b.modBulletsLastLonger);
