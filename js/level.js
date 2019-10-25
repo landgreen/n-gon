@@ -18,9 +18,9 @@ const level = {
       // mech.fieldUpgrades[1](); //give a field power up for testing
       // b.mods[6](); //give specific mod
 
-      this.intro(); //starting level
+      // this.intro(); //starting level
       // this.testingMap();
-      // this.bosses();
+      this.bosses();
       // this.aerie();
       // this.rooftops();
       // this.warehouse();
@@ -142,7 +142,7 @@ const level = {
     //   b.dmgScale *= 0.9; //damage done by player decreases each level
     // }
 
-    document.body.style.backgroundColor = "#fff";
+    document.body.style.backgroundColor = "#ddd";
 
     // level.fillBG.push({
     //   x: -150,
