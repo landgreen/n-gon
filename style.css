@@ -68,8 +68,8 @@ summary {
 
 #health-bg {
   position: absolute;
-  top: 30px;
-  left: 40px;
+  top: 15px;
+  left: 15px;
   height: 20px;
   width: 300px;
   background-color: #000;
@@ -81,8 +81,8 @@ summary {
 
 #health {
   position: absolute;
-  top: 30px;
-  left: 40px;
+  top: 15px;
+  left: 15px;
   height: 20px;
   width: 0px;
   transition: width 1s ease-out;
@@ -119,10 +119,10 @@ summary {
 
 #guns {
   position: absolute;
-  top: 55px;
-  left: 40px;
+  top: 40px;
+  left: 15px;
   z-index: 2;
-  font-size: 25px;
+  font-size: 23px;
   color: #111;
   background-color: rgba(255, 255, 255, 0.4);
   user-select: none;
@@ -134,12 +134,14 @@ summary {
 
 #mods {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 15px;
+  right: 15px;
   z-index: 2;
-  font-size: 21px;
-  color: #111;
+  font-size: 19px;
+  color: #000;
+  text-align: right;
   opacity: 0.5;
+  line-height: 140%;
   background-color: rgba(255, 255, 255, 0.4);
   user-select: none;
   pointer-events: none;

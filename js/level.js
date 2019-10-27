@@ -12,11 +12,11 @@ const level = {
   onLevel: 0,
   start() {
     if (game.levelsCleared === 0) {
-      // game.levelsCleared = 5; //for testing to simulate possible mobs spawns
+      // game.levelsCleared = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns("all", 1000)
       // b.giveGuns(3) // set a starting gun for testing
-      // mech.fieldUpgrades[2](); //give a field power up for testing
-      // b.mods[6].effect(); //give specific mod
+      // mech.fieldUpgrades[2].effect(); //give a field power up for testing
+      // b.mods[7].effect(); //give specific mod
 
       this.intro(); //starting level
       // this.testingMap();
@@ -28,11 +28,11 @@ const level = {
       // this.office();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-      this[this.levels[this.onLevel]](); //picks the current map from the the levels array
-      this.levelAnnounce();
+      level[level.levels[level.onLevel]](); //picks the current map from the the levels array
+      level.levelAnnounce();
     }
     game.setZoom();
-    this.addToWorld(); //add bodies to game engine
+    level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
   },
   difficultyIncrease() {

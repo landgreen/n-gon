@@ -28,9 +28,9 @@ const powerUps = {
         while (mode === mech.fieldMode) {
           mode = Math.ceil(Math.random() * (mech.fieldUpgrades.length - 1))
         }
-        mech.fieldUpgrades[mode](); //choose random field upgrade that you don't already have
+        mech.fieldUpgrades[mode].effect(); //choose random field upgrade that you don't already have
       } else {
-        mech.fieldUpgrades[this.mode](); //set a predetermined power up
+        mech.fieldUpgrades[this.mode].effect(); //set a predetermined power up
       }
       //pop the old field out in case player wants to swap back
       if (previousMode !== 0) {

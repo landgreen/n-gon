@@ -153,6 +153,16 @@ const game = {
     }
     game.boldActiveGunHUD();
   },
+  updateModHUD() {
+    let text = ""
+    if (mech.fieldMode !== 0) {
+      text += mech.fieldUpgrades[mech.fieldMode].name
+      if (b.mod !== null) text += "<br>" + b.mods[b.mod].name
+    } else if (b.mod !== null) {
+      text += b.mods[b.mod].name
+    }
+    document.getElementById("mods").innerHTML = text
+  },
   makeTextLog(text, time = 180) {
     document.getElementById("text-log").innerHTML = text;
     document.getElementById("text-log").style.opacity = 1;
@@ -250,10 +260,14 @@ const game = {
         requestAnimationFrame(cycle);
       } else {
         game.paused = true;
-        let text = "<h1>PAUSED</h1>"
-        // if (b.mod !== null) text+=
-        //output current mod, field, and gun info when paused
-        game.makeTextLog(text);
+        game.makeTextLog("<h1>PAUSED</h1>", 1);
+        // let text = "<h1>PAUSED</h1><br><div style='font-size: 85%;'>"
+        // //output current mod, field, and gun info when paused
+        // if (mech.fieldMode !== 0) text += "<br><p><strong style='font-size:130%;'>" + mech.fieldUpgrades[mech.fieldMode].name + "</strong><br>" + mech.fieldUpgrades[mech.fieldMode].description + "</p>"
+        // if (b.mod !== null) text += "<br><p><strong style='font-size:130%;'>" + b.mods[b.mod].name + "</strong><br>" + b.mods[b.mod].description + "</p>"
+        // if (b.activeGun !== null) text += "<br><p><strong style='font-size:130%;'>" + b.guns[b.activeGun].name + "</strong><br>" + b.guns[b.activeGun].description + "</p>"
+        // text += "</div>"
+        // game.makeTextLog(text, 1);
       }
     }
 
@@ -270,9 +284,9 @@ const game = {
 
       if (keys[70]) { //cycle fields with F
         if (mech.fieldMode === mech.fieldUpgrades.length - 1) {
-          mech.fieldUpgrades[0]()
+          mech.fieldUpgrades[0].effect()
         } else {
-          mech.fieldUpgrades[mech.fieldMode + 1]()
+          mech.fieldUpgrades[mech.fieldMode + 1].effect()
         }
       }
       if (keys[71]) { // give all guns with G
@@ -361,8 +375,11 @@ const game = {
   },
   wipe() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.fillStyle = "#000";
+
+    // ctx.fillStyle = "rgba(255,255,255,1)";
+    // ctx.globalCompositeOperation = "difference";
     // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.globalCompositeOperation = "source-over";
 
     // ctx.globalAlpha = (mech.health < 0.7) ? (mech.health+0.3)*(mech.health+0.3) : 1
     // if (mech.health < 0.7) {
@@ -393,11 +410,11 @@ const game = {
       b.guns[i].have = false;
       if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
     }
+    b.activeGun = null;
     game.paused = false;
     engine.timing.timeScale = 1;
     game.dmgScale = 1;
     b.dmgScale = 0.7;
-    b.activeGun = null;
     game.makeGunHUD();
     mech.drop();
     mech.addHealth(1);
@@ -408,8 +425,7 @@ const game = {
     document.getElementById("text-log").style.opacity = 0;
     document.getElementById("fade-out").style.opacity = 0;
     document.title = "n-gon";
-    // mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
-    if (!mech.fieldMode) mech.fieldUpgrades[0](); //reset to starting field?   or let them keep the field
+    if (!mech.fieldMode) mech.fieldUpgrades[0].effect(); //reset to starting field?   or let them keep the field
   },
   firstRun: true,
   splashReturn() {

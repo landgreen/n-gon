@@ -12,7 +12,7 @@ const b = {
   modHealthDrain: null,
   modNoAmmo: null,
   modBulletsLastLonger: null,
-  // modNonEuclidean: null,
+  modIsImmortal: null,
   setModDefaults() {
     b.modFireRate = 1;
     b.modExplosionRadius = 1;
@@ -21,15 +21,15 @@ const b = {
     b.modHealthDrain = 0;
     b.modNoAmmo = 0;
     b.modBulletsLastLonger = 1;
-    // b.modNonEuclidean = false;
+    b.modIsImmortal = false;
   },
-  modText: function () {
-    game.makeTextLog(`<strong style='font-size:30px;'>${b.mods[b.mod].name}</strong><br> <span class='faded'>(left click)</span><p>${b.mods[b.mod].description}</p>`, 1200);
-    document.getElementById("mods").innerHTML = b.mods[b.mod].name
+  modText() {
+    if (b.mod !== null) game.makeTextLog(`<strong style='font-size:30px;'>${b.mods[b.mod].name}</strong><br> <p>${b.mods[b.mod].description}</p>`, 1200);
+    game.updateModHUD()
   },
   mods: [{
       name: "Auto-Loading Heuristics",
-      description: "your <strong>rate of fire</strong> 15% is faster",
+      description: "your <strong>rate of fire</strong> is 15% faster",
       effect: () => {
         b.mod = 0
         b.modText();
@@ -40,7 +40,7 @@ const b = {
     },
     {
       name: "Anti-Matter Cores",
-      description: "your <strong>explosions</strong> are larger and do more damage",
+      description: "your <strong>explosions</strong> are larger and more dangerous",
       effect: () => {
         b.mod = 1
         b.modText();
@@ -68,7 +68,7 @@ const b = {
       effect: () => {
         b.mod = 3
         b.modText();
-        b.setModDefaults(); //good with laser, Nano-Scale Manufacturing, Standing Wave Harmonics, Phase Decoherence Field
+        b.setModDefaults(); //good with laser, and all fields
         b.modEnergySiphon = 0.2;
       }
     },
@@ -93,26 +93,26 @@ const b = {
       }
     },
     {
-      name: "Anti-Decay Coating",
-      description: "your bullets <strong>last 25% longer</strong>",
+      name: "Decay Resistant Topology",
+      description: "your bullets <strong>last 30% longer</strong>",
       effect: () => {
         b.mod = 6
         b.modText();
         b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
-        b.modBulletsLastLonger = 1.25
+        b.modBulletsLastLonger = 1.30
       }
     },
-    // {
-    //   name: "Non-Euclidean Geometry",
-    //   description: "after you fall loop back to the top of the map",
-    //   have: false,
-    //   effect: () => {
-    //     b.mod = 7
-    //     b.modText();
-    //     b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
-    //     b.modNonEuclidean = true
-    //   }
-    // },
+    {
+      name: "Quantum Immortality",
+      description: "after you die continue in an alternate reality with randomized abilities<br>",
+      effect: () => {
+        b.mod = 7
+        b.modText();
+        b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
+        b.modIsImmortal = true;
+      }
+    },
+
     // () => {
     //   b.mod = 8;
     //   game.makeTextLog("<strong style='font-size:30px;'>Relativistic Velocity</strong><br> <span class='faded'>(left click)</span><p>Your bullets are effected extra by your own velocity</p>", 1200);

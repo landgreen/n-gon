@@ -2,6 +2,9 @@
 /* TODO:  *******************************************
 *****************************************************
 
+make player legs just slide if the player is above the normal speed
+  like when you fire the one shot
+
 make power ups keep moving to player if the field is turned off
 
 levels spawn by having the map aspects randomly fly into place

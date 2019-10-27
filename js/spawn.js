@@ -491,12 +491,12 @@ const spawn = {
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-      if (game.levelsCleared > 6) {
-        for (let i = 0; i < (game.levelsCleared - 5); ++i) {
-          spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 20);
+      if (game.levelsCleared > 5) {
+        for (let i = 0; i < (game.levelsCleared - 3); ++i) {
+          spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 70 * Math.random());
           Matter.Body.setVelocity(mob[mob.length - 1], {
-            x: (Math.random() - 0.5) * 25,
-            y: (Math.random() - 0.5) * 25
+            x: (Math.random() - 0.5) * 70,
+            y: (Math.random() - 0.5) * 70
           });
         }
       }
@@ -540,7 +540,7 @@ const spawn = {
         ctx.fill();
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(0,20,40,0.05)";
+        ctx.fillStyle = "rgba(0,0,0,0.05)";
         ctx.fill();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
