@@ -15,12 +15,12 @@ const level = {
       // game.levelsCleared = 5; //for testing to simulate possible mobs spawns
       // b.giveGuns("all", 1000)
       // b.giveGuns(3) // set a starting gun for testing
-      // mech.fieldUpgrades[1](); //give a field power up for testing
-      // b.mods[6](); //give specific mod
+      // mech.fieldUpgrades[2](); //give a field power up for testing
+      // b.mods[6].effect(); //give specific mod
 
-      // this.intro(); //starting level
+      this.intro(); //starting level
       // this.testingMap();
-      this.bosses();
+      // this.bosses();
       // this.aerie();
       // this.rooftops();
       // this.warehouse();
@@ -645,14 +645,17 @@ const level = {
       spawn.bodyRect(1750, -800, 700, 35);
     }
     spawn.mapVertex(2225, -2100, "0 0 450 0 300 -2500 150 -2500")
-    spawn.mapRect(2000, -750, 450, 300);
+    spawn.mapRect(2000, -700, 450, 300);
     spawn.bodyRect(2360, -450, 100, 300, 0.6);
-    spawn.mapRect(2000, -150, 450, 350);
+    spawn.mapRect(2000, -75, 450, 275);
     spawn.bodyRect(2450, 150, 150, 150, 0.4);
     spawn.mapRect(1550, 300, 4600, 200); //ground
     //floor below right tall tower
     spawn.bodyRect(3000, 50, 150, 250, 0.9);
     spawn.bodyRect(4500, -500, 300, 250, 0.7);
+    spawn.bodyRect(3500, -100, 100, 150, 0.7);
+    spawn.bodyRect(4200, -500, 110, 30, 0.7);
+    spawn.bodyRect(3800, -500, 150, 130, 0.7);
     spawn.bodyRect(4000, 50, 200, 150, 0.9);
     spawn.bodyRect(4500, 50, 300, 200, 0.9);
     spawn.bodyRect(4200, -350, 200, 50, 0.9);

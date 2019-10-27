@@ -2,6 +2,16 @@
 /* TODO:  *******************************************
 *****************************************************
 
+make power ups keep moving to player if the field is turned off
+
+levels spawn by having the map aspects randomly fly into place
+
+new map with repeating endlessness
+  get ideas from Manifold Garden game
+  if falling, get teleported above the map
+    this can apply to blocks mobs, and power ups as well
+
+
 when paused show details on field, mods, guns?
 
 Find a diegetic way to see player damage  (and or field meter too)

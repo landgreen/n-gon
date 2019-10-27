@@ -289,9 +289,9 @@ const game = {
       }
       if (keys[89]) { //cycle fields with F
         if (b.mod === b.mods.length - 1) {
-          b.mods[0]()
+          b.mods[0].effect()
         } else {
-          b.mods[b.mod + 1]()
+          b.mods[b.mod + 1].effect()
         }
       }
       if (keys[82]) { // teleport to mouse with R
@@ -541,7 +541,33 @@ const game = {
   },
   fallChecks() {
     // if 4000px deep
-    if (mech.pos.y > game.fallHeight) mech.death();
+    if (mech.pos.y > game.fallHeight) {
+      mech.death();
+      // if (b.modNonEuclidean) {
+      //   Matter.Body.setPosition(player, {
+      //     x: player.position.x,
+      //     y: player.position.y - 12000
+      //   });
+      //   Matter.Body.setVelocity(player, {
+      //     x: player.velocity.x,
+      //     y: player.velocity.y * 0
+      //   });
+
+      //   mech.pos.x = player.position.x;
+      //   mech.pos.y = playerBody.position.y - mech.yOff;
+
+      //   //smoothed mouse look translations
+      //   const scale = 10;
+      //   mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
+      //   mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
+
+      //   mech.transX = mech.transSmoothX
+      //   mech.transY = mech.transSmoothY
+
+      // } else {
+      // mech.death();
+      // }
+    }
 
     if (!(mech.cycle % 420)) {
       remove = function (who) {

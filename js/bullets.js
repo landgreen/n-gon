@@ -12,6 +12,7 @@ const b = {
   modHealthDrain: null,
   modNoAmmo: null,
   modBulletsLastLonger: null,
+  // modNonEuclidean: null,
   setModDefaults() {
     b.modFireRate = 1;
     b.modExplosionRadius = 1;
@@ -20,58 +21,101 @@ const b = {
     b.modHealthDrain = 0;
     b.modNoAmmo = 0;
     b.modBulletsLastLonger = 1;
+    // b.modNonEuclidean = false;
   },
-  mods: [
-    () => {
-      b.mod = 0;
-      game.makeTextLog("<strong style='font-size:30px;'>Auto-Loading Heuristics</strong><br> (left click)<p>your <strong>rate of fire</strong> 15% is faster</p>", 1200);
-      b.setModDefaults(); //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
-      b.modFireRate = 0.85
-      //ADD: maybe add in something that changes game play
+  modText: function () {
+    game.makeTextLog(`<strong style='font-size:30px;'>${b.mods[b.mod].name}</strong><br> <span class='faded'>(left click)</span><p>${b.mods[b.mod].description}</p>`, 1200);
+    document.getElementById("mods").innerHTML = b.mods[b.mod].name
+  },
+  mods: [{
+      name: "Auto-Loading Heuristics",
+      description: "your <strong>rate of fire</strong> 15% is faster",
+      effect: () => {
+        b.mod = 0
+        b.modText();
+        b.setModDefaults(); //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
+        b.modFireRate = 0.85
+        //ADD: maybe add in something that changes game play
+      }
     },
-    () => {
-      b.mod = 1;
-      game.makeTextLog("<strong style='font-size:30px;'>Anti-Matter Cores</strong><br> (left click)<p>your <strong>explosions</strong> are larger and do more damage</p>", 1200);
-      b.setModDefaults(); //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
-      //testing at 1.3: grenade(+0.3), missiles, flak, M80
-      b.modExplosionRadius = 2; //good for guns with explosions:
+    {
+      name: "Anti-Matter Cores",
+      description: "your <strong>explosions</strong> are larger and do more damage",
+      effect: () => {
+        b.mod = 1
+        b.modText();
+        b.setModDefaults(); //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
+        //testing at 1.3: grenade(+0.3), missiles, flak, M80
+        b.modExplosionRadius = 2; //good for guns with explosions:
+      }
     },
-    () => {
-      b.mod = 2;
-      game.makeTextLog("<strong style='font-size:30px;'>High Caliber Bullets</strong><br> (left click)<p>your bullets are <strong>larger</strong> and do more physical damage</p>", 1200);
-      b.setModDefaults(); //good for guns that do mostly projectile damage:
-      //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
-      //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
-      b.modBulletSize = 1.07;
-      //ADD: maybe add in something that changes game play
+    {
+      name: "High Caliber Bullets",
+      description: "your bullets are <strong>larger</strong> and do more physical damage",
+      effect: () => {
+        b.mod = 2
+        b.modText();
+        b.setModDefaults(); //good for guns that do mostly projectile damage:
+        //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
+        //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
+        b.modBulletSize = 1.07;
+        //ADD: maybe add in something that changes game play
+      }
     },
-    () => {
-      b.mod = 3;
-      game.makeTextLog("<strong style='font-size:30px;'>Energy Siphon</strong><br> (left click)<p>regenerate <strong>energy</strong> proportional to your damage done</p>", 1200);
-      b.setModDefaults(); //good with laser, Nano-Scale Manufacturing, Standing Wave Harmonics, Phase Decoherence Field
-      b.modEnergySiphon = 0.2;
+    {
+      name: "Energy Siphon",
+      description: "regenerate <strong>energy</strong> proportional to your damage done",
+      effect: () => {
+        b.mod = 3
+        b.modText();
+        b.setModDefaults(); //good with laser, Nano-Scale Manufacturing, Standing Wave Harmonics, Phase Decoherence Field
+        b.modEnergySiphon = 0.2;
+      }
     },
-    () => {
-      b.mod = 4;
-      game.makeTextLog("<strong style='font-size:30px;'>Entropy Transfer</strong><br> (left click)<p><strong>heal</strong> proportional to your damage done</p>", 1200);
-      b.setModDefaults(); //good with guns that overkill: one shot, grenade
-      b.modHealthDrain = 0.01;
+    {
+      name: "Entropy Transfer",
+      description: "<strong>heal</strong> proportional to your damage done",
+      effect: () => {
+        b.mod = 4
+        b.modText();
+        b.setModDefaults(); //good with guns that overkill: one shot, grenade
+        b.modHealthDrain = 0.01;
+      }
     },
-    () => {
-      b.mod = 5;
-      game.makeTextLog("<strong style='font-size:30px;'>Desublimated Ammunition</strong><br> (left click)<p>1 out of 2 shots will not consume <strong>ammo</strong> when <strong>crouching</strong></p>", 1200);
-      b.setModDefaults(); //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
-      b.modNoAmmo = 1
+    {
+      name: "Desublimated Ammunition",
+      description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
+      effect: () => {
+        b.mod = 5
+        b.modText();
+        b.setModDefaults(); //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
+        b.modNoAmmo = 1
+      }
     },
-    () => {
-      b.mod = 6;
-      game.makeTextLog("<strong style='font-size:30px;'>Anti-Decay Coating</strong><br> (left click)<p>your bullets <strong>last 25% longer</strong></p>", 1200);
-      b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
-      b.modBulletsLastLonger = 1.25
+    {
+      name: "Anti-Decay Coating",
+      description: "your bullets <strong>last 25% longer</strong>",
+      effect: () => {
+        b.mod = 6
+        b.modText();
+        b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
+        b.modBulletsLastLonger = 1.25
+      }
     },
+    // {
+    //   name: "Non-Euclidean Geometry",
+    //   description: "after you fall loop back to the top of the map",
+    //   have: false,
+    //   effect: () => {
+    //     b.mod = 7
+    //     b.modText();
+    //     b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
+    //     b.modNonEuclidean = true
+    //   }
+    // },
     // () => {
     //   b.mod = 8;
-    //   game.makeTextLog("<strong style='font-size:30px;'>Relativistic Velocity</strong><br> (left click)<p>Your bullets are effected extra by your own velocity</p>", 1200);
+    //   game.makeTextLog("<strong style='font-size:30px;'>Relativistic Velocity</strong><br> <span class='faded'>(left click)</span><p>Your bullets are effected extra by your own velocity</p>", 1200);
     //   b.setModDefaults(); //good with: one shot, rapid fire, spray, super balls
     // },
   ],
