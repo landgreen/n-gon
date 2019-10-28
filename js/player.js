@@ -364,41 +364,47 @@ const mech = {
       b.setModDefaults();
       b.modText();
 
-      //randomize guns
-      b.activeGun = null;
-      b.inventory = []; //removes guns and ammo  
-      for (let i = 0, len = b.guns.length; i < len; ++i) {
-        b.guns[i].have = false;
-        if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
-      }
-      if (game.levelsCleared > 0) powerUps.gun.effect();
-      if (game.levelsCleared > 1) powerUps.gun.effect();
-      if (game.levelsCleared > 3) powerUps.gun.effect();
-      if (game.levelsCleared > 6) powerUps.gun.effect();
-      game.makeGunHUD();
 
-      //randomize field
-
-      if (game.levelsCleared > 5) {
-        mech.fieldUpgrades[Math.floor(Math.random() * (mech.fieldUpgrades.length))].effect();
-      } else {
-        mech.fieldUpgrades[0].effect();
+      function randomizeField() {
+        if (game.levelsCleared > 5) {
+          mech.fieldUpgrades[Math.floor(Math.random() * (mech.fieldUpgrades.length))].effect();
+        } else {
+          mech.fieldUpgrades[0].effect();
+        }
       }
 
       mech.addHealth(1);
-      spawn.setSpawnList();
-      game.clearNow = true;
+      spawn.setSpawnList(); //new mob types
+      game.clearNow = true; //triggers a map reset
+
+      //randomize guns
+      function randomizeGuns() {
+        b.activeGun = null;
+        b.inventory = []; //removes guns and ammo  
+        for (let i = 0, len = b.guns.length; i < len; ++i) {
+          b.guns[i].have = false;
+          if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
+        }
+        if (game.levelsCleared > 0) powerUps.gun.effect();
+        if (game.levelsCleared > 1) powerUps.gun.effect();
+        if (game.levelsCleared > 3) powerUps.gun.effect();
+        if (game.levelsCleared > 6) powerUps.gun.effect();
+        game.makeGunHUD();
+      }
 
       game.wipe = function () { //set wipe to have trails
-        ctx.fillStyle = "rgba(255,255,255,0.01)";
+        ctx.fillStyle = "rgba(255,255,255,0.005)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
+      randomizeGuns()
       for (let i = 0; i < 7; i++) {
         setTimeout(function () {
-          game.makeTextLog(`<div style='opacity:0.3;'> probability amplitude will synchronize in ${7-i} seconds</div>`, 1000);
+          randomizeGuns()
+          randomizeField()
+          game.makeTextLog(`probability amplitude will synchronize in ${7-i} seconds`, 1000);
           game.wipe = function () { //set wipe to have trails
-            ctx.fillStyle = `rgba(255,255,255,${(i+1)*0.04})`;
+            ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.003})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
         }, (i + 1) * 1000);
@@ -408,8 +414,8 @@ const mech = {
         game.wipe = function () { //set wipe to normal
           ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-        game.makeTextLog("<div style='opacity:0.5;'><strong>Quantum Immortality</strong> has stabilized your probability amplitude<br>welcome to your new reality</div>", 1000);
-        document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel] + " version 2";
+        game.makeTextLog("your quantum probability has stabilized", 1000);
+        document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
       }, 8000);
 
     } else if (this.alive) { //normal death code here
@@ -1391,9 +1397,7 @@ const mech = {
     this.hip.x = 12 + offset;
     this.hip.y = 24 + offset;
     //stepSize goes to zero if Vx is zero or not on ground (make this transition cleaner)
-    this.stepSize =
-      0.8 * this.stepSize +
-      0.2 * (7 * Math.sqrt(Math.abs(this.Vx)) * this.onGround);
+    this.stepSize = 0.8 * this.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(this.Vx))) * this.onGround);
     //changes to stepsize are smoothed by adding only a percent of the new value each cycle
     const stepAngle = 0.034 * this.walk_cycle + cycle_offset;
     this.foot.x = 2.2 * this.stepSize * Math.cos(stepAngle) + offset;
