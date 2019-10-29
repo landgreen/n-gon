@@ -47,7 +47,6 @@ const powerUps = {
     },
     effect() {
       const previousMode = b.mod
-
       if (this.mode === null) { //this.mode is set if the power up has been ejected from player
         mode = b.mod //start with current mob
         while (mode === b.mod) {
@@ -102,7 +101,7 @@ const powerUps = {
   },
   gun: {
     name: "gun",
-    color: "#0cf",
+    color: "#0bf",
     size() {
       return 30;
     },
@@ -231,38 +230,4 @@ const powerUps = {
     }
     World.add(engine.world, powerUp[i]); //add to world
   },
-  attractionLoop() {
-    for (let i = 0, len = powerUp.length; i < len; ++i) {
-      const dxP = player.position.x - powerUp[i].position.x;
-      const dyP = player.position.y - powerUp[i].position.y;
-      const dist2 = dxP * dxP + dyP * dyP;
-      //gravitation for pickup
-      if (dist2 < 100000 && (powerUp[i].name != "heal" || mech.health < 1)) {
-        if (dist2 < 2000) {
-          //knock back from grabbing power up
-          Matter.Body.setVelocity(player, {
-            x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.25,
-            y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.25
-          });
-          mech.usePowerUp(i);
-          break;
-        }
-        //power up needs to be able to see player to gravitate
-        if (Matter.Query.ray(map, powerUp[i].position, player.position).length === 0) { // && Matter.Query.ray(body, powerUp[i].position, player.position).length === 0
-          //extra friction
-          Matter.Body.setVelocity(powerUp[i], {
-            x: powerUp[i].velocity.x * 0.97,
-            y: powerUp[i].velocity.y * 0.97
-          });
-          //float towards player
-          powerUp[i].force.x += (dxP / dist2) * powerUp[i].mass * 1.6;
-          powerUp[i].force.y += (dyP / dist2) * powerUp[i].mass * 1.6 - powerUp[i].mass * game.g; //negate gravity
-          //draw the pulling effect
-          ctx.globalAlpha = 0.2;
-          mech.drawHold(powerUp[i], false);
-          ctx.globalAlpha = 1;
-        }
-      }
-    }
-  }
 };

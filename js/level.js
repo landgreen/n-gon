@@ -12,7 +12,7 @@ const level = {
   onLevel: 0,
   start() {
     if (game.levelsCleared === 0) {
-      // game.levelsCleared = 6; //for testing to simulate possible mobs spawns
+      // game.levelsCleared = 16; //for testing to simulate possible mobs spawns
       // b.giveGuns("all", 1000)
       // b.giveGuns(3) // set a starting gun for testing
       // mech.fieldUpgrades[2].effect(); //give a field power up for testing

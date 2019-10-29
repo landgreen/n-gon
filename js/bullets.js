@@ -40,7 +40,7 @@ const b = {
     },
     {
       name: "Anti-Matter Cores",
-      description: "your <strong>explosions</strong> are larger and more dangerous",
+      description: "The radius of your <strong>explosions</strong> is doubled",
       effect: () => {
         b.mod = 1
         b.modText();
@@ -50,7 +50,7 @@ const b = {
       }
     },
     {
-      name: "High Caliber Bullets",
+      name: "Depleted Uranium Rounds",
       description: "your bullets are <strong>larger</strong> and do more physical damage",
       effect: () => {
         b.mod = 2
@@ -69,7 +69,7 @@ const b = {
         b.mod = 3
         b.modText();
         b.setModDefaults(); //good with laser, and all fields
-        b.modEnergySiphon = 0.2;
+        b.modEnergySiphon = 0.25;
       }
     },
     {
@@ -94,12 +94,12 @@ const b = {
     },
     {
       name: "Decay Resistant Topology",
-      description: "your bullets <strong>last 30% longer</strong>",
+      description: "your bullets <strong>last 40% longer</strong>",
       effect: () => {
         b.mod = 6
         b.modText();
         b.setModDefaults(); //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
-        b.modBulletsLastLonger = 1.30
+        b.modBulletsLastLonger = 1.40
       }
     },
     {

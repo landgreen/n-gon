@@ -2,9 +2,6 @@
 /* TODO:  *******************************************
 *****************************************************
 
-make player legs just slide if the player is above the normal speed
-  like when you fire the one shot
-
 make power ups keep moving to player if the field is turned off
 
 levels spawn by having the map aspects randomly fly into place
@@ -12,11 +9,9 @@ levels spawn by having the map aspects randomly fly into place
 new map with repeating endlessness
   get ideas from Manifold Garden game
   if falling, get teleported above the map
+    I tried it, but had trouble getting the camera to adjust
     this can apply to blocks mobs, and power ups as well
-
-
-when paused show details on field, mods, guns?
-
+    
 Find a diegetic way to see player damage  (and or field meter too)
   a health meter, like the field meter above player?  (doesn't work with the field meter)
 

@@ -359,11 +359,10 @@ const mech = {
   alive: true,
   death() {
     if (b.modIsImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
-      //remove mod
+      //remove mods
       b.mod = null
       b.setModDefaults();
       b.modText();
-
 
       function randomizeField() {
         if (game.levelsCleared > 5) {
@@ -383,17 +382,23 @@ const mech = {
         b.inventory = []; //removes guns and ammo  
         for (let i = 0, len = b.guns.length; i < len; ++i) {
           b.guns[i].have = false;
-          if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
+          if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
         }
         if (game.levelsCleared > 0) powerUps.gun.effect();
         if (game.levelsCleared > 1) powerUps.gun.effect();
         if (game.levelsCleared > 3) powerUps.gun.effect();
         if (game.levelsCleared > 6) powerUps.gun.effect();
-        game.makeGunHUD();
+        //randomize ammo
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+          if (b.guns[b.inventory[i]].ammo !== Infinity) {
+            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(2.2 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.15)))
+          }
+        }
+        game.makeGunHUD(); //update gun HUD
       }
 
       game.wipe = function () { //set wipe to have trails
-        ctx.fillStyle = "rgba(255,255,255,0.005)";
+        ctx.fillStyle = "rgba(255,255,255,0)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
@@ -730,33 +735,29 @@ const mech = {
   grabPowerUp() {
     //look for power ups to grab
     if (mech.fieldCDcycle < mech.cycle) {
-      const grabPowerUpRange2 = (this.grabRange + 200) * (this.grabRange + 200)
+      const grabPowerUpRange2 = (this.grabRange + 220) * (this.grabRange + 220)
       for (let i = 0, len = powerUp.length; i < len; ++i) {
         const dxP = mech.pos.x - powerUp[i].position.x;
         const dyP = mech.pos.y - powerUp[i].position.y;
         const dist2 = dxP * dxP + dyP * dyP;
-
-        // float towards player    if looking at and in range  or  if very close to player
-        if (dist2 < grabPowerUpRange2 && this.lookingAt(powerUp[i]) || dist2 < 14000) {
+        // float towards player  if looking at and in range  or  if very close to player
+        if (dist2 < grabPowerUpRange2 && this.lookingAt(powerUp[i]) || dist2 < 16000) {
+          if (dist2 < 5000) { //use power up if it is close enough
+            Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
+              x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
+              y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
+            });
+            mech.usePowerUp(i);
+            return;
+          }
           this.fieldMeter -= this.fieldRegen * 0.5;
           powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
           powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
           //extra friction
           Matter.Body.setVelocity(powerUp[i], {
-            x: powerUp[i].velocity.x * 0.4,
-            y: powerUp[i].velocity.y * 0.4
+            x: powerUp[i].velocity.x * 0.11,
+            y: powerUp[i].velocity.y * 0.11
           });
-          if (dist2 < 5000) { //use power up if it is close enough
-            //player knockback
-            Matter.Body.setVelocity(player, {
-              x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.2,
-              y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.2
-            });
-            mech.usePowerUp(i);
-            // this.fireCDcycle = mech.cycle + 10; //cool down
-            return;
-          }
-          // return;
         }
       }
     }
@@ -775,7 +776,6 @@ const mech = {
           //mob and player knock back
           const angle = Math.atan2(player.position.y - mob[i].position.y, player.position.x - mob[i].position.x);
           const mass = Math.min(Math.sqrt(mob[i].mass), 4);
-          // console.log(mob[i].mass, Math.sqrt(mob[i].mass), mass)
           Matter.Body.setVelocity(mob[i], {
             x: player.velocity.x - (15 * Math.cos(angle)) / mass,
             y: player.velocity.y - (15 * Math.sin(angle)) / mass
@@ -860,21 +860,21 @@ const mech = {
   pickUp() {
     //triggers when a hold target exits and field button is released
     this.isHolding = true;
-    if (this.holdingTarget) {
-      this.holdingTarget.collisionFilter.category = 0x010000;
-      this.holdingTarget.collisionFilter.mask = 0x011111;
-    }
-    //combine momentum
-    const px = player.velocity.x * player.mass + this.holdingTarget.velocity.x * this.holdingTarget.mass;
-    const py = player.velocity.y * player.mass + this.holdingTarget.velocity.y * this.holdingTarget.mass;
-    Matter.Body.setVelocity(player, {
-      x: px / (player.mass + this.holdingTarget.mass),
-      y: py / (player.mass + this.holdingTarget.mass)
-    });
     this.definePlayerMass(5 + this.holdingTarget.mass * this.holdingMassScale)
     //collide with nothing
     this.holdingTarget.collisionFilter.category = 0x000000;
     this.holdingTarget.collisionFilter.mask = 0x000000;
+    // if (this.holdingTarget) {
+    //   this.holdingTarget.collisionFilter.category = 0x010000;
+    //   this.holdingTarget.collisionFilter.mask = 0x011111;
+    // }
+    // combine momentum   // this doesn't feel right in game
+    // const px = player.velocity.x * player.mass + this.holdingTarget.velocity.x * this.holdingTarget.mass;
+    // const py = player.velocity.y * player.mass + this.holdingTarget.velocity.y * this.holdingTarget.mass;
+    // Matter.Body.setVelocity(player, {
+    //   x: px / (player.mass + this.holdingTarget.mass),
+    //   y: py / (player.mass + this.holdingTarget.mass)
+    // });
   },
   wakeCheck() {
     if (mech.isBodiesAsleep) {
@@ -1007,7 +1007,7 @@ const mech = {
       }
     },
     {
-      name: "Electrostatic Force Field",
+      name: "Electrostatic Field",
       description: "field does <strong>damage</strong> on contact<br> blocks are thrown at a higher velocity<br> increased field regeneration",
       effect: () => {
         mech.fieldMode = 2;
@@ -1016,7 +1016,7 @@ const mech = {
         //throw quicker and harder
         mech.grabRange = 225;
         mech.fieldShieldingScale = 2;
-        mech.fieldRegen *= 3;
+        mech.fieldRegen *= 2;
         mech.throwChargeRate = 3;
         mech.throwChargeMax = 140;
         mech.fieldDamage = 5; //passive field does extra damage
