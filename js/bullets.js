@@ -22,7 +22,7 @@ const b = {
     b.modNoAmmo = 0;
     b.modBulletsLastLonger = 1;
     b.modIsImmortal = false;
-    b.modSpores = false;
+    b.modSpores = 0;
     for (let i = 0; i < b.mods.length; i++) {
       b.mods[i].have = false;
     }
@@ -105,10 +105,10 @@ const b = {
     },
     {
       name: "Zoospore Vector",
-      description: "when an enemy dies it has a 40% chance to release a <strong>spore</strong>",
+      description: "when an enemy dies it has a 50% chance to release a <strong>spore</strong>",
       have: false,
       effect: () => {
-        b.modSpores = true; //good late game
+        b.modSpores = 0.5; //good late game maybe?
       }
     },
     // () => {

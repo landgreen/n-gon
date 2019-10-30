@@ -917,7 +917,7 @@ const mobs = {
         this.alive = false;
         if (this.dropPowerUp) {
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
-          if (b.modSpores && Math.random() < 0.4) b.spore(this) //spawn drone
+          if (Math.random() < b.modSpores) b.spore(this) //spawn drone
         }
 
       },
