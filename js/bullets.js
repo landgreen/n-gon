@@ -393,7 +393,7 @@ const b = {
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (mob[i].alive) {
         sub = Matter.Vector.sub(bullet[me].position, mob[i].position);
-        dist = Matter.Vector.magnitude(sub);
+        dist = Matter.Vector.magnitude(sub) - mob[i].radius;
         if (dist < radius) {
           mob[i].damage(dmg * damageScale);
           mob[i].locatePlayer();
@@ -1082,22 +1082,22 @@ const b = {
       }
     },
     {
-      name: "M80",
+      name: "grenade",
       description: "rapidly fire small bouncy bombs<br>explodes on contact or after 2 seconds",
       ammo: 0,
-      ammoPack: 45,
+      ammoPack: 20,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10 * b.modBulletSize, b.fireAttributes(dir, false));
-        b.fireProps(mech.crouch ? 15 : 8, mech.crouch ? 32 : 24, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 40 : 25, mech.crouch ? 40 : 30, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
-        bullet[me].totalCycles = 120;
+        bullet[me].totalCycles = 100;
         bullet[me].endCycle = game.cycle + Math.floor(120 * b.modBulletsLastLonger);
         bullet[me].restitution = 0.6;
-        bullet[me].explodeRad = 130;
+        bullet[me].explodeRad = 220;
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
         bullet[me].dmg = 0.25;
@@ -1111,8 +1111,8 @@ const b = {
       }
     },
     {
-      name: "grenades",
-      description: "fire a huge sticky bomb<br>explodes on contact or after 2 seconds",
+      name: "vacuum bomb",
+      description: "fire a huge bomb that pulls things in before it explodes<br>explodes after 2 seconds",
       ammo: 0,
       ammoPack: 5,
       have: false,
@@ -1134,15 +1134,44 @@ const b = {
         bullet[me].restitution = 0;
         bullet[me].friction = 1;
 
-        bullet[me].explodeRad = 380 + Math.floor(Math.random() * 60);
+        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 60);
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
         bullet[me].onDmg = function () {
-          this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
+          // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
         };
         bullet[me].do = function () {
           //extra gravity for harder arcs
           this.force.y += this.mass * 0.0022;
+
+          //before the explosion suck in stuff
+          if (game.cycle > this.endCycle - 40) {
+            const that = this
+
+            function suck(who, mag = 0.08, radius = that.explodeRad * 2) {
+              for (i = 0, len = who.length; i < len; i++) {
+                const sub = Matter.Vector.sub(that.position, who[i].position);
+                const dist = Matter.Vector.magnitude(sub);
+                if (dist < radius && dist > 100) {
+                  knock = Matter.Vector.mult(Matter.Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
+                  who[i].force.x += knock.x;
+                  who[i].force.y += knock.y;
+                }
+              }
+            }
+            if (game.cycle > this.endCycle - 5) {
+              suck(body, -0.08)
+              suck(mob, -0.08)
+              suck(powerUp, -0.08)
+            } else {
+              suck(body)
+              suck(mob)
+              suck(powerUp)
+            }
+
+          }
+
+
           //draw timer
           if (!(game.cycle % 10)) {
             if (this.isFlashOn) {
