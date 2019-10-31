@@ -3,6 +3,7 @@
 *****************************************************
 
 make power ups keep moving to player if the field is turned off
+  not sure how to do this without adding a constant check
 
 levels spawn by having the map aspects randomly fly into place
 

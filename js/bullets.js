@@ -105,10 +105,10 @@ const b = {
     },
     {
       name: "Zoospore Vector",
-      description: "when an enemy dies it has a 50% chance to release a <strong>spore</strong>",
+      description: "when an enemy dies it has a 20% chance to release <strong>spores</strong>",
       have: false,
       effect: () => {
-        b.modSpores = 0.5; //good late game maybe?
+        b.modSpores = 0.2; //good late game maybe?
       }
     },
     // () => {
