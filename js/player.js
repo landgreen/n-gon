@@ -914,7 +914,7 @@ const mech = {
     document.getElementById("field").innerHTML = mech.fieldUpgrades[mech.fieldMode].name //add field
   },
   fieldUpgrades: [{
-      name: "Field Emitter",
+      name: "field emitter",
       description: "lets you <strong>pick up</strong> and throw objects<br><strong>shields</strong> you from damage",
       effect: () => {
         mech.fieldMode = 0;
@@ -941,7 +941,7 @@ const mech = {
       }
     },
     {
-      name: "Time Dilation Field",
+      name: "time dilation field",
       description: "<strong>stop time</strong> while field is active<br> can fire while field is active",
       effect: () => {
         mech.fieldMode = 1;
@@ -1012,7 +1012,7 @@ const mech = {
       }
     },
     {
-      name: "Electrostatic Field",
+      name: "electrostatic field",
       description: "field does <strong>damage</strong> on contact<br> blocks are thrown at a higher velocity<br> increased field regeneration",
       effect: () => {
         mech.fieldMode = 2;
@@ -1085,7 +1085,7 @@ const mech = {
       }
     },
     {
-      name: "Negative Mass Field",
+      name: "negative mass field",
       description: "field nullifies <strong>gravity</strong><br> player can hold more massive objects<br>can fire while field is active",
       effect: () => {
         mech.fieldMode = 3;
@@ -1173,7 +1173,7 @@ const mech = {
       }
     },
     {
-      name: "Standing Wave Harmonics",
+      name: "standing wave harmonics",
       description: "oscillating shields always surround player<br> <span style='color:#a00;'>decreased</span> field regeneration",
       effect: () => {
         mech.fieldMode = 4;
@@ -1216,7 +1216,7 @@ const mech = {
       }
     },
     {
-      name: "Nano-Scale Manufacturing",
+      name: "nano-scale manufacturing",
       description: "excess field energy used to build <strong>drones</strong><br> increased field regeneration",
       effect: () => {
         mech.fieldMode = 5;
@@ -1247,7 +1247,7 @@ const mech = {
       }
     },
     {
-      name: "Phase Decoherence Field",
+      name: "phase decoherence field",
       description: "<strong>intangible</strong> while field is active<br>can't see or be seen outside field",
       effect: () => {
         mech.fieldMode = 6;

@@ -28,7 +28,7 @@ const b = {
     }
   },
   mods: [{
-      name: "Depleted Uranium Rounds",
+      name: "depleted uranium rounds",
       description: "your bullets are <strong>larger</strong> and do more physical damage",
       have: false,
       effect: () => {
@@ -40,7 +40,7 @@ const b = {
       }
     },
     {
-      name: "Auto-Loading Heuristics",
+      name: "auto-loading heuristics",
       description: "your <strong>rate of fire</strong> is 15% faster",
       have: false,
       effect: () => {
@@ -50,7 +50,7 @@ const b = {
       }
     },
     {
-      name: "Desublimated Ammunition",
+      name: "desublimated ammunition",
       description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
       have: false,
       effect: () => {
@@ -59,7 +59,7 @@ const b = {
       }
     },
     {
-      name: "Corrosion Resistant Topology",
+      name: "corrosion resistant topology",
       description: "your bullets <strong>last 40% longer</strong>",
       have: false,
       effect: () => {
@@ -68,17 +68,17 @@ const b = {
       }
     },
     {
-      name: "Anti-Matter Cores",
+      name: "anti-matter cores",
       description: "the radius of your <strong>explosions</strong> is doubled",
       have: false,
       effect: () => {
         //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
         //testing at 1.3: grenade(+0.3), missiles, flak, M80
-        b.modExplosionRadius = 2; //good for guns with explosions:
+        b.modExplosionRadius = 1.8; //good for guns with explosions:
       }
     },
     {
-      name: "Energy Siphon",
+      name: "energy siphon",
       description: "regenerate <strong>energy</strong> proportional to your damage done",
       have: false,
       effect: () => {
@@ -87,7 +87,7 @@ const b = {
       }
     },
     {
-      name: "Entropy Transfer",
+      name: "entropy transfer",
       description: "<strong>heal</strong> proportional to your damage done",
       have: false,
       effect: () => {
@@ -96,7 +96,7 @@ const b = {
       }
     },
     {
-      name: "Quantum Immortality",
+      name: "quantum immortality",
       description: "after you die continue in an alternate reality with randomized abilities",
       have: false,
       effect: () => {
@@ -104,11 +104,11 @@ const b = {
       }
     },
     {
-      name: "Zoospore Vector",
+      name: "zoospore vector",
       description: "when an enemy dies it has a 20% chance to release <strong>spores</strong>",
       have: false,
       effect: () => {
-        b.modSpores = 0.2; //good late game maybe?
+        b.modSpores = 0.20; //good late game maybe?
       }
     },
     // () => {
@@ -281,7 +281,7 @@ const b = {
       time: game.drawTime
     });
     let dist, sub, knock;
-    const dmg = b.dmgScale * radius * 0.01;
+    const dmg = b.dmgScale * radius * 0.009;
 
     const alertRange = 100 + radius * 2; //alert range
     //add alert to draw queue
@@ -757,8 +757,8 @@ const b = {
       //     }
       //   }
     }, {
-      name: "one shot",
-      description: "fire a huge bullet with high recoil<br>effective at long distances",
+      name: "kinetic slugs",
+      description: "fire a huge rod with high recoil<br>effective at long distances",
       ammo: 0,
       ammoPack: 5,
       have: false,
@@ -781,7 +781,7 @@ const b = {
       }
     },
     {
-      name: "rapid fire",
+      name: "minigun",
       description: "fire a stream of bullets",
       ammo: 0,
       ammoPack: 105,
@@ -882,7 +882,7 @@ const b = {
       }
     },
     {
-      name: "spray",
+      name: "shotgun",
       description: "fire a burst of bullets with high recoil<br>more effective at close range",
       ammo: 0,
       ammoPack: 8,
@@ -910,7 +910,7 @@ const b = {
       }
     },
     {
-      name: "needles",
+      name: "fléchettes",
       description: "fire a narrow projectile<br>effective at long distances",
       ammo: 0,
       ammoPack: 19,
@@ -925,7 +925,7 @@ const b = {
         }
         b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 45 : 37, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + Math.floor(180 * b.modBulletsLastLonger);
-        bullet[me].dmg = mech.crouch ? 1.4 : 1;
+        bullet[me].dmg = mech.crouch ? 1.5 : 1;
         b.drawOneBullet(bullet[me].vertices);
         bullet[me].do = function () {
           //low gravity
@@ -1042,14 +1042,14 @@ const b = {
       name: "flak",
       description: "fire a cluster of explosive projectiles<br>explode on contact or after half a second",
       ammo: 0,
-      ammoPack: 18,
+      ammoPack: 20,
       have: false,
       fire() {
         b.muzzleFlash(30);
         const totalBullets = 5
         const angleStep = (mech.crouch ? 0.06 : 0.15) / totalBullets
         const SPEED = mech.crouch ? 27 : 20
-        const CD = mech.crouch ? 50 : 20
+        const CD = mech.crouch ? 30 : 15
         const END = Math.floor((mech.crouch ? 27 : 18) * b.modBulletsLastLonger);
         let dir = mech.angle - angleStep * totalBullets / 2;
         const side1 = 17 * b.modBulletSize
@@ -1060,12 +1060,12 @@ const b = {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), side1, side2, b.fireAttributes(dir));
           b.fireProps(CD, SPEED + 25 * Math.random() - i, dir, me); //cd , speed
-
-          //Matter.Body.setDensity(bullet[me], 0.00001);
+          // Matter.Body.setDensity(bullet[me], 0.005);
           bullet[me].endCycle = i + game.cycle + END
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
-          bullet[me].explodeRad = 75 + (Math.random() - 0.5) * 50;
+          // bullet[me].dmg = 0.15;
+          bullet[me].explodeRad = 45 + (Math.random() - 0.5) * 50;
           bullet[me].onEnd = b.explode;
           bullet[me].onDmg = function () {
             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -1082,51 +1082,51 @@ const b = {
       }
     },
     {
-      name: "grenade",
-      description: "rapidly fire small bouncy bombs<br>explodes on contact or after 2 seconds",
+      name: "grenades",
+      description: "fire a bomb that explodes on contact or after 1.6 seconds",
       ammo: 0,
-      ammoPack: 20,
+      ammoPack: 17,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10 * b.modBulletSize, b.fireAttributes(dir, false));
-        b.fireProps(mech.crouch ? 40 : 25, mech.crouch ? 40 : 30, dir, me); //cd , speed
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 15 * b.modBulletSize, b.fireAttributes(dir, false));
+        b.fireProps(mech.crouch ? 45 : 32, mech.crouch ? 41 : 32, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].totalCycles = 100;
-        bullet[me].endCycle = game.cycle + Math.floor(120 * b.modBulletsLastLonger);
-        bullet[me].restitution = 0.6;
+        bullet[me].endCycle = game.cycle + Math.floor(70 * b.modBulletsLastLonger);
+        bullet[me].restitution = 0.25;
         bullet[me].explodeRad = 220;
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
-        bullet[me].dmg = 0.25;
+        bullet[me].dmg = 0.5;
         bullet[me].onDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
         };
         bullet[me].do = function () {
           //extra gravity for harder arcs
-          this.force.y += this.mass * 0.0025;
+          this.force.y += this.mass * 0.0022;
         };
       }
     },
     {
       name: "vacuum bomb",
-      description: "fire a huge bomb that pulls things in before it explodes<br>explodes after 2 seconds",
+      description: "fire a huge bomb that sucks before it explodes<br>2 second fuse",
       ammo: 0,
       ammoPack: 5,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 22 * b.modBulletSize, b.fireAttributes(dir, false));
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 26 * b.modBulletSize, b.fireAttributes(dir, false));
         bullet[me].radius = 22; //used from drawing timer
-        b.fireProps(mech.crouch ? 60 : 40, mech.crouch ? 38 : 30, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 80 : 50, mech.crouch ? 37 : 0, dir, me); //cd , speed
 
         b.drawOneBullet(bullet[me].vertices);
-        Matter.Body.setDensity(bullet[me], 0.000001);
-        bullet[me].endCycle = game.cycle + Math.floor(140 * b.modBulletsLastLonger);
-        bullet[me].endCycleLength = Math.floor(140 * b.modBulletsLastLonger);
+        // Matter.Body.setDensity(bullet[me], 0.001);
+        bullet[me].endCycle = game.cycle + Math.floor(120 * b.modBulletsLastLonger);
+        bullet[me].endCycleLength = bullet[me].endCycle - game.cycle
         // bullet[me].restitution = 0.3;
         // bullet[me].frictionAir = 0.01;
         // bullet[me].friction = 0.15;
@@ -1134,7 +1134,7 @@ const b = {
         bullet[me].restitution = 0;
         bullet[me].friction = 1;
 
-        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 60);
+        bullet[me].explodeRad = 380 + Math.floor(Math.random() * 60);
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
         bullet[me].onDmg = function () {
@@ -1145,14 +1145,15 @@ const b = {
           this.force.y += this.mass * 0.0022;
 
           //before the explosion suck in stuff
-          if (game.cycle > this.endCycle - 40) {
+          if (game.cycle > this.endCycle - 35) {
             const that = this
+            let mag = 0.1
 
-            function suck(who, mag = 0.08, radius = that.explodeRad * 2) {
+            function suck(who, radius = that.explodeRad * 2) {
               for (i = 0, len = who.length; i < len; i++) {
                 const sub = Matter.Vector.sub(that.position, who[i].position);
                 const dist = Matter.Vector.magnitude(sub);
-                if (dist < radius && dist > 100) {
+                if (dist < radius && dist > 150) {
                   knock = Matter.Vector.mult(Matter.Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
                   who[i].force.x += knock.x;
                   who[i].force.y += knock.y;
@@ -1160,17 +1161,23 @@ const b = {
               }
             }
             if (game.cycle > this.endCycle - 5) {
-              suck(body, -0.08)
-              suck(mob, -0.08)
-              suck(powerUp, -0.08)
+              mag = -0.22
+              suck(body)
+              suck(mob)
+              suck(powerUp)
             } else {
+              mag = 0.1
               suck(body)
               suck(mob)
               suck(powerUp)
             }
 
+            //keep bomb in place
+            Matter.Body.setVelocity(this, {
+              x: 0,
+              y: 0
+            });
           }
-
 
           //draw timer
           if (!(game.cycle % 10)) {
@@ -1387,7 +1394,7 @@ const b = {
             }
           }
         })
-        b.fireProps(mech.crouch ? 22 : 15, mech.crouch ? 26 : 1, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 19 : 15, mech.crouch ? 30 : 1, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
       }
     },

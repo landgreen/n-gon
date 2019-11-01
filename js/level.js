@@ -16,7 +16,7 @@ const level = {
       // b.giveGuns("all", 1000)
       // b.giveGuns(3) // set a starting gun for testing
       // mech.fieldUpgrades[2].effect(); //give a field power up for testing
-      b.giveMod(8)
+      // b.giveMod(8)
 
       this.intro(); //starting level
       // this.testingMap();
