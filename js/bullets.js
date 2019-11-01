@@ -1181,7 +1181,7 @@ const b = {
             });
             //draw suck
             const radius = 9 * this.explodeRad * (this.endCycle - game.cycle) / this.endCycleLength
-            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
             ctx.fill();
