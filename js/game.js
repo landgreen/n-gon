@@ -297,9 +297,9 @@ const game = {
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+        if (!powerUps.haveAllMods) powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
       }
       if (keys[89]) { //add all mods with y
         for (let i = 0; i < b.mods.length; i++) {

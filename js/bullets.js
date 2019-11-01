@@ -124,7 +124,7 @@ const b = {
   },
   activeGun: null, //current gun in use by player
   inventoryGun: 0,
-  inventory: [0], //list of what guns player has  // 0 starts with basic gun
+  inventory: [], //list of what guns player has  // 0 starts with basic gun
   giveGuns(gun = "all", ammoPacks = 2) {
     if (gun === "all") {
       b.activeGun = 0;
@@ -1085,15 +1085,15 @@ const b = {
       name: "grenades",
       description: "fire a bomb that explodes on contact or after 1.6 seconds",
       ammo: 0,
-      ammoPack: 17,
+      ammoPack: 14,
       have: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 15 * b.modBulletSize, b.fireAttributes(dir, false));
-        b.fireProps(mech.crouch ? 45 : 32, mech.crouch ? 41 : 32, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 40 : 25, mech.crouch ? 41 : 32, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
-        Matter.Body.setDensity(bullet[me], 0.000001);
+        // Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].totalCycles = 100;
         bullet[me].endCycle = game.cycle + Math.floor(70 * b.modBulletsLastLonger);
         bullet[me].restitution = 0.25;
@@ -1112,7 +1112,7 @@ const b = {
     },
     {
       name: "vacuum bomb",
-      description: "fire a huge bomb that sucks before it explodes<br>2 second fuse",
+      description: "fire a huge bomb that sucks before it explodes",
       ammo: 0,
       ammoPack: 5,
       have: false,
@@ -1125,7 +1125,7 @@ const b = {
 
         b.drawOneBullet(bullet[me].vertices);
         // Matter.Body.setDensity(bullet[me], 0.001);
-        bullet[me].endCycle = game.cycle + Math.floor(120 * b.modBulletsLastLonger);
+        bullet[me].endCycle = game.cycle + Math.floor((mech.crouch ? 100 : 150) * b.modBulletsLastLonger);
         bullet[me].endCycleLength = bullet[me].endCycle - game.cycle
         // bullet[me].restitution = 0.3;
         // bullet[me].frictionAir = 0.01;
@@ -1145,7 +1145,7 @@ const b = {
           this.force.y += this.mass * 0.0022;
 
           //before the explosion suck in stuff
-          if (game.cycle > this.endCycle - 35) {
+          if (game.cycle > this.endCycle - 35 && !mech.isBodiesAsleep) {
             const that = this
             let mag = 0.1
 
@@ -1165,11 +1165,13 @@ const b = {
               suck(body)
               suck(mob)
               suck(powerUp)
+              suck([player])
             } else {
               mag = 0.1
               suck(body)
               suck(mob)
               suck(powerUp)
+              suck([player])
             }
 
             //keep bomb in place
@@ -1177,6 +1179,12 @@ const b = {
               x: 0,
               y: 0
             });
+            //draw suck
+            const radius = 9 * this.explodeRad * (this.endCycle - game.cycle) / this.endCycleLength
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
+            ctx.fill();
           }
 
           //draw timer

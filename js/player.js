@@ -374,26 +374,28 @@ const mech = {
       }
 
       function randomizeHealth() {
-        mech.health = 0.5 + 0.5 * Math.random()
+        mech.health = 0.5 + 1 * Math.random()
         mech.displayHealth();
       }
 
       function randomizeGuns() {
+        const length = b.inventory.length
+        //removes guns and ammo  
+        b.inventory = [];
         b.activeGun = null;
-        b.inventory = []; //removes guns and ammo  
+        b.inventoryGun = 0;
         for (let i = 0, len = b.guns.length; i < len; ++i) {
           b.guns[i].have = false;
           if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
         }
-        if (game.levelsCleared > 0 && Math.random() < 0.95) powerUps.gun.effect();
-        if (game.levelsCleared > 1 && Math.random() < 0.89) powerUps.gun.effect();
-        if (game.levelsCleared > 3 && Math.random() < 0.6) powerUps.gun.effect();
-        if (game.levelsCleared > 5 && Math.random() < 0.5) powerUps.gun.effect();
-        if (game.levelsCleared > 7 && Math.random() < 0.4) powerUps.gun.effect();
+        for (let i = 0; i < length; i++) {
+          powerUps.gun.effect();
+        }
+
         //randomize ammo
         for (let i = 0, len = b.inventory.length; i < len; i++) {
           if (b.guns[b.inventory[i]].ammo !== Infinity) {
-            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(2.2 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.15)))
+            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(5 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.25)))
           }
         }
         game.makeGunHUD(); //update gun HUD
