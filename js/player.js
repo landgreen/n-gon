@@ -439,7 +439,7 @@ const mech = {
       document.getElementById("fade-out").style.opacity = 1; //slowly fades out
       setTimeout(function () {
         game.splashReturn();
-      }, 5000);
+      }, 3000);
     }
   },
   health: 0,
@@ -912,12 +912,12 @@ const mech = {
   },
   hold() {},
   fieldText() {
-    game.makeTextLog(`<strong style='font-size:30px;'>${mech.fieldUpgrades[mech.fieldMode].name}</strong><br> <span class='faded'>(right click or space bar)</span><p>${mech.fieldUpgrades[mech.fieldMode].description}</p>`, 1200);
+    game.makeTextLog(`<strong style='font-size:30px;'>${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'>(right click or space bar)</span><br><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 1000);
     document.getElementById("field").innerHTML = mech.fieldUpgrades[mech.fieldMode].name //add field
   },
   fieldUpgrades: [{
       name: "field emitter",
-      description: "lets you <strong>pick up</strong> and throw objects<br><strong>shields</strong> you from damage",
+      description: "<strong class='color-f'>shields</strong> you from <span class='color-d'>damage</span><br>lets you <strong>pick up</strong> and throw objects",
       effect: () => {
         mech.fieldMode = 0;
         mech.fieldText();
@@ -944,7 +944,7 @@ const mech = {
     },
     {
       name: "time dilation field",
-      description: "<strong>stop time</strong> while field is active<br> can fire while field is active",
+      description: "<strong style='letter-spacing: 6px;'>stop time</strong>&nbsp; while field is active<br> <em>can fire while field is active</em>",
       effect: () => {
         mech.fieldMode = 1;
         mech.fieldText();
@@ -1015,7 +1015,7 @@ const mech = {
     },
     {
       name: "electrostatic field",
-      description: "field does <strong>damage</strong> on contact<br> blocks are thrown at a higher velocity<br> increased field regeneration",
+      description: "field does <strong class='color-d'>damage</strong> on contact<br> blocks are thrown at a higher velocity<br> increased <span class='color-f'>field</span> regeneration",
       effect: () => {
         mech.fieldMode = 2;
         mech.fieldText();
@@ -1088,7 +1088,7 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "field nullifies <strong>gravity</strong><br> player can hold more massive objects<br>can fire while field is active",
+      description: "field nullifies &nbsp;<strong style='letter-spacing: 6px;'>gravity</strong><br> player can hold more massive objects<br><em>can fire while field is active</em>",
       effect: () => {
         mech.fieldMode = 3;
         mech.fieldText();
@@ -1176,12 +1176,12 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "oscillating shields always surround player<br> <span style='color:#a00;'>decreased</span> field regeneration",
+      description: "you are surrounded by oscillating <strong style='color: #08f;'>shields</strong><br> <span style='color:#a00;'>decreased</span> field regeneration",
       effect: () => {
         mech.fieldMode = 4;
         mech.fieldText();
         mech.setHoldDefaults();
-        mech.fieldRegen *= 0.25;
+        mech.fieldRegen *= 0.3;
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1219,7 +1219,7 @@ const mech = {
     },
     {
       name: "nano-scale manufacturing",
-      description: "excess field energy used to build <strong>drones</strong><br> increased field regeneration",
+      description: "excess field energy used to build <strong class='color-b'>drones</strong><br> increased <span class='color-f'>field</span> regeneration",
       effect: () => {
         mech.fieldMode = 5;
         mech.fieldText();
@@ -1250,7 +1250,7 @@ const mech = {
     },
     {
       name: "phase decoherence field",
-      description: "<strong>intangible</strong> while field is active<br>can't see or be seen outside field",
+      description: "<strong>intangible</strong> while field is active<br><em style='opacity: 0.6;'>can't see or be seen outside field</em>",
       effect: () => {
         mech.fieldMode = 6;
         mech.fieldText();

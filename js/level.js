@@ -14,7 +14,7 @@ const level = {
     if (game.levelsCleared === 0) {
       // game.levelsCleared = 16; //for testing to simulate possible mobs spawns
       // b.giveGuns("all", 1000)
-      // b.giveGuns(3) // set a starting gun for testing
+      // b.giveGuns(9) // set a starting gun for testing
       // mech.fieldUpgrades[2].effect(); //give a field power up for testing
       // b.giveMod(8)
 
@@ -36,8 +36,8 @@ const level = {
     game.draw.setPaths();
   },
   difficultyIncrease() {
-    game.dmgScale += 0.35; //damage done by mobs increases each level
-    b.dmgScale *= 0.92; //damage done by player decreases each level
+    game.dmgScale += 0.3; //damage done by mobs increases each level
+    b.dmgScale *= 0.94; //damage done by player decreases each level
     game.accelScale *= 1.05 //mob acceleration increases each level
     game.lookFreqScale *= 0.95 //mob cycles between looks decreases each level
     game.CDScale *= 0.95 //mob CD time decreases each level
@@ -122,7 +122,8 @@ const level = {
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.focuser(800, -1150);
     // spawn.groupBoss(-600, -550);
-    spawn.starter(800, -150, 100);
+    spawn.striker(800, -150);
+    // spawn.beamer(800, -150);
     // spawn.grower(800, -250);
     // spawn.blinker(800, -250, 40);
     // spawn.groupBoss(900, -1070);
@@ -797,7 +798,7 @@ const level = {
     spawn.mapRect(1600, -400, 1500, 500); //long center building
     spawn.mapRect(1345, -1100, 250, 25); //left platform
     spawn.mapRect(1755, -1100, 250, 25); //right platform
-    spawn.mapRect(1300, -1850, 750, 50); //left higher platform
+    spawn.mapRect(1300, -1850, 780, 50); //left higher platform
     spawn.mapRect(1300, -2150, 50, 350); //left higher platform left edge wall
     spawn.mapRect(1300, -2150, 450, 50); //left higher platform roof
     spawn.mapRect(1500, -1860, 100, 50); //ground bump wall
@@ -1554,7 +1555,7 @@ const level = {
   },
   levelAnnounce() {
     document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
-    game.makeTextLog(`<div style='font-size: 25px;'>level ${game.levelsCleared} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
+    // game.makeTextLog(`<div style='font-size: 25px;'>level ${game.levelsCleared} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
     // if (game.levelsCleared === 0) text = "";
     // text = "Level " + (game.levelsCleared + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";
 
@@ -1572,7 +1573,7 @@ const level = {
     for (let i = 0; i < body.length; i++) {
       //body[i].collisionFilter.group = 0;
       body[i].collisionFilter.category = 0x010000;
-      body[i].collisionFilter.mask = 0x011111;
+      body[i].collisionFilter.mask = 0x111111;
       body[i].classType = "body";
       World.add(engine.world, body[i]); //add to world
     }

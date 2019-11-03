@@ -252,6 +252,8 @@ const mobs = {
           ctx.lineWidth = 1;
           ctx.stroke();
           ctx.setLineDash([]);
+          ctx.fillStyle = "rgba(255,0,170,0.03)";
+          ctx.fill();
         }
       },
       laser() {

@@ -1,6 +1,15 @@
 // game Object ********************************************************
 //*********************************************************************
 const game = {
+  // difficulty: {
+  //   damageDone: 1,
+  //   damageTaken: 1,
+  //   mobQuickness: 1,
+  //   powerUpDropRate: 1,
+  //   fallingDamage: false,
+  //   explosiveDamage: true,
+  //   unlimitedAmmo: false,
+  // },
   loop() {
     game.cycle++; //tracks game cycles
     mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
@@ -710,13 +719,12 @@ const game = {
       }
     },
     mapFill: "#444",
-    bodyFill: "#999",
+    bodyFill: "rgba(140,140,140,0.85)", //"#999",
     bodyStroke: "#222",
     drawMapPath() {
       ctx.fillStyle = this.mapFill;
       ctx.fill(this.mapPath);
     },
-
     seeEdges() {
       const eye = {
         x: mech.pos.x + 20 * Math.cos(mech.angle),

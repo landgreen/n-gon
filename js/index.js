@@ -2,7 +2,19 @@
 /* TODO:  *******************************************
 *****************************************************
 
-make power ups keep moving to player if the field is turned off
+add Boss levels
+  
+
+add modular difficulty settings
+  take reduced dmg
+  slower mob look / CD
+  more drops
+  fewer mobs
+    make a new var to scale number of mobs and stop using levels cleared var
+
+get text output to show multiple notifications at once by queuing them vertically
+
+make power ups keep moving to player if the pickup field is turned off before they get picked up
   not sure how to do this without adding a constant check
 
 levels spawn by having the map aspects randomly fly into place
