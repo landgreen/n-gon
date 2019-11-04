@@ -1003,12 +1003,14 @@ const b = {
                 suck(body)
                 suck(mob)
                 suck(powerUp)
+                suck(bullet)
                 suck([player])
               } else {
                 mag = 0.1
                 suck(body)
                 suck(mob)
                 suck(powerUp)
+                suck(bullet)
                 suck([player])
               }
               //keep bomb in place

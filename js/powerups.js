@@ -11,7 +11,7 @@ const powerUps = {
       let heal = (this.size / 40) ** 2
       heal = Math.min(1 - mech.health, heal)
       mech.addHealth(heal);
-      if (!game.lastLogTime && heal > 0) game.makeTextLog("<span style='font-size:150;'> <span class='color-h'>heal</span>  " + (heal * 100).toFixed(0) + "%</span>", 300)
+      if (!game.lastLogTime && heal > 0) game.makeTextLog("<span style='font-size:220;'> <span class='color-h'>heal</span>  " + (heal * 100).toFixed(0) + "%</span>", 300)
     }
   },
   ammo: {
@@ -41,13 +41,13 @@ const powerUps = {
       }
       if (target.ammo === Infinity) {
         mech.fieldMeter = 1;
-        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:150;'><span class='color-f'>+energy</span></span>", 300);
+        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:200;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
         const ammo = Math.ceil((target.ammoPack * (0.6 + 0.04 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
-        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:150;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
+        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:200;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
       }
     }
   },
@@ -129,7 +129,7 @@ const powerUps = {
         const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 2);
         b.guns[ammoTarget].ammo += ammo;
         game.updateGunHUD();
-        game.makeTextLog("<span style='font-size:150;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
+        game.makeTextLog("<span style='font-size:200;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
       }
     }
   },

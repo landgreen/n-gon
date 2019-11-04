@@ -374,7 +374,8 @@ const mech = {
       }
 
       function randomizeHealth() {
-        mech.health = 0.5 + 1 * Math.random()
+        mech.health = 0.5 + Math.random()
+        if (mech.health > 1) mech.health = 1;
         mech.displayHealth();
       }
 
@@ -720,22 +721,37 @@ const mech = {
     //draw field
     const range = this.grabRange - 20;
     ctx.beginPath();
-    ctx.arc(this.pos.x, this.pos.y, range, this.angle - Math.PI * this.fieldArc, this.angle + Math.PI * this.fieldArc, false);
+    ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
+    ctx.strokeStyle = "#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
+    ctx.lineWidth = 2;
+    ctx.lineCap = "butt"
+    ctx.stroke();
     let eye = 13;
-    ctx.lineTo(mech.pos.x + eye * Math.cos(this.angle), mech.pos.y + eye * Math.sin(this.angle));
-    if (this.holdingTarget) {
-      ctx.fillStyle = "rgba(110,170,200," + (0.05 + 0.1 * Math.random()) + ")";
+    let aMag = 0.75 * Math.PI * mech.fieldArc
+    let a = mech.angle + aMag
+    let cp1x = mech.pos.x + 0.6 * range * Math.cos(a)
+    let cp1y = mech.pos.y + 0.6 * range * Math.sin(a)
+    ctx.quadraticCurveTo(cp1x, cp1y, mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle))
+    a = mech.angle - aMag
+    cp1x = mech.pos.x + 0.6 * range * Math.cos(a)
+    cp1y = mech.pos.y + 0.6 * range * Math.sin(a)
+    ctx.quadraticCurveTo(cp1x, cp1y, mech.pos.x + 1 * range * Math.cos(mech.angle - Math.PI * mech.fieldArc), mech.pos.y + 1 * range * Math.sin(mech.angle - Math.PI * mech.fieldArc))
+    // ctx.lineTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
+
+    if (mech.holdingTarget) {
+      ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.1 + 0.05 * Math.random())) + ")";
     } else {
-      ctx.fillStyle = "rgba(110,170,200," + (0.15 + 0.15 * Math.random()) + ")";
+      ctx.fillStyle = "rgba(110,170,200," + (0.07 + mech.fieldMeter * (0.2 + 0.15 * Math.random())) + ")";
     }
     ctx.fill();
+
     //draw random lines in field for cool effect
-    let offAngle = this.angle + 2 * Math.PI * this.fieldArc * (Math.random() - 0.5);
+    let offAngle = mech.angle + 1.7 * Math.PI * mech.fieldArc * (Math.random() - 0.5);
     ctx.beginPath();
     eye = 15;
-    ctx.moveTo(mech.pos.x + eye * Math.cos(this.angle), mech.pos.y + eye * Math.sin(this.angle));
-    ctx.lineTo(this.pos.x + range * Math.cos(offAngle), this.pos.y + range * Math.sin(offAngle));
-    ctx.strokeStyle = "rgba(120,170,255,0.4)";
+    ctx.moveTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
+    ctx.lineTo(mech.pos.x + range * Math.cos(offAngle), mech.pos.y + range * Math.sin(offAngle));
+    ctx.strokeStyle = "rgba(120,170,255,0.6)";
     ctx.lineWidth = 1;
     ctx.stroke();
   },
@@ -944,7 +960,7 @@ const mech = {
     },
     {
       name: "time dilation field",
-      description: "<strong style='letter-spacing: 6px;'>stop time</strong>&nbsp; while field is active<br> <em>can fire while field is active</em>",
+      description: "<strong style='letter-spacing: 3px;'>stop time</strong> while field is active<br> <em>can fire while field is active</em>",
       effect: () => {
         mech.fieldMode = 1;
         mech.fieldText();
@@ -1059,10 +1075,12 @@ const mech = {
             ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - arc, mech.angle + arc, false);
             ctx.lineTo(mech.pos.x + 13 * Math.cos(mech.angle), mech.pos.y + 13 * Math.sin(mech.angle));
             if (mech.holdingTarget) {
-              ctx.fillStyle = "rgba(255,50,150," + (0.05 + 0.1 * Math.random()) + ")";
+              ctx.fillStyle = "rgba(255,50,150," + (0.01 + mech.fieldMeter * (0.1 + 0.1 * Math.random())) + ")";
             } else {
-              ctx.fillStyle = "rgba(255,50,150," + (0.13 + 0.18 * Math.random()) + ")";
+              ctx.fillStyle = "rgba(255,50,150," + (0.02 + mech.fieldMeter * (0.18 + 0.18 * Math.random())) + ")";
             }
+            // ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.08 + 0.1 * Math.random())) + ")";
+            // ctx.fillStyle = "rgba(110,170,200," + (0.06 + mech.fieldMeter * (0.1 + 0.18 * Math.random())) + ")";
             ctx.fill();
 
             //draw random lines in field for cool effect
@@ -1088,7 +1106,7 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "field nullifies &nbsp;<strong style='letter-spacing: 6px;'>gravity</strong><br> player can hold more massive objects<br><em>can fire while field is active</em>",
+      description: "field nullifies &nbsp;<strong style='letter-spacing: 15px;'>gravity</strong><br> player can hold more massive objects<br><em>can fire while field is active</em>",
       effect: () => {
         mech.fieldMode = 3;
         mech.fieldText();
@@ -1201,7 +1219,7 @@ const mech = {
             const grabRange2 = 85 + 70 * Math.sin(mech.cycle / 37)
             const grabRange3 = 80 + 80 * Math.sin(mech.cycle / 47)
             const netGrabRange = Math.max(grabRange1, grabRange2, grabRange3)
-            ctx.fillStyle = "rgba(110,170,200," + (0.15 + 0.15 * Math.random()) + ")";
+            ctx.fillStyle = "rgba(110,170,200," + (0.04 + mech.fieldMeter * (0.12 + 0.13 * Math.random())) + ")";
             ctx.beginPath();
             ctx.arc(mech.pos.x, mech.pos.y, grabRange1, 0, 2 * Math.PI);
             ctx.fill();
@@ -1272,7 +1290,7 @@ const mech = {
               player.collisionFilter.mask = 0x000001 //0x010011 is normals
 
               ctx.beginPath();
-              ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
+              ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange / (0.3 + 0.7 * mech.fieldMeter), 0, 2 * Math.PI);
               ctx.globalCompositeOperation = "destination-in"; //in or atop
               ctx.fillStyle = "rgba(255,255,255,0.25)";
               ctx.fill();

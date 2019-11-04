@@ -2,6 +2,8 @@
 /* TODO:  *******************************************
 *****************************************************
 
+add a key that player picks up and needs to set on the exit door to open it
+
 add Boss levels
   
 

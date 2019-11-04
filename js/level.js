@@ -663,7 +663,10 @@ const level = {
     spawn.bodyRect(4700, -350, 50, 200, 0.9);
     spawn.bodyRect(4900, -100, 300, 300, 0.7);
     spawn.boost(5350, 275, 2850);
-    spawn.mapRect(6050, -700, 600, 1200);
+    // spawn.mapRect(6050, -700, 450, 1200);
+    spawn.mapRect(6050, -1060, 450, 1560);
+    spawn.mapVertex(6275, -2100, "0 0 450 0 300 -2500 150 -2500")
+
     //right tall tower
     spawn.mapRect(3700, -3200, 100, 800);
     spawn.mapRect(4700, -2910, 100, 510);
