@@ -739,9 +739,9 @@ const mech = {
     // ctx.lineTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
 
     if (mech.holdingTarget) {
-      ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.1 + 0.05 * Math.random())) + ")";
+      ctx.fillStyle = "rgba(110,170,200," + (mech.fieldMeter * (0.05 + 0.05 * Math.random())) + ")";
     } else {
-      ctx.fillStyle = "rgba(110,170,200," + (0.07 + mech.fieldMeter * (0.2 + 0.15 * Math.random())) + ")";
+      ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.15 + 0.15 * Math.random())) + ")";
     }
     ctx.fill();
 
@@ -1237,7 +1237,7 @@ const mech = {
     },
     {
       name: "nano-scale manufacturing",
-      description: "excess field energy used to build <strong class='color-b'>drones</strong><br> increased <span class='color-f'>field</span> regeneration",
+      description: "excess field <span class='color-f'>energy</span> used to build <strong class='color-b'>drones</strong><br> increased <span class='color-f'>energy</span> regeneration",
       effect: () => {
         mech.fieldMode = 5;
         mech.fieldText();
