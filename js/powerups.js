@@ -11,7 +11,7 @@ const powerUps = {
       let heal = (this.size / 40) ** 2
       heal = Math.min(1 - mech.health, heal)
       mech.addHealth(heal);
-      if (!game.lastLogTime && heal > 0) game.makeTextLog("<span style='font-size:220;'> <span class='color-h'>heal</span>  " + (heal * 100).toFixed(0) + "%</span>", 300)
+      if (!game.lastLogTime && heal > 0) game.makeTextLog("<span style='font-size:115%;'> <strong class='color-h' style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
     }
   },
   ammo: {
@@ -41,13 +41,13 @@ const powerUps = {
       }
       if (target.ammo === Infinity) {
         mech.fieldMeter = 1;
-        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:200;'><span class='color-f'>+energy</span></span>", 300);
+        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
         const ammo = Math.ceil((target.ammoPack * (0.6 + 0.04 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
-        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:200;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
+        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
       }
     }
   },
@@ -91,16 +91,16 @@ const powerUps = {
       }
       //give a random mod from the mods I don't have
       if (options.length > 0) {
+        if (options.length === 1) powerUps.haveAllMods = true
         let newMod = options[Math.floor(Math.random() * options.length)]
         b.giveMod(newMod)
-        game.makeTextLog(`<strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
-        if (options.length < 2) powerUps.haveAllMods = true
+        game.makeTextLog(`<div class="circle mod"></div> &nbsp;<strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
       }
     }
   },
   gun: {
     name: "gun",
-    color: "#37a",
+    color: "#26a",
     size() {
       return 35;
     },
@@ -118,7 +118,7 @@ const powerUps = {
       if (options.length > 0) {
         let newGun = options[Math.floor(Math.random() * options.length)];
         if (b.activeGun === null) b.activeGun = newGun //if no active gun switch to new gun
-        game.makeTextLog(`<strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br><span class='faded'>(left click)</span><br><br>${b.guns[newGun].description}`, 900);
+        game.makeTextLog(`<div class="circle gun "></div> &nbsp; <strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br><span class='faded'>(left click)</span><br><br>${b.guns[newGun].description}`, 900);
         b.guns[newGun].have = true;
         b.inventory.push(newGun);
         b.guns[newGun].ammo += b.guns[newGun].ammoPack * 2;
@@ -129,7 +129,7 @@ const powerUps = {
         const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 2);
         b.guns[ammoTarget].ammo += ammo;
         game.updateGunHUD();
-        game.makeTextLog("<span style='font-size:200;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
+        game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
       }
     }
   },
@@ -146,7 +146,7 @@ const powerUps = {
       powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.008 && !powerUps.haveAllMods) {
+    if (Math.random() < 0.007 && !powerUps.haveAllMods) {
       powerUps.spawn(x, y, "mod");
       return;
     }
@@ -160,11 +160,11 @@ const powerUps = {
       powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.35 && !powerUps.haveAllMods) {
       powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.27) {
+    } else if (Math.random() < 0.25) {
       powerUps.spawn(x, y, "field");
-    } else if (Math.random() < 0.04 * (7 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    } else if (Math.random() < 0.05 * (7 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun")
-    } else if (mech.health < 0.5) {
+    } else if (mech.health < 0.6) {
       powerUps.spawn(x, y, "heal");
     } else {
       powerUps.spawn(x, y, "ammo");

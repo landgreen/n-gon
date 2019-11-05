@@ -196,12 +196,16 @@ summary {
   user-select: none;
 }
 
+em {
+  opacity: 0.7;
+}
+
 .color-f {
   color: #0bf;
 }
 
 .color-b {
-  color: #023;
+  color: #024;
 }
 
 .color-d {
@@ -227,6 +231,27 @@ summary {
   font-size: 90%;
 }
 
+.circle {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.field {
+  background: #0bf;
+}
+
+.mod {
+  background: #96e;
+}
+
+.gun {
+  background: #149;
+}
+
+
+
 .box {
   padding: 3px 8px 3px 8px;
   border: 2px solid #444;
@@ -234,9 +259,6 @@ summary {
   background-color: rgba(255, 255, 255, 0.5);
 }
 
-em {
-  opacity: 0.7;
-}
 
 .wrapper {
   display: grid;

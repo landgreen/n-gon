@@ -359,11 +359,33 @@ const mech = {
   alive: true,
   death() {
     if (b.modIsImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
-      //remove mods
-      b.setModDefaults();
-      game.updateModHUD();
       spawn.setSpawnList(); //new mob types
       game.clearNow = true; //triggers a map reset
+
+      //count mods
+      let totalMods = -2; //lose the immortality mod and one more, so -2 
+      for (let i = 0; i < b.mods.length; i++) {
+        if (b.mods[i].have) totalMods++
+      }
+
+      function randomizeMods() {
+        b.setModDefaults(); //remove all mods
+        for (let i = 0; i < totalMods; i++) {
+          //find what mods I don't have
+          let options = [];
+          for (let i = 0; i < b.mods.length; i++) {
+            if (!b.mods[i].have) options.push(i);
+          }
+          //add a new mods
+          if (options.length > 0) {
+            const choose = Math.floor(Math.random() * options.length)
+            let newMod = options[choose]
+            b.giveMod(newMod)
+            options.splice(choose, 1);
+          }
+        }
+        game.updateModHUD();
+      }
 
       function randomizeField() {
         if (game.levelsCleared > 5 && Math.random() < 0.9) {
@@ -396,7 +418,7 @@ const mech = {
         //randomize ammo
         for (let i = 0, len = b.inventory.length; i < len; i++) {
           if (b.guns[b.inventory[i]].ammo !== Infinity) {
-            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(5 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.25)))
+            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(6 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.3)))
           }
         }
         game.makeGunHUD(); //update gun HUD
@@ -406,16 +428,17 @@ const mech = {
         ctx.fillStyle = "rgba(255,255,255,0)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
-
+      randomizeMods()
       randomizeGuns()
       randomizeField()
       randomizeHealth()
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 6; i++) {
         setTimeout(function () {
+          randomizeMods()
           randomizeGuns()
           randomizeField()
           randomizeHealth()
-          game.makeTextLog(`probability amplitude will synchronize in ${7-i} seconds`, 1000);
+          game.makeTextLog(`probability amplitude will synchronize in ${6-i} seconds`, 1000);
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.003})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -718,11 +741,16 @@ const mech = {
     }
   },
   drawField() {
-    //draw field
+    if (mech.holdingTarget) {
+      ctx.fillStyle = "rgba(110,170,200," + (mech.fieldMeter * (0.05 + 0.05 * Math.random())) + ")";
+      ctx.strokeStyle = "rgba(110, 200, 235, " + (0.3 + 0.08 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
+    } else {
+      ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.15 + 0.15 * Math.random())) + ")";
+      ctx.strokeStyle = "rgba(110, 200, 235, " + (0.6 + 0.2 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
+    }
     const range = this.grabRange - 20;
     ctx.beginPath();
     ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
-    ctx.strokeStyle = "#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
     ctx.lineWidth = 2;
     ctx.lineCap = "butt"
     ctx.stroke();
@@ -736,14 +764,8 @@ const mech = {
     cp1x = mech.pos.x + 0.6 * range * Math.cos(a)
     cp1y = mech.pos.y + 0.6 * range * Math.sin(a)
     ctx.quadraticCurveTo(cp1x, cp1y, mech.pos.x + 1 * range * Math.cos(mech.angle - Math.PI * mech.fieldArc), mech.pos.y + 1 * range * Math.sin(mech.angle - Math.PI * mech.fieldArc))
-    // ctx.lineTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
-
-    if (mech.holdingTarget) {
-      ctx.fillStyle = "rgba(110,170,200," + (mech.fieldMeter * (0.05 + 0.05 * Math.random())) + ")";
-    } else {
-      ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.15 + 0.15 * Math.random())) + ")";
-    }
     ctx.fill();
+    // ctx.lineTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
 
     //draw random lines in field for cool effect
     let offAngle = mech.angle + 1.7 * Math.PI * mech.fieldArc * (Math.random() - 0.5);
@@ -755,8 +777,7 @@ const mech = {
     ctx.lineWidth = 1;
     ctx.stroke();
   },
-  grabPowerUp() {
-    //look for power ups to grab
+  grabPowerUp() { //look for power ups to grab with field
     if (mech.fieldCDcycle < mech.cycle) {
       const grabPowerUpRange2 = (this.grabRange + 220) * (this.grabRange + 220)
       for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -785,8 +806,7 @@ const mech = {
       }
     }
   },
-  pushMobs() {
-    // push all mobs in range
+  pushMobs() { // push all mobs in range and in direction looking
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (this.lookingAt(mob[i]) && Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < this.grabRange && Matter.Query.ray(map, mob[i].position, this.pos).length === 0) {
         const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.012) //0.012
@@ -811,8 +831,7 @@ const mech = {
       }
     }
   },
-  pushMobs360(range = this.grabRange * 0.75) {
-    // push all mobs in range
+  pushMobs360(range = this.grabRange * 0.75) { // push all mobs in range in any direction
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < range && Matter.Query.ray(map, mob[i].position, this.pos).length === 0) {
         const fieldBlockCost = Math.max(0.02, mob[i].mass * 0.012)
@@ -928,7 +947,7 @@ const mech = {
   },
   hold() {},
   fieldText() {
-    game.makeTextLog(`<strong style='font-size:30px;'>${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'>(right click or space bar)</span><br><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 1000);
+    game.makeTextLog(`<div class="circle field "></div> &nbsp; <strong style='font-size:30px;'>${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'>(right click or space bar)</span><br><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 1000);
     document.getElementById("field").innerHTML = mech.fieldUpgrades[mech.fieldMode].name //add field
   },
   fieldUpgrades: [{
