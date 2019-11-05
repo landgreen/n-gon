@@ -934,7 +934,7 @@ const level = {
     // }); 
     powerUps.spawn(-4300, -700, "heal");
     powerUps.spawn(-4200, -700, "ammo");
-    powerUps.spawn(-4100, -700, "gun");
+    powerUps.spawn(-4000, -700, "ammo");
     spawn.mapRect(-4450, -1000, 100, 500);
     spawn.bodyRect(-3576, -750, 150, 150);
 

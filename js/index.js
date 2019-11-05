@@ -2,9 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
-add a key that player picks up and needs to set on the exit door to open it
+Boss level
+  boss grows and spilt, if you don't kill it fast
+    sensor that locks you in after you enter the boss room
+  boss that eats other mobs and gains stats from them
+    chance to spawn on any level (past level 5)
+  boss that knows how to shoot (player) bullets that collide with player 
+    overwrite custom engine collision bullet mob function.
 
-add Boss levels
+add a key that player picks up and needs to set on the exit door to open it
 
 add modular difficulty settings
   take reduced dmg
@@ -12,8 +18,6 @@ add modular difficulty settings
   more drops
   fewer mobs
     make a new var to scale number of mobs and stop using levels cleared var
-
-get text output to show multiple notifications at once by queuing them vertically
 
 make power ups keep moving to player if the pickup field is turned off before they get picked up
   not sure how to do this without adding a constant check
@@ -26,9 +30,6 @@ new map with repeating endlessness
     I tried it, but had trouble getting the camera to adjust to the teleportation
     this can apply to blocks mobs, and power ups as well
     
-Find a diegetic way to see player damage  (and or field meter too)
-  a health meter, like the field meter above player?  (doesn't work with the field meter)
-
 field power up effects
   field allows player to hold and throw living mobs
 
@@ -64,17 +65,6 @@ game mechanics
     water
     low friction ground
     bouncy ground
-
-track foot positions with velocity better as the player walks/crouch/runs
-
-Boss ideas
-  boss grows and spilt, if you don't kill it fast
-    sensor that locks you in after you enter the boss room
-  boss that eats other mobs and gains stats from them
-    chance to spawn on any level (past level 5)
-  boss that knows how to shoot (player) bullets that collide with player 
-    overwrite custom engine collision bullet mob function.
-
 
 
 // collision info:
