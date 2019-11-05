@@ -76,7 +76,6 @@ const powerUps = {
       }
     }
   },
-  haveAllMods: false,
   mod: {
     name: "mod",
     color: "#a8f",
@@ -91,7 +90,6 @@ const powerUps = {
       }
       //give a random mod from the mods I don't have
       if (options.length > 0) {
-        if (options.length === 1) powerUps.haveAllMods = true
         let newMod = options[Math.floor(Math.random() * options.length)]
         b.giveMod(newMod)
         game.makeTextLog(`<div class="circle mod"></div> &nbsp;<strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
@@ -146,7 +144,7 @@ const powerUps = {
       powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.007 && !powerUps.haveAllMods) {
+    if (Math.random() < 0.0015 * (b.mods.length - b.modCount)) {
       powerUps.spawn(x, y, "mod");
       return;
     }
@@ -158,7 +156,7 @@ const powerUps = {
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.35 && !powerUps.haveAllMods) {
+    } else if (Math.random() < 0.047 * (b.mods.length - b.modCount)) {
       powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.25) {
       powerUps.spawn(x, y, "field");

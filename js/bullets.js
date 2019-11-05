@@ -4,6 +4,7 @@ const b = {
   dmgScale: null, //scales all gun damage from momentum, but not raw .dmg //this is reset in game.reset
   gravity: 0.0006, //most other bodies have   gravity = 0.001
   //variables use for gun mod upgrades
+  modCount: null,
   modFireRate: null,
   modExplosionRadius: null,
   modBulletSize: null,
@@ -14,6 +15,7 @@ const b = {
   modIsImmortal: null,
   modSpores: null,
   setModDefaults() {
+    b.modCount = 0;
     b.modFireRate = 1;
     b.modExplosionRadius = 1;
     b.modBulletSize = 1;
@@ -119,6 +121,7 @@ const b = {
   ],
   giveMod(i) {
     b.mods[i].effect(); //give specific mod
+    b.modCount++
     b.mods[i].have = true
     game.updateModHUD();
   },
