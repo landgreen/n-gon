@@ -44,7 +44,7 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.6 + 0.04 * Math.random())) / b.dmgScale);
+        const ammo = Math.ceil((target.ammoPack * (0.5 + 0.08 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
@@ -92,7 +92,7 @@ const powerUps = {
       if (options.length > 0) {
         let newMod = options[Math.floor(Math.random() * options.length)]
         b.giveMod(newMod)
-        game.makeTextLog(`<div class="circle mod"></div> &nbsp;<strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
+        game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
       }
     }
   },
@@ -144,7 +144,7 @@ const powerUps = {
       powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0015 * (b.mods.length - b.modCount)) {
+    if (Math.random() < 0.0018 * (b.mods.length - b.modCount - 2)) {
       powerUps.spawn(x, y, "mod");
       return;
     }
@@ -158,7 +158,7 @@ const powerUps = {
       powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.047 * (b.mods.length - b.modCount)) {
       powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.25) {
+    } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "field");
     } else if (Math.random() < 0.05 * (7 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun")

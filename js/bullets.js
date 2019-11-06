@@ -609,7 +609,7 @@ const b = {
         //knock back
         const KNOCK = ((mech.crouch) ? 0.025 : 0.25) * b.modBulletSize * b.modBulletSize
         player.force.x -= KNOCK * Math.cos(dir)
-        player.force.y -= KNOCK * Math.sin(dir) * 0.5 //reduce knock back in vertical direction to stop super jumps
+        player.force.y -= KNOCK * Math.sin(dir) * 0.4 //reduce knock back in vertical direction to stop super jumps
       }
     },
     {
@@ -738,14 +738,14 @@ const b = {
         //knock back
         const KNOCK = ((mech.crouch) ? 0.015 : 0.15) * b.modBulletSize * b.modBulletSize
         player.force.x -= KNOCK * Math.cos(mech.angle)
-        player.force.y -= KNOCK * Math.sin(mech.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps
+        player.force.y -= KNOCK * Math.sin(mech.angle) * 0.4 //reduce knock back in vertical direction to stop super jumps
       }
     },
     {
       name: "fléchettes",
       description: "fire an accurate high speed needle<br>",
       ammo: 0,
-      ammoPack: 19,
+      ammoPack: 14,
       have: false,
       fire() {
         const me = bullet.length;
@@ -755,9 +755,9 @@ const b = {
         } else {
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(dir));
         }
-        b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 45 : 37, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 50 : 30, mech.crouch ? 45 : 37, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + Math.floor(180 * b.modBulletsLastLonger);
-        bullet[me].dmg = mech.crouch ? 1.5 : 1;
+        bullet[me].dmg = mech.crouch ? 2.2 : 1.6;
         b.drawOneBullet(bullet[me].vertices);
         bullet[me].do = function () {
           //low gravity
@@ -917,7 +917,7 @@ const b = {
       name: "grenades",
       description: "fire a projectile that <span class='color-e'>explodes</span> on contact or after one second",
       ammo: 0,
-      ammoPack: 11,
+      ammoPack: 9,
       have: false,
       fire() {
         const me = bullet.length;
@@ -1054,7 +1054,7 @@ const b = {
     },
     {
       name: "spores",
-      description: "release an orb that discharges <span class='color-s'>spores</span> after 2 seconds<br><span class='color-s'>spores</span> seek out targets<br><span class='color-s'>spores</span> can pass through blocks",
+      description: "release an orb that discharges <span class='color-s'>spores</span> after 2 seconds<br>seeks out targets<br>passes through blocks",
       ammo: 0,
       ammoPack: 5,
       have: false,
