@@ -162,6 +162,7 @@ const b = {
       } else {
         mech.fireCDcycle = mech.cycle + 30; //cooldown
         // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><span class = 'box'>E</span> / <span class = 'box'>Q</span>", 200);
+        game.replaceTextLog = true;
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
       if (mech.isHolding) {
@@ -1163,7 +1164,7 @@ const b = {
       have: false,
       fire() {
         const THRUST = 0.0015
-        const dir = mech.angle + (Math.random() - 0.5) * 0.7;
+        const dir = mech.angle + 0.2 * (Math.random() - 0.5);
         const me = bullet.length;
         const RADIUS = (4 + 4 * Math.random()) * b.modBulletSize
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
@@ -1245,7 +1246,7 @@ const b = {
             }
           }
         })
-        b.fireProps(mech.crouch ? 19 : 15, mech.crouch ? 30 : 1, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 19 : 15, mech.crouch ? 35 : 1, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
       }
     },

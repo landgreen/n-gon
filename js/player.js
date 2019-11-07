@@ -438,6 +438,7 @@ const mech = {
           randomizeGuns()
           randomizeField()
           randomizeHealth()
+          game.replaceTextLog = true;
           game.makeTextLog(`probability amplitude will synchronize in ${6-i} seconds`, 1000);
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.003})`;
@@ -450,6 +451,7 @@ const mech = {
         game.wipe = function () { //set wipe to normal
           ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
+        game.replaceTextLog = true;
         game.makeTextLog("your quantum probability has stabilized", 1000);
         document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
       }, 8000);
@@ -947,7 +949,9 @@ const mech = {
   },
   hold() {},
   fieldText() {
+    game.replaceTextLog = true;
     game.makeTextLog(`<div class="circle field "></div> &nbsp; <strong style='font-size:30px;'>${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'>(right click or space bar)</span><br><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 1000);
+    game.replaceTextLog = false;
     document.getElementById("field").innerHTML = mech.fieldUpgrades[mech.fieldMode].name //add field
   },
   fieldUpgrades: [{
@@ -956,6 +960,7 @@ const mech = {
       effect: () => {
         mech.fieldMode = 0;
         mech.fieldText();
+        game.replaceTextLog = true; //allow text over write
         // game.makeTextLog("<strong style='font-size:30px;'></strong><br> <span class='faded'>(right click or space bar)</span><p></p>", 1200);
         mech.setHoldDefaults();
         mech.hold = function () {

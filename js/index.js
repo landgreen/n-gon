@@ -34,10 +34,12 @@ field power up effects
   field allows player to hold and throw living mobs
 
 mod power ups ideas
+  double jump
   bullet on mob damage effects
     add to the array mob.do new mob behaviors
         add a damage over time
         add a freeze
+
 give mobs more animal-like behaviors
   like rainworld
   give mobs something to do when they don't see player

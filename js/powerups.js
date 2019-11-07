@@ -11,7 +11,7 @@ const powerUps = {
       let heal = (this.size / 40) ** 2
       heal = Math.min(1 - mech.health, heal)
       mech.addHealth(heal);
-      if (!game.lastLogTime && heal > 0) game.makeTextLog("<span style='font-size:115%;'> <strong class='color-h' style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
+      if (heal > 0) game.makeTextLog("<span style='font-size:115%;'> <strong class='color-h' style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
     }
   },
   ammo: {
@@ -47,7 +47,7 @@ const powerUps = {
         const ammo = Math.ceil((target.ammoPack * (0.5 + 0.08 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
-        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
+        game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
       }
     }
   },
@@ -92,7 +92,9 @@ const powerUps = {
       if (options.length > 0) {
         let newMod = options[Math.floor(Math.random() * options.length)]
         b.giveMod(newMod)
+        game.replaceTextLog = true;
         game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
+        game.replaceTextLog = false;
       }
     }
   },
@@ -113,6 +115,7 @@ const powerUps = {
         }
       }
       //give player a gun they don't already have if possible
+      game.replaceTextLog = true;
       if (options.length > 0) {
         let newGun = options[Math.floor(Math.random() * options.length)];
         if (b.activeGun === null) b.activeGun = newGun //if no active gun switch to new gun
@@ -129,6 +132,7 @@ const powerUps = {
         game.updateGunHUD();
         game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
       }
+      game.replaceTextLog = false
     }
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
