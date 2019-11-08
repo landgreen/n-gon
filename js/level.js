@@ -14,12 +14,12 @@ const level = {
     if (game.levelsCleared === 0) {
       // game.levelsCleared = 16; //for testing to simulate possible mobs spawns
       // b.giveGuns("all", 1000)
-      b.giveGuns(6) // set a starting gun for testing
+      b.giveGuns(13) // set a starting gun for testing
       // mech.fieldUpgrades[2].effect(); //give a field power up for testing
       // b.giveMod(7)
 
-      this.intro(); //starting level
-      // this.testingMap();
+      // this.intro(); //starting level
+      this.testingMap();
       // this.bosses();
       // this.aerie();
       // this.rooftops();
@@ -46,7 +46,6 @@ const level = {
   //******************************************************************************************************************
   testingMap() {
     //start with all guns
-    b.giveGuns("all", 1000)
     game.zoomScale = 1400 //1400 is normal
     spawn.setSpawnList();
     game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
@@ -121,8 +120,8 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.focuser(800, -1150);
-    // spawn.groupBoss(-600, -550);
-    spawn.striker(800, -150);
+    spawn.groupBoss(-600, -550);
+    // spawn.hopper(800, -150);
     // spawn.beamer(800, -150);
     // spawn.grower(800, -250);
     // spawn.blinker(800, -250, 40);

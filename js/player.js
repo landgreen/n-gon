@@ -750,6 +750,7 @@ const mech = {
       ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.15 + 0.15 * Math.random())) + ")";
       ctx.strokeStyle = "rgba(110, 200, 235, " + (0.6 + 0.2 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
     }
+    // const off = 2 * Math.cos(game.cycle * 0.1)
     const range = this.grabRange - 20;
     ctx.beginPath();
     ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);

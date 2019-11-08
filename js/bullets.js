@@ -746,7 +746,7 @@ const b = {
       name: "fléchettes",
       description: "fire an accurate high speed needle<br>",
       ammo: 0,
-      ammoPack: 14,
+      ammoPack: 16,
       have: false,
       fire() {
         const me = bullet.length;
@@ -1157,7 +1157,7 @@ const b = {
       }
     },
     {
-      name: "drones",
+      name: "hunter drones",
       description: "release <span class='color-b'>drones</span> that seek out targets<br>if no targets are found, <span class='color-b'>drones</span> move towards mouse<br>",
       ammo: 0,
       ammoPack: 20,
@@ -1247,6 +1247,73 @@ const b = {
           }
         })
         b.fireProps(mech.crouch ? 19 : 15, mech.crouch ? 35 : 1, dir, me); //cd , speed
+        b.drawOneBullet(bullet[me].vertices);
+      }
+    },
+    {
+      name: "defense drones",
+      description: "release <span class='color-b'>drones</span> that defend the space around the player",
+      ammo: 0,
+      ammoPack: 3,
+      have: false,
+      fire() {
+        const THRUST = 0.0015
+        const dir = mech.angle + 0.2 * (Math.random() - 0.5);
+        const me = bullet.length;
+        const RADIUS = (10 + 6 * Math.random()) * b.modBulletSize
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
+          angle: dir,
+          inertia: Infinity,
+          friction: 0,
+          frictionAir: 0.001,
+          restitution: 1,
+          dmg: 0.14, //damage done in addition to the damage from momentum
+          lookFrequency: 27 + Math.floor(37 * Math.random()),
+          endCycle: game.cycle + Math.floor((2400 + 1800 * Math.random()) * b.modBulletsLastLonger),
+          classType: "bullet",
+          collisionFilter: {
+            category: 0x000100,
+            mask: 0x000110 //self collide
+          },
+          minDmgSpeed: 0,
+          range: 450 + 150 * Math.random(),
+          lockedOn: null,
+          isFollowMouse: true,
+          onDmg() {
+            this.lockedOn = null
+          },
+          onEnd() {},
+          do() {
+            if (!(game.cycle % this.lookFrequency)) {
+              this.lockedOn = null;
+              let closeDist = Infinity;
+              for (let i = 0, len = mob.length; i < len; ++i) {
+                const TARGET_VECTOR = Matter.Vector.sub(mech.pos, mob[i].position)
+                const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+                if (DIST < this.range && DIST < closeDist) {
+                  closeDist = DIST;
+                  this.lockedOn = mob[i]
+                }
+              }
+            }
+
+            const distanceToPlayer = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mech.pos))
+            if (this.lockedOn) { //accelerate towards mobs
+              this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+            } else if (distanceToPlayer > 0.2 * this.range) {
+              this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, mech.pos)), -this.mass * THRUST * 0.5)
+            }
+
+            // speed cap instead of friction to give more agility
+            if (this.speed > 12) {
+              Matter.Body.setVelocity(this, {
+                x: this.velocity.x * 0.97,
+                y: this.velocity.y * 0.97
+              });
+            }
+          }
+        })
+        b.fireProps(mech.crouch ? 80 : 60, mech.crouch ? 35 : 10, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
       }
     },
