@@ -374,9 +374,10 @@ const mech = {
           //find what mods I don't have
           let options = [];
           for (let i = 0; i < b.mods.length; i++) {
-            if (!b.mods[i].have) options.push(i);
+            //can't get quantum immortality again 
+            if (i !== 7 && !b.mods[i].have) options.push(i);
           }
-          //add a new mods
+          //add a new mod
           if (options.length > 0) {
             const choose = Math.floor(Math.random() * options.length)
             let newMod = options[choose]
@@ -388,7 +389,7 @@ const mech = {
       }
 
       function randomizeField() {
-        if (game.levelsCleared > 5 && Math.random() < 0.9) {
+        if (game.levelsCleared * (Math.random() + 0.27) > 2) {
           mech.fieldUpgrades[Math.floor(Math.random() * (mech.fieldUpgrades.length))].effect();
         } else {
           mech.fieldUpgrades[0].effect();
@@ -402,7 +403,7 @@ const mech = {
       }
 
       function randomizeGuns() {
-        const length = b.inventory.length
+        const length = Math.round(b.inventory.length * (1 + 0.4 * (Math.random() - 0.5)))
         //removes guns and ammo  
         b.inventory = [];
         b.activeGun = null;
@@ -432,16 +433,16 @@ const mech = {
       randomizeGuns()
       randomizeField()
       randomizeHealth()
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0, len = 7; i < len; i++) {
         setTimeout(function () {
           randomizeMods()
           randomizeGuns()
           randomizeField()
           randomizeHealth()
           game.replaceTextLog = true;
-          game.makeTextLog(`probability amplitude will synchronize in ${6-i} seconds`, 1000);
+          game.makeTextLog(`probability amplitude will synchronize in ${len-i-1} seconds`, 1000);
           game.wipe = function () { //set wipe to have trails
-            ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.003})`;
+            ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.006})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
         }, (i + 1) * 1000);
@@ -514,13 +515,17 @@ const mech = {
     document.getElementById("dmg").style.transition = "opacity 0s";
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
 
-    //drop block if holding
-    if (dmg > 0.07) {
-      this.drop();
+    //chance to build a drone on damage  from mod
+    if (b.makeDroneOnDamage) {
+      const len = (dmg - 0.08 + 0.05 * Math.random()) / 0.05
+      for (let i = 0; i < len; i++) {
+        if (Math.random() < 0.6) b.guns[12].fire() //spawn drone
+      }
     }
 
     // freeze game and display a full screen red color
     if (dmg > 0.05) {
+      this.drop(); //drop block if holding
       game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
       game.fpsInterval = 1000 / game.fpsCap;
     } else {
@@ -540,16 +545,132 @@ const mech = {
       }
     };
     requestAnimationFrame(normalFPS);
+
+    // // freeze game and display a full screen red color
+    // if (dmg > 0.05) {
+    //   if (dmg > 0.07) {
+    //     this.drop(); //drop block if holding
+    //   }
+
+    //   game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
+    //   game.fpsInterval = 1000 / game.fpsCap;
+    // } else {
+    //   game.fpsCap = game.fpsCapDefault
+    //   game.fpsInterval = 1000 / game.fpsCap;
+    // }
+    // mech.defaultFPSCycle = mech.cycle
+
+    // const normalFPS = function () {
+    //   if (mech.defaultFPSCycle < mech.cycle) { //back to default values
+    //     game.fpsCap = game.fpsCapDefault
+    //     game.fpsInterval = 1000 / game.fpsCap;
+    //     document.getElementById("dmg").style.transition = "opacity 1s";
+    //     document.getElementById("dmg").style.opacity = "0";
+    //   } else {
+    //     requestAnimationFrame(normalFPS);
+    //   }
+    // };
+    // requestAnimationFrame(normalFPS);
   },
   damageImmune: 0,
   hitMob(i, dmg) {
     //prevents damage happening too quick
   },
-  buttonCD: 0, //cooldown for player buttons
+  buttonCD: 0, //cool down for player buttons
   usePowerUp(i) {
     powerUp[i].effect();
     Matter.World.remove(engine.world, powerUp[i]);
     powerUp.splice(i, 1);
+  },
+  drawLeg(stroke) {
+    // if (game.mouseInGame.x > this.pos.x) {
+    if (mech.angle > -Math.PI / 2 && mech.angle < Math.PI / 2) {
+      this.flipLegs = 1;
+    } else {
+      this.flipLegs = -1;
+    }
+    ctx.save();
+    ctx.scale(this.flipLegs, 1); //leg lines
+    ctx.beginPath();
+    ctx.moveTo(this.hip.x, this.hip.y);
+    ctx.lineTo(this.knee.x, this.knee.y);
+    ctx.lineTo(this.foot.x, this.foot.y);
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+    //toe lines
+    ctx.beginPath();
+    ctx.moveTo(this.foot.x, this.foot.y);
+    ctx.lineTo(this.foot.x - 15, this.foot.y + 5);
+    ctx.moveTo(this.foot.x, this.foot.y);
+    ctx.lineTo(this.foot.x + 15, this.foot.y + 5);
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    //hip joint
+    ctx.beginPath();
+    ctx.arc(this.hip.x, this.hip.y, 11, 0, 2 * Math.PI);
+    //knee joint
+    ctx.moveTo(this.knee.x + 7, this.knee.y);
+    ctx.arc(this.knee.x, this.knee.y, 7, 0, 2 * Math.PI);
+    //foot joint
+    ctx.moveTo(this.foot.x + 6, this.foot.y);
+    ctx.arc(this.foot.x, this.foot.y, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = this.fillColor;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  },
+  calcLeg(cycle_offset, offset) {
+    this.hip.x = 12 + offset;
+    this.hip.y = 24 + offset;
+    //stepSize goes to zero if Vx is zero or not on ground (make this transition cleaner)
+    this.stepSize = 0.8 * this.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(this.Vx))) * this.onGround);
+    //changes to stepsize are smoothed by adding only a percent of the new value each cycle
+    const stepAngle = 0.034 * this.walk_cycle + cycle_offset;
+    this.foot.x = 2.2 * this.stepSize * Math.cos(stepAngle) + offset;
+    this.foot.y = offset + 1.2 * this.stepSize * Math.sin(stepAngle) + this.yOff + this.height;
+    const Ymax = this.yOff + this.height;
+    if (this.foot.y > Ymax) this.foot.y = Ymax;
+
+    //calculate knee position as intersection of circle from hip and foot
+    const d = Math.sqrt((this.hip.x - this.foot.x) * (this.hip.x - this.foot.x) + (this.hip.y - this.foot.y) * (this.hip.y - this.foot.y));
+    const l = (this.legLength1 * this.legLength1 - this.legLength2 * this.legLength2 + d * d) / (2 * d);
+    const h = Math.sqrt(this.legLength1 * this.legLength1 - l * l);
+    this.knee.x = (l / d) * (this.foot.x - this.hip.x) - (h / d) * (this.foot.y - this.hip.y) + this.hip.x + offset;
+    this.knee.y = (l / d) * (this.foot.y - this.hip.y) + (h / d) * (this.foot.x - this.hip.x) + this.hip.y;
+  },
+  draw() {
+    ctx.fillStyle = this.fillColor;
+    this.walk_cycle += this.flipLegs * this.Vx;
+
+    //draw body
+    ctx.save();
+    ctx.translate(this.pos.x, this.pos.y);
+    this.calcLeg(Math.PI, -3);
+    this.drawLeg("#4a4a4a");
+    this.calcLeg(0, 0);
+    this.drawLeg("#333");
+    ctx.rotate(this.angle);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+    let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+    grd.addColorStop(0, this.fillColorDark);
+    grd.addColorStop(1, this.fillColor);
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // ctx.beginPath();
+    // ctx.arc(15, 0, 3, 0, 2 * Math.PI);
+    // ctx.fillStyle = '#9cf' //'#0cf';
+    // ctx.fill()
+    ctx.restore();
   },
   // *********************************************
   // **************** holding ********************
@@ -1264,6 +1385,7 @@ const mech = {
       name: "nano-scale manufacturing",
       description: "excess field <span class='color-f'>energy</span> used to build <strong class='color-b'>drones</strong><br> increased <span class='color-f'>energy</span> regeneration",
       effect: () => {
+        let gunIndex = Math.random() < 0.5 ? 13 : 12
         mech.fieldMode = 5;
         mech.fieldText();
         mech.setHoldDefaults();
@@ -1271,7 +1393,7 @@ const mech = {
         mech.hold = function () {
           if (mech.fieldMeter === 1) {
             mech.fieldMeter -= 0.5;
-            b.guns[12].fire() //spawn drone
+            b.guns[gunIndex].fire() //spawn drone
           }
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1315,9 +1437,9 @@ const mech = {
               player.collisionFilter.mask = 0x000001 //0x010011 is normals
 
               ctx.beginPath();
-              ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange / (0.3 + 0.7 * mech.fieldMeter), 0, 2 * Math.PI);
+              ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
               ctx.globalCompositeOperation = "destination-in"; //in or atop
-              ctx.fillStyle = "rgba(255,255,255,0.25)";
+              ctx.fillStyle = `rgba(255,255,255,${mech.fieldMeter*0.5})`;
               ctx.fill();
               ctx.globalCompositeOperation = "source-over";
               ctx.strokeStyle = "#000"
@@ -1403,94 +1525,4 @@ const mech = {
     //   }
     // },
   ],
-  drawLeg(stroke) {
-    // if (game.mouseInGame.x > this.pos.x) {
-    if (mech.angle > -Math.PI / 2 && mech.angle < Math.PI / 2) {
-      this.flipLegs = 1;
-    } else {
-      this.flipLegs = -1;
-    }
-    ctx.save();
-    ctx.scale(this.flipLegs, 1); //leg lines
-    ctx.beginPath();
-    ctx.moveTo(this.hip.x, this.hip.y);
-    ctx.lineTo(this.knee.x, this.knee.y);
-    ctx.lineTo(this.foot.x, this.foot.y);
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = 7;
-    ctx.stroke();
-
-    //toe lines
-    ctx.beginPath();
-    ctx.moveTo(this.foot.x, this.foot.y);
-    ctx.lineTo(this.foot.x - 15, this.foot.y + 5);
-    ctx.moveTo(this.foot.x, this.foot.y);
-    ctx.lineTo(this.foot.x + 15, this.foot.y + 5);
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    //hip joint
-    ctx.beginPath();
-    ctx.arc(this.hip.x, this.hip.y, 11, 0, 2 * Math.PI);
-    //knee joint
-    ctx.moveTo(this.knee.x + 7, this.knee.y);
-    ctx.arc(this.knee.x, this.knee.y, 7, 0, 2 * Math.PI);
-    //foot joint
-    ctx.moveTo(this.foot.x + 6, this.foot.y);
-    ctx.arc(this.foot.x, this.foot.y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = this.fillColor;
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-  },
-  calcLeg(cycle_offset, offset) {
-    this.hip.x = 12 + offset;
-    this.hip.y = 24 + offset;
-    //stepSize goes to zero if Vx is zero or not on ground (make this transition cleaner)
-    this.stepSize = 0.8 * this.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(this.Vx))) * this.onGround);
-    //changes to stepsize are smoothed by adding only a percent of the new value each cycle
-    const stepAngle = 0.034 * this.walk_cycle + cycle_offset;
-    this.foot.x = 2.2 * this.stepSize * Math.cos(stepAngle) + offset;
-    this.foot.y = offset + 1.2 * this.stepSize * Math.sin(stepAngle) + this.yOff + this.height;
-    const Ymax = this.yOff + this.height;
-    if (this.foot.y > Ymax) this.foot.y = Ymax;
-
-    //calculate knee position as intersection of circle from hip and foot
-    const d = Math.sqrt((this.hip.x - this.foot.x) * (this.hip.x - this.foot.x) + (this.hip.y - this.foot.y) * (this.hip.y - this.foot.y));
-    const l = (this.legLength1 * this.legLength1 - this.legLength2 * this.legLength2 + d * d) / (2 * d);
-    const h = Math.sqrt(this.legLength1 * this.legLength1 - l * l);
-    this.knee.x = (l / d) * (this.foot.x - this.hip.x) - (h / d) * (this.foot.y - this.hip.y) + this.hip.x + offset;
-    this.knee.y = (l / d) * (this.foot.y - this.hip.y) + (h / d) * (this.foot.x - this.hip.x) + this.hip.y;
-  },
-  draw() {
-    ctx.fillStyle = this.fillColor;
-    this.walk_cycle += this.flipLegs * this.Vx;
-
-    //draw body
-    ctx.save();
-    ctx.translate(this.pos.x, this.pos.y);
-    this.calcLeg(Math.PI, -3);
-    this.drawLeg("#4a4a4a");
-    this.calcLeg(0, 0);
-    this.drawLeg("#333");
-    ctx.rotate(this.angle);
-
-    ctx.beginPath();
-    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-    let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-    grd.addColorStop(0, this.fillColorDark);
-    grd.addColorStop(1, this.fillColor);
-    ctx.fillStyle = grd;
-    ctx.fill();
-    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    // ctx.beginPath();
-    // ctx.arc(15, 0, 3, 0, 2 * Math.PI);
-    // ctx.fillStyle = '#9cf' //'#0cf';
-    // ctx.fill()
-    ctx.restore();
-  }
 };

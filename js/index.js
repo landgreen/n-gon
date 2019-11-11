@@ -2,7 +2,17 @@
 /* TODO:  *******************************************
 *****************************************************
 
-Boss level
+diegetic field meter
+  show as the player head filling with teal color
+
+atmosphere levels
+  give the user a rest, between combat
+  low combat
+    nonaggressive mobs
+      one mob attacking the passive mobs
+  more graphics
+  
+Boss levels
   boss grows and spilt, if you don't kill it fast
     sensor that locks you in after you enter the boss room
   boss that eats other mobs and gains stats from them

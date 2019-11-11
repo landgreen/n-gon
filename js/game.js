@@ -304,25 +304,18 @@ const game = {
         }
       }
       if (keys[71]) { // give all guns with G
-        b.giveGuns("all", 1000)
+        // b.giveGuns("all", 1000)
+        powerUps.gun.effect()
       }
       if (keys[72]) { // power ups with H
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
       }
       if (keys[89]) { //add all mods with y
-        for (let i = 0; i < b.mods.length; i++) {
-          if (!b.mods[i].have) {
-            b.mods[i].effect()
-            b.mods[i].have = true
-          }
-        }
-        game.updateModHUD();
+        powerUps.mod.effect()
       }
       if (keys[82]) { // teleport to mouse with R
         Matter.Body.setPosition(player, this.mouseInGame);

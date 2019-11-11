@@ -231,8 +231,10 @@ const mobs = {
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange) {
             //if (Math.random()>0.2 && this.seePlayer.yes && this.distanceToPlayer2()<800000) {
-            mech.damage(0.0003 * game.dmgScale);
-            if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.005
+            if (!b.AoEImmunity) {
+              mech.damage(0.0003 * game.dmgScale);
+              if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.005
+            }
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
             ctx.lineTo(mech.pos.x, mech.pos.y);
