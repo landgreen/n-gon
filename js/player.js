@@ -519,7 +519,7 @@ const mech = {
     if (b.makeDroneOnDamage) {
       const len = (dmg - 0.08 + 0.05 * Math.random()) / 0.05
       for (let i = 0; i < len; i++) {
-        if (Math.random() < 0.6) b.guns[12].fire() //spawn drone
+        if (Math.random() < 0.6) b.guns[13].fire() //spawn drone
       }
     }
 

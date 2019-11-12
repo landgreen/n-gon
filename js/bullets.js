@@ -891,6 +891,87 @@ const b = {
         }
       }
     },
+    // {
+    //   name: "seekers",
+    //   description: "fire a needle that curves towards it's target",
+    //   ammo: 0,
+    //   ammoPack: 80,
+    //   have: false,
+    //   fireCycle: 0,
+    //   ammoLoaded: 0,
+    //   fire() {
+    //     let dir = mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2);
+    //     const me = bullet.length;
+    //     bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(dir));
+    //     b.fireProps(mech.crouch ? 50 : 30, (mech.crouch ? 15 : 10), dir, me); //cd , speed
+    //     b.drawOneBullet(bullet[me].vertices);
+    //     // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
+    //     bullet[me].endCycle = game.cycle + Math.floor((265 + Math.random() * 20) * b.modBulletsLastLonger);
+    //     bullet[me].lookFrequency = Math.floor(8 + Math.random() * 7);
+    //     bullet[me].lockedOn = null;
+    //     bullet[me].do = function () {
+    //       if (!mech.isBodiesAsleep) {
+    //         this.force.y += this.mass * 0.0002;
+
+    //         if (!(mech.cycle % this.lookFrequency)) {
+    //           this.closestTarget = null;
+    //           this.lockedOn = null;
+    //           let closeDist = Infinity;
+
+    //           //look for targets
+    //           for (let i = 0, len = mob.length; i < len; ++i) {
+    //             if (
+    //               mob[i].alive &&
+    //               mob[i].dropPowerUp &&
+    //               Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+    //               Matter.Query.ray(body, this.position, mob[i].position).length === 0
+    //             ) {
+    //               const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[i].position));
+    //               // const futurePosition = Matter.Vector.add(this.position, Matter.Vector.mult(this.velocity, 10))
+    //               // const dist = Matter.Vector.magnitude(Matter.Vector.sub(futurePosition, mob[i].position));
+    //               if (dist < closeDist) {
+    //                 this.closestTarget = mob[i].position;
+    //                 closeDist = dist;
+    //                 this.lockedOn = mob[i];
+    //               }
+    //             }
+    //           }
+    //         }
+
+    //         //rotate missile towards the target
+    //         if (this.closestTarget) {
+    //           // const face = {
+    //           //   x: Math.cos(this.angle),
+    //           //   y: Math.sin(this.angle)
+    //           // };
+    //           // Matter.Body.rotate(this, -0.08);
+    //           // if (Matter.Vector.dot(target, face) > -0.98) {
+    //           //   if (Matter.Vector.cross(target, face) > 0) {
+    //           //     Matter.Body.rotate(this, 0.08);
+    //           //   } else {
+    //           //     Matter.Body.rotate(this, -0.08);
+    //           //   }
+    //           // }
+
+    //           //rotate the velocity to the new position
+    //           // Matter.Body.setVelocity(this, {
+    //           //   x: this.velocity.x * Math.cos(this.angle) - this.velocity.y * Math.sin(this.angle),
+    //           //   y: this.velocity.x * Math.sin(this.angle) + this.velocity.y * Math.cos(this.angle)
+    //           // });
+    //           // const target = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.closestTarget));
+    //           const oldAngle = this.angle
+    //           Matter.Body.setAngle(this, Matter.Vector.angle(this.position, this.closestTarget))
+    //           Matter.Body.setVelocity(this, Matter.Vector.rotate(this.velocity, this.angle - oldAngle));
+
+    //         }
+    //         //acceleration is proportional to speed
+    //         // const thrust = 0.00001;
+    //         // this.force.x += Math.cos(dir) * thrust * this.speed;
+    //         // this.force.y += Math.sin(dir) * thrust * this.speed;
+    //       }
+    //     }
+    //   }
+    // },
     {
       name: "flak",
       description: "fire a cluster of short range projectiles<br><span class='color-e'>explode</span> on contact or after half a second",
@@ -1067,6 +1148,115 @@ const b = {
               ctx.fillStyle = "#f04";
               ctx.beginPath();
               ctx.arc(this.position.x, this.position.y, this.radius * 0.5, 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          }
+        }
+      }
+    },
+    {
+      name: "nail bomb",
+      description: "fire a <strong>bomb</strong> that ejects <strong class='color-m'>magnetized</strong> nails<br>nails are <strong class='color-m'>attracted</strong> to enemy targets<br>click left mouse <strong>again</strong> to detonate",
+      ammo: 0,
+      ammoPack: 6,
+      have: false,
+      fire() {
+        const me = bullet.length;
+        const dir = mech.angle;
+        const radius = 17 * b.modBulletSize
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), radius, b.fireAttributes(dir, false));
+        bullet[me].radius = radius; //used from drawing timer
+        b.fireProps(10, mech.crouch ? 42 : 26, dir, me); //cd , speed
+
+        b.drawOneBullet(bullet[me].vertices);
+        bullet[me].endCycle = Infinity
+        bullet[me].endCycle = Infinity
+        // bullet[me].restitution = 0.3;
+        // bullet[me].frictionAir = 0.01;
+        // bullet[me].friction = 0.15;
+        // bullet[me].friction = 1;
+        bullet[me].inertia = Infinity; //prevents rotation
+        bullet[me].restitution = 0.5;
+        bullet[me].onEnd = () => {}
+        bullet[me].minDmgSpeed = 1;
+        bullet[me].isArmed = false;
+        bullet[me].isTriggered = false;
+        bullet[me].do = function () {
+          //extra gravity for harder arcs
+          this.force.y += this.mass * 0.002;
+          mech.fireCDcycle = mech.cycle + 10 //can't fire until after the explosion
+
+          //set armed and sucking status
+          if (!this.isArmed && !game.mouseDown) {
+            this.isArmed = true
+          } else if (this.isArmed && game.mouseDown && !this.isTriggered) {
+            this.isTriggered = true;
+            this.endCycle = game.cycle + 2;
+          }
+
+          if (this.isTriggered) {
+            if (!mech.isBodiesAsleep) {
+              //target nearby mobs
+              const targets = []
+              for (let i = 0, len = mob.length; i < len; i++) {
+                if (
+                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                  Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                ) {
+                  targets.push(mob[i].position)
+                }
+              }
+              for (let i = 0; i < 4; i++) {
+                const SPEED = 35 + 20 * Math.random()
+                if (Math.random() < 0.5 && targets.length > 0) { // aim near a random target
+                  const SPREAD = 100
+                  const INDEX = Math.floor(Math.random() * targets.length)
+                  const WHERE = {
+                    x: targets[INDEX].x + SPREAD * Math.random(),
+                    y: targets[INDEX].y + SPREAD * Math.random()
+                  }
+                  needle(this.position, Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(WHERE, this.position)), SPEED))
+                } else { // aim in random direction
+                  const ANGLE = 2 * Math.PI * Math.random()
+                  needle(this.position, {
+                    x: SPEED * Math.cos(ANGLE),
+                    y: SPEED * Math.sin(ANGLE)
+                  })
+                }
+              }
+
+              function needle(pos, velocity) {
+                const me = bullet.length;
+                bullet[me] = Bodies.rectangle(pos.x, pos.y, 23 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(dir));
+                Matter.Body.setVelocity(bullet[me], velocity);
+
+                Matter.Body.setAngle(bullet[me], Math.atan2(velocity.y, velocity.x))
+                World.add(engine.world, bullet[me]); //add bullet to world
+                bullet[me].endCycle = game.cycle + 45 + Math.floor(15 * Math.random());
+                bullet[me].dmg = 1.1;
+                bullet[me].category = 0x010000
+                bullet[me].mask = 0x011011
+                bullet[me].do = function () {};
+              }
+            }
+          } else {
+            // flashing lights to show armed
+            if (!(game.cycle % 10)) {
+              if (this.isFlashOn) {
+                this.isFlashOn = false;
+              } else {
+                this.isFlashOn = true;
+              }
+            }
+            if (this.isFlashOn) {
+              ctx.fillStyle = "#000";
+              ctx.beginPath();
+              ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+              ctx.fill();
+              //draw clock on timer
+              ctx.fillStyle = "#83f";
+              ctx.beginPath();
+              ctx.arc(this.position.x, this.position.y, this.radius * 0.3, 0, 2 * Math.PI);
               ctx.fill();
             }
           }
