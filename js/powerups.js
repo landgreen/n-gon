@@ -107,9 +107,13 @@ const powerUps = {
     effect() {
       //find what guns I don't have
       let options = [];
-      if (b.activeGun === null) { //choose the first gun to be one that is good for the early game
-        options = [0, 1, 2, 3, 4, 5, 6, 8, 9, 12]
+      if (b.activeGun === null) {
+        //choose the first gun to be one that is good for the early game
+        for (let i = 0; i < b.guns.length; ++i) {
+          if (!b.guns[i].have && b.guns[i].isStarterGun) options.push(i);
+        }
       } else {
+        //choose a gun you don't have
         for (let i = 0; i < b.guns.length; ++i) {
           if (!b.guns[i].have) options.push(i);
         }

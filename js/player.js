@@ -1385,7 +1385,7 @@ const mech = {
       name: "nano-scale manufacturing",
       description: "excess field <span class='color-f'>energy</span> used to build <strong class='color-b'>drones</strong><br> increased <span class='color-f'>energy</span> regeneration",
       effect: () => {
-        let gunIndex = Math.random() < 0.5 ? 13 : 12
+        let gunIndex = Math.random() < 0.5 ? 13 : 14
         mech.fieldMode = 5;
         mech.fieldText();
         mech.setHoldDefaults();
