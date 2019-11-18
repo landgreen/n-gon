@@ -96,14 +96,27 @@ function mobCollisionChecks(event) {
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
               if (mob[k].onHit) mob[k].onHit(k);
-              game.drawList.push({
-                //add dmg to draw queue
-                x: pairs[i].activeContacts[0].vertex.x,
-                y: pairs[i].activeContacts[0].vertex.y,
-                radius: dmg * 500,
-                color: game.mobDmgColor,
-                time: game.drawTime
-              });
+              if (b.annihilation && mob[k].dropPowerUp) {
+                mob[k].death();
+                game.drawList.push({
+                  //add dmg to draw queue
+                  x: pairs[i].activeContacts[0].vertex.x,
+                  y: pairs[i].activeContacts[0].vertex.y,
+                  radius: dmg * 2000,
+                  color: "rgba(255,0,255,0.2)",
+                  time: game.drawTime
+                });
+              } else {
+                game.drawList.push({
+                  //add dmg to draw queue
+                  x: pairs[i].activeContacts[0].vertex.x,
+                  y: pairs[i].activeContacts[0].vertex.y,
+                  radius: dmg * 500,
+                  color: game.mobDmgColor,
+                  time: game.drawTime
+                });
+
+              }
             }
             //extra kick between player and mob
             //this section would be better with forces but they don't work...
@@ -121,8 +134,8 @@ function mobCollisionChecks(event) {
           //bullet mob collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             mob[k].foundPlayer();
-            const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
-            // console.log(dmg)
+            // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
+            const dmg = b.dmgScale * (obj.dmg + b.extraDmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)))
             mob[k].damage(dmg);
             obj.onDmg(); //some bullets do actions when they hits things, like despawn
             game.drawList.push({

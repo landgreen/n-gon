@@ -16,6 +16,9 @@ const b = {
   modSpores: null,
   AoEImmunity: null,
   makeDroneOnDamage: null,
+  extraDmg: null,
+  annihilation: null,
+  fullHeal: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -29,6 +32,9 @@ const b = {
     b.modBulletsLastLonger = 1;
     b.modIsImmortal = false;
     b.modSpores = 0;
+    b.extraDmg = 0;
+    b.annihilation = false;
+    b.fullHeal = false;
     for (let i = 0; i < b.mods.length; i++) {
       b.mods[i].have = false;
     }
@@ -36,49 +42,42 @@ const b = {
   mods: [{
       name: "depleted uranium rounds",
       description: "your <strong class='color-b'>bullets</strong> are larger and do more physical <span class='color-d'>damage</span>",
-      have: false,
+      have: false, //0
       effect: () => {
         //good for guns that do mostly projectile damage:
-        //testing done at 1.15: one shot(+0.38), rapid fire(+0.25), spray, wave beam(+0.4 adds range and dmg), needles(+0.1)
         //testing at 1.08:  spray(point blank)(+0.25), one shot(+0.16), wave beam(point blank)(+0.14)
         b.modBulletSize = 1.07;
-        //ADD: maybe add in something that changes game play
       }
     },
     {
       name: "auto-loading heuristics",
       description: "your rate of fire is 15% higher",
-      have: false,
-      effect: () => {
-        //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
+      have: false, //1
+      effect: () => { //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
         b.modFireRate = 0.85
-        //ADD: maybe add in something that changes game play
       }
     },
     {
       name: "desublimated ammunition",
       description: "use 50% less <strong class='color-b'>ammo</strong> when <strong>crouching</strong>",
-      have: false,
-      effect: () => {
-        //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
+      have: false, //2
+      effect: () => { //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
         b.modNoAmmo = 1
       }
     },
     {
       name: "Lorentzian topology",
       description: "your <strong class='color-b'>bullets</strong> last 40% longer",
-      have: false,
-      effect: () => {
-        //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
+      have: false, //3
+      effect: () => { //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
         b.modBulletsLastLonger = 1.40
       }
     },
     {
       name: "anti-matter cores",
       description: "the radius of your <strong class='color-e'>explosions</strong> is doubled<br><span style='opacity:0.3;'>be careful</span>",
-      have: false,
-      effect: () => {
-        //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
+      have: false, //4
+      effect: () => { //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
         //testing at 1.3: grenade(+0.3), missiles, flak, M80
         b.modExplosionRadius = 1.8; //good for guns with explosions
       }
@@ -86,58 +85,76 @@ const b = {
     {
       name: "ceramic plating",
       description: "you take no damage from area effects<br>immune to <strong class='color-e'>explosions</strong> and enemy fields",
-      have: false,
+      have: false, //5
       effect: () => {
         b.AoEImmunity = true; //good for guns with explosions
       }
     },
     {
       name: "ablative synthesis",
-      description: "your <span class='color-d'>damaged</span> parts are rebuilt as <strong class='color-b'>drones</strong>",
-      have: false,
-      effect: () => {
-        b.makeDroneOnDamage = true; //makes dangerous situations more survivable
+      description: "after taking <span class='color-d'>damage</span>, there is a chance that your damaged parts will be rebuilt as <strong class='color-b'>drones</strong>",
+      have: false, //6
+      effect: () => { //makes dangerous situations more survivable
+        b.makeDroneOnDamage = true;
       }
     },
     {
       name: "zoospore vector",
       description: "when an enemy <span style='color: #888;'>dies</span> it has a 20% chance to release <strong class='color-s'>spores</strong>",
-      have: false,
-      effect: () => {
-        b.modSpores = 0.20; //good late game maybe?
+      have: false, //7
+      effect: () => { //good late game maybe?
+        b.modSpores = 0.20;
       }
     },
     {
       name: "field siphon",
       description: "regenerate <span class='color-f'>field energy</span> proportional to your <span class='color-d'>damage</span> done",
-      have: false,
-      effect: () => {
-        //good with laser, and all fields
+      have: false, //8
+      effect: () => { //good with laser, and all fields
+
         b.modEnergySiphon = 0.2;
       }
     },
     {
       name: "entropy transfer",
       description: "<span class='color-h'>heal</span> proportional to your <span class='color-d'>damage</span> done",
-      have: false,
-      effect: () => {
-        //good with guns that overkill: one shot, grenade
+      have: false, //9
+      effect: () => { //good with guns that overkill: one shot, grenade
         b.modHealthDrain = 0.01;
       }
     },
     {
       name: "quantum immortality",
       description: "after you <strong style='color: #606;'>die</strong> continue in an <em>alternate reality</em><br>guns, ammo, and field are randomized",
-      have: false,
+      have: false, //10
       effect: () => {
         b.modIsImmortal = true;
       }
     },
-    // () => {
-    //   b.mod = 8;
-    //   game.makeTextLog("<strong style='font-size:30px;'>Relativistic Velocity</strong><br> <span class='faded'>(left click)</span><p>Your bullets are effected extra by your own velocity</p>", 1200);
-    //   b.setModDefaults(); //good with: one shot, rapid fire, spray, super balls
-    // },
+    {
+      name: "fluoroantimonic acid",
+      description: "Your bullets do extra chemical <span class='color-d'>damage</span> each time they make contact",
+      have: false, //11
+      effect: () => { //good with guns that fire many bullets at low speeds, minigun, drones, junk-bots, shotgun, superballs, wavebeam
+        b.extraDmg = 0.1
+      }
+    },
+    {
+      name: "annihilation",
+      description: "after you touch an enemy, they become <strong class='color-l'>light</strong><br><em>touching enemies still damages you</em>",
+      have: false, //12
+      effect: () => { //good with mods that heal: superconductive healing, entropy transfer 
+        b.annihilation = true
+      }
+    },
+    {
+      name: "superconductive healing",
+      description: "<span class='color-h'>heals</span> have zero resistance, and maximum efficiency<br><span class='color-h'>heals</span> bring you to full health",
+      have: false, //13
+      effect: () => { // good with ablative synthesis, electrostatic field
+        b.fullHeal = true
+      }
+    },
   ],
   giveMod(i) {
     b.mods[i].effect(); //give specific mod
@@ -234,7 +251,7 @@ const b = {
         angle: dir,
         friction: 0.5,
         frictionAir: 0,
-        dmg: 0, //damage done in addition to the damage from momentum
+        dmg: b.extraDmg, //damage done in addition to the damage from momentum
         classType: "bullet",
         collisionFilter: {
           category: 0x000100,
@@ -394,17 +411,17 @@ const b = {
     bullet[bIndex] = Bodies.circle(who.position.x, who.position.y, RADIUS, {
       // density: 0.0015,			//frictionAir: 0.01,
       inertia: Infinity,
-      restitution: 0.9,
+      restitution: 0.5,
       angle: Math.random() * 2 * Math.PI,
       friction: 0,
-      frictionAir: 0.01,
+      frictionAir: 0.011,
       dmg: 1.8, //damage done in addition to the damage from momentum
       classType: "bullet",
       collisionFilter: {
         category: 0x000100,
         mask: 0x000011 //no collide with body
       },
-      endCycle: game.cycle + Math.floor((300 + Math.floor(Math.random() * 240)) * b.modBulletsLastLonger),
+      endCycle: game.cycle + Math.floor((360 + Math.floor(Math.random() * 240)) * b.modBulletsLastLonger),
       minDmgSpeed: 0,
       onDmg() {
         this.endCycle = 0; //bullet ends cycle after doing damage 
@@ -432,7 +449,7 @@ const b = {
           }
         }
         //accelerate towards mobs
-        const THRUST = this.mass * 0.0008
+        const THRUST = this.mass * 0.0009
         if (this.lockedOn) {
           this.force.x -= THRUST * this.lockedOn.x
           this.force.y -= THRUST * this.lockedOn.y
@@ -450,7 +467,7 @@ const b = {
     World.add(engine.world, bullet[bIndex]); //add bullet to world
   },
   guns: [{
-      name: "laser",
+      name: "laser", //0
       description: "fire a  <span style='color:#f00;'>beam</span> of coherent light<br>reflects off walls at 75% intensity<br>uses  <span class='color-f'>energy</span> instead of ammunition",
       ammo: 0,
       // ammoPack: 350,
@@ -611,7 +628,7 @@ const b = {
         }
       }
     }, {
-      name: "kinetic slugs",
+      name: "kinetic slugs", //1
       description: "fire a large <strong>rod</strong> that does excessive physical <span class='color-d'>damage</span><br><em>high recoil</em>",
       ammo: 0,
       ammoPack: 5,
@@ -636,7 +653,7 @@ const b = {
       }
     },
     {
-      name: "minigun",
+      name: "minigun", //2
       description: "rapidly fire a stream of small <strong>bullets</strong>",
       ammo: 0,
       ammoPack: 105,
@@ -657,7 +674,7 @@ const b = {
       }
     },
     {
-      name: "wave beam",
+      name: "wave beam", //3
       description: "fire a stream of oscillating particles<br><strong style='opacity: 0.4;'>propagates through solids</strong>",
       ammo: 0,
       ammoPack: 85,
@@ -675,7 +692,7 @@ const b = {
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.13, //damage done in addition to the damage from momentum
+          dmg: 0.13 + b.extraDmg, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -711,7 +728,7 @@ const b = {
       }
     },
     {
-      name: "super balls",
+      name: "super balls", //4
       description: "fire 3 very <strong>bouncy</strong> balls",
       ammo: 0,
       ammoPack: 11,
@@ -728,7 +745,7 @@ const b = {
           b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 34 : 26, dir, me); //cd , speed
           Matter.Body.setDensity(bullet[me], 0.0001);
           bullet[me].endCycle = game.cycle + Math.floor(360 * b.modBulletsLastLonger);
-          bullet[me].dmg = 0.5;
+          bullet[me].dmg = 0.5 + b.extraDmg;
           bullet[me].minDmgSpeed = 0;
           bullet[me].restitution = 0.96;
           bullet[me].friction = 0;
@@ -740,7 +757,7 @@ const b = {
       }
     },
     {
-      name: "shotgun",
+      name: "shotgun", //5
       description: "fire a <strong>burst</strong> of bullets<br><em>high recoil</em>",
       ammo: 0,
       ammoPack: 8,
@@ -769,32 +786,44 @@ const b = {
       }
     },
     {
-      name: "fléchettes",
-      description: "fire an accurate high speed needle<br>",
+      name: "fléchettes", //6
+      description: "fire accurate high speed needles<br>crouch to fire 6 needles at once",
       ammo: 0,
-      ammoPack: 16,
+      ammoPack: 35,
       have: false,
       isStarterGun: true,
       fire() {
-        const me = bullet.length;
-        const dir = mech.angle;
-        if (mech.crouch) {
-          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 40 * b.modBulletSize, 3 * b.modBulletSize, b.fireAttributes(dir));
-        } else {
-          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 31 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(dir));
+        function spawnFlechette(dir = mech.angle, speed, size = 1) {
+          const me = bullet.length;
+          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(dir), mech.pos.y + 40 * Math.sin(dir), 36 * size * b.modBulletSize, 2.5 * size * b.modBulletSize, b.fireAttributes(dir));
+          bullet[me].endCycle = game.cycle + Math.floor(180 * b.modBulletsLastLonger);
+          bullet[me].dmg = 0.5 * size + b.extraDmg;
+          b.drawOneBullet(bullet[me].vertices);
+          bullet[me].do = function () {
+            //low gravity
+            this.force.y += this.mass * 0.0002;
+          };
+          Matter.Body.setVelocity(bullet[me], {
+            x: mech.Vx / 2 + speed * Math.cos(dir),
+            y: mech.Vy / 2 + speed * Math.sin(dir)
+          });
+          World.add(engine.world, bullet[me]); //add bullet to world
         }
-        b.fireProps(mech.crouch ? 50 : 30, mech.crouch ? 45 : 37, dir, me); //cd , speed
-        bullet[me].endCycle = game.cycle + Math.floor(180 * b.modBulletsLastLonger);
-        bullet[me].dmg = mech.crouch ? 2.2 : 1.6;
-        b.drawOneBullet(bullet[me].vertices);
-        bullet[me].do = function () {
-          //low gravity
-          this.force.y += this.mass * 0.0002;
-        };
+
+        if (mech.crouch) {
+          mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
+          // b.guns[6].ammo -= b.modNoAmmo ? Math.floor(COST / 2) : COST
+          for (let i = 0; i < 6; i++) {
+            spawnFlechette(mech.angle + 0.14 * (Math.random() - 0.5), 30 + 6 * Math.random(), 0.7)
+          }
+        } else {
+          mech.fireCDcycle = mech.cycle + Math.floor(30 * b.modFireRate); // cool down
+          spawnFlechette(mech.angle, 45)
+        }
       }
     },
     {
-      name: "missiles",
+      name: "missiles", //7
       description: "fire a missile that accelerates towards nearby targets<br><span class='color-e'>explodes</span> when near target",
       ammo: 0,
       ammoPack: 8,
@@ -900,7 +929,7 @@ const b = {
       }
     },
     {
-      name: "flak",
+      name: "flak", //8
       description: "fire a cluster of short range projectiles<br><span class='color-e'>explode</span> on contact or after half a second",
       ammo: 0,
       ammoPack: 20,
@@ -944,7 +973,7 @@ const b = {
       }
     },
     {
-      name: "grenades",
+      name: "grenades", //9
       description: "fire a projectile that <span class='color-e'>explodes</span> on contact or after one second",
       ammo: 0,
       ammoPack: 9,
@@ -973,7 +1002,7 @@ const b = {
       }
     },
     {
-      name: "vacuum bomb",
+      name: "vacuum bomb", //10
       description: "fire a huge <strong>bomb</strong> that sucks before it <span class='color-e'>explodes</span><br>click left mouse <strong>again</strong> to detonate",
       ammo: 0,
       ammoPack: 4,
@@ -1084,7 +1113,7 @@ const b = {
       }
     },
     {
-      name: "ferro frag",
+      name: "ferro frag", //11
       description: "fire a <strong>grenade</strong> that ejects <strong class='color-m'>magnetized</strong> nails<br>nails are <strong class='color-m'>attracted</strong> to enemy targets",
       ammo: 0,
       ammoPack: 8,
@@ -1142,7 +1171,7 @@ const b = {
                   Matter.Body.setVelocity(bullet[me], velocity);
                   World.add(engine.world, bullet[me]); //add bullet to world
                   bullet[me].endCycle = game.cycle + 60 + Math.floor(15 * Math.random());
-                  // bullet[me].dmg = 1.1;
+                  // bullet[me].dmg = 1.1+b.extraDmg;
                   bullet[me].do = function () {};
                 }
               }
@@ -1152,7 +1181,7 @@ const b = {
       }
     },
     {
-      name: "spores",
+      name: "spores", //12
       description: "release an orb that discharges <span class='color-s'>spores</span> after 2 seconds<br>seeks out targets<br>passes through blocks",
       ammo: 0,
       ammoPack: 5,
@@ -1196,17 +1225,17 @@ const b = {
             bullet[bIndex] = Bodies.circle(this.position.x, this.position.y, RADIUS, {
               // density: 0.0015,			//frictionAir: 0.01,
               inertia: Infinity,
-              restitution: 0.9,
+              restitution: 0.5,
               angle: dir,
               friction: 0,
-              frictionAir: 0.01,
-              dmg: 1.8, //damage done in addition to the damage from momentum
+              frictionAir: 0.011,
+              dmg: 1.8 + b.extraDmg, //damage done in addition to the damage from momentum
               classType: "bullet",
               collisionFilter: {
                 category: 0x000100,
                 mask: 0x000011 //no collide with body
               },
-              endCycle: game.cycle + Math.floor((300 + Math.floor(Math.random() * 240)) * b.modBulletsLastLonger),
+              endCycle: game.cycle + Math.floor((360 + Math.floor(Math.random() * 240)) * b.modBulletsLastLonger),
               minDmgSpeed: 0,
               onDmg() {
                 this.endCycle = 0; //bullet ends cycle after doing damage 
@@ -1234,12 +1263,12 @@ const b = {
                   }
                 }
                 //accelerate towards mobs
-                const THRUST = this.mass * 0.0008
+                const THRUST = this.mass * 0.0009
                 if (this.lockedOn) {
                   this.force.x -= THRUST * this.lockedOn.x
                   this.force.y -= THRUST * this.lockedOn.y
                 } else {
-                  this.force.y += this.mass * 0.00027; //gravity
+                  this.force.y += this.mass * 0.00025; //gravity
                 }
               },
             });
@@ -1256,7 +1285,7 @@ const b = {
       }
     },
     {
-      name: "drones",
+      name: "drones", //13
       description: "release <strong>drones</strong> that seek out targets for 16 seconds<br>follows mouse if no targets are found",
       ammo: 0,
       ammoPack: 20,
@@ -1273,7 +1302,7 @@ const b = {
           friction: 0,
           frictionAir: 0.0005,
           restitution: 1,
-          dmg: 0.14, //damage done in addition to the damage from momentum
+          dmg: 0.14 + b.extraDmg, //damage done in addition to the damage from momentum
           lookFrequency: 79 + Math.floor(37 * Math.random()),
           endCycle: game.cycle + Math.floor((780 + 360 * Math.random()) * b.modBulletsLastLonger),
           classType: "bullet",
@@ -1352,8 +1381,8 @@ const b = {
     },
     {
       //draw a halo, since there will only be 1-3 balls
-      name: "hornets",
-      description: "release large <strong>drones</strong> that defend the space around the player for 5 seconds",
+      name: "junk-bots", //14
+      description: "release large <strong>drones</strong> that defend the space around the player<br>despawn after not doing <span class='color-d'>damage</span> for 3 seconds",
       ammo: 0,
       ammoPack: 20,
       have: false,
@@ -1362,18 +1391,19 @@ const b = {
         const THRUST = 0.004
         const dir = mech.angle + 0.2 * (Math.random() - 0.5);
         const me = bullet.length;
-        const RADIUS = (10 + 5 * Math.random()) * b.modBulletSize
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS, {
+        const RADIUS = (18 + 5 * Math.random()) * b.modBulletSize
+        const LENGTH = 0.6 + 0.8 * Math.random()
+        bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), RADIUS * LENGTH, RADIUS / LENGTH, {
           isOrb: true,
           angle: dir,
-          inertia: Infinity,
+          // inertia: Infinity,
           friction: 0,
           frictionAir: 0.06,
           restitution: 1,
-          dmg: 0, // 0.14   //damage done in addition to the damage from momentum
+          dmg: b.extraDmg, // 0.14   //damage done in addition to the damage from momentum
           minDmgSpeed: 2,
           lookFrequency: 37 + Math.floor(37 * Math.random()),
-          endCycle: game.cycle + Math.floor((300 + 140 * Math.random()) * b.modBulletsLastLonger),
+          endCycle: game.cycle + Math.floor((170 + 120 * Math.random()) * b.modBulletsLastLonger),
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -1384,6 +1414,7 @@ const b = {
           onDmg() {
             // this.endCycle = 0;
             this.lockedOn = null
+            this.endCycle = game.cycle + Math.floor(180 * b.modBulletsLastLonger)
           },
           onEnd() {},
           do() {

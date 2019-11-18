@@ -2,10 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mouse can get suck as clicked if the user clicks off the window
+  can lead to gun lock up until player pressed mouse again
+  should I really need to fix this?
+
 diegetic field meter
   show as the player head filling with teal color
 
 atmosphere levels
+  large rotating fan that the player has to move through
   give the user a rest, between combat
   low combat
     nonaggressive mobs

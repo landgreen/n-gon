@@ -63,10 +63,11 @@ const mech = {
     stand: 49,
     jump: 70
   },
+  defaultMass: 5,
   mass: 5,
   Fx: 0.015, //run Force on ground
   FxAir: 0.015, //run Force in Air
-  definePlayerMass(mass = 5) {
+  definePlayerMass(mass = mech.defaultMass) {
     Matter.Body.setMass(player, mass);
     //reduce air and ground move forces
     this.Fx = 0.075 / mass
@@ -1026,7 +1027,7 @@ const mech = {
   pickUp() {
     //triggers when a hold target exits and field button is released
     this.isHolding = true;
-    this.definePlayerMass(5 + this.holdingTarget.mass * this.holdingMassScale)
+    this.definePlayerMass(mech.defaultMass + this.holdingTarget.mass * this.holdingMassScale)
     //collide with nothing
     this.holdingTarget.collisionFilter.category = 0x000000;
     this.holdingTarget.collisionFilter.mask = 0x000000;

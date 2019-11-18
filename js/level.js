@@ -12,11 +12,11 @@ const level = {
   onLevel: 0,
   start() {
     if (game.levelsCleared === 0) {
-      // game.levelsCleared = 16; //for testing to simulate possible mobs spawns
-      // b.giveGuns("all", 1000)
-      // b.giveGuns(11) // set a starting gun for testing
-      // mech.fieldUpgrades[6].effect(); //give a field power up for testing
-      // b.giveMod(6)
+      // game.levelsCleared = 6; //for testing to simulate possible mobs spawns
+      // b.giveGuns(6)
+      // mech.fieldUpgrades[6].effect();
+      // b.giveMod(13)
+      // spawn.pickList = ["ghoster", "ghoster"]
 
       this.intro(); //starting level
       // this.testingMap();
@@ -36,8 +36,8 @@ const level = {
     game.draw.setPaths();
   },
   difficultyIncrease() {
-    game.dmgScale += 0.3; //damage done by mobs increases each level
-    b.dmgScale *= 0.94; //damage done by player decreases each level
+    game.dmgScale += 0.2; //damage done by mobs increases each level
+    b.dmgScale *= 0.95; //damage done by player decreases each level
     game.accelScale *= 1.05 //mob acceleration increases each level
     game.lookFreqScale *= 0.95 //mob cycles between looks decreases each level
     game.CDScale *= 0.95 //mob CD time decreases each level

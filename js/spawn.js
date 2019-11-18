@@ -515,9 +515,11 @@ const spawn = {
       if (this.seePlayer.recall) {
         //accelerate towards the player
         const forceMag = this.accelMag * this.mass;
-        const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-        this.force.x += forceMag * Math.cos(angle);
-        this.force.y += forceMag * Math.sin(angle);
+        const dx = this.seePlayer.position.x - this.position.x
+        const dy = this.seePlayer.position.y - this.position.y
+        const mag = Math.sqrt(dx * dx + dy * dy)
+        this.force.x += forceMag * dx / mag;
+        this.force.y += forceMag * dy / mag;
 
         //eventHorizon waves in and out
         eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(game.cycle * 0.008))
@@ -685,7 +687,7 @@ const spawn = {
     me.g = 0.0002; //required if using 'gravity'
     me.frictionStatic = 0;
     me.friction = 0;
-    me.delay = 60;
+    me.delay = 90;
     Matter.Body.rotate(me, Math.PI * 0.1);
     me.onDamage = function () {
       this.cd = game.cycle + this.delay;
@@ -752,7 +754,7 @@ const spawn = {
     mobs.spawn(x, y, 7, radius, "transparent");
     me = mob[mob.length - 1];
     me.seeAtDistance2 = 1000000;
-    me.accelMag = 0.00014 * game.accelScale;
+    me.accelMag = 0.00012 * game.accelScale;
     if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     Matter.Body.setDensity(me, 0.00065); //normal is 0.001 //makes effective life much lower
     me.stroke = "transparent"; //used for drawGhost
@@ -764,7 +766,7 @@ const spawn = {
     me.do = function () {
       //cap max speed
       if (this.speed > 5) {
-        Matter.Body.setVelocity(mob[mob.length - 1], {
+        Matter.Body.setVelocity(this, {
           x: this.velocity.x * 0.8,
           y: this.velocity.y * 0.8
         });

@@ -689,7 +689,7 @@ const mobs = {
         //accelerate towards the searchTarget
         if (!this.seePlayer.recall) {
           const newTarget = function (that) {
-            if (Math.random() < 0.05) {
+            if (Math.random() < 0.025) {
               that.searchTarget = player.position; //chance to target player
             } else {
               //target random body
@@ -721,7 +721,7 @@ const mobs = {
         if (this.seePlayer.recall && this.cd < game.cycle) {
           const dist = Matter.Vector.sub(this.seePlayer.position, this.position);
           const distMag = Matter.Vector.magnitude(dist);
-          if (distMag < 430) {
+          if (distMag < 400) {
             this.cd = game.cycle + this.delay;
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
@@ -902,8 +902,10 @@ const mobs = {
         //this.fill = this.color + this.health + ')';
         if (this.health < 0.1) this.death();
         this.onDamage(this); //custom damage effects
-        if (b.modEnergySiphon) mech.fieldMeter += dmg * b.modEnergySiphon
-        if (b.modHealthDrain) mech.addHealth(dmg * b.modHealthDrain)
+        if (dmg !== Infinity) {
+          if (b.modEnergySiphon) mech.fieldMeter += dmg * b.modEnergySiphon
+          if (b.modHealthDrain) mech.addHealth(dmg * b.modHealthDrain)
+        }
       },
       onDamage() {
         // a placeholder for custom effects on mob damage

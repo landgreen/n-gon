@@ -9,6 +9,7 @@ const powerUps = {
     },
     effect() {
       let heal = (this.size / 40) ** 2
+      if (b.fullHeal) heal = Infinity
       heal = Math.min(1 - mech.health, heal)
       mech.addHealth(heal);
       if (heal > 0) game.makeTextLog("<span style='font-size:115%;'> <strong class='color-h' style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
@@ -44,7 +45,7 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.55 + 0.08 * Math.random())) / b.dmgScale);
+        const ammo = Math.ceil((target.ammoPack * (0.45 + 0.08 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
         game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
