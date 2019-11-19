@@ -76,22 +76,52 @@ function playerHeadCheck(event) {
 function mobCollisionChecks(event) {
   const pairs = event.pairs;
   for (let i = 0, j = pairs.length; i != j; i++) {
+
+    //body + player collision
+    if (pairs[i].bodyA === playerBody || pairs[i].bodyA === playerHead) {
+      collidePlayer(pairs[i].bodyB)
+    } else if (pairs[i].bodyB === playerBody || pairs[i].bodyB === playerHead) {
+      collidePlayer(pairs[i].bodyA)
+    }
+
+    function collidePlayer(obj, speedThreshold = 12) {
+      if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > 2) {
+        const v = Matter.Vector.magnitude(Matter.Vector.sub(player.velocity, obj.velocity));
+        if (v > speedThreshold && mech.damageImmune < mech.cycle) {
+          mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
+          let dmg = Math.sqrt(v * obj.mass) * 0.01;
+          console.log(`mass = ${obj.mass} \n`, `dmg = ${dmg}\n`, `v = ${v}\n`)
+          // console.log(v, dmg)
+          mech.damage(dmg);
+          game.drawList.push({
+            //add dmg to draw queue
+            x: pairs[i].activeContacts[0].vertex.x,
+            y: pairs[i].activeContacts[0].vertex.y,
+            radius: Math.sqrt(dmg) * 40,
+            color: game.playerDmgColor,
+            time: game.drawTime
+          });
+          return;
+        }
+      }
+    }
+
+    //mob + (player,bullet,body) collisions
     for (let k = 0; k < mob.length; k++) {
       if (mob[k].alive && mech.alive) {
         if (pairs[i].bodyA === mob[k]) {
-          collide(pairs[i].bodyB);
+          collideMob(pairs[i].bodyB);
           break;
         } else if (pairs[i].bodyB === mob[k]) {
-          collide(pairs[i].bodyA);
+          collideMob(pairs[i].bodyA);
           break;
         }
 
-        function collide(obj) {
-          //player and mob collision
+        function collideMob(obj) {
+          //player + mob collision
           if (obj === playerBody || obj === playerHead) {
             if (mech.damageImmune < mech.cycle) {
-              //player is immune to mob collision damage for 30 cycles
-              mech.damageImmune = mech.cycle + 30;
+              mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
               mob[k].foundPlayer();
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
@@ -118,8 +148,7 @@ function mobCollisionChecks(event) {
 
               }
             }
-            //extra kick between player and mob
-            //this section would be better with forces but they don't work...
+            //extra kick between player and mob              //this section would be better with forces but they don't work...
             let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
             Matter.Body.setVelocity(player, {
               x: player.velocity.x + 8 * Math.cos(angle),
@@ -131,7 +160,7 @@ function mobCollisionChecks(event) {
             });
             return;
           }
-          //bullet mob collisions
+          //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             mob[k].foundPlayer();
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
@@ -148,7 +177,7 @@ function mobCollisionChecks(event) {
             });
             return;
           }
-          //mob and body collisions
+          //mob + body collisions
           if (obj.classType === "body" && obj.speed > 5) {
             const v = Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 8) {
