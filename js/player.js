@@ -847,7 +847,7 @@ const mech = {
           setTimeout(solid, 50, that);
         }
       };
-      setTimeout(solid, 400, this.holdingTarget);
+      setTimeout(solid, 200, this.holdingTarget);
       //throw speed scales a bit with mass
       const speed = Math.min(85, Math.min(54 / this.holdingTarget.mass + 5, 48) * Math.min(this.throwCharge, this.throwChargeMax) / 50);
 
