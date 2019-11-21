@@ -211,7 +211,6 @@ const level = {
       }
     }
   },
-  //empty map for testing mobs
   intro() {
     // b.giveGuns(0, 1000)
     game.zoomScale = 1000 //1400 is normal
@@ -626,7 +625,7 @@ const level = {
     spawn.mapRect(-300, -1000, 600, 50);
     spawn.mapRect(-300, -1300, 450, 50);
     spawn.mapRect(-300, -1300, 50, 350);
-    if (!backwards) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
+    if (!backwards && game.levelsCleared > 1) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
     //left building
     spawn.mapRect(-100, -975, 100, 975);
     spawn.mapRect(-500, 100, 1950, 400);

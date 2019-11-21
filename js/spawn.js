@@ -1160,38 +1160,6 @@ const spawn = {
     }
     this.allowShields = true;
   },
-  // nodeBoss(
-  //   x,
-  //   y,
-  //   spawn = "striker",
-  //   nodes = Math.min(2 + Math.round(Math.random() * game.levelsCleared), 8),
-  //   //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(game.levelsCleared/2)),
-  //   radius = Math.ceil(Math.random() * 10) + 17, // radius of each node mob
-  //   l = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
-  //   stiffness = Math.random() * 0.03 + 0.005
-  // ) {
-  //   this.allowShields = false; //dont' want shields on boss mobs
-  //   let px = 0;
-  //   let py = 0;
-  //   let a = (2 * Math.PI) / nodes;
-  //   for (let i = 0; i < nodes; ++i) {
-  //     px += l * Math.cos(a * i);
-  //     py += l * Math.sin(a * i);
-  //     let whoSpawn = spawn;
-  //     if (spawn === "random") {
-  //       whoSpawn = this.fullPickList[Math.floor(Math.random() * this.fullPickList.length)];
-  //     } else if (spawn === "randomList") {
-  //       whoSpawn = this.pickList[Math.floor(Math.random() * this.pickList.length)];
-  //     }
-  //     this[whoSpawn](x + px, y + py, radius);
-  //   }
-  //   if (Math.random() < 0.3) {
-  //     this.constrain2AdjacentMobs(nodes, stiffness * 2, true);
-  //   } else {
-  //     this.constrainAllMobCombos(nodes, stiffness);
-  //   }
-  //   this.allowShields = true;
-  // },
   lineBoss(
     x,
     y,

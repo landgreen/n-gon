@@ -1192,7 +1192,6 @@ const mech = {
         mech.fieldDamage = 4; //passive field does extra damage
         // mech.fieldArc = 0.11
         // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
-
         mech.hold = function () {
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
