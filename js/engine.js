@@ -97,8 +97,8 @@ function mobCollisionChecks(event) {
             //add dmg to draw queue
             x: pairs[i].activeContacts[0].vertex.x,
             y: pairs[i].activeContacts[0].vertex.y,
-            radius: Math.sqrt(dmg) * 40,
-            color: game.playerDmgColor,
+            radius: dmg * 500,
+            color: game.mobDmgColor,
             time: game.drawTime
           });
           return;
