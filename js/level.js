@@ -13,7 +13,7 @@ const level = {
   start() {
     if (level.onLevel === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(6)
+      b.giveGuns(15)
       // mech.fieldUpgrades[6].effect();
       // b.giveMod(13)
       // spawn.pickList = ["ghoster", "ghoster"]
