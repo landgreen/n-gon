@@ -1,7 +1,7 @@
 let bullet = [];
 
 const b = {
-  dmgScale: null, //scales all gun damage from momentum, but not raw .dmg //this is reset in game.reset
+  dmgScale: null, //scales all gun damage from momentum, but not raw .dmg //set in levels.setDifficulty
   gravity: 0.0006, //most other bodies have   gravity = 0.001
   //variables use for gun mod upgrades
   modCount: null,
@@ -133,7 +133,7 @@ const b = {
     },
     {
       name: "fluoroantimonic acid",
-      description: "Your bullets do extra chemical <span class='color-d'>damage</span> each time they make contact",
+      description: "your bullets do extra chemical <span class='color-d'>damage</span> each time they make contact",
       have: false, //11
       effect: () => { //good with guns that fire many bullets at low speeds, minigun, drones, junk-bots, shotgun, superballs, wavebeam
         b.extraDmg = 0.1
@@ -141,7 +141,7 @@ const b = {
     },
     {
       name: "annihilation",
-      description: "after you touch an enemy, they become <strong class='color-l'>light</strong><br><em>touching enemies still damages you</em>",
+      description: "after you touch any enemy, they are <strong class='color-l'>annihilated</strong><br><em>touching enemies damages you, but destroys them</em>",
       have: false, //12
       effect: () => { //good with mods that heal: superconductive healing, entropy transfer 
         b.annihilation = true
@@ -149,7 +149,7 @@ const b = {
     },
     {
       name: "superconductive healing",
-      description: "<span class='color-h'>heals</span> have zero resistance, and maximum efficiency<br><span class='color-h'>heals</span> bring you to full health",
+      description: "<span class='color-h'>heals</span> bring you to full health",
       have: false, //13
       effect: () => { // good with ablative synthesis, electrostatic field
         b.fullHeal = true

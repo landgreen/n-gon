@@ -174,6 +174,22 @@ document.body.addEventListener("wheel", (e) => {
   passive: true
 });
 
+document.getElementById("fps-select").addEventListener("input", event => {
+  let value = document.getElementById("fps-select").value
+  if (value === 'max') {
+    game.fpsCapDefault = 999999999;
+  } else if (value === '72') {
+    game.fpsCapDefault = 72
+  } else if (value === '60') {
+    game.fpsCapDefault = 60
+  } else if (value === '45') {
+    game.fpsCapDefault = 45
+  } else if (value === '30') {
+    game.fpsCapDefault = 30
+  } else if (value === '15') {
+    game.fpsCapDefault = 15
+  }
+});
 
 // function playSound(id) {
 //   //play sound

@@ -11,8 +11,8 @@ const level = {
   levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie"],
   onLevel: 0,
   start() {
-    if (game.levelsCleared === 0) {
-      // game.levelsCleared = 6; //for testing to simulate possible mobs spawns
+    if (level.onLevel === 0) {
+      // game.difficulty = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns(6)
       // mech.fieldUpgrades[6].effect();
       // b.giveMod(13)
@@ -35,12 +35,23 @@ const level = {
     level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
   },
-  difficultyIncrease() {
-    game.dmgScale += 0.2; //damage done by mobs increases each level
-    b.dmgScale *= 0.95; //damage done by player decreases each level
-    game.accelScale *= 1.05 //mob acceleration increases each level
-    game.lookFreqScale *= 0.95 //mob cycles between looks decreases each level
-    game.CDScale *= 0.95 //mob CD time decreases each level
+  difficultyIncrease(num = 1) {
+    for (let i = 0; i < num; i++) {
+      game.dmgScale += 0.2; //damage done by mobs increases each level
+      b.dmgScale *= 0.95; //damage done by player decreases each level
+      game.accelScale *= 1.05 //mob acceleration increases each level
+      game.lookFreqScale *= 0.95 //mob cycles between looks decreases each level
+      game.CDScale *= 0.95 //mob CD time decreases each level
+    }
+  },
+  difficultyDecrease(num = 1) { //used in easy mode for game.reset()
+    for (let i = 0; i < num; i++) {
+      game.dmgScale -= 0.2; //damage done by mobs increases each level
+      b.dmgScale /= 0.95; //damage done by player decreases each level
+      game.accelScale /= 1.05 //mob acceleration increases each level
+      game.lookFreqScale /= 0.95 //mob cycles between looks decreases each level
+      game.CDScale /= 0.95 //mob CD time decreases each level
+    }
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
@@ -48,10 +59,6 @@ const level = {
     //start with all guns
     game.zoomScale = 1400 //1400 is normal
     spawn.setSpawnList();
-    game.levelsCleared = 3; //for testing to simulate all possible mobs spawns
-    for (let i = 0; i < game.levelsCleared; i++) {
-      level.difficultyIncrease()
-    }
     mech.setPosToSpawn(-75, -60); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
@@ -136,8 +143,8 @@ const level = {
 
     // spawn.setSpawnList();
     // spawn.setSpawnList();
-    // game.levelsCleared = 7; //for testing to simulate all possible mobs spawns
-    // for (let i = 0; i < game.levelsCleared; i++) {
+    // game.difficulty = 7; //for testing to simulate all possible mobs spawns
+    // for (let i = 0; i < game.difficulty; i++) {
     //   game.dmgScale += 0.4; //damage done by mobs increases each level
     //   b.dmgScale *= 0.9; //damage done by player decreases each level
     // }
@@ -183,7 +190,7 @@ const level = {
     }
     blockDoor(710, -710);
 
-    spawn[spawn.pickList[0]](1500, -200, 100 + game.levelsCleared * 8);
+    spawn[spawn.pickList[0]](1500, -200, 100 + game.difficulty * 8);
     spawn.mapRect(2500, -1200, 200, 750); //right wall
     blockDoor(2585, -210)
     spawn.mapRect(2500, -200, 200, 300); //right wall
@@ -200,13 +207,13 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     for (let i = 0; i < 5; ++i) {
-      if (game.levelsCleared * Math.random() > 3 * i) {
+      if (game.difficulty * Math.random() > 3 * i) {
         spawn.randomBoss(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
-      if (game.levelsCleared * Math.random() > 2.6 * i) {
+      if (game.difficulty * Math.random() > 2.6 * i) {
         spawn.randomBoss(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
-      if (game.levelsCleared * Math.random() > 2.4 * i) {
+      if (game.difficulty * Math.random() > 2.4 * i) {
         spawn.randomBoss(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
     }
@@ -325,12 +332,16 @@ const level = {
 
     mech.health = 0.25;
     mech.displayHealth();
-    powerUps.spawn(-100, 0, "heal", false); //starting gun
+    // powerUps.spawn(-100, 0, "heal", false); //starting gun
     powerUps.spawn(1900, -150, "heal", false); //starting gun
     powerUps.spawn(2050, -150, "heal", false); //starting gun
     // powerUps.spawn(2050, -150, "field", false); //starting gun
     powerUps.spawn(2300, -150, "gun", false); //starting gun
-
+    if (game.isEasyMode) {
+      powerUps.spawn(2050, -150, "mod", false); //starting gun
+      powerUps.spawn(2050, -150, "mod", false); //starting gun
+      powerUps.spawn(-100, 0, "heal", false); //starting gun
+    }
     spawn.wireFoot();
     spawn.wireFootLeft();
     spawn.wireKnee();
@@ -526,11 +537,11 @@ const level = {
     spawn.randomBoss(2225, -1325, 0.4);
     spawn.randomBoss(4900, -1200, 0);
     //spawn.randomBoss(4850, -1250,0.7);
-    if (game.levelsCleared > 4) spawn.bomber(2500, -2400, 100);
+    if (game.difficulty > 4) spawn.bomber(2500, -2400, 100);
   },
   aerie() {
     // game.setZoom(3000);
-    // game.levelsCleared = 4; //for testing to simulate possible mobs spawns
+    // game.difficulty = 4; //for testing to simulate possible mobs spawns
     level.defaultZoom = 2100
     game.zoomTransition(level.defaultZoom)
 
@@ -625,7 +636,7 @@ const level = {
     spawn.mapRect(-300, -1000, 600, 50);
     spawn.mapRect(-300, -1300, 450, 50);
     spawn.mapRect(-300, -1300, 50, 350);
-    if (!backwards && game.levelsCleared > 1) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
+    if (!backwards && game.difficulty > 1) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
     //left building
     spawn.mapRect(-100, -975, 100, 975);
     spawn.mapRect(-500, 100, 1950, 400);
@@ -699,7 +710,7 @@ const level = {
     spawn.randomBoss(350, -500, 1)
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
-    if (game.levelsCleared > 2) spawn.suckerBoss(4500, -400);
+    if (game.difficulty > 2) spawn.suckerBoss(4500, -400);
 
     //add mini boss, giant hopper?   or a black hole that spawns hoppers?
   },
@@ -836,7 +847,7 @@ const level = {
     spawn.bodyRect(1425, -1110, 115, 25, 0.9); //block on far left building
     spawn.bodyRect(1540, -1110, 300, 25, 0.9); //block on far left building
 
-    if (game.levelsCleared > 2) spawn.shooterBoss(2200, -1300);
+    if (game.difficulty > 2) spawn.shooterBoss(2200, -1300);
     spawn.randomSmallMob(1300, -70);
     spawn.randomSmallMob(3200, -100);
     spawn.randomSmallMob(4450, -100);
@@ -876,7 +887,7 @@ const level = {
     spawn.debris(-2325, -1825, 2400); //20 debris per level
     spawn.debris(-2625, -600, 600, 6); //20 debris per level
     spawn.debris(-2000, -60, 1200, 6); //20 debris per level
-    // if (!game.levelsCleared) powerUps.spawn(2450, -1675, "gun", false);
+    // if (!game.difficulty) powerUps.spawn(2450, -1675, "gun", false);
     //background
     level.fillBG.push({
       x: -4425,
@@ -961,7 +972,7 @@ const level = {
 
     spawn.mapRect(-1850, -1150, 1050, 175);
     spawn.bodyRect(-1907, -1600, 550, 25);
-    if (game.levelsCleared < 4) {
+    if (game.difficulty < 4) {
       spawn.bodyRect(-1600, -125, 125, 125);
       spawn.bodyRect(-1560, -200, 75, 75);
     } else {
@@ -996,7 +1007,7 @@ const level = {
     spawn.bodyRect(-3570, -1800, 50, 50);
     spawn.bodyRect(-2970, -2250, 50, 50);
 
-    if (game.levelsCleared < 4) spawn.bodyRect(-3760, -2400, 50, 50);
+    if (game.difficulty < 4) spawn.bodyRect(-3760, -2400, 50, 50);
 
     spawn.bodyRect(-3080, -2250, 40, 40);
     spawn.bodyRect(-3420, -650, 50, 50);
@@ -1207,7 +1218,7 @@ const level = {
     //spawn.randomMob(1120, -1200, 0.3);
     //spawn.randomSmallMob(2200, -1775);
 
-    if (game.levelsCleared > 2) spawn.snaker(-1300 + Math.random() * 2000, -2200); //boss snake with head
+    if (game.difficulty > 2) spawn.snaker(-1300 + Math.random() * 2000, -2200); //boss snake with head
   },
   office() {
     level.defaultZoom = 1400
@@ -1332,7 +1343,7 @@ const level = {
     spawn.spawnStairs(3000 + 2000 - 50, 0, 4, 250, 350, true); //stairs ground
 
     // tether ball
-    if (game.levelsCleared > 2) {
+    if (game.difficulty > 2) {
       level.fillBG.push({
         x: 2495,
         y: -500,
@@ -1350,7 +1361,7 @@ const level = {
         stiffness: 0.00012
       });
       //chance to spawn a ring of exploding mobs around this boss
-      if (game.levelsCleared > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
+      if (game.difficulty > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
     }
 
     spawn.randomSmallMob(4575, -560, 1);
@@ -1456,8 +1467,8 @@ const level = {
     nextLevel() {
       //enter when player isn't falling
       if (player.velocity.y < 0.1) {
-        game.levelsCleared++;
-        if (game.levelsCleared > 1) level.difficultyIncrease()
+        game.difficulty++;
+        if (game.difficulty > 1) level.difficultyIncrease()
         //cycles map to next level
         level.onLevel++;
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
@@ -1555,10 +1566,10 @@ const level = {
     }
   },
   levelAnnounce() {
-    document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
-    // game.makeTextLog(`<div style='font-size: 25px;'>level ${game.levelsCleared} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
-    // if (game.levelsCleared === 0) text = "";
-    // text = "Level " + (game.levelsCleared + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";
+    document.title = "n-gon: L" + (level.onLevel) + " " + level.levels[level.onLevel];
+    // game.makeTextLog(`<div style='font-size: 25px;'>level ${game.difficulty} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
+    // if (game.difficulty === 0) text = "";
+    // text = "Level " + (game.difficulty + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";
 
     // text = text + " with population: ";
     // for (let i = 0, len = spawn.pickList.length; i < len; ++i) {

@@ -1,15 +1,6 @@
 // game Object ********************************************************
 //*********************************************************************
 const game = {
-  // difficulty: {
-  //   damageDone: 1,
-  //   damageTaken: 1,
-  //   mobQuickness: 1,
-  //   powerUpDropRate: 1,
-  //   fallingDamage: false,
-  //   explosiveDamage: true,
-  //   unlimitedAmmo: false,
-  // },
   loop() {
     game.cycle++; //tracks game cycles
     mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
@@ -69,21 +60,23 @@ const game = {
   },
   levelsCleared: 0,
   g: 0.001,
-  dmgScale: 1,
-  accelScale: 1,
-  CDScale: 1,
-  lookFreqScale: 1,
+  dmgScale: null, //set in levels.setDifficulty
+  accelScale: null, //set in levels.setDifficulty
+  CDScale: null, //set in levels.setDifficulty
+  lookFreqScale: null, //set in levels.setDifficulty
   onTitlePage: true,
   paused: false,
   testing: false, //testing mode: shows wireframe and some variables
   cycle: 0, //total cycles, 60 per second
-  fpsCap: 72, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
+  fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
   fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
   cyclePaused: 0,
   fallHeight: 3000, //below this y position the player dies
   lastTimeStamp: 0, //tracks time stamps for measuring delta
   delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
   buttonCD: 0,
+  isEasyMode: false,
+  difficulty: null,
   // dropFPS(cap = 40, time = 15) {
   //   game.fpsCap = cap
   //   game.fpsInterval = 1000 / game.fpsCap;
@@ -188,12 +181,6 @@ const game = {
       document.getElementById("text-log").style.opacity = 0;
     }
   },
-  // timing: function() {
-  //   this.cycle++; //tracks game cycles
-  //   //delta is used to adjust forces on game slow down;
-  //   this.delta = (engine.timing.timestamp - this.lastTimeStamp) / 16.666666666666;
-  //   this.lastTimeStamp = engine.timing.timestamp; //track last engine timestamp
-  // },
   nextGun() {
     if (b.inventory.length > 0) {
       b.inventoryGun++;
@@ -425,14 +412,29 @@ const game = {
     mech.fieldUpgrades[0].effect(); //set to default field
     game.paused = false;
     engine.timing.timeScale = 1;
-    game.dmgScale = 1;
-    b.dmgScale = 0.7;
+    game.fpsCap = game.fpsCapDefault;
     game.makeGunHUD();
     mech.drop();
     mech.addHealth(1);
     mech.alive = true;
     level.onLevel = 0;
-    game.levelsCleared = 0;
+
+    //resetting difficulty
+    game.dmgScale = 1;
+    b.dmgScale = 0.7;
+    game.accelScale = 1;
+    game.lookFreqScale = 1;
+    game.CDScale = 1;
+    if (document.getElementById("difficulty-select").value === 'easy') {
+      game.difficulty = 0;
+      game.isEasyMode = true;
+      level.difficultyDecrease(6);
+    } else {
+      game.difficulty = parseInt(document.getElementById("difficulty-select").value)
+      level.difficultyIncrease(game.difficulty)
+    }
+
+
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
     document.getElementById("fade-out").style.opacity = 0;
@@ -447,6 +449,7 @@ const game = {
       game.startGame();
     };
     document.getElementById("controls").style.display = "inline";
+    document.getElementById("settings").style.display = "inline";
     document.getElementById("splash").style.display = "inline";
     document.getElementById("dmg").style.display = "none";
     document.getElementById("health-bg").style.display = "none";
@@ -457,6 +460,7 @@ const game = {
   startGame() {
     game.onTitlePage = false;
     document.getElementById("controls").style.display = "none";
+    document.getElementById("settings").style.display = "none";
     document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
     document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
     document.getElementById("dmg").style.display = "inline";

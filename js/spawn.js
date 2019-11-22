@@ -27,16 +27,16 @@ const spawn = {
     spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
   },
   randomMob(x, y, chance = 1) {
-    if (Math.random() < chance + 0.09 * (game.levelsCleared - 1) && mob.length < 4 + game.levelsCleared * 1.7) {
+    if (Math.random() < chance + 0.09 * (game.difficulty - 1) && mob.length < 4 + game.difficulty * 1.7) {
       const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       this[pick](x, y);
     }
   },
   randomSmallMob(x, y,
-    num = Math.max(Math.min(Math.round(Math.random() * (game.levelsCleared - 1) * 0.45 - 0.4), 4), 0),
+    num = Math.max(Math.min(Math.round(Math.random() * (game.difficulty - 1) * 0.45 - 0.4), 4), 0),
     size = 16 + Math.ceil(Math.random() * 15),
     chance = 1) {
-    if (Math.random() < chance + (game.levelsCleared - 1) * 0.03 && mob.length < 4 + game.levelsCleared * 1.7) {
+    if (Math.random() < chance + (game.difficulty - 1) * 0.03 && mob.length < 4 + game.difficulty * 1.7) {
       for (let i = 0; i < num; ++i) {
         const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
         this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
@@ -44,7 +44,7 @@ const spawn = {
     }
   },
   randomBoss(x, y, chance = 1) {
-    if (Math.random() < chance + (game.levelsCleared - 1) * 0.14 && game.levelsCleared !== 1 && mob.length < 4 + game.levelsCleared * 2 || chance == Infinity) {
+    if (Math.random() < chance + (game.difficulty - 1) * 0.14 && game.difficulty !== 1 && mob.length < 4 + game.difficulty * 2 || chance == Infinity) {
       //choose from the possible picklist
       let pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       //is the pick able to be a boss?
@@ -236,7 +236,7 @@ const spawn = {
     me.accelMag = 0.001 * game.accelScale;;
     me.g = me.accelMag * 0.6; //required if using 'gravity'
     me.memory = 50;
-    if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
       this.gravity();
@@ -298,7 +298,7 @@ const spawn = {
     me.onDeath = function () {
       this.removeCons();
     };
-    if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
       this.gravity();
@@ -493,8 +493,8 @@ const spawn = {
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-      if (game.levelsCleared > 5) {
-        for (let i = 0; i < (game.levelsCleared - 3); ++i) {
+      if (game.difficulty > 5) {
+        for (let i = 0; i < (game.difficulty - 3); ++i) {
           spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 70 * Math.random());
           Matter.Body.setVelocity(mob[mob.length - 1], {
             x: (Math.random() - 0.5) * 70,
@@ -580,7 +580,7 @@ const spawn = {
     me.accelMag = 0.0005 * game.accelScale;
     me.frictionStatic = 0;
     me.friction = 0;
-    if (Math.random() < Math.min(0.2 + (game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
       this.seePlayerByLookingAt();
@@ -604,7 +604,7 @@ const spawn = {
     me.onDamage = function () {
       this.laserPos = this.position;
     };
-    // if (Math.random() < Math.min(0.2 + game.levelsCleared * 0.1, 0.7)) spawn.shield(me, x, y);
+    // if (Math.random() < Math.min(0.2 + game.difficulty * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
       if (!mech.isBodiesAsleep) {
@@ -849,7 +849,7 @@ const spawn = {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
-    Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
     me.stroke = "rgba(255,0,200)"; //used for drawGhost
     me.seeAtDistance2 = 2000000;
@@ -892,7 +892,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    if (Math.random() < Math.min(0.15 + (game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
       this.seePlayerByLookingAt();
@@ -915,7 +915,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -963,7 +963,7 @@ const spawn = {
         });
       }
     };
-    if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.5)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
       this.gravity();
@@ -1013,9 +1013,9 @@ const spawn = {
     me.accelMag = 0.0012 * game.accelScale;
     me.memory = 200;
     me.laserRange = 500;
-    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
@@ -1027,7 +1027,7 @@ const spawn = {
     };
 
     //snake tail
-    const nodes = Math.min(3 + Math.ceil(Math.random() * game.levelsCleared + 2), 8)
+    const nodes = Math.min(3 + Math.ceil(Math.random() * game.difficulty + 2), 8)
     spawn.lineBoss(x + 105, y, "spawns", nodes);
     //constraint boss with first 3 mobs in lineboss
     consBB[consBB.length] = Constraint.create({
@@ -1055,9 +1055,9 @@ const spawn = {
     me.g = 0.0001; //required if using 'gravity'
     me.accelMag = 0.002 * game.accelScale;
     me.memory = 20;
-    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.levelsCleared)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.levelsCleared - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
 
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -1131,8 +1131,8 @@ const spawn = {
     x,
     y,
     spawn = "striker",
-    nodes = Math.min(2 + Math.ceil(Math.random() * (game.levelsCleared + 2)), 8),
-    //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(game.levelsCleared/2)),
+    nodes = Math.min(2 + Math.ceil(Math.random() * (game.difficulty + 2)), 8),
+    //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(game.difficulty/2)),
     radius = Math.ceil(Math.random() * 10) + 17, // radius of each node mob
     sideLength = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
     stiffness = Math.random() * 0.03 + 0.005
@@ -1164,8 +1164,8 @@ const spawn = {
     x,
     y,
     spawn = "striker",
-    nodes = Math.min(3 + Math.ceil(Math.random() * game.levelsCleared + 2), 8),
-    //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(game.levelsCleared/2)),
+    nodes = Math.min(3 + Math.ceil(Math.random() * game.difficulty + 2), 8),
+    //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(game.difficulty/2)),
     radius = Math.ceil(Math.random() * 10) + 17,
     l = Math.ceil(Math.random() * 80) + 30,
     stiffness = Math.random() * 0.06 + 0.01

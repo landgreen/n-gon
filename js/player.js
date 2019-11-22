@@ -390,7 +390,7 @@ const mech = {
       }
 
       function randomizeField() {
-        if (game.levelsCleared * (Math.random() + 0.27) > 2) {
+        if (game.difficulty * (Math.random() + 0.27) > 2) {
           mech.fieldUpgrades[Math.floor(Math.random() * (mech.fieldUpgrades.length))].effect();
         } else {
           mech.fieldUpgrades[0].effect();
@@ -455,7 +455,7 @@ const mech = {
         }
         game.replaceTextLog = true;
         game.makeTextLog("your quantum probability has stabilized", 1000);
-        document.title = "n-gon: L" + (game.levelsCleared) + " " + level.levels[level.onLevel];
+        document.title = "n-gon: L" + (game.difficulty) + " " + level.levels[level.onLevel];
       }, 8000);
 
     } else if (this.alive) { //normal death code here

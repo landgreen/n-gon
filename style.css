@@ -49,7 +49,15 @@ summary {
   /* border-radius: 5px; */
 }
 
-#controls-div {
+#settings {
+  position: absolute;
+  bottom: 0px;
+  right: 1px;
+  z-index: 12;
+  font-size: 1.3em;
+}
+
+#details-div {
   padding: 10px;
   border-radius: 8px;
   background-color: #ddd;
@@ -258,15 +266,12 @@ em {
   background: #149;
 }
 
-
-
 .box {
   padding: 3px 8px 3px 8px;
   border: 2px solid #444;
   border-radius: 4px;
   background-color: rgba(255, 255, 255, 0.5);
 }
-
 
 .wrapper {
   display: grid;
