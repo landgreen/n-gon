@@ -10,11 +10,12 @@ const level = {
   boostScale: 0.000023,
   levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie"],
   onLevel: 0,
+  levelsCleared: 0,
   start() {
-    if (level.onLevel === 0) {
+    if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      b.giveGuns(15)
-      // mech.fieldUpgrades[6].effect();
+      // b.giveGuns(6)
+      // mech.fieldUpgrades[7].effect();
       // b.giveMod(13)
       // spawn.pickList = ["ghoster", "ghoster"]
 
@@ -1470,6 +1471,7 @@ const level = {
         game.difficulty++;
         if (game.difficulty > 1) level.difficultyIncrease()
         //cycles map to next level
+        level.levelsCleared++;
         level.onLevel++;
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
 
@@ -1566,7 +1568,7 @@ const level = {
     }
   },
   levelAnnounce() {
-    document.title = "n-gon: L" + (level.onLevel) + " " + level.levels[level.onLevel];
+    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel];
     // game.makeTextLog(`<div style='font-size: 25px;'>level ${game.difficulty} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
     // if (game.difficulty === 0) text = "";
     // text = "Level " + (game.difficulty + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";

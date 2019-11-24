@@ -75,6 +75,7 @@ const game = {
   lastTimeStamp: 0, //tracks time stamps for measuring delta
   delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
   buttonCD: 0,
+  isBodyDamage: true,
   isEasyMode: false,
   difficulty: null,
   // dropFPS(cap = 40, time = 15) {
@@ -418,6 +419,7 @@ const game = {
     mech.addHealth(1);
     mech.alive = true;
     level.onLevel = 0;
+    level.levelsCleared = 0;
 
     //resetting difficulty
     game.dmgScale = 1;
@@ -433,7 +435,6 @@ const game = {
       game.difficulty = parseInt(document.getElementById("difficulty-select").value)
       level.difficultyIncrease(game.difficulty)
     }
-
 
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;

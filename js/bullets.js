@@ -35,6 +35,8 @@ const b = {
     b.extraDmg = 0;
     b.annihilation = false;
     b.fullHeal = false;
+    mech.throwChargeRate = 2;
+    mech.throwChargeMax = 50;
     for (let i = 0; i < b.mods.length; i++) {
       b.mods[i].have = false;
     }
@@ -148,11 +150,21 @@ const b = {
       }
     },
     {
-      name: "superconductive healing",
+      name: "recursive healing",
       description: "<span class='color-h'>heals</span> bring you to full health",
       have: false, //13
       effect: () => { // good with ablative synthesis, electrostatic field
         b.fullHeal = true
+      }
+    },
+    {
+      name: "superconductive rail gun",
+      description: "throw blocks at very high speeds<br><em>to charge a throw, hold right click while holding a block<br>release right click to fire</em>",
+      have: false, //14
+      effect: () => { // good with ablative synthesis, electrostatic field
+        b.fullHeal = true
+        mech.throwChargeRate = 4;
+        mech.throwChargeMax = 150;
       }
     },
   ],
@@ -787,21 +799,20 @@ const b = {
     },
     {
       name: "fléchettes", //6
-      description: "fire accurate high speed needles<br>crouch to fire 6 needles at once",
+      description: "fire accurate high speed needles",
       ammo: 0,
-      ammoPack: 35,
+      ammoPack: 20,
       have: false,
       isStarterGun: true,
       fire() {
         function spawnFlechette(dir = mech.angle, speed, size = 1) {
           const me = bullet.length;
-          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(dir), mech.pos.y + 40 * Math.sin(dir), 36 * size * b.modBulletSize, 2.5 * size * b.modBulletSize, b.fireAttributes(dir));
+          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(dir), mech.pos.y + 40 * Math.sin(dir), 65 * size * b.modBulletSize, 1.5 * size * b.modBulletSize, b.fireAttributes(dir));
           bullet[me].endCycle = game.cycle + Math.floor(180 * b.modBulletsLastLonger);
-          bullet[me].dmg = 0.5 * size + b.extraDmg;
+          bullet[me].dmg = 0.25 * size + b.extraDmg;
           b.drawOneBullet(bullet[me].vertices);
           bullet[me].do = function () {
-            //low gravity
-            this.force.y += this.mass * 0.0002;
+            this.force.y += this.mass * 0.0002; //low gravity
           };
           Matter.Body.setVelocity(bullet[me], {
             x: mech.Vx / 2 + speed * Math.cos(dir),
@@ -811,15 +822,13 @@ const b = {
         }
 
         if (mech.crouch) {
-          mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
-          // b.guns[6].ammo -= b.modNoAmmo ? Math.floor(COST / 2) : COST
-          for (let i = 0; i < 6; i++) {
-            spawnFlechette(mech.angle + 0.14 * (Math.random() - 0.5), 30 + 6 * Math.random(), 0.7)
-          }
+          spawnFlechette(mech.angle, 55, 1.2)
         } else {
-          mech.fireCDcycle = mech.cycle + Math.floor(30 * b.modFireRate); // cool down
-          spawnFlechette(mech.angle, 45)
+          for (let i = 0; i < 7; i++) {
+            spawnFlechette(mech.angle + 0.14 * (Math.random() - 0.5), 30 + 8 * Math.random(), 0.5)
+          }
         }
+        mech.fireCDcycle = mech.cycle + Math.floor(30 * b.modFireRate); // cool down
       }
     },
     {
@@ -1454,140 +1463,5 @@ const b = {
         b.drawOneBullet(bullet[me].vertices);
       }
     },
-    {
-      name: "short range laser", //15
-      description: "fire a  <span style='color:#f00;'>beam</span> of coherent light<br>reflects off walls at 75% intensity<br>uses  <span class='color-f'>energy</span> instead of ammunition",
-      ammo: 0,
-      ammoPack: Infinity,
-      have: false,
-      isStarterGun: true,
-      fire() {
-        //laser drains energy as well as bullets
-        const FIELD_DRAIN = 0.001
-        const damage = 0.3
-        if (mech.fieldMeter < FIELD_DRAIN) {
-          mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
-        } else {
-          mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
-          let best;
-          const color = "#f06";
-          const range = 150 + 200 * Math.random() //+ 100 * Math.sin(mech.cycle * 0.3);
-          const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
-          const path = [{
-              x: mech.pos.x + 20 * Math.cos(dir),
-              y: mech.pos.y + 20 * Math.sin(dir)
-            },
-            {
-              x: mech.pos.x + range * Math.cos(dir),
-              y: mech.pos.y + range * Math.sin(dir)
-            }
-          ];
-          const vertexCollision = function (v1, v1End, domain) {
-            for (let i = 0; i < domain.length; ++i) {
-              let vertices = domain[i].vertices;
-              const len = vertices.length - 1;
-              for (let j = 0; j < len; j++) {
-                results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                if (results.onLine1 && results.onLine2) {
-                  const dx = v1.x - results.x;
-                  const dy = v1.y - results.y;
-                  const dist2 = dx * dx + dy * dy;
-                  if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                    best = {
-                      x: results.x,
-                      y: results.y,
-                      dist2: dist2,
-                      who: domain[i],
-                      v1: vertices[j],
-                      v2: vertices[j + 1]
-                    };
-                  }
-                }
-              }
-              results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-              if (results.onLine1 && results.onLine2) {
-                const dx = v1.x - results.x;
-                const dy = v1.y - results.y;
-                const dist2 = dx * dx + dy * dy;
-                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                  best = {
-                    x: results.x,
-                    y: results.y,
-                    dist2: dist2,
-                    who: domain[i],
-                    v1: vertices[0],
-                    v2: vertices[len]
-                  };
-                }
-              }
-            }
-          };
-          const checkforCollisions = function () {
-            best = {
-              x: null,
-              y: null,
-              dist2: Infinity,
-              who: null,
-              v1: null,
-              v2: null
-            };
-            vertexCollision(path[path.length - 2], path[path.length - 1], mob);
-            vertexCollision(path[path.length - 2], path[path.length - 1], map);
-            vertexCollision(path[path.length - 2], path[path.length - 1], body);
-          };
-          const laserHitMob = function (dmg) {
-            if (best.who.alive) {
-              dmg *= b.dmgScale * damage;
-              best.who.damage(dmg);
-              best.who.locatePlayer();
-              //draw mob damage circle
-              ctx.fillStyle = color;
-              ctx.beginPath();
-              ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
-              ctx.fill();
-            }
-          };
-          checkforCollisions();
-          if (best.dist2 != Infinity) {
-            //if hitting something
-            path[path.length - 1] = {
-              x: best.x,
-              y: best.y
-            };
-            laserHitMob(1);
-          }
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 1
-          ctx.beginPath();
-          ctx.moveTo(path[0].x, path[0].y);
-          ctx.lineTo(path[1].x, path[1].y);
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255,0,60,0.1)"
-          ctx.lineWidth = 10
-          ctx.beginPath();
-          ctx.moveTo(path[0].x, path[0].y);
-          ctx.lineTo(path[1].x, path[1].y);
-          ctx.stroke();
-        }
-      }
-    },
-    // {
-    //   name: "melee", //15
-    //   description: "rapidly fire a stream of short range <strong>bullets</strong>",
-    //   ammo: 0,
-    //   ammoPack: 205,
-    //   have: false,
-    //   isStarterGun: true,
-    //   fire() {
-    //     const me = bullet.length;
-    //     const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.1 : 0.7);
-    //     bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12 * b.modBulletSize, 12 * b.modBulletSize, b.fireAttributes(dir));
-    //     b.fireProps(mech.crouch ? 6 : 2, mech.crouch ? 30 : 20, dir, me); //cd , speed
-    //     bullet[me].endCycle = game.cycle + Math.floor(18 * b.modBulletsLastLonger);
-    //     bullet[me].do = function () {
-
-    //     };
-    //   }
-    // },
   ]
 };

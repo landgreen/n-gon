@@ -78,7 +78,7 @@ function mobCollisionChecks(event) {
   for (let i = 0, j = pairs.length; i != j; i++) {
 
     //body + player collision
-    if (mech.damageImmune < mech.cycle) {
+    if (game.isBodyDamage && mech.damageImmune < mech.cycle) {
       if (pairs[i].bodyA === playerBody || pairs[i].bodyA === playerHead) {
         collidePlayer(pairs[i].bodyB)
       } else if (pairs[i].bodyB === playerBody || pairs[i].bodyB === playerHead) {

@@ -150,26 +150,25 @@
 		<details>
 			<summary>settings</summary>
 			<div id="details-div">
-				<label for="fps-select">frames per second cap:</label>
-				<select name="fps-select" id="fps-select">
-					<option value="max">no fps cap</option>
-					<option value="72" selected>72 fps cap</option>
-					<option value="60">60 fps cap</option>
-					<option value="45">45 fps cap</option>
-					<option value="30">30 fps cap</option>
-					<!-- <option value="15">15 fps cap</option> -->
-				</select>
+				<label for="body-damage" title="allow damage from heavy, fast moving blocks">damage from blocks:</label>
+				<input type="checkbox" id="body-damage" name="body-damage" checked>
 				<br><br>
-				<label for="difficulty-select">combat difficulty:</label>
+				<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed">combat difficulty:</label>
 				<select name="difficulty-select" id="difficulty-select">
 					<option value="easy">easy</option>
 					<option value="0" selected>normal</option>
 					<option value="4">hard</option>
 					<option value="8">why...</option>
 				</select>
-				<!-- <br> <br>
-				<label for="falling-damage">falling damage:</label>
-				<input type="checkbox" id="falling-damage" name="falling-damage" checked> -->
+				<br><br>
+				<label for="fps-select" title="use this to slow the game down">FPS cap:</label>
+				<select name="fps-select" id="fps-select">
+					<option value="max">no fps cap</option>
+					<option value="72" selected>72 fps cap</option>
+					<option value="60">60 fps cap</option>
+					<option value="45">45 fps cap</option>
+					<option value="30">30 fps cap</option>
+				</select>
 			</div>
 		</details>
 	</div>
@@ -264,6 +263,8 @@
 		<!-- mouse -->
 		<g class="draw-lines3" transform="translate(290,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round" stroke-width="10px" stroke="#222" fill="none">
 			<path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="rgb(0, 200, 255)" stroke="none" />
+			<!-- <path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
+			<path class="fade-in" d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
 			<path d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
 			<path d="M657 317 h 340 h-170 v-207 s 21 -59, -5 -59 S 807 7, 807 7" />
 			<ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />

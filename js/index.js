@@ -174,7 +174,7 @@ document.body.addEventListener("wheel", (e) => {
   passive: true
 });
 
-document.getElementById("fps-select").addEventListener("input", event => {
+document.getElementById("fps-select").addEventListener("input", () => {
   let value = document.getElementById("fps-select").value
   if (value === 'max') {
     game.fpsCapDefault = 999999999;
@@ -189,6 +189,10 @@ document.getElementById("fps-select").addEventListener("input", event => {
   } else if (value === '15') {
     game.fpsCapDefault = 15
   }
+});
+
+document.getElementById("body-damage").addEventListener("input", () => {
+  game.isBodyDamage = document.getElementById("body-damage").checked
 });
 
 // function playSound(id) {

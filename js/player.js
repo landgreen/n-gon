@@ -711,14 +711,12 @@ const mech = {
     this.isStealth = false;
     player.collisionFilter.mask = 0x010011 //0x010011 is normal
     this.holdingMassScale = 0.5;
-    this.throwChargeRate = 2;
-    this.throwChargeMax = 50;
     this.fieldFireCD = 15;
     this.fieldDamage = 0; // a value of 1.0 kills a small mob in 2-3 hits on level 1
     this.fieldShieldingScale = 1; //scale energy loss after collision with mob
     this.grabRange = 175;
-    this.fieldArc = 0.2;
-    this.calculateFieldThreshold();
+    this.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+    this.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     this.jumpForce = 0.38;
     this.Fx = 0.015; //run Force on ground
     this.FxAir = 0.015; //run Force in Air
@@ -802,8 +800,8 @@ const mech = {
   },
   throw () {
     if ((keys[32] || game.mouseDownRight)) {
-      if (this.fieldMeter > 0.002) {
-        this.fieldMeter -= 0.002;
+      if (this.fieldMeter > 0.0008) {
+        this.fieldMeter -= 0.0008;
         this.throwCharge += this.throwChargeRate;;
         //draw charge
         const x = mech.pos.x + 15 * Math.cos(this.angle);
@@ -1127,9 +1125,12 @@ const mech = {
               mech.fieldMeter -= DRAIN;
 
               //draw field everywhere
-              ctx.fillStyle = "rgba(110,170,200," + (0.19 + 0.16 * Math.random()) + ")";
-              ctx.fillRect(-100000, -100000, 200000, 200000)
 
+              ctx.globalCompositeOperation = "saturation"
+              // ctx.fillStyle = "rgba(100,200,230," + (0.25 + 0.06 * Math.random()) + ")";
+              ctx.fillStyle = "#ccc";
+              ctx.fillRect(-100000, -100000, 200000, 200000)
+              ctx.globalCompositeOperation = "source-over"
               //stop time
               mech.isBodiesAsleep = true;
 
@@ -1177,70 +1178,163 @@ const mech = {
       }
     },
     {
-      name: "electrostatic field",
-      description: "field does <strong class='color-d'>damage</strong> on contact<br> blocks are thrown at a higher velocity<br> increased <span class='color-f'>field</span> regeneration",
+      name: "plasma torch",
+      description: "field emits a beam of destructive <span style='color:#f0f;'>ionized gas</span><br><span style='color:#a00;'>decreased</span> <strong style='color: #08f;'>shield</strong> range and efficiency",
       effect: () => {
         mech.fieldMode = 2;
         mech.fieldText();
         mech.setHoldDefaults();
-        //throw quicker and harder
-        mech.grabRange = 225;
-        mech.fieldShieldingScale = 2;
-        mech.fieldRegen *= 2;
-        mech.throwChargeRate = 3;
-        mech.throwChargeMax = 140;
-        mech.fieldDamage = 4; //passive field does extra damage
-        // mech.fieldArc = 0.11
-        // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+        // mech.fieldShieldingScale = 2;
+        mech.grabRange = 125;
+        mech.fieldArc = 0.05 //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+        mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         mech.hold = function () {
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throw();
-          } else if ((keys[32] || game.mouseDownRight) && mech.fieldMeter > 0.15) { //not hold but field button is pressed
-            //draw electricity
-            const Dx = Math.cos(mech.angle);
-            const Dy = Math.sin(mech.angle);
-            let x = mech.pos.x + 20 * Dx;
-            let y = mech.pos.y + 20 * Dy;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            for (let i = 0; i < 8; i++) {
-              x += 18 * (Dx + 2 * (Math.random() - 0.5))
-              y += 18 * (Dy + 2 * (Math.random() - 0.5))
-              ctx.lineTo(x, y);
-            }
-            ctx.lineWidth = 1 //0.5 + 2 * Math.random();
-            ctx.strokeStyle = `rgba(100,20,50,${0.5+0.5*Math.random()})`;
-            ctx.stroke();
+          } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
+            const DRAIN = 0.0006
+            if (mech.fieldMeter > DRAIN) {
+              mech.fieldMeter -= DRAIN;
 
-            //draw field
-            const range = 170;
-            const arc = Math.PI * 0.11
-            ctx.beginPath();
-            ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - arc, mech.angle + arc, false);
-            ctx.lineTo(mech.pos.x + 13 * Math.cos(mech.angle), mech.pos.y + 13 * Math.sin(mech.angle));
-            if (mech.holdingTarget) {
-              ctx.fillStyle = "rgba(255,50,150," + (0.01 + mech.fieldMeter * (0.1 + 0.1 * Math.random())) + ")";
+              //calculate laser collision
+              let best;
+              let range = 80 + (mech.crouch ? 500 : 300) * Math.sqrt(Math.random()) //+ 100 * Math.sin(mech.cycle * 0.3);
+              const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
+              const path = [{
+                  x: mech.pos.x + 20 * Math.cos(dir),
+                  y: mech.pos.y + 20 * Math.sin(dir)
+                },
+                {
+                  x: mech.pos.x + range * Math.cos(dir),
+                  y: mech.pos.y + range * Math.sin(dir)
+                }
+              ];
+              const vertexCollision = function (v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                  let vertices = domain[i].vertices;
+                  const len = vertices.length - 1;
+                  for (let j = 0; j < len; j++) {
+                    results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                    if (results.onLine1 && results.onLine2) {
+                      const dx = v1.x - results.x;
+                      const dy = v1.y - results.y;
+                      const dist2 = dx * dx + dy * dy;
+                      if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                        best = {
+                          x: results.x,
+                          y: results.y,
+                          dist2: dist2,
+                          who: domain[i],
+                          v1: vertices[j],
+                          v2: vertices[j + 1]
+                        };
+                      }
+                    }
+                  }
+                  results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                  if (results.onLine1 && results.onLine2) {
+                    const dx = v1.x - results.x;
+                    const dy = v1.y - results.y;
+                    const dist2 = dx * dx + dy * dy;
+                    if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                      best = {
+                        x: results.x,
+                        y: results.y,
+                        dist2: dist2,
+                        who: domain[i],
+                        v1: vertices[0],
+                        v2: vertices[len]
+                      };
+                    }
+                  }
+                }
+              };
+
+              //check for collisions
+              best = {
+                x: null,
+                y: null,
+                dist2: Infinity,
+                who: null,
+                v1: null,
+                v2: null
+              };
+              vertexCollision(path[0], path[1], mob);
+              vertexCollision(path[0], path[1], map);
+              vertexCollision(path[0], path[1], body);
+              if (best.dist2 != Infinity) { //if hitting something
+                path[path.length - 1] = {
+                  x: best.x,
+                  y: best.y
+                };
+                if (best.who.alive) {
+                  const dmg = 0.35 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                  best.who.damage(dmg);
+                  best.who.locatePlayer();
+
+                  //push mobs away
+                  const force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(mech.pos, path[1])), -0.01 * Math.sqrt(best.who.mass))
+                  Matter.Body.applyForce(best.who, path[1], force)
+                  // const angle = Math.atan2(player.position.y - best.who.position.y, player.position.x - best.who.position.x);
+                  // const mass = Math.min(Math.sqrt(best.who.mass), 6);
+                  // Matter.Body.setVelocity(best.who, {
+                  //   x: best.who.velocity.x * 0.85 - 3 * Math.cos(angle) / mass,
+                  //   y: best.who.velocity.y * 0.85 - 3 * Math.sin(angle) / mass
+                  // });
+
+                  //draw mob damage circle
+                  game.drawList.push({
+                    x: path[1].x,
+                    y: path[1].y,
+                    radius: Math.sqrt(dmg) * 50,
+                    color: "rgba(255,0,255,0.2)",
+                    time: game.drawTime * 4
+                  });
+                } else if (!best.who.isStatic) {
+                  //push blocks away
+                  const force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(mech.pos, path[1])), -0.006 * Math.sqrt(Math.sqrt(best.who.mass)))
+                  Matter.Body.applyForce(best.who, path[1], force)
+                }
+              }
+
+              //draw blowtorch laser beam
+              ctx.strokeStyle = "rgba(255,0,255,0.1)"
+              ctx.lineWidth = 14
+              ctx.beginPath();
+              ctx.moveTo(path[0].x, path[0].y);
+              ctx.lineTo(path[1].x, path[1].y);
+              ctx.stroke();
+              ctx.strokeStyle = "#f0f";
+              ctx.lineWidth = 2
+              ctx.beginPath();
+              ctx.moveTo(path[0].x, path[0].y);
+              ctx.lineTo(path[1].x, path[1].y);
+              ctx.stroke();
+
+              //draw electricity
+              const Dx = Math.cos(mech.angle);
+              const Dy = Math.sin(mech.angle);
+              let x = mech.pos.x + 20 * Dx;
+              let y = mech.pos.y + 20 * Dy;
+              ctx.beginPath();
+              ctx.moveTo(x, y);
+              const step = range / 10
+              for (let i = 0; i < 8; i++) {
+                x += step * (Dx + 1.5 * (Math.random() - 0.5))
+                y += step * (Dy + 1.5 * (Math.random() - 0.5))
+                ctx.lineTo(x, y);
+              }
+              ctx.lineWidth = 2 * Math.random();
+              ctx.stroke();
+
+              mech.pushMobs360(100);
+              mech.grabPowerUp();
+              mech.lookForPickUp();
             } else {
-              ctx.fillStyle = "rgba(255,50,150," + (0.02 + mech.fieldMeter * (0.18 + 0.18 * Math.random())) + ")";
+              mech.fieldCDcycle = mech.cycle + 120; //if out of energy
             }
-            // ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.08 + 0.1 * Math.random())) + ")";
-            // ctx.fillStyle = "rgba(110,170,200," + (0.06 + mech.fieldMeter * (0.1 + 0.18 * Math.random())) + ")";
-            ctx.fill();
-
-            //draw random lines in field for cool effect
-            // eye = 15;
-            // ctx.beginPath();
-            // ctx.moveTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
-            // const offAngle = mech.angle + 2 * Math.PI * mech.fieldArc * (Math.random() - 0.5);
-            // ctx.lineTo(mech.pos.x + range * Math.cos(offAngle), mech.pos.y + range * Math.sin(offAngle));
-            // ctx.strokeStyle = "rgba(100,20,50,0.2)";
-            // ctx.stroke();
-
-            mech.grabPowerUp();
-            mech.pushMobs();
-            mech.lookForPickUp();
           } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
@@ -1460,6 +1554,79 @@ const mech = {
         }
       }
     },
+
+    // {
+    //   name: "electrostatic field",
+    //   description: "field does <strong class='color-d'>damage</strong> on contact<br> increased <span class='color-f'>field</span> regeneration",
+    //   effect: () => {
+    //     mech.fieldMode = 2;
+    //     mech.fieldText();
+    //     mech.setHoldDefaults();
+    //     mech.grabRange = 225;
+    //     mech.fieldShieldingScale = 2.5;
+    //     mech.fieldRegen *= 2;
+    //     mech.fieldDamage = 4; //passive field does extra damage
+    //     // mech.fieldArc = 0.11
+    //     // mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+    //     mech.hold = function () {
+    //       if (mech.isHolding) {
+    //         mech.drawHold(mech.holdingTarget);
+    //         mech.holding();
+    //         mech.throw();
+    //       } else if ((keys[32] || game.mouseDownRight) && mech.fieldMeter > 0.15) { //not hold but field button is pressed
+    //         //draw electricity
+    //         const Dx = Math.cos(mech.angle);
+    //         const Dy = Math.sin(mech.angle);
+    //         let x = mech.pos.x + 20 * Dx;
+    //         let y = mech.pos.y + 20 * Dy;
+    //         ctx.beginPath();
+    //         ctx.moveTo(x, y);
+    //         for (let i = 0; i < 8; i++) {
+    //           x += 18 * (Dx + 2 * (Math.random() - 0.5))
+    //           y += 18 * (Dy + 2 * (Math.random() - 0.5))
+    //           ctx.lineTo(x, y);
+    //         }
+    //         ctx.lineWidth = 1 //0.5 + 2 * Math.random();
+    //         ctx.strokeStyle = `rgba(100,20,50,${0.5+0.5*Math.random()})`;
+    //         ctx.stroke();
+
+    //         //draw field
+    //         const range = 170;
+    //         const arc = Math.PI * 0.11
+    //         ctx.beginPath();
+    //         ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - arc, mech.angle + arc, false);
+    //         ctx.lineTo(mech.pos.x + 13 * Math.cos(mech.angle), mech.pos.y + 13 * Math.sin(mech.angle));
+    //         if (mech.holdingTarget) {
+    //           ctx.fillStyle = "rgba(255,50,150," + (0.01 + mech.fieldMeter * (0.1 + 0.1 * Math.random())) + ")";
+    //         } else {
+    //           ctx.fillStyle = "rgba(255,50,150," + (0.02 + mech.fieldMeter * (0.18 + 0.18 * Math.random())) + ")";
+    //         }
+    //         // ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.fieldMeter * (0.08 + 0.1 * Math.random())) + ")";
+    //         // ctx.fillStyle = "rgba(110,170,200," + (0.06 + mech.fieldMeter * (0.1 + 0.18 * Math.random())) + ")";
+    //         ctx.fill();
+
+    //         //draw random lines in field for cool effect
+    //         // eye = 15;
+    //         // ctx.beginPath();
+    //         // ctx.moveTo(mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle));
+    //         // const offAngle = mech.angle + 2 * Math.PI * mech.fieldArc * (Math.random() - 0.5);
+    //         // ctx.lineTo(mech.pos.x + range * Math.cos(offAngle), mech.pos.y + range * Math.sin(offAngle));
+    //         // ctx.strokeStyle = "rgba(100,20,50,0.2)";
+    //         // ctx.stroke();
+
+    //         mech.grabPowerUp();
+    //         mech.pushMobs();
+    //         mech.lookForPickUp();
+    //       } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+    //         mech.pickUp();
+    //       } else {
+    //         mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+    //       }
+    //       mech.drawFieldMeter()
+    //     }
+    //   }
+    // },
+
     // () => {
     //   mech.fieldMode = 7;
     //   game.makeTextLog("<strong style='font-size:30px;'>Thermal Radiation Field</strong><br> <span class='faded'>(right click or space bar)</span> <p>field grows while active<br>damages all targets within range, <span style='color:#a00;'>including player</span><br> <span style='color:#a00;'>decreased</span> field shielding efficiency</p>", 1200);
