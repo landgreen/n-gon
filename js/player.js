@@ -6,15 +6,15 @@ const mech = {
   spawn() {
     //load player in matter.js physic engine
     // let vector = Vertices.fromPath("0 40  50 40   50 115   0 115   30 130   20 130"); //player as a series of vertices
-    let vector = Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"); //player as a series of vertices
-    playerBody = Matter.Bodies.fromVertices(0, 0, vector);
+    let vertices = Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"); //player as a series of vertices
+    playerBody = Matter.Bodies.fromVertices(0, 0, vertices);
     jumpSensor = Bodies.rectangle(0, 46, 36, 6, {
       //this sensor check if the player is on the ground to enable jumping
       sleepThreshold: 99999999999,
       isSensor: true
     });
-    vector = Vertices.fromPath("16 -82  2 -66  2 -37  43 -37  43 -66  30 -82");
-    playerHead = Matter.Bodies.fromVertices(0, -55, vector); //this part of the player lowers on crouch
+    vertices = Vertices.fromPath("16 -82  2 -66  2 -37  43 -37  43 -66  30 -82");
+    playerHead = Matter.Bodies.fromVertices(0, -55, vertices); //this part of the player lowers on crouch
     headSensor = Bodies.rectangle(0, -57, 48, 45, {
       //senses if the player's head is empty and can return after crouching
       sleepThreshold: 99999999999,
@@ -65,7 +65,7 @@ const mech = {
   },
   defaultMass: 5,
   mass: 5,
-  Fx: 0.015, //run Force on ground
+  Fx: 0.015, //run Force on ground  //this is reset in b.setModDefaults()
   FxAir: 0.015, //run Force in Air
   definePlayerMass(mass = mech.defaultMass) {
     Matter.Body.setMass(player, mass);
@@ -110,7 +110,7 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  jumpForce: 0.38,
+  jumpForce: 0.38, //this is reset in b.setModDefaults()
   gravity: 0.0019,
   friction: {
     ground: 0.01,
@@ -211,6 +211,14 @@ const mech = {
         this.doCrouch();
         this.yOff = this.yOffWhen.jump;
         this.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
+
+        if (game.isBodyDamage && momentum > 200 && player.velocity.y > 20) { //falling damage
+          mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
+          let dmg = Math.sqrt(momentum - 200) * 0.01
+          console.log(dmg, momentum, player.velocity.y)
+          dmg = Math.min(Math.max(dmg, 0.02), 0.15);
+          mech.damage(dmg);
+        }
       } else {
         this.yOffGoal = this.yOffWhen.stand;
       }
@@ -242,11 +250,17 @@ const mech = {
       //horizontal move on ground
       //apply a force to move
       if (keys[65] || keys[37]) { //left / a
-        player.force.x -= this.Fx
-        if (player.velocity.x > -2) player.force.x -= this.Fx * 0.5
+        if (player.velocity.x > -2) {
+          player.force.x -= this.Fx * 1.5
+        } else {
+          player.force.x -= this.Fx
+        }
       } else if (keys[68] || keys[39]) { //right / d
-        player.force.x += this.Fx
-        if (player.velocity.x < 2) player.force.x += this.Fx * 0.5
+        if (player.velocity.x < 2) {
+          player.force.x += this.Fx * 1.5
+        } else {
+          player.force.x += this.Fx
+        }
       } else {
         const stoppingFriction = 0.92;
         Matter.Body.setVelocity(player, {
@@ -280,76 +294,6 @@ const mech = {
       if (keys[65] || keys[37]) {
         if (player.velocity.x > -limit) player.force.x -= this.FxAir; // move player   left / a
       } else if (keys[68] || keys[39]) {
-        if (player.velocity.x < limit) player.force.x += this.FxAir; //move player  right / d
-      }
-    }
-
-    //smoothly move leg height towards height goal
-    this.yOff = this.yOff * 0.85 + this.yOffGoal * 0.15;
-  },
-  gamepadMove() {
-    if (this.onGround) { //on ground **********************
-      if (this.crouch) {
-        if (game.gamepad.leftAxis.y !== -1 && this.isHeadClear && this.hardLandCD < mech.cycle) this.undoCrouch();
-      } else if (game.gamepad.leftAxis.y === -1 || this.hardLandCD > mech.cycle) {
-        this.doCrouch(); //on ground && not crouched and pressing s or down
-      } else if (game.gamepad.jump && this.buttonCD_jump + 20 < mech.cycle && this.yOffWhen.stand > 23) {
-        this.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
-
-        //apply a fraction of the jump force to the body the player is jumping off of
-        Matter.Body.applyForce(mech.standingOn, mech.pos, {
-          x: 0,
-          y: this.jumpForce * 0.12 * Math.min(mech.standingOn.mass, 5)
-        });
-
-        player.force.y = -this.jumpForce; //player jump force
-        Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
-          x: player.velocity.x,
-          y: 0
-        });
-      }
-
-      //horizontal move on ground
-      //apply a force to move
-      if (game.gamepad.leftAxis.x === -1) { //left / a
-        player.force.x -= this.Fx
-        if (player.velocity.x > -2) player.force.x -= this.Fx * 0.5
-      } else if (game.gamepad.leftAxis.x === 1) { //right / d
-        player.force.x += this.Fx
-        if (player.velocity.x < 2) player.force.x += this.Fx * 0.5
-      } else {
-        const stoppingFriction = 0.92;
-        Matter.Body.setVelocity(player, {
-          x: player.velocity.x * stoppingFriction,
-          y: player.velocity.y * stoppingFriction
-        });
-      }
-      //come to a stop if fast or if no move key is pressed
-      if (player.speed > 4) {
-        const stoppingFriction = (this.crouch) ? 0.65 : 0.89;
-        Matter.Body.setVelocity(player, {
-          x: player.velocity.x * stoppingFriction,
-          y: player.velocity.y * stoppingFriction
-        });
-      }
-
-    } else { // in air **********************************
-      //check for short jumps
-      if (
-        this.buttonCD_jump + 60 > mech.cycle && //just pressed jump
-        !game.gamepad.jump && //but not pressing jump key
-        this.Vy < 0 //moving up
-      ) {
-        Matter.Body.setVelocity(player, {
-          //reduce player y-velocity every cycle
-          x: player.velocity.x,
-          y: player.velocity.y * 0.94
-        });
-      }
-      const limit = 125 / player.mass / player.mass
-      if (game.gamepad.leftAxis.x === -1) {
-        if (player.velocity.x > -limit) player.force.x -= this.FxAir; // move player   left / a
-      } else if (game.gamepad.leftAxis.x === 1) {
         if (player.velocity.x < limit) player.force.x += this.FxAir; //move player  right / d
       }
     }
@@ -517,7 +461,7 @@ const mech = {
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
 
     //chance to build a drone on damage  from mod
-    if (b.makeDroneOnDamage) {
+    if (b.isModDroneOnDamage) {
       const len = (dmg - 0.08 + 0.05 * Math.random()) / 0.05
       for (let i = 0; i < len; i++) {
         if (Math.random() < 0.6) b.guns[13].fire() //spawn drone
@@ -730,7 +674,7 @@ const mech = {
       mech.fieldMeter += mech.fieldRegen;
       ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
       ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range, 10);
-      ctx.fillStyle = "rgb(50,220,255)";
+      ctx.fillStyle = "#0af";
       ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range * this.fieldMeter, 10);
     } else {
       mech.fieldMeter = 1
@@ -1071,7 +1015,7 @@ const mech = {
   hold() {},
   fieldText() {
     game.replaceTextLog = true;
-    game.makeTextLog(`<div class="circle field "></div> &nbsp; <strong style='font-size:30px;'>${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'>(right click or space bar)</span><br><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 1000);
+    game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 1000);
     game.replaceTextLog = false;
     document.getElementById("field").innerHTML = mech.fieldUpgrades[mech.fieldMode].name //add field
   },
@@ -1179,13 +1123,13 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "field emits a beam of destructive <span style='color:#f0f;'>ionized gas</span><br><span style='color:#a00;'>decreased</span> <strong style='color: #08f;'>shield</strong> range and efficiency",
+      description: "field emits a beam of destructive <span style='color:#f0f;'>ionized gas</span><br><span style='color:#a00;'>decreased</span> <strong class='color-f'>shield</strong> range and efficiency",
       effect: () => {
         mech.fieldMode = 2;
         mech.fieldText();
         mech.setHoldDefaults();
         // mech.fieldShieldingScale = 2;
-        mech.grabRange = 125;
+        // mech.grabRange = 125;
         mech.fieldArc = 0.05 //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         mech.calculateFieldThreshold(); //run after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         mech.hold = function () {
@@ -1346,13 +1290,12 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "field nullifies &nbsp;<strong style='letter-spacing: 15px;'>gravity</strong><br> player can hold more massive objects<br><em>can fire while field is active</em>",
+      description: "field nullifies &nbsp;<strong style='letter-spacing: 15px;'>gravity</strong><br><em>can fire while field is active</em>",
       effect: () => {
         mech.fieldMode = 3;
         mech.fieldText();
         mech.setHoldDefaults();
         mech.fieldFire = true;
-        mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1434,7 +1377,7 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "you are surrounded by oscillating <strong style='color: #08f;'>shields</strong><br> <span style='color:#a00;'>decreased</span> field regeneration",
+      description: "you are surrounded by oscillating <strong class='color-f'>shields</strong><br> <span style='color:#a00;'>decreased</span> field regeneration",
       effect: () => {
         mech.fieldMode = 4;
         mech.fieldText();
@@ -1479,7 +1422,7 @@ const mech = {
       name: "nano-scale manufacturing",
       description: "excess field <span class='color-f'>energy</span> used to build <strong class='color-b'>drones</strong><br> increased <span class='color-f'>energy</span> regeneration",
       effect: () => {
-        let gunIndex = Math.random() < 0.5 ? 13 : 14
+        let gunIndex = 13 //Math.random() < 0.5 ? 13 : 14
         mech.fieldMode = 5;
         mech.fieldText();
         mech.setHoldDefaults();

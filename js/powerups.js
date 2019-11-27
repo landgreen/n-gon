@@ -9,10 +9,10 @@ const powerUps = {
     },
     effect() {
       let heal = (this.size / 40) ** 2
-      if (b.fullHeal) heal = Infinity
+      if (b.isModFullHeal) heal = Infinity
       heal = Math.min(1 - mech.health, heal)
       mech.addHealth(heal);
-      if (heal > 0) game.makeTextLog("<span style='font-size:115%;'> <strong class='color-h' style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
+      if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
     }
   },
   ammo: {
@@ -48,13 +48,13 @@ const powerUps = {
         const ammo = Math.ceil((target.ammoPack * (0.45 + 0.08 * Math.random())) / b.dmgScale);
         target.ammo += ammo;
         game.updateGunHUD();
-        game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
+        game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
       }
     }
   },
   field: {
     name: "field",
-    color: "#0bf",
+    color: "#0af",
     size() {
       return 45;
     },
@@ -124,7 +124,7 @@ const powerUps = {
       if (options.length > 0) {
         let newGun = options[Math.floor(Math.random() * options.length)];
         if (b.activeGun === null) b.activeGun = newGun //if no active gun switch to new gun
-        game.makeTextLog(`<div class="circle gun "></div> &nbsp; <strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br><span class='faded'>(left click)</span><br><br>${b.guns[newGun].description}`, 900);
+        game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br><br>${b.guns[newGun].description}`, 900);
         b.guns[newGun].have = true;
         b.inventory.push(newGun);
         b.guns[newGun].ammo += b.guns[newGun].ammoPack * 2;

@@ -91,13 +91,10 @@ function mobCollisionChecks(event) {
         const v = Matter.Vector.magnitude(Matter.Vector.sub(player.velocity, obj.velocity));
         if (v > speedThreshold) {
           mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
-          let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.02;
-          dmg = Math.min(Math.max(dmg, 0.02), 0.2);
-          // console.log(`mass = ${obj.mass} \n`, `dmg = ${dmg}\n`, `v = ${v}\n`)
-          // console.log(v, dmg)
+          let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
+          dmg = Math.min(Math.max(dmg, 0.02), 0.15);
           mech.damage(dmg);
-          game.drawList.push({
-            //add dmg to draw queue
+          game.drawList.push({ //add dmg to draw queue
             x: pairs[i].activeContacts[0].vertex.x,
             y: pairs[i].activeContacts[0].vertex.y,
             radius: dmg * 500,
@@ -144,7 +141,7 @@ function mobCollisionChecks(event) {
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
               if (mob[k].onHit) mob[k].onHit(k);
-              if (b.annihilation && mob[k].dropPowerUp) {
+              if (b.modAnnihilation && mob[k].dropPowerUp) {
                 mob[k].death();
                 game.drawList.push({
                   //add dmg to draw queue
@@ -182,7 +179,7 @@ function mobCollisionChecks(event) {
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             mob[k].foundPlayer();
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
-            const dmg = b.dmgScale * (obj.dmg + b.extraDmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)))
+            const dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)))
             mob[k].damage(dmg);
             obj.onDmg(); //some bullets do actions when they hits things, like despawn
             game.drawList.push({

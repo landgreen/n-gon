@@ -208,8 +208,12 @@ em {
   opacity: 0.7;
 }
 
+.mouse-icon {
+  margin-bottom: -20px;
+}
+
 .color-f {
-  color: #0bf;
+  color: #0af;
 }
 
 .color-b {
@@ -255,7 +259,7 @@ em {
 }
 
 .field {
-  background: #0bf;
+  background: #0af;
 }
 
 .mod {
@@ -264,6 +268,12 @@ em {
 
 .gun {
   background: #149;
+  margin-bottom: -2px;
+}
+
+.heal {
+  background: #0d9;
+  margin-bottom: -2px;
 }
 
 .box {
@@ -283,48 +293,6 @@ em {
 .grid-box {
   align-self: center;
   justify-self: center;
-}
-
-.mouse {
-  color: #ccc;
-  position: relative;
-  padding: 37px 30px 37px 30px;
-  border-radius: 25px;
-  border: 2px solid #444;
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-.mouse:after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  top: 4px;
-  left: 26px;
-  border-radius: 25px;
-  /* background: #444; */
-  border: 2px solid #444;
-
-  width: 4px;
-  height: 20px;
-  border-radius: 10px / 25px;
-}
-
-.mouse-line {
-  position: relative;
-  top: 30px;
-  left: 0px;
-}
-
-.mouse-line:after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  top: -35px;
-  left: -30px;
-  width: 60px;
-  height: 2px;
-  border-radius: 8px;
-  background: #444;
 }
 
 .right {

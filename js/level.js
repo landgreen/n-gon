@@ -14,9 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(6)
+      // b.giveGuns(1)
       // mech.fieldUpgrades[7].effect();
-      // b.giveMod(13)
+      b.giveMod(15)
       // spawn.pickList = ["ghoster", "ghoster"]
 
       this.intro(); //starting level
@@ -1475,7 +1475,7 @@ const level = {
         level.onLevel++;
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
 
-        game.clearNow = true; //triggers in the physics engine to remove all physics bodies
+        game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
       }
     },
     death() {

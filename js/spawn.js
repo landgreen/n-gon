@@ -457,7 +457,7 @@ const spawn = {
         this.healthBar();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (!b.AoEImmunity) {
+          if (!b.isModAoEImmunity) {
             mech.damage(0.00015 * game.dmgScale);
             if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           }
@@ -548,7 +548,7 @@ const spawn = {
         ctx.fill();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (!b.AoEImmunity) {
+          if (!b.isModAoEImmunity) {
             mech.damage(0.00015 * game.dmgScale);
             if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           }
@@ -680,14 +680,14 @@ const spawn = {
       this.laser();
     };
   },
-  striker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {
+  striker(x, y, radius = 14 + Math.ceil(Math.random() * 25)) {
     mobs.spawn(x, y, 5, radius, "rgb(221,102,119)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.0004 * game.accelScale;
+    me.accelMag = 0.0003 * game.accelScale;
     me.g = 0.0002; //required if using 'gravity'
     me.frictionStatic = 0;
     me.friction = 0;
-    me.delay = 90;
+    me.delay = 100;
     Matter.Body.rotate(me, Math.PI * 0.1);
     me.onDamage = function () {
       this.cd = game.cycle + this.delay;
