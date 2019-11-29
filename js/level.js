@@ -1425,7 +1425,6 @@ const level = {
       ctx.fillRect(f.x, f.y, f.width, f.height);
     }
   },
-
   fill: [],
   drawFills() {
     for (let i = 0, len = level.fill.length; i < len; ++i) {

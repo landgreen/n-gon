@@ -170,7 +170,7 @@ const game = {
   // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
   // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
   SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#456" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-  SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0af" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
+  SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
   makeTextLog(text, time = 180) {
     if (game.replaceTextLog) {
       document.getElementById("text-log").innerHTML = text;
@@ -733,133 +733,133 @@ const game = {
       ctx.fillStyle = this.mapFill;
       ctx.fill(this.mapPath);
     },
-    seeEdges() {
-      const eye = {
-        x: mech.pos.x + 20 * Math.cos(mech.angle),
-        y: mech.pos.y + 20 * Math.sin(mech.angle)
-      };
-      //find all vertex nodes in range and in LOS
-      findNodes = function (domain, center) {
-        let nodes = [];
-        for (let i = 0; i < domain.length; ++i) {
-          let vertices = domain[i].vertices;
+    // seeEdges() {
+    //   const eye = {
+    //     x: mech.pos.x + 20 * Math.cos(mech.angle),
+    //     y: mech.pos.y + 20 * Math.sin(mech.angle)
+    //   };
+    //   //find all vertex nodes in range and in LOS
+    //   findNodes = function (domain, center) {
+    //     let nodes = [];
+    //     for (let i = 0; i < domain.length; ++i) {
+    //       let vertices = domain[i].vertices;
 
-          for (let j = 0, len = vertices.length; j < len; j++) {
-            //calculate distance to player
-            const dx = vertices[j].x - center.x;
-            const dy = vertices[j].y - center.y;
-            if (dx * dx + dy * dy < 800 * 800 && Matter.Query.ray(domain, center, vertices[j]).length === 0) {
-              nodes.push(vertices[j]);
-            }
-          }
-        }
-        return nodes;
-      };
-      let nodes = findNodes(map, eye);
-      //sort node list by angle to player
-      nodes.sort(function (a, b) {
-        //sub artan2 from player loc
-        const dx = a.x - eye.x;
-        const dy = a.y - eye.y;
-        return Math.atan2(dy, dx) - Math.atan2(dy, dx);
-      });
-      //draw nodes
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#000";
-      ctx.beginPath();
-      for (let i = 0; i < nodes.length; ++i) {
-        ctx.lineTo(nodes[i].x, nodes[i].y);
-      }
-      ctx.stroke();
-    },
-    see() {
-      const vertexCollision = function (
-        v1,
-        v1End,
-        domain,
-        best = {
-          x: null,
-          y: null,
-          dist2: Infinity,
-          who: null,
-          v1: null,
-          v2: null
-        }
-      ) {
-        for (let i = 0; i < domain.length; ++i) {
-          let vertices = domain[i].vertices;
-          const len = vertices.length - 1;
-          for (let j = 0; j < len; j++) {
-            results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-            if (results.onLine1 && results.onLine2) {
-              const dx = v1.x - results.x;
-              const dy = v1.y - results.y;
-              const dist2 = dx * dx + dy * dy;
-              if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                best = {
-                  x: results.x,
-                  y: results.y,
-                  dist2: dist2,
-                  who: domain[i],
-                  v1: vertices[j],
-                  v2: vertices[j + 1]
-                };
-              }
-            }
-          }
-          results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-          if (results.onLine1 && results.onLine2) {
-            const dx = v1.x - results.x;
-            const dy = v1.y - results.y;
-            const dist2 = dx * dx + dy * dy;
-            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-              best = {
-                x: results.x,
-                y: results.y,
-                dist2: dist2,
-                who: domain[i],
-                v1: vertices[0],
-                v2: vertices[len]
-              };
-            }
-          }
-        }
-        return best;
-      };
-      const range = 3000;
-      ctx.beginPath();
-      for (let i = 0; i < Math.PI * 2; i += Math.PI / 2 / 100) {
-        const cosAngle = Math.cos(mech.angle + i);
-        const sinAngle = Math.sin(mech.angle + i);
+    //       for (let j = 0, len = vertices.length; j < len; j++) {
+    //         //calculate distance to player
+    //         const dx = vertices[j].x - center.x;
+    //         const dy = vertices[j].y - center.y;
+    //         if (dx * dx + dy * dy < 800 * 800 && Matter.Query.ray(domain, center, vertices[j]).length === 0) {
+    //           nodes.push(vertices[j]);
+    //         }
+    //       }
+    //     }
+    //     return nodes;
+    //   };
+    //   let nodes = findNodes(map, eye);
+    //   //sort node list by angle to player
+    //   nodes.sort(function (a, b) {
+    //     //sub artan2 from player loc
+    //     const dx = a.x - eye.x;
+    //     const dy = a.y - eye.y;
+    //     return Math.atan2(dy, dx) - Math.atan2(dy, dx);
+    //   });
+    //   //draw nodes
+    //   ctx.lineWidth = 2;
+    //   ctx.strokeStyle = "#000";
+    //   ctx.beginPath();
+    //   for (let i = 0; i < nodes.length; ++i) {
+    //     ctx.lineTo(nodes[i].x, nodes[i].y);
+    //   }
+    //   ctx.stroke();
+    // },
+    // see() {
+    //   const vertexCollision = function (
+    //     v1,
+    //     v1End,
+    //     domain,
+    //     best = {
+    //       x: null,
+    //       y: null,
+    //       dist2: Infinity,
+    //       who: null,
+    //       v1: null,
+    //       v2: null
+    //     }
+    //   ) {
+    //     for (let i = 0; i < domain.length; ++i) {
+    //       let vertices = domain[i].vertices;
+    //       const len = vertices.length - 1;
+    //       for (let j = 0; j < len; j++) {
+    //         results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+    //         if (results.onLine1 && results.onLine2) {
+    //           const dx = v1.x - results.x;
+    //           const dy = v1.y - results.y;
+    //           const dist2 = dx * dx + dy * dy;
+    //           if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+    //             best = {
+    //               x: results.x,
+    //               y: results.y,
+    //               dist2: dist2,
+    //               who: domain[i],
+    //               v1: vertices[j],
+    //               v2: vertices[j + 1]
+    //             };
+    //           }
+    //         }
+    //       }
+    //       results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+    //       if (results.onLine1 && results.onLine2) {
+    //         const dx = v1.x - results.x;
+    //         const dy = v1.y - results.y;
+    //         const dist2 = dx * dx + dy * dy;
+    //         if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+    //           best = {
+    //             x: results.x,
+    //             y: results.y,
+    //             dist2: dist2,
+    //             who: domain[i],
+    //             v1: vertices[0],
+    //             v2: vertices[len]
+    //           };
+    //         }
+    //       }
+    //     }
+    //     return best;
+    //   };
+    //   const range = 3000;
+    //   ctx.beginPath();
+    //   for (let i = 0; i < Math.PI * 2; i += Math.PI / 2 / 100) {
+    //     const cosAngle = Math.cos(mech.angle + i);
+    //     const sinAngle = Math.sin(mech.angle + i);
 
-        const start = {
-          x: mech.pos.x + 20 * cosAngle,
-          y: mech.pos.y + 20 * sinAngle
-        };
-        const end = {
-          x: mech.pos.x + range * cosAngle,
-          y: mech.pos.y + range * sinAngle
-        };
-        let result = vertexCollision(start, end, map);
-        result = vertexCollision(start, end, body, result);
-        result = vertexCollision(start, end, mob, result);
+    //     const start = {
+    //       x: mech.pos.x + 20 * cosAngle,
+    //       y: mech.pos.y + 20 * sinAngle
+    //     };
+    //     const end = {
+    //       x: mech.pos.x + range * cosAngle,
+    //       y: mech.pos.y + range * sinAngle
+    //     };
+    //     let result = vertexCollision(start, end, map);
+    //     result = vertexCollision(start, end, body, result);
+    //     result = vertexCollision(start, end, mob, result);
 
-        if (result.dist2 < range * range) {
-          // ctx.arc(result.x, result.y, 2, 0, 2 * Math.PI);
-          ctx.lineTo(result.x, result.y);
-        } else {
-          // ctx.arc(end.x, end.y, 2, 0, 2 * Math.PI);
-          ctx.lineTo(end.x, end.y);
-        }
-      }
-      // ctx.lineWidth = 1;
-      // ctx.strokeStyle = "#000";
-      // ctx.stroke();
-      ctx.fillStyle = "rgba(0,0,0,0.3)";
-      ctx.fillStyle = "#fff";
-      ctx.fill();
-      ctx.clip();
-    },
+    //     if (result.dist2 < range * range) {
+    //       // ctx.arc(result.x, result.y, 2, 0, 2 * Math.PI);
+    //       ctx.lineTo(result.x, result.y);
+    //     } else {
+    //       // ctx.arc(end.x, end.y, 2, 0, 2 * Math.PI);
+    //       ctx.lineTo(end.x, end.y);
+    //     }
+    //   }
+    //   // ctx.lineWidth = 1;
+    //   // ctx.strokeStyle = "#000";
+    //   // ctx.stroke();
+    //   ctx.fillStyle = "rgba(0,0,0,0.3)";
+    //   ctx.fillStyle = "#fff";
+    //   ctx.fill();
+    //   ctx.clip();
+    // },
     body() {
       ctx.beginPath();
       for (let i = 0, len = body.length; i < len; ++i) {

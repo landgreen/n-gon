@@ -54,7 +54,7 @@ const powerUps = {
   },
   field: {
     name: "field",
-    color: "#0af",
+    color: "#0cf",
     size() {
       return 45;
     },
@@ -153,7 +153,7 @@ const powerUps = {
       powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0018 * (b.mods.length - b.modCount - 2)) {
+    if (Math.random() < 0.004 * (8 - b.modCount)) {
       powerUps.spawn(x, y, "mod");
       return;
     }
@@ -165,7 +165,7 @@ const powerUps = {
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.047 * (b.mods.length - b.modCount)) {
+    } else if (Math.random() < 0.042 * (b.mods.length - b.modCount)) {
       powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "field");

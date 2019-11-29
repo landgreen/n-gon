@@ -670,7 +670,7 @@ const mech = {
       mech.fieldMeter += mech.fieldRegen;
       ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
       ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range, 10);
-      ctx.fillStyle = "#0af";
+      ctx.fillStyle = "#0cf";
       ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range * this.fieldMeter, 10);
     } else {
       mech.fieldMeter = 1
@@ -1119,7 +1119,7 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "field emits a beam of destructive <span style='color:#f0f;'>ionized gas</span><br><span style='color:#a00;'>decreased</span> <strong class='color-f'>shield</strong> range and efficiency",
+      description: "field emits a beam of destructive <strong style='color:#d0d;'>ionized gas</strong><br><span style='color:#a00;'>decreased</span> <strong class='color-f'>shield</strong> range and efficiency",
       effect: () => {
         mech.fieldMode = 2;
         mech.fieldText();
