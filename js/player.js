@@ -65,12 +65,13 @@ const mech = {
   },
   defaultMass: 5,
   mass: 5,
+  FxNotHolding: 0.015,
   Fx: 0.015, //run Force on ground  //this is reset in b.setModDefaults()
   FxAir: 0.015, //run Force in Air
   definePlayerMass(mass = mech.defaultMass) {
     Matter.Body.setMass(player, mass);
     //reduce air and ground move forces
-    this.Fx = 0.075 / mass
+    this.Fx = 0.075 / mass * b.modSquirrelFx
     this.FxAir = 0.375 / mass / mass
     //make player stand a bit lower when holding heavy masses
     this.yOffWhen.stand = Math.max(this.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
@@ -212,11 +213,10 @@ const mech = {
         this.yOff = this.yOffWhen.jump;
         this.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
-        if (game.isBodyDamage && momentum > 200 && player.velocity.y > 20) { //falling damage
+        if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165) { //falling damage
           mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
-          let dmg = Math.sqrt(momentum - 200) * 0.01
-          console.log(dmg, momentum, player.velocity.y)
-          dmg = Math.min(Math.max(dmg, 0.02), 0.15);
+          let dmg = Math.sqrt(momentum - 165) * 0.01
+          dmg = Math.min(Math.max(dmg, 0.02), 0.20);
           mech.damage(dmg);
         }
       } else {
@@ -661,10 +661,6 @@ const mech = {
     this.grabRange = 175;
     this.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     this.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
-    this.jumpForce = 0.38;
-    this.Fx = 0.015; //run Force on ground
-    this.FxAir = 0.015; //run Force in Air
-    this.gravity = 0.0019;
     mech.isBodiesAsleep = true;
     mech.wakeCheck();
     // this.phaseBlocks(0x011111)

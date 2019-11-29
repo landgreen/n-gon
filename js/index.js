@@ -2,8 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
-gun:  Spirit Bomb
+gun: like drones, but fast moving and short lived
+  dies after doing damage
+
+gun:  Spirit Bomb (singularity)
   use charge up like rail gun
+  electricity graphics like plasma torch
+  suck in nearby mobs, power ups?, blocks?
+    sucked in stuff increase size
+  uses energy
 
 left and right click mouse icons for text displays
 
@@ -17,7 +24,7 @@ mod: + move speed and jump height
   this could just slow the mobs down instead?
     how?
 
-rework junk bot, or remove it
+rework junk bot
   it's behavior is too unpredictable
     range is unclear
     having the bullets last long after doing dmg isn't fun

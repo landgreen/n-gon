@@ -608,7 +608,7 @@ const game = {
     }
 
     if (!(mech.cycle % 420)) {
-      remove = function (who) {
+      fallCheck = function (who) {
         let i = who.length;
         while (i--) {
           if (who[i].position.y > game.fallHeight) {
@@ -617,9 +617,9 @@ const game = {
           }
         }
       };
-      remove(mob);
-      remove(body);
-      remove(powerUp);
+      fallCheck(mob);
+      fallCheck(body);
+      fallCheck(powerUp);
     }
   },
   testingOutput() {

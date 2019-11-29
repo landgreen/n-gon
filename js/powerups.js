@@ -9,7 +9,7 @@ const powerUps = {
     },
     effect() {
       let heal = (this.size / 40) ** 2
-      if (b.isModFullHeal) heal = Infinity
+      if (b.fullHeal) heal = Infinity
       heal = Math.min(1 - mech.health, heal)
       mech.addHealth(heal);
       if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
@@ -108,7 +108,7 @@ const powerUps = {
     effect() {
       //find what guns I don't have
       let options = [];
-      if (b.activeGun === null) {
+      if (b.activeGun === null && game.difficulty < 3) {
         //choose the first gun to be one that is good for the early game
         for (let i = 0; i < b.guns.length; ++i) {
           if (!b.guns[i].have && b.guns[i].isStarterGun) options.push(i);
