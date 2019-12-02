@@ -30,7 +30,6 @@
 </head>
 
 <body>
-
 	<!-- <body oncontextmenu="return false"> -->
 	<div id='guns'></div>
 	<div id='field'></div>
@@ -77,34 +76,82 @@
 	<canvas id="canvas"></canvas>
 	<!-- **********  intro page ***********************************************
 ******************************************************************************* -->
+
+	<!-- <div id="build-details">
+		<div class="build-grid-module"></div>
+		<details>
+			<summary>build</summary>
+			<div id="details-div">
+
+			</div>
+		</details>
+	</div> -->
+	<div id="build-grid">
+
+	</div>
+	<button type="button" id="build-button">builds</button>
+
+
+
+	<!-- <div id="build">
+		<details>
+			<summary>builds</summary>
+
+		</details>
+	</div> -->
+
+
 	<div id="controls">
 		<details>
-			<summary>info</summary>
+			<summary>about</summary>
 			<div id="details-div">
+				<div style="line-height: 150%;">
+					<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed">combat difficulty:</label>
+					<select name="difficulty-select" id="difficulty-select">
+						<option value="easy">easy</option>
+						<option value="0" selected>normal</option>
+						<option value="4">hard</option>
+						<option value="8">why...</option>
+					</select>
+					<br>
+					<label for="body-damage" title="allow damage from heavy, fast moving blocks">collision damage from blocks:</label>
+					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:16px; height:16px;">
+					<br>
+					<label for="fps-select" title="use this to slow the game down">frames per second cap:</label>
+					<select name="fps-select" id="fps-select">
+						<option value="max">no fps cap</option>
+						<option value="72" selected>72 fps cap</option>
+						<option value="60">60 fps cap</option>
+						<option value="45">45 fps cap</option>
+						<option value="30">30 fps cap</option>
+					</select>
+				</div>
+				<br><br>
+
 				<table>
 					<tr>
-						<td>FIRE</td>
+						<th>FIRE</th>
 						<td>left mouse</td>
 						<td></td>
 					</tr>
 					<tr>
-						<td>FIELD</td>
+						<th>FIELD</th>
 						<td>right mouse / spacebar</td>
 					</tr>
 					<tr>
-						<td>MOVE</td>
+						<th>MOVE</th>
 						<td>WASD / arrows</td>
 					</tr>
 					<tr>
-						<td>GUNS</td>
+						<th>GUNS</th>
 						<td>Q / E / mouse wheel</td>
 					</tr>
 					<tr>
-						<td>ZOOM</td>
+						<th>ZOOM</th>
 						<td>+ / -</td>
 					</tr>
 					<tr>
-						<td>PAUSE</td>
+						<th>PAUSE</th>
 						<td>P</td>
 					</tr>
 					<!-- <tr>
@@ -140,35 +187,9 @@
 				<a href="https://github.com/landgreen/n-gon">Github</a> hosts the source code for n-gon.<br> It's written in JavaScript, CSS, and HTML.
 				<br>
 				<br>
-				N-gon is also on <a href="https://lilgreenland.itch.io/n-gon">itch.io</a>.
+				n-gon is also hosted at <a href="https://lilgreenland.itch.io/n-gon">itch.io</a>.
 				<br>
-			</div>
-		</details>
-	</div>
-
-	<div id="settings">
-		<details>
-			<summary>settings</summary>
-			<div id="details-div">
-				<label for="body-damage" title="allow damage from heavy, fast moving blocks">block collision damage:</label>
-				<input type="checkbox" id="body-damage" name="body-damage" checked>
-				<br><br>
-				<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed">combat difficulty:</label>
-				<select name="difficulty-select" id="difficulty-select">
-					<option value="easy">easy</option>
-					<option value="0" selected>normal</option>
-					<option value="4">hard</option>
-					<option value="8">why...</option>
-				</select>
-				<br><br>
-				<label for="fps-select" title="use this to slow the game down">FPS cap:</label>
-				<select name="fps-select" id="fps-select">
-					<option value="max">no fps cap</option>
-					<option value="72" selected>72 fps cap</option>
-					<option value="60">60 fps cap</option>
-					<option value="45">45 fps cap</option>
-					<option value="30">30 fps cap</option>
-				</select>
+				<br>
 			</div>
 		</details>
 	</div>

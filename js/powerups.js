@@ -45,7 +45,8 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
-        const ammo = Math.ceil((target.ammoPack * (0.45 + 0.08 * Math.random())) / b.dmgScale);
+        let ammo = Math.ceil((target.ammoPack * (0.4 + 0.05 * Math.random())) / b.dmgScale);
+        if (level.isBuildRun) ammo *= 2
         target.ammo += ammo;
         game.updateGunHUD();
         game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
@@ -143,38 +144,49 @@ const powerUps = {
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
     if (Math.random() * Math.random() - 0.25 > Math.sqrt(mech.health) || Math.random() < 0.04) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "heal");
       return;
     }
-    if (Math.random() < 0.2) {
-      if (b.inventory.length > 0) powerUps.spawn(x, y, "ammo");
+    if (Math.random() < 0.2 && b.inventory.length > 0) {
+      powerUps.spawn(x, y, "ammo");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "ammo");
       return;
     }
     if (Math.random() < 0.004 * (5 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun");
       return;
     }
     if (Math.random() < 0.004 * (8 - b.modCount)) {
       powerUps.spawn(x, y, "mod");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod");
       return;
     }
     if (Math.random() < 0.005) {
       powerUps.spawn(x, y, "field");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
       return;
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.042 * (b.mods.length - b.modCount)) {
       powerUps.spawn(x, y, "mod")
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "field");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
     } else if (Math.random() < 0.05 * (7 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun")
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun")
     } else if (mech.health < 0.6) {
       powerUps.spawn(x, y, "heal");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "heal");
     } else {
       powerUps.spawn(x, y, "ammo");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "ammo");
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
@@ -195,31 +207,33 @@ const powerUps = {
     }
   },
   spawn(x, y, target, moving = true, mode = null) {
-    let i = powerUp.length;
-    target = powerUps[target];
-    size = target.size();
-    powerUp[i] = Matter.Bodies.polygon(x, y, 0, size, {
-      density: 0.001,
-      frictionAir: 0.01,
-      restitution: 0.8,
-      inertia: Infinity, //prevents rotation
-      collisionFilter: {
-        group: 0,
-        category: 0x100000,
-        mask: 0x100001
-      },
-      color: target.color,
-      effect: target.effect,
-      mode: mode,
-      name: target.name,
-      size: size
-    });
-    if (moving) {
-      Matter.Body.setVelocity(powerUp[i], {
-        x: (Math.random() - 0.5) * 15,
-        y: Math.random() * -9 - 3
+    if (!level.isBuildRun || target === "heal" || target === "ammo") {
+      let i = powerUp.length;
+      target = powerUps[target];
+      size = target.size();
+      powerUp[i] = Matter.Bodies.polygon(x, y, 0, size, {
+        density: 0.001,
+        frictionAir: 0.01,
+        restitution: 0.8,
+        inertia: Infinity, //prevents rotation
+        collisionFilter: {
+          group: 0,
+          category: 0x100000,
+          mask: 0x100001
+        },
+        color: target.color,
+        effect: target.effect,
+        mode: mode,
+        name: target.name,
+        size: size
       });
+      if (moving) {
+        Matter.Body.setVelocity(powerUp[i], {
+          x: (Math.random() - 0.5) * 15,
+          y: Math.random() * -9 - 3
+        });
+      }
+      World.add(engine.world, powerUp[i]); //add to world
     }
-    World.add(engine.world, powerUp[i]); //add to world
   },
 };

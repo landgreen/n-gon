@@ -177,9 +177,10 @@ function mobCollisionChecks(event) {
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
-            mob[k].foundPlayer();
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
-            const dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)))
+            let dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)))
+            if (b.modIsCrit && !mob[k].seePlayer.recall) dmg *= 6
+            mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(); //some bullets do actions when they hits things, like despawn
             game.drawList.push({

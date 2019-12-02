@@ -2,6 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
+add builds with combinations of gun, field and mobs
+  use the pull down menu
+
+dynamically generate html about fields, guns and mods
+
+add grid check to improve queries over large body arrays
+  something about broad phase
+  having trouble with this, might give up
+
 gun: like drones, but fast moving and short lived
   dies after doing damage
 
@@ -12,30 +21,15 @@ gun:  Spirit Bomb (singularity)
     sucked in stuff increase size
   uses energy
 
-left and right click mouse icons for text displays
-
 mod: auto pick up guns, heals, ammo
   use the same rule for drones
   maybe give some other bonus too?
-
-mod: + move speed and jump height
-  will leg animations look strange?
-    that's OK for a mod
-  this could just slow the mobs down instead?
-    how?
 
 rework junk bot
   it's behavior is too unpredictable
     range is unclear
     having the bullets last long after doing dmg isn't fun
   we want a fun gun that acts like a melee weapon
-
-mouse can get suck as clicked if the user clicks off the window
-  can lead to gun lock up until player pressed mouse again
-  should I really need to fix this?
-
-diegetic field meter
-  show as the player head filling with teal color
 
 atmosphere levels
   large rotating fan that the player has to move through
@@ -55,17 +49,10 @@ Boss levels
 
 add a key that player picks up and needs to set on the exit door to open it
 
-add modular difficulty settings
-  take reduced dmg
-  slower mob look / CD
-  more drops
-  fewer mobs
-    make a new var to scale number of mobs and stop using levels cleared var
-
 make power ups keep moving to player if the pickup field is turned off before they get picked up
   not sure how to do this without adding a constant check
 
-levels spawn by having the map aspects randomly fly into place
+animate new level spawn by having the map aspects randomly fly into place
 
 new map with repeating endlessness
   get ideas from Manifold Garden game
@@ -127,6 +114,37 @@ map:        0x000001   0x111111
 
 
 */
+
+//build build grid display
+let isShowingBuilds = false
+document.getElementById("build-button").addEventListener("click", () => {
+  const el = document.getElementById("build-grid")
+  if (isShowingBuilds) {
+    el.style.display = "none"
+    isShowingBuilds = false
+    document.body.style.overflow = "hidden"
+    document.getElementById("controls").style.display = 'inline'
+  } else {
+    let text = ""
+    for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
+      text += `<div class="build-grid-module "><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
+    }
+    for (let i = 0, len = b.guns.length; i < len; i++) {
+      text += `<div class="build-grid-module "><div class="circle-grid gun"></div> &nbsp; <strong style='font-size:1.3em;'>${b.guns[i].name}</strong><br> ${b.guns[i].description}</div>`
+    }
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      text += `<div class="build-grid-module "><div class="circle-grid mod"></div> &nbsp; <strong style='font-size:1.3em;'>${b.mods[i].name}</strong><br> ${b.mods[i].description}</div>`
+    }
+    el.innerHTML = text
+    el.style.display = "grid"
+    isShowingBuilds = true
+    document.body.style.overflowY = "scroll";
+    document.body.style.overflowX = "hidden";
+    document.getElementById("controls").style.display = 'none'
+  }
+});
+
+
 
 //set up canvas
 var canvas = document.getElementById("canvas");

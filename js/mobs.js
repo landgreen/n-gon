@@ -898,6 +898,8 @@ const mobs = {
         }
       },
       damage(dmg) {
+        if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
+        if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
         this.health -= dmg / Math.sqrt(this.mass);
         //this.fill = this.color + this.health + ')';
         if (this.health < 0.1) this.death();
@@ -913,7 +915,7 @@ const mobs = {
       },
       onDeath() {
         // a placeholder for custom effects on mob death
-        //to use declare custom method in mob spawn
+        // to use declare custom method in mob spawn
       },
       leaveBody: true,
       dropPowerUp: true,

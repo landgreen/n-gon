@@ -454,7 +454,9 @@ const game = {
       game.startGame();
     };
     document.getElementById("controls").style.display = "inline";
-    document.getElementById("settings").style.display = "inline";
+    document.getElementById("build-button").style.display = "inline"
+    isShowingBuilds = false
+    // document.getElementById("settings").style.display = "inline";
     document.getElementById("splash").style.display = "inline";
     document.getElementById("dmg").style.display = "none";
     document.getElementById("health-bg").style.display = "none";
@@ -464,8 +466,10 @@ const game = {
   then: null,
   startGame() {
     game.onTitlePage = false;
+    document.body.style.overflow = "hidden"
+    document.getElementById("build-grid").style.display = "none"
     document.getElementById("controls").style.display = "none";
-    document.getElementById("settings").style.display = "none";
+    document.getElementById("build-button").style.display = "none";
     document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
     document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
     document.getElementById("dmg").style.display = "inline";
