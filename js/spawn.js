@@ -952,10 +952,10 @@ const spawn = {
     // me.dropPowerUp = false;
     me.onDeath = function () { //run this function on death
       for (let i = 0; i < Math.ceil(this.mass * 0.2 + Math.random() * 3); ++i) {
-        spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2);
+        spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2.5, this.position.y + (Math.random() - 0.5) * radius * 2.5);
         Matter.Body.setVelocity(mob[mob.length - 1], {
-          x: (Math.random() - 0.5) * 25,
-          y: (Math.random() - 0.5) * 25
+          x: this.velocity.x + (Math.random() - 0.5) * 15,
+          y: this.velocity.x + (Math.random() - 0.5) * 15
         });
       }
     };

@@ -14,14 +14,14 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // level.startBuildRun(2)
+      // level.startBuildRun(5)
       // b.giveGuns(11)
       // mech.fieldUpgrades[2].effect();
       // b.giveMod(13)
       // spawn.pickList = ["ghoster", "ghoster"]
 
-      this.intro(); //starting level
-      // this.testingMap();
+      // this.intro(); //starting level
+      this.testingMap();
       // this.bosses();
       // this.aerie();
       // this.rooftops();
@@ -217,7 +217,7 @@ const level = {
     powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.focuser(800, -1150);
+    spawn.spawner(800, -1150);
     spawn.groupBoss(-600, -550);
     // spawn.hopper(800, -150);
     // spawn.beamer(800, -150);

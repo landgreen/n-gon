@@ -44,7 +44,7 @@ summary {
 }
 
 #build-button {
-  position: absolute;
+  position: sticky;
   bottom: 0px;
   right: 1px;
   z-index: 12;

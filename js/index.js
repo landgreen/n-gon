@@ -116,35 +116,44 @@ map:        0x000001   0x111111
 */
 
 //build build grid display
-let isShowingBuilds = false
+const build = {
+  isShowingBuilds: false,
+  list: [],
+  choosePowerUp(index, type) {
+    build.list[build.list.length] = {
+      index: index,
+      type: type
+    }
+    console.log(build.list)
+  },
+}
+
 document.getElementById("build-button").addEventListener("click", () => {
   const el = document.getElementById("build-grid")
-  if (isShowingBuilds) {
+  if (build.isShowingBuilds) {
     el.style.display = "none"
-    isShowingBuilds = false
+    build.isShowingBuilds = false
     document.body.style.overflow = "hidden"
     document.getElementById("controls").style.display = 'inline'
   } else {
-    let text = ""
-    for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
-      text += `<div class="build-grid-module "><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
+    let text = '<p>click on 5 powers, then click begin	<button type="button" id="build-begin-button">Begin</button></p>'
+    for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
     }
     for (let i = 0, len = b.guns.length; i < len; i++) {
-      text += `<div class="build-grid-module "><div class="circle-grid gun"></div> &nbsp; <strong style='font-size:1.3em;'>${b.guns[i].name}</strong><br> ${b.guns[i].description}</div>`
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(${i},'gun')"><div class="circle-grid gun"></div> &nbsp; <strong style='font-size:1.3em;'>${b.guns[i].name}</strong><br> ${b.guns[i].description}</div>`
     }
     for (let i = 0, len = b.mods.length; i < len; i++) {
-      text += `<div class="build-grid-module "><div class="circle-grid mod"></div> &nbsp; <strong style='font-size:1.3em;'>${b.mods[i].name}</strong><br> ${b.mods[i].description}</div>`
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(${i},'mod')"><div class="circle-grid mod"></div> &nbsp; <strong style='font-size:1.3em;'>${b.mods[i].name}</strong><br> ${b.mods[i].description}</div>`
     }
     el.innerHTML = text
     el.style.display = "grid"
-    isShowingBuilds = true
+    build.isShowingBuilds = true
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("controls").style.display = 'none'
   }
 });
-
-
 
 //set up canvas
 var canvas = document.getElementById("canvas");
