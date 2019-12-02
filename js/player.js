@@ -431,7 +431,7 @@ const mech = {
   },
   addHealth(heal) {
     this.health += heal;
-    if (this.health > 1) this.health = 1;
+    if (this.health > 1 || b.isModFullHeal) this.health = 1;
     this.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
@@ -1445,6 +1445,7 @@ const mech = {
           if (mech.fieldMeter === 1) {
             mech.fieldMeter -= 0.43;
             b.guns[gunIndex].fire() //spawn drone
+            mech.fireCDcycle = mech.cycle + 25; // set fire cool down to prevent +energy from making huge numbers of drones
           }
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);

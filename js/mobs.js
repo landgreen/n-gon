@@ -234,19 +234,19 @@ const mobs = {
             if (!b.isModAoEImmunity) {
               mech.damage(0.0003 * game.dmgScale);
               if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.005
-            }
-            ctx.beginPath();
-            ctx.moveTo(this.position.x, this.position.y);
-            ctx.lineTo(mech.pos.x, mech.pos.y);
-            ctx.lineTo(mech.pos.x + (Math.random() - 0.5) * 3000, mech.pos.y + (Math.random() - 0.5) * 3000);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "rgb(255,0,170)";
-            ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(this.position.x, this.position.y);
+              ctx.lineTo(mech.pos.x, mech.pos.y);
+              ctx.lineTo(mech.pos.x + (Math.random() - 0.5) * 3000, mech.pos.y + (Math.random() - 0.5) * 3000);
+              ctx.lineWidth = 2;
+              ctx.strokeStyle = "rgb(255,0,170)";
+              ctx.stroke();
 
-            ctx.beginPath();
-            ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255,0,170,0.15)";
-            ctx.fill();
+              ctx.beginPath();
+              ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
+              ctx.fillStyle = "rgba(255,0,170,0.15)";
+              ctx.fill();
+            }
           }
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);

@@ -100,7 +100,7 @@ const b = {
     },
     {
       name: "ceramic plating",
-      description: "<strong>immune</strong> to <strong class='color-e'>explosions</strong> and enemy fields",
+      description: "<strong>immune</strong> to <strong class='color-e'>explosions</strong><br> <strong>immune</strong> to enemy field effects",
       have: false, //5
       effect: () => {
         b.isModAoEImmunity = true; //good for guns with explosions
@@ -167,6 +167,7 @@ const b = {
       description: "<strong class='color-h'>healing</strong> power ups bring you to <strong>full health</strong>",
       have: false, //13
       effect: () => { // good with ablative synthesis, melee builds
+        b.isModFullHeal = true
       }
     },
     {
@@ -174,7 +175,6 @@ const b = {
       description: "<strong>launch blocks</strong> at much higher speeds<br>carry more massive blocks",
       have: false, //14
       effect: () => { // good with guns that run out of ammo
-        b.isModFullHeal = true
         mech.throwChargeRate = 4;
         mech.throwChargeMax = 150;
         mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
@@ -200,7 +200,7 @@ const b = {
     },
     {
       name: "kinetic bombardment",
-      description: "do extra <strong class='color-d'>damage</strong> from farther away<br><em>up to 50% increase at about 30 steps away</em>",
+      description: "do extra <strong class='color-d'>damage</strong> from a distance<br><em>up to 50% increase at about 30 steps away</em>",
       have: false, //17
       effect: () => { // good with annihilation, melee builds
         b.isModFarAwayDmg = true; //used in mob.damage()
@@ -224,7 +224,7 @@ const b = {
     },
     {
       name: "monogamy",
-      description: "equipping your first gun reduces <strong class='color-d'>damage</strong> taken<br>scales by <strong>7%</strong> for each gun in your inventory",
+      description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br>scales by <strong>7%</strong> for each gun in your inventory",
       have: false, //20
       effect: () => { // good with long term planning
         b.isModMonogamy = true
@@ -1563,9 +1563,9 @@ const b = {
           friction: 0.05,
           frictionAir: 0.0005,
           restitution: 1,
-          dmg: 0.14 + b.modExtraDmg, //damage done in addition to the damage from momentum
-          lookFrequency: 79 + Math.floor(37 * Math.random()),
-          endCycle: game.cycle + Math.floor((960 + 360 * Math.random()) * b.isModBulletsLastLonger),
+          dmg: 0.13 + b.modExtraDmg, //damage done in addition to the damage from momentum
+          lookFrequency: 83 + Math.floor(41 * Math.random()),
+          endCycle: game.cycle + Math.floor((900 + 360 * Math.random()) * b.isModBulletsLastLonger),
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -1641,7 +1641,7 @@ const b = {
             }
           }
         })
-        b.fireProps(mech.crouch ? 19 : 15, mech.crouch ? 35 : 1, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 14 : 10, mech.crouch ? 40 : 1, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
       }
     },

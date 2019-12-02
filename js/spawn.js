@@ -456,11 +456,9 @@ const spawn = {
 
         this.healthBar();
         //when player is inside event horizon
-        if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (!b.isModAoEImmunity) {
-            mech.damage(0.00015 * game.dmgScale);
-            if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
-          }
+        if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon && !b.isModAoEImmunity) {
+          mech.damage(0.00015 * game.dmgScale);
+          if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 1.25 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.8 : 1);
           player.force.y -= 0.96 * player.mass * game.g * Math.sin(angle);
@@ -547,11 +545,9 @@ const spawn = {
         ctx.fillStyle = "rgba(0,0,0,0.05)";
         ctx.fill();
         //when player is inside event horizon
-        if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (!b.isModAoEImmunity) {
-            mech.damage(0.00015 * game.dmgScale);
-            if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
-          }
+        if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon && !b.isModAoEImmunity) {
+          mech.damage(0.00015 * game.dmgScale);
+          if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.01
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 1.3 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
           player.force.y -= 1.2 * Math.sin(angle) * player.mass * game.g;
