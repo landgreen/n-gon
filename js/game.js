@@ -416,6 +416,7 @@ const game = {
     game.updateModHUD();
     mech.fieldUpgrades[0].effect(); //set to default field
     game.paused = false;
+    build.isShowingBuilds = false
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
     game.makeGunHUD();

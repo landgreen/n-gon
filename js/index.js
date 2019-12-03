@@ -175,6 +175,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.body.style.overflow = "hidden"
     document.getElementById("controls").style.display = 'inline'
   } else {
+    build.list = []
     let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
