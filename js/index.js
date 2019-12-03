@@ -119,13 +119,52 @@ map:        0x000001   0x111111
 const build = {
   isShowingBuilds: false,
   list: [],
-  choosePowerUp(index, type) {
-    build.list[build.list.length] = {
-      index: index,
-      type: type
+  choosePowerUp(who, index, type) {
+    //check if matching a current power up
+    for (let i = 0; i < build.list.length; i++) {
+      if (build.list[i].index === index && build.list[i].type === type) { //if already click, toggle off
+        build.list.splice(i, 1);
+        who.style.backgroundColor = "#fff"
+        return
+      }
     }
-    console.log(build.list)
+
+    //check if trying to get a second field
+    if (type === "field") {
+      for (let i = 0; i < build.list.length; i++) {
+        if (build.list[i].type === "field") { //if already click, toggle off
+          build.list[i].who.style.backgroundColor = "#fff"
+          build.list.splice(i, 1);
+        }
+      }
+    }
+
+    if (build.list.length < 5) { //add to build array
+      // who.style.border = "2px solid #333"
+      who.style.backgroundColor = "#868f9a"
+      build.list[build.list.length] = {
+        who: who,
+        index: index,
+        type: type
+      }
+    }
   },
+  startBuildRun() {
+    spawn.setSpawnList();
+    spawn.setSpawnList();
+    game.startGame();
+    game.difficulty = 6;
+    level.isBuildRun = true;
+    for (let i = 0; i < build.list.length; i++) {
+      if (build.list[i].type === "field") {
+        mech.fieldUpgrades[build.list[i].index].effect();
+      } else if (build.list[i].type === "gun") {
+        b.giveGuns(build.list[i].index)
+      } else if (build.list[i].type === "mod") {
+        b.giveMod(build.list[i].index)
+      }
+    }
+  }
 }
 
 document.getElementById("build-button").addEventListener("click", () => {
@@ -136,15 +175,15 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.body.style.overflow = "hidden"
     document.getElementById("controls").style.display = 'inline'
   } else {
-    let text = '<p>click on 5 powers, then click begin	<button type="button" id="build-begin-button">Begin</button></p>'
+    let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
     }
     for (let i = 0, len = b.guns.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(${i},'gun')"><div class="circle-grid gun"></div> &nbsp; <strong style='font-size:1.3em;'>${b.guns[i].name}</strong><br> ${b.guns[i].description}</div>`
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="circle-grid gun"></div> &nbsp; <strong style='font-size:1.3em;'>${b.guns[i].name}</strong><br> ${b.guns[i].description}</div>`
     }
     for (let i = 0, len = b.mods.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(${i},'mod')"><div class="circle-grid mod"></div> &nbsp; <strong style='font-size:1.3em;'>${b.mods[i].name}</strong><br> ${b.mods[i].description}</div>`
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="circle-grid mod"></div> &nbsp; <strong style='font-size:1.3em;'>${b.mods[i].name}</strong><br> ${b.mods[i].description}</div>`
     }
     el.innerHTML = text
     el.style.display = "grid"

@@ -57,6 +57,7 @@ summary {
   border: 0px;
   /* border-radius: 8px; */
   background-color: #b6bfca;
+  /* #b6bfca; */
 
   display: none;
   /* display: grid; */
@@ -77,7 +78,7 @@ summary {
   /* margin: 4px; */
   line-height: 150%;
   border-radius: 6px;
-  background: #eee;
+  background: #fff;
   font-size: 0.65em;
   /* display: flex; */
 }

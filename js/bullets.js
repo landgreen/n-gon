@@ -67,7 +67,7 @@ const b = {
     },
     {
       name: "auto-loading heuristics",
-      description: "your <strong>rate of fire</strong> is 15% higher",
+      description: "<strong>delay</strong> between your shots is 15% <strong>shorter</strong>",
       have: false, //1
       effect: () => { //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
         b.modFireRate = 0.85
@@ -707,7 +707,7 @@ const b = {
       name: "rail gun", //1
       description: "magnetically launch a dense rod<br><strong>hold left mouse</strong> to charge and <strong>repel</strong> enemies",
       ammo: 0,
-      ammoPack: 12,
+      ammoPack: 11,
       have: false,
       isStarterGun: false,
       fire() {
@@ -790,7 +790,7 @@ const b = {
               }
 
               //gently push away mobs while charging
-              const RANGE = 350 * this.charge
+              const RANGE = 270 * this.charge
               for (let i = 0, len = mob.length; i < len; ++i) {
                 const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
                 const DISTANCE = Matter.Vector.magnitude(SUB)

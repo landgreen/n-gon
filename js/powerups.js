@@ -152,12 +152,12 @@ const powerUps = {
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.004 * (5 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    if (Math.random() < 0.004 * (4 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
       powerUps.spawn(x, y, "gun");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.004 * (8 - b.modCount)) {
+    if (Math.random() < 0.004 * (7 - b.modCount)) {
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod");
       return;
@@ -172,13 +172,13 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.042 * (b.mods.length - b.modCount)) {
+    } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
-    } else if (Math.random() < 0.05 * (7 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun")
     } else if (mech.health < 0.6) {

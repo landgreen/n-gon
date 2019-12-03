@@ -20,8 +20,8 @@ const level = {
       // b.giveMod(13)
       // spawn.pickList = ["ghoster", "ghoster"]
 
-      // this.intro(); //starting level
-      this.testingMap();
+      this.intro(); //starting level
+      // this.testingMap();
       // this.bosses();
       // this.aerie();
       // this.rooftops();

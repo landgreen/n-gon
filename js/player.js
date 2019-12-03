@@ -441,7 +441,6 @@ const mech = {
         dmg *= 0.93
       }
     }
-    console.log(dmg, "after")
     this.health -= dmg;
     if (this.health < 0) {
       this.health = 0;
