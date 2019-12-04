@@ -87,45 +87,47 @@
 		</details>
 	</div> -->
 	<div id="build-grid"></div>
-	<button type="button" id="build-button">challenge run</button>
+	<!-- <button type="button" id="build-button">challenge run</button> -->
+	<svg class="SVG-button" id="build-button" width="94" height="40">
+		<g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Arial, sans-serif">
+			<text x="10" y="30">builds</text>
+		</g>
+	</svg>
 
 
 
-	<!-- <div id="build">
+	<div id="settings">
 		<details>
-			<summary>builds</summary>
-
+			<summary>settings</summary>
+			<div style="line-height: 150%;" id="details-div">
+				<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed">combat difficulty:</label>
+				<select name="difficulty-select" id="difficulty-select">
+					<option value="easy">easy</option>
+					<option value="0" selected>normal</option>
+					<option value="4">hard</option>
+					<option value="8">why...</option>
+				</select>
+				<br>
+				<label for="body-damage" title="allow damage from heavy, fast moving blocks">collision damage from blocks:</label>
+				<input type="checkbox" id="body-damage" name="body-damage" checked style="width:16px; height:16px;">
+				<br>
+				<label for="fps-select" title="use this to slow the game down">frames per second cap:</label>
+				<select name="fps-select" id="fps-select">
+					<option value="max">no fps cap</option>
+					<option value="72" selected>72 fps cap</option>
+					<option value="60">60 fps cap</option>
+					<option value="45">45 fps cap</option>
+					<option value="30">30 fps cap</option>
+				</select>
+			</div>
 		</details>
-	</div> -->
+	</div>
 
 
 	<div id="controls">
 		<details>
 			<summary>about</summary>
 			<div id="details-div">
-				<div style="line-height: 150%;">
-					<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed">combat difficulty:</label>
-					<select name="difficulty-select" id="difficulty-select">
-						<option value="easy">easy</option>
-						<option value="0" selected>normal</option>
-						<option value="4">hard</option>
-						<option value="8">why...</option>
-					</select>
-					<br>
-					<label for="body-damage" title="allow damage from heavy, fast moving blocks">collision damage from blocks:</label>
-					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:16px; height:16px;">
-					<br>
-					<label for="fps-select" title="use this to slow the game down">frames per second cap:</label>
-					<select name="fps-select" id="fps-select">
-						<option value="max">no fps cap</option>
-						<option value="72" selected>72 fps cap</option>
-						<option value="60">60 fps cap</option>
-						<option value="45">45 fps cap</option>
-						<option value="30">30 fps cap</option>
-					</select>
-				</div>
-				<br><br>
-
 				<table>
 					<tr>
 						<th>FIRE</th>
@@ -183,11 +185,11 @@
 					</svg>
 				</a>
 				<a href="https://github.com/landgreen/n-gon">Github</a> hosts the source code for n-gon.<br> It's written in JavaScript, CSS, and HTML.
-				<br>
+				<!-- <br>
 				<br>
 				n-gon is also hosted at <a href="https://lilgreenland.itch.io/n-gon">itch.io</a>.
 				<br>
-				<br>
+				<br> -->
 			</div>
 		</details>
 	</div>

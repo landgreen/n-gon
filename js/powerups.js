@@ -45,8 +45,8 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
-        let ammo = Math.ceil((target.ammoPack * (0.4 + 0.05 * Math.random())) / b.dmgScale);
-        if (level.isBuildRun) ammo *= 2
+        let ammo = Math.ceil((target.ammoPack * (0.45 + 0.06 * Math.random())) / Math.sqrt(b.dmgScale));
+        if (level.isBuildRun) ammo = Math.floor(ammo * 1.2)
         target.ammo += ammo;
         game.updateGunHUD();
         game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);

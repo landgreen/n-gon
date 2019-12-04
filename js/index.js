@@ -168,12 +168,14 @@ const build = {
 }
 
 document.getElementById("build-button").addEventListener("click", () => {
+  document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
   if (build.isShowingBuilds) {
     el.style.display = "none"
     build.isShowingBuilds = false
     document.body.style.overflow = "hidden"
     document.getElementById("controls").style.display = 'inline'
+    document.getElementById("settings").style.display = 'inline'
   } else {
     build.list = []
     let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
@@ -192,6 +194,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("controls").style.display = 'none'
+    document.getElementById("settings").style.display = 'none'
   }
 });
 

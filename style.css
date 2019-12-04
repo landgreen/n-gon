@@ -43,12 +43,21 @@ summary {
   font-size: 1.2em;
 }
 
+.SVG-button {
+  border: 2px #333 solid;
+  border-radius: 9px;
+}
+
+.SVG-button:hover {
+  background-color: #eee;
+}
+
 #build-button {
-  position: sticky;
-  bottom: 0px;
-  right: 1px;
+
+  position: absolute;
+  top: 3px;
+  right: 3px;
   z-index: 12;
-  font-size: 1.3em;
 }
 
 #build-grid {
@@ -84,7 +93,7 @@ summary {
 }
 
 .build-grid-module:hover {
-  background-color: #fff;
+  background-color: #eee;
 }
 
 .gun-module {
@@ -107,15 +116,20 @@ summary {
   z-index: 12;
   font-size: 1.3em;
 } */
+#settings {
+  position: absolute;
+  bottom: 0px;
+  right: 1px;
+  z-index: 12;
+  font-size: 1.5em;
+}
 
 #controls {
   position: absolute;
   bottom: 0px;
   left: 1px;
   z-index: 12;
-  font-size: 1.3em;
-  /* background-color: #ccc; */
-  /* border-radius: 5px; */
+  font-size: 1.5em;
 }
 
 #details-div {
@@ -274,7 +288,7 @@ em {
 }
 
 .color-f {
-  color: #0cf;
+  color: #0ad;
   letter-spacing: 1px;
 }
 
@@ -284,19 +298,19 @@ em {
 }
 
 .color-h {
-  color: #0c8;
+  color: #0b7;
   letter-spacing: 1px;
 }
 
 .color-e {
-  color: #e50;
+  color: #d60;
   letter-spacing: 1px;
 }
 
 .color-s {
-  color: #066;
+  color: #055;
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .faded {

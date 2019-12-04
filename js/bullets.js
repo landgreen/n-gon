@@ -57,7 +57,7 @@ const b = {
   },
   mods: [{
       name: "depleted uranium rounds",
-      description: "your <strong>bullets</strong> are 10% larger<br>increased momentum and physical <strong class='color-d'>damage</strong>",
+      description: "your <strong>bullets</strong> are 10% larger<br>increased mass and physical <strong class='color-d'>damage</strong>",
       have: false, //0
       effect: () => {
         //good for guns that do mostly projectile damage:
@@ -224,7 +224,7 @@ const b = {
     },
     {
       name: "monogamy",
-      description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br>scales by <strong>7%</strong> for each gun in your inventory",
+      description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br><em>scales by <strong>7%</strong> for each gun in your inventory</em>",
       have: false, //20
       effect: () => { // good with long term planning
         b.isModMonogamy = true
@@ -943,7 +943,7 @@ const b = {
       }
     }, {
       name: "wave beam", //3
-      description: "fire a stream of oscillating particles<br>bullets <strong>propagate</strong> through solids",
+      description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
       ammo: 0,
       ammoPack: 85,
       have: false,
@@ -1192,7 +1192,7 @@ const b = {
       }
     }, {
       name: "flak", //8
-      description: "fire a cluster of short range projectiles<br><strong class='color-e'>explode</strong> on contact or after half a second",
+      description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
       ammo: 0,
       ammoPack: 20,
       have: false,
