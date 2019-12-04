@@ -46,14 +46,14 @@ summary {
 .SVG-button {
   border: 2px #333 solid;
   border-radius: 9px;
+  background-color: #fff;
 }
 
 .SVG-button:hover {
-  background-color: #eee;
+  background-color: #efeff5;
 }
 
 #build-button {
-
   position: absolute;
   top: 3px;
   right: 3px;
@@ -65,7 +65,7 @@ summary {
   margin: 0px;
   border: 0px;
   /* border-radius: 8px; */
-  background-color: #b6bfca;
+  background-color: #c4ccd8;
   /* #b6bfca; */
 
   display: none;
@@ -93,7 +93,7 @@ summary {
 }
 
 .build-grid-module:hover {
-  background-color: #eee;
+  background-color: #efeff5;
 }
 
 .gun-module {

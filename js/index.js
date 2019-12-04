@@ -141,7 +141,7 @@ const build = {
 
     if (build.list.length < 5) { //add to build array
       // who.style.border = "2px solid #333"
-      who.style.backgroundColor = "#868f9a"
+      who.style.backgroundColor = "#919ba8" //"#868f9a"
       build.list[build.list.length] = {
         who: who,
         index: index,
@@ -178,7 +178,21 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.getElementById("settings").style.display = 'inline'
   } else {
     build.list = []
-    let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
+    // let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
+    let text =
+      `<div style="  display: flex;
+      justify-content: center;
+      align-items: center;">
+      <p>choose up to 5 powers</p>
+      </div>
+      <div style="  display: flex;
+      justify-content: center;
+      align-items: center;">
+      <svg class="SVG-button" onclick="build.startBuildRun()" width="74" height="36">
+         <g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Ariel, sans-serif">
+           <text x="10" y="28">start</text>
+         </g>
+      </svg></div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
     }
