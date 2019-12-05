@@ -405,7 +405,7 @@ const game = {
     addGravity(body, game.g);
     player.force.y += player.mass * mech.gravity;
   },
-  reset() {
+  reset() { //run on first run, and each later run after you die
     b.inventory = []; //removes guns and ammo  
     for (let i = 0, len = b.guns.length; i < len; ++i) {
       b.guns[i].have = false;

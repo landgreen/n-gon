@@ -898,9 +898,7 @@ const mobs = {
         }
       },
       damage(dmg) {
-        console.log(dmg, "before")
         dmg /= Math.sqrt(this.mass)
-        console.log(dmg, "after")
         if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
         if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
         if (dmg !== Infinity) {
@@ -909,7 +907,7 @@ const mobs = {
         }
         this.health -= dmg
         //this.fill = this.color + this.health + ')';
-        if (this.health < 0.01) this.death();
+        if (this.health < 0.05) this.death();
         this.onDamage(this); //custom damage effects
       },
       onDamage() {

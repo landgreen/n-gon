@@ -735,7 +735,7 @@ const b = {
         bullet[me].charge = 0;
         bullet[me].do = function () {
           if (this.isCharging) {
-            if ((!game.mouseDown && this.charge > 0.4)) { //fire on mouse release
+            if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release
               this.isCharging = false
               mech.fireCDcycle = mech.cycle + 2; // set fire cool down
               Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
