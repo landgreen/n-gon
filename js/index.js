@@ -71,7 +71,7 @@ mod power ups ideas
         add a freeze
 
 give mobs more animal-like behaviors
-  like rainworld
+  like rain world
   give mobs something to do when they don't see player
     explore map
     eat power ups
@@ -180,19 +180,16 @@ document.getElementById("build-button").addEventListener("click", () => {
     build.list = []
     // let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
     let text =
-      `<div style="  display: flex;
-      justify-content: center;
-      align-items: center;">
-      <p>choose up to 5 powers</p>
+      `<div style="display: flex; justify-content: center; align-items: center;">
+        <svg class="SVG-button" onclick="build.startBuildRun()" width="90" height="40">
+          <g stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Ariel, sans-serif">
+            <text x="15" y="31">start</text>
+          </g>
+        </svg>
       </div>
-      <div style="  display: flex;
-      justify-content: center;
-      align-items: center;">
-      <svg class="SVG-button" onclick="build.startBuildRun()" width="74" height="36">
-         <g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Ariel, sans-serif">
-           <text x="10" y="28">start</text>
-         </g>
-      </svg></div>`
+      <div class="build-grid-module" style="font-size: 19px; line-height: 110%;">
+        Choose up to five power ups. Once you start, only health and ammo will drop, so pick carefully.
+      </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`
     }
@@ -248,7 +245,7 @@ document.body.addEventListener("mousemove", (e) => {
 
 document.body.addEventListener("mouseup", (e) => {
   // game.buildingUp(e); //uncomment when building levels
-  game.mouseDown = false;
+  // game.mouseDown = false;
   // console.log(e)
   if (e.which === 3) {
     game.mouseDownRight = false;

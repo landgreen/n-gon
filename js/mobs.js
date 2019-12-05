@@ -29,20 +29,20 @@ const mobs = {
       ctx.stroke();
     }
   },
-  alert(range) {
-    range = range * range;
-    for (let i = 0; i < mob.length; i++) {
-      if (mob[i].distanceToPlayer2() < range) mob[i].locatePlayer();
-    }
-  },
-  startle(amount) {
-    for (let i = 0; i < mob.length; i++) {
-      if (!mob[i].seePlayer.yes) {
-        mob[i].force.x += amount * mob[i].mass * (Math.random() - 0.5);
-        mob[i].force.y += amount * mob[i].mass * (Math.random() - 0.5);
-      }
-    }
-  },
+  // alert(range) {
+  //   range = range * range;
+  //   for (let i = 0; i < mob.length; i++) {
+  //     if (mob[i].distanceToPlayer2() < range) mob[i].locatePlayer();
+  //   }
+  // },
+  // startle(amount) {
+  //   for (let i = 0; i < mob.length; i++) {
+  //     if (!mob[i].seePlayer.yes) {
+  //       mob[i].force.x += amount * mob[i].mass * (Math.random() - 0.5);
+  //       mob[i].force.y += amount * mob[i].mass * (Math.random() - 0.5);
+  //     }
+  //   }
+  // },
   //**********************************************************************************************
   //**********************************************************************************************
   spawn(xPos, yPos, sides, radius, color) {
@@ -898,16 +898,19 @@ const mobs = {
         }
       },
       damage(dmg) {
+        console.log(dmg, "before")
+        dmg /= Math.sqrt(this.mass)
+        console.log(dmg, "after")
         if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
         if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
-        this.health -= dmg / Math.sqrt(this.mass);
-        //this.fill = this.color + this.health + ')';
-        if (this.health < 0.1) this.death();
-        this.onDamage(this); //custom damage effects
         if (dmg !== Infinity) {
-          if (b.modEnergySiphon) mech.fieldMeter += dmg * b.modEnergySiphon
-          if (b.modHealthDrain) mech.addHealth(dmg * b.modHealthDrain)
+          if (b.modEnergySiphon) mech.fieldMeter += Math.min(this.health, dmg) * b.modEnergySiphon
+          if (b.modHealthDrain) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
         }
+        this.health -= dmg
+        //this.fill = this.color + this.health + ')';
+        if (this.health < 0.01) this.death();
+        this.onDamage(this); //custom damage effects
       },
       onDamage() {
         // a placeholder for custom effects on mob damage
@@ -996,7 +999,7 @@ const mobs = {
         mob.splice(i, 1);
       }
     });
-    mob[i].alertRange2 = Math.pow(mob[i].radius * 3 + 200, 2);
+    mob[i].alertRange2 = Math.pow(mob[i].radius * 3.5 + 550, 2);
     World.add(engine.world, mob[i]); //add to world
   }
 };

@@ -67,7 +67,7 @@ const b = {
     },
     {
       name: "auto-loading heuristics",
-      description: "<strong>delay</strong> between your shots is 15% <strong>shorter</strong>",
+      description: "your <strong>delay</strong> after firing is 15% <strong>shorter</strong>",
       have: false, //1
       effect: () => { //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
         b.modFireRate = 0.85
@@ -123,11 +123,11 @@ const b = {
       }
     },
     {
-      name: "field siphon",
+      name: "energy transfer",
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
       have: false, //8
       effect: () => { //good with laser, and all fields
-        b.modEnergySiphon = 0.15;
+        b.modEnergySiphon = 0.2;
       }
     },
     {
@@ -135,7 +135,7 @@ const b = {
       description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
       have: false, //9
       effect: () => { //good with guns that overkill: one shot, grenade
-        b.modHealthDrain = 0.01;
+        b.modHealthDrain = 0.015;
       }
     },
     {
@@ -192,7 +192,7 @@ const b = {
     },
     {
       name: "fracture analysis",
-      description: "<strong>6x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>enemies aware of you have a health bar</em>",
+      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
       have: false, //16
       effect: () => { // good with high damage guns that strike from a distance: rail gun, drones, flechettes, spores, grenade, vacuum bomb
         b.modIsCrit = true;
@@ -223,7 +223,7 @@ const b = {
       }
     },
     {
-      name: "monogamy",
+      name: "entanglement",
       description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br><em>scales by <strong>7%</strong> for each gun in your inventory</em>",
       have: false, //20
       effect: () => { // good with long term planning
@@ -251,7 +251,7 @@ const b = {
       }
     } else {
       if (!b.guns[gun].have) b.inventory.push(gun);
-      b.activeGun = gun;
+      if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
       b.guns[gun].have = true;
       b.guns[gun].ammo = b.guns[gun].ammoPack * ammoPacks;
     }
@@ -705,20 +705,20 @@ const b = {
     },
     {
       name: "rail gun", //1
-      description: "magnetically launch a dense rod<br><strong>hold left mouse</strong> to charge and <strong>repel</strong> enemies",
+      description: "electro-magnetically launch a dense rod<br><strong>hold</strong> left mouse to charge <strong>release</strong> to fire", //and <strong>repel</strong> enemies
       ammo: 0,
-      ammoPack: 11,
+      ammoPack: 7,
       have: false,
       isStarterGun: false,
       fire() {
         const me = bullet.length;
-        bullet[me] = Bodies.rectangle(0, 0, 0.012 * b.modBulletSize, 0.0022 * b.modBulletSize, {
-          density: 0.002, //0.001 is normal
+        bullet[me] = Bodies.rectangle(0, 0, 0.012 * b.modBulletSize, 0.0025 * b.modBulletSize, {
+          density: 0.01, //0.001 is normal
           //frictionAir: 0.01,			//restitution: 0,
           // angle: 0,
           // friction: 0.5,
           frictionAir: 0,
-          dmg: 3 + b.modExtraDmg, //damage done in addition to the damage from momentum
+          dmg: b.modExtraDmg, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000000,
@@ -735,7 +735,7 @@ const b = {
         bullet[me].charge = 0;
         bullet[me].do = function () {
           if (this.isCharging) {
-            if ((!game.mouseDown && this.charge > 0.5)) { //fire on mouse release
+            if ((!game.mouseDown && this.charge > 0.4)) { //fire on mouse release
               this.isCharging = false
               mech.fireCDcycle = mech.cycle + 2; // set fire cool down
               Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
@@ -746,7 +746,7 @@ const b = {
                 y: mech.pos.y
               })
               Matter.Body.setAngle(this, mech.angle)
-              const speed = 85
+              const speed = 90
               Matter.Body.setVelocity(this, {
                 x: mech.Vx / 2 + speed * this.charge * Math.cos(mech.angle),
                 y: mech.Vy / 2 + speed * this.charge * Math.sin(mech.angle)
@@ -758,24 +758,36 @@ const b = {
               player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
 
               //push away blocks when firing
-              const RANGE = 450 * this.charge
+              let range = 450 * this.charge
               for (let i = 0, len = body.length; i < len; ++i) {
                 const SUB = Matter.Vector.sub(body[i].position, mech.pos)
                 const DISTANCE = Matter.Vector.magnitude(SUB)
 
-                if (DISTANCE < RANGE) {
-                  const DEPTH = Math.max(RANGE - DISTANCE, 100)
+                if (DISTANCE < range) {
+                  const DEPTH = Math.max(range - DISTANCE, 100)
                   const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.005 * Math.sqrt(DEPTH) * Math.sqrt(body[i].mass))
-                  body[i].force.x += FORCE.x
+                  body[i].force.x += FORCE.x;
                   body[i].force.y += FORCE.y - body[i].mass * (game.g * 1.5); //kick up a bit to give them some arc
                 }
               }
+              for (let i = 0, len = mob.length; i < len; ++i) {
+                const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
+                const DISTANCE = Matter.Vector.magnitude(SUB)
+
+                if (DISTANCE < range) {
+                  const DEPTH = Math.max(range - DISTANCE, 100)
+                  const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.005 * Math.sqrt(DEPTH) * Math.sqrt(mob[i].mass))
+                  mob[i].force.x += 1.5 * FORCE.x;
+                  mob[i].force.y += 1.5 * FORCE.y;
+                }
+              }
               //push mobs around player when firing
+              // range = 600 * this.charge
               // for (let i = 0, len = mob.length; i < len; ++i) {
               //   const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
               //   const DISTANCE = Matter.Vector.magnitude(SUB)
-              //   if (DISTANCE < RANGE) {
-              //     const DEPTH = RANGE - DISTANCE
+              //   if (DISTANCE < range) {
+              //     const DEPTH = range - DISTANCE
               //     const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.00000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
               //     mob[i].force.x += FORCE.x
               //     mob[i].force.y += FORCE.y
@@ -786,107 +798,109 @@ const b = {
               if (mech.crouch) {
                 this.charge = this.charge * 0.97 + 0.03 // this.charge converges to 1
               } else {
-                this.charge = this.charge * 0.98 + 0.02 // this.charge converges to 1
+                this.charge = this.charge * 0.987 + 0.013 // this.charge converges to 1
               }
 
               //gently push away mobs while charging
-              const RANGE = 270 * this.charge
-              for (let i = 0, len = mob.length; i < len; ++i) {
-                const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
-                const DISTANCE = Matter.Vector.magnitude(SUB)
-                // if (DISTANCE < RANGE) {
-                //   Matter.Body.setVelocity(mob[i], Matter.Vector.rotate(mob[i].velocity, 0.1))
-                // }
-                // const DRAIN = 0.0002  //&& mech.fieldMeter > DRAIN
-                if (DISTANCE < RANGE) {
-                  // mech.fieldMeter -= DRAIN + mech.fieldRegen;
-                  const DEPTH = RANGE - DISTANCE
-                  const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.000000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
-                  mob[i].force.x += FORCE.x
-                  mob[i].force.y += FORCE.y
-                }
-              }
-
-              // //draw laser targeting
-              // let best;
-              // let range = 3000
-              // const dir = mech.angle
-              // const path = [{
-              //     x: mech.pos.x + 20 * Math.cos(dir),
-              //     y: mech.pos.y + 20 * Math.sin(dir)
-              //   },
-              //   {
-              //     x: mech.pos.x + range * Math.cos(dir),
-              //     y: mech.pos.y + range * Math.sin(dir)
+              // const RANGE = 270 * this.charge
+              // for (let i = 0, len = mob.length; i < len; ++i) {
+              //   const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
+              //   const DISTANCE = Matter.Vector.magnitude(SUB)
+              //   // if (DISTANCE < RANGE) {
+              //   //   Matter.Body.setVelocity(mob[i], Matter.Vector.rotate(mob[i].velocity, 0.1))
+              //   // }
+              //   // const DRAIN = 0.0002  //&& mech.fieldMeter > DRAIN
+              //   if (DISTANCE < RANGE) {
+              //     // mech.fieldMeter -= DRAIN + mech.fieldRegen;
+              //     const DEPTH = RANGE - DISTANCE
+              //     const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.000000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
+              //     mob[i].force.x += FORCE.x
+              //     mob[i].force.y += FORCE.y
               //   }
-              // ];
-              // const vertexCollision = function (v1, v1End, domain) {
-              //   for (let i = 0; i < domain.length; ++i) {
-              //     let vertices = domain[i].vertices;
-              //     const len = vertices.length - 1;
-              //     for (let j = 0; j < len; j++) {
-              //       results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-              //       if (results.onLine1 && results.onLine2) {
-              //         const dx = v1.x - results.x;
-              //         const dy = v1.y - results.y;
-              //         const dist2 = dx * dx + dy * dy;
-              //         if (dist2 < best.dist2) {
-              //           best = {
-              //             x: results.x,
-              //             y: results.y,
-              //             dist2: dist2,
-              //             who: domain[i],
-              //             v1: vertices[j],
-              //             v2: vertices[j + 1]
-              //           };
-              //         }
-              //       }
-              //     }
-              //     results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-              //     if (results.onLine1 && results.onLine2) {
-              //       const dx = v1.x - results.x;
-              //       const dy = v1.y - results.y;
-              //       const dist2 = dx * dx + dy * dy;
-              //       if (dist2 < best.dist2) {
-              //         best = {
-              //           x: results.x,
-              //           y: results.y,
-              //           dist2: dist2,
-              //           who: domain[i],
-              //           v1: vertices[0],
-              //           v2: vertices[len]
-              //         };
-              //       }
-              //     }
-              //   }
-              // };
-
-              // //check for collisions
-              // best = {
-              //   x: null,
-              //   y: null,
-              //   dist2: Infinity,
-              //   who: null,
-              //   v1: null,
-              //   v2: null
-              // };
-              // vertexCollision(path[0], path[1], mob);
-              // vertexCollision(path[0], path[1], map);
-              // vertexCollision(path[0], path[1], body);
-              // if (best.dist2 != Infinity) { //if hitting something
-              //   path[path.length - 1] = {
-              //     x: best.x,
-              //     y: best.y
-              //   };
               // }
 
-              // //draw laser beam
-              // ctx.beginPath();
-              // ctx.moveTo(path[0].x, path[0].y);
-              // ctx.lineTo(path[1].x, path[1].y);
-              // ctx.strokeStyle = `rgba(50,0,100,0.1)`;
-              // ctx.lineWidth = this.charge * 3
-              // ctx.stroke();
+              //draw laser targeting
+              let best;
+              let range = 3000
+              const dir = mech.angle
+              const path = [{
+                  x: mech.pos.x + 20 * Math.cos(dir),
+                  y: mech.pos.y + 20 * Math.sin(dir)
+                },
+                {
+                  x: mech.pos.x + range * Math.cos(dir),
+                  y: mech.pos.y + range * Math.sin(dir)
+                }
+              ];
+              const vertexCollision = function (v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                  let vertices = domain[i].vertices;
+                  const len = vertices.length - 1;
+                  for (let j = 0; j < len; j++) {
+                    results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                    if (results.onLine1 && results.onLine2) {
+                      const dx = v1.x - results.x;
+                      const dy = v1.y - results.y;
+                      const dist2 = dx * dx + dy * dy;
+                      if (dist2 < best.dist2) {
+                        best = {
+                          x: results.x,
+                          y: results.y,
+                          dist2: dist2,
+                          who: domain[i],
+                          v1: vertices[j],
+                          v2: vertices[j + 1]
+                        };
+                      }
+                    }
+                  }
+                  results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                  if (results.onLine1 && results.onLine2) {
+                    const dx = v1.x - results.x;
+                    const dy = v1.y - results.y;
+                    const dist2 = dx * dx + dy * dy;
+                    if (dist2 < best.dist2) {
+                      best = {
+                        x: results.x,
+                        y: results.y,
+                        dist2: dist2,
+                        who: domain[i],
+                        v1: vertices[0],
+                        v2: vertices[len]
+                      };
+                    }
+                  }
+                }
+              };
+
+              //check for collisions
+              best = {
+                x: null,
+                y: null,
+                dist2: Infinity,
+                who: null,
+                v1: null,
+                v2: null
+              };
+              vertexCollision(path[0], path[1], mob);
+              vertexCollision(path[0], path[1], map);
+              vertexCollision(path[0], path[1], body);
+              if (best.dist2 != Infinity) { //if hitting something
+                path[path.length - 1] = {
+                  x: best.x,
+                  y: best.y
+                };
+              }
+
+              //draw laser beam
+              ctx.beginPath();
+              ctx.moveTo(path[0].x, path[0].y);
+              ctx.lineTo(path[1].x, path[1].y);
+              ctx.strokeStyle = `rgba(100,0,180,0.7)`;
+              ctx.lineWidth = this.charge * 1
+              ctx.setLineDash([10, 20]);
+              ctx.stroke();
+              ctx.setLineDash([0, 0]);
 
               //draw magnetic field
               const X = mech.pos.x
