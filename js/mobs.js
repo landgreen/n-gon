@@ -231,22 +231,25 @@ const mobs = {
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange) {
             //if (Math.random()>0.2 && this.seePlayer.yes && this.distanceToPlayer2()<800000) {
-            if (!b.isModAoEImmunity) {
+            if (b.isModTempResist) {
+              mech.damage(0.00006 * game.dmgScale);
+            } else {
               mech.damage(0.0003 * game.dmgScale);
-              if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.005
-              ctx.beginPath();
-              ctx.moveTo(this.position.x, this.position.y);
-              ctx.lineTo(mech.pos.x, mech.pos.y);
-              ctx.lineTo(mech.pos.x + (Math.random() - 0.5) * 3000, mech.pos.y + (Math.random() - 0.5) * 3000);
-              ctx.lineWidth = 2;
-              ctx.strokeStyle = "rgb(255,0,170)";
-              ctx.stroke();
-
-              ctx.beginPath();
-              ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
-              ctx.fillStyle = "rgba(255,0,170,0.15)";
-              ctx.fill();
             }
+            if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.004
+            ctx.beginPath();
+            ctx.moveTo(this.position.x, this.position.y);
+            ctx.lineTo(mech.pos.x, mech.pos.y);
+            ctx.lineTo(mech.pos.x + (Math.random() - 0.5) * 3000, mech.pos.y + (Math.random() - 0.5) * 3000);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "rgb(255,0,170)";
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255,0,170,0.15)";
+            ctx.fill();
+
           }
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);
@@ -320,7 +323,12 @@ const mobs = {
           vertexCollision(this.position, look, [player]);
           // hitting player
           if (best.who === player) {
-            dmg = 0.004 * game.dmgScale;
+            if (b.isModTempResist) {
+              dmg = 0.0008 * game.dmgScale;
+            } else {
+              dmg = 0.004 * game.dmgScale;
+            }
+
             mech.damage(dmg);
             //draw damage
             ctx.fillStyle = color;

@@ -16,7 +16,7 @@ const level = {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns(1)
       // mech.fieldUpgrades[2].effect();
-      // b.giveMod(13)
+      // b.giveMod(5)
       // spawn.pickList = ["ghoster", "ghoster"]
 
       this.intro(); //starting level
@@ -50,6 +50,7 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.dmgScale -= 0.2; //damage done by mobs increases each level
+      if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.95; //damage done by player decreases each level
       game.accelScale /= 1.05 //mob acceleration increases each level
       game.lookFreqScale /= 0.95 //mob cycles between looks decreases each level
@@ -684,7 +685,10 @@ const level = {
     spawn.mapRect(4700, -2910, 100, 510);
     spawn.mapRect(3700, -2600, 300, 50);
     spawn.mapRect(4100, -2900, 900, 50);
-    spawn.mapRect(3450, -2300, 1650, 100);
+    spawn.mapRect(3450, -2300, 750, 100);
+    spawn.mapRect(4300, -2300, 750, 100);
+    spawn.mapRect(4150, -1600, 200, 25);
+    spawn.mapRect(4150, -700, 200, 25);
     //exit room on top of tower
     spawn.mapRect(3700, -3700, 600, 50);
     spawn.mapRect(3700, -3700, 50, 500);

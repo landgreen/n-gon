@@ -34,10 +34,10 @@ function playerOnGroundCheck(event) {
     let pair = pairs[i];
     if (pair.bodyA === jumpSensor) {
       mech.standingOn = pair.bodyB; //keeping track to correctly provide recoil on jump
-      enter();
+      if (mech.standingOn.alive !== true) enter();
     } else if (pair.bodyB === jumpSensor) {
       mech.standingOn = pair.bodyA; //keeping track to correctly provide recoil on jump
-      enter();
+      if (mech.standingOn.alive !== true) enter();
     }
   }
   mech.numTouching = 0;
