@@ -14,10 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(1)
+      b.giveGuns(14)
       // mech.fieldUpgrades[2].effect();
       // b.giveMod(5)
-      // spawn.pickList = ["ghoster", "ghoster"]
 
       this.intro(); //starting level
       // this.testingMap();
@@ -29,6 +28,7 @@ const level = {
       // this.office();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+      // spawn.pickList = ["focuser", "focuser"]
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
       level.levelAnnounce();
     }
@@ -106,26 +106,6 @@ const level = {
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
-    // spawn.bodyRect(-145, -150, 60, 50);
-    // spawn.bodyRect(-140, -200, 50, 50);
-    // spawn.bodyRect(-95, -50, 40, 50);
-    // spawn.bodyRect(-90, -100, 60, 50);
-    // spawn.bodyRect(300, -150, 140, 50);
-    // spawn.bodyRect(300, -150, 30, 30);
-    // spawn.bodyRect(300, -150, 20, 20);
-    // spawn.bodyRect(300, -150, 40, 100);
-    // spawn.bodyRect(300, -150, 40, 90);
-    // spawn.bodyRect(300, -150, 30, 60);
-    // spawn.bodyRect(300, -150, 40, 70);
-    // spawn.bodyRect(300, -150, 40, 60);
-    // spawn.bodyRect(300, -150, 20, 20);
-    // spawn.bodyRect(500, -150, 140, 110);
-    // spawn.bodyRect(600, -150, 140, 100);
-    // spawn.bodyRect(400, -150, 140, 160);
-    // spawn.bodyRect(500, -150, 110, 110);
-    // powerUps.spawn(340, -400, "heal", false);
-    // powerUps.spawn(370, -400, "gun", false);
-    // powerUps.spawn(400, -400, "field", false, 2);
     // powerUps.spawn(420, -400, "ammo", false);
     powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
@@ -342,10 +322,12 @@ const level = {
     // powerUps.spawn(2050, -150, "field", false); //starting gun
     powerUps.spawn(2300, -150, "gun", false); //starting gun
     if (game.isEasyMode) {
-      powerUps.spawn(2050, -150, "mod", false); //starting gun
-      powerUps.spawn(2050, -150, "mod", false); //starting gun
+      // powerUps.spawn(2050, -150, "mod", false); //starting gun
+      // powerUps.spawn(2050, -150, "mod", false); //starting gun
+      // powerUps.spawn(-100, -150, "ammo", false); //starting gun
       powerUps.spawn(-100, 0, "heal", false); //starting gun
     }
+
     spawn.wireFoot();
     spawn.wireFootLeft();
     spawn.wireKnee();

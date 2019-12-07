@@ -157,7 +157,7 @@ const powerUps = {
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.004 * (7 - b.modCount)) {
+    if (Math.random() < 0.0035 * (7 - b.modCount)) {
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod");
       return;
@@ -172,13 +172,13 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.3) {
+    } else if (Math.random() < 0.27) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.3) {
+    } else if (Math.random() < 0.27) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
-    } else if (Math.random() < 0.3) {
+    } else if (Math.random() < 0.27) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun")
     } else if (mech.health < 0.6) {

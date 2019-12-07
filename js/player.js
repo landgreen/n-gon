@@ -738,8 +738,8 @@ const mech = {
   },
   throw () {
     if ((keys[32] || game.mouseDownRight)) {
-      if (this.fieldMeter > 0.0008) {
-        this.fieldMeter -= 0.0008;
+      if (this.fieldMeter > 0.0007) {
+        this.fieldMeter -= 0.0007;
         this.throwCharge += this.throwChargeRate;;
         //draw charge
         const x = mech.pos.x + 15 * Math.cos(this.angle);
