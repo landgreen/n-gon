@@ -1687,10 +1687,9 @@ const b = {
           restitution: 0.8,
           dmg: b.modExtraDmg, // 0.14   //damage done in addition to the damage from momentum
           minDmgSpeed: 2,
-          lookFrequency: 47 + Math.floor(37 * Math.random()),
-          range: 450 + Math.floor(200 * Math.random()),
+          lookFrequency: 37 + Math.floor(27 * Math.random()),
+          range: 500 + Math.floor(200 * Math.random()),
           endCycle: Infinity,
-          modulus: Math.floor(2 * Math.random()), //offsets the modulus so the bullets don't all fire at the same time
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -1717,50 +1716,49 @@ const b = {
               }
             }
 
-            if (!((game.cycle + this.modulus) % 2)) {
-              const FIELD_DRAIN = 0.006
-              if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > FIELD_DRAIN) { //hit target with laser
-                mech.fieldMeter -= FIELD_DRAIN
+            const FIELD_DRAIN = 0.001
+            if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > FIELD_DRAIN) { //hit target with laser
+              mech.fieldMeter -= FIELD_DRAIN
 
-                //make sure you can still see target
-                const TARGET_VECTOR = Matter.Vector.sub(this.vertices[0], this.lockedOn.position)
-                const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
-                if (DIST - this.lockedOn.radius < this.range + 200 &&
-                  Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
-                  Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
-                  //find the closest vertex
-                  let bestVertexDistance = Infinity
-                  let bestVertex = null
-                  for (let i = 0; i < this.lockedOn.vertices.length; i++) {
-                    const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.vertices[0], this.lockedOn.vertices[i]));
-                    if (dist < bestVertexDistance) {
-                      bestVertex = i
-                      bestVertexDistance = dist
-                    }
+              //make sure you can still see target
+              const TARGET_VECTOR = Matter.Vector.sub(this.vertices[0], this.lockedOn.position)
+              const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+              if (DIST - this.lockedOn.radius < this.range + 150 &&
+                Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
+                Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
+                //find the closest vertex
+                let bestVertexDistance = Infinity
+                let bestVertex = null
+                for (let i = 0; i < this.lockedOn.vertices.length; i++) {
+                  const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.vertices[0], this.lockedOn.vertices[i]));
+                  if (dist < bestVertexDistance) {
+                    bestVertex = i
+                    bestVertexDistance = dist
                   }
-                  const dmg = b.dmgScale * 0.10;
-                  this.lockedOn.damage(dmg);
-                  this.lockedOn.locatePlayer();
-
-                  //draw laser
-                  ctx.beginPath();
-                  ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
-                  ctx.lineTo(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y);
-                  ctx.strokeStyle = "#f00";
-                  ctx.lineWidth = "2"
-                  ctx.lineDashOffset = 300 * Math.random()
-                  ctx.setLineDash([50 + 100 * Math.random(), 100 * Math.random()]);
-                  ctx.stroke();
-                  ctx.setLineDash([0, 0]);
-                  ctx.beginPath();
-                  ctx.arc(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
-                  ctx.fillStyle = "#f00"
-                  ctx.fill();
                 }
+                const dmg = b.dmgScale * 0.03;
+                this.lockedOn.damage(dmg);
+                this.lockedOn.locatePlayer();
+
+                //draw laser
+                ctx.beginPath();
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                ctx.lineTo(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y);
+                ctx.strokeStyle = "rgb(255,0,40)";
+                ctx.lineWidth = "2"
+                ctx.lineDashOffset = 300 * Math.random()
+                ctx.setLineDash([50 + 100 * Math.random(), 100 * Math.random()]);
+                ctx.stroke();
+                ctx.setLineDash([0, 0]);
+                ctx.beginPath();
+                ctx.arc(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
+                ctx.fillStyle = "rgba(255,0,40,0.7)" //"#f00"
+                ctx.fill();
               }
             }
+
             const distanceToPlayer = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mech.pos))
-            if (distanceToPlayer > this.range * 0.25) { //if far away move towards player
+            if (distanceToPlayer > this.range * 0.2) { //if far away move towards player
               this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(mech.pos, this.position)), this.mass * 0.002)
               this.frictionAir = 0.02
             } else { //close to player

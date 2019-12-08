@@ -130,7 +130,7 @@ const spawn = {
     //easy mob for on level 1
     mobs.spawn(x, y, 8, radius, "#9ccdc6");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.00055 * game.accelScale;
+    me.accelMag = 0.0005 * game.accelScale;
     me.memory = 60;
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
 
@@ -141,7 +141,6 @@ const spawn = {
     };
   },
   healer(x, y, radius = 20) {
-    //easy mob for on level 1
     mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
     let me = mob[mob.length - 1];
     me.frictionAir = 0.02;
