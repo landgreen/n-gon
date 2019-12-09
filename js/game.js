@@ -201,6 +201,7 @@ const game = {
     }
   },
   switchGun() {
+    if (b.modNoAmmo) b.modNoAmmo = 1 //this prevents hacking the mod by switching guns
     b.activeGun = b.inventory[b.inventoryGun];
     game.updateGunHUD();
     game.boldActiveGunHUD();

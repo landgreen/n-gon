@@ -225,11 +225,34 @@ const mobs = {
         // ctx.stroke();
         // return targetPos;
       },
+
+      hacked() { //set this.hackedTarget variable before running this method
+        //find a new target
+        if (!(game.cycle % this.seePlayerFreq)) {
+          this.hackedTarget = null
+          for (let i = 0, len = mob.length; i < len; i++) {
+            if (mob[i] !== this) {
+              // const DIST = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[j]));
+              if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                this.hackedTarget = mob[i]
+              }
+            }
+          }
+        }
+
+        //acceleration towards targets
+        if (this.hackedTarget) {
+          this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
+        }
+
+      },
+
       laserBeam() {
         if (game.cycle % 7 && this.seePlayer.yes) {
           ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
           // ctx.lineDashOffset = 6*(game.cycle % 215);
-          if (this.distanceToPlayer() < this.laserRange) {
+          if (this.distanceToPlayer() < this.laserRange && !mech.isStealth) {
             //if (Math.random()>0.2 && this.seePlayer.yes && this.distanceToPlayer2()<800000) {
             if (b.isModTempResist) {
               mech.damage(0.00006 * game.dmgScale);
@@ -320,7 +343,7 @@ const mobs = {
           };
           vertexCollision(this.position, look, map);
           vertexCollision(this.position, look, body);
-          vertexCollision(this.position, look, [player]);
+          if (!mech.isStealth) vertexCollision(this.position, look, [player]);
           // hitting player
           if (best.who === player) {
             if (b.isModTempResist) {

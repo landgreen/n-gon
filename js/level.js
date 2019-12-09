@@ -15,8 +15,8 @@ const level = {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns(14)
-      // mech.fieldUpgrades[2].effect();
-      // b.giveMod(5)
+      // mech.fieldUpgrades[7].effect();
+      // b.giveMod(2)
 
       this.intro(); //starting level
       // this.testingMap();
@@ -107,11 +107,11 @@ const level = {
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
     // powerUps.spawn(420, -400, "ammo", false);
-    powerUps.spawn(450, -400, "mod", false, 6);
+    // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.spawner(800, -1150);
-    spawn.groupBoss(-600, -550);
+    spawn.spinner(800, -1150);
+    // spawn.groupBoss(-600, -550);
     // spawn.hopper(800, -150);
     // spawn.beamer(800, -150);
     // spawn.grower(800, -250);

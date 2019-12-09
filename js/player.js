@@ -517,6 +517,10 @@ const mech = {
     powerUp[i].effect();
     Matter.World.remove(engine.world, powerUp[i]);
     powerUp.splice(i, 1);
+    if (b.isModMassEnergy) {
+      mech.fieldMeter = 1;
+      mech.addHealth(0.03);
+    }
   },
   drawLeg(stroke) {
     // if (game.mouseInGame.x > this.pos.x) {
@@ -1512,5 +1516,75 @@ const mech = {
         }
       }
     },
+    // {
+    //   name: "code injection field",
+    //   description: "capture an enemy in your field for 3 seconds<br>rewrite thier behavior to target your enemies",
+    //   effect: () => {
+    //     mech.fieldMode = 7;
+    //     mech.fieldText();
+    //     mech.setHoldDefaults();
+    //     mech.hackProgress = 0;
+    //     // mech.grabRange = 230
+    //     mech.hold = function () {
+    //       mech.isStealth = false //isStealth is checked in mob foundPlayer()
+    //       player.collisionFilter.mask = 0x010011 //0x010011 is normal
+    //       if (mech.isHolding) {
+    //         mech.hackProgress = 0
+    //         mech.drawHold(mech.holdingTarget);
+    //         mech.holding();
+    //         mech.throw();
+    //       } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
+    //         const DRAIN = 0.0005
+    //         if (mech.fieldMeter > DRAIN) {
+    //           mech.fieldMeter -= DRAIN;
+
+    //           //try to hack a mob
+    //           for (let i = 0, len = mob.length; i < len; ++i) {
+    //             if (
+    //               Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < this.grabRange &&
+    //               this.lookingAt(mob[i]) &&
+    //               Matter.Query.ray(map, mob[i].position, this.pos).length === 0
+    //             ) {
+    //               if (mech.hackProgress > 180) { //hack the mob
+    //                 mech.fieldMeter = 0;
+    //                 mob[i].hackedTarget = null;
+    //                 mob[i].seePlayerFreq = Math.round((30 + 30 * Math.random()) * game.lookFreqScale)
+    //                 mob[i].do = function () {
+    //                   this.healthBar();
+    //                   this.hacked();
+    //                 }
+    //               } else { //hold the mob still
+    //                 mech.hackProgress++
+    //                 range = this.grabRange * 0.9
+    //                 Matter.Body.setPosition(mob[i], {
+    //                   x: mech.pos.x + range * Math.cos(mech.angle),
+    //                   y: mech.pos.y + range * Math.sin(mech.angle),
+    //                 });
+    //                 Matter.Body.setVelocity(mob[i], player.velocity);
+    //               }
+
+    //             }
+    //           }
+
+
+    //           mech.pushBodyFacing();
+    //           mech.drawField();
+    //           mech.grabPowerUp();
+    //           mech.lookForPickUp();
+    //         } else {
+    //           mech.hackProgress = 0
+    //           mech.fieldCDcycle = mech.cycle + 120;
+    //         }
+    //       } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+    //         mech.pickUp();
+    //         mech.hackProgress = 0
+    //       } else {
+    //         mech.hackProgress = 0
+    //         mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+    //       }
+    //       mech.drawFieldMeter()
+    //     }
+    //   }
+    // },
   ],
 };

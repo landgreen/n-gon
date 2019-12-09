@@ -307,12 +307,6 @@ em {
   letter-spacing: 1px;
 }
 
-.color-s {
-  color: #055;
-  font-weight: 900;
-  letter-spacing: 2px;
-}
-
 .faded {
   opacity: 0.7;
   font-size: 90%;
