@@ -187,8 +187,8 @@ document.getElementById("build-button").addEventListener("click", () => {
           </g>
         </svg>
       </div>
-      <div class="build-grid-module" style="font-size: 19px; line-height: 110%;">
-        Choose up to five power ups. Once you start, only health and ammo will drop, so pick carefully.
+      <div class="build-grid-module" style="font-size: 0.85em; line-height: 170%;">
+        Choose five power ups.<br>Click start to begin.
       </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')" ><div class="circle-grid field"></div> &nbsp; <strong style='font-size:1.3em;'>${mech.fieldUpgrades[i].name}</strong><br> ${mech.fieldUpgrades[i].description}</div>`

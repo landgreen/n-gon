@@ -102,7 +102,7 @@ const b = {
     },
     {
       name: "ceramic plating",
-      description: "protection from to high <strong>temperatures</strong><br>5x less <strong class='color-d'>damage</strong> from <strong class='color-e'>explosions</strong>, lasers",
+      description: "protection from to high <strong>temperatures</strong><br>5x less <strong class='color-d'>damage</strong> from <strong class='color-e'>explosions</strong> and lasers",
       have: false, //5
       effect: () => {
         b.isModTempResist = true; //good for guns with explosions
@@ -174,7 +174,7 @@ const b = {
     },
     {
       name: "Gauss rifle",
-      description: "<strong>launch blocks</strong> at much higher speeds<br>carry more massive blocks",
+      description: "<strong>launch blocks</strong> at much higher speeds<br>hold onto larger blocks even after getting hit",
       have: false, //14
       effect: () => { // good with guns that run out of ammo
         mech.throwChargeRate = 4;
@@ -398,7 +398,7 @@ const b = {
   },
   explode(me) {
     // typically explode is used for some bullets with .onEnd
-    const radius = bullet[me].explodeRad * b.modExplosionRadius
+    let radius = bullet[me].explodeRad * b.modExplosionRadius
     //add dmg to draw queue
     game.drawList.push({
       x: bullet[me].position.x,
@@ -482,7 +482,8 @@ const b = {
           knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 18);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
-          damageScale *= 0.8 //reduced damage for each additional explosion target 
+          radius *= 0.9 //reduced range for each additional explosion target
+          damageScale *= 0.9 //reduced damage for each additional explosion target 
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
           knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 35);
@@ -1222,7 +1223,7 @@ const b = {
       name: "flak", //8
       description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
       ammo: 0,
-      ammoPack: 20,
+      ammoPack: 22,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1265,7 +1266,7 @@ const b = {
       name: "grenades", //9
       description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
       ammo: 0,
-      ammoPack: 9,
+      ammoPack: 10,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1278,9 +1279,10 @@ const b = {
         bullet[me].totalCycles = 100;
         bullet[me].endCycle = game.cycle + Math.floor((mech.crouch ? 120 : 60) * b.isModBulletsLastLonger);
         bullet[me].restitution = 0.5;
-        bullet[me].explodeRad = 210;
+        bullet[me].explodeRad = 270;
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
+        Matter.Body.setDensity(bullet[me], 0.0002);
         bullet[me].onDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
         };
@@ -1311,6 +1313,7 @@ const b = {
         bullet[me].inertia = Infinity; //prevents rotation
         bullet[me].restitution = 0;
         bullet[me].friction = 1;
+        Matter.Body.setDensity(bullet[me], 0.0002);
 
         bullet[me].explodeRad = 380 + Math.floor(Math.random() * 60);
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
@@ -1724,9 +1727,8 @@ const b = {
               }
             }
 
-            const FIELD_DRAIN = 0.0016
-            if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > FIELD_DRAIN) { //hit target with laser
-              mech.fieldMeter -= FIELD_DRAIN
+            if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > 0.15) { //hit target with laser
+              mech.fieldMeter -= 0.0016
 
               //make sure you can still see target
               const DIST = Matter.Vector.magnitude(Matter.Vector.sub(this.vertices[0], this.lockedOn.position));

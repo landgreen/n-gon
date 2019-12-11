@@ -70,7 +70,7 @@ summary {
 
   display: none;
   /* display: grid; */
-  grid-template-columns: repeat(auto-fit, minmax(292px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-auto-rows: minmax(auto, auto);
   grid-gap: 15px;
 
