@@ -467,6 +467,7 @@ const game = {
   fpsInterval: 0, //set in startGame
   then: null,
   startGame() {
+    level.isBuildRun = false; //can get set back to true in buld.startBuildRun()
     game.onTitlePage = false;
     document.body.style.overflow = "hidden"
     document.getElementById("build-grid").style.display = "none"

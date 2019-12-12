@@ -184,7 +184,7 @@ const b = {
     },
     {
       name: "squirrel-cage rotor",
-      description: "your legs produce 20% more force<br><strong>jump</strong> higher and <strong>move</strong> faster",
+      description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>falling</strong> <strong class='color-d'>damage</strong>",
       have: false, //15
       effect: () => { // good with melee builds, content skipping builds
         b.modSquirrelFx = 1.2;

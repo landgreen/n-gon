@@ -204,7 +204,7 @@ const mech = {
         this.yOff = this.yOffWhen.jump;
         this.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
-        if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165) { //falling damage
+        if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
           mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
           let dmg = Math.sqrt(momentum - 165) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
@@ -872,28 +872,39 @@ const mech = {
     }
   },
   pushMass(who) {
-    const fieldBlockCost = Math.max(0.02, who.mass * 0.012) //0.012
-    if (this.fieldMeter > fieldBlockCost) {
+    const speed = Matter.Vector.magnitude(Matter.Vector.sub(who.velocity, player.velocity))
+    const fieldBlockCost = 0.03 + Math.sqrt(who.mass) * speed * 0.003 //0.012
+    if (this.fieldMeter > fieldBlockCost * 0.6) { //shield needs at least some of the cost to block
       this.fieldMeter -= fieldBlockCost * this.fieldShieldingScale;
       if (this.fieldMeter < 0) this.fieldMeter = 0;
       this.drawHold(who);
+      mech.fieldCDcycle = mech.cycle + 10;
       //knock backs
-      const angle = Math.atan2(player.position.y - who.position.y, player.position.x - who.position.x);
-      const mass = Math.min(Math.sqrt(who.mass), 4);
+      const unit = Matter.Vector.normalise(Matter.Vector.sub(player.position, who.position))
+      const mass = Math.min(Math.sqrt(who.mass), 3.5); //large masses above 4*4 can start to overcome the push back
+      console.log(Math.sqrt(who.mass), mass)
       Matter.Body.setVelocity(who, {
-        x: player.velocity.x - (15 * Math.cos(angle)) / mass,
-        y: player.velocity.y - (15 * Math.sin(angle)) / mass
+        x: player.velocity.x - (15 * unit.x) / mass,
+        y: player.velocity.y - (15 * unit.y) / mass
       });
-      Matter.Body.setVelocity(player, {
-        x: player.velocity.x + 5 * Math.cos(angle) * mass,
-        y: player.velocity.y + 5 * Math.sin(angle) * mass
-      });
+      if (mech.crouch) {
+        Matter.Body.setVelocity(player, {
+          x: player.velocity.x + 0.4 * unit.x * mass,
+          y: player.velocity.y + 0.4 * unit.y * mass
+        });
+      } else {
+        Matter.Body.setVelocity(player, {
+          x: player.velocity.x + 5 * unit.x * mass,
+          y: player.velocity.y + 5 * unit.y * mass
+        });
+      }
+
     }
   },
   pushMobsFacing() { // find mobs in range and in direction looking
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
-        Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < this.grabRange &&
+        Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, player.position)) < this.grabRange &&
         this.lookingAt(mob[i]) &&
         Matter.Query.ray(map, mob[i].position, this.pos).length === 0
       ) {
@@ -1046,7 +1057,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throw();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1)) { //not hold but field button is pressed
+          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.drawField();
             mech.grabPowerUp();
             mech.pushMobsFacing();
@@ -1413,7 +1424,7 @@ const mech = {
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
-          if (mech.fieldMeter > 0.1) {
+          if (mech.fieldMeter > 0.1 && mech.fieldCDcycle < mech.cycle) {
             const grabRange1 = 90 + 60 * Math.sin(mech.cycle / 23)
             const grabRange2 = 85 + 70 * Math.sin(mech.cycle / 37)
             const grabRange3 = 80 + 80 * Math.sin(mech.cycle / 47)
@@ -1454,7 +1465,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throw();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1)) { //not hold but field button is pressed
+          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.pushMobsFacing();
             mech.pushBodyFacing();
             mech.drawField();
