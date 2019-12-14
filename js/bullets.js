@@ -18,7 +18,7 @@ const b = {
   isModDroneOnDamage: null,
   modExtraDmg: null,
   annihilation: null,
-  fullHeal: null,
+  isModFullHeal: null,
   modSquirrelFx: null,
   modIsCrit: null,
   modMoreDrops: null,
@@ -53,6 +53,7 @@ const b = {
     mech.jumpForce = 0.38;
     mech.throwChargeRate = 2;
     mech.throwChargeMax = 50;
+    mech.maxHealth = 1;
     for (let i = 0; i < b.mods.length; i++) {
       b.mods[i].have = false;
     }
@@ -68,128 +69,11 @@ const b = {
       }
     },
     {
-      name: "auto-loading heuristics",
-      description: "your <strong>delay</strong> after firing is 15% <strong>shorter</strong>",
-      have: false, //1
-      effect: () => { //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
-        b.modFireRate = 0.85
-      }
-    },
-    {
-      name: "desublimated ammunition",
-      description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
-      have: false, //2
-      effect: () => { //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
-        b.modNoAmmo = 1
-      }
-    },
-    {
-      name: "Lorentzian topology",
-      description: "your <strong>bullets</strong> last 40% <strong>longer</strong>",
-      have: false, //3
-      effect: () => { //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
-        b.isModBulletsLastLonger = 1.40
-      }
-    },
-    {
-      name: "anti-matter cores",
-      description: "the <strong>radius</strong> of your <strong class='color-e'>explosions</strong> is doubled<br><strong style='opacity:0.3;'>be careful</strong>",
-      have: false, //4
-      effect: () => { //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
-        //testing at 1.3: grenade(+0.3), missiles, flak, M80
-        b.modExplosionRadius = 1.8; //good for guns with explosions
-      }
-    },
-    {
-      name: "ceramic plating",
-      description: "protection from to high <strong>temperatures</strong><br>5x less <strong class='color-d'>damage</strong> from <strong class='color-e'>explosions</strong> and lasers",
-      have: false, //5
-      effect: () => {
-        b.isModTempResist = true; //good for guns with explosions
-      }
-    },
-    {
-      name: "ablative synthesis",
-      description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after taking <strong class='color-d'>damage</strong>",
-      have: false, //6
-      effect: () => { //makes dangerous situations more survivable
-        b.isModDroneOnDamage = true;
-      }
-    },
-    {
-      name: "zoospore vector",
-      description: "enemies can discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out enemies",
-      have: false, //7
-      effect: () => { //good late game maybe?
-        b.modSpores = 0.20;
-      }
-    },
-    {
-      name: "energy transfer",
-      description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
-      have: false, //8
-      effect: () => { //good with laser, and all fields
-        b.modEnergySiphon = 0.2;
-      }
-    },
-    {
-      name: "entropy transfer",
-      description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
-      have: false, //9
-      effect: () => { //good with guns that overkill: one shot, grenade
-        b.modHealthDrain = 0.015;
-      }
-    },
-    {
-      name: "quantum immortality",
-      description: "after <strong>dying</strong>, continue in an <em>alternate reality</em><br>guns, ammo, and field are randomized",
-      have: false, //10
-      effect: () => {
-        b.modIsImmortal = true;
-      }
-    },
-    {
       name: "fluoroantimonic acid",
       description: "each bullet does extra chemical <strong class='color-d'>damage</strong><br>instant damage, unaffected by momentum",
       have: false, //11
       effect: () => { //good with guns that fire many bullets at low speeds, minigun, drones, junk-bots, shotgun, superballs, wavebeam
         b.modExtraDmg = 0.1
-      }
-    },
-    {
-      name: "annihilation",
-      description: "after <strong>touching</strong> enemies, they are annihilated<br><em>doesn't trigger health or energy transfer</em>",
-      have: false, //12
-      effect: () => { //good with mods that heal: superconductive healing, entropy transfer 
-        b.modAnnihilation = true
-      }
-    },
-    {
-      name: "recursive healing",
-      description: "<strong class='color-h'>healing</strong> power ups bring you to <strong>full health</strong>",
-      have: false, //13
-      effect: () => { // good with ablative synthesis, melee builds
-        b.isModFullHeal = true
-      }
-    },
-    {
-      name: "Gauss rifle",
-      description: "<strong>launch blocks</strong> at much higher speeds<br>hold onto larger blocks even after getting hit",
-      have: false, //14
-      effect: () => { // good with guns that run out of ammo
-        mech.throwChargeRate = 4;
-        mech.throwChargeMax = 150;
-        mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
-      }
-    },
-    {
-      name: "squirrel-cage rotor",
-      description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>falling</strong> <strong class='color-d'>damage</strong>",
-      have: false, //15
-      effect: () => { // good with melee builds, content skipping builds
-        b.modSquirrelFx = 1.2;
-        mech.Fx = 0.015 * b.modSquirrelFx;
-        mech.jumpForce = 0.38 * 1.1;
       }
     },
     {
@@ -217,6 +101,115 @@ const b = {
       }
     },
     {
+      name: "auto-loading heuristics",
+      description: "your <strong>delay</strong> after firing is 15% <strong>shorter</strong>",
+      have: false, //1
+      effect: () => { //good for guns with extra ammo: needles, M80, rapid fire, flak, super balls
+        b.modFireRate = 0.85
+      }
+    },
+    {
+      name: "desublimated ammunition",
+      description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
+      have: false, //2
+      effect: () => { //good with guns that have less ammo: one shot, grenades, missiles, super balls, spray
+        b.modNoAmmo = 1
+      }
+    },
+    {
+      name: "Lorentzian topology",
+      description: "your <strong>bullets</strong> last 40% <strong>longer</strong>",
+      have: false, //3
+      effect: () => { //good with: drones, super balls, spore, missiles, wave beam(range), rapid fire(range), flak(range)
+        b.isModBulletsLastLonger = 1.40
+      }
+    },
+    {
+      name: "zoospore vector",
+      description: "enemies can discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out enemies",
+      have: false, //7
+      effect: () => { //good late game maybe?
+        b.modSpores = 0.20;
+      }
+    },
+    {
+      name: "ablative synthesis",
+      description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after taking <strong class='color-d'>damage</strong>",
+      have: false, //6
+      effect: () => { //makes dangerous situations more survivable
+        b.isModDroneOnDamage = true;
+      }
+    },
+    {
+      name: "annihilation",
+      description: "after <strong>touching</strong> enemies, they are annihilated<br><em>doesn't trigger health or energy transfer</em>",
+      have: false, //12
+      effect: () => { //good with mods that heal: superconductive healing, entropy transfer 
+        b.modAnnihilation = true
+      }
+    },
+    {
+      name: "anti-matter cores",
+      description: "the <strong>radius</strong> of your <strong class='color-e'>explosions</strong> is doubled<br><strong style='opacity:0.3;'>be careful</strong>",
+      have: false, //4
+      effect: () => { //at 1.4 gives a flat 40% increase, and increased range,  balanced by limited guns and self damage
+        //testing at 1.3: grenade(+0.3), missiles, flak, M80
+        b.modExplosionRadius = 1.8; //good for guns with explosions
+      }
+    },
+    {
+      name: "ceramic plating",
+      description: "protection from to high <strong>temperatures</strong><br>5x less <strong class='color-d'>damage</strong> from <strong class='color-e'>explosions</strong> and lasers",
+      have: false, //5
+      effect: () => {
+        b.isModTempResist = true; //good for guns with explosions
+      }
+    },
+    {
+      name: "Gauss rifle",
+      description: "<strong>launch blocks</strong> at much higher speeds<br>hold onto larger blocks even after getting hit",
+      have: false, //14
+      effect: () => { // good with guns that run out of ammo
+        mech.throwChargeRate = 4;
+        mech.throwChargeMax = 150;
+        mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
+      }
+    },
+    {
+      name: "squirrel-cage rotor",
+      description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>falling</strong> <strong class='color-d'>damage</strong>",
+      have: false, //15
+      effect: () => { // good with melee builds, content skipping builds
+        b.modSquirrelFx = 1.2;
+        mech.Fx = 0.015 * b.modSquirrelFx;
+        mech.jumpForce = 0.38 * 1.1;
+      }
+    },
+    {
+      name: "energy transfer",
+      description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
+      have: false, //8
+      effect: () => { //good with laser, and all fields
+        b.modEnergySiphon = 0.2;
+      }
+    },
+    {
+      name: "entropy transfer",
+      description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
+      have: false, //9
+      effect: () => { //good with guns that overkill: one shot, grenade
+        b.modHealthDrain = 0.015;
+      }
+    },
+    {
+      name: "entanglement",
+      description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br><em>scales by <strong>7%</strong> for each gun in your inventory</em>",
+      have: false, //20
+      effect: () => { // good with laser-bots
+        b.isModMonogamy = true
+      }
+    },
+    {
       name: "Bayesian inference",
       description: "<strong>20%</strong> chance for double <strong>power ups</strong> to drop",
       have: false, //19
@@ -225,19 +218,35 @@ const b = {
       }
     },
     {
-      name: "entanglement",
-      description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br><em>scales by <strong>7%</strong> for each gun in your inventory</em>",
-      have: false, //20
-      effect: () => { // good with long term planning
-        b.isModMonogamy = true
-      }
-    },
-    {
       name: "mass-energy equivalence",
       description: "change the mass of <strong>power ups</strong> into <strong class='color-f'>energy</strong><br>power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +3%",
       have: false, //21
-      effect: () => { // good with long term planning
+      effect: () => {
         b.isModMassEnergy = true // used in mech.usePowerUp
+      }
+    },
+    {
+      name: "supersaturation",
+      description: "<strong class='color-h'>heal</strong> <strong>25%</strong> beyond your max health",
+      have: false, //22
+      effect: () => {
+        mech.maxHealth = 1.25
+      }
+    },
+    {
+      name: "recursive healing",
+      description: "<strong class='color-h'>healing</strong> power ups bring you to <strong>full health</strong>",
+      have: false, //13
+      effect: () => { // good with ablative synthesis, melee builds
+        b.isModFullHeal = true
+      }
+    },
+    {
+      name: "quantum immortality",
+      description: "after <strong>dying</strong>, continue in an <em>alternate reality</em><br>guns, ammo, and field are randomized",
+      have: false, //10
+      effect: () => {
+        b.modIsImmortal = true;
       }
     },
   ],
@@ -970,7 +979,8 @@ const b = {
           this.force.y += this.mass * 0.0005;
         };
       }
-    }, {
+    },
+    {
       name: "wave beam", //3
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
       ammo: 0,
@@ -979,11 +989,11 @@ const b = {
       isStarterGun: true,
       fire() {
         const me = bullet.length;
-        const DIR = mech.angle
+        const dir = mech.angle
         const SCALE = (mech.crouch ? 0.963 : 0.95)
         const wiggleMag = ((mech.flipLegs === 1) ? 1 : -1) * ((mech.crouch) ? 0.004 : 0.005)
-        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(DIR), mech.pos.y + 25 * Math.sin(DIR), 10 * b.modBulletSize, {
-          angle: DIR,
+        bullet[me] = Bodies.circle(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 10 * b.modBulletSize, {
+          angle: dir,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
           endCycle: game.cycle + Math.floor((mech.crouch ? 155 : 120) * b.isModBulletsLastLonger),
           inertia: Infinity,
@@ -1011,8 +1021,8 @@ const b = {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 8 : 4) * b.modFireRate); // cool down
         const SPEED = mech.crouch ? 5.2 : 4.5;
         Matter.Body.setVelocity(bullet[me], {
-          x: SPEED * Math.cos(DIR),
-          y: SPEED * Math.sin(DIR)
+          x: SPEED * Math.cos(dir),
+          y: SPEED * Math.sin(dir)
         });
         bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
         // if (mech.angle + Math.PI / 2 > 0) {
@@ -1083,7 +1093,7 @@ const b = {
       name: "fléchettes", //6
       description: "fire a flight of long range needles",
       ammo: 0,
-      ammoPack: 25,
+      ammoPack: 16,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1779,6 +1789,84 @@ const b = {
         })
         b.fireProps(mech.crouch ? 60 : 30, 15, dir, me); //cd , speed
         b.drawOneBullet(bullet[me].vertices);
+      }
+    },
+    {
+      name: "chronon", //15
+      description: "fire a bubble of null time<br>enemies are frozen for 5 seconds",
+      ammo: 0,
+      ammoPack: 80,
+      have: false,
+      isStarterGun: true,
+      fire() {
+        const me = bullet.length;
+        const dir = mech.angle
+        const RADIUS = 23 + 45 * Math.random()
+        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 0, RADIUS, {
+          density: 0.0001, //  0.1 normal density to keep damage consistent
+          frictionAir: 0,
+          restitution: 0.3,
+          angle: dir,
+          friction: 0,
+          frictionAir: 0,
+          dmg: 0.5 + b.modExtraDmg, //damage done in addition to the damage from momentum
+          classType: "bullet",
+          collisionFilter: {
+            category: 0x000100,
+            mask: 0x010011 //mask: 0x000101,  //for self collision
+          },
+          minDmgSpeed: 0,
+          endCycle: Infinity, //game.cycle + Math.floor(265 * b.isModBulletsLastLonger),
+          radius: RADIUS,
+          onDmg(who) {
+            this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
+            if (!who.isSleeping) {
+              const sleep = function (who) {
+                if (who) {
+                  who.storeVelocity = who.velocity
+                  who.storeAngularVelocity = who.angularVelocity
+                  Matter.Sleeping.set(who, true)
+                }
+              };
+              setTimeout(sleep, 1, who);
+
+              const awake = function (who) {
+                if (who) {
+                  Matter.Sleeping.set(who, false)
+                  if (who.storeVelocity) {
+                    Matter.Body.setVelocity(who, {
+                      x: who.storeVelocity.x,
+                      y: who.storeVelocity.y
+                    })
+                    Matter.Body.setAngularVelocity(who, who.storeAngularVelocity)
+                  }
+                }
+              };
+              setTimeout(awake, 5000, who);
+            }
+          },
+          onEnd() {},
+          do() {
+            //shrink
+            const SCALE = 0.994
+            Matter.Body.scale(this, SCALE, SCALE);
+            this.radius *= SCALE;
+            if (this.radius < 5) this.endCycle = 0;
+
+            ctx.beginPath()
+            ctx.arc(this.position.x, this.position.y, this.radius - 2, 0, 2 * Math.PI);
+            ctx.fillStyle = "#fff"
+            ctx.fill()
+          }
+        });
+        World.add(engine.world, bullet[me]); //add bullet to world
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 7) * b.modFireRate); // cool down
+        const SPEED = mech.crouch ? 9 : 5;
+        Matter.Body.setVelocity(bullet[me], {
+          x: mech.Vx / 2 + SPEED * Math.cos(dir),
+          y: mech.Vy / 2 + SPEED * Math.sin(dir)
+        });
+        bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
       }
     },
     // {

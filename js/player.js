@@ -406,6 +406,7 @@ const mech = {
     }
   },
   health: 0,
+  maxHealth: 1,
   drawHealth() {
     if (this.health < 1) {
       ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
@@ -431,7 +432,7 @@ const mech = {
   },
   addHealth(heal) {
     this.health += heal;
-    if (this.health > 1 || b.isModFullHeal) this.health = 1;
+    if (this.health > mech.maxHealth) this.health = mech.maxHealth;
     this.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
@@ -882,7 +883,6 @@ const mech = {
       //knock backs
       const unit = Matter.Vector.normalise(Matter.Vector.sub(player.position, who.position))
       const mass = Math.min(Math.sqrt(who.mass), 3.5); //large masses above 4*4 can start to overcome the push back
-      console.log(Math.sqrt(who.mass), mass)
       Matter.Body.setVelocity(who, {
         x: player.velocity.x - (15 * unit.x) / mass,
         y: player.velocity.y - (15 * unit.y) / mass

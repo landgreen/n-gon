@@ -600,7 +600,7 @@ const spawn = {
     // if (Math.random() < Math.min(0.2 + game.difficulty * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
       this.healthBar();
-      if (!mech.isBodiesAsleep) {
+      if (!this.isSleeping) {
         this.seePlayerByLookingAt();
         const dist2 = this.distanceToPlayer2();
         //laser Tracking
@@ -703,7 +703,7 @@ const spawn = {
       this.attraction();
       this.gravity();
       //draw
-      if (!mech.isBodiesAsleep) {
+      if (!this.isSleeping) {
         if (this.seePlayer.yes) {
           if (this.alpha < 1) this.alpha += 0.01;
         } else {

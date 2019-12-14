@@ -9,8 +9,8 @@ const powerUps = {
     },
     effect() {
       let heal = (this.size / 40) ** 2
-      if (b.fullHeal) heal = Infinity
-      heal = Math.min(1 - mech.health, heal)
+      heal = Math.min(mech.maxHealth - mech.health, heal)
+      if (b.isModFullHeal) heal = mech.maxHealth
       mech.addHealth(heal);
       if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
     }
