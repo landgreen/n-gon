@@ -99,7 +99,6 @@ const spawn = {
       this.gravity();
       if (this.seePlayer.recall) {
         this.seePlayerByDistAndLOS();
-        this.healthBar();
         this.attraction();
         //tether to other blocks
         ctx.beginPath();
@@ -135,7 +134,6 @@ const spawn = {
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
 
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       this.attraction();
     };
@@ -151,7 +149,6 @@ const spawn = {
   //   Matter.Body.setDensity(me, 0.003) // normal density is 0.001
 
   //   me.do = function () {
-  //     this.healthBar();
 
   //     if (!(game.cycle % this.lookFrequency)) {
   //       //slow self heal
@@ -237,7 +234,6 @@ const spawn = {
     me.memory = 50;
     if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
@@ -249,7 +245,6 @@ const spawn = {
     me.big = false; //required for grow
     me.accelMag = 0.00045 * game.accelScale;
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       this.attraction();
       this.grow();
@@ -299,7 +294,6 @@ const spawn = {
     };
     if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.searchSpring();
     };
@@ -319,7 +313,6 @@ const spawn = {
   //     this.zoomMode = 150;
   //   };
   //   me.do = function () {
-  //     this.healthBar();
   //     this.seePlayerByDistAndLOS();
   //     this.zoom();
   //     this.gravity();
@@ -336,7 +329,6 @@ const spawn = {
     me.randomHopFrequency = 50 + Math.floor(Math.random() * 1000);
     me.randomHopCD = game.cycle + me.randomHopFrequency;
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.seePlayerCheck();
       this.hop();
@@ -369,7 +361,6 @@ const spawn = {
     me.lookTorque = 0.0000014;
     me.restitution = 0;
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       //accelerate towards the player after a delay
       if (this.seePlayer.recall) {
@@ -450,7 +441,6 @@ const spawn = {
         ctx.fillStyle = "rgba(0,0,0,0.1)";
         ctx.fill();
 
-        this.healthBar();
         //when player is inside event horizon
         if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
           mech.damage(0.00015 * game.dmgScale);
@@ -560,7 +550,6 @@ const spawn = {
           ctx.fillStyle = "rgba(0,0,0,0.3)";
           ctx.fill();
         }
-        this.healthBar();
         this.curl(eventHorizon);
       }
     }
@@ -575,7 +564,6 @@ const spawn = {
     me.friction = 0;
     if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       this.attraction();
       this.repulsion();
@@ -599,7 +587,6 @@ const spawn = {
     };
     // if (Math.random() < Math.min(0.2 + game.difficulty * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
-      this.healthBar();
       if (!this.isSleeping) {
         this.seePlayerByLookingAt();
         const dist2 = this.distanceToPlayer2();
@@ -659,7 +646,6 @@ const spawn = {
       this.explode();
     };
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       this.attraction();
       this.laser();
@@ -678,7 +664,6 @@ const spawn = {
       this.cd = game.cycle + this.delay;
     };
     me.do = function () {
-      this.healthBar();
       this.seePlayerCheck();
       this.attraction();
       this.gravity();
@@ -696,6 +681,7 @@ const spawn = {
     // me.leaveBody = false;
     me.canTouchPlayer = false; //used in drawSneaker
     me.collisionFilter.mask = 0x010111; //can't touch player
+    me.showHealthBar = false;
     // me.memory = 420;
     me.do = function () {
 
@@ -747,6 +733,7 @@ const spawn = {
     me.canTouchPlayer = false; //used in drawGhost
     // me.leaveBody = false;
     me.collisionFilter.mask = 0x000100; //move through walls and player
+    me.showHealthBar = false;
     me.memory = 480;
     me.do = function () {
       //cap max speed
@@ -810,7 +797,6 @@ const spawn = {
   //     }
   //   };
   //   me.do = function () {
-  //     this.healthBar();
   //     this.seePlayerCheck();
   //     this.blink();
   //     //strike by expanding
@@ -855,7 +841,6 @@ const spawn = {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
-      this.healthBar();
       this.seePlayerCheckByDistance();
       this.hoverOverPlayer();
       this.bomb();
@@ -879,7 +864,6 @@ const spawn = {
     };
     if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       this.fire();
     };
@@ -906,7 +890,6 @@ const spawn = {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
-      this.healthBar();
       this.seePlayerByLookingAt();
       this.fire();
     };
@@ -926,6 +909,7 @@ const spawn = {
     me.restitution = 0.8;
     me.leaveBody = false;
     me.dropPowerUp = false;
+    me.showHealthBar = false;
     me.collisionFilter.category = 0x000010;
     me.collisionFilter.mask = 0x011101;
     me.do = function () {
@@ -950,7 +934,6 @@ const spawn = {
     };
     if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.5)) spawn.shield(me, x, y);
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
@@ -970,7 +953,6 @@ const spawn = {
     me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * game.lookFreqScale);
     me.frictionAir = 0.002;
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
@@ -985,7 +967,6 @@ const spawn = {
     };
     me.g = 0.0004; //required if using 'gravity'
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
@@ -1005,7 +986,6 @@ const spawn = {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
-      this.healthBar();
       this.seePlayerCheck();
       this.attraction();
       this.laserBeam();
@@ -1049,7 +1029,6 @@ const spawn = {
       this.removeCons(); //remove constraint
     };
     me.do = function () {
-      this.healthBar();
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
@@ -1076,6 +1055,7 @@ const spawn = {
       };
       me.leaveBody = false;
       me.dropPowerUp = false;
+      me.showHealthBar = false;
       //swap order of shield and mob, so that mob is behind shield graphically
       mob[mob.length - 1] = mob[mob.length - 2];
       mob[mob.length - 2] = me;
@@ -1105,6 +1085,7 @@ const spawn = {
     };
     me.leaveBody = false;
     me.dropPowerUp = false;
+    me.showHealthBar = false;
     mob[mob.length - 1] = mob[mob.length - 1 - nodes];
     mob[mob.length - 1 - nodes] = me;
     me.do = function () {};
@@ -1254,6 +1235,8 @@ const spawn = {
     me.frictionStatic = 1;
     me.friction = 1;
     me.frictionAir = 0.01;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
 
     me.do = function () {
       let wireX = -50;
@@ -1319,6 +1302,8 @@ const spawn = {
     me.frictionStatic = 1;
     me.friction = 1;
     me.frictionAir = 0.01;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
 
     me.do = function () {
       let wireX = -50 - 20;
@@ -1367,6 +1352,8 @@ const spawn = {
     me.frictionStatic = 1;
     me.friction = 1;
     me.frictionAir = 0.01;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
 
     me.do = function () {
       let wireX = -50 - 35;
@@ -1414,6 +1401,8 @@ const spawn = {
     // me.frictionStatic = 1;
     // me.friction = 1;
     me.frictionAir = 0.01;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
 
     me.do = function () {
       let wireX = -50 + 16;
@@ -1461,6 +1450,8 @@ const spawn = {
     // me.frictionStatic = 1;
     // me.friction = 1;
     me.frictionAir = 0.01;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
 
     me.do = function () {
       let wireX = -50 + 26;

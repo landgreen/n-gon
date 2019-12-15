@@ -43,8 +43,9 @@ const game = {
       mech.hold();
       level.drawFills();
       game.draw.drawMapPath();
-      b.draw();
       b.fire();
+      b.bulletActions();
+      mobs.healthBar();
       game.drawCircle();
       ctx.restore();
     }
@@ -415,6 +416,8 @@ const game = {
     b.activeGun = null;
     b.setModDefaults(); //remove mods
     game.updateModHUD();
+    mech.fieldEnergyMax = 1
+    mech.maxHealth = 1
     mech.fieldUpgrades[0].effect(); //set to default field
     game.paused = false;
     build.isShowingBuilds = false
@@ -873,7 +876,7 @@ const game = {
       for (let i = 0, len = body.length; i < len; ++i) {
         let vertices = body[i].vertices;
         ctx.moveTo(vertices[0].x, vertices[0].y);
-        for (let j = 1; j < vertices.length; j += 1) {
+        for (let j = 1; j < vertices.length; j++) {
           ctx.lineTo(vertices[j].x, vertices[j].y);
         }
         ctx.lineTo(vertices[0].x, vertices[0].y);
