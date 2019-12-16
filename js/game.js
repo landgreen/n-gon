@@ -425,6 +425,7 @@ const game = {
     game.fpsCap = game.fpsCapDefault;
     game.makeGunHUD();
     mech.drop();
+    mech.holdingTarget = null
     mech.addHealth(1);
     mech.alive = true;
     level.onLevel = 0;

@@ -1798,12 +1798,12 @@ const b = {
         const RADIUS = (6 + 16 * Math.random()) * b.modBulletSize
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 25, RADIUS, {
           angle: dir,
-          density: 0.000001, //  0.001 is normal density
+          density: 0.000005, //  0.001 is normal density
           inertia: Infinity,
-          frictionAir: 0,
+          frictionAir: 0.003,
           friction: 0.2,
           restitution: 0.2,
-          dmg: 0.04 + b.modExtraDmg, //damage done in addition to the damage from momentum
+          dmg: b.modExtraDmg, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -1822,17 +1822,14 @@ const b = {
           },
           onEnd() {},
           do() {
-            this.force.y += this.mass * 0.00005;
-
+            this.force.y += this.mass * 0.00006; //gravity
             //draw white circle
             ctx.beginPath()
             ctx.arc(this.position.x, this.position.y, this.radius * 0.97 - 1.6, 0, 2 * Math.PI);
             ctx.fillStyle = "#fff"
             ctx.fill()
 
-
             if (!mech.isBodiesAsleep) { //if time dilation isn't active
-
               if (this.count < 17) {
                 this.count++
                 //grow
@@ -1841,20 +1838,18 @@ const b = {
                 this.radius *= SCALE;
               } else {
                 //shrink
-                const SCALE = 1 - 0.006 / b.isModBulletsLastLonger
+                const SCALE = 1 - 0.007 / b.isModBulletsLastLonger
                 Matter.Body.scale(this, SCALE, SCALE);
                 this.radius *= SCALE;
                 if (this.radius < 11) this.endCycle = 0;
               }
 
-
-              if (this.target && this.target.alive) {
+              if (this.target && this.target.alive) { //if stuck to a target
                 Matter.Body.setPosition(this, this.target.position)
-                Matter.Body.setVelocity(this.target, Matter.Vector.mult(this.target.velocity, 0.95))
-                Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.96)
-                this.target.damage(b.dmgScale * 0.0025);
-              } else {
-                //look for a new target
+                Matter.Body.setVelocity(this.target, Matter.Vector.mult(this.target.velocity, 0.94))
+                Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.94)
+                this.target.damage(b.dmgScale * 0.0045);
+              } else { //look for a new target
                 this.target = null
                 this.collisionFilter.category = 0x000100;
               }
@@ -1862,13 +1857,13 @@ const b = {
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 15 : 3) * b.modFireRate); // cool down
-        const SPEED = mech.crouch ? 22 : 15 - RADIUS * 0.25;
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 15 : 4) * b.modFireRate); // cool down
+        const SPEED = mech.crouch ? 20 : 14 - RADIUS * 0.25;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
         });
-        bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
+        // bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
       }
     },
     // {

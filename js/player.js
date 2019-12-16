@@ -1452,7 +1452,7 @@ const mech = {
         mech.setHoldDefaults();
         mech.fieldRegen *= 3;
         mech.hold = function () {
-          if (mech.fieldMeter === mech.fieldEnergyMax) {
+          if (mech.fieldMeter > mech.fieldEnergyMax - 0.02) {
             mech.fieldMeter -= 0.43;
             b.guns[gunIndex].fire() //spawn drone
             mech.fireCDcycle = mech.cycle + 25; // set fire cool down to prevent +energy from making huge numbers of drones
