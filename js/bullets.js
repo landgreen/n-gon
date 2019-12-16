@@ -1789,13 +1789,13 @@ const b = {
       name: "foam", //15
       description: "spray bubbly foam that <strong>sticks</strong> to enemies<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
       ammo: 0,
-      ammoPack: 80,
+      ammoPack: 95,
       have: false,
       isStarterGun: true,
       fire() {
         const me = bullet.length;
-        const dir = mech.angle + 0.1 * (Math.random() - 0.5)
-        const RADIUS = (9 + 12 * Math.random()) * b.modBulletSize
+        const dir = mech.angle + 0.2 * (Math.random() - 0.5)
+        const RADIUS = (6 + 16 * Math.random()) * b.modBulletSize
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 25, RADIUS, {
           angle: dir,
           density: 0.000001, //  0.001 is normal density
@@ -1803,7 +1803,7 @@ const b = {
           frictionAir: 0,
           friction: 0.2,
           restitution: 0.2,
-          dmg: b.modExtraDmg, //damage done in addition to the damage from momentum
+          dmg: 0.04 + b.modExtraDmg, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: 0x000100,
@@ -1815,7 +1815,7 @@ const b = {
           radius: RADIUS,
           target: null,
           onDmg(who) {
-            if (!this.target && who.alive) {
+            if (!this.target && who.alive && who.dropPowerUp) {
               this.target = who;
               this.collisionFilter.category = 0x000000;
             }
@@ -1852,7 +1852,7 @@ const b = {
                 Matter.Body.setPosition(this, this.target.position)
                 Matter.Body.setVelocity(this.target, Matter.Vector.mult(this.target.velocity, 0.95))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.96)
-                this.target.damage(b.dmgScale * 0.0035);
+                this.target.damage(b.dmgScale * 0.0025);
               } else {
                 //look for a new target
                 this.target = null
@@ -1863,7 +1863,7 @@ const b = {
         });
         World.add(engine.world, bullet[me]); //add bullet to world
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 15 : 3) * b.modFireRate); // cool down
-        const SPEED = mech.crouch ? 25 : 16 - RADIUS * 0.25;
+        const SPEED = mech.crouch ? 22 : 15 - RADIUS * 0.25;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)

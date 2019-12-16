@@ -846,13 +846,13 @@ const mech = {
   },
   grabPowerUp() { //look for power ups to grab with field
     if (mech.fieldCDcycle < mech.cycle) {
-      const grabPowerUpRange2 = (this.grabRange + 220) * (this.grabRange + 220)
+      const grabPowerUpRange2 = (mech.grabRange + 220) * (mech.grabRange + 220)
       for (let i = 0, len = powerUp.length; i < len; ++i) {
         const dxP = mech.pos.x - powerUp[i].position.x;
         const dyP = mech.pos.y - powerUp[i].position.y;
         const dist2 = dxP * dxP + dyP * dyP;
         // float towards player  if looking at and in range  or  if very close to player
-        if (dist2 < grabPowerUpRange2 && this.lookingAt(powerUp[i]) || dist2 < 16000) {
+        if (dist2 < grabPowerUpRange2 && mech.lookingAt(powerUp[i]) || dist2 < 16000) {
           if (dist2 < 5000) { //use power up if it is close enough
             Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
               x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
@@ -861,7 +861,7 @@ const mech = {
             mech.usePowerUp(i);
             return;
           }
-          this.fieldMeter -= this.fieldRegen * 0.5;
+          mech.fieldMeter -= mech.fieldRegen * 0.5;
           powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
           powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
           //extra friction
@@ -876,11 +876,12 @@ const mech = {
   pushMass(who) {
     const speed = Matter.Vector.magnitude(Matter.Vector.sub(who.velocity, player.velocity))
     const fieldBlockCost = 0.03 + Math.sqrt(who.mass) * speed * 0.003 //0.012
-    if (this.fieldMeter > fieldBlockCost * 0.6) { //shield needs at least some of the cost to block
-      this.fieldMeter -= fieldBlockCost * this.fieldShieldingScale;
-      if (this.fieldMeter < 0) this.fieldMeter = 0;
-      this.drawHold(who);
+    if (mech.fieldMeter > fieldBlockCost * 0.6) { //shield needs at least some of the cost to block
+      mech.fieldMeter -= fieldBlockCost * mech.fieldShieldingScale;
+      if (mech.fieldMeter < 0) mech.fieldMeter = 0;
+      mech.drawHold(who);
       mech.fieldCDcycle = mech.cycle + 10;
+      mech.holdingTarget = null
       //knock backs
       const unit = Matter.Vector.normalise(Matter.Vector.sub(player.position, who.position))
       const mass = Math.min(Math.sqrt(who.mass), 3.5); //large masses above 4*4 can start to overcome the push back
@@ -1061,9 +1062,9 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.drawField();
             mech.grabPowerUp();
-            mech.pushMobsFacing();
-            mech.pushBodyFacing();
             mech.lookForPickUp();
+            mech.pushBodyFacing();
+            mech.pushMobsFacing();
           } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
@@ -1294,10 +1295,10 @@ const mech = {
               ctx.lineWidth = 2 * Math.random();
               ctx.stroke();
 
-              mech.pushMobs360(110);
-              // mech.pushBody360(100); //disabled because doesn't work at short range
               mech.grabPowerUp();
               mech.lookForPickUp();
+              mech.pushMobs360(110);
+              // mech.pushBody360(100); //disabled because doesn't work at short range
             } else {
               mech.fieldCDcycle = mech.cycle + 120; //if out of energy
             }
@@ -1327,10 +1328,9 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
             const DRAIN = 0.0004
             if (mech.fieldMeter > DRAIN) {
-              mech.pushMobs360(170);
-              mech.pushBody360(180);
               mech.grabPowerUp();
               mech.lookForPickUp(170);
+              mech.pushMobs360(170);
               //look for nearby objects to make zero-g
               function zeroG(who, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -1462,11 +1462,11 @@ const mech = {
             mech.holding();
             mech.throw();
           } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
-            mech.pushMobsFacing();
-            mech.pushBodyFacing();
             mech.drawField();
             mech.grabPowerUp();
             mech.lookForPickUp();
+            mech.pushMobsFacing();
+            mech.pushBodyFacing();
           } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {

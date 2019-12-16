@@ -711,7 +711,7 @@ const mobs = {
         // }
       },
       grow() {
-        if (!this.isSleeping) {
+        if (!mech.isBodiesAsleep) {
           if (this.seePlayer.recall) {
             if (this.radius < 80) {
               const scale = 1.01;
@@ -845,7 +845,7 @@ const mobs = {
         }
       },
       fire() {
-        if (!this.isSleeping) {
+        if (!mech.isBodiesAsleep) {
           const setNoseShape = () => {
             const mag = this.radius + this.radius * this.noseLength;
             this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
@@ -921,7 +921,7 @@ const mobs = {
         this.death(); //death with no power up or body
       },
       timeLimit() {
-        if (!this.isSleeping) {
+        if (!mech.isBodiesAsleep) {
           this.timeLeft--;
           if (this.timeLeft < 0) {
             this.dropPowerUp = false;

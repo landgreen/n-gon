@@ -110,7 +110,7 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.shooter(800, -1150);
+    spawn.shooter(800, -1050);
     // spawn.groupBoss(-600, -550);
     // spawn.hopper(800, -150);
     // spawn.beamer(800, -150);
