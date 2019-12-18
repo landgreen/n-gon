@@ -218,8 +218,8 @@ const powerUps = {
         inertia: Infinity, //prevents rotation
         collisionFilter: {
           group: 0,
-          category: 0x100000,
-          mask: 0x100001
+          category: cat.powerUp,
+          mask: cat.map | cat.powerUp
         },
         color: target.color,
         effect: target.effect,

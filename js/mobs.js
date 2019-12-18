@@ -71,8 +71,8 @@ const mobs = {
       restitution: 0.5,
       collisionFilter: {
         group: 0,
-        category: 0x000010,
-        mask: 0x011111
+        category: cat.mob,
+        mask: cat.player | cat.map | cat.body | cat.bullet | cat.mob
       },
       onHit: undefined,
       alive: true,
@@ -1025,14 +1025,12 @@ const mobs = {
           body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, this.vertices);
           Matter.Body.setVelocity(body[len], this.velocity);
           Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
-          body[len].collisionFilter.category = 0x010000;
-          body[len].collisionFilter.mask = 0x011111;
-          // body[len].collisionFilter.category = body[len].collisionFilter.category //0x000001;
-          // body[len].collisionFilter.mask = body[len].collisionFilter.mask //0x011111;
+          body[len].collisionFilter.category = cat.body;
+          body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
 
           //large mobs or too many bodies go intangible and fall until removed from game to help performance
           if (body[len].mass > 10 || 40 + 30 * Math.random() < body.length) {
-            body[len].collisionFilter.mask = 0x001100;
+            body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
           }
           body[len].classType = "body";
           World.add(engine.world, body[len]); //add to world

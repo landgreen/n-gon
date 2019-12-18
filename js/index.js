@@ -114,6 +114,18 @@ map:        0x000001   0x111111
 
 
 */
+//collision groups
+//   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
+const cat = {
+  player: 0x1,
+  map: 0x10,
+  body: 0x100,
+  bullet: 0x1000,
+  powerUp: 0x10000,
+  mob: 0x100000,
+  mobBullet: 0x1000000,
+  mobShield: 0x10000000,
+}
 
 //build build grid display
 const build = {

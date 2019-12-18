@@ -471,7 +471,7 @@ const spawn = {
     me.eventHorizon = 1100; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
     me.accelMag = 0.00003 * game.accelScale;
-    me.collisionFilter.mask = 0x001100
+    me.collisionFilter.mask = cat.player | cat.bullet
     // me.frictionAir = 0.005;
     me.memory = 1600;
     Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
@@ -680,7 +680,7 @@ const spawn = {
     me.alpha = 1; //used in drawSneaker
     // me.leaveBody = false;
     me.canTouchPlayer = false; //used in drawSneaker
-    me.collisionFilter.mask = 0x010111; //can't touch player
+    me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
     me.showHealthBar = false;
     // me.memory = 420;
     me.do = function () {
@@ -701,7 +701,7 @@ const spawn = {
           this.healthBar();
           if (!this.canTouchPlayer) {
             this.canTouchPlayer = true;
-            this.collisionFilter.mask = 0x011111; //can touch player
+            this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
           }
         }
         //draw body
@@ -716,7 +716,7 @@ const spawn = {
         ctx.fill();
       } else if (this.canTouchPlayer) {
         this.canTouchPlayer = false;
-        this.collisionFilter.mask = 0x000111; //can't   touch player
+        this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
       }
     };
   },
@@ -724,7 +724,7 @@ const spawn = {
     let me;
     mobs.spawn(x, y, 7, radius, "transparent");
     me = mob[mob.length - 1];
-    me.seeAtDistance2 = 1000000;
+    me.seeAtDistance2 = 700000;
     me.accelMag = 0.00012 * game.accelScale;
     if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     Matter.Body.setDensity(me, 0.00065); //normal is 0.001 //makes effective life much lower
@@ -732,7 +732,7 @@ const spawn = {
     me.alpha = 1; //used in drawGhost
     me.canTouchPlayer = false; //used in drawGhost
     // me.leaveBody = false;
-    me.collisionFilter.mask = 0x000100; //move through walls and player
+    me.collisionFilter.mask = cat.bullet
     me.showHealthBar = false;
     me.memory = 480;
     me.do = function () {
@@ -757,7 +757,7 @@ const spawn = {
           this.healthBar();
           if (!this.canTouchPlayer) {
             this.canTouchPlayer = true;
-            this.collisionFilter.mask = 0x001100; //can touch player but not walls
+            this.collisionFilter.mask = cat.player | cat.bullet
           }
         }
         //draw body
@@ -773,7 +773,7 @@ const spawn = {
         ctx.stroke();
       } else if (this.canTouchPlayer) {
         this.canTouchPlayer = false;
-        this.collisionFilter.mask = 0x000100; //can't touch player or walls
+        this.collisionFilter.mask = cat.bullet; //can't touch player or walls
       }
     };
   },
@@ -823,7 +823,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
     me.stroke = "rgba(255,0,200)"; //used for drawGhost
-    me.seeAtDistance2 = 2000000;
+    me.seeAtDistance2 = 1500000;
     me.fireFreq = Math.ceil(30 + 2000 / radius);
     me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     me.hoverElevation = 400 + (Math.random() - 0.5) * 200; //squared
@@ -835,7 +835,7 @@ const spawn = {
     me.frictionAir = 0.01;
     // me.memory = 300;
     // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
-    me.collisionFilter.mask = 0x001100; //move through walls
+    me.collisionFilter.mask = cat.player | cat.bullet
     spawn.shield(me, x, y);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -910,8 +910,8 @@ const spawn = {
     me.leaveBody = false;
     me.dropPowerUp = false;
     me.showHealthBar = false;
-    me.collisionFilter.category = 0x000010;
-    me.collisionFilter.mask = 0x011101;
+    me.collisionFilter.category = cat.mobBullet;
+    me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
     me.do = function () {
       this.gravity();
       this.timeLimit();
@@ -1041,7 +1041,8 @@ const spawn = {
       me.stroke = "rgb(220,220,255)";
       Matter.Body.setDensity(me, 0.0001) //very low density to not mess with the original mob's motion
       me.shield = true;
-      me.collisionFilter.mask = 0x000100; //don't collide with bodies, map, player, and mobs, only bullets
+      me.collisionFilter.category = cat.mobShield
+      me.collisionFilter.mask = cat.bullet;
       consBB[consBB.length] = Constraint.create({
         //attach shield to last spawned mob
         bodyA: me,
@@ -1069,7 +1070,8 @@ const spawn = {
     Matter.Body.setDensity(me, 0.00005) //very low density to not mess with the original mob's motion
     me.frictionAir = 0;
     me.shield = true;
-    me.collisionFilter.mask = 0x000100; //don't collide with bodies, map, and mobs, only bullets and player
+    me.collisionFilter.category = cat.mobShield
+    me.collisionFilter.mask = cat.bullet;
     //constrain to all mob nodes in boss
     for (let i = 0; i < nodes; ++i) {
       consBB[consBB.length] = Constraint.create({
@@ -1224,9 +1226,8 @@ const spawn = {
     const breakingPoint = 1300
     mobs.spawn(breakingPoint, -100, 0, 7.5, "transparent");
     let me = mob[mob.length - 1];
-    //touch nothing
-    me.collisionFilter.category = 0x010000; //act like a body
-    me.collisionFilter.mask = 0x000101; //only collide with map
+    me.collisionFilter.category = cat.body;
+    me.collisionFilter.mask = cat.map;
     me.inertia = Infinity;
     me.g = 0.0004; //required for gravity
     me.restitution = 0;
@@ -1291,8 +1292,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x010000; //act like a body
-    me.collisionFilter.mask = 0x000101; //only collide with map
+    me.collisionFilter.category = cat.body;
+    me.collisionFilter.mask = cat.map;
     me.g = 0.0003; //required for gravity
     // me.restitution = 0;
     me.stroke = "transparent"
@@ -1341,8 +1342,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x010000; //act like a body
-    me.collisionFilter.mask = 0x000101; //only collide with map
+    me.collisionFilter.category = cat.body;
+    me.collisionFilter.mask = cat.map;
     me.g = 0.0003; //required for gravity
     // me.restitution = 0;
     me.stroke = "transparent"
@@ -1391,8 +1392,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x010000; //act like a body
-    me.collisionFilter.mask = 0x000101; //only collide with map
+    me.collisionFilter.category = cat.body;
+    me.collisionFilter.mask = cat.map;
     me.g = 0.0003; //required for gravity
     me.restitution = 0;
     me.stroke = "transparent"
@@ -1440,8 +1441,8 @@ const spawn = {
     mobs.spawn(breakingPoint, -100, 0, 2, "transparent");
     let me = mob[mob.length - 1];
     //touch nothing
-    me.collisionFilter.category = 0x010000; //act like a body
-    me.collisionFilter.mask = 0x000101; //only collide with map
+    me.collisionFilter.category = cat.body;
+    me.collisionFilter.mask = cat.map;
     me.g = 0.0003; //required for gravity
     me.restitution = 0;
     me.stroke = "transparent"

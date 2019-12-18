@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(15)
+      b.giveGuns(12)
       // mech.fieldUpgrades[1].effect();
       // b.giveMod(21)
 
@@ -96,21 +96,22 @@ const level = {
     spawn.spawnBuilding(-200, -250, 275, 240, false, true, "left"); //far left; player spawns in side
     // spawn.boost(350, 0, -1000);
     // for (let i = 0; i < 10; i++) {
-    //   powerUps.spawn(950, -425, "gun", false);
+    powerUps.spawn(950, -425, "gun", false);
+    powerUps.spawn(950, -425, "gun", false);
     // }
-    // for (let i = 0; i < 5; i++) {
-    //   powerUps.spawn(2500 + i * 20, -1300, "gun", false);
-    //   powerUps.spawn(2500 + i * 20, -1100, "ammo", false);
-    // }
+
     // spawn.nodeBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
-    // spawn.bodyRect(-135, -50, 50, 50);
-    // spawn.bodyRect(-140, -100, 50, 50);
+    spawn.bodyRect(-135, -50, 50, 50);
+    spawn.bodyRect(-140, -100, 50, 50);
     // powerUps.spawn(420, -400, "ammo", false);
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.shooter(800, -1050);
+    spawn.starter(800, -1050);
+    spawn.starter(800, -1050);
+    spawn.starter(800, -1050);
+    spawn.starter(800, -1050);
     // spawn.groupBoss(-600, -550);
     // spawn.hopper(800, -150);
     // spawn.beamer(800, -150);
@@ -1576,15 +1577,15 @@ const level = {
     //needs to be run to put bodies into the world
     for (let i = 0; i < body.length; i++) {
       //body[i].collisionFilter.group = 0;
-      body[i].collisionFilter.category = 0x010000;
-      body[i].collisionFilter.mask = 0x111111;
+      body[i].collisionFilter.category = cat.body;
+      body[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
       body[i].classType = "body";
       World.add(engine.world, body[i]); //add to world
     }
     for (let i = 0; i < map.length; i++) {
       //map[i].collisionFilter.group = 0;
-      map[i].collisionFilter.category = 0x000001;
-      map[i].collisionFilter.mask = 0x111111;
+      map[i].collisionFilter.category = cat.map;
+      map[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
       Matter.Body.setStatic(map[i], true); //make static
       World.add(engine.world, map[i]); //add to world
     }

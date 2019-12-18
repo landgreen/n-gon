@@ -31,8 +31,8 @@ const mech = {
       sleepThreshold: Infinity,
       collisionFilter: {
         group: 0,
-        category: 0x001000,
-        mask: 0x010011
+        category: cat.player,
+        mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
       },
       death() {
         mech.death();
@@ -649,7 +649,7 @@ const mech = {
     this.fieldFire = false;
     this.fieldCDcycle = 0;
     this.isStealth = false;
-    player.collisionFilter.mask = 0x010011 //0x010011 is normal
+    player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
     this.holdingMassScale = 0.5;
     this.fieldFireCD = 15;
     this.fieldShieldingScale = 1; //scale energy loss after collision with mob
@@ -658,7 +658,6 @@ const mech = {
     this.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.isBodiesAsleep = true;
     mech.wakeCheck();
-    // this.phaseBlocks(0x011111)
   },
   drawFieldMeter(range = 60) {
     if (this.fieldMeter < this.fieldEnergyMax) {
@@ -690,8 +689,8 @@ const mech = {
     if (this.isHolding) {
       this.isHolding = false;
       this.definePlayerMass()
-      this.holdingTarget.collisionFilter.category = 0x010000;
-      this.holdingTarget.collisionFilter.mask = 0x011111;
+      this.holdingTarget.collisionFilter.category = cat.body;
+      this.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
       this.holdingTarget = null;
       this.throwCharge = 0;
     }
@@ -776,15 +775,15 @@ const mech = {
       this.fireCDcycle = mech.cycle + this.fieldFireCD;
       this.isHolding = false;
       //bullet-like collisions
-      this.holdingTarget.collisionFilter.category = 0x000100;
-      this.holdingTarget.collisionFilter.mask = 0x110111;
+      this.holdingTarget.collisionFilter.category = cat.body;
+      this.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
       //check every second to see if player is away from thrown body, and make solid
       const solid = function (that) {
         const dx = that.position.x - player.position.x;
         const dy = that.position.y - player.position.y;
         if (dx * dx + dy * dy > 10000 && that.speed < 3 && that !== mech.holdingTarget) {
-          that.collisionFilter.category = 0x010000; //make solid
-          that.collisionFilter.mask = 0x011111;
+          that.collisionFilter.category = cat.body; //make solid
+          that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
         } else {
           setTimeout(solid, 50, that);
         }
@@ -799,9 +798,10 @@ const mech = {
         y: player.velocity.y + Math.sin(this.angle) * speed
       });
       //player recoil //stronger in x-dir to prevent jump hacking
+
       Matter.Body.setVelocity(player, {
-        x: player.velocity.x - Math.cos(this.angle) * speed / 20 * Math.sqrt(this.holdingTarget.mass),
-        y: player.velocity.y - Math.sin(this.angle) * speed / 80 * Math.sqrt(this.holdingTarget.mass)
+        x: player.velocity.x - Math.cos(this.angle) * speed / (mech.crouch ? 30 : 5) * Math.sqrt(this.holdingTarget.mass),
+        y: player.velocity.y - Math.sin(this.angle) * speed / 40 * Math.sqrt(this.holdingTarget.mass)
       });
       this.definePlayerMass() //return to normal player mass
     }
@@ -945,7 +945,7 @@ const mech = {
         Matter.Vector.magnitude(Matter.Vector.sub(body[i].position, this.pos)) < range &&
         this.lookingAt(body[i]) &&
         Matter.Query.ray(map, body[i].position, this.pos).length === 0 &&
-        body[i].collisionFilter.category === 0x010000
+        body[i].collisionFilter.category === cat.body
       ) {
         mech.pushMass(body[i]);
       }
@@ -997,12 +997,8 @@ const mech = {
     this.isHolding = true;
     this.definePlayerMass(mech.defaultMass + this.holdingTarget.mass * this.holdingMassScale)
     //collide with nothing
-    this.holdingTarget.collisionFilter.category = 0x000000;
-    this.holdingTarget.collisionFilter.mask = 0x000000;
-    // if (this.holdingTarget) {
-    //   this.holdingTarget.collisionFilter.category = 0x010000;
-    //   this.holdingTarget.collisionFilter.mask = 0x011111;
-    // }
+    this.holdingTarget.collisionFilter.category = 0;
+    this.holdingTarget.collisionFilter.mask = 0;
     // combine momentum   // this doesn't feel right in game
     // const px = player.velocity.x * player.mass + this.holdingTarget.velocity.x * this.holdingTarget.mass;
     // const py = player.velocity.y * player.mass + this.holdingTarget.velocity.y * this.holdingTarget.mass;
@@ -1486,7 +1482,7 @@ const mech = {
         // mech.grabRange = 230
         mech.hold = function () {
           mech.isStealth = false //isStealth is checked in mob foundPlayer()
-          player.collisionFilter.mask = 0x010011 //0x010011 is normal
+          player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
@@ -1497,7 +1493,7 @@ const mech = {
               mech.fieldMeter -= DRAIN;
 
               mech.isStealth = true //isStealth is checked in mob foundPlayer() 
-              player.collisionFilter.mask = 0x000001 //0x010011 is normals
+              player.collisionFilter.mask = cat.map
 
               ctx.beginPath();
               ctx.arc(mech.pos.x, mech.pos.y, mech.grabRange, 0, 2 * Math.PI);
@@ -1534,7 +1530,7 @@ const mech = {
     //     // mech.grabRange = 230
     //     mech.hold = function () {
     //       mech.isStealth = false //isStealth is checked in mob foundPlayer()
-    //       player.collisionFilter.mask = 0x010011 //0x010011 is normal
+    //       player.collisionFilter.mask = 0x010011
     //       if (mech.isHolding) {
     //         mech.hackProgress = 0
     //         mech.drawHold(mech.holdingTarget);
