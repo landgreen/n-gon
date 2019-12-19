@@ -98,6 +98,8 @@ const mech = {
     player.force.y = 0;
     Matter.Body.setPosition(player, this.spawnPos);
     Matter.Body.setVelocity(player, this.spawnVel);
+    // mech.transX = -player.position.x
+    // mech.transY = player.position.y
   },
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
@@ -995,17 +997,14 @@ const mech = {
   pickUp() {
     //triggers when a hold target exits and field button is released
     this.isHolding = true;
+    //conserve momentum when player mass changes
+    totalMomentum = Matter.Vector.add(Matter.Vector.mult(player.velocity, player.mass), Matter.Vector.mult(this.holdingTarget.velocity, this.holdingTarget.mass))
+    Matter.Body.setVelocity(player, Matter.Vector.mult(totalMomentum, 1 / (mech.defaultMass + this.holdingTarget.mass)));
+
     this.definePlayerMass(mech.defaultMass + this.holdingTarget.mass * this.holdingMassScale)
-    //collide with nothing
+    //make block collide with nothing
     this.holdingTarget.collisionFilter.category = 0;
     this.holdingTarget.collisionFilter.mask = 0;
-    // combine momentum   // this doesn't feel right in game
-    // const px = player.velocity.x * player.mass + this.holdingTarget.velocity.x * this.holdingTarget.mass;
-    // const py = player.velocity.y * player.mass + this.holdingTarget.velocity.y * this.holdingTarget.mass;
-    // Matter.Body.setVelocity(player, {
-    //   x: px / (player.mass + this.holdingTarget.mass),
-    //   y: py / (player.mass + this.holdingTarget.mass)
-    // });
   },
   wakeCheck() {
     if (mech.isBodiesAsleep) {

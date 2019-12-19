@@ -1039,7 +1039,7 @@ const b = {
       name: "super balls", //4
       description: "fire balls that <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 11,
+      ammoPack: 14,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1050,12 +1050,12 @@ const b = {
         for (let i = 0; i < 3; i++) {
           const me = bullet.length;
           bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 7 * b.modBulletSize, b.fireAttributes(dir, false));
-          b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 34 : 26, dir, me); //cd , speed
+          b.fireProps(mech.crouch ? 30 : 12, mech.crouch ? 38 : 30, dir, me); //cd , speed
           Matter.Body.setDensity(bullet[me], 0.0001);
-          bullet[me].endCycle = game.cycle + Math.floor(360 * b.isModBulletsLastLonger);
-          bullet[me].dmg = 0.5 + b.modExtraDmg;
+          bullet[me].endCycle = game.cycle + Math.floor(300 * b.isModBulletsLastLonger);
+          bullet[me].dmg = 0.25 + b.modExtraDmg;
           bullet[me].minDmgSpeed = 0;
-          bullet[me].restitution = 0.96;
+          bullet[me].restitution = 0.98;
           bullet[me].friction = 0;
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
@@ -1737,7 +1737,7 @@ const b = {
       fire() {
         const me = bullet.length;
         const dir = mech.angle + 0.2 * (Math.random() - 0.5)
-        const RADIUS = (6 + 16 * Math.random()) * b.modBulletSize
+        const RADIUS = (8 + 16 * Math.random()) * b.modBulletSize
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 25, RADIUS, {
           angle: dir,
           density: 0.000005, //  0.001 is normal density
@@ -1749,19 +1749,30 @@ const b = {
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
-            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
+            mask: cat.map | cat.body | cat.mob | cat.mobShield
           },
           minDmgSpeed: 0,
           endCycle: Infinity, //game.cycle + Math.floor(265 * b.isModBulletsLastLonger),
           count: 0,
           radius: RADIUS,
           target: null,
-          targetSub: null,
+          targetVertex: null,
           onDmg(who) {
             if (!this.target && who.alive && who.dropPowerUp) {
               this.target = who;
-              // this.targetSub = Matter.Vector.sub(this.position, this.target.position)
-              this.collisionFilter.category = 0;
+              this.collisionFilter.category = cat.body;
+              this.collisionFilter.mask = cat.player
+
+              let bestVertexDistance = Infinity
+              let bestVertex = null
+              for (let i = 0; i < this.target.vertices.length; i++) {
+                const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, this.target.vertices[i]));
+                if (dist < bestVertexDistance) {
+                  bestVertex = i
+                  bestVertexDistance = dist
+                }
+              }
+              this.targetVertex = bestVertex
             }
           },
           onEnd() {},
@@ -1773,6 +1784,7 @@ const b = {
 
             if (!mech.isBodiesAsleep) { //if time dilation isn't active
               this.force.y += this.mass * 0.00006; //gravity
+
               if (this.count < 17) {
                 this.count++
                 //grow
@@ -1781,21 +1793,21 @@ const b = {
                 this.radius *= SCALE;
               } else {
                 //shrink
-                const SCALE = 1 - 0.007 / b.isModBulletsLastLonger
+                const SCALE = 1 - 0.006 / b.isModBulletsLastLonger
                 Matter.Body.scale(this, SCALE, SCALE);
                 this.radius *= SCALE;
                 if (this.radius < 11) this.endCycle = 0;
               }
 
               if (this.target && this.target.alive) { //if stuck to a target
-                // Matter.Body.setPosition(this, Matter.Vector.add(this.target.position, this.targetSub))
-                Matter.Body.setPosition(this, this.target.position)
+                Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
                 Matter.Body.setVelocity(this.target, Matter.Vector.mult(this.target.velocity, 0.94))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.94)
-                this.target.damage(b.dmgScale * 0.0045);
+                this.target.damage(b.dmgScale * 0.0025);
               } else if (this.target !== null) { //look for a new target
                 this.target = null
                 this.collisionFilter.category = cat.bullet;
+                this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
               }
             }
           }
@@ -1807,7 +1819,6 @@ const b = {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
         });
-        // bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
       }
     },
     // {

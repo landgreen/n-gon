@@ -287,36 +287,49 @@ const game = {
       } else {
         this.testing = true;
       }
-    } else if (this.testing) {
-      //only in testing mode
-
-      if (keys[70]) { //cycle fields with F
+    }
+    //in testing mode
+    if (this.testing) {
+      if (keys[49]) { // give power ups with 1
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+      } else if (keys[50]) { // 2
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
+      } else if (keys[51]) { // 3
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+      } else if (keys[52]) { // 4
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+      } else if (keys[53]) { // 5
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
+      } else if (keys[54]) { // 6  spawn mob
+        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+        spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
+      } else if (keys[55]) { // 7  spawn body
+        index = body.length
+        spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
+        body[index].collisionFilter.category = cat.body;
+        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        body[index].classType = "body";
+        World.add(engine.world, body[index]); //add to world
+      } else if (keys[70]) { //cycle fields with F
         if (mech.fieldMode === mech.fieldUpgrades.length - 1) {
           mech.fieldUpgrades[0].effect()
         } else {
           mech.fieldUpgrades[mech.fieldMode + 1].effect()
         }
-      }
-      if (keys[71]) { // give all guns with G
+      } else if (keys[71]) { // give all guns with G
         // b.giveGuns("all", 1000)
         powerUps.gun.effect()
-      }
-      if (keys[72]) { // power ups with H
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
-      }
-      if (keys[89]) { //add all mods with y
+      } else if (keys[72]) { // power ups with H
+        mech.addHealth(Infinity)
+      } else if (keys[89]) { //add all mods with y
         powerUps.mod.effect()
-      }
-      if (keys[82]) { // teleport to mouse with R
+      } else if (keys[82]) { // teleport to mouse with R
         Matter.Body.setPosition(player, this.mouseInGame);
         Matter.Body.setVelocity(player, {
           x: 0,
           y: 0
         });
+        // game.noCameraScroll()
       }
     }
   },
@@ -325,6 +338,16 @@ const game = {
   setZoom(zoomScale = game.zoomScale) { //use in window resize in index.js
     game.zoomScale = zoomScale
     game.zoom = canvas.height / zoomScale; //sets starting zoom scale
+  },
+  noCameraScroll() {
+    // makes the camera not scroll after changing locations
+    mech.pos.x = player.position.x;
+    mech.pos.y = playerBody.position.y - mech.yOff;
+    const scale = 0.8;
+    mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
+    mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
+    mech.transX += (mech.transSmoothX - mech.transX) * 1;
+    mech.transY += (mech.transSmoothY - mech.transY) * 1;
   },
   zoomTransition(newZoomScale, step = 2) {
     const isBigger = (newZoomScale - game.zoomScale > 0) ? true : false;
@@ -649,7 +672,9 @@ const game = {
     line += 20;
     ctx.fillText("G: give all guns", x, line);
     line += 20;
-    ctx.fillText("H: spawn power ups", x, line);
+    ctx.fillText("H: heal", x, line);
+    line += 20;
+    ctx.fillText("1-7: spawn things", x, line);
     line += 30;
 
     ctx.fillText("cycle: " + game.cycle, x, line);

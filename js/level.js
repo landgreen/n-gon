@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      b.giveGuns(12)
+      // b.giveGuns(15)
       // mech.fieldUpgrades[1].effect();
       // b.giveMod(21)
 
@@ -32,6 +32,7 @@ const level = {
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
       level.levelAnnounce();
     }
+    game.noCameraScroll();
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
