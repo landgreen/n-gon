@@ -98,21 +98,6 @@ game mechanics
     low friction ground
     bouncy ground
 
-
-// collision info:
-            category    mask
-powerUp:    0x100000   0x100001
-body:       0x010000   0x011111
-player:     0x001000   0x010011
-bullet:     0x000100   0x010011
-mob:        0x000010   0x011111
-mobBullet:  0x000010   0x011101
-mobShield:  0x000010   0x001100
-map:        0x000001   0x111111
-
-
-
-
 */
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield

@@ -362,9 +362,9 @@ const mobs = {
           // hitting player
           if (best.who === player) {
             if (b.isModTempResist) {
-              dmg = 0.0008 * game.dmgScale;
+              dmg = 0.0004 * game.dmgScale;
             } else {
-              dmg = 0.004 * game.dmgScale;
+              dmg = 0.002 * game.dmgScale;
             }
 
             mech.damage(dmg);

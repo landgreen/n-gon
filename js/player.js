@@ -849,31 +849,29 @@ const mech = {
     ctx.stroke();
   },
   grabPowerUp() { //look for power ups to grab with field
-    if (mech.fieldCDcycle < mech.cycle) {
-      const grabPowerUpRange2 = (mech.grabRange + 220) * (mech.grabRange + 220)
-      for (let i = 0, len = powerUp.length; i < len; ++i) {
-        const dxP = mech.pos.x - powerUp[i].position.x;
-        const dyP = mech.pos.y - powerUp[i].position.y;
-        const dist2 = dxP * dxP + dyP * dyP;
-        // float towards player  if looking at and in range  or  if very close to player
-        if (dist2 < grabPowerUpRange2 && mech.lookingAt(powerUp[i]) || dist2 < 16000) {
-          if (dist2 < 5000) { //use power up if it is close enough
-            Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
-              x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
-              y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
-            });
-            mech.usePowerUp(i);
-            return;
-          }
-          mech.fieldMeter -= mech.fieldRegen * 0.5;
-          powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
-          powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
-          //extra friction
-          Matter.Body.setVelocity(powerUp[i], {
-            x: powerUp[i].velocity.x * 0.11,
-            y: powerUp[i].velocity.y * 0.11
+    const grabPowerUpRange2 = (mech.grabRange + 220) * (mech.grabRange + 220)
+    for (let i = 0, len = powerUp.length; i < len; ++i) {
+      const dxP = mech.pos.x - powerUp[i].position.x;
+      const dyP = mech.pos.y - powerUp[i].position.y;
+      const dist2 = dxP * dxP + dyP * dyP;
+      // float towards player  if looking at and in range  or  if very close to player
+      if (dist2 < grabPowerUpRange2 && mech.lookingAt(powerUp[i]) || dist2 < 16000) {
+        if (dist2 < 5000) { //use power up if it is close enough
+          Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
+            x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
+            y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
           });
+          mech.usePowerUp(i);
+          return;
         }
+        mech.fieldMeter -= mech.fieldRegen * 0.5;
+        powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
+        powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+        //extra friction
+        Matter.Body.setVelocity(powerUp[i], {
+          x: powerUp[i].velocity.x * 0.11,
+          y: powerUp[i].velocity.y * 0.11
+        });
       }
     }
   },
@@ -1056,7 +1054,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throw();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.05 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.drawField();
             mech.grabPowerUp();
             mech.lookForPickUp();
@@ -1402,7 +1400,7 @@ const mech = {
         mech.fieldMode = 4;
         mech.fieldText();
         mech.setHoldDefaults();
-        mech.fieldRegen *= 0.5;
+        mech.fieldRegen *= 0.6;
         mech.fieldShieldingScale = 1.5;
 
         mech.hold = function () {

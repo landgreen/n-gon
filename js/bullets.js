@@ -1731,7 +1731,7 @@ const b = {
       name: "foam", //15
       description: "spray bubbly foam that <strong>sticks</strong> to enemies<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
       ammo: 0,
-      ammoPack: 95,
+      ammoPack: 90,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1788,22 +1788,22 @@ const b = {
               if (this.count < 17) {
                 this.count++
                 //grow
-                const SCALE = 1.1
+                const SCALE = 1.08
                 Matter.Body.scale(this, SCALE, SCALE);
                 this.radius *= SCALE;
               } else {
                 //shrink
-                const SCALE = 1 - 0.006 / b.isModBulletsLastLonger
+                const SCALE = 1 - 0.0035 / b.isModBulletsLastLonger
                 Matter.Body.scale(this, SCALE, SCALE);
                 this.radius *= SCALE;
-                if (this.radius < 11) this.endCycle = 0;
+                if (this.radius < 14) this.endCycle = 0;
               }
 
               if (this.target && this.target.alive) { //if stuck to a target
                 Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
                 Matter.Body.setVelocity(this.target, Matter.Vector.mult(this.target.velocity, 0.94))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.94)
-                this.target.damage(b.dmgScale * 0.0025);
+                this.target.damage(b.dmgScale * 0.004);
               } else if (this.target !== null) { //look for a new target
                 this.target = null
                 this.collisionFilter.category = cat.bullet;
@@ -1813,8 +1813,8 @@ const b = {
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 15 : 4) * b.modFireRate); // cool down
-        const SPEED = mech.crouch ? 20 : 14 - RADIUS * 0.25;
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 12 : 4) * b.modFireRate); // cool down
+        const SPEED = mech.crouch ? 22 : 12 - RADIUS * 0.25;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
