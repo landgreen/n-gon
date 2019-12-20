@@ -1129,23 +1129,23 @@ const b = {
       name: "missiles", //7
       description: "fire missiles that accelerate towards enemies<br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
-      ammoPack: 8,
+      ammoPack: 10,
       have: false,
       isStarterGun: false,
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
-        const thrust = 0.0003;
+        const thrust = 0.0005;
         let dir = mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2);
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30 * b.modBulletSize, 4 * b.modBulletSize, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 70 : 30, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 55 : 30, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
 
         // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
-        bullet[me].force.y += 0.00045; //a small push down at first to make it seem like the missile is briefly falling
-        bullet[me].frictionAir = 0
-        bullet[me].endCycle = game.cycle + Math.floor((265 + Math.random() * 20) * b.isModBulletsLastLonger);
-        bullet[me].explodeRad = 170 + 60 * Math.random();
+        bullet[me].force.y += 0.0005; //a small push down at first to make it seem like the missile is briefly falling
+        bullet[me].frictionAir = 0.023
+        bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
+        bullet[me].explodeRad = 170 + 70 * Math.random();
         bullet[me].lookFrequency = Math.floor(8 + Math.random() * 7);
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage at end
         bullet[me].onDmg = function () {
@@ -1155,7 +1155,6 @@ const b = {
         bullet[me].do = function () {
           if (!mech.isBodiesAsleep) {
             if (!(mech.cycle % this.lookFrequency)) {
-              this.closestTarget = null;
               this.lockedOn = null;
               let closeDist = Infinity;
 
@@ -1169,39 +1168,29 @@ const b = {
                 ) {
                   const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[i].position));
                   if (dist < closeDist) {
-                    this.closestTarget = mob[i].position;
                     closeDist = dist;
                     this.lockedOn = mob[i];
+                    this.frictionAir = 0.05; //extra friction once a target it locked
                   }
                 }
               }
               //explode when bullet is close enough to target
-              if (this.closestTarget && closeDist < this.explodeRad) {
+              if (this.lockedOn && closeDist < this.explodeRad * 0.6) {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
-              }
+                //does extra damage to target
 
-              if (this.lockedOn) {
-                this.frictionAir = 0.04; //extra friction
-
-                //draw locked on targeting
-                ctx.beginPath();
-                const vertices = this.lockedOn.vertices;
-                ctx.moveTo(this.position.x, this.position.y);
-                const mod = Math.floor((game.cycle / 3) % vertices.length);
-                ctx.lineTo(vertices[mod].x, vertices[mod].y);
-                ctx.strokeStyle = "rgba(0,0,155,0.35)"; //"#2f6";
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                const dmg = b.dmgScale * 4;
+                this.lockedOn.damage(dmg);
               }
             }
 
             //rotate missile towards the target
-            if (this.closestTarget) {
+            if (this.lockedOn) {
               const face = {
                 x: Math.cos(this.angle),
                 y: Math.sin(this.angle)
               };
-              const target = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.closestTarget));
+              const target = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position));
               if (Matter.Vector.dot(target, face) > -0.98) {
                 if (Matter.Vector.cross(target, face) > 0) {
                   Matter.Body.rotate(this, 0.08);
@@ -1276,19 +1265,19 @@ const b = {
       name: "grenades", //9
       description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
       ammo: 0,
-      ammoPack: 10,
+      ammoPack: 16,
       have: false,
       isStarterGun: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 15 * b.modBulletSize, b.fireAttributes(dir, false));
-        b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 43 : 32, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 30 : 20, mech.crouch ? 43 : 32, dir, me); //cd , speed
         // Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].totalCycles = 100;
         bullet[me].endCycle = game.cycle + Math.floor((mech.crouch ? 120 : 60) * b.isModBulletsLastLonger);
         bullet[me].restitution = 0.5;
-        bullet[me].explodeRad = 270;
+        bullet[me].explodeRad = 290;
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
         Matter.Body.setDensity(bullet[me], 0.0002);
