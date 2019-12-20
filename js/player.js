@@ -707,30 +707,32 @@ const mech = {
     if (this.onGround && !this.crouch) this.yOffGoal = this.yOffWhen.stand;
   },
   drawHold(target, stroke = true) {
-    const eye = 15;
-    const len = target.vertices.length - 1;
-    ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#000";
-    ctx.beginPath();
-    ctx.moveTo(
-      mech.pos.x + eye * Math.cos(this.angle),
-      mech.pos.y + eye * Math.sin(this.angle)
-    );
-    ctx.lineTo(target.vertices[len].x, target.vertices[len].y);
-    ctx.lineTo(target.vertices[0].x, target.vertices[0].y);
-    ctx.fill();
-    if (stroke) ctx.stroke();
-    for (let i = 0; i < len; i++) {
+    if (target) {
+      const eye = 15;
+      const len = target.vertices.length - 1;
+      ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#000";
       ctx.beginPath();
       ctx.moveTo(
         mech.pos.x + eye * Math.cos(this.angle),
         mech.pos.y + eye * Math.sin(this.angle)
       );
-      ctx.lineTo(target.vertices[i].x, target.vertices[i].y);
-      ctx.lineTo(target.vertices[i + 1].x, target.vertices[i + 1].y);
+      ctx.lineTo(target.vertices[len].x, target.vertices[len].y);
+      ctx.lineTo(target.vertices[0].x, target.vertices[0].y);
       ctx.fill();
       if (stroke) ctx.stroke();
+      for (let i = 0; i < len; i++) {
+        ctx.beginPath();
+        ctx.moveTo(
+          mech.pos.x + eye * Math.cos(this.angle),
+          mech.pos.y + eye * Math.sin(this.angle)
+        );
+        ctx.lineTo(target.vertices[i].x, target.vertices[i].y);
+        ctx.lineTo(target.vertices[i + 1].x, target.vertices[i + 1].y);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
     }
   },
   holding() {
@@ -1400,14 +1402,15 @@ const mech = {
         mech.fieldMode = 4;
         mech.fieldText();
         mech.setHoldDefaults();
-        mech.fieldRegen *= 0.3;
+        mech.fieldRegen *= 0.5;
+        mech.fieldShieldingScale = 1.5;
 
         mech.hold = function () {
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throw();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0.1)) { //not hold but field button is pressed
+          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0)) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp(180);
           } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle) { //holding, but field button is released
@@ -1431,7 +1434,7 @@ const mech = {
             ctx.arc(mech.pos.x, mech.pos.y, grabRange3, 0, 2 * Math.PI);
             ctx.fill();
             mech.pushMobs360(netGrabRange);
-            mech.pushBody360(netGrabRange);
+            // mech.pushBody360(netGrabRange);  //can't throw block when pushhing blocks away
           }
           mech.drawFieldMeter()
         }
