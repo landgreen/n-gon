@@ -268,12 +268,7 @@ const mobs = {
           ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange && !mech.isStealth) {
-            //if (Math.random()>0.2 && this.seePlayer.yes && this.distanceToPlayer2()<800000) {
-            if (b.isModTempResist) {
-              mech.damage(0.00006 * game.dmgScale);
-            } else {
-              mech.damage(0.0003 * game.dmgScale);
-            }
+            mech.damage(0.0003 * game.dmgScale);
             if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.004
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
@@ -361,12 +356,7 @@ const mobs = {
           if (!mech.isStealth) vertexCollision(this.position, look, [player]);
           // hitting player
           if (best.who === player) {
-            if (b.isModTempResist) {
-              dmg = 0.0004 * game.dmgScale;
-            } else {
-              dmg = 0.002 * game.dmgScale;
-            }
-
+            dmg = 0.002 * game.dmgScale;
             mech.damage(dmg);
             //draw damage
             ctx.fillStyle = color;
@@ -915,8 +905,8 @@ const mobs = {
         const angle = Math.atan2(unitVector.y, unitVector.x);
         Matter.Body.setAngle(this, angle - Math.PI);
       },
-      explode() {
-        mech.damage(Math.min(Math.max(0.02 * Math.sqrt(this.mass), 0.01), 0.35) * game.dmgScale);
+      explode(mass = this.mass) {
+        mech.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * game.dmgScale);
         this.dropPowerUp = false;
         this.death(); //death with no power up or body
       },

@@ -458,7 +458,7 @@ const mech = {
     if (b.isModDroneOnDamage) {
       const len = (dmg - 0.08 + 0.05 * Math.random()) / 0.05
       for (let i = 0; i < len; i++) {
-        if (Math.random() < 0.6) b.guns[13].fire() //spawn drone
+        if (Math.random() < 0.6) b.drone() //spawn drone
       }
     }
 
@@ -886,20 +886,20 @@ const mech = {
       mech.holdingTarget = null
       //knock backs
       const unit = Matter.Vector.normalise(Matter.Vector.sub(player.position, who.position))
-      const mass = Math.min(Math.sqrt(who.mass), 3.5); //large masses above 4*4 can start to overcome the push back
+      const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
       Matter.Body.setVelocity(who, {
-        x: player.velocity.x - (15 * unit.x) / mass,
-        y: player.velocity.y - (15 * unit.y) / mass
+        x: player.velocity.x - (15 * unit.x) / massRoot,
+        y: player.velocity.y - (15 * unit.y) / massRoot
       });
       if (mech.crouch) {
         Matter.Body.setVelocity(player, {
-          x: player.velocity.x + 0.4 * unit.x * mass,
-          y: player.velocity.y + 0.4 * unit.y * mass
+          x: player.velocity.x + 0.4 * unit.x * massRoot,
+          y: player.velocity.y + 0.4 * unit.y * massRoot
         });
       } else {
         Matter.Body.setVelocity(player, {
-          x: player.velocity.x + 5 * unit.x * mass,
-          y: player.velocity.y + 5 * unit.y * mass
+          x: player.velocity.x + 5 * unit.x * massRoot,
+          y: player.velocity.y + 5 * unit.y * massRoot
         });
       }
 
@@ -1086,7 +1086,7 @@ const mech = {
             mech.holding();
             mech.throw();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-            const DRAIN = 0.0027
+            const DRAIN = 0.0023
             if (mech.fieldMeter > DRAIN) {
               mech.fieldMeter -= DRAIN;
 
@@ -1140,7 +1140,7 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br><strong>decreased</strong> <strong>shield</strong> range and efficiency",
+      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br><em>effective at close range</em>",
       effect: () => {
         mech.fieldMode = 2;
         mech.fieldText();
@@ -1289,10 +1289,16 @@ const mech = {
               }
               ctx.lineWidth = 2 * Math.random();
               ctx.stroke();
+              //draw shield around player
+              const pushRange = 110;
+              ctx.beginPath();
+              ctx.arc(mech.pos.x, mech.pos.y, pushRange, 0, 2 * Math.PI);
+              ctx.fillStyle = "rgba(255,0,255,0.05)"
+              ctx.fill();
 
               mech.grabPowerUp();
               mech.lookForPickUp();
-              mech.pushMobs360(110);
+              mech.pushMobs360(pushRange);
               // mech.pushBody360(100); //disabled because doesn't work at short range
             } else {
               mech.fieldCDcycle = mech.cycle + 120; //if out of energy
@@ -1395,13 +1401,13 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "oscillating <strong>shields</strong> surround you <strong>constantly</strong><br> <strong>decreased</strong> <strong class='color-f'>energy</strong> regeneration",
+      description: "three oscillating <strong>shields</strong> are perminantly active<br><strong class='color-f'>energy</strong> regenerates at normal rate",
       effect: () => {
         mech.fieldMode = 4;
         mech.fieldText();
         mech.setHoldDefaults();
-        mech.fieldRegen *= 0.6;
-        mech.fieldShieldingScale = 1.5;
+        // mech.fieldRegen *= 0.6;
+        mech.fieldShieldingScale = 1.33;
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1440,17 +1446,16 @@ const mech = {
     },
     {
       name: "nano-scale manufacturing",
-      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>3x</strong> <strong class='color-f'>energy</strong> regeneration",
+      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>2x</strong> <strong class='color-f'>energy</strong> regeneration",
       effect: () => {
-        let gunIndex = 13 //Math.random() < 0.5 ? 13 : 14
         mech.fieldMode = 5;
         mech.fieldText();
         mech.setHoldDefaults();
-        mech.fieldRegen *= 3;
+        mech.fieldRegen *= 2;
         mech.hold = function () {
           if (mech.fieldMeter > mech.fieldEnergyMax - 0.02) {
-            mech.fieldMeter -= 0.43;
-            b.guns[gunIndex].fire() //spawn drone
+            mech.fieldMeter -= 0.32;
+            b.drone(1)
             mech.fireCDcycle = mech.cycle + 25; // set fire cool down to prevent +energy from making huge numbers of drones
           }
           if (mech.isHolding) {
