@@ -191,18 +191,18 @@ const b = {
     },
     {
       name: "overcharge",
-      description: "charge <strong class='color-f'>energy</strong> <strong>25%</strong> beyond your <strong>maximum</strong>",
+      description: "charge <strong class='color-f'>energy</strong> <strong>33%</strong> beyond your <strong>maximum</strong>",
       have: false, //16
       effect: () => {
-        mech.fieldEnergyMax = 1.25
+        mech.fieldEnergyMax = 1.33
       }
     },
     {
       name: "supersaturation",
-      description: "<strong class='color-h'>heal</strong> <strong>25%</strong> beyond your <strong>max health</strong>",
+      description: "<strong class='color-h'>heal</strong> <strong>33%</strong> beyond your <strong>max health</strong>",
       have: false, //17
       effect: () => {
-        mech.maxHealth = 1.25
+        mech.maxHealth = 1.33
       }
     },
     {
@@ -215,7 +215,7 @@ const b = {
     },
     {
       name: "mass-energy equivalence",
-      description: "convert the mass of <strong>power ups</strong> into <strong class='color-f'>energy</strong><br>power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +3%",
+      description: "convert the mass of <strong>power ups</strong> into <strong class='color-f'>energy</strong><br>power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +5%",
       have: false, //19
       effect: () => {
         b.isModMassEnergy = true // used in mech.usePowerUp
@@ -1830,12 +1830,11 @@ const b = {
     },
     {
       name: "pulse", //15
-      description: "emit a pulse of collimation coherent light<br>use <strong class='color-f'>energy</strong> to induce an <strong class='color-e'>explosion</strong>",
+      description: "emit an <strong class='color-e'>explosive</strong> laser pulse<br>each pulse uses 20% of your <strong class='color-f'>energy</strong>",
       ammo: 0,
       ammoPack: Infinity,
       have: false,
       isStarterGun: true,
-      count: 0,
       fire() {
         //calculate laser collision
         let best;
@@ -1910,28 +1909,24 @@ const b = {
           };
         }
 
-        //draw blowtorch laser beam
-        ctx.strokeStyle = "rgba(255,0,0,0.15)"
-        ctx.lineWidth = 16
+        //draw laser beam
+        ctx.strokeStyle = "rgba(255,0,0,0.2)"
+        ctx.lineWidth = 25
         ctx.beginPath();
         ctx.moveTo(path[0].x, path[0].y);
         ctx.lineTo(path[1].x, path[1].y);
         ctx.stroke();
         ctx.strokeStyle = "#f00";
-        ctx.lineWidth = 2.5
+        ctx.lineWidth = 4
         ctx.beginPath();
         ctx.moveTo(path[0].x, path[0].y);
         ctx.lineTo(path[1].x, path[1].y);
         ctx.stroke();
 
-        this.count++
-        if (this.count > 2) {
-          this.count = 0;
-          mech.fireCDcycle = mech.cycle + Math.floor(30 * b.modFireRate); // cool down
-          const energy = Math.min(0.2, mech.fieldMeter * 0.3)
-          if (best.who) b.explosion(path[1], 1300 * energy)
-          mech.fieldMeter -= energy
-        }
+        const energy = mech.fieldMeter * 0.2
+        mech.fieldMeter -= energy
+        if (best.who) b.explosion(path[1], 1300 * energy)
+        mech.fireCDcycle = mech.cycle + Math.floor(20 * b.modFireRate); // cool down
       }
     },
     {

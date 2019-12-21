@@ -522,7 +522,7 @@ const mech = {
     powerUp.splice(i, 1);
     if (b.isModMassEnergy) {
       mech.fieldMeter = mech.fieldEnergyMax;
-      mech.addHealth(0.03);
+      mech.addHealth(0.05);
     }
   },
   drawLeg(stroke) {

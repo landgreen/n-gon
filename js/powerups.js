@@ -41,7 +41,7 @@ const powerUps = {
         target = b.guns[Math.floor(Math.random() * b.guns.length)];
       }
       if (target.ammo === Infinity) {
-        mech.fieldMeter = 1;
+        mech.fieldMeter = mech.fieldEnergyMax;
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
