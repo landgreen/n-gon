@@ -301,7 +301,7 @@ const mech = {
       game.clearNow = true; //triggers a map reset
 
       //count mods
-      let totalMods = -2; //lose the immortality mod and one more, so -2 
+      let totalMods = -2; //lose 2 mods for balance reasons
       for (let i = 0; i < b.mods.length; i++) {
         if (b.mods[i].have) totalMods++
       }
@@ -311,9 +311,9 @@ const mech = {
         for (let i = 0; i < totalMods; i++) {
           //find what mods I don't have
           let options = [];
-          for (let i = 0; i < b.mods.length; i++) {
+          for (let i = 0, len = b.mods.length; i < len; i++) {
             //can't get quantum immortality again 
-            if (i !== 7 && !b.mods[i].have) options.push(i);
+            if (b.mods[i].name !== "quantum immortality" && !b.mods[i].have) options.push(i);
           }
           //add a new mod
           if (options.length > 0) {
@@ -1287,15 +1287,14 @@ const mech = {
               ctx.lineWidth = 2 * Math.random();
               ctx.stroke();
               //draw shield around player
-              const pushRange = 110;
               ctx.beginPath();
-              ctx.arc(mech.pos.x, mech.pos.y, pushRange, 0, 2 * Math.PI);
+              ctx.arc(mech.pos.x, mech.pos.y, 110, 0, 2 * Math.PI);
               ctx.fillStyle = "rgba(255,0,255,0.05)"
               ctx.fill();
 
               mech.grabPowerUp();
               mech.lookForPickUp();
-              mech.pushMobs360(pushRange);
+              mech.pushMobs360(120);
               // mech.pushBody360(100); //disabled because doesn't work at short range
             } else {
               mech.fieldCDcycle = mech.cycle + 120; //if out of energy
@@ -1398,7 +1397,7 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are perminantly active<br><strong class='color-f'>energy</strong> regenerates at normal rate",
+      description: "three oscillating <strong>shields</strong> are perminantly active<br><strong class='color-f'>energy</strong> regenerates while field is active",
       effect: () => {
         mech.fieldMode = 4;
         mech.fieldText();

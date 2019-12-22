@@ -134,7 +134,7 @@ const b = {
     },
     {
       name: "ablative synthesis",
-      description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after taking <strong class='color-d'>damage</strong>",
+      description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
       have: false, //9
       effect: () => { //makes dangerous situations more survivable
         b.isModDroneOnDamage = true;
@@ -142,32 +142,24 @@ const b = {
     },
     {
       name: "annihilation",
-      description: "after <strong>touching</strong> enemies, they are annihilated<br><em>doesn't trigger health or energy transfer</em>",
+      description: "after <strong>touching</strong> enemies, they are annihilated",
       have: false, //10
       effect: () => { //good with mods that heal: superconductive healing, entropy transfer 
         b.modAnnihilation = true
       }
     },
     {
-      name: "anti-matter cores",
-      description: "your <strong class='color-e'>explosions</strong> are doubled in <strong>size</strong><br>immune to <strong class='color-d'>damage</strong> from <strong class='color-e'>explosions</strong>",
+      name: "high explosives",
+      description: "<strong class='color-e'>explosions</strong> are 50% <strong>larger</strong><br>immune to <strong>harm</strong> from <strong class='color-e'>explosions</strong>",
       have: false, //11
       effect: () => {
-        b.modExplosionRadius = 1.5;
+        b.modExplosionRadius = 1.3;
         b.isModImmuneExplosion = true;
       }
     },
-    // {
-    //   name: "ceramic plating",
-    //   description: "protection from to high <strong>temperatures</strong><br>5x less <strong class='color-d'>damage</strong> from <strong class='color-e'>explosions</strong> and lasers",
-    //   have: false, //12
-    //   effect: () => {
-    //     b.isModImmuneExplosion = true; //good for guns with explosions
-    //   }
-    // },
     {
       name: "entanglement",
-      description: "using your first gun reduces <strong class='color-d'>damage</strong> taken<br><em>scales by <strong>7%</strong> for each gun in your inventory</em>",
+      description: "using your first gun reduces <strong>harm</strong><br>scales by <strong>7%</strong> for each gun in your inventory",
       have: false, //13
       effect: () => { // good with laser-bots
         b.isModMonogamy = true
@@ -241,7 +233,7 @@ const b = {
     },
     {
       name: "squirrel-cage rotor",
-      description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>falling</strong> <strong class='color-d'>damage</strong>",
+      description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
       have: false, //22
       effect: () => { // good with melee builds, content skipping builds
         b.modSquirrelFx = 1.2;
@@ -1306,17 +1298,17 @@ const b = {
       name: "grenades", //8
       description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
       ammo: 0,
-      ammoPack: 11,
+      ammoPack: 12,
       have: false,
       isStarterGun: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 15 * b.modBulletSize, b.fireAttributes(dir, false));
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20 * b.modBulletSize, b.fireAttributes(dir, false));
         b.fireProps(mech.crouch ? 30 : 20, mech.crouch ? 43 : 32, dir, me); //cd , speed
-        // Matter.Body.setDensity(bullet[me], 0.000001);
+        Matter.Body.setDensity(bullet[me], 0.0005);
         bullet[me].totalCycles = 100;
-        bullet[me].endCycle = game.cycle + Math.floor((mech.crouch ? 120 : 60) * b.isModBulletsLastLonger);
+        bullet[me].endCycle = game.cycle + Math.floor((mech.crouch ? 120 : 80) * b.isModBulletsLastLonger);
         bullet[me].restitution = 0.5;
         bullet[me].explodeRad = 290;
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
@@ -1327,7 +1319,7 @@ const b = {
         };
         bullet[me].do = function () {
           //extra gravity for harder arcs
-          this.force.y += this.mass * 0.002;
+          this.force.y += this.mass * 0.0025;
         };
       }
     }, {
@@ -1556,7 +1548,7 @@ const b = {
     },
     {
       name: "drones", //12
-      description: "deploy <strong>drones</strong> that seek out enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
+      description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
       ammo: 0,
       ammoPack: 17,
       have: false,
@@ -1568,7 +1560,7 @@ const b = {
     },
     {
       name: "guardian", //13
-      description: "deploy a bot that protect you for one level<br>uses a short range laser that drains <strong class='color-f'>energy</strong>",
+      description: "deploy a bot that <strong>protects</strong> you for <strong>one level</strong><br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
       ammo: 0,
       ammoPack: 1,
       have: false,
@@ -1668,16 +1660,13 @@ const b = {
     },
     {
       name: "laser", //14
-      description: "emit a beam of collimation coherent light<br>uses <strong class='color-f'>energy</strong> instead of ammunition",
+      description: "emit a beam of collimated coherent <strong>light</strong><br>uses <strong class='color-f'>energy</strong> instead of ammunition",
       ammo: 0,
-      // ammoPack: 350,
       ammoPack: Infinity,
       have: false,
       isStarterGun: true,
       fire() {
-        // mech.fireCDcycle = mech.cycle + 1
-        //laser drains energy as well as bullets
-        const FIELD_DRAIN = 0.002
+        const FIELD_DRAIN = 0.002 //laser drains energy as well as bullets
         const damage = 0.05
         if (mech.fieldMeter < FIELD_DRAIN) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
@@ -1830,7 +1819,7 @@ const b = {
     },
     {
       name: "pulse", //15
-      description: "emit an <strong class='color-e'>explosive</strong> laser pulse<br>each pulse uses 20% of your <strong class='color-f'>energy</strong>",
+      description: "power a <strong>laser</strong> that initiates a fusion <strong class='color-e'>explosion</strong><br>each pulse drains 25% of your current <strong class='color-f'>energy</strong>",
       ammo: 0,
       ammoPack: Infinity,
       have: false,
@@ -1838,15 +1827,14 @@ const b = {
       fire() {
         //calculate laser collision
         let best;
-        let range = 6000
-        const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
+        let range = 4000
         const path = [{
-            x: mech.pos.x + 20 * Math.cos(dir),
-            y: mech.pos.y + 20 * Math.sin(dir)
+            x: mech.pos.x + 20 * Math.cos(mech.angle),
+            y: mech.pos.y + 20 * Math.sin(mech.angle)
           },
           {
-            x: mech.pos.x + range * Math.cos(dir),
-            y: mech.pos.y + range * Math.sin(dir)
+            x: mech.pos.x + range * Math.cos(mech.angle),
+            y: mech.pos.y + range * Math.sin(mech.angle)
           }
         ];
         const vertexCollision = function (v1, v1End, domain) {
@@ -1909,10 +1897,11 @@ const b = {
           };
         }
 
-        const energy = mech.fieldMeter * 0.2
+        //use energy to explode
+        const energy = mech.fieldMeter * 0.25
         mech.fieldMeter -= energy
         if (best.who) b.explosion(path[1], 1300 * energy)
-        mech.fireCDcycle = mech.cycle + Math.floor(20 * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
 
         //draw laser beam
         ctx.beginPath();
@@ -1928,17 +1917,17 @@ const b = {
         ctx.lineWidth = 4
         ctx.stroke();
 
-        //draw little dot sparkles
+        //draw little dots along the laser path
         const sub = Matter.Vector.sub(path[1], path[0])
         const mag = Matter.Vector.magnitude(sub)
         for (let i = 0, len = Math.floor(mag * 0.03 * energy / 0.2); i < len; i++) {
           const dist = Math.random()
           game.drawList.push({
-            x: path[0].x + sub.x * dist + 30 * (Math.random() - 0.5),
-            y: path[0].y + sub.y * dist + 30 * (Math.random() - 0.5),
-            radius: 1 + 2 * Math.random(),
+            x: path[0].x + sub.x * dist + 13 * (Math.random() - 0.5),
+            y: path[0].y + sub.y * dist + 13 * (Math.random() - 0.5),
+            radius: 1 + 4 * Math.random(),
             color: "rgba(255,0,0,0.5)",
-            time: Math.floor(2 + 7 * Math.random())
+            time: Math.floor(2 + 33 * Math.random() * Math.random())
           });
         }
       }
