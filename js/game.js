@@ -301,8 +301,11 @@ const game = {
       } else if (keys[53]) { // 5
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
       } else if (keys[54]) { // 6  spawn mob
+
         const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+        spawn.allowShields = false;
         spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
+        spawn.allowShields = true;
       } else if (keys[55]) { // 7  spawn body
         index = body.length
         spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
@@ -319,8 +322,9 @@ const game = {
       } else if (keys[71]) { // give all guns with G
         // b.giveGuns("all", 1000)
         powerUps.gun.effect()
-      } else if (keys[72]) { // power ups with H
+      } else if (keys[72]) { // heal with H
         mech.addHealth(Infinity)
+        mech.fieldMeter = mech.fieldEnergyMax;
       } else if (keys[89]) { //add all mods with y
         powerUps.mod.effect()
       } else if (keys[82]) { // teleport to mouse with R
@@ -330,6 +334,8 @@ const game = {
           y: 0
         });
         // game.noCameraScroll()
+      } else if (keys[85]) { // next level with U
+        level.zoneActions.nextLevel();
       }
     }
   },

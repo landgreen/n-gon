@@ -1269,9 +1269,6 @@ const mech = {
               ctx.stroke();
               ctx.strokeStyle = "#f0f";
               ctx.lineWidth = 2
-              ctx.beginPath();
-              ctx.moveTo(path[0].x, path[0].y);
-              ctx.lineTo(path[1].x, path[1].y);
               ctx.stroke();
 
               //draw electricity

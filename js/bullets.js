@@ -816,14 +816,14 @@ const b = {
       name: "super balls", //2
       description: "fire balls that <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 15,
+      ammoPack: 16,
       have: false,
       isStarterGun: true,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 15) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 18) * b.modFireRate); // cool down
         b.muzzleFlash(20);
         // mobs.alert(450);
-        const SPEED = mech.crouch ? 45 : 28
+        const SPEED = mech.crouch ? 45 : 26
         const SPREAD = mech.crouch ? 0.04 : 0.14
         let dir = mech.angle - SPREAD;
         for (let i = 0; i < 3; i++) {
@@ -1909,24 +1909,38 @@ const b = {
           };
         }
 
-        //draw laser beam
-        ctx.strokeStyle = "rgba(255,0,0,0.2)"
-        ctx.lineWidth = 25
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        ctx.lineTo(path[1].x, path[1].y);
-        ctx.stroke();
-        ctx.strokeStyle = "#f00";
-        ctx.lineWidth = 4
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        ctx.lineTo(path[1].x, path[1].y);
-        ctx.stroke();
-
         const energy = mech.fieldMeter * 0.2
         mech.fieldMeter -= energy
         if (best.who) b.explosion(path[1], 1300 * energy)
         mech.fireCDcycle = mech.cycle + Math.floor(20 * b.modFireRate); // cool down
+
+        //draw laser beam
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        ctx.lineTo(path[1].x, path[1].y);
+        ctx.strokeStyle = "rgba(255,0,0,0.13)"
+        ctx.lineWidth = 60 * energy / 0.2
+        ctx.stroke();
+        ctx.strokeStyle = "rgba(255,0,0,0.2)"
+        ctx.lineWidth = 18
+        ctx.stroke();
+        ctx.strokeStyle = "#f00";
+        ctx.lineWidth = 4
+        ctx.stroke();
+
+        //draw little dot sparkles
+        const sub = Matter.Vector.sub(path[1], path[0])
+        const mag = Matter.Vector.magnitude(sub)
+        for (let i = 0, len = Math.floor(mag * 0.03 * energy / 0.2); i < len; i++) {
+          const dist = Math.random()
+          game.drawList.push({
+            x: path[0].x + sub.x * dist + 30 * (Math.random() - 0.5),
+            y: path[0].y + sub.y * dist + 30 * (Math.random() - 0.5),
+            radius: 1 + 2 * Math.random(),
+            color: "rgba(255,0,0,0.5)",
+            time: Math.floor(2 + 7 * Math.random())
+          });
+        }
       }
     },
     {
