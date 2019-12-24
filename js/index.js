@@ -296,33 +296,98 @@ document.getElementById("body-damage").addEventListener("input", () => {
 //   }
 // }
 
-function shuffle(array) {
-  var currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-  return array;
-}
+// function stuff() {
+//   game.cycle++; //tracks game cycles
+//   mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
+//   if (game.clearNow) {
+//     game.clearNow = false;
+//     game.clearMap();
+//     level.start();
+//   }
+//   Engine.update(engine, game.delta);
+// }
 
+// function theRest() {
+//   if (game.testing) {
+//     mech.draw();
+//     game.draw.wireFrame();
+//     game.draw.cons();
+//     game.draw.testing();
+//     game.drawCircle();
+//     ctx.restore();
+//     game.testingOutput();
+//   } else {
+//     level.drawFillBGs();
+//     level.exit.draw();
+//     level.enter.draw();
+//     game.draw.powerUp();
+//     mobs.draw();
+//     game.draw.cons();
+//     game.draw.body();
+//     mobs.loop();
+//     mech.draw();
+//     mech.hold();
+//     level.drawFills();
+//     game.draw.drawMapPath();
+//     b.fire();
+//     b.bulletActions();
+//     mobs.healthBar();
+//     game.drawCircle();
+//     ctx.restore();
+//   }
+// }
 
+// const loop = [
+//   stuff,
+//   game.gravity,
+//   game.wipe,
+//   game.wipe,
+//   game.textLog,
+//   mech.keyMove,
+//   level.checkZones,
+//   level.checkQuery,
+//   mech.move,
+//   mech.look,
+//   game.fallChecks,
+//   game.camera,
+
+//   level.drawFillBGs,
+//   level.exit.draw,
+//   level.enter.draw,
+//   game.draw.powerUp,
+//   mobs.draw,
+//   game.draw.cons,
+//   game.draw.body,
+//   mobs.loop,
+//   mech.draw,
+//   mech.hold,
+
+//   theRest,
+//   game.drawCursor
+// ]
 
 //main loop ************************************************************
 //**********************************************************************
+game.loop = game.normalLoop;
+
 function cycle() {
   if (!game.paused) requestAnimationFrame(cycle);
   const now = Date.now();
   const elapsed = now - game.then; // calc elapsed time since last loop
   if (elapsed > game.fpsInterval) { // if enough time has elapsed, draw the next frame
     game.then = now - (elapsed % game.fpsInterval); // Get ready for next frame by setting then=now.   Also, adjust for fpsInterval not being multiple of 16.67
+
+    game.cycle++; //tracks game cycles
+    mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
+    if (game.clearNow) {
+      game.clearNow = false;
+      game.clearMap();
+      level.start();
+    }
+
     game.loop();
+    // for (let i = 0, len = loop.length; i < len; i++) {
+    //   loop[i]()
+    // }
   }
 }

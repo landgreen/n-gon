@@ -854,7 +854,7 @@ const b = {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(dir), mech.pos.y + 40 * Math.sin(dir), 32 * size * b.modBulletSize, 0.8 * size * b.modBulletSize, b.fireAttributes(dir));
           bullet[me].endCycle = game.cycle + Math.floor(180 * b.isModBulletsLastLonger);
-          bullet[me].dmg = 0.15 * size + b.modExtraDmg;
+          bullet[me].dmg = 0.13 * size + b.modExtraDmg;
           bullet[me].do = function () {
             this.force.y += this.mass * 0.0002; //low gravity
           };
@@ -867,11 +867,11 @@ const b = {
 
         if (mech.crouch) {
           for (let i = 0; i < 3; i++) {
-            spawnFlechette(mech.angle + 0.02 * (Math.random() - 0.5), 35 + 4 * i, 1.55)
+            spawnFlechette(mech.angle + 0.02 * (Math.random() - 0.5), 50 + 4 * i, 1.55)
           }
         } else {
-          for (let i = 0; i < 9; i++) {
-            spawnFlechette(mech.angle + 0.12 * (Math.random() - 0.5), 30 + 8 * Math.random())
+          for (let i = 0; i < 8; i++) {
+            spawnFlechette(mech.angle + 0.12 * (Math.random() - 0.5), 43 + 8 * Math.random())
           }
         }
       }
@@ -1972,7 +1972,7 @@ const b = {
             if (!this.target && who.alive && who.dropPowerUp) {
               this.target = who;
               this.collisionFilter.category = cat.body;
-              this.collisionFilter.mask = cat.player
+              this.collisionFilter.mask = null;
 
               let bestVertexDistance = Infinity
               let bestVertex = null

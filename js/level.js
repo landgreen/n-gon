@@ -14,18 +14,18 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(5)
+      // b.giveGuns(16)
       // mech.fieldUpgrades[2].effect();
       // b.giveMod(21)
 
-      this.intro(); //starting level
-      // this.testingMap();
-      // this.bosses();
-      // this.aerie();
-      // this.rooftops();
-      // this.warehouse();
-      // this.highrise();
-      // this.office();
+      level.intro(); //starting level
+      // level.testingMap();
+      // level.bosses();
+      // level.aerie();
+      // level.rooftops();
+      // level.warehouse();
+      // level.highrise();
+      // level.office();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       // spawn.pickList = ["focuser", "focuser"]
@@ -70,7 +70,7 @@ const level = {
 
     level.exit.x = 3500;
     level.exit.y = -870;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.testingMap.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     document.body.style.backgroundColor = "#dcdcde";
 
 
@@ -160,7 +160,7 @@ const level = {
     level.enter.y = mech.spawnPos.y + 20;
     level.exit.x = 6500;
     level.exit.y = -230;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     spawn.mapRect(-950, 0, 8200, 800); //ground
     spawn.mapRect(-950, -1200, 800, 1400); //left wall
@@ -217,7 +217,7 @@ const level = {
     level.enter.y = -400;
     level.exit.x = 2800;
     level.exit.y = -335;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     document.body.style.backgroundColor = "#fff";
     level.fillBG.push({
       x: 2600,
@@ -383,7 +383,7 @@ const level = {
     }
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     spawn.debris(1650, -1800, 3800, 20); //20 debris per level
     powerUps.spawnStartingPowerUps(2450, -1675);
@@ -550,7 +550,7 @@ const level = {
 
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     powerUps.spawnStartingPowerUps(1075, -550);
     spawn.debris(-250, 50, 1650, 2); //20 debris per level
     spawn.debris(2475, 0, 750, 2); //20 debris per level
@@ -718,7 +718,7 @@ const level = {
     level.enter.y = mech.spawnPos.y + 20;
     level.exit.x = 1500;
     level.exit.y = -1875;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     powerUps.spawnStartingPowerUps(1475, -1175);
     spawn.debris(0, -2200, 4500, 20); //20 debris per level
@@ -870,7 +870,7 @@ const level = {
     level.enter.y = mech.spawnPos.y + 20;
     level.exit.x = -4275;
     level.exit.y = -2805;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     powerUps.spawnStartingPowerUps(-2550, -700);
 
     // spawn.laserZone(-550, -350, 10, 400, 0.3)
@@ -1048,7 +1048,7 @@ const level = {
     level.enter.y = mech.spawnPos.y + 20;
     level.exit.x = 425;
     level.exit.y = -35;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     //level.addQueryRegion(-600, -250, 180, 420, "death", [[player]],{});
 
     spawn.debris(-2250, 1330, 3000, 7); //20 debris per level
@@ -1233,7 +1233,7 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
-    this.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     document.body.style.backgroundColor = "#e0e5e0";
     //foreground
@@ -1386,11 +1386,11 @@ const level = {
     y: 0,
     draw() {
       ctx.beginPath();
-      ctx.moveTo(this.x, this.y + 30);
-      ctx.lineTo(this.x, this.y - 80);
-      ctx.bezierCurveTo(this.x, this.y - 170, this.x + 100, this.y - 170, this.x + 100, this.y - 80);
-      ctx.lineTo(this.x + 100, this.y + 30);
-      ctx.lineTo(this.x, this.y + 30);
+      ctx.moveTo(level.enter.x, level.enter.y + 30);
+      ctx.lineTo(level.enter.x, level.enter.y - 80);
+      ctx.bezierCurveTo(level.enter.x, level.enter.y - 170, level.enter.x + 100, level.enter.y - 170, level.enter.x + 100, level.enter.y - 80);
+      ctx.lineTo(level.enter.x + 100, level.enter.y + 30);
+      ctx.lineTo(level.enter.x, level.enter.y + 30);
       ctx.fillStyle = "#ccc";
       ctx.fill();
     }
@@ -1400,11 +1400,11 @@ const level = {
     y: 0,
     draw() {
       ctx.beginPath();
-      ctx.moveTo(this.x, this.y + 30);
-      ctx.lineTo(this.x, this.y - 80);
-      ctx.bezierCurveTo(this.x, this.y - 170, this.x + 100, this.y - 170, this.x + 100, this.y - 80);
-      ctx.lineTo(this.x + 100, this.y + 30);
-      ctx.lineTo(this.x, this.y + 30);
+      ctx.moveTo(level.exit.x, level.exit.y + 30);
+      ctx.lineTo(level.exit.x, level.exit.y - 80);
+      ctx.bezierCurveTo(level.exit.x, level.exit.y - 170, level.exit.x + 100, level.exit.y - 170, level.exit.x + 100, level.exit.y - 80);
+      ctx.lineTo(level.exit.x + 100, level.exit.y + 30);
+      ctx.lineTo(level.exit.x, level.exit.y + 30);
       ctx.fillStyle = "#0ff";
       ctx.fill();
     }
@@ -1427,20 +1427,20 @@ const level = {
   },
   zones: [], //zone do actions when player is in a region   // to effect everything use a query
   checkZones() {
-    for (let i = 0, len = this.zones.length; i < len; ++i) {
+    for (let i = 0, len = level.zones.length; i < len; ++i) {
       if (
-        player.position.x > this.zones[i].x1 &&
-        player.position.x < this.zones[i].x2 &&
-        player.position.y > this.zones[i].y1 &&
-        player.position.y < this.zones[i].y2
+        player.position.x > level.zones[i].x1 &&
+        player.position.x < level.zones[i].x2 &&
+        player.position.y > level.zones[i].y1 &&
+        player.position.y < level.zones[i].y2
       ) {
-        this.zoneActions[this.zones[i].action](i);
+        level.zoneActions[level.zones[i].action](i);
         break;
       }
     }
   },
   addZone(x, y, width, height, action, info) {
-    this.zones[this.zones.length] = {
+    level.zones[level.zones.length] = {
       x1: x,
       y1: y - 150,
       x2: x + width,
@@ -1509,7 +1509,7 @@ const level = {
   addQueryRegion(x, y, width, height, action, groups = [
     [player], body, mob, powerUp, bullet
   ], info) {
-    this.queryList[this.queryList.length] = {
+    level.queryList[level.queryList.length] = {
       bounds: {
         min: {
           x: x,

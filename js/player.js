@@ -133,10 +133,10 @@ const mech = {
   transX: 0,
   transY: 0,
   move() {
-    this.pos.x = player.position.x;
-    this.pos.y = playerBody.position.y - this.yOff;
-    this.Vx = player.velocity.x;
-    this.Vy = player.velocity.y;
+    mech.pos.x = player.position.x;
+    mech.pos.y = playerBody.position.y - mech.yOff;
+    mech.Vx = player.velocity.x;
+    mech.Vy = player.velocity.y;
   },
   transSmoothX: 0,
   transSmoothY: 0,
@@ -144,22 +144,22 @@ const mech = {
   // mouseZoom: 0,
   look() {
     //always on mouse look
-    this.angle = Math.atan2(
-      game.mouseInGame.y - this.pos.y,
-      game.mouseInGame.x - this.pos.x
+    mech.angle = Math.atan2(
+      game.mouseInGame.y - mech.pos.y,
+      game.mouseInGame.x - mech.pos.x
     );
     //smoothed mouse look translations
     const scale = 0.8;
-    this.transSmoothX = canvas.width2 - this.pos.x - (game.mouse.x - canvas.width2) * scale;
-    this.transSmoothY = canvas.height2 - this.pos.y - (game.mouse.y - canvas.height2) * scale;
+    mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
+    mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
 
-    this.transX += (this.transSmoothX - this.transX) * 0.07;
-    this.transY += (this.transSmoothY - this.transY) * 0.07;
+    mech.transX += (mech.transSmoothX - mech.transX) * 0.07;
+    mech.transY += (mech.transSmoothY - mech.transY) * 0.07;
   },
   doCrouch() {
-    if (!this.crouch) {
-      this.crouch = true;
-      this.yOffGoal = this.yOffWhen.crouch;
+    if (!mech.crouch) {
+      mech.crouch = true;
+      mech.yOffGoal = mech.yOffWhen.crouch;
       Matter.Body.translate(playerHead, {
         x: 0,
         y: 40
@@ -167,9 +167,9 @@ const mech = {
     }
   },
   undoCrouch() {
-    if (this.crouch) {
-      this.crouch = false;
-      this.yOffGoal = this.yOffWhen.stand;
+    if (mech.crouch) {
+      mech.crouch = false;
+      mech.yOffGoal = mech.yOffWhen.stand;
       Matter.Body.translate(playerHead, {
         x: 0,
         y: -40
@@ -179,32 +179,32 @@ const mech = {
   hardLandCD: 0,
   enterAir() {
     //triggered in engine.js on collision
-    this.onGround = false;
-    this.hardLandCD = 0 // disable hard landing
-    if (this.isHeadClear) {
-      if (this.crouch) {
-        this.undoCrouch();
+    mech.onGround = false;
+    mech.hardLandCD = 0 // disable hard landing
+    if (mech.isHeadClear) {
+      if (mech.crouch) {
+        mech.undoCrouch();
       }
-      this.yOffGoal = this.yOffWhen.jump;
+      mech.yOffGoal = mech.yOffWhen.jump;
     }
   },
   //triggered in engine.js on collision
   enterLand() {
-    this.onGround = true;
-    if (this.crouch) {
-      if (this.isHeadClear) {
-        this.undoCrouch();
+    mech.onGround = true;
+    if (mech.crouch) {
+      if (mech.isHeadClear) {
+        mech.undoCrouch();
       } else {
-        this.yOffGoal = this.yOffWhen.crouch;
+        mech.yOffGoal = mech.yOffWhen.crouch;
       }
     } else {
       //sets a hard land where player stays in a crouch for a bit and can't jump
       //crouch is forced in keyMove() on ground section below
       const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 20 down velocity, unless the player is holding something
       if (momentum > 120) {
-        this.doCrouch();
-        this.yOff = this.yOffWhen.jump;
-        this.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
+        mech.doCrouch();
+        mech.yOff = mech.yOffWhen.jump;
+        mech.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
         if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
           mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
@@ -213,27 +213,27 @@ const mech = {
           mech.damage(dmg);
         }
       } else {
-        this.yOffGoal = this.yOffWhen.stand;
+        mech.yOffGoal = mech.yOffWhen.stand;
       }
     }
   },
   buttonCD_jump: 0, //cool down for player buttons
   keyMove() {
-    if (this.onGround) { //on ground **********************
-      if (this.crouch) {
-        if (!(keys[83] || keys[40]) && this.isHeadClear && this.hardLandCD < mech.cycle) this.undoCrouch();
-      } else if (keys[83] || keys[40] || this.hardLandCD > mech.cycle) {
-        this.doCrouch(); //on ground && not crouched and pressing s or down
-      } else if ((keys[87] || keys[38]) && this.buttonCD_jump + 20 < mech.cycle && this.yOffWhen.stand > 23) {
-        this.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
+    if (mech.onGround) { //on ground **********************
+      if (mech.crouch) {
+        if (!(keys[83] || keys[40]) && mech.isHeadClear && mech.hardLandCD < mech.cycle) mech.undoCrouch();
+      } else if (keys[83] || keys[40] || mech.hardLandCD > mech.cycle) {
+        mech.doCrouch(); //on ground && not crouched and pressing s or down
+      } else if ((keys[87] || keys[38]) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
+        mech.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
 
         //apply a fraction of the jump force to the body the player is jumping off of
         Matter.Body.applyForce(mech.standingOn, mech.pos, {
           x: 0,
-          y: this.jumpForce * 0.12 * Math.min(mech.standingOn.mass, 5)
+          y: mech.jumpForce * 0.12 * Math.min(mech.standingOn.mass, 5)
         });
 
-        player.force.y = -this.jumpForce; //player jump force
+        player.force.y = -mech.jumpForce; //player jump force
         Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
           x: player.velocity.x,
           y: 0
@@ -244,15 +244,15 @@ const mech = {
       //apply a force to move
       if (keys[65] || keys[37]) { //left / a
         if (player.velocity.x > -2) {
-          player.force.x -= this.Fx * 1.5
+          player.force.x -= mech.Fx * 1.5
         } else {
-          player.force.x -= this.Fx
+          player.force.x -= mech.Fx
         }
       } else if (keys[68] || keys[39]) { //right / d
         if (player.velocity.x < 2) {
-          player.force.x += this.Fx * 1.5
+          player.force.x += mech.Fx * 1.5
         } else {
-          player.force.x += this.Fx
+          player.force.x += mech.Fx
         }
       } else {
         const stoppingFriction = 0.92;
@@ -263,7 +263,7 @@ const mech = {
       }
       //come to a stop if fast or if no move key is pressed
       if (player.speed > 4) {
-        const stoppingFriction = (this.crouch) ? 0.65 : 0.89; // this controls speed when crouched
+        const stoppingFriction = (mech.crouch) ? 0.65 : 0.89; // this controls speed when crouched
         Matter.Body.setVelocity(player, {
           x: player.velocity.x * stoppingFriction,
           y: player.velocity.y * stoppingFriction
@@ -273,9 +273,9 @@ const mech = {
     } else { // in air **********************************
       //check for short jumps
       if (
-        this.buttonCD_jump + 60 > mech.cycle && //just pressed jump
+        mech.buttonCD_jump + 60 > mech.cycle && //just pressed jump
         !(keys[87] || keys[38]) && //but not pressing jump key
-        this.Vy < 0 //moving up
+        mech.Vy < 0 //moving up
       ) {
         Matter.Body.setVelocity(player, {
           //reduce player y-velocity every cycle
@@ -285,14 +285,14 @@ const mech = {
       }
       const limit = 125 / player.mass / player.mass
       if (keys[65] || keys[37]) {
-        if (player.velocity.x > -limit) player.force.x -= this.FxAir; // move player   left / a
+        if (player.velocity.x > -limit) player.force.x -= mech.FxAir; // move player   left / a
       } else if (keys[68] || keys[39]) {
-        if (player.velocity.x < limit) player.force.x += this.FxAir; //move player  right / d
+        if (player.velocity.x < limit) player.force.x += mech.FxAir; //move player  right / d
       }
     }
 
     //smoothly move leg height towards height goal
-    this.yOff = this.yOff * 0.85 + this.yOffGoal * 0.15;
+    mech.yOff = mech.yOff * 0.85 + mech.yOffGoal * 0.15;
   },
   alive: true,
   death() {
@@ -395,11 +395,11 @@ const mech = {
         document.title = "n-gon: L" + (game.difficulty) + " " + level.levels[level.onLevel];
       }, 8000);
 
-    } else if (this.alive) { //normal death code here
-      this.alive = false;
+    } else if (mech.alive) { //normal death code here
+      mech.alive = false;
       game.paused = true;
-      this.health = 0;
-      this.displayHealth();
+      mech.health = 0;
+      mech.displayHealth();
       document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
       document.getElementById("fade-out").style.opacity = 1; //slowly fades out
       setTimeout(function () {
@@ -410,32 +410,32 @@ const mech = {
   health: 0,
   maxHealth: 1,
   drawHealth() {
-    if (this.health < 1) {
+    if (mech.health < 1) {
       ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
-      ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, 60, 10);
+      ctx.fillRect(mech.pos.x - mech.radius, mech.pos.y - 50, 60, 10);
       ctx.fillStyle = "#f00";
       ctx.fillRect(
-        this.pos.x - this.radius,
-        this.pos.y - 50,
-        60 * this.health,
+        mech.pos.x - mech.radius,
+        mech.pos.y - 50,
+        60 * mech.health,
         10
       );
     }
   },
   displayHealth() {
     id = document.getElementById("health");
-    id.style.width = Math.floor(300 * this.health) + "px";
+    id.style.width = Math.floor(300 * mech.health) + "px";
     //css animation blink if health is low
-    if (this.health < 0.3) {
+    if (mech.health < 0.3) {
       id.classList.add("low-health");
     } else {
       id.classList.remove("low-health");
     }
   },
   addHealth(heal) {
-    this.health += heal;
-    if (this.health > mech.maxHealth) this.health = mech.maxHealth;
-    this.displayHealth();
+    mech.health += heal;
+    if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+    mech.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
   damage(dmg) {
@@ -444,13 +444,13 @@ const mech = {
         dmg *= 0.93
       }
     }
-    this.health -= dmg;
-    if (this.health < 0) {
-      this.health = 0;
-      this.death();
+    mech.health -= dmg;
+    if (mech.health < 0) {
+      mech.health = 0;
+      mech.death();
       return;
     }
-    this.displayHealth();
+    mech.displayHealth();
     document.getElementById("dmg").style.transition = "opacity 0s";
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
 
@@ -464,7 +464,7 @@ const mech = {
 
     // freeze game and display a full screen red color
     if (dmg > 0.05) {
-      if (dmg > 0.07 && mech.holdingMassScale > 0.2) this.drop(); //drop block if holding
+      if (dmg > 0.07 && mech.holdingMassScale > 0.2) mech.drop(); //drop block if holding
       game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
       game.fpsInterval = 1000 / game.fpsCap;
     } else {
@@ -488,7 +488,7 @@ const mech = {
     // // freeze game and display a full screen red color
     // if (dmg > 0.05) {
     //   if (dmg > 0.07) {
-    //     this.drop(); //drop block if holding
+    //     mech.drop(); //drop block if holding
     //   }
 
     //   game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
@@ -526,83 +526,83 @@ const mech = {
     }
   },
   drawLeg(stroke) {
-    // if (game.mouseInGame.x > this.pos.x) {
+    // if (game.mouseInGame.x > mech.pos.x) {
     if (mech.angle > -Math.PI / 2 && mech.angle < Math.PI / 2) {
-      this.flipLegs = 1;
+      mech.flipLegs = 1;
     } else {
-      this.flipLegs = -1;
+      mech.flipLegs = -1;
     }
     ctx.save();
-    ctx.scale(this.flipLegs, 1); //leg lines
+    ctx.scale(mech.flipLegs, 1); //leg lines
     ctx.beginPath();
-    ctx.moveTo(this.hip.x, this.hip.y);
-    ctx.lineTo(this.knee.x, this.knee.y);
-    ctx.lineTo(this.foot.x, this.foot.y);
+    ctx.moveTo(mech.hip.x, mech.hip.y);
+    ctx.lineTo(mech.knee.x, mech.knee.y);
+    ctx.lineTo(mech.foot.x, mech.foot.y);
     ctx.strokeStyle = stroke;
     ctx.lineWidth = 7;
     ctx.stroke();
 
     //toe lines
     ctx.beginPath();
-    ctx.moveTo(this.foot.x, this.foot.y);
-    ctx.lineTo(this.foot.x - 15, this.foot.y + 5);
-    ctx.moveTo(this.foot.x, this.foot.y);
-    ctx.lineTo(this.foot.x + 15, this.foot.y + 5);
+    ctx.moveTo(mech.foot.x, mech.foot.y);
+    ctx.lineTo(mech.foot.x - 15, mech.foot.y + 5);
+    ctx.moveTo(mech.foot.x, mech.foot.y);
+    ctx.lineTo(mech.foot.x + 15, mech.foot.y + 5);
     ctx.lineWidth = 4;
     ctx.stroke();
 
     //hip joint
     ctx.beginPath();
-    ctx.arc(this.hip.x, this.hip.y, 11, 0, 2 * Math.PI);
+    ctx.arc(mech.hip.x, mech.hip.y, 11, 0, 2 * Math.PI);
     //knee joint
-    ctx.moveTo(this.knee.x + 7, this.knee.y);
-    ctx.arc(this.knee.x, this.knee.y, 7, 0, 2 * Math.PI);
+    ctx.moveTo(mech.knee.x + 7, mech.knee.y);
+    ctx.arc(mech.knee.x, mech.knee.y, 7, 0, 2 * Math.PI);
     //foot joint
-    ctx.moveTo(this.foot.x + 6, this.foot.y);
-    ctx.arc(this.foot.x, this.foot.y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = this.fillColor;
+    ctx.moveTo(mech.foot.x + 6, mech.foot.y);
+    ctx.arc(mech.foot.x, mech.foot.y, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = mech.fillColor;
     ctx.fill();
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.restore();
   },
   calcLeg(cycle_offset, offset) {
-    this.hip.x = 12 + offset;
-    this.hip.y = 24 + offset;
-    //stepSize goes to zero if Vx is zero or not on ground (make this transition cleaner)
-    this.stepSize = 0.8 * this.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(this.Vx))) * this.onGround);
+    mech.hip.x = 12 + offset;
+    mech.hip.y = 24 + offset;
+    //stepSize goes to zero if Vx is zero or not on ground (make mech transition cleaner)
+    mech.stepSize = 0.8 * mech.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(mech.Vx))) * mech.onGround);
     //changes to stepsize are smoothed by adding only a percent of the new value each cycle
-    const stepAngle = 0.034 * this.walk_cycle + cycle_offset;
-    this.foot.x = 2.2 * this.stepSize * Math.cos(stepAngle) + offset;
-    this.foot.y = offset + 1.2 * this.stepSize * Math.sin(stepAngle) + this.yOff + this.height;
-    const Ymax = this.yOff + this.height;
-    if (this.foot.y > Ymax) this.foot.y = Ymax;
+    const stepAngle = 0.034 * mech.walk_cycle + cycle_offset;
+    mech.foot.x = 2.2 * mech.stepSize * Math.cos(stepAngle) + offset;
+    mech.foot.y = offset + 1.2 * mech.stepSize * Math.sin(stepAngle) + mech.yOff + mech.height;
+    const Ymax = mech.yOff + mech.height;
+    if (mech.foot.y > Ymax) mech.foot.y = Ymax;
 
     //calculate knee position as intersection of circle from hip and foot
-    const d = Math.sqrt((this.hip.x - this.foot.x) * (this.hip.x - this.foot.x) + (this.hip.y - this.foot.y) * (this.hip.y - this.foot.y));
-    const l = (this.legLength1 * this.legLength1 - this.legLength2 * this.legLength2 + d * d) / (2 * d);
-    const h = Math.sqrt(this.legLength1 * this.legLength1 - l * l);
-    this.knee.x = (l / d) * (this.foot.x - this.hip.x) - (h / d) * (this.foot.y - this.hip.y) + this.hip.x + offset;
-    this.knee.y = (l / d) * (this.foot.y - this.hip.y) + (h / d) * (this.foot.x - this.hip.x) + this.hip.y;
+    const d = Math.sqrt((mech.hip.x - mech.foot.x) * (mech.hip.x - mech.foot.x) + (mech.hip.y - mech.foot.y) * (mech.hip.y - mech.foot.y));
+    const l = (mech.legLength1 * mech.legLength1 - mech.legLength2 * mech.legLength2 + d * d) / (2 * d);
+    const h = Math.sqrt(mech.legLength1 * mech.legLength1 - l * l);
+    mech.knee.x = (l / d) * (mech.foot.x - mech.hip.x) - (h / d) * (mech.foot.y - mech.hip.y) + mech.hip.x + offset;
+    mech.knee.y = (l / d) * (mech.foot.y - mech.hip.y) + (h / d) * (mech.foot.x - mech.hip.x) + mech.hip.y;
   },
   draw() {
-    ctx.fillStyle = this.fillColor;
-    this.walk_cycle += this.flipLegs * this.Vx;
+    ctx.fillStyle = mech.fillColor;
+    mech.walk_cycle += mech.flipLegs * mech.Vx;
 
     //draw body
     ctx.save();
-    ctx.translate(this.pos.x, this.pos.y);
-    this.calcLeg(Math.PI, -3);
-    this.drawLeg("#4a4a4a");
-    this.calcLeg(0, 0);
-    this.drawLeg("#333");
-    ctx.rotate(this.angle);
+    ctx.translate(mech.pos.x, mech.pos.y);
+    mech.calcLeg(Math.PI, -3);
+    mech.drawLeg("#4a4a4a");
+    mech.calcLeg(0, 0);
+    mech.drawLeg("#333");
+    ctx.rotate(mech.angle);
 
     ctx.beginPath();
     ctx.arc(0, 0, 30, 0, 2 * Math.PI);
     let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-    grd.addColorStop(0, this.fillColorDark);
-    grd.addColorStop(1, this.fillColor);
+    grd.addColorStop(0, mech.fillColorDark);
+    grd.addColorStop(1, mech.fillColor);
     ctx.fillStyle = grd;
     ctx.fill();
     ctx.arc(15, 0, 4, 0, 2 * Math.PI);
@@ -629,6 +629,7 @@ const mech = {
   fieldCDcycle: 0,
   fieldMode: 0, //basic field mode before upgrades
   fieldEnergyMax: 1, //can be increased by a mod
+  holdingTarget: null,
   // these values are set on reset by setHoldDefaults()
   fieldMeter: 0,
   fieldRegen: 0,
@@ -642,32 +643,32 @@ const mech = {
   fieldArc: 0,
   fieldThreshold: 0,
   calculateFieldThreshold() {
-    this.fieldThreshold = Math.cos(this.fieldArc * Math.PI)
+    mech.fieldThreshold = Math.cos(mech.fieldArc * Math.PI)
   },
   setHoldDefaults() {
-    this.fieldMeter = this.fieldEnergyMax;
-    this.fieldRegen = 0.001;
-    this.fieldFire = false;
-    this.fieldCDcycle = 0;
-    this.isStealth = false;
+    mech.fieldMeter = mech.fieldEnergyMax;
+    mech.fieldRegen = 0.001;
+    mech.fieldFire = false;
+    mech.fieldCDcycle = 0;
+    mech.isStealth = false;
     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-    this.holdingMassScale = 0.5;
-    this.fieldShieldingScale = 1; //scale energy loss after collision with mob
-    this.grabRange = 175;
-    this.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
-    this.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+    mech.holdingMassScale = 0.5;
+    mech.fieldShieldingScale = 1; //scale energy loss after collision with mob
+    mech.grabRange = 175;
+    mech.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+    mech.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.isBodiesAsleep = true;
     mech.wakeCheck();
   },
   drawFieldMeter(range = 60) {
-    if (this.fieldMeter < this.fieldEnergyMax) {
+    if (mech.fieldMeter < mech.fieldEnergyMax) {
       mech.fieldMeter += mech.fieldRegen;
       ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-      ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range, 10);
+      ctx.fillRect(mech.pos.x - mech.radius, mech.pos.y - 50, range, 10);
       ctx.fillStyle = "#0cf";
-      ctx.fillRect(this.pos.x - this.radius, this.pos.y - 50, range * this.fieldMeter, 10);
+      ctx.fillRect(mech.pos.x - mech.radius, mech.pos.y - 50, range * mech.fieldMeter, 10);
     } else {
-      mech.fieldMeter = this.fieldEnergyMax
+      mech.fieldMeter = mech.fieldEnergyMax
     }
   },
   lookingAt(who) {
@@ -680,29 +681,29 @@ const mech = {
     };
     //the dot product of diff and dir will return how much over lap between the vectors
     // console.log(Vector.dot(dir, diff))
-    if (Vector.dot(dir, diff) > this.fieldThreshold) {
+    if (Vector.dot(dir, diff) > mech.fieldThreshold) {
       return true;
     }
     return false;
   },
   drop() {
-    if (this.isHolding) {
-      this.isHolding = false;
-      this.definePlayerMass()
-      this.holdingTarget.collisionFilter.category = cat.body;
-      this.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-      this.holdingTarget = null;
-      this.throwCharge = 0;
+    if (mech.isHolding) {
+      mech.isHolding = false;
+      mech.definePlayerMass()
+      mech.holdingTarget.collisionFilter.category = cat.body;
+      mech.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+      mech.holdingTarget = null;
+      mech.throwCharge = 0;
     }
   },
   definePlayerMass(mass = mech.defaultMass) {
     Matter.Body.setMass(player, mass);
     //reduce air and ground move forces
-    this.Fx = 0.075 / mass * b.modSquirrelFx
-    this.FxAir = 0.375 / mass / mass
+    mech.Fx = 0.075 / mass * b.modSquirrelFx
+    mech.FxAir = 0.375 / mass / mass
     //make player stand a bit lower when holding heavy masses
-    this.yOffWhen.stand = Math.max(this.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
-    if (this.onGround && !this.crouch) this.yOffGoal = this.yOffWhen.stand;
+    mech.yOffWhen.stand = Math.max(mech.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
+    if (mech.onGround && !mech.crouch) mech.yOffGoal = mech.yOffWhen.stand;
   },
   drawHold(target, stroke = true) {
     if (target) {
@@ -713,8 +714,8 @@ const mech = {
       ctx.strokeStyle = "#000";
       ctx.beginPath();
       ctx.moveTo(
-        mech.pos.x + eye * Math.cos(this.angle),
-        mech.pos.y + eye * Math.sin(this.angle)
+        mech.pos.x + eye * Math.cos(mech.angle),
+        mech.pos.y + eye * Math.sin(mech.angle)
       );
       ctx.lineTo(target.vertices[len].x, target.vertices[len].y);
       ctx.lineTo(target.vertices[0].x, target.vertices[0].y);
@@ -723,8 +724,8 @@ const mech = {
       for (let i = 0; i < len; i++) {
         ctx.beginPath();
         ctx.moveTo(
-          mech.pos.x + eye * Math.cos(this.angle),
-          mech.pos.y + eye * Math.sin(this.angle)
+          mech.pos.x + eye * Math.cos(mech.angle),
+          mech.pos.y + eye * Math.sin(mech.angle)
         );
         ctx.lineTo(target.vertices[i].x, target.vertices[i].y);
         ctx.lineTo(target.vertices[i + 1].x, target.vertices[i + 1].y);
@@ -734,51 +735,51 @@ const mech = {
     }
   },
   holding() {
-    this.fieldMeter -= this.fieldRegen;
-    if (this.fieldMeter < 0) this.fieldMeter = 0;
-    Matter.Body.setPosition(this.holdingTarget, {
-      x: mech.pos.x + 70 * Math.cos(this.angle),
-      y: mech.pos.y + 70 * Math.sin(this.angle)
+    mech.fieldMeter -= mech.fieldRegen;
+    if (mech.fieldMeter < 0) mech.fieldMeter = 0;
+    Matter.Body.setPosition(mech.holdingTarget, {
+      x: mech.pos.x + 70 * Math.cos(mech.angle),
+      y: mech.pos.y + 70 * Math.sin(mech.angle)
     });
-    Matter.Body.setVelocity(this.holdingTarget, player.velocity);
-    Matter.Body.rotate(this.holdingTarget, 0.01 / this.holdingTarget.mass); //gently spin the block
+    Matter.Body.setVelocity(mech.holdingTarget, player.velocity);
+    Matter.Body.rotate(mech.holdingTarget, 0.01 / mech.holdingTarget.mass); //gently spin the block
   },
   throw () {
     if ((keys[32] || game.mouseDownRight)) {
-      if (this.fieldMeter > 0.0007) {
-        this.fieldMeter -= 0.0007;
-        this.throwCharge += this.throwChargeRate;;
+      if (mech.fieldMeter > 0.0007) {
+        mech.fieldMeter -= 0.0007;
+        mech.throwCharge += mech.throwChargeRate;;
         //draw charge
-        const x = mech.pos.x + 15 * Math.cos(this.angle);
-        const y = mech.pos.y + 15 * Math.sin(this.angle);
-        const len = this.holdingTarget.vertices.length - 1;
-        const edge = this.throwCharge * this.throwCharge * 0.02;
+        const x = mech.pos.x + 15 * Math.cos(mech.angle);
+        const y = mech.pos.y + 15 * Math.sin(mech.angle);
+        const len = mech.holdingTarget.vertices.length - 1;
+        const edge = mech.throwCharge * mech.throwCharge * 0.02;
         const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
         grd.addColorStop(0, "rgba(255,50,150,0.3)");
         grd.addColorStop(1, "transparent");
         ctx.fillStyle = grd;
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(this.holdingTarget.vertices[len].x, this.holdingTarget.vertices[len].y);
-        ctx.lineTo(this.holdingTarget.vertices[0].x, this.holdingTarget.vertices[0].y);
+        ctx.lineTo(mech.holdingTarget.vertices[len].x, mech.holdingTarget.vertices[len].y);
+        ctx.lineTo(mech.holdingTarget.vertices[0].x, mech.holdingTarget.vertices[0].y);
         ctx.fill();
         for (let i = 0; i < len; i++) {
           ctx.beginPath();
           ctx.moveTo(x, y);
-          ctx.lineTo(this.holdingTarget.vertices[i].x, this.holdingTarget.vertices[i].y);
-          ctx.lineTo(this.holdingTarget.vertices[i + 1].x, this.holdingTarget.vertices[i + 1].y);
+          ctx.lineTo(mech.holdingTarget.vertices[i].x, mech.holdingTarget.vertices[i].y);
+          ctx.lineTo(mech.holdingTarget.vertices[i + 1].x, mech.holdingTarget.vertices[i + 1].y);
           ctx.fill();
         }
       } else {
-        this.drop()
+        mech.drop()
       }
-    } else if (this.throwCharge > 0) {
+    } else if (mech.throwCharge > 0) {
       //throw the body
-      this.fieldCDcycle = mech.cycle + 15;
-      this.isHolding = false;
+      mech.fieldCDcycle = mech.cycle + 15;
+      mech.isHolding = false;
       //bullet-like collisions
-      this.holdingTarget.collisionFilter.category = cat.body;
-      this.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+      mech.holdingTarget.collisionFilter.category = cat.body;
+      mech.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
       //check every second to see if player is away from thrown body, and make solid
       const solid = function (that) {
         const dx = that.position.x - player.position.x;
@@ -790,22 +791,22 @@ const mech = {
           setTimeout(solid, 50, that);
         }
       };
-      setTimeout(solid, 200, this.holdingTarget);
+      setTimeout(solid, 200, mech.holdingTarget);
       //throw speed scales a bit with mass
-      const speed = Math.min(85, Math.min(54 / this.holdingTarget.mass + 5, 48) * Math.min(this.throwCharge, this.throwChargeMax) / 50);
+      const speed = Math.min(85, Math.min(54 / mech.holdingTarget.mass + 5, 48) * Math.min(mech.throwCharge, mech.throwChargeMax) / 50);
 
-      this.throwCharge = 0;
-      Matter.Body.setVelocity(this.holdingTarget, {
-        x: player.velocity.x + Math.cos(this.angle) * speed,
-        y: player.velocity.y + Math.sin(this.angle) * speed
+      mech.throwCharge = 0;
+      Matter.Body.setVelocity(mech.holdingTarget, {
+        x: player.velocity.x + Math.cos(mech.angle) * speed,
+        y: player.velocity.y + Math.sin(mech.angle) * speed
       });
       //player recoil //stronger in x-dir to prevent jump hacking
 
       Matter.Body.setVelocity(player, {
-        x: player.velocity.x - Math.cos(this.angle) * speed / (mech.crouch ? 30 : 5) * Math.sqrt(this.holdingTarget.mass),
-        y: player.velocity.y - Math.sin(this.angle) * speed / 40 * Math.sqrt(this.holdingTarget.mass)
+        x: player.velocity.x - Math.cos(mech.angle) * speed / (mech.crouch ? 30 : 5) * Math.sqrt(mech.holdingTarget.mass),
+        y: player.velocity.y - Math.sin(mech.angle) * speed / 40 * Math.sqrt(mech.holdingTarget.mass)
       });
-      this.definePlayerMass() //return to normal player mass
+      mech.definePlayerMass() //return to normal player mass
     }
   },
   drawField() {
@@ -817,7 +818,7 @@ const mech = {
       ctx.strokeStyle = "rgba(110, 200, 235, " + (0.6 + 0.2 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
     }
     // const off = 2 * Math.cos(game.cycle * 0.1)
-    const range = this.grabRange - 20;
+    const range = mech.grabRange - 20;
     ctx.beginPath();
     ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
     ctx.lineWidth = 2;
@@ -906,20 +907,20 @@ const mech = {
   pushMobsFacing() { // find mobs in range and in direction looking
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
-        Vector.magnitude(Vector.sub(mob[i].position, player.position)) < this.grabRange &&
-        this.lookingAt(mob[i]) &&
-        Matter.Query.ray(map, mob[i].position, this.pos).length === 0
+        Vector.magnitude(Vector.sub(mob[i].position, player.position)) < mech.grabRange &&
+        mech.lookingAt(mob[i]) &&
+        Matter.Query.ray(map, mob[i].position, mech.pos).length === 0
       ) {
         mob[i].locatePlayer();
         mech.pushMass(mob[i]);
       }
     }
   },
-  pushMobs360(range = this.grabRange * 0.75) { // find mobs in range in any direction
+  pushMobs360(range = mech.grabRange * 0.75) { // find mobs in range in any direction
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
-        Vector.magnitude(Vector.sub(mob[i].position, this.pos)) < range &&
-        Matter.Query.ray(map, mob[i].position, this.pos).length === 0
+        Vector.magnitude(Vector.sub(mob[i].position, mech.pos)) < range &&
+        Matter.Query.ray(map, mob[i].position, mech.pos).length === 0
       ) {
         mob[i].locatePlayer();
         mech.pushMass(mob[i]);
@@ -930,39 +931,39 @@ const mech = {
     for (let i = 0, len = body.length; i < len; ++i) {
       if (
         body[i].speed > 12 && body[i].mass > 2 &&
-        Vector.magnitude(Vector.sub(body[i].position, this.pos)) < this.grabRange &&
-        this.lookingAt(body[i]) &&
-        Matter.Query.ray(map, body[i].position, this.pos).length === 0
+        Vector.magnitude(Vector.sub(body[i].position, mech.pos)) < mech.grabRange &&
+        mech.lookingAt(body[i]) &&
+        Matter.Query.ray(map, body[i].position, mech.pos).length === 0
       ) {
         mech.pushMass(body[i]);
       }
     }
   },
-  pushBody360(range = this.grabRange * 0.75) { // push all body in range and in direction looking
+  pushBody360(range = mech.grabRange * 0.75) { // push all body in range and in direction looking
     for (let i = 0, len = body.length; i < len; ++i) {
       if (
         body[i].speed > 12 && body[i].mass > 2 &&
-        Vector.magnitude(Vector.sub(body[i].position, this.pos)) < range &&
-        this.lookingAt(body[i]) &&
-        Matter.Query.ray(map, body[i].position, this.pos).length === 0 &&
+        Vector.magnitude(Vector.sub(body[i].position, mech.pos)) < range &&
+        mech.lookingAt(body[i]) &&
+        Matter.Query.ray(map, body[i].position, mech.pos).length === 0 &&
         body[i].collisionFilter.category === cat.body
       ) {
         mech.pushMass(body[i]);
       }
     }
   },
-  lookForPickUp(range = this.grabRange) { //find body to pickup
-    this.fieldMeter -= this.fieldRegen;
+  lookForPickUp(range = mech.grabRange) { //find body to pickup
+    mech.fieldMeter -= mech.fieldRegen;
     const grabbing = {
       targetIndex: null,
       targetRange: range,
       // lookingAt: false //false to pick up object in range, but not looking at
     };
     for (let i = 0, len = body.length; i < len; ++i) {
-      if (Matter.Query.ray(map, body[i].position, this.pos).length === 0) {
-        //is this next body a better target then my current best
-        const dist = Vector.magnitude(Vector.sub(body[i].position, this.pos));
-        const looking = this.lookingAt(body[i]);
+      if (Matter.Query.ray(map, body[i].position, mech.pos).length === 0) {
+        //is mech next body a better target then my current best
+        const dist = Vector.magnitude(Vector.sub(body[i].position, mech.pos));
+        const looking = mech.lookingAt(body[i]);
         // if (dist < grabbing.targetRange && (looking || !grabbing.lookingAt) && !body[i].isNotHoldable) {
         if (dist < grabbing.targetRange && looking && !body[i].isNotHoldable) {
           grabbing.targetRange = dist;
@@ -973,10 +974,10 @@ const mech = {
     }
     // set pick up target for when mouse is released
     if (body[grabbing.targetIndex]) {
-      this.holdingTarget = body[grabbing.targetIndex];
+      mech.holdingTarget = body[grabbing.targetIndex];
       //
       ctx.beginPath(); //draw on each valid body
-      let vertices = this.holdingTarget.vertices;
+      let vertices = mech.holdingTarget.vertices;
       ctx.moveTo(vertices[0].x, vertices[0].y);
       for (let j = 1; j < vertices.length; j += 1) {
         ctx.lineTo(vertices[j].x, vertices[j].y);
@@ -986,23 +987,23 @@ const mech = {
       ctx.fill();
 
       ctx.globalAlpha = 0.2;
-      this.drawHold(this.holdingTarget);
+      mech.drawHold(mech.holdingTarget);
       ctx.globalAlpha = 1;
     } else {
-      this.holdingTarget = null;
+      mech.holdingTarget = null;
     }
   },
   pickUp() {
     //triggers when a hold target exits and field button is released
-    this.isHolding = true;
+    mech.isHolding = true;
     //conserve momentum when player mass changes
-    totalMomentum = Vector.add(Vector.mult(player.velocity, player.mass), Vector.mult(this.holdingTarget.velocity, this.holdingTarget.mass))
-    Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (mech.defaultMass + this.holdingTarget.mass)));
+    totalMomentum = Vector.add(Vector.mult(player.velocity, player.mass), Vector.mult(mech.holdingTarget.velocity, mech.holdingTarget.mass))
+    Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (mech.defaultMass + mech.holdingTarget.mass)));
 
-    this.definePlayerMass(mech.defaultMass + this.holdingTarget.mass * this.holdingMassScale)
+    mech.definePlayerMass(mech.defaultMass + mech.holdingTarget.mass * mech.holdingMassScale)
     //make block collide with nothing
-    this.holdingTarget.collisionFilter.category = 0;
-    this.holdingTarget.collisionFilter.mask = 0;
+    mech.holdingTarget.collisionFilter.category = 0;
+    mech.holdingTarget.collisionFilter.mask = 0;
   },
   wakeCheck() {
     if (mech.isBodiesAsleep) {
