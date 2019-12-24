@@ -104,7 +104,7 @@ const spawn = {
         ctx.beginPath();
         for (let i = 0, len = mob.length; i < len; i++) {
           if (mob[i] != this && mob[i].dropPowerUp) { //don't tether to self, bullets, shields, ...
-            const distance2 = Matter.Vector.magnitudeSquared(Matter.Vector.sub(this.position, mob[i].position))
+            const distance2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
             if (distance2 < this.groupingRangeMax) {
               if (!mob[i].seePlayer.recall) mob[i].seePlayerByDistAndLOS(); //wake up sleepy mobs
               if (distance2 > this.groupingRangeMin) {
@@ -159,8 +159,8 @@ const spawn = {
   //       let closeDist = Infinity;
   //       for (let i = 0; i < mob.length; i++) {
   //         if (mob[i] != this && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
-  //           const TARGET_VECTOR = Matter.Vector.sub(this.position, mob[i].position)
-  //           const DIST = Matter.Vector.magnitude(TARGET_VECTOR) * mob[i].health * mob[i].health * mob[i].health; //distance is multiplied by mob health to prioritize low health mobs
+  //           const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
+  //           const DIST = Vector.magnitude(TARGET_VECTOR) * mob[i].health * mob[i].health * mob[i].health; //distance is multiplied by mob health to prioritize low health mobs
   //           if (DIST < closeDist) {
   //             closeDist = DIST;
   //             this.lockedOn = mob[i]
@@ -171,15 +171,15 @@ const spawn = {
 
   //     //move away from player if too close
   //     if (this.distanceToPlayer2() < 400000) {
-  //       const TARGET_VECTOR = Matter.Vector.sub(this.position, player.position)
-  //       this.force = Matter.Vector.mult(Matter.Vector.normalise(TARGET_VECTOR), this.mass * this.accelMag * 1.4)
+  //       const TARGET_VECTOR = Vector.sub(this.position, player.position)
+  //       this.force = Vector.mult(Vector.normalise(TARGET_VECTOR), this.mass * this.accelMag * 1.4)
   //       if (this.lockedOn) this.lockedOn = null
   //     } else if (this.lockedOn && this.lockedOn.alive) {
   //       //move towards and heal locked on target
-  //       const TARGET_VECTOR = Matter.Vector.sub(this.position, this.lockedOn.position)
-  //       const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+  //       const TARGET_VECTOR = Vector.sub(this.position, this.lockedOn.position)
+  //       const DIST = Vector.magnitude(TARGET_VECTOR);
   //       if (DIST > 250) {
-  //         this.force = Matter.Vector.mult(Matter.Vector.normalise(TARGET_VECTOR), -this.mass * this.accelMag)
+  //         this.force = Vector.mult(Vector.normalise(TARGET_VECTOR), -this.mass * this.accelMag)
   //       } else {
   //         if (this.lockedOn.health < 1) {
   //           this.lockedOn.health += 0.002;
@@ -202,15 +202,15 @@ const spawn = {
   //         that.searchTarget = mob[Math.floor(Math.random() * (mob.length - 1))].position;
   //       };
 
-  //       const sub = Matter.Vector.sub(this.searchTarget, this.position);
-  //       if (Matter.Vector.magnitude(sub) > this.radius * 2) {
+  //       const sub = Vector.sub(this.searchTarget, this.position);
+  //       if (Vector.magnitude(sub) > this.radius * 2) {
   //         ctx.beginPath();
   //         ctx.strokeStyle = "#aaa";
   //         ctx.moveTo(this.position.x, this.position.y);
   //         ctx.lineTo(this.searchTarget.x, this.searchTarget.y);
   //         ctx.stroke();
   //         //accelerate at 0.6 of normal acceleration
-  //         this.force = Matter.Vector.mult(Matter.Vector.normalise(sub), this.accelMag * this.mass * 0.6);
+  //         this.force = Vector.mult(Vector.normalise(sub), this.accelMag * this.mass * 0.6);
   //       } else {
   //         //after reaching random target switch to new target
   //         newTarget(this);
@@ -367,11 +367,11 @@ const spawn = {
         if (this.cdBurst2 < game.cycle && this.angularSpeed < 0.01) {
           this.cdBurst2 = Infinity;
           this.cdBurst1 = game.cycle + 40;
-          this.burstDir = Matter.Vector.normalise(Matter.Vector.sub(this.seePlayer.position, this.position));
+          this.burstDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
         } else if (this.cdBurst1 < game.cycle) {
           this.cdBurst2 = game.cycle + this.delay;
           this.cdBurst1 = Infinity;
-          this.force = Matter.Vector.mult(this.burstDir, this.mass * 0.25);
+          this.force = Vector.mult(this.burstDir, this.mass * 0.25);
           this.fill = this.rememberFill;
         } else if (this.cdBurst1 != Infinity) {
           this.torque += 0.000035 * this.inertia;
@@ -383,7 +383,7 @@ const spawn = {
           ctx.strokeStyle = "rgba(0,0,0,0.2)";
           ctx.lineWidth = 3;
           ctx.setLineDash([10, 20]); //30
-          const dir = Matter.Vector.add(this.position, Matter.Vector.mult(this.burstDir, mag));
+          const dir = Vector.add(this.position, Vector.mult(this.burstDir, mag));
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
           ctx.lineTo(dir.x, dir.y);
@@ -442,7 +442,7 @@ const spawn = {
         ctx.fill();
 
         //when player is inside event horizon
-        if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
+        if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
           mech.damage(0.00015 * game.dmgScale);
           if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.007
 
@@ -532,7 +532,7 @@ const spawn = {
         ctx.fillStyle = "rgba(0,0,0,0.05)";
         ctx.fill();
         //when player is inside event horizon
-        if (Matter.Vector.magnitude(Matter.Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
+        if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
           mech.damage(0.00015 * game.dmgScale);
           if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.007
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
@@ -595,8 +595,8 @@ const spawn = {
           this.attraction();
           const rangeWidth = 2000; //this is sqrt of 4000000 from above if()
           //targeting laser will slowly move from the mob to the player's position
-          this.laserPos = Matter.Vector.add(this.laserPos, Matter.Vector.mult(Matter.Vector.sub(player.position, this.laserPos), 0.1));
-          let targetDist = Matter.Vector.magnitude(Matter.Vector.sub(this.laserPos, mech.pos));
+          this.laserPos = Vector.add(this.laserPos, Vector.mult(Vector.sub(player.position, this.laserPos), 0.1));
+          let targetDist = Vector.magnitude(Vector.sub(this.laserPos, mech.pos));
           const r = 10;
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
@@ -616,14 +616,14 @@ const spawn = {
           }
           if (dist2 > 80000) {
             const laserWidth = 0.002;
-            let laserOffR = Matter.Vector.rotateAbout(this.laserPos, (targetDist - r) * laserWidth, this.position);
-            let sub = Matter.Vector.normalise(Matter.Vector.sub(laserOffR, this.position));
-            laserOffR = Matter.Vector.add(laserOffR, Matter.Vector.mult(sub, rangeWidth));
+            let laserOffR = Vector.rotateAbout(this.laserPos, (targetDist - r) * laserWidth, this.position);
+            let sub = Vector.normalise(Vector.sub(laserOffR, this.position));
+            laserOffR = Vector.add(laserOffR, Vector.mult(sub, rangeWidth));
             ctx.lineTo(laserOffR.x, laserOffR.y);
 
-            let laserOffL = Matter.Vector.rotateAbout(this.laserPos, (targetDist - r) * -laserWidth, this.position);
-            sub = Matter.Vector.normalise(Matter.Vector.sub(laserOffL, this.position));
-            laserOffL = Matter.Vector.add(laserOffL, Matter.Vector.mult(sub, rangeWidth));
+            let laserOffL = Vector.rotateAbout(this.laserPos, (targetDist - r) * -laserWidth, this.position);
+            sub = Vector.normalise(Vector.sub(laserOffL, this.position));
+            laserOffL = Vector.add(laserOffL, Vector.mult(sub, rangeWidth));
             ctx.lineTo(laserOffL.x, laserOffL.y);
             ctx.fillStyle = `rgba(0,0,255,${Math.max(0,0.3*r/targetDist)})`
             ctx.fill();
@@ -806,8 +806,8 @@ const spawn = {
   //         this.isBig = false;
   //       }
   //     } else if (this.seePlayer.yes && this.cd < game.cycle) {
-  //       const dist = Matter.Vector.sub(this.seePlayer.position, this.position);
-  //       const distMag2 = Matter.Vector.magnitudeSquared(dist);
+  //       const dist = Vector.sub(this.seePlayer.position, this.position);
+  //       const distMag2 = Vector.magnitudeSquared(dist);
   //       if (distMag2 < 80000) {
   //         this.cd = game.cycle + this.delay;
   //         Matter.Body.scale(this, this.scaleMag, this.scaleMag);

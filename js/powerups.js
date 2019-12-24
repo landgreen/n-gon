@@ -3,7 +3,7 @@ let powerUp = [];
 const powerUps = {
   heal: {
     name: "heal",
-    color: "#0fb",
+    color: "#0eb",
     size() {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
@@ -61,20 +61,25 @@ const powerUps = {
     },
     effect() {
       const previousMode = mech.fieldMode
-
-      if (!this.mode) { //this.mode is set if the power up has been ejected from player
-        mode = mech.fieldMode
-        while (mode === mech.fieldMode) {
-          mode = Math.ceil(Math.random() * (mech.fieldUpgrades.length - 1))
-        }
-        mech.fieldUpgrades[mode].effect(); //choose random field upgrade that you don't already have
-      } else {
+      if (this.mode) { //this.mode is set if the power up has been ejected from player
         mech.fieldUpgrades[this.mode].effect(); //set a predetermined power up
+      } else { //choose a random mode that you don't already have
+        availableModes = []
+        for (let i = 1; i < mech.fieldUpgrades.length; i++) { //start on 1 to skip the default field
+          if (i !== previousMode) {
+            availableModes.push(i)
+          }
+        }
+        const mode = availableModes[Math.floor(Math.random() * availableModes.length)]
+        mech.fieldUpgrades[mode].effect();
       }
       //pop the old field out in case player wants to swap back
       if (previousMode !== 0) {
         mech.fieldCDcycle = mech.cycle + 40; //trigger fieldCD to stop power up grab automatic pick up of spawn
-        powerUps.spawn(mech.pos.x, mech.pos.y - 15, "field", false, previousMode);
+        setTimeout(function () {
+          powerUps.spawn(mech.pos.x, mech.pos.y - 15, "field", false, previousMode);
+        }, 100);
+
       }
     }
   },
@@ -208,10 +213,10 @@ const powerUps = {
   },
   spawn(x, y, target, moving = true, mode = null) {
     if (!level.isBuildRun || target === "heal" || target === "ammo") {
-      let i = powerUp.length;
+      let index = powerUp.length;
       target = powerUps[target];
       size = target.size();
-      powerUp[i] = Matter.Bodies.polygon(x, y, 0, size, {
+      powerUp[index] = Matter.Bodies.polygon(x, y, 0, size, {
         density: 0.001,
         frictionAir: 0.01,
         restitution: 0.8,
@@ -223,17 +228,20 @@ const powerUps = {
         },
         color: target.color,
         effect: target.effect,
-        mode: mode,
         name: target.name,
         size: size
       });
+      if (mode) {
+        console.log(mode)
+        powerUp[index].mode = mode
+      }
       if (moving) {
-        Matter.Body.setVelocity(powerUp[i], {
+        Matter.Body.setVelocity(powerUp[index], {
           x: (Math.random() - 0.5) * 15,
           y: Math.random() * -9 - 3
         });
       }
-      World.add(engine.world, powerUp[i]); //add to world
+      World.add(engine.world, powerUp[index]); //add to world
     }
   },
 };

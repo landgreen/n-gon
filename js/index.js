@@ -2,17 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
-add builds with combinations of gun, field and mobs
-  use the pull down menu
+new game loop structure: game loop is an object with named methods
+  when looping each method is called in order like an array
+  allows me to dynamically add and remove functions to the game
 
-dynamically generate html about fields, guns and mods
+mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
+  10% max health
+  20% of your current health
 
-add grid check to improve queries over large body arrays
-  something about broad phase
-  having trouble with this, might give up
-
-gun: like drones, but fast moving and short lived
-  dies after doing damage
+mod: increase range of shield block
 
 gun:  Spirit Bomb (singularity)
   use charge up like rail gun
@@ -20,16 +18,6 @@ gun:  Spirit Bomb (singularity)
   suck in nearby mobs, power ups?, blocks?
     sucked in stuff increase size
   uses energy
-
-mod: auto pick up guns, heals, ammo
-  use the same rule for drones
-  maybe give some other bonus too?
-
-rework junk bot
-  it's behavior is too unpredictable
-    range is unclear
-    having the bullets last long after doing dmg isn't fun
-  we want a fun gun that acts like a melee weapon
 
 atmosphere levels
   large rotating fan that the player has to move through
@@ -62,13 +50,7 @@ new map with repeating endlessness
     
 field power up effects
   field allows player to hold and throw living mobs
-
-mod power ups ideas
-  double jump
-  bullet on mob damage effects
-    add to the array mob.do new mob behaviors
-        add a damage over time
-        add a freeze
+    of hack mobs
 
 give mobs more animal-like behaviors
   like rain world
@@ -99,6 +81,8 @@ game mechanics
     bouncy ground
 
 */
+
+
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
 const cat = {

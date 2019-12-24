@@ -637,7 +637,6 @@ const mech = {
   holdingMassScale: 0,
   throwChargeRate: 0,
   throwChargeMax: 0,
-  fieldFireCD: 0,
   fieldShieldingScale: 0,
   grabRange: 0,
   fieldArc: 0,
@@ -653,7 +652,6 @@ const mech = {
     this.isStealth = false;
     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
     this.holdingMassScale = 0.5;
-    this.fieldFireCD = 15;
     this.fieldShieldingScale = 1; //scale energy loss after collision with mob
     this.grabRange = 175;
     this.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -674,15 +672,15 @@ const mech = {
   },
   lookingAt(who) {
     //calculate a vector from body to player and make it length 1
-    const diff = Matter.Vector.normalise(Matter.Vector.sub(who.position, mech.pos));
+    const diff = Vector.normalise(Vector.sub(who.position, mech.pos));
     //make a vector for the player's direction of length 1
     const dir = {
       x: Math.cos(mech.angle),
       y: Math.sin(mech.angle)
     };
     //the dot product of diff and dir will return how much over lap between the vectors
-    // console.log(Matter.Vector.dot(dir, diff))
-    if (Matter.Vector.dot(dir, diff) > this.fieldThreshold) {
+    // console.log(Vector.dot(dir, diff))
+    if (Vector.dot(dir, diff) > this.fieldThreshold) {
       return true;
     }
     return false;
@@ -776,7 +774,7 @@ const mech = {
       }
     } else if (this.throwCharge > 0) {
       //throw the body
-      this.fireCDcycle = mech.cycle + this.fieldFireCD;
+      this.fieldCDcycle = mech.cycle + 15;
       this.isHolding = false;
       //bullet-like collisions
       this.holdingTarget.collisionFilter.category = cat.body;
@@ -876,7 +874,7 @@ const mech = {
     }
   },
   pushMass(who) {
-    const speed = Matter.Vector.magnitude(Matter.Vector.sub(who.velocity, player.velocity))
+    const speed = Vector.magnitude(Vector.sub(who.velocity, player.velocity))
     const fieldBlockCost = 0.03 + Math.sqrt(who.mass) * speed * 0.003 //0.012
     if (mech.fieldMeter > fieldBlockCost * 0.6) { //shield needs at least some of the cost to block
       mech.fieldMeter -= fieldBlockCost * mech.fieldShieldingScale;
@@ -885,7 +883,7 @@ const mech = {
       mech.fieldCDcycle = mech.cycle + 10;
       mech.holdingTarget = null
       //knock backs
-      const unit = Matter.Vector.normalise(Matter.Vector.sub(player.position, who.position))
+      const unit = Vector.normalise(Vector.sub(player.position, who.position))
       const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
       Matter.Body.setVelocity(who, {
         x: player.velocity.x - (15 * unit.x) / massRoot,
@@ -908,7 +906,7 @@ const mech = {
   pushMobsFacing() { // find mobs in range and in direction looking
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
-        Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, player.position)) < this.grabRange &&
+        Vector.magnitude(Vector.sub(mob[i].position, player.position)) < this.grabRange &&
         this.lookingAt(mob[i]) &&
         Matter.Query.ray(map, mob[i].position, this.pos).length === 0
       ) {
@@ -920,7 +918,7 @@ const mech = {
   pushMobs360(range = this.grabRange * 0.75) { // find mobs in range in any direction
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
-        Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < range &&
+        Vector.magnitude(Vector.sub(mob[i].position, this.pos)) < range &&
         Matter.Query.ray(map, mob[i].position, this.pos).length === 0
       ) {
         mob[i].locatePlayer();
@@ -932,7 +930,7 @@ const mech = {
     for (let i = 0, len = body.length; i < len; ++i) {
       if (
         body[i].speed > 12 && body[i].mass > 2 &&
-        Matter.Vector.magnitude(Matter.Vector.sub(body[i].position, this.pos)) < this.grabRange &&
+        Vector.magnitude(Vector.sub(body[i].position, this.pos)) < this.grabRange &&
         this.lookingAt(body[i]) &&
         Matter.Query.ray(map, body[i].position, this.pos).length === 0
       ) {
@@ -944,7 +942,7 @@ const mech = {
     for (let i = 0, len = body.length; i < len; ++i) {
       if (
         body[i].speed > 12 && body[i].mass > 2 &&
-        Matter.Vector.magnitude(Matter.Vector.sub(body[i].position, this.pos)) < range &&
+        Vector.magnitude(Vector.sub(body[i].position, this.pos)) < range &&
         this.lookingAt(body[i]) &&
         Matter.Query.ray(map, body[i].position, this.pos).length === 0 &&
         body[i].collisionFilter.category === cat.body
@@ -963,7 +961,7 @@ const mech = {
     for (let i = 0, len = body.length; i < len; ++i) {
       if (Matter.Query.ray(map, body[i].position, this.pos).length === 0) {
         //is this next body a better target then my current best
-        const dist = Matter.Vector.magnitude(Matter.Vector.sub(body[i].position, this.pos));
+        const dist = Vector.magnitude(Vector.sub(body[i].position, this.pos));
         const looking = this.lookingAt(body[i]);
         // if (dist < grabbing.targetRange && (looking || !grabbing.lookingAt) && !body[i].isNotHoldable) {
         if (dist < grabbing.targetRange && looking && !body[i].isNotHoldable) {
@@ -998,8 +996,8 @@ const mech = {
     //triggers when a hold target exits and field button is released
     this.isHolding = true;
     //conserve momentum when player mass changes
-    totalMomentum = Matter.Vector.add(Matter.Vector.mult(player.velocity, player.mass), Matter.Vector.mult(this.holdingTarget.velocity, this.holdingTarget.mass))
-    Matter.Body.setVelocity(player, Matter.Vector.mult(totalMomentum, 1 / (mech.defaultMass + this.holdingTarget.mass)));
+    totalMomentum = Vector.add(Vector.mult(player.velocity, player.mass), Vector.mult(this.holdingTarget.velocity, this.holdingTarget.mass))
+    Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (mech.defaultMass + this.holdingTarget.mass)));
 
     this.definePlayerMass(mech.defaultMass + this.holdingTarget.mass * this.holdingMassScale)
     //make block collide with nothing
@@ -1060,7 +1058,7 @@ const mech = {
             mech.lookForPickUp();
             mech.pushBodyFacing();
             mech.pushMobsFacing();
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
@@ -1126,7 +1124,7 @@ const mech = {
               mech.wakeCheck();
               mech.fieldCDcycle = mech.cycle + 120;
             }
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.wakeCheck();
             mech.pickUp();
           } else {
@@ -1158,6 +1156,9 @@ const mech = {
             const DRAIN = 0.0006
             if (mech.fieldMeter > DRAIN) {
               mech.fieldMeter -= DRAIN;
+              mech.grabPowerUp();
+              mech.lookForPickUp();
+              mech.pushMobs360(120);
 
               //calculate laser collision
               let best;
@@ -1236,7 +1237,7 @@ const mech = {
                   best.who.locatePlayer();
 
                   //push mobs away
-                  const force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(mech.pos, path[1])), -0.01 * Math.sqrt(best.who.mass))
+                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.sqrt(best.who.mass))
                   Matter.Body.applyForce(best.who, path[1], force)
                   // const angle = Math.atan2(player.position.y - best.who.position.y, player.position.x - best.who.position.x);
                   // const mass = Math.min(Math.sqrt(best.who.mass), 6);
@@ -1255,7 +1256,7 @@ const mech = {
                   });
                 } else if (!best.who.isStatic) {
                   //push blocks away
-                  const force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(mech.pos, path[1])), -0.006 * Math.sqrt(Math.sqrt(best.who.mass)))
+                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.006 * Math.sqrt(Math.sqrt(best.who.mass)))
                   Matter.Body.applyForce(best.who, path[1], force)
                 }
               }
@@ -1291,15 +1292,11 @@ const mech = {
               ctx.arc(mech.pos.x, mech.pos.y, 110, 0, 2 * Math.PI);
               ctx.fillStyle = "rgba(255,0,255,0.05)"
               ctx.fill();
-
-              mech.grabPowerUp();
-              mech.lookForPickUp();
-              mech.pushMobs360(120);
               // mech.pushBody360(100); //disabled because doesn't work at short range
             } else {
               mech.fieldCDcycle = mech.cycle + 120; //if out of energy
             }
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
@@ -1331,8 +1328,8 @@ const mech = {
               //look for nearby objects to make zero-g
               function zeroG(who, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
-                  sub = Matter.Vector.sub(who[i].position, mech.pos);
-                  dist = Matter.Vector.magnitude(sub);
+                  sub = Vector.sub(who[i].position, mech.pos);
+                  dist = Vector.magnitude(sub);
                   if (dist < mech.grabRange) {
                     who[i].force.y -= who[i].mass * (game.g * mag); //add a bit more then standard gravity
                   }
@@ -1384,7 +1381,7 @@ const mech = {
               //trigger cool down
               mech.fieldCDcycle = mech.cycle + 120;
             }
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
             mech.grabRange = 0
           } else {
@@ -1397,7 +1394,7 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are perminantly active<br><strong class='color-f'>energy</strong> regenerates while field is active",
+      description: "three oscillating <strong>shields</strong> are permanently active<br><strong class='color-f'>energy</strong> regenerates while field is active",
       effect: () => {
         mech.fieldMode = 4;
         mech.fieldText();
@@ -1410,10 +1407,10 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throw();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldMeter > 0)) { //not hold but field button is pressed
+          } else if (((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0)) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp(180);
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
             mech.pickUp();
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
@@ -1464,7 +1461,7 @@ const mech = {
             mech.lookForPickUp();
             mech.pushMobsFacing();
             mech.pushBodyFacing();
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
@@ -1511,7 +1508,7 @@ const mech = {
             } else {
               mech.fieldCDcycle = mech.cycle + 120;
             }
-          } else if (mech.holdingTarget && mech.fireCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
@@ -1545,7 +1542,7 @@ const mech = {
     //           //try to hack a mob
     //           for (let i = 0, len = mob.length; i < len; ++i) {
     //             if (
-    //               Matter.Vector.magnitude(Matter.Vector.sub(mob[i].position, this.pos)) < this.grabRange &&
+    //               Vector.magnitude(Vector.sub(mob[i].position, this.pos)) < this.grabRange &&
     //               this.lookingAt(mob[i]) &&
     //               Matter.Query.ray(map, mob[i].position, this.pos).length === 0
     //             ) {

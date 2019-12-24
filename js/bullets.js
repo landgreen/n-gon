@@ -424,16 +424,16 @@ const b = {
     });
 
     //player damage and knock back
-    sub = Matter.Vector.sub(where, player.position);
-    dist = Matter.Vector.magnitude(sub);
+    sub = Vector.sub(where, player.position);
+    dist = Vector.magnitude(sub);
     if (dist < radius) {
       if (!b.isModImmuneExplosion) mech.damage(radius * 0.0002);
-      knock = Matter.Vector.mult(Matter.Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
+      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
       player.force.x += knock.x;
       player.force.y += knock.y;
       mech.drop();
     } else if (dist < alertRange) {
-      knock = Matter.Vector.mult(Matter.Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
+      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
       player.force.x += knock.x;
       player.force.y += knock.y;
       mech.drop();
@@ -441,14 +441,14 @@ const b = {
 
     //body knock backs
     for (let i = 0, len = body.length; i < len; ++i) {
-      sub = Matter.Vector.sub(where, body[i].position);
-      dist = Matter.Vector.magnitude(sub);
+      sub = Vector.sub(where, body[i].position);
+      dist = Vector.magnitude(sub);
       if (dist < radius) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 18);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 18);
         body[i].force.x += knock.x;
         body[i].force.y += knock.y;
       } else if (dist < alertRange) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 40);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 40);
         body[i].force.x += knock.x;
         body[i].force.y += knock.y;
       }
@@ -456,14 +456,14 @@ const b = {
 
     //power up knock backs
     for (let i = 0, len = powerUp.length; i < len; ++i) {
-      sub = Matter.Vector.sub(where, powerUp[i].position);
-      dist = Matter.Vector.magnitude(sub);
+      sub = Vector.sub(where, powerUp[i].position);
+      dist = Vector.magnitude(sub);
       if (dist < radius) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 26);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 30);
         powerUp[i].force.x += knock.x;
         powerUp[i].force.y += knock.y;
       } else if (dist < alertRange) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 40);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 45);
         powerUp[i].force.x += knock.x;
         powerUp[i].force.y += knock.y;
       }
@@ -473,19 +473,19 @@ const b = {
     let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (mob[i].alive) {
-        sub = Matter.Vector.sub(where, mob[i].position);
-        dist = Matter.Vector.magnitude(sub) - mob[i].radius;
+        sub = Vector.sub(where, mob[i].position);
+        dist = Vector.magnitude(sub) - mob[i].radius;
         if (dist < radius) {
           mob[i].damage(dmg * damageScale);
           mob[i].locatePlayer();
-          knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 18);
+          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 30);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
           radius *= 0.9 //reduced range for each additional explosion target
           damageScale *= 0.75 //reduced damage for each additional explosion target 
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
-          knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 35);
+          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 50);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
         }
@@ -517,16 +517,16 @@ const b = {
     });
 
     //player damage and knock back
-    sub = Matter.Vector.sub(bullet[me].position, player.position);
-    dist = Matter.Vector.magnitude(sub);
+    sub = Vector.sub(bullet[me].position, player.position);
+    dist = Vector.magnitude(sub);
     if (dist < radius) {
       if (!b.isModImmuneExplosion) mech.damage(radius * 0.0002);
-      knock = Matter.Vector.mult(Matter.Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
+      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
       player.force.x += knock.x;
       player.force.y += knock.y;
       mech.drop();
     } else if (dist < alertRange) {
-      knock = Matter.Vector.mult(Matter.Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
+      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
       player.force.x += knock.x;
       player.force.y += knock.y;
       mech.drop();
@@ -534,14 +534,14 @@ const b = {
 
     //body knock backs
     for (let i = 0, len = body.length; i < len; ++i) {
-      sub = Matter.Vector.sub(bullet[me].position, body[i].position);
-      dist = Matter.Vector.magnitude(sub);
+      sub = Vector.sub(bullet[me].position, body[i].position);
+      dist = Vector.magnitude(sub);
       if (dist < radius) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 18);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 18);
         body[i].force.x += knock.x;
         body[i].force.y += knock.y;
       } else if (dist < alertRange) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 40);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 40);
         body[i].force.x += knock.x;
         body[i].force.y += knock.y;
       }
@@ -549,14 +549,14 @@ const b = {
 
     //power up knock backs
     for (let i = 0, len = powerUp.length; i < len; ++i) {
-      sub = Matter.Vector.sub(bullet[me].position, powerUp[i].position);
-      dist = Matter.Vector.magnitude(sub);
+      sub = Vector.sub(bullet[me].position, powerUp[i].position);
+      dist = Vector.magnitude(sub);
       if (dist < radius) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 26);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 30);
         powerUp[i].force.x += knock.x;
         powerUp[i].force.y += knock.y;
       } else if (dist < alertRange) {
-        knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 40);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 45);
         powerUp[i].force.x += knock.x;
         powerUp[i].force.y += knock.y;
       }
@@ -566,26 +566,26 @@ const b = {
     let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (mob[i].alive) {
-        sub = Matter.Vector.sub(bullet[me].position, mob[i].position);
-        dist = Matter.Vector.magnitude(sub) - mob[i].radius;
+        sub = Vector.sub(bullet[me].position, mob[i].position);
+        dist = Vector.magnitude(sub) - mob[i].radius;
         if (dist < radius) {
           mob[i].damage(dmg * damageScale);
           mob[i].locatePlayer();
-          knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 18);
+          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 30);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
           radius *= 0.9 //reduced range for each additional explosion target
           damageScale *= 0.75 //reduced damage for each additional explosion target 
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
-          knock = Matter.Vector.mult(Matter.Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 35);
+          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 50);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
         }
       }
     }
 
-    // Matter.Vector.magnitudeSquared(Matter.Vector.sub(bullet[me].position, mob[i].position))
+    // Vector.magnitudeSquared(Vector.sub(bullet[me].position, mob[i].position))
   },
   spore(who) { //used with the mod upgrade in mob.death()
     const bIndex = bullet.length;
@@ -619,12 +619,12 @@ const b = {
           for (let i = 0, len = mob.length; i < len; ++i) {
             if (Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
               // Matter.Query.ray(body, this.position, mob[i].position).length === 0
-              const targetVector = Matter.Vector.sub(this.position, mob[i].position)
-              const dist = Matter.Vector.magnitude(targetVector);
+              const targetVector = Vector.sub(this.position, mob[i].position)
+              const dist = Vector.magnitude(targetVector);
               if (dist < closeDist) {
                 this.closestTarget = mob[i].position;
                 closeDist = dist;
-                this.lockedOn = Matter.Vector.normalise(targetVector);
+                this.lockedOn = Vector.normalise(targetVector);
                 if (0.3 > Math.random()) break //doesn't always target the closest mob
               }
             }
@@ -693,8 +693,8 @@ const b = {
                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                 Matter.Query.ray(body, this.position, mob[i].position).length === 0
               ) {
-                const TARGET_VECTOR = Matter.Vector.sub(this.position, mob[i].position)
-                const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+                const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
+                const DIST = Vector.magnitude(TARGET_VECTOR);
                 if (DIST < closeDist) {
                   closeDist = DIST;
                   this.lockedOn = mob[i]
@@ -710,8 +710,8 @@ const b = {
                   Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
                   Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
                 ) {
-                  const TARGET_VECTOR = Matter.Vector.sub(this.position, powerUp[i].position)
-                  const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+                  const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
+                  const DIST = Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
                     if (DIST < 50) { //eat the power up if close enough
                       powerUp[i].effect();
@@ -727,9 +727,9 @@ const b = {
             }
           }
           if (this.lockedOn) { //accelerate towards mobs
-            this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+            this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
           } else { //accelerate towards mouse
-            this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, game.mouseInGame)), -this.mass * THRUST)
+            this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, game.mouseInGame)), -this.mass * THRUST)
           }
           // speed cap instead of friction to give more agility
           if (this.speed > 6) {
@@ -907,7 +907,7 @@ const b = {
             if (!mech.isBodiesAsleep) {
               this.cycle++
               const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
-              this.force = Matter.Vector.mult(Matter.Vector.normalise(this.direction), this.mass * THRUST) //wiggle
+              this.force = Vector.mult(Vector.normalise(this.direction), this.mass * THRUST) //wiggle
 
               if (this.cycle > 0 && !(Math.floor(this.cycle) % 6)) Matter.Body.scale(this, SCALE, SCALE); //shrink
             }
@@ -920,11 +920,11 @@ const b = {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
         });
-        bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
+        bullet[me].direction = Vector.perp(bullet[me].velocity)
         // if (mech.angle + Math.PI / 2 > 0) {
-        //   bullet[me].direction = Matter.Vector.perp(bullet[me].velocity, true)
+        //   bullet[me].direction = Vector.perp(bullet[me].velocity, true)
         // } else {
-        //   bullet[me].direction = Matter.Vector.perp(bullet[me].velocity)
+        //   bullet[me].direction = Vector.perp(bullet[me].velocity)
         // }
 
         World.add(engine.world, bullet[me]); //add bullet to world
@@ -985,25 +985,25 @@ const b = {
               player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
 
               //push away blocks when firing
-              let range = 450 * this.charge
+              let range = 700 * this.charge
               for (let i = 0, len = body.length; i < len; ++i) {
-                const SUB = Matter.Vector.sub(body[i].position, mech.pos)
-                const DISTANCE = Matter.Vector.magnitude(SUB)
+                const SUB = Vector.sub(body[i].position, mech.pos)
+                const DISTANCE = Vector.magnitude(SUB)
 
                 if (DISTANCE < range) {
-                  const DEPTH = Math.max(range - DISTANCE, 100)
-                  const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.005 * Math.sqrt(DEPTH) * Math.sqrt(body[i].mass))
+                  const DEPTH = Math.min(range - DISTANCE, 300)
+                  const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * body[i].mass)
                   body[i].force.x += FORCE.x;
                   body[i].force.y += FORCE.y - body[i].mass * (game.g * 1.5); //kick up a bit to give them some arc
                 }
               }
               for (let i = 0, len = mob.length; i < len; ++i) {
-                const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
-                const DISTANCE = Matter.Vector.magnitude(SUB)
+                const SUB = Vector.sub(mob[i].position, mech.pos)
+                const DISTANCE = Vector.magnitude(SUB)
 
                 if (DISTANCE < range) {
-                  const DEPTH = Math.max(range - DISTANCE, 100)
-                  const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.005 * Math.sqrt(DEPTH) * Math.sqrt(mob[i].mass))
+                  const DEPTH = Math.min(range - DISTANCE, 300)
+                  const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * mob[i].mass)
                   mob[i].force.x += 1.5 * FORCE.x;
                   mob[i].force.y += 1.5 * FORCE.y;
                 }
@@ -1011,11 +1011,11 @@ const b = {
               //push mobs around player when firing
               // range = 600 * this.charge
               // for (let i = 0, len = mob.length; i < len; ++i) {
-              //   const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
-              //   const DISTANCE = Matter.Vector.magnitude(SUB)
+              //   const SUB = Vector.sub(mob[i].position, mech.pos)
+              //   const DISTANCE = Vector.magnitude(SUB)
               //   if (DISTANCE < range) {
               //     const DEPTH = range - DISTANCE
-              //     const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.00000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
+              //     const FORCE = Vector.mult(Vector.normalise(SUB), 0.00000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
               //     mob[i].force.x += FORCE.x
               //     mob[i].force.y += FORCE.y
               //   }
@@ -1031,16 +1031,16 @@ const b = {
               //gently push away mobs while charging
               // const RANGE = 270 * this.charge
               // for (let i = 0, len = mob.length; i < len; ++i) {
-              //   const SUB = Matter.Vector.sub(mob[i].position, mech.pos)
-              //   const DISTANCE = Matter.Vector.magnitude(SUB)
+              //   const SUB = Vector.sub(mob[i].position, mech.pos)
+              //   const DISTANCE = Vector.magnitude(SUB)
               //   // if (DISTANCE < RANGE) {
-              //   //   Matter.Body.setVelocity(mob[i], Matter.Vector.rotate(mob[i].velocity, 0.1))
+              //   //   Matter.Body.setVelocity(mob[i], Vector.rotate(mob[i].velocity, 0.1))
               //   // }
               //   // const DRAIN = 0.0002  //&& mech.fieldMeter > DRAIN
               //   if (DISTANCE < RANGE) {
               //     // mech.fieldMeter -= DRAIN + mech.fieldRegen;
               //     const DEPTH = RANGE - DISTANCE
-              //     const FORCE = Matter.Vector.mult(Matter.Vector.normalise(SUB), 0.000000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
+              //     const FORCE = Vector.mult(Vector.normalise(SUB), 0.000000001 * DEPTH * DEPTH * DEPTH * Math.sqrt(mob[i].mass))
               //     mob[i].force.x += FORCE.x
               //     mob[i].force.y += FORCE.y
               //   }
@@ -1132,8 +1132,8 @@ const b = {
               //draw magnetic field
               const X = mech.pos.x
               const Y = mech.pos.y
-              const unitVector = Matter.Vector.normalise(Matter.Vector.sub(game.mouseInGame, mech.pos))
-              const unitVectorPerp = Matter.Vector.perp(unitVector)
+              const unitVector = Vector.normalise(Vector.sub(game.mouseInGame, mech.pos))
+              const unitVectorPerp = Vector.perp(unitVector)
 
               function magField(mag, arc) {
                 ctx.moveTo(X, Y);
@@ -1195,24 +1195,29 @@ const b = {
               this.lockedOn = null;
               let closeDist = Infinity;
 
-              //look for targets
+
+              //look for closest target to where the missile will be in 30 cycles
+              const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 30))
+              // ctx.beginPath(); //draw future pos
+              // ctx.arc(futurePos.x, futurePos.y, 20, 0, 2 * Math.PI);
+              // ctx.fillStyle = "rgba(0,0,0,0.5)";
+              // ctx.fill();
               for (let i = 0, len = mob.length; i < len; ++i) {
                 if (
-                  mob[i].alive &&
-                  mob[i].dropPowerUp &&
+                  mob[i].alive && mob[i].dropPowerUp &&
                   Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                   Matter.Query.ray(body, this.position, mob[i].position).length === 0
                 ) {
-                  const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[i].position));
-                  if (dist < closeDist) {
-                    closeDist = dist;
+                  const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
+                  if (futureDist < closeDist) {
+                    closeDist = futureDist;
                     this.lockedOn = mob[i];
                     this.frictionAir = 0.05; //extra friction once a target it locked
                   }
                 }
               }
               //explode when bullet is close enough to target
-              if (this.lockedOn && closeDist < this.explodeRad * 0.6) {
+              if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad * 0.7) {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
                 const dmg = b.dmgScale * 3;
                 this.lockedOn.damage(dmg); //does extra damage to target
@@ -1225,9 +1230,9 @@ const b = {
                 x: Math.cos(this.angle),
                 y: Math.sin(this.angle)
               };
-              const target = Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position));
-              if (Matter.Vector.dot(target, face) > -0.98) {
-                if (Matter.Vector.cross(target, face) > 0) {
+              const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
+              if (Vector.dot(target, face) > -0.98) {
+                if (Vector.cross(target, face) > 0) {
                   Matter.Body.rotate(this, 0.08);
                 } else {
                   Matter.Body.rotate(this, -0.08);
@@ -1332,7 +1337,7 @@ const b = {
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 26 * b.modBulletSize, b.fireAttributes(dir, false));
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 35 * b.modBulletSize, b.fireAttributes(dir, false));
         bullet[me].radius = 22; //used from drawing timer
         b.fireProps(10, mech.crouch ? 42 : 26, dir, me); //cd , speed
 
@@ -1372,10 +1377,10 @@ const b = {
 
               function suck(who, radius = that.explodeRad * 2) {
                 for (i = 0, len = who.length; i < len; i++) {
-                  const sub = Matter.Vector.sub(that.position, who[i].position);
-                  const dist = Matter.Vector.magnitude(sub);
+                  const sub = Vector.sub(that.position, who[i].position);
+                  const dist = Vector.magnitude(sub);
                   if (dist < radius && dist > 150) {
-                    knock = Matter.Vector.mult(Matter.Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
+                    knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
                     who[i].force.x += knock.x;
                     who[i].force.y += knock.y;
                   }
@@ -1425,7 +1430,7 @@ const b = {
               //draw clock on timer
               ctx.fillStyle = "#f04";
               ctx.beginPath();
-              ctx.arc(this.position.x, this.position.y, this.radius * 0.5, 0, 2 * Math.PI);
+              ctx.arc(this.position.x, this.position.y, this.radius * 0.7, 0, 2 * Math.PI);
               ctx.fill();
             }
           }
@@ -1458,13 +1463,13 @@ const b = {
               const targets = []
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].dropPowerUp) {
-                  const sub = Matter.Vector.sub(this.position, mob[i].position);
-                  const dist = Matter.Vector.magnitude(sub);
+                  const sub = Vector.sub(this.position, mob[i].position);
+                  const dist = Vector.magnitude(sub);
                   if (dist < 1400 &&
                     Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                     Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                     targets.push(
-                      Matter.Vector.add(mob[i].position, Matter.Vector.mult(mob[i].velocity, dist / 60))
+                      Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))
                     )
                   }
                 }
@@ -1478,7 +1483,7 @@ const b = {
                     x: targets[index].x + SPREAD * (Math.random() - 0.5),
                     y: targets[index].y + SPREAD * (Math.random() - 0.5)
                   }
-                  needle(this.position, Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(WHERE, this.position)), speed))
+                  needle(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed))
                 } else { // aim in random direction
                   const ANGLE = 2 * Math.PI * Math.random()
                   needle(this.position, {
@@ -1595,7 +1600,7 @@ const b = {
               this.lockedOn = null;
               let closeDist = this.range;
               for (let i = 0, len = mob.length; i < len; ++i) {
-                const DIST = Matter.Vector.magnitude(Matter.Vector.sub(this.vertices[0], mob[i].position));
+                const DIST = Vector.magnitude(Vector.sub(this.vertices[0], mob[i].position));
                 if (DIST - mob[i].radius < closeDist &&
                   Matter.Query.ray(map, this.vertices[0], mob[i].position).length === 0 &&
                   Matter.Query.ray(body, this.vertices[0], mob[i].position).length === 0) {
@@ -1609,7 +1614,7 @@ const b = {
               mech.fieldMeter -= 0.0016
 
               //make sure you can still see target
-              const DIST = Matter.Vector.magnitude(Matter.Vector.sub(this.vertices[0], this.lockedOn.position));
+              const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
               if (DIST - this.lockedOn.radius < this.range + 150 &&
                 Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
                 Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
@@ -1617,7 +1622,7 @@ const b = {
                 let bestVertexDistance = Infinity
                 let bestVertex = null
                 for (let i = 0; i < this.lockedOn.vertices.length; i++) {
-                  const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.vertices[0], this.lockedOn.vertices[i]));
+                  const dist = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.vertices[i]));
                   if (dist < bestVertexDistance) {
                     bestVertex = i
                     bestVertexDistance = dist
@@ -1644,14 +1649,14 @@ const b = {
               }
             }
 
-            const distanceToPlayer = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mech.pos))
+            const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
             if (distanceToPlayer > this.range * 0.2) { //if far away move towards player
-              this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
+              this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
               this.frictionAir = 0.02
             } else { //close to player
               this.frictionAir = 0
               //add player's velocity
-              Matter.Body.setVelocity(this, Matter.Vector.add(Matter.Vector.mult(this.velocity, 1), Matter.Vector.mult(player.velocity, 0.02)));
+              Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 1), Vector.mult(player.velocity, 0.02)));
             }
           }
         })
@@ -1752,11 +1757,11 @@ const b = {
 
           const reflection = function () {
             // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-            const n = Matter.Vector.perp(Matter.Vector.normalise(Matter.Vector.sub(best.v1, best.v2)));
-            const d = Matter.Vector.sub(path[path.length - 1], path[path.length - 2]);
-            const nn = Matter.Vector.mult(n, 2 * Matter.Vector.dot(d, n));
-            const r = Matter.Vector.normalise(Matter.Vector.sub(d, nn));
-            path[path.length] = Matter.Vector.add(Matter.Vector.mult(r, range), path[path.length - 1]);
+            const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
+            const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
+            const nn = Vector.mult(n, 2 * Vector.dot(d, n));
+            const r = Vector.normalise(Vector.sub(d, nn));
+            path[path.length] = Vector.add(Vector.mult(r, range), path[path.length - 1]);
           };
           //beam before reflection
           checkForCollisions();
@@ -1827,7 +1832,7 @@ const b = {
       fire() {
         //calculate laser collision
         let best;
-        let range = 4000
+        let range = 3000
         const path = [{
             x: mech.pos.x + 20 * Math.cos(mech.angle),
             y: mech.pos.y + 20 * Math.sin(mech.angle)
@@ -1918,8 +1923,8 @@ const b = {
         ctx.stroke();
 
         //draw little dots along the laser path
-        const sub = Matter.Vector.sub(path[1], path[0])
-        const mag = Matter.Vector.magnitude(sub)
+        const sub = Vector.sub(path[1], path[0])
+        const mag = Vector.magnitude(sub)
         for (let i = 0, len = Math.floor(mag * 0.03 * energy / 0.2); i < len; i++) {
           const dist = Math.random()
           game.drawList.push({
@@ -1940,13 +1945,13 @@ const b = {
       have: false,
       isStarterGun: true,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 12 : 4) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 12 : 5) * b.modFireRate); // cool down
         const me = bullet.length;
         const dir = mech.angle + 0.2 * (Math.random() - 0.5)
         const RADIUS = (8 + 16 * Math.random()) * b.modBulletSize
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 25, RADIUS, {
           angle: dir,
-          density: 0.000005, //  0.001 is normal density
+          density: 0.00001, //  0.001 is normal density
           inertia: Infinity,
           frictionAir: 0.003,
           friction: 0.2,
@@ -1972,7 +1977,7 @@ const b = {
               let bestVertexDistance = Infinity
               let bestVertex = null
               for (let i = 0; i < this.target.vertices.length; i++) {
-                const dist = Matter.Vector.magnitude(Matter.Vector.sub(this.position, this.target.vertices[i]));
+                const dist = Vector.magnitude(Vector.sub(this.position, this.target.vertices[i]));
                 if (dist < bestVertexDistance) {
                   bestVertex = i
                   bestVertexDistance = dist
@@ -2007,9 +2012,9 @@ const b = {
 
               if (this.target && this.target.alive) { //if stuck to a target
                 Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
-                Matter.Body.setVelocity(this.target, Matter.Vector.mult(this.target.velocity, 0.94))
+                Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.94))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.94)
-                this.target.damage(b.dmgScale * 0.004);
+                this.target.damage(b.dmgScale * 0.0045);
               } else if (this.target !== null) { //look for a new target
                 this.target = null
                 this.collisionFilter.category = cat.bullet;
@@ -2065,8 +2070,8 @@ const b = {
     //         const dmg = b.dmgScale * 0.02
     //         for (let i = 0, len = mob.length; i < len; ++i) {
     //           if (mob[i].alive) {
-    //             sub = Matter.Vector.sub(this.position, mob[i].position);
-    //             dist = Matter.Vector.magnitude(sub) - mob[i].radius;
+    //             sub = Vector.sub(this.position, mob[i].position);
+    //             dist = Vector.magnitude(sub) - mob[i].radius;
     //             if (dist < this.range) {
     //               mob[i].damage(dmg);
     //               mob[i].locatePlayer();
@@ -2076,8 +2081,8 @@ const b = {
 
     //         //pull in body, and power ups?, and bullets?
     //         for (let i = 0, len = body.length; i < len; ++i) {
-    //           sub = Matter.Vector.sub(this.position, body[i].position);
-    //           dist = Matter.Vector.magnitude(sub)
+    //           sub = Vector.sub(this.position, body[i].position);
+    //           dist = Vector.magnitude(sub)
     //           if (dist < this.range) {
     //             this.range += body[i].mass * 2
     //             Matter.World.remove(engine.world, body[i]);
@@ -2155,7 +2160,7 @@ const b = {
     //       onEnd() {},
     //       do() {
     //         if (this.lockedOn) { //accelerate towards mobs
-    //           this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.position, this.lockedOn.position)), -this.mass * 0.01)
+    //           this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * 0.01)
     //           Matter.Body.setVelocity(this, {
     //             x: this.velocity.x * 0.93,
     //             y: this.velocity.y * 0.93
@@ -2175,8 +2180,8 @@ const b = {
     //         Matter.Query.ray(map, bullet[me].position, mob[i].position).length === 0 &&
     //         Matter.Query.ray(body, bullet[me].position, mob[i].position).length === 0
     //       ) {
-    //         const TARGET_VECTOR = Matter.Vector.sub(bullet[me].position, mob[i].position)
-    //         const DIST = Matter.Vector.magnitude(TARGET_VECTOR);
+    //         const TARGET_VECTOR = Vector.sub(bullet[me].position, mob[i].position)
+    //         const DIST = Vector.magnitude(TARGET_VECTOR);
     //         if (DIST < closeDist) {
     //           closeDist = DIST;
     //           bullet[me].lockedOn = mob[i]

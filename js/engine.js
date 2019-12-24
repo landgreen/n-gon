@@ -9,7 +9,8 @@ const Engine = Matter.Engine,
   Vertices = Matter.Vertices,
   Query = Matter.Query,
   Body = Matter.Body,
-  Bodies = Matter.Bodies;
+  Bodies = Matter.Bodies,
+  Vector = Matter.Vector;
 
 // create an engine
 const engine = Engine.create();
@@ -88,7 +89,7 @@ function mobCollisionChecks(event) {
 
     function collidePlayer(obj, speedThreshold = 12, massThreshold = 2) {
       if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > massThreshold) { //dmg from hitting a body
-        const v = Matter.Vector.magnitude(Matter.Vector.sub(player.velocity, obj.velocity));
+        const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
         if (v > speedThreshold) {
           mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
           let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
@@ -177,17 +178,15 @@ function mobCollisionChecks(event) {
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
-            // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)));
-            let dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity)))
+            // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)));
+            let dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
             if (b.modIsCrit && !mob[k].seePlayer.recall) dmg *= 5
             mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn
-            game.drawList.push({
-              //add dmg to draw queue
+            game.drawList.push({ //add dmg to draw queue
               x: pairs[i].activeContacts[0].vertex.x,
               y: pairs[i].activeContacts[0].vertex.y,
-              // radius: Math.sqrt(dmg) * 40,
               radius: Math.log(2 * dmg + 1.1) * 40,
               color: game.playerDmgColor,
               time: game.drawTime
@@ -196,7 +195,7 @@ function mobCollisionChecks(event) {
           }
           //mob + body collisions
           if (obj.classType === "body" && obj.speed > 5) {
-            const v = Matter.Vector.magnitude(Matter.Vector.sub(mob[k].velocity, obj.velocity));
+            const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 8) {
               let dmg = b.dmgScale * v * Math.sqrt(obj.mass) * 0.05;
               mob[k].damage(dmg);

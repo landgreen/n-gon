@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(15)
+      // b.giveGuns(5)
       // mech.fieldUpgrades[2].effect();
       // b.giveMod(21)
 
@@ -97,19 +97,24 @@ const level = {
     spawn.spawnBuilding(-200, -250, 275, 240, false, true, "left"); //far left; player spawns in side
     // spawn.boost(350, 0, -1000);
     // for (let i = 0; i < 10; i++) {
-    powerUps.spawn(950, -425, "gun", false);
-    powerUps.spawn(950, -425, "gun", false);
+    // powerUps.spawn(950, -425, "gun", false);
+    // powerUps.spawn(950, -425, "gun", false);
     // }
 
     // spawn.nodeBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
-    spawn.bodyRect(-135, -50, 50, 50);
-    spawn.bodyRect(-140, -100, 50, 50);
-    // powerUps.spawn(420, -400, "ammo", false);
+    // spawn.bodyRect(-135, -50, 50, 50);
+    // spawn.bodyRect(-140, -100, 50, 50);
+    powerUps.spawn(420, -400, "field", false);
+    powerUps.spawn(420, -400, "field", false);
+    powerUps.spawn(420, -400, "field", false);
+    powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.shooter(800, -1050);
+    // spawn.shooter(800, -1050);
+    // spawn.shooter(400, -1050);
+    // spawn.shooter(1200, -1050);
     // spawn.groupBoss(-600, -550);
     // spawn.hopper(800, -150);
     // spawn.beamer(800, -150);

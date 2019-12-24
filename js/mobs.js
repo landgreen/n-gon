@@ -185,14 +185,14 @@ const mobs = {
         }
       },
       isLookingAtPlayer(threshold) {
-        const diff = Matter.Vector.normalise(Matter.Vector.sub(player.position, this.position));
+        const diff = Vector.normalise(Vector.sub(player.position, this.position));
         //make a vector for the mob's direction of length 1
         const dir = {
           x: Math.cos(this.angle),
           y: Math.sin(this.angle)
         };
         //the dot product of diff and dir will return how much over lap between the vectors
-        const dot = Matter.Vector.dot(dir, diff);
+        const dot = Vector.dot(dir, diff);
         // console.log(Math.cos(dot)*180/Math.PI)
         if (dot > threshold) {
           return true;
@@ -247,7 +247,7 @@ const mobs = {
           this.hackedTarget = null
           for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i] !== this) {
-              // const DIST = Matter.Vector.magnitude(Matter.Vector.sub(this.position, mob[j]));
+              // const DIST = Vector.magnitude(Vector.sub(this.position, mob[j]));
               if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                 this.hackedTarget = mob[i]
@@ -258,7 +258,7 @@ const mobs = {
 
         //acceleration towards targets
         if (this.hackedTarget) {
-          this.force = Matter.Vector.mult(Matter.Vector.normalise(Matter.Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
+          this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
         }
 
       },
@@ -508,7 +508,7 @@ const mobs = {
       alertNearByMobs() {
         //this.alertRange2 is set at the very bottom of this mobs, after mob is made
         for (let i = 0; i < mob.length; i++) {
-          if (!mob[i].seePlayer.recall && Matter.Vector.magnitudeSquared(Matter.Vector.sub(this.position, mob[i].position)) < this.alertRange2) {
+          if (!mob[i].seePlayer.recall && Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < this.alertRange2) {
             mob[i].locatePlayer();
           }
         }
@@ -576,12 +576,12 @@ const mobs = {
         //cause all mobs, and bodies to rotate in a circle
         applyCurl = function (center, array) {
           for (let i = 0; i < array.length; ++i) {
-            const sub = Matter.Vector.sub(center, array[i].position)
-            const radius2 = Matter.Vector.magnitudeSquared(sub);
+            const sub = Vector.sub(center, array[i].position)
+            const radius2 = Vector.magnitudeSquared(sub);
 
             //if too close, like center mob or shield, don't curl   // if too far don't curl
             if (radius2 < range * range && radius2 > 10000) {
-              const curlVector = Matter.Vector.mult(Matter.Vector.perp(Matter.Vector.normalise(sub)), mag)
+              const curlVector = Vector.mult(Vector.perp(Vector.normalise(sub)), mag)
               //apply curl force
               Matter.Body.setVelocity(array[i], {
                 x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
@@ -610,7 +610,7 @@ const mobs = {
         // ctx.fill();
       },
       pullPlayer() {
-        if (this.seePlayer.yes && Matter.Vector.magnitudeSquared(Matter.Vector.sub(this.position, player.position)) < 1000000) {
+        if (this.seePlayer.yes && Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < 1000000) {
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= game.accelScale * 1.13 * Math.cos(angle) * (mech.onGround ? 2 * player.mass * game.g : player.mass * game.g);
           player.force.y -= game.accelScale * 0.84 * player.mass * game.g * Math.sin(angle);
@@ -733,15 +733,15 @@ const mobs = {
             }
           };
 
-          const sub = Matter.Vector.sub(this.searchTarget, this.position);
-          if (Matter.Vector.magnitude(sub) > this.radius * 2) {
+          const sub = Vector.sub(this.searchTarget, this.position);
+          if (Vector.magnitude(sub) > this.radius * 2) {
             // ctx.beginPath();
             // ctx.strokeStyle = "#aaa";
             // ctx.moveTo(this.position.x, this.position.y);
             // ctx.lineTo(this.searchTarget.x,this.searchTarget.y);
             // ctx.stroke();
             //accelerate at 0.1 of normal acceleration
-            this.force = Matter.Vector.mult(Matter.Vector.normalise(sub), this.accelMag * this.mass * 0.2);
+            this.force = Vector.mult(Vector.normalise(sub), this.accelMag * this.mass * 0.2);
           } else {
             //after reaching random target switch to new target
             newTarget(this);
@@ -755,13 +755,13 @@ const mobs = {
       strike() {
         //teleport to player when close enough on CD
         if (this.seePlayer.recall && this.cd < game.cycle) {
-          const dist = Matter.Vector.sub(this.seePlayer.position, this.position);
-          const distMag = Matter.Vector.magnitude(dist);
+          const dist = Vector.sub(this.seePlayer.position, this.position);
+          const distMag = Vector.magnitude(dist);
           if (distMag < 400) {
             this.cd = game.cycle + this.delay;
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
-            Matter.Body.translate(this, Matter.Vector.mult(Matter.Vector.normalise(dist), distMag - 20 - radius));
+            Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), distMag - 20 - radius));
             ctx.lineTo(this.position.x, this.position.y);
             ctx.lineWidth = radius * 2;
             ctx.strokeStyle = this.fill; //"rgba(0,0,0,0.5)"; //'#000'
@@ -774,14 +774,14 @@ const mobs = {
         if (this.seePlayer.recall && !(game.cycle % this.blinkRate)) {
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
-          const dist = Matter.Vector.sub(this.seePlayer.position, this.position);
-          const distMag = Matter.Vector.magnitude(dist);
-          const unitVector = Matter.Vector.normalise(dist);
+          const dist = Vector.sub(this.seePlayer.position, this.position);
+          const distMag = Vector.magnitude(dist);
+          const unitVector = Vector.normalise(dist);
           const rando = (Math.random() - 0.5) * 50;
           if (distMag < this.blinkLength) {
-            Matter.Body.translate(this, Matter.Vector.mult(unitVector, distMag + rando));
+            Matter.Body.translate(this, Vector.mult(unitVector, distMag + rando));
           } else {
-            Matter.Body.translate(this, Matter.Vector.mult(unitVector, this.blinkLength + rando));
+            Matter.Body.translate(this, Vector.mult(unitVector, this.blinkLength + rando));
           }
           ctx.lineTo(this.position.x, this.position.y);
           ctx.lineWidth = radius * 2;
@@ -795,9 +795,9 @@ const mobs = {
           // && !mech.lookingAtMob(this,0.5)){
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
-          const dist = Matter.Vector.sub(this.seePlayer.position, this.position);
-          const distMag = Matter.Vector.magnitude(dist);
-          const vector = Matter.Vector.mult(Matter.Vector.normalise(dist), this.blinkLength);
+          const dist = Vector.sub(this.seePlayer.position, this.position);
+          const distMag = Vector.magnitude(dist);
+          const vector = Vector.mult(Vector.normalise(dist), this.blinkLength);
           if (distMag < this.blinkLength) {
             Matter.Body.setPosition(this, this.seePlayer.position);
             Matter.Body.translate(this, {
@@ -845,7 +845,7 @@ const mobs = {
           if (this.seePlayer.recall) {
             //set direction to turn to fire
             if (!(game.cycle % this.seePlayerFreq)) {
-              this.fireDir = Matter.Vector.normalise(Matter.Vector.sub(this.seePlayer.position, this.position));
+              this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
               this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 1600; //gives the bullet an arc
               this.fireAngle = Math.atan2(this.fireDir.y, this.fireDir.x);
             }
@@ -901,7 +901,7 @@ const mobs = {
         }
       },
       facePlayer() {
-        const unitVector = Matter.Vector.normalise(Matter.Vector.sub(this.seePlayer.position, this.position));
+        const unitVector = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
         const angle = Math.atan2(unitVector.y, unitVector.x);
         Matter.Body.setAngle(this, angle - Math.PI);
       },
