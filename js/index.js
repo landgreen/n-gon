@@ -82,6 +82,25 @@ game mechanics
 
 */
 
+//find what mods I don't have
+function doNotHave(who) {
+  let options = [];
+  for (let i = 0; i < who.length; i++) {
+    if (!who[i].have) options.push(i);
+  }
+  if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
+}
+
+
+//give a random mod from the mods I don't have
+let newMod = doNotHave(b.mods)
+
+let t = ""
+for (let i = 0; i < 3; i++) {
+  t += `<div class="choose-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+}
+// document.getElementById("choose-grid").innerHTML = t
+
 
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield

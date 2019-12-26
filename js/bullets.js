@@ -839,41 +839,41 @@ const b = {
         }
       }
     },
-
     {
       name: "fléchettes", //3
-      description: "fire a flight of long range needles",
+      description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 16,
+      ammoPack: 60,
       have: false,
       isStarterGun: true,
+      count: 0, //used to track how many shots are in a volley before a big CD
+      lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor(40 * b.modFireRate); // cool down
+        const CD = (mech.crouch) ? 35 : 25
+        if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
+        this.lastFireCycle = mech.cycle
 
-        function spawnFlechette(dir = mech.angle, speed, size = 1) {
-          const me = bullet.length;
-          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(dir), mech.pos.y + 40 * Math.sin(dir), 32 * size * b.modBulletSize, 0.8 * size * b.modBulletSize, b.fireAttributes(dir));
-          bullet[me].endCycle = game.cycle + Math.floor(180 * b.isModBulletsLastLonger);
-          bullet[me].dmg = 0.13 * size + b.modExtraDmg;
-          bullet[me].do = function () {
-            this.force.y += this.mass * 0.0002; //low gravity
-          };
-          Matter.Body.setVelocity(bullet[me], {
-            x: mech.Vx / 2 + speed * Math.cos(dir),
-            y: mech.Vy / 2 + speed * Math.sin(dir)
-          });
-          World.add(engine.world, bullet[me]); //add bullet to world
-        }
-
-        if (mech.crouch) {
-          for (let i = 0; i < 3; i++) {
-            spawnFlechette(mech.angle + 0.02 * (Math.random() - 0.5), 50 + 4 * i, 1.55)
-          }
+        if (this.count > ((mech.crouch) ? 4 : 1)) {
+          this.count = 0
+          mech.fireCDcycle = mech.cycle + Math.floor(CD * b.modFireRate); // cool down
         } else {
-          for (let i = 0; i < 8; i++) {
-            spawnFlechette(mech.angle + 0.12 * (Math.random() - 0.5), 43 + 8 * Math.random())
-          }
+          this.count++
+          mech.fireCDcycle = mech.cycle + Math.floor(2 * b.modFireRate); // cool down
         }
+
+        const me = bullet.length;
+        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 50 * b.modBulletSize, 1.3 * b.modBulletSize, b.fireAttributes(mech.angle));
+        bullet[me].endCycle = game.cycle + Math.floor(180 * b.isModBulletsLastLonger);
+        bullet[me].dmg = 0.7 + b.modExtraDmg;
+        bullet[me].do = function () {
+          this.force.y += this.mass * 0.0002; //low gravity
+        };
+        const SPEED = 45
+        Matter.Body.setVelocity(bullet[me], {
+          x: mech.Vx / 2 + SPEED * Math.cos(mech.angle),
+          y: mech.Vy / 2 + SPEED * Math.sin(mech.angle)
+        });
+        World.add(engine.world, bullet[me]); //add bullet to world
       }
     },
     {
@@ -1289,7 +1289,7 @@ const b = {
           bullet[me].endCycle = 2 * i + game.cycle + END
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
-          bullet[me].explodeRad = (mech.crouch ? 70 : 50) + (Math.random() - 0.5) * 50;
+          bullet[me].explodeRad = (mech.crouch ? 85 : 60) + (Math.random() - 0.5) * 50;
           bullet[me].onEnd = b.explode;
           bullet[me].onDmg = function () {
             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -1517,9 +1517,9 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, 4.5, b.fireAttributes(dir, false));
-        b.fireProps(mech.crouch ? 65 : 45, mech.crouch ? 28 : 14, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 60 : 40, mech.crouch ? 28 : 14, dir, me); //cd , speed
         Matter.Body.setDensity(bullet[me], 0.000001);
-        bullet[me].endCycle = game.cycle + 100;
+        bullet[me].endCycle = game.cycle + 80;
         bullet[me].frictionAir = 0;
         bullet[me].friction = 0.5;
         bullet[me].restitution = 0.3;
@@ -1527,7 +1527,7 @@ const b = {
         bullet[me].onDmg = function () {};
         bullet[me].do = function () {
           if (!mech.isBodiesAsleep) {
-            const SCALE = 1.017
+            const SCALE = 1.022
             Matter.Body.scale(this, SCALE, SCALE);
             this.frictionAir += 0.00023;
           }
@@ -1611,7 +1611,7 @@ const b = {
             }
 
             if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > 0.15) { //hit target with laser
-              mech.fieldMeter -= 0.0016
+              mech.fieldMeter -= 0.001
 
               //make sure you can still see target
               const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
@@ -1941,7 +1941,7 @@ const b = {
       name: "foam", //16
       description: "spray bubbly foam that <strong>sticks</strong> to enemies<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
       ammo: 0,
-      ammoPack: 90,
+      ammoPack: 100,
       have: false,
       isStarterGun: true,
       fire() {

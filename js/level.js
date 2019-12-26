@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(16)
+      // b.giveGuns(3)
       // mech.fieldUpgrades[2].effect();
       // b.giveMod(21)
 

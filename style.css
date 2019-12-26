@@ -68,7 +68,8 @@ summary {
   bottom: 0px;
   left: 0px;
   z-index: 12;
-  background-color: #c4ccd8;
+  background-color: #444;
+  /* background-color: rgba(68, 68, 68, 0.5); */
 
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
@@ -76,7 +77,23 @@ summary {
   grid-gap: 10px;
   z-index: 12;
   font-size: 1.3em;
-  cursor: "auto";
+  cursor: auto;
+}
+
+.choose-grid-module {
+  /* box-shadow: 0px 1px 4px #234; */
+  padding: 10px;
+  /* margin: 4px; */
+  line-height: 170%;
+  border-radius: 6px;
+  background-color: #fff;
+  /* background-color: rgba(255, 255, 255, 0.5); */
+  font-size: 0.8em;
+  /* display: flex; */
+}
+
+.choose-grid-module:hover {
+  background-color: #efeff5;
 }
 
 #build-grid {

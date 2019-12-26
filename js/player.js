@@ -927,31 +927,31 @@ const mech = {
       }
     }
   },
-  pushBodyFacing() { // push all body in range and in direction looking
-    for (let i = 0, len = body.length; i < len; ++i) {
-      if (
-        body[i].speed > 12 && body[i].mass > 2 &&
-        Vector.magnitude(Vector.sub(body[i].position, mech.pos)) < mech.grabRange &&
-        mech.lookingAt(body[i]) &&
-        Matter.Query.ray(map, body[i].position, mech.pos).length === 0
-      ) {
-        mech.pushMass(body[i]);
-      }
-    }
-  },
-  pushBody360(range = mech.grabRange * 0.75) { // push all body in range and in direction looking
-    for (let i = 0, len = body.length; i < len; ++i) {
-      if (
-        body[i].speed > 12 && body[i].mass > 2 &&
-        Vector.magnitude(Vector.sub(body[i].position, mech.pos)) < range &&
-        mech.lookingAt(body[i]) &&
-        Matter.Query.ray(map, body[i].position, mech.pos).length === 0 &&
-        body[i].collisionFilter.category === cat.body
-      ) {
-        mech.pushMass(body[i]);
-      }
-    }
-  },
+  // pushBodyFacing() { // push all body in range and in direction looking
+  //   for (let i = 0, len = body.length; i < len; ++i) {
+  //     if (
+  //       body[i].speed > 12 && body[i].mass > 2 &&
+  //       Vector.magnitude(Vector.sub(body[i].position, mech.pos)) < mech.grabRange &&
+  //       mech.lookingAt(body[i]) &&
+  //       Matter.Query.ray(map, body[i].position, mech.pos).length === 0
+  //     ) {
+  //       mech.pushMass(body[i]);
+  //     }
+  //   }
+  // },
+  // pushBody360(range = mech.grabRange * 0.75) { // push all body in range and in direction looking
+  //   for (let i = 0, len = body.length; i < len; ++i) {
+  //     if (
+  //       body[i].speed > 12 && body[i].mass > 2 &&
+  //       Vector.magnitude(Vector.sub(body[i].position, mech.pos)) < range &&
+  //       mech.lookingAt(body[i]) &&
+  //       Matter.Query.ray(map, body[i].position, mech.pos).length === 0 &&
+  //       body[i].collisionFilter.category === cat.body
+  //     ) {
+  //       mech.pushMass(body[i]);
+  //     }
+  //   }
+  // },
   lookForPickUp(range = mech.grabRange) { //find body to pickup
     mech.fieldMeter -= mech.fieldRegen;
     const grabbing = {
@@ -1057,7 +1057,6 @@ const mech = {
             mech.drawField();
             mech.grabPowerUp();
             mech.lookForPickUp();
-            mech.pushBodyFacing();
             mech.pushMobsFacing();
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
@@ -1461,7 +1460,6 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
             mech.pushMobsFacing();
-            mech.pushBodyFacing();
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.fieldMeter > 0.05) { //holding, but field button is released
             mech.pickUp();
           } else {
