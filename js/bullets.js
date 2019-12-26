@@ -751,7 +751,7 @@ const b = {
       name: "minigun", //0
       description: "rapidly fire a stream of small <strong>bullets</strong>",
       ammo: 0,
-      ammoPack: 115,
+      ammoPack: 125,
       have: false,
       isStarterGun: true,
       fire() {
@@ -806,19 +806,19 @@ const b = {
     },
     {
       name: "super balls", //2
-      description: "fire balls that <strong>bounce</strong> with no momentum loss",
+      description: "fire <strong>five</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 16,
+      ammoPack: 12,
       have: false,
       isStarterGun: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 18) * b.modFireRate); // cool down
         b.muzzleFlash(20);
         // mobs.alert(450);
-        const SPEED = mech.crouch ? 45 : 26
-        const SPREAD = mech.crouch ? 0.04 : 0.14
-        let dir = mech.angle - SPREAD;
-        for (let i = 0; i < 3; i++) {
+        const SPEED = mech.crouch ? 55 : 35
+        const SPREAD = mech.crouch ? 0.04 : 0.15
+        let dir = mech.angle - SPREAD * 2;
+        for (let i = 0; i < 5; i++) {
           const me = bullet.length;
           bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 7 * b.modBulletSize, b.fireAttributes(dir, false));
           World.add(engine.world, bullet[me]); //add bullet to world
@@ -843,7 +843,7 @@ const b = {
       name: "fléchettes", //3
       description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 60,
+      ammoPack: 70,
       have: false,
       isStarterGun: true,
       count: 0, //used to track how many shots are in a volley before a big CD
@@ -858,17 +858,17 @@ const b = {
           mech.fireCDcycle = mech.cycle + Math.floor(CD * b.modFireRate); // cool down
         } else {
           this.count++
-          mech.fireCDcycle = mech.cycle + Math.floor(2 * b.modFireRate); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
         }
 
         const me = bullet.length;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 50 * b.modBulletSize, 1.3 * b.modBulletSize, b.fireAttributes(mech.angle));
+        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(mech.angle));
         bullet[me].endCycle = game.cycle + Math.floor(180 * b.isModBulletsLastLonger);
-        bullet[me].dmg = 0.7 + b.modExtraDmg;
+        bullet[me].dmg = 0.9 + b.modExtraDmg;
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0002; //low gravity
         };
-        const SPEED = 45
+        const SPEED = 49
         Matter.Body.setVelocity(bullet[me], {
           x: mech.Vx / 2 + SPEED * Math.cos(mech.angle),
           y: mech.Vy / 2 + SPEED * Math.sin(mech.angle)
