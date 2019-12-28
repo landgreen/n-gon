@@ -53,6 +53,13 @@ summary {
   background-color: #efeff5;
 }
 
+#draft-button {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  z-index: 12;
+}
+
 #build-button {
   position: absolute;
   top: 3px;
@@ -60,36 +67,40 @@ summary {
   z-index: 12;
 }
 
+#choose-background {
+  position: absolute;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: none;
+  background-color: #fff;
+  opacity: 0.5;
+  /* transition: display 0.5s; */
+}
+
 #choose-grid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 10px;
   margin: 0px;
-  border-radius: 7px;
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
+  border-radius: 8px;
   z-index: 12;
   background-color: #444;
-  /* background-color: rgba(68, 68, 68, 0.5); */
-
-  display: grid;
+  display: none;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
   grid-auto-rows: minmax(auto, auto);
   grid-gap: 10px;
-  z-index: 12;
   font-size: 1.3em;
-  cursor: auto;
 }
 
 .choose-grid-module {
-  /* box-shadow: 0px 1px 4px #234; */
   padding: 10px;
-  /* margin: 4px; */
   line-height: 170%;
   border-radius: 6px;
   background-color: #fff;
-  /* background-color: rgba(255, 255, 255, 0.5); */
   font-size: 0.8em;
-  /* display: flex; */
 }
 
 .choose-grid-module:hover {
@@ -100,32 +111,25 @@ summary {
   padding: 16px;
   margin: 0px;
   border: 0px;
-  /* border-radius: 8px; */
   background-color: #c4ccd8;
-  /* #b6bfca; */
 
   display: none;
-  /* display: grid; */
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
   grid-auto-rows: minmax(auto, auto);
   grid-gap: 16px;
 
   position: relative;
   bottom: 0px;
-  /* left: 0px; */
-  z-index: 12;
+  z-index: 10;
   font-size: 1.3em;
 }
 
 .build-grid-module {
-  /* box-shadow: 0px 1px 4px #234; */
   padding: 10px;
-  /* margin: 4px; */
   line-height: 170%;
   border-radius: 6px;
   background: #fff;
   font-size: 0.65em;
-  /* display: flex; */
 }
 
 .grid-title {
@@ -138,26 +142,6 @@ summary {
   background-color: #efeff5;
 }
 
-.gun-module {
-  background: #d5dde5;
-}
-
-.field-module {
-  background: #bde;
-}
-
-.mod-module {
-  background: #fdf;
-}
-
-
-/* #build {
-  position: absolute;
-  bottom: 0px;
-  right: 1px;
-  z-index: 12;
-  font-size: 1.3em;
-} */
 #settings {
   position: absolute;
   bottom: 0px;

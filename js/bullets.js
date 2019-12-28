@@ -250,11 +250,24 @@ const b = {
       }
     },
   ],
-  giveMod(i) {
-    b.mods[i].effect(); //give specific mod
-    b.modCount++
-    b.mods[i].have = true
-    game.updateModHUD();
+  giveMod(index = 'random') {
+    if (index === 'random') {
+      let options = [];
+      for (let i = 0; i < b.mods.length; i++) {
+        if (!b.mods[i].have) options.push(i);
+      }
+
+      // give a random mod from the mods I don't have
+      if (options.length > 0) {
+        let newMod = options[Math.floor(Math.random() * options.length)]
+        b.giveMod(newMod)
+      }
+    } else {
+      b.mods[index].effect(); //give specific mod
+      b.modCount++
+      b.mods[index].have = true
+      game.updateModHUD();
+    }
   },
   activeGun: null, //current gun in use by player
   inventoryGun: 0,
@@ -812,7 +825,7 @@ const b = {
       have: false,
       isStarterGun: true,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 18) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 35 : 20) * b.modFireRate); // cool down
         b.muzzleFlash(20);
         // mobs.alert(450);
         const SPEED = mech.crouch ? 55 : 35
@@ -1665,7 +1678,7 @@ const b = {
     },
     {
       name: "laser", //14
-      description: "emit a beam of collimated coherent <strong>light</strong><br>uses <strong class='color-f'>energy</strong> instead of ammunition",
+      description: "emit a beam of collimated coherent <strong>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
       ammo: 0,
       ammoPack: Infinity,
       have: false,
@@ -1784,7 +1797,7 @@ const b = {
                 x: best.x,
                 y: best.y
               };
-              laserHitMob(0.75);
+              laserHitMob(0.8);
 
               //2nd reflection beam
               //ugly bug fix: this stops the reflection on a bug where the beam gets trapped inside a body
@@ -1797,7 +1810,19 @@ const b = {
                     x: best.x,
                     y: best.y
                   };
-                  laserHitMob(0.5);
+                  laserHitMob(0.63);
+
+
+                  reflection();
+                  checkForCollisions();
+                  if (best.dist2 != Infinity) {
+                    //if hitting something
+                    path[path.length - 1] = {
+                      x: best.x,
+                      y: best.y
+                    };
+                    laserHitMob(0.5);
+                  }
                 }
               }
             }
@@ -1814,7 +1839,7 @@ const b = {
             ctx.moveTo(path[i - 1].x, path[i - 1].y);
             ctx.lineTo(path[i].x, path[i].y);
             ctx.stroke();
-            ctx.globalAlpha *= 0.5; //reflections are less intense
+            ctx.globalAlpha *= 0.65; //reflections are less intense
             // ctx.globalAlpha -= 0.1; //reflections are less intense
           }
           ctx.setLineDash([0, 0]);

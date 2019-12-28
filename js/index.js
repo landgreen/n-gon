@@ -82,26 +82,6 @@ game mechanics
 
 */
 
-//find what mods I don't have
-function doNotHave(who) {
-  let options = [];
-  for (let i = 0; i < who.length; i++) {
-    if (!who[i].have) options.push(i);
-  }
-  if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
-}
-
-
-//give a random mod from the mods I don't have
-let newMod = doNotHave(b.mods)
-
-let t = ""
-for (let i = 0; i < 3; i++) {
-  t += `<div class="choose-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
-}
-// document.getElementById("choose-grid").innerHTML = t
-
-
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
 const cat = {
@@ -114,6 +94,13 @@ const cat = {
   mobBullet: 0x1000000,
   mobShield: 0x10000000,
 }
+
+
+document.getElementById("draft-button").addEventListener("click", () => {
+  game.isDraftMode = true;
+  game.startGame();
+});
+
 
 //build build grid display
 const build = {
@@ -140,7 +127,6 @@ const build = {
     }
 
     if (build.list.length < 5) { //add to build array
-      // who.style.border = "2px solid #333"
       who.style.backgroundColor = "#919ba8" //"#868f9a"
       build.list[build.list.length] = {
         who: who,
@@ -151,7 +137,7 @@ const build = {
   },
   startBuildRun() {
     spawn.setSpawnList();
-    spawn.setSpawnList();
+    spawn.setSpawnList(); //gives random mobs,  not starter
     game.startGame();
     game.difficulty = 6;
     level.isBuildRun = true;
@@ -169,6 +155,7 @@ const build = {
 
 document.getElementById("build-button").addEventListener("click", () => {
   document.getElementById("build-button").style.display = "none";
+  document.getElementById("draft-button").style.display = "none";
   const el = document.getElementById("build-grid")
   if (build.isShowingBuilds) {
     el.style.display = "none"

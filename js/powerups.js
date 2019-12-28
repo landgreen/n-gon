@@ -1,6 +1,37 @@
 let powerUp = [];
 
 const powerUps = {
+  choose(type, index) {
+    if (type === "gun") {
+      if (b.activeGun === null) b.activeGun = index //if no active gun switch to new gun
+      b.guns[index].have = true;
+      b.inventory.push(index);
+      b.guns[index].ammo += b.guns[index].ammoPack * 2;
+      game.makeGunHUD();
+
+      // game.replaceTextLog = true;
+      // game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[index].name}</strong><br><br>${b.guns[index].description}`, 500);
+      // game.replaceTextLog = false;
+    } else if (type === "field") {
+      mech.setField(index)
+    } else if (type === "mod") {
+      b.giveMod(index)
+      // game.replaceTextLog = true;
+      // game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[index].name}</strong><br><br> ${b.mods[index].description}`, 500);
+      // game.replaceTextLog = false;
+    }
+    document.body.style.cursor = "none";
+    document.getElementById("choose-grid").style.display = "none"
+    document.getElementById("choose-background").style.display = "none"
+    game.paused = false;
+    requestAnimationFrame(cycle);
+  },
+  showDraft() {
+    document.getElementById("choose-grid").style.display = "grid"
+    document.getElementById("choose-background").style.display = "inline"
+    document.body.style.cursor = "auto";
+    game.paused = true;
+  },
   heal: {
     name: "heal",
     color: "#0eb",
@@ -60,26 +91,54 @@ const powerUps = {
       return 45;
     },
     effect() {
-      const previousMode = mech.fieldMode
-      if (this.mode) { //this.mode is set if the power up has been ejected from player
-        mech.fieldUpgrades[this.mode].effect(); //set a predetermined power up
-      } else { //choose a random mode that you don't already have
-        availableModes = []
-        for (let i = 1; i < mech.fieldUpgrades.length; i++) { //start on 1 to skip the default field
-          if (i !== previousMode) {
-            availableModes.push(i)
+      if (game.isDraftMode) {
+        function doNotHave(who, skip1 = -1, skip2 = -1) {
+          let options = [];
+          for (let i = 1; i < who.length; i++) {
+            if (i !== mech.fieldMode && i !== skip1 && i !== skip2) options.push(i);
           }
+          if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
         }
-        const mode = availableModes[Math.floor(Math.random() * availableModes.length)]
-        mech.fieldUpgrades[mode].effect();
-      }
-      //pop the old field out in case player wants to swap back
-      if (previousMode !== 0) {
-        mech.fieldCDcycle = mech.cycle + 40; //trigger fieldCD to stop power up grab automatic pick up of spawn
-        setTimeout(function () {
-          powerUps.spawn(mech.pos.x, mech.pos.y - 15, "field", false, previousMode);
-        }, 100);
 
+        let choice1 = doNotHave(mech.fieldUpgrades)
+        let choice2 = doNotHave(mech.fieldUpgrades, choice1)
+        let choice3 = doNotHave(mech.fieldUpgrades, choice1, choice2)
+        if (choice1 > -1) {
+          let text = `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
+          text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
+          if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice3].name}</div> ${mech.fieldUpgrades[choice3].description}</div>`
+          // text += `<div style = 'color:#fff'>${game.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
+          document.getElementById("choose-grid").innerHTML = text
+          powerUps.showDraft();
+        } else {
+          powerUps.giveRandomAmmo()
+        }
+      } else {
+        const previousMode = mech.fieldMode
+        if (this.mode) { //this.mode is set if the power up has been ejected from player
+          // mech.fieldUpgrades[this.mode].effect(); //set a predetermined power up
+          mech.setField(this.mode)
+        } else { //choose a random mode that you don't already have
+          availableModes = []
+          for (let i = 1; i < mech.fieldUpgrades.length; i++) { //start on 1 to skip the default field
+            if (i !== previousMode) {
+              availableModes.push(i)
+            }
+          }
+          const mode = availableModes[Math.floor(Math.random() * availableModes.length)]
+          mech.setField(mode)
+        }
+        game.replaceTextLog = true;
+        game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
+        game.replaceTextLog = false;
+        //pop the old field out in case player wants to swap back
+        if (previousMode !== 0) {
+          mech.fieldCDcycle = mech.cycle + 40; //trigger fieldCD to stop power up grab automatic pick up of spawn
+          setTimeout(function () {
+            powerUps.spawn(mech.pos.x, mech.pos.y - 15, "field", false, previousMode);
+          }, 100);
+        }
       }
     }
   },
@@ -90,18 +149,43 @@ const powerUps = {
       return 42;
     },
     effect() {
-      //find what mods I don't have
-      let options = [];
-      for (let i = 0; i < b.mods.length; i++) {
-        if (!b.mods[i].have) options.push(i);
-      }
-      //give a random mod from the mods I don't have
-      if (options.length > 0) {
-        let newMod = options[Math.floor(Math.random() * options.length)]
-        b.giveMod(newMod)
-        game.replaceTextLog = true;
-        game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
-        game.replaceTextLog = false;
+      if (game.isDraftMode) {
+        function doNotHave(who, skip1 = -1, skip2 = -1) {
+          let options = [];
+          for (let i = 0; i < who.length; i++) {
+            if (!who[i].have && i !== skip1 && i !== skip2) options.push(i);
+          }
+          if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
+        }
+
+        let choice1 = doNotHave(b.mods)
+        let choice2 = doNotHave(b.mods, choice1)
+        let choice3 = doNotHave(b.mods, choice1, choice2)
+        if (choice1 > -1) {
+          let text = "<h3 style = 'color:#fff; text-align:center; margin: 0px;'>choose a mod</h3>"
+          text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
+          if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice3].name}</div> ${b.mods[choice3].description}</div>`
+          document.getElementById("choose-grid").innerHTML = text
+          powerUps.showDraft();
+        } else {
+          powerUps.giveRandomAmmo()
+        }
+      } else {
+        //find what mods I don't have
+        let options = [];
+        for (let i = 0; i < b.mods.length; i++) {
+          if (!b.mods[i].have) options.push(i);
+        }
+
+        // give a random mod from the mods I don 't have
+        if (options.length > 0) {
+          let newMod = options[Math.floor(Math.random() * options.length)]
+          b.giveMod(newMod)
+          game.replaceTextLog = true;
+          game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[newMod].name}</strong><br><br> ${b.mods[newMod].description}`, 1000);
+          game.replaceTextLog = false;
+        }
       }
     }
   },
@@ -112,39 +196,67 @@ const powerUps = {
       return 35;
     },
     effect() {
-      //find what guns I don't have
-      let options = [];
-      if (b.activeGun === null && game.difficulty < 3) {
-        //choose the first gun to be one that is good for the early game
-        for (let i = 0; i < b.guns.length; ++i) {
-          if (!b.guns[i].have && b.guns[i].isStarterGun) options.push(i);
+      if (game.isDraftMode) {
+
+        function doNotHave(who, skip1 = -1, skip2 = -1) {
+          let options = [];
+          for (let i = 0; i < who.length; i++) {
+            if (!who[i].have && i !== skip1 && i !== skip2) options.push(i);
+          }
+          if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
+        }
+
+        let choice1 = doNotHave(b.guns)
+        let choice2 = doNotHave(b.guns, choice1)
+        let choice3 = doNotHave(b.guns, choice1, choice2)
+
+        if (choice1 > -1) {
+          let text = "<h3 style = 'color:#fff; text-align:center; margin: 0px;'>choose a gun</h3>"
+          text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
+          if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice3})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice3].name}</div> ${b.guns[choice3].description}</div>`
+          document.getElementById("choose-grid").innerHTML = text
+          powerUps.showDraft();
+        } else {
+          powerUps.giveRandomAmmo()
         }
       } else {
-        //choose a gun you don't have
-        for (let i = 0; i < b.guns.length; ++i) {
-          if (!b.guns[i].have) options.push(i);
+        //find what guns I don't have
+        let options = [];
+        if (b.activeGun === null && game.difficulty < 3) {
+          //choose the first gun to be one that is good for the early game
+          for (let i = 0; i < b.guns.length; ++i) {
+            if (!b.guns[i].have && b.guns[i].isStarterGun) options.push(i);
+          }
+        } else {
+          //choose a gun you don't have
+          for (let i = 0; i < b.guns.length; ++i) {
+            if (!b.guns[i].have) options.push(i);
+          }
         }
+        //give player a gun they don't already have if possible
+        game.replaceTextLog = true;
+        if (options.length > 0) {
+          let newGun = options[Math.floor(Math.random() * options.length)];
+          if (b.activeGun === null) b.activeGun = newGun //if no active gun switch to new gun
+          b.guns[newGun].have = true;
+          b.inventory.push(newGun);
+          b.guns[newGun].ammo += b.guns[newGun].ammoPack * 2;
+          game.makeGunHUD();
+          game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br><br>${b.guns[newGun].description}`, 900);
+        } else {
+          powerUps.giveRandomAmmo()
+        }
+        game.replaceTextLog = false
       }
-      //give player a gun they don't already have if possible
-      game.replaceTextLog = true;
-      if (options.length > 0) {
-        let newGun = options[Math.floor(Math.random() * options.length)];
-        if (b.activeGun === null) b.activeGun = newGun //if no active gun switch to new gun
-        game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[newGun].name}</strong><br><br>${b.guns[newGun].description}`, 900);
-        b.guns[newGun].have = true;
-        b.inventory.push(newGun);
-        b.guns[newGun].ammo += b.guns[newGun].ammoPack * 2;
-        game.makeGunHUD();
-      } else {
-        //if you have all guns then get ammo
-        const ammoTarget = Math.floor(Math.random() * (b.guns.length));
-        const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 2);
-        b.guns[ammoTarget].ammo += ammo;
-        game.updateGunHUD();
-        game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
-      }
-      game.replaceTextLog = false
     }
+  },
+  giveRandomAmmo() {
+    const ammoTarget = Math.floor(Math.random() * (b.guns.length));
+    const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 2);
+    b.guns[ammoTarget].ammo += ammo;
+    game.updateGunHUD();
+    game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
     if (Math.random() * Math.random() - 0.25 > Math.sqrt(mech.health) || Math.random() < 0.04) { //spawn heal chance is higher at low health
@@ -167,7 +279,7 @@ const powerUps = {
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod");
       return;
     }
-    if (Math.random() < 0.005) {
+    if (Math.random() < 0.003) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
       return;
@@ -177,21 +289,29 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.27) {
+    } else if (Math.random() < 0.4) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.27) {
-      powerUps.spawn(x, y, "field");
-      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
-    } else if (Math.random() < 0.27) {
+    } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun")
+    } else if (Math.random() < 0.15) {
+      powerUps.spawn(x, y, "field");
+      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
     } else if (mech.health < 0.6) {
       powerUps.spawn(x, y, "heal");
-      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "heal");
+      powerUps.spawn(x, y, "heal");
+      if (Math.random() < b.modMoreDrops) {
+        powerUps.spawn(x, y, "heal");
+        powerUps.spawn(x, y, "heal");
+      }
     } else {
       powerUps.spawn(x, y, "ammo");
-      if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "ammo");
+      powerUps.spawn(x, y, "ammo");
+      if (Math.random() < b.modMoreDrops) {
+        powerUps.spawn(x, y, "ammo");
+        powerUps.spawn(x, y, "ammo");
+      }
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris

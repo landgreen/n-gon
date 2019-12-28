@@ -70,7 +70,7 @@ const level = {
 
     level.exit.x = 3500;
     level.exit.y = -870;
-    level.testingMap.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     document.body.style.backgroundColor = "#dcdcde";
 
 
@@ -105,10 +105,10 @@ const level = {
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
-    powerUps.spawn(420, -400, "field", false);
-    powerUps.spawn(420, -400, "field", false);
-    powerUps.spawn(420, -400, "field", false);
-    powerUps.spawn(420, -400, "field", false);
+    powerUps.spawn(420, -400, "mod", false);
+    // powerUps.spawn(420, -400, "field", false);
+    // powerUps.spawn(420, -400, "field", false);
+    // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
