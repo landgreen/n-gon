@@ -39,9 +39,10 @@ const powerUps = {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
     effect() {
-      let heal = (this.size / 40) ** 2
+      let heal = ((this.size / 40) ** 2)
+      heal /= (0.95 + game.difficulty * 0.01)
       heal = Math.min(mech.maxHealth - mech.health, heal)
-      if (b.isModFullHeal) heal = mech.maxHealth
+      if (b.isModRecursiveHealing) heal *= 2
       mech.addHealth(heal);
       if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * 100).toFixed(0) + "%</span>", 300)
     }
@@ -76,8 +77,8 @@ const powerUps = {
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
         //ammo given scales as mobs take more hits to kill
-        let ammo = Math.ceil((target.ammoPack * (0.45 + 0.06 * Math.random())) / Math.sqrt(b.dmgScale));
-        if (level.isBuildRun) ammo = Math.floor(ammo * 1.2)
+        let ammo = Math.ceil((target.ammoPack * (0.4 + 0.05 * Math.random())));
+        if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
         target.ammo += ammo;
         game.updateGunHUD();
         game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
@@ -269,12 +270,12 @@ const powerUps = {
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.004 * (4 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun to drop
+    if (Math.random() < 0.004 * (4 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 4
       powerUps.spawn(x, y, "gun");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0035 * (7 - b.modCount)) {
+    if (Math.random() < 0.0035 * (9 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 7
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod");
       return;
@@ -289,16 +290,16 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.4) {
+    } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.3) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun")
-    } else if (Math.random() < 0.15) {
+    } else if (Math.random() < 0.1) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field");
-    } else if (mech.health < 0.6) {
+    } else if (mech.health < 0.65) {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       if (Math.random() < b.modMoreDrops) {
@@ -322,7 +323,7 @@ const powerUps = {
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-    if (b.inventory.length < 2 || game.isEasyMode) {
+    if (b.inventory.length < 2) {
       powerUps.spawn(x, y, "gun", false); //starting gun
     } else {
       powerUps.spawnRandomPowerUp(x, y);

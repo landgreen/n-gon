@@ -1143,12 +1143,12 @@ const mech = {
             mech.holding();
             mech.throw();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
-            const DRAIN = 0.0006
+            const DRAIN = 0.0005
             if (mech.fieldMeter > DRAIN) {
               mech.fieldMeter -= DRAIN;
               mech.grabPowerUp();
               mech.lookForPickUp();
-              mech.pushMobs360(120);
+              mech.pushMobs360(130);
 
               //calculate laser collision
               let best;
@@ -1222,7 +1222,7 @@ const mech = {
                   y: best.y
                 };
                 if (best.who.alive) {
-                  const dmg = 0.35 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                  const dmg = 0.4 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
                   best.who.damage(dmg);
                   best.who.locatePlayer();
 
@@ -1311,7 +1311,7 @@ const mech = {
             if (mech.fieldMeter > DRAIN) {
               mech.grabPowerUp();
               mech.lookForPickUp(170);
-              mech.pushMobs360(170);
+              mech.pushMobs360(200);
               //look for nearby objects to make zero-g
               function zeroG(who, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {

@@ -41,21 +41,22 @@ const level = {
   difficultyIncrease(num = 1) {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
-      game.dmgScale += 0.2; //damage done by mobs increases each level
-      b.dmgScale *= 0.95; //damage done by player decreases each level
-      game.accelScale *= 1.05 //mob acceleration increases each level
-      game.lookFreqScale *= 0.95 //mob cycles between looks decreases each level
-      game.CDScale *= 0.95 //mob CD time decreases each level
+      game.difficulty++
+      game.dmgScale += 0.15; //damage done by mobs increases each level
+      b.dmgScale *= 0.94; //damage done by player decreases each level
+      game.accelScale *= 1.03 //mob acceleration increases each level
+      game.lookFreqScale *= 0.97 //mob cycles between looks decreases each level
+      game.CDScale *= 0.97 //mob CD time decreases each level
     }
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
-      game.dmgScale -= 0.2; //damage done by mobs increases each level
+      game.dmgScale -= 0.15; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
-      b.dmgScale /= 0.95; //damage done by player decreases each level
-      game.accelScale /= 1.05 //mob acceleration increases each level
-      game.lookFreqScale /= 0.95 //mob cycles between looks decreases each level
-      game.CDScale /= 0.95 //mob CD time decreases each level
+      b.dmgScale /= 0.94; //damage done by player decreases each level
+      game.accelScale /= 1.03 //mob acceleration increases each level
+      game.lookFreqScale /= 0.97 //mob cycles between looks decreases each level
+      game.CDScale /= 0.97 //mob CD time decreases each level
     }
   },
   //******************************************************************************************************************
@@ -112,11 +113,11 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.shooter(800, -1050);
-    // spawn.shooter(400, -1050);
-    // spawn.shooter(1200, -1050);
+    spawn.groupBoss(800, -1050);
+    spawn.shooter(400, -1050);
+    spawn.shooter(1200, -1050);
     // spawn.groupBoss(-600, -550);
-    // spawn.hopper(800, -150);
+    spawn.hopper(800, -150);
     // spawn.beamer(800, -150);
     // spawn.grower(800, -250);
     // spawn.blinker(800, -250, 40);
@@ -325,12 +326,12 @@ const level = {
     powerUps.spawn(2050, -150, "heal", false); //starting gun
     // powerUps.spawn(2050, -150, "field", false); //starting gun
     powerUps.spawn(2300, -150, "gun", false); //starting gun
-    if (game.isEasyMode) {
-      // powerUps.spawn(2050, -150, "mod", false); //starting gun
-      // powerUps.spawn(2050, -150, "mod", false); //starting gun
-      // powerUps.spawn(-100, -150, "ammo", false); //starting gun
-      powerUps.spawn(-100, 0, "heal", false); //starting gun
-    }
+    // if (game.isEasyMode) {
+    //   // powerUps.spawn(2050, -150, "mod", false); //starting gun
+    //   // powerUps.spawn(2050, -150, "mod", false); //starting gun
+    //   // powerUps.spawn(-100, -150, "ammo", false); //starting gun
+    //   powerUps.spawn(-100, 0, "heal", false); //starting gun
+    // }
 
     spawn.wireFoot();
     spawn.wireFootLeft();
@@ -1459,11 +1460,8 @@ const level = {
     nextLevel() {
       //enter when player isn't falling
       if (player.velocity.y < 0.1) {
-        game.difficulty++;
-        if (game.difficulty > 1) {
-          level.difficultyIncrease()
-          if (level.isBuildRun) level.difficultyIncrease()
-        }
+        //increase difficulty based on modes
+        level.difficultyIncrease(game.difficultyMode + level.isBuildRun)
         //cycles map to next level
         level.levelsCleared++;
         level.onLevel++;

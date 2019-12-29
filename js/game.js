@@ -82,9 +82,9 @@ const game = {
   delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
   buttonCD: 0,
   isBodyDamage: true,
-  isEasyMode: false,
+  difficultyMode: null,
+  difficulty: 0,
   isDraftMode: false,
-  difficulty: null,
   // dropFPS(cap = 40, time = 15) {
   //   game.fpsCap = cap
   //   game.fpsInterval = 1000 / game.fpsCap;
@@ -473,13 +473,10 @@ const game = {
     game.accelScale = 1;
     game.lookFreqScale = 1;
     game.CDScale = 1;
-    if (document.getElementById("difficulty-select").value === 'easy') {
-      game.difficulty = 0;
-      game.isEasyMode = true;
+    game.difficultyMode = Number(document.getElementById("difficulty-select").value)
+    if (game.difficultyMode === 0) {
+      game.difficultyMode = 1
       level.difficultyDecrease(6);
-    } else {
-      game.difficulty = parseInt(document.getElementById("difficulty-select").value)
-      level.difficultyIncrease(game.difficulty)
     }
 
     game.clearNow = true;

@@ -79,21 +79,22 @@ const spawn = {
 
   //mob templates *********************************************************************************************
   //***********************************************************************************************************
-  groupBoss(x, y, num = 5 + Math.random() * 8) {
+  groupBoss(x, y, num = 3 + Math.random() * 8) {
     for (let i = 0; i < num; i++) {
       const radius = 25 + Math.floor(Math.random() * 20)
       spawn.grouper(x + Math.random() * radius, y + Math.random() * radius, radius);
     }
   },
-  grouper(x, y, radius = 27 + Math.floor(Math.random() * 10)) {
+  grouper(x, y, radius = 25 + Math.floor(Math.random() * 20)) {
     mobs.spawn(x, y, 4, radius, "#777");
     let me = mob[mob.length - 1];
-    me.g = 0.0002; //required if using 'gravity'
-    me.accelMag = 0.0007 * game.accelScale;
+    me.g = 0.00015; //required if using 'gravity'
+    me.accelMag = 0.0008 * game.accelScale;
     me.groupingRangeMax = 250000 + Math.random() * 100000;
     me.groupingRangeMin = (radius * 8) * (radius * 8);
     me.groupingStrength = 0.0005
     me.memory = 200;
+    me.isGrouper = true;
 
     me.do = function () {
       this.gravity();
@@ -103,7 +104,7 @@ const spawn = {
         //tether to other blocks
         ctx.beginPath();
         for (let i = 0, len = mob.length; i < len; i++) {
-          if (mob[i] != this && mob[i].dropPowerUp) { //don't tether to self, bullets, shields, ...
+          if (mob[i].isGrouper && mob[i] != this && mob[i].dropPowerUp) { //don't tether to self, bullets, shields, ...
             const distance2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
             if (distance2 < this.groupingRangeMax) {
               if (!mob[i].seePlayer.recall) mob[i].seePlayerByDistAndLOS(); //wake up sleepy mobs
@@ -232,7 +233,7 @@ const spawn = {
     me.accelMag = 0.001 * game.accelScale;;
     me.g = me.accelMag * 0.6; //required if using 'gravity'
     me.memory = 50;
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -292,7 +293,7 @@ const spawn = {
     me.onDeath = function () {
       this.removeCons();
     };
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.searchSpring();
@@ -561,7 +562,7 @@ const spawn = {
     me.accelMag = 0.0005 * game.accelScale;
     me.frictionStatic = 0;
     me.friction = 0;
-    if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       this.attraction();
@@ -861,7 +862,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       this.fire();
@@ -931,7 +932,7 @@ const spawn = {
         });
       }
     };
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.4)) spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -980,7 +981,7 @@ const spawn = {
     me.laserRange = 500;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
@@ -1021,7 +1022,7 @@ const spawn = {
     me.memory = 20;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.1, 0.7)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
 
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -1137,7 +1138,7 @@ const spawn = {
     l = Math.ceil(Math.random() * 80) + 30,
     stiffness = Math.random() * 0.06 + 0.01
   ) {
-    this.allowShields = false; //dont' want shields on boss mobs
+    this.allowShields = false; //don't want shields on boss mobs
     for (let i = 0; i < nodes; ++i) {
       let whoSpawn = spawn;
       if (spawn === "random") {

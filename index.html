@@ -80,11 +80,13 @@
 	<div id="choose-grid"></div>
 	<div id="build-grid"></div>
 	<svg class="SVG-button" id="build-button" width="110" height="40">
+		<title>Select 5 power ups and see how far you can progress.</title>
 		<g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Arial, sans-serif">
 			<text x="10" y="30">custom</text>
 		</g>
 	</svg>
 	<svg class="SVG-button" id="draft-button" width="80" height="40">
+		<title>When you gain a new a power up choose between 3 random options.</title>
 		<g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Arial, sans-serif">
 			<text x="10" y="30">draft</text>
 		</g>
@@ -96,14 +98,13 @@
 				<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed">combat
 					difficulty:</label>
 				<select name="difficulty-select" id="difficulty-select">
-					<option value="easy">easy</option>
-					<option value="0" selected>normal</option>
-					<option value="4">hard</option>
-					<option value="8">why...</option>
+					<option value="0">easy</option>
+					<option value="1" selected>normal</option>
+					<option value="2">hard</option>
+					<option value="6">why...</option>
 				</select>
 				<br>
-				<label for="body-damage" title="allow damage from heavy, fast moving blocks">collision damage from
-					blocks:</label>
+				<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
 				<input type="checkbox" id="body-damage" name="body-damage" checked style="width:16px; height:16px;">
 				<br>
 				<label for="fps-select" title="use this to slow the game down">frames per second cap:</label>
