@@ -64,12 +64,8 @@ const game = {
     x: 0,
     y: 0
   },
-  levelsCleared: 0,
+
   g: 0.001,
-  dmgScale: null, //set in levels.setDifficulty
-  accelScale: null, //set in levels.setDifficulty
-  CDScale: null, //set in levels.setDifficulty
-  lookFreqScale: null, //set in levels.setDifficulty
   onTitlePage: true,
   paused: false,
   testing: false, //testing mode: shows wireframe and some variables
@@ -82,8 +78,14 @@ const game = {
   delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
   buttonCD: 0,
   isBodyDamage: true,
+  levelsCleared: 0,
   difficultyMode: null,
-  difficulty: 0,
+  difficulty: 1,
+  dmgScale: null, //set in levels.setDifficulty
+  healScale: 1,
+  accelScale: null, //set in levels.setDifficulty
+  CDScale: null, //set in levels.setDifficulty
+  lookFreqScale: null, //set in levels.setDifficulty
   isDraftMode: false,
   // dropFPS(cap = 40, time = 15) {
   //   game.fpsCap = cap
@@ -462,7 +464,7 @@ const game = {
     game.makeGunHUD();
     mech.drop();
     mech.holdingTarget = null
-    mech.addHealth(1);
+    mech.addHealth(Infinity);
     mech.alive = true;
     level.onLevel = 0;
     level.levelsCleared = 0;

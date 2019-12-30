@@ -2,15 +2,23 @@
 /* TODO:  *******************************************
 *****************************************************
 
-new game loop structure: game loop is an object with named methods
-  when looping each method is called in order like an array
-  allows me to dynamically add and remove functions to the game
+make draft mode default and add in negative mods
+
+field: catch mobs in your field and make them into guardian bullets
+
+negative mod effect ideas
+  -max health
+  -fire rate
+  -slow life decay
 
 mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
   10% max health
   20% of your current health
 
-mod: increase range of shield block
+Boss mob:  triangle that fires three lasers
+
+mob: has 2 or 3 shields that can regenerate over time
+  could be just a boss
 
 gun:  Spirit Bomb (singularity)
   use charge up like rail gun
@@ -143,7 +151,7 @@ const build = {
     level.isBuildRun = true;
     for (let i = 0; i < build.list.length; i++) {
       if (build.list[i].type === "field") {
-        mech.fieldUpgrades[build.list[i].index].effect();
+        mech.setField(build.list[i].index)
       } else if (build.list[i].type === "gun") {
         b.giveGuns(build.list[i].index)
       } else if (build.list[i].type === "mod") {

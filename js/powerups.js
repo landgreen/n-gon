@@ -40,7 +40,6 @@ const powerUps = {
     },
     effect() {
       let heal = ((this.size / 40) ** 2)
-      heal /= (0.95 + game.difficulty * 0.01)
       heal = Math.min(mech.maxHealth - mech.health, heal)
       if (b.isModRecursiveHealing) heal *= 2
       mech.addHealth(heal);
@@ -290,10 +289,10 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.5) {
+    } else if (Math.random() < 0.55) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.3) {
+    } else if (Math.random() < 0.2) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.modMoreDrops) powerUps.spawn(x, y, "gun")
     } else if (Math.random() < 0.1) {

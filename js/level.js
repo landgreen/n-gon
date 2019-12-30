@@ -42,22 +42,26 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.15; //damage done by mobs increases each level
+      game.dmgScale += 0.1; //damage done by mobs increases each level
       b.dmgScale *= 0.94; //damage done by player decreases each level
       game.accelScale *= 1.03 //mob acceleration increases each level
       game.lookFreqScale *= 0.97 //mob cycles between looks decreases each level
       game.CDScale *= 0.97 //mob CD time decreases each level
     }
+    game.healScale = 1 / (1 + game.difficulty * 0.05)
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
-      game.dmgScale -= 0.15; //damage done by mobs increases each level
+      game.difficulty--
+      game.dmgScale -= 0.1; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.94; //damage done by player decreases each level
       game.accelScale /= 1.03 //mob acceleration increases each level
       game.lookFreqScale /= 0.97 //mob cycles between looks decreases each level
       game.CDScale /= 0.97 //mob CD time decreases each level
     }
+    if (game.difficulty < 1) game.difficulty = 1;
+    game.healScale = 1 / (1 + game.difficulty * 0.05)
   },
   //******************************************************************************************************************
   //******************************************************************************************************************

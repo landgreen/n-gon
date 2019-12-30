@@ -433,7 +433,7 @@ const mech = {
     }
   },
   addHealth(heal) {
-    mech.health += heal;
+    mech.health += heal * game.healScale;
     if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
     mech.displayHealth();
   },
