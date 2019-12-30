@@ -309,7 +309,7 @@ const b = {
         game.replaceTextLog = true;
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
-      if (mech.isHolding) {
+      if (mech.holdingTarget) {
         mech.drop();
       }
     }
@@ -1761,7 +1761,7 @@ const b = {
           //use energy to explode
           const energy = mech.fieldMeter * 0.25
           mech.fieldMeter -= energy
-          if (best.who) b.explosion(path[1], 1200 * energy)
+          if (best.who) b.explosion(path[1], 1000 * energy)
           mech.fireCDcycle = mech.cycle + Math.floor(65 * b.modFireRate); // cool down
 
           //draw laser beam

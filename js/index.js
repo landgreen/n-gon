@@ -2,14 +2,14 @@
 /* TODO:  *******************************************
 *****************************************************
 
-make draft mode default and add in negative mods
-
 field: catch mobs in your field and make them into guardian bullets
 
 negative mod effect ideas
   -max health
   -fire rate
   -slow life decay
+
+mod: gain an extra choice of power ups
 
 mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
   10% max health
@@ -104,12 +104,6 @@ const cat = {
 }
 
 
-document.getElementById("draft-button").addEventListener("click", () => {
-  game.isDraftMode = true;
-  game.startGame();
-});
-
-
 //build build grid display
 const build = {
   isShowingBuilds: false,
@@ -163,7 +157,6 @@ const build = {
 
 document.getElementById("build-button").addEventListener("click", () => {
   document.getElementById("build-button").style.display = "none";
-  document.getElementById("draft-button").style.display = "none";
   const el = document.getElementById("build-grid")
   if (build.isShowingBuilds) {
     el.style.display = "none"

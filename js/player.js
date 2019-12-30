@@ -687,7 +687,7 @@ const mech = {
     return false;
   },
   drop() {
-    if (mech.isHolding) {
+    if (mech.isHolding && mech.holdingTarget) {
       mech.isHolding = false;
       mech.definePlayerMass()
       mech.holdingTarget.collisionFilter.category = cat.body;
@@ -735,6 +735,7 @@ const mech = {
     }
   },
   holding() {
+    // if (mech.holdingTarget) {
     mech.fieldMeter -= mech.fieldRegen;
     if (mech.fieldMeter < 0) mech.fieldMeter = 0;
     Matter.Body.setPosition(mech.holdingTarget, {
@@ -743,32 +744,35 @@ const mech = {
     });
     Matter.Body.setVelocity(mech.holdingTarget, player.velocity);
     Matter.Body.rotate(mech.holdingTarget, 0.01 / mech.holdingTarget.mass); //gently spin the block
+    // }
   },
   throw () {
     if ((keys[32] || game.mouseDownRight)) {
       if (mech.fieldMeter > 0.0007) {
-        mech.fieldMeter -= 0.0007;
-        mech.throwCharge += mech.throwChargeRate;;
-        //draw charge
-        const x = mech.pos.x + 15 * Math.cos(mech.angle);
-        const y = mech.pos.y + 15 * Math.sin(mech.angle);
-        const len = mech.holdingTarget.vertices.length - 1;
-        const edge = mech.throwCharge * mech.throwCharge * 0.02;
-        const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
-        grd.addColorStop(0, "rgba(255,50,150,0.3)");
-        grd.addColorStop(1, "transparent");
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(mech.holdingTarget.vertices[len].x, mech.holdingTarget.vertices[len].y);
-        ctx.lineTo(mech.holdingTarget.vertices[0].x, mech.holdingTarget.vertices[0].y);
-        ctx.fill();
-        for (let i = 0; i < len; i++) {
+        if (mech.holdingTarget) {
+          mech.fieldMeter -= 0.0007;
+          mech.throwCharge += mech.throwChargeRate;;
+          //draw charge
+          const x = mech.pos.x + 15 * Math.cos(mech.angle);
+          const y = mech.pos.y + 15 * Math.sin(mech.angle);
+          const len = mech.holdingTarget.vertices.length - 1;
+          const edge = mech.throwCharge * mech.throwCharge * 0.02;
+          const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
+          grd.addColorStop(0, "rgba(255,50,150,0.3)");
+          grd.addColorStop(1, "transparent");
+          ctx.fillStyle = grd;
           ctx.beginPath();
           ctx.moveTo(x, y);
-          ctx.lineTo(mech.holdingTarget.vertices[i].x, mech.holdingTarget.vertices[i].y);
-          ctx.lineTo(mech.holdingTarget.vertices[i + 1].x, mech.holdingTarget.vertices[i + 1].y);
+          ctx.lineTo(mech.holdingTarget.vertices[len].x, mech.holdingTarget.vertices[len].y);
+          ctx.lineTo(mech.holdingTarget.vertices[0].x, mech.holdingTarget.vertices[0].y);
           ctx.fill();
+          for (let i = 0; i < len; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(mech.holdingTarget.vertices[i].x, mech.holdingTarget.vertices[i].y);
+            ctx.lineTo(mech.holdingTarget.vertices[i + 1].x, mech.holdingTarget.vertices[i + 1].y);
+            ctx.fill();
+          }
         }
       } else {
         mech.drop()

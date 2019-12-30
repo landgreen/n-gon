@@ -53,13 +53,6 @@ summary {
   background-color: #efeff5;
 }
 
-#draft-button {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  z-index: 12;
-}
-
 #build-button {
   position: absolute;
   top: 3px;
