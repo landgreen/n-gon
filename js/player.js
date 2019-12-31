@@ -439,7 +439,7 @@ const mech = {
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
   damage(dmg) {
-    if (b.isModMonogamy && b.inventory[0] === b.activeGun) {
+    if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.93
       }
@@ -735,16 +735,16 @@ const mech = {
     }
   },
   holding() {
-    // if (mech.holdingTarget) {
-    mech.fieldMeter -= mech.fieldRegen;
-    if (mech.fieldMeter < 0) mech.fieldMeter = 0;
-    Matter.Body.setPosition(mech.holdingTarget, {
-      x: mech.pos.x + 70 * Math.cos(mech.angle),
-      y: mech.pos.y + 70 * Math.sin(mech.angle)
-    });
-    Matter.Body.setVelocity(mech.holdingTarget, player.velocity);
-    Matter.Body.rotate(mech.holdingTarget, 0.01 / mech.holdingTarget.mass); //gently spin the block
-    // }
+    if (mech.holdingTarget) {
+      mech.fieldMeter -= mech.fieldRegen;
+      if (mech.fieldMeter < 0) mech.fieldMeter = 0;
+      Matter.Body.setPosition(mech.holdingTarget, {
+        x: mech.pos.x + 70 * Math.cos(mech.angle),
+        y: mech.pos.y + 70 * Math.sin(mech.angle)
+      });
+      Matter.Body.setVelocity(mech.holdingTarget, player.velocity);
+      Matter.Body.rotate(mech.holdingTarget, 0.01 / mech.holdingTarget.mass); //gently spin the block
+    }
   },
   throw () {
     if ((keys[32] || game.mouseDownRight)) {

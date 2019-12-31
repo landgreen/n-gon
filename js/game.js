@@ -79,7 +79,7 @@ const game = {
   buttonCD: 0,
   isBodyDamage: true,
   levelsCleared: 0,
-  difficultyMode: null,
+  difficultyMode: 1,
   difficulty: 1,
   dmgScale: null, //set in levels.setDifficulty
   healScale: 1,

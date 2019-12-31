@@ -24,7 +24,7 @@ const b = {
   modMoreDrops: null,
   isModLowHealthDmg: null,
   isModFarAwayDmg: null,
-  isModMonogamy: null,
+  isModEntanglement: null,
   isModMassEnergy: null,
   setModDefaults() {
     b.modCount = 0;
@@ -47,7 +47,7 @@ const b = {
     b.modMoreDrops = 0;
     b.isModLowHealthDmg = false;
     b.isModFarAwayDmg = false;
-    b.isModMonogamy = false;
+    b.isModEntanglement = false;
     b.isModMassEnergy = false;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
@@ -162,7 +162,7 @@ const b = {
       description: "using your first gun reduces <strong>harm</strong><br>scales by <strong>7%</strong> for each gun in your inventory",
       have: false, //13
       effect: () => { // good with laser-bots
-        b.isModMonogamy = true
+        b.isModEntanglement = true
       }
     },
     {
@@ -1792,8 +1792,8 @@ const b = {
             });
           }
         } else { //normal fire mode
-          const FIELD_DRAIN = 0.002 //laser drains energy as well as bullets
-          const damage = 0.045
+          const FIELD_DRAIN = 0.0018 //laser drains energy as well as bullets
+          const damage = 0.05
           if (mech.fieldMeter < FIELD_DRAIN) {
             mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
           } else {

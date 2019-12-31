@@ -2,6 +2,8 @@
 /* TODO:  *******************************************
 *****************************************************
 
+use cookies to remember settings
+
 field: catch mobs in your field and make them into guardian bullets
 
 negative mod effect ideas
@@ -89,6 +91,34 @@ game mechanics
     bouncy ground
 
 */
+
+//  local storage
+let localSettings = JSON.parse(localStorage.getItem("localSettings"));
+
+if (localSettings) {
+  game.isBodyDamage = localSettings.isBodyDamage
+  document.getElementById("body-damage").checked = localSettings.isBodyDamage
+
+  game.difficultyMode = localSettings.difficultyMode
+  document.getElementById("difficulty-select").value = localSettings.difficultyMode
+
+  game.fpsCapDefault = localSettings.fpsCapDefault
+  document.getElementById("fps-select").value = localSettings.fpsCapDefault
+
+} else {
+  localSettings = {
+    isBodyDamage: true,
+    difficultyMode: '1',
+    fpsCapDefault: '72',
+  };
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+}
+
+
+
+
+
+
 
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
@@ -286,10 +316,20 @@ document.getElementById("fps-select").addEventListener("input", () => {
   } else if (value === '15') {
     game.fpsCapDefault = 15
   }
+  localSettings.fpsCapDefault = game.fpsCapDefault
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 document.getElementById("body-damage").addEventListener("input", () => {
   game.isBodyDamage = document.getElementById("body-damage").checked
+  localSettings.isBodyDamage = game.isBodyDamage
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+document.getElementById("difficulty-select").addEventListener("input", () => {
+  game.difficultyMode = Number(document.getElementById("difficulty-select").value)
+  localSettings.difficultyMode = game.difficultyMode
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 // function playSound(id) {
