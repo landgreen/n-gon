@@ -94,7 +94,7 @@ game mechanics
 
 //  local storage
 let localSettings = JSON.parse(localStorage.getItem("localSettings"));
-
+// console.log(localSettings)
 if (localSettings) {
   game.isBodyDamage = localSettings.isBodyDamage
   document.getElementById("body-damage").checked = localSettings.isBodyDamage
@@ -102,9 +102,12 @@ if (localSettings) {
   game.difficultyMode = localSettings.difficultyMode
   document.getElementById("difficulty-select").value = localSettings.difficultyMode
 
-  game.fpsCapDefault = localSettings.fpsCapDefault
+  if (localSettings.fpsCapDefault === 'max') {
+    game.fpsCapDefault = 999999999;
+  } else {
+    game.fpsCapDefault = Number(localSettings.fpsCapDefault)
+  }
   document.getElementById("fps-select").value = localSettings.fpsCapDefault
-
 } else {
   localSettings = {
     isBodyDamage: true,
@@ -192,8 +195,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     el.style.display = "none"
     build.isShowingBuilds = false
     document.body.style.overflow = "hidden"
-    document.getElementById("controls").style.display = 'inline'
-    document.getElementById("settings").style.display = 'inline'
+    document.getElementById("info").style.display = 'inline'
   } else {
     build.list = []
     // let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
@@ -222,8 +224,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     build.isShowingBuilds = true
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
-    document.getElementById("controls").style.display = 'none'
-    document.getElementById("settings").style.display = 'none'
+    document.getElementById("info").style.display = 'none'
   }
 });
 
@@ -305,18 +306,10 @@ document.getElementById("fps-select").addEventListener("input", () => {
   let value = document.getElementById("fps-select").value
   if (value === 'max') {
     game.fpsCapDefault = 999999999;
-  } else if (value === '72') {
-    game.fpsCapDefault = 72
-  } else if (value === '60') {
-    game.fpsCapDefault = 60
-  } else if (value === '45') {
-    game.fpsCapDefault = 45
-  } else if (value === '30') {
-    game.fpsCapDefault = 30
-  } else if (value === '15') {
-    game.fpsCapDefault = 15
+  } else {
+    game.fpsCapDefault = Number(value)
   }
-  localSettings.fpsCapDefault = game.fpsCapDefault
+  localSettings.fpsCapDefault = value
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 

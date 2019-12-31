@@ -3,12 +3,7 @@ let powerUp = [];
 const powerUps = {
   choose(type, index) {
     if (type === "gun") {
-      if (b.activeGun === null) b.activeGun = index //if no active gun switch to new gun
-      b.guns[index].have = true;
-      b.inventory.push(index);
-      b.guns[index].ammo += b.guns[index].ammoPack * 2;
-      game.makeGunHUD();
-
+      b.giveGuns(index)
       // game.replaceTextLog = true;
       // game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[index].name}</strong><br><br>${b.guns[index].description}`, 500);
       // game.replaceTextLog = false;

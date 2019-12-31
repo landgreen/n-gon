@@ -55,7 +55,7 @@ summary {
 
 #build-button {
   position: absolute;
-  top: 3px;
+  bottom: 3px;
   right: 3px;
   z-index: 12;
 }
@@ -135,15 +135,7 @@ summary {
   background-color: #efeff5;
 }
 
-#settings {
-  position: absolute;
-  bottom: 0px;
-  right: 1px;
-  z-index: 12;
-  font-size: 1.5em;
-}
-
-#controls {
+#info {
   position: absolute;
   bottom: 0px;
   left: 1px;
