@@ -479,13 +479,51 @@ const spawn = {
       //applying forces to player doesn't seem to work inside this method, not sure why
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       if (game.difficulty > 5) {
-        for (let i = 0; i < (game.difficulty - 3); ++i) {
-          spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 70 * Math.random());
-          Matter.Body.setVelocity(mob[mob.length - 1], {
-            x: (Math.random() - 0.5) * 70,
-            y: (Math.random() - 0.5) * 70
-          });
+        //teleport everything to center
+        function toMe(who, where, range) {
+          for (let i = 0, len = who.length; i < len; i++) {
+            const SUB = Vector.sub(who[i].position, where)
+            const DISTANCE = Vector.magnitude(SUB)
+            if (DISTANCE < range) {
+              Matter.Body.setPosition(who[i], where)
+            }
+          }
         }
+        toMe(body, this.position, this.eventHorizon)
+        toMe(mob, this.position, this.eventHorizon)
+        toMe(bullet, this.position, this.eventHorizon)
+
+
+
+
+        //push everything away
+
+        // function push(who, pos, range) {
+        //   for (let i = 0, len = who.length; i < len; ++i) {
+        //     const SUB = Vector.sub(who[i].position, pos)
+        //     const DISTANCE = Vector.magnitude(SUB)
+
+        //     if (DISTANCE < range) {
+        //       const depth = range - DISTANCE
+        //       const force = Vector.mult(Vector.normalise(SUB), 30 * who[i].mass / depth)
+        //       who[i].force.x += force.x;
+        //       who[i].force.y += force.y;
+        //     }
+        //   }
+        // }
+        // push(body, this.position, this.eventHorizon)
+        // push(mob, this.position, this.eventHorizon)
+        // push(bullet, this.position, this.eventHorizon)
+        // push([player], this.position, this.eventHorizon)
+
+
+        // for (let i = 0; i < (game.difficulty - 3); ++i) {
+        //   spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 70 * Math.random());
+        //   Matter.Body.setVelocity(mob[mob.length - 1], {
+        //     x: (Math.random() - 0.5) * 70,
+        //     y: (Math.random() - 0.5) * 70
+        //   });
+        // }
       }
     };
     me.do = function () {
@@ -724,7 +762,7 @@ const spawn = {
     let me;
     mobs.spawn(x, y, 7, radius, "transparent");
     me = mob[mob.length - 1];
-    me.seeAtDistance2 = 700000;
+    me.seeAtDistance2 = 300000;
     me.accelMag = 0.00012 * game.accelScale;
     if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     Matter.Body.setDensity(me, 0.00065); //normal is 0.001 //makes effective life much lower

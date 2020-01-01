@@ -21,11 +21,12 @@ const b = {
   isModRecursiveHealing: null,
   modSquirrelFx: null,
   modIsCrit: null,
-  modMoreDrops: null,
+  isModBayesian: null,
   isModLowHealthDmg: null,
   isModFarAwayDmg: null,
   isModEntanglement: null,
   isModMassEnergy: null,
+  modIsFourOptions: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -44,7 +45,8 @@ const b = {
     b.isModRecursiveHealing = false;
     b.modSquirrelFx = 1;
     b.modIsCrit = false;
-    b.modMoreDrops = 0;
+    b.isModBayesian = 0;
+    b.modIsFourOptions = false;
     b.isModLowHealthDmg = false;
     b.isModFarAwayDmg = false;
     b.isModEntanglement = false;
@@ -215,17 +217,25 @@ const b = {
       }
     },
     {
-      name: "Bayesian inference",
-      description: "<strong>15%</strong> chance for double <strong>power ups</strong> to drop",
+      name: "+1 cardinality",
+      description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
       have: false, //19
-      effect: () => { // good with long term planning
-        b.modMoreDrops = 0.15;
+      effect: () => {
+        b.modIsFourOptions = true;
+      }
+    },
+    {
+      name: "Bayesian inference",
+      description: "<strong>25%</strong> chance for double <strong>power ups</strong> to drop<br>one fewer <strong>choice</strong> when selecting <strong>power ups</strong>",
+      have: false, //20
+      effect: () => {
+        b.isModBayesian = 0.25;
       }
     },
     {
       name: "Gauss rifle",
       description: "<strong>launch blocks</strong> at much higher speeds<br><em>hold onto larger blocks even after getting hit</em>",
-      have: false, //20
+      have: false, //21
       effect: () => { // good with guns that run out of ammo
         mech.throwChargeRate = 4;
         mech.throwChargeMax = 150;
@@ -235,7 +245,7 @@ const b = {
     {
       name: "squirrel-cage rotor",
       description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
-      have: false, //21
+      have: false, //22
       effect: () => { // good with melee builds, content skipping builds
         b.modSquirrelFx = 1.2;
         mech.Fx = 0.015 * b.modSquirrelFx;
@@ -245,7 +255,7 @@ const b = {
     {
       name: "quantum immortality",
       description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, and field are randomized</em>",
-      have: false, //22
+      have: false, //23
       effect: () => {
         b.modIsImmortal = true;
       }
@@ -779,16 +789,16 @@ const b = {
       name: "minigun", //0
       description: "rapidly fire a stream of small <strong>bullets</strong>",
       ammo: 0,
-      ammoPack: 125,
+      ammoPack: 150,
       have: false,
       isStarterGun: true,
       fire() {
         const me = bullet.length;
         b.muzzleFlash(15);
         // if (Math.random() > 0.2) mobs.alert(500);
-        const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.03 : 0.14);
+        const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.04 : 0.12);
         bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 17 * b.modBulletSize, 5 * b.modBulletSize, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 11 : 5, mech.crouch ? 44 : 36, dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 10 : 5, mech.crouch ? 50 : 36, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + Math.floor(65 * b.isModBulletsLastLonger);
         bullet[me].frictionAir = mech.crouch ? 0.007 : 0.01;
         bullet[me].do = function () {
@@ -871,13 +881,13 @@ const b = {
       name: "fléchettes", //3
       description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 75,
+      ammoPack: 65,
       have: false,
       isStarterGun: true,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
-        const CD = (mech.crouch) ? 40 : 20
+        const CD = (mech.crouch) ? 45 : 25
         if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
         this.lastFireCycle = mech.cycle
 
@@ -962,7 +972,7 @@ const b = {
       name: "rail gun", //5
       description: "electro-magnetically launch a dense rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire", //and <strong>repel</strong> enemies
       ammo: 0,
-      ammoPack: 7,
+      ammoPack: 6,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1051,9 +1061,9 @@ const b = {
             } else { // charging on mouse down
               mech.fireCDcycle = Infinity //can't fire until mouse is released
               if (mech.crouch) {
-                this.charge = this.charge * 0.96 + 0.04 // this.charge converges to 1
+                this.charge = this.charge * 0.965 + 0.035 // this.charge converges to 1
               } else {
-                this.charge = this.charge * 0.98 + 0.02 // this.charge converges to 1
+                this.charge = this.charge * 0.985 + 0.015 // this.charge converges to 1
               }
 
               //gently push away mobs while charging

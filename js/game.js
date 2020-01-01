@@ -68,6 +68,7 @@ const game = {
   g: 0.001,
   onTitlePage: true,
   paused: false,
+  isChoosing: false,
   testing: false, //testing mode: shows wireframe and some variables
   cycle: 0, //total cycles, 60 per second
   fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
@@ -230,7 +231,7 @@ const game = {
   //   "You jump higher if you hold down the jump button.",
   //   "Crouching while firing makes bullets go faster, but slows the rate of fire.",
   // ]
-  keyPress() {
+  keyPress() { //runs on key down event
     if (keys[189]) {
       // - key
       game.zoomScale /= 0.9;
@@ -267,8 +268,7 @@ const game = {
       game.previousGun();
     }
 
-    if (keys[80]) {
-      //p  for pause
+    if (keys[80] && !game.isChoosing) { //p  for pause
       if (game.paused) {
         game.paused = false;
         requestAnimationFrame(cycle);

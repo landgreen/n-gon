@@ -14,9 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(21)
-      // mech.fieldUpgrades[2].effect();
-      // b.giveMod(22)
+      // b.giveGuns(0)
+      // mech.setField(2)
+      b.giveMod(20)
 
       level.intro(); //starting level
       // level.testingMap();
@@ -111,7 +111,7 @@ const level = {
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
-    powerUps.spawn(420, -400, "mod", false);
+    powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);
@@ -119,10 +119,10 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.groupBoss(800, -1050);
-    spawn.starter(400, -1050);
-    spawn.starter(1200, -1050);
+    // spawn.starter(400, -1050);
+    // spawn.starter(1200, -1050);
     // spawn.groupBoss(-600, -550);
-    spawn.starter(800, -150);
+    // spawn.starter(800, -150);
     // spawn.beamer(800, -150);
     // spawn.grower(800, -250);
     // spawn.blinker(800, -250, 40);
@@ -184,7 +184,7 @@ const level = {
     }
     blockDoor(710, -710);
 
-    spawn[spawn.pickList[0]](1500, -200, 100 + game.difficulty * 8);
+    spawn[spawn.pickList[0]](1500, -200, 150 + Math.random() * 30);
     spawn.mapRect(2500, -1200, 200, 750); //right wall
     blockDoor(2585, -210)
     spawn.mapRect(2500, -200, 200, 300); //right wall

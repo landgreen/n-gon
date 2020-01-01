@@ -410,7 +410,7 @@ const mech = {
     }
   },
   health: 0,
-  maxHealth: 1,
+  maxHealth: null, //set in game.reset()
   drawHealth() {
     if (mech.health < 1) {
       ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
@@ -689,13 +689,15 @@ const mech = {
     return false;
   },
   drop() {
-    if (mech.isHolding && mech.holdingTarget) {
+    if (mech.isHolding) {
       mech.isHolding = false;
-      mech.definePlayerMass()
-      mech.holdingTarget.collisionFilter.category = cat.body;
-      mech.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-      mech.holdingTarget = null;
       mech.throwCharge = 0;
+      if (mech.holdingTarget) {
+        mech.definePlayerMass()
+        mech.holdingTarget.collisionFilter.category = cat.body;
+        mech.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        mech.holdingTarget = null;
+      }
     }
   },
   definePlayerMass(mass = mech.defaultMass) {
@@ -746,71 +748,77 @@ const mech = {
       });
       Matter.Body.setVelocity(mech.holdingTarget, player.velocity);
       Matter.Body.rotate(mech.holdingTarget, 0.01 / mech.holdingTarget.mass); //gently spin the block
+    } else {
+      mech.isHolding = false
     }
   },
   throwBlock() {
-    if (mech.holdingTarget && (keys[32] || game.mouseDownRight)) {
-      if (mech.fieldMeter > 0.0007) {
-        mech.fieldMeter -= 0.0007;
-        mech.throwCharge += mech.throwChargeRate;;
-        //draw charge
-        const x = mech.pos.x + 15 * Math.cos(mech.angle);
-        const y = mech.pos.y + 15 * Math.sin(mech.angle);
-        const len = mech.holdingTarget.vertices.length - 1;
-        const edge = mech.throwCharge * mech.throwCharge * 0.02;
-        const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
-        grd.addColorStop(0, "rgba(255,50,150,0.3)");
-        grd.addColorStop(1, "transparent");
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(mech.holdingTarget.vertices[len].x, mech.holdingTarget.vertices[len].y);
-        ctx.lineTo(mech.holdingTarget.vertices[0].x, mech.holdingTarget.vertices[0].y);
-        ctx.fill();
-        for (let i = 0; i < len; i++) {
+    if (mech.holdingTarget) {
+      if (keys[32] || game.mouseDownRight) {
+        if (mech.fieldMeter > 0.0007) {
+          mech.fieldMeter -= 0.0007;
+          mech.throwCharge += mech.throwChargeRate;;
+          //draw charge
+          const x = mech.pos.x + 15 * Math.cos(mech.angle);
+          const y = mech.pos.y + 15 * Math.sin(mech.angle);
+          const len = mech.holdingTarget.vertices.length - 1;
+          const edge = mech.throwCharge * mech.throwCharge * 0.02;
+          const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
+          grd.addColorStop(0, "rgba(255,50,150,0.3)");
+          grd.addColorStop(1, "transparent");
+          ctx.fillStyle = grd;
           ctx.beginPath();
           ctx.moveTo(x, y);
-          ctx.lineTo(mech.holdingTarget.vertices[i].x, mech.holdingTarget.vertices[i].y);
-          ctx.lineTo(mech.holdingTarget.vertices[i + 1].x, mech.holdingTarget.vertices[i + 1].y);
+          ctx.lineTo(mech.holdingTarget.vertices[len].x, mech.holdingTarget.vertices[len].y);
+          ctx.lineTo(mech.holdingTarget.vertices[0].x, mech.holdingTarget.vertices[0].y);
           ctx.fill();
-        }
-      } else {
-        mech.drop()
-      }
-    } else if (mech.throwCharge > 0) {
-      //throw the body
-      mech.fieldCDcycle = mech.cycle + 15;
-      mech.isHolding = false;
-      //bullet-like collisions
-      mech.holdingTarget.collisionFilter.category = cat.body;
-      mech.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-      //check every second to see if player is away from thrown body, and make solid
-      const solid = function (that) {
-        const dx = that.position.x - player.position.x;
-        const dy = that.position.y - player.position.y;
-        if (dx * dx + dy * dy > 10000 && that.speed < 3 && that !== mech.holdingTarget) {
-          that.collisionFilter.category = cat.body; //make solid
-          that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+          for (let i = 0; i < len; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(mech.holdingTarget.vertices[i].x, mech.holdingTarget.vertices[i].y);
+            ctx.lineTo(mech.holdingTarget.vertices[i + 1].x, mech.holdingTarget.vertices[i + 1].y);
+            ctx.fill();
+          }
         } else {
-          setTimeout(solid, 50, that);
+          mech.drop()
         }
-      };
-      setTimeout(solid, 200, mech.holdingTarget);
-      //throw speed scales a bit with mass
-      const speed = Math.min(85, Math.min(54 / mech.holdingTarget.mass + 5, 48) * Math.min(mech.throwCharge, mech.throwChargeMax) / 50);
+      } else if (mech.throwCharge > 0) {
+        //throw the body
+        mech.fieldCDcycle = mech.cycle + 15;
+        mech.isHolding = false;
+        //bullet-like collisions
+        mech.holdingTarget.collisionFilter.category = cat.body;
+        mech.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+        //check every second to see if player is away from thrown body, and make solid
+        const solid = function (that) {
+          const dx = that.position.x - player.position.x;
+          const dy = that.position.y - player.position.y;
+          if (dx * dx + dy * dy > 10000 && that.speed < 3 && that !== mech.holdingTarget) {
+            that.collisionFilter.category = cat.body; //make solid
+            that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+          } else {
+            setTimeout(solid, 50, that);
+          }
+        };
+        setTimeout(solid, 200, mech.holdingTarget);
+        //throw speed scales a bit with mass
+        const speed = Math.min(85, Math.min(54 / mech.holdingTarget.mass + 5, 48) * Math.min(mech.throwCharge, mech.throwChargeMax) / 50);
 
-      mech.throwCharge = 0;
-      Matter.Body.setVelocity(mech.holdingTarget, {
-        x: player.velocity.x + Math.cos(mech.angle) * speed,
-        y: player.velocity.y + Math.sin(mech.angle) * speed
-      });
-      //player recoil //stronger in x-dir to prevent jump hacking
+        mech.throwCharge = 0;
+        Matter.Body.setVelocity(mech.holdingTarget, {
+          x: player.velocity.x + Math.cos(mech.angle) * speed,
+          y: player.velocity.y + Math.sin(mech.angle) * speed
+        });
+        //player recoil //stronger in x-dir to prevent jump hacking
 
-      Matter.Body.setVelocity(player, {
-        x: player.velocity.x - Math.cos(mech.angle) * speed / (mech.crouch ? 30 : 5) * Math.sqrt(mech.holdingTarget.mass),
-        y: player.velocity.y - Math.sin(mech.angle) * speed / 40 * Math.sqrt(mech.holdingTarget.mass)
-      });
-      mech.definePlayerMass() //return to normal player mass
+        Matter.Body.setVelocity(player, {
+          x: player.velocity.x - Math.cos(mech.angle) * speed / (mech.crouch ? 30 : 5) * Math.sqrt(mech.holdingTarget.mass),
+          y: player.velocity.y - Math.sin(mech.angle) * speed / 40 * Math.sqrt(mech.holdingTarget.mass)
+        });
+        mech.definePlayerMass() //return to normal player mass
+      }
+    } else {
+      mech.isHolding = false
     }
   },
   drawField() {
