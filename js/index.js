@@ -2,16 +2,26 @@
 /* TODO:  *******************************************
 *****************************************************
 
-use cookies to remember settings
+selection options for field to stay with current
 
-field: catch mobs in your field and make them into guardian bullets
+custom mode grey out mods that are bad, like selection based mods
+  not important
 
-negative mod effect ideas
-  -max health
-  -fire rate
-  -slow life decay
+field graphics too dark at high energy
+  not important
 
-mod: gain an extra choice of power ups
+rewrite pause as a change to the main loop
+  not important
+  like testing loop
+
+game setting for slower computers
+  fewer blocks
+  fewer debris
+  fewer mobs
+
+mod: guardian
+  recursive
+  spawns at start of level
 
 mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
   10% max health

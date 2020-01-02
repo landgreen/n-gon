@@ -16,7 +16,7 @@ const level = {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns(0)
       // mech.setField(2)
-      b.giveMod(20)
+      // b.giveMod(20)
 
       level.intro(); //starting level
       // level.testingMap();
@@ -36,6 +36,9 @@ const level = {
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
+    for (let i = 0; i < b.modGuardianCount; i++) {
+      b.guardian()
+    }
   },
   isBuildRun: false,
   difficultyIncrease(num = 1) {

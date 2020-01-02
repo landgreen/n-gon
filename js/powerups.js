@@ -107,7 +107,7 @@ const powerUps = {
           choice3 = doNotHave(mech.fieldUpgrades, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice3].name}</div> ${mech.fieldUpgrades[choice3].description}</div>`
         }
-        if (b.modIsFourOptions) {
+        if (b.isModFourOptions) {
           let choice4 = doNotHave(mech.fieldUpgrades, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice4].name}</div> ${mech.fieldUpgrades[choice4].description}</div>`
         }
@@ -129,7 +129,7 @@ const powerUps = {
       function doNotHave(who, skip1 = -1, skip2 = -1, skip3 = -1) {
         let options = [];
         for (let i = 0; i < who.length; i++) {
-          if (!who[i].have && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
+          if (who[i].count < who[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
         }
         if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
       }
@@ -145,7 +145,7 @@ const powerUps = {
           choice3 = doNotHave(b.mods, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice3].name}</div> ${b.mods[choice3].description}</div>`
         }
-        if (b.modIsFourOptions) {
+        if (b.isModFourOptions) {
           let choice4 = doNotHave(b.mods, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice4].name}</div> ${b.mods[choice4].description}</div>`
         }
@@ -182,7 +182,7 @@ const powerUps = {
           choice3 = doNotHave(b.guns, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice3})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice3].name}</div> ${b.guns[choice3].description}</div>`
         }
-        if (b.modIsFourOptions) {
+        if (b.isModFourOptions) {
           let choice4 = doNotHave(b.guns, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice4})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice4].name}</div> ${b.guns[choice4].description}</div>`
         }

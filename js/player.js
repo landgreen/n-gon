@@ -296,14 +296,14 @@ const mech = {
   },
   alive: true,
   death() {
-    if (b.modIsImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
+    if (b.isModImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
       spawn.setSpawnList(); //new mob types
       game.clearNow = true; //triggers a map reset
 
       //count mods
       let totalMods = -2; //lose 2 mods for balance reasons
       for (let i = 0; i < b.mods.length; i++) {
-        if (b.mods[i].have) totalMods++
+        totalMods += b.mods[i].count
       }
 
       function randomizeMods() {
@@ -313,7 +313,7 @@ const mech = {
           let options = [];
           for (let i = 0, len = b.mods.length; i < len; i++) {
             //can't get quantum immortality again 
-            if (b.mods[i].name !== "quantum immortality" && !b.mods[i].have) options.push(i);
+            if (b.mods[i].name !== "quantum immortality" && b.mods[i].count < b.mods[i].maxCount) options.push(i);
           }
           //add a new mod
           if (options.length > 0) {
@@ -666,9 +666,11 @@ const mech = {
     if (mech.fieldMeter < mech.fieldEnergyMax) {
       mech.fieldMeter += mech.fieldRegen;
       ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-      ctx.fillRect(mech.pos.x - mech.radius, mech.pos.y - 50, range, 10);
+      const xOff = mech.pos.x - mech.radius * mech.fieldEnergyMax
+      const yOff = mech.pos.y - 50
+      ctx.fillRect(xOff, yOff, range * mech.fieldEnergyMax, 10);
       ctx.fillStyle = "#0cf";
-      ctx.fillRect(mech.pos.x - mech.radius, mech.pos.y - 50, range * mech.fieldMeter, 10);
+      ctx.fillRect(xOff, yOff, range * mech.fieldMeter, 10);
     } else {
       mech.fieldMeter = mech.fieldEnergyMax
     }

@@ -168,9 +168,10 @@ const game = {
   updateModHUD() {
     let text = ""
     for (let i = 0, len = b.mods.length; i < len; i++) { //add mods
-      if (b.mods[i].have) {
+      if (b.mods[i].count > 0) {
         if (text) text += "<br>" //add a new line, but not on the first line
         text += b.mods[i].name
+        if (b.mods[i].count > 1) text += ` (${b.mods[i].count}x)`
       }
     }
     document.getElementById("mods").innerHTML = text
@@ -447,7 +448,7 @@ const game = {
   reset() { //run on first run, and each later run after you die
     b.inventory = []; //removes guns and ammo  
     for (let i = 0, len = b.guns.length; i < len; ++i) {
-      b.guns[i].have = false;
+      b.guns[i].count = 0;
       if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
     }
     b.activeGun = null;
