@@ -100,6 +100,18 @@ summary {
   background-color: #efeff5;
 }
 
+.cancel {
+  /* text-align: right; */
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #fff;
+}
+
+.cancel:hover {
+  color: #aaa;
+}
+
 #build-grid {
   padding: 16px;
   margin: 0px;

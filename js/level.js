@@ -14,9 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(0)
-      // mech.setField(2)
-      // b.giveMod(20)
+      // b.giveGuns(15)
+      // mech.setField(3)
+      // b.giveMod(10);
 
       level.intro(); //starting level
       // level.testingMap();
@@ -114,7 +114,7 @@ const level = {
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
-    powerUps.spawn(420, -400, "field", false);
+    powerUps.spawn(420, -400, "gun", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);

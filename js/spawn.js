@@ -233,7 +233,7 @@ const spawn = {
     me.accelMag = 0.001 * game.accelScale;;
     me.g = me.accelMag * 0.6; //required if using 'gravity'
     me.memory = 50;
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -293,7 +293,7 @@ const spawn = {
     me.onDeath = function () {
       this.removeCons();
     };
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.searchSpring();
@@ -600,7 +600,7 @@ const spawn = {
     me.accelMag = 0.0005 * game.accelScale;
     me.frictionStatic = 0;
     me.friction = 0;
-    if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       this.attraction();
@@ -900,7 +900,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       this.fire();
@@ -970,7 +970,7 @@ const spawn = {
         });
       }
     };
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.4)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.04, 0.2)) spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -1019,7 +1019,7 @@ const spawn = {
     me.laserRange = 500;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
@@ -1060,7 +1060,7 @@ const spawn = {
     me.memory = 20;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.07, 0.5)) spawn.shield(me, x, y);
+    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
 
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)

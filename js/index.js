@@ -2,10 +2,24 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: fields do damage on blocking
+  name: something about radiation?
+
+mod: do something at the end of each level
+  heal to full
+    should still be effected by the heal reduction at higher difficulty
+  give ammo to current gun
+  give goals/quests for each level
+    how to track goals?
+    take no damage
+    don't shoot
+
 selection options for field to stay with current
 
 custom mode grey out mods that are bad, like selection based mods
   not important
+
+custom mode can't use recursive mods
 
 field graphics too dark at high energy
   not important
@@ -19,9 +33,10 @@ game setting for slower computers
   fewer debris
   fewer mobs
 
-mod: guardian
-  recursive
-  spawns at start of level
+mod: gain energy after taking damage
+  use piezoelectric name  (already used)
+
+mod: ground stomp on enterLand()
 
 mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
   10% max health
@@ -153,6 +168,7 @@ const build = {
   list: [],
   choosePowerUp(who, index, type) {
     //check if matching a current power up
+    // if (type === "field" || type === "gun") {
     for (let i = 0; i < build.list.length; i++) {
       if (build.list[i].index === index && build.list[i].type === type) { //if already click, toggle off
         build.list.splice(i, 1);
@@ -160,7 +176,6 @@ const build = {
         return
       }
     }
-
     //check if trying to get a second field
     if (type === "field") {
       for (let i = 0; i < build.list.length; i++) {
@@ -170,14 +185,46 @@ const build = {
         }
       }
     }
+    // } else { //type is mod
+
+    //   //count each mod type to check for recursion caps
+    //   let counts = []
+    //   for (let i = 0; i < build.list.length; i++) {
+    //     if (build.list[i].type === "mod") {
+    //       if (!counts[build.list[i].index]) {
+    //         counts[build.list[i].index] = 1
+    //       } else {
+    //         counts[build.list[i].index] = counts[build.list[i].index] + 1
+    //       }
+    //     }
+    //   }
+
+    //   for (let i = 0; i < build.list.length; i++) {
+    //     //if above max count, toggle off
+    //     if (build.list[i].index === index && build.list[i].type === type &&
+    //       counts[index] >= b.mods[index].maxCount) {
+    //       //remove all versions of mod
+
+
+    //       who.style.backgroundColor = "#fff"
+    //       return
+    //     }
+    //   }
+    // }
 
     if (build.list.length < 5) { //add to build array
       who.style.backgroundColor = "#919ba8" //"#868f9a"
       build.list[build.list.length] = {
         who: who,
         index: index,
-        type: type
+        type: type,
       }
+    }
+    console.log(build.list)
+  },
+  removeMod(index) {
+    for (let i = build.list.length - 1; i > -1; i--) {
+      if (build.list[i].type === "mod" && build.list[i].index === index) build.list.splice(i, 1);
     }
   },
   startBuildRun() {

@@ -55,7 +55,7 @@ const mech = {
   cycle: 0,
   width: 50,
   radius: 30,
-  fillColor: "#fff",
+  fillColor: "#fff", //changed by mod piezoelectric plating (damage immunity)
   fillColorDark: "#ccc",
   height: 42,
   yOffWhen: {
@@ -207,7 +207,6 @@ const mech = {
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
         if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
-          mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
           let dmg = Math.sqrt(momentum - 165) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
           mech.damage(dmg);
@@ -440,6 +439,7 @@ const mech = {
     mech.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
+  collisionImmune: 0, //used in engine
   damage(dmg) {
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -513,7 +513,6 @@ const mech = {
     // };
     // requestAnimationFrame(normalFPS);
   },
-  damageImmune: 0,
   hitMob(i, dmg) {
     //prevents damage happening too quick
   },
@@ -588,11 +587,13 @@ const mech = {
     mech.knee.y = (l / d) * (mech.foot.y - mech.hip.y) + (h / d) * (mech.foot.x - mech.hip.x) + mech.hip.y;
   },
   draw() {
+    // mech.fillColor = (mech.collisionImmune < mech.cycle) ? "#fff" : "rgba(255,255,255,0.1)" //"#cff"
     ctx.fillStyle = mech.fillColor;
     mech.walk_cycle += mech.flipLegs * mech.Vx;
 
     //draw body
     ctx.save();
+    ctx.globalAlpha = (mech.collisionImmune < mech.cycle) ? 1 : 0.7
     ctx.translate(mech.pos.x, mech.pos.y);
     mech.calcLeg(Math.PI, -3);
     mech.drawLeg("#4a4a4a");
@@ -654,8 +655,10 @@ const mech = {
     mech.fieldCDcycle = 0;
     mech.isStealth = false;
     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-    mech.holdingMassScale = 0.5;
     mech.fieldShieldingScale = 1; //scale energy loss after collision with mob
+    mech.holdingMassScale = 0.5;
+    mech.throwChargeRate = 2;
+    mech.throwChargeMax = 50;
     mech.grabRange = 175;
     mech.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -1311,9 +1314,12 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify &nbsp; <strong style='letter-spacing: 10px;'>gravity</strong><br><em>can fire bullets while active</em>",
+      description: "use <strong class='color-f'>energy</strong> to nullify &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br><strong>launch</strong> larger blocks at much higher speeds",
       effect: () => {
         mech.fieldFire = true;
+        mech.throwChargeRate = 4;
+        mech.throwChargeMax = 150;
+        mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1321,11 +1327,11 @@ const mech = {
             mech.holding();
             mech.throwBlock();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
-            const DRAIN = 0.0004
+            const DRAIN = 0.00025
             if (mech.fieldMeter > DRAIN) {
               mech.grabPowerUp();
-              mech.lookForPickUp(170);
-              mech.pushMobs360(200);
+              mech.lookForPickUp(150);
+              mech.pushMobs360(150);
               //look for nearby objects to make zero-g
               function zeroG(who, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -1339,22 +1345,17 @@ const mech = {
               // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
               // zeroG(mob);  //mobs are too irregular to make this work?
 
-              Matter.Body.setVelocity(player, {
-                x: player.velocity.x,
-                y: player.velocity.y * 0.97
-              });
-
               if (keys[83] || keys[40]) { //down
-                player.force.y -= 0.8 * player.mass * mech.gravity;
+                player.force.y -= 0.5 * player.mass * mech.gravity;
                 mech.grabRange = mech.grabRange * 0.97 + 400 * 0.03;
-                zeroG(powerUp, 0.85);
-                zeroG(body, 0.85);
+                zeroG(powerUp, 0.7);
+                zeroG(body, 0.7);
               } else if (keys[87] || keys[38]) { //up
                 mech.fieldMeter -= 5 * DRAIN;
-                mech.grabRange = mech.grabRange * 0.97 + 750 * 0.03;
-                player.force.y -= 1.2 * player.mass * mech.gravity;
-                zeroG(powerUp, 1.13);
-                zeroG(body, 1.13);
+                mech.grabRange = mech.grabRange * 0.97 + 850 * 0.03;
+                player.force.y -= 1.45 * player.mass * mech.gravity;
+                zeroG(powerUp, 1.38);
+                zeroG(body, 1.38);
               } else {
                 mech.fieldMeter -= DRAIN;
                 mech.grabRange = mech.grabRange * 0.97 + 650 * 0.03;
@@ -1366,8 +1367,13 @@ const mech = {
               //add extra friction for horizontal motion
               if (keys[65] || keys[68] || keys[37] || keys[39]) {
                 Matter.Body.setVelocity(player, {
-                  x: player.velocity.x * 0.85,
-                  y: player.velocity.y
+                  x: player.velocity.x * 0.95,
+                  y: player.velocity.y * 0.97
+                });
+              } else { //slow rise and fall
+                Matter.Body.setVelocity(player, {
+                  x: player.velocity.x,
+                  y: player.velocity.y * 0.97
                 });
               }
 
@@ -1443,7 +1449,7 @@ const mech = {
         mech.hold = function () {
           if (mech.fieldMeter > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-            mech.fieldMeter -= 0.32;
+            mech.fieldMeter -= 0.35;
             b.drone(1)
           }
           if (mech.isHolding) {

@@ -961,7 +961,7 @@ const mobs = {
         if (this.dropPowerUp) {
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
           if (Math.random() < b.modSpores) {
-            for (let i = 0, len = Math.floor(3 + this.mass * Math.random()); i < len; i++) {
+            for (let i = 0, len = Math.floor(4 + this.mass * Math.random()); i < len; i++) {
               b.spore(this) //spawn drone
             }
           }

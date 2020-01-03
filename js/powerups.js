@@ -22,6 +22,14 @@ const powerUps = {
     game.isChoosing = false; //stops p from un pausing on key down
     requestAnimationFrame(cycle);
   },
+  cancel() {
+    document.body.style.cursor = "none";
+    document.getElementById("choose-grid").style.display = "none"
+    document.getElementById("choose-background").style.display = "none"
+    game.paused = false;
+    game.isChoosing = false; //stops p from un pausing on key down
+    requestAnimationFrame(cycle);
+  },
   showDraft() {
     document.getElementById("choose-grid").style.display = "grid"
     document.getElementById("choose-background").style.display = "inline"
@@ -36,11 +44,10 @@ const powerUps = {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
     effect() {
-      let heal = ((this.size / 40) ** 2)
-      heal = Math.min(mech.maxHealth - mech.health, heal)
-      if (b.isModRecursiveHealing) heal *= 2
+      let heal = 0
+      for (let i = 0; i < b.modRecursiveHealing; i++) heal += ((this.size / 40) ** 2)
+      if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
       mech.addHealth(heal);
-      if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (heal * game.healScale * 100).toFixed(0) + "%</span>", 300)
     }
   },
   ammo: {
@@ -72,8 +79,7 @@ const powerUps = {
         mech.fieldMeter = mech.fieldEnergyMax;
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
-        //ammo given scales as mobs take more hits to kill
-        let ammo = Math.ceil((target.ammoPack * (0.4 + 0.05 * Math.random())));
+        let ammo = Math.ceil((target.ammoPack * (1 + 0.05 * Math.random())));
         if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
         target.ammo += ammo;
         game.updateGunHUD();
@@ -100,7 +106,7 @@ const powerUps = {
       let choice2 = doNotHave(mech.fieldUpgrades, choice1)
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
+        let text = `<div class='cancel' onclick='powerUps.cancel()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
         if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
         if (!b.isModBayesian) {
@@ -138,7 +144,7 @@ const powerUps = {
       let choice2 = doNotHave(b.mods, choice1)
       let choice3 = -1
       if (choice1 > -1) {
-        let text = "<h3 style = 'color:#fff; text-align:center; margin: 0px;'>choose a mod</h3>"
+        let text = "<div class='cancel' onclick='powerUps.cancel()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>"
         text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
         if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
         if (!b.isModBayesian) {
@@ -175,7 +181,7 @@ const powerUps = {
       let choice2 = doNotHave(b.guns, choice1)
       let choice3 = -1
       if (choice1 > -1) {
-        let text = "<h3 style = 'color:#fff; text-align:center; margin: 0px;'>choose a gun</h3>"
+        let text = "<div class='cancel' onclick='powerUps.cancel()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>"
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
         if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
         if (!b.isModBayesian) {
@@ -195,7 +201,7 @@ const powerUps = {
   },
   giveRandomAmmo() {
     const ammoTarget = Math.floor(Math.random() * (b.guns.length));
-    const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 2);
+    const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 6);
     b.guns[ammoTarget].ammo += ammo;
     game.updateGunHUD();
     game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
@@ -206,17 +212,17 @@ const powerUps = {
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "heal");
       return;
     }
-    if (Math.random() < 0.2 && b.inventory.length > 0) {
+    if (Math.random() < 0.15 && b.inventory.length > 0) {
       powerUps.spawn(x, y, "ammo");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.004 * (4 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 4
+    if (Math.random() < 0.0035 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 4
       powerUps.spawn(x, y, "gun");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0035 * (9 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 7
+    if (Math.random() < 0.0031 * (10 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 7
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod");
       return;
@@ -231,10 +237,10 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.55) {
+    } else if (Math.random() < 0.6) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.2) {
+    } else if (Math.random() < 0.1) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun")
     } else if (Math.random() < 0.1) {
@@ -243,15 +249,15 @@ const powerUps = {
     } else if (mech.health < 0.65) {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
+      powerUps.spawn(x, y, "heal");
       if (Math.random() < b.isModBayesian) {
-        powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
       }
     } else {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
+      powerUps.spawn(x, y, "ammo");
       if (Math.random() < b.isModBayesian) {
-        powerUps.spawn(x, y, "ammo");
         powerUps.spawn(x, y, "ammo");
       }
     }

@@ -79,7 +79,7 @@ function mobCollisionChecks(event) {
   for (let i = 0, j = pairs.length; i != j; i++) {
 
     //body + player collision
-    if (game.isBodyDamage && mech.damageImmune < mech.cycle) {
+    if (game.isBodyDamage) {
       if (pairs[i].bodyA === playerBody || pairs[i].bodyA === playerHead) {
         collidePlayer(pairs[i].bodyB)
       } else if (pairs[i].bodyB === playerBody || pairs[i].bodyB === playerHead) {
@@ -91,7 +91,6 @@ function mobCollisionChecks(event) {
       if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > massThreshold) { //dmg from hitting a body
         const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
         if (v > speedThreshold) {
-          mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
           let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
           dmg = Math.min(Math.max(dmg, 0.02), 0.15);
           mech.damage(dmg);
@@ -105,21 +104,6 @@ function mobCollisionChecks(event) {
           return;
         }
       }
-      //    else if (obj.isStatic && player.speed > speedThreshold * 2) { //falling dmg / hitting map dmg
-      //     mech.damageImmune = mech.cycle + 30;
-      //     console.log(player.speed)
-      //     let dmg = Math.min(Math.max(player.speed * 0.001, 0.02), 0.2);
-      //     mech.damage(dmg);
-      //     game.drawList.push({
-      //       //add dmg to draw queue
-      //       x: pairs[i].activeContacts[0].vertex.x,
-      //       y: pairs[i].activeContacts[0].vertex.y,
-      //       radius: dmg * 500,
-      //       color: game.mobDmgColor,
-      //       time: game.drawTime
-      //     });
-      //     return;
-      //   }
     }
 
     //mob + (player,bullet,body) collisions
@@ -135,9 +119,9 @@ function mobCollisionChecks(event) {
 
         function collideMob(obj) {
           //player + mob collision
-          if (obj === playerBody || obj === playerHead) {
-            if (mech.damageImmune < mech.cycle) {
-              mech.damageImmune = mech.cycle + 30; //player is immune to collision damage for 30 cycles
+          if (mech.collisionImmune < mech.cycle) {
+            if (obj === playerBody || obj === playerHead) {
+              mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
               mob[k].foundPlayer();
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
@@ -163,23 +147,24 @@ function mobCollisionChecks(event) {
                 });
 
               }
+              //extra kick between player and mob              //this section would be better with forces but they don't work...
+              let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
+              Matter.Body.setVelocity(player, {
+                x: player.velocity.x + 8 * Math.cos(angle),
+                y: player.velocity.y + 8 * Math.sin(angle)
+              });
+              Matter.Body.setVelocity(mob[k], {
+                x: mob[k].velocity.x - 8 * Math.cos(angle),
+                y: mob[k].velocity.y - 8 * Math.sin(angle)
+              });
+              return;
             }
-            //extra kick between player and mob              //this section would be better with forces but they don't work...
-            let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
-            Matter.Body.setVelocity(player, {
-              x: player.velocity.x + 8 * Math.cos(angle),
-              y: player.velocity.y + 8 * Math.sin(angle)
-            });
-            Matter.Body.setVelocity(mob[k], {
-              x: mob[k].velocity.x - 8 * Math.cos(angle),
-              y: mob[k].velocity.y - 8 * Math.sin(angle)
-            });
-            return;
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)));
             let dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+            if (mob[k].shield) dmg *= 0.3
             if (b.isModCrit && !mob[k].seePlayer.recall) dmg *= 5
             mob[k].foundPlayer();
             mob[k].damage(dmg);
