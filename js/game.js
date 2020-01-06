@@ -81,7 +81,8 @@ const game = {
   isBodyDamage: true,
   levelsCleared: 0,
   difficultyMode: 1,
-  difficulty: 1,
+  isEasyMode: false,
+  difficulty: 0,
   dmgScale: null, //set in levels.setDifficulty
   healScale: 1,
   accelScale: null, //set in levels.setDifficulty
@@ -416,24 +417,6 @@ const game = {
   },
   wipe() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // ctx.fillStyle = "rgba(255,255,255,1)";
-    // ctx.globalCompositeOperation = "difference";
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // ctx.globalCompositeOperation = "source-over";
-
-    // ctx.globalAlpha = (mech.health < 0.7) ? (mech.health+0.3)*(mech.health+0.3) : 1
-    // if (mech.health < 0.7) {
-    // 	ctx.globalAlpha= 0.3 + mech.health
-    // 	ctx.fillStyle = document.body.style.backgroundColor
-    // 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // 	ctx.globalAlpha=1;
-    // } else {
-    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // }
-    //ctx.fillStyle = "rgba(255,255,255," + (1 - Math.sqrt(player.speed)*0.1) + ")";
-    //ctx.fillStyle = "rgba(255,255,255,0.4)";
-    //ctx.fillRect(0, 0, canvas.width, canvas.height);
   },
   gravity() {
     function addGravity(bodies, magnitude) {
@@ -474,8 +457,10 @@ const game = {
     game.accelScale = 1;
     game.lookFreqScale = 1;
     game.CDScale = 1;
+    game.difficulty = 0;
     game.difficultyMode = Number(document.getElementById("difficulty-select").value)
     if (game.difficultyMode === 0) {
+      game.isEasyMode = true;
       game.difficultyMode = 1
       level.difficultyDecrease(6);
     }
@@ -693,7 +678,7 @@ const game = {
   testingOutput() {
     ctx.textAlign = "right";
     ctx.fillStyle = "#000";
-    let line = 140;
+    let line = 500;
     const x = canvas.width - 5;
     ctx.fillText("T: exit testing mode", x, line);
     line += 20;
@@ -712,38 +697,38 @@ const game = {
     ctx.fillText("1-7: spawn things", x, line);
     line += 30;
 
-    ctx.fillText("cycle: " + game.cycle, x, line);
-    line += 20;
-    ctx.fillText("player cycle: " + mech.cycle, x, line);
-    line += 20;
-    ctx.fillText("x: " + player.position.x.toFixed(0), x, line);
-    line += 20;
-    ctx.fillText("y: " + player.position.y.toFixed(0), x, line);
-    line += 20;
-    ctx.fillText("Vx: " + mech.Vx.toFixed(2), x, line);
-    line += 20;
-    ctx.fillText("Vy: " + mech.Vy.toFixed(2), x, line);
-    line += 20;
-    ctx.fillText("Fx: " + player.force.x.toFixed(3), x, line);
-    line += 20;
-    ctx.fillText("Fy: " + player.force.y.toFixed(3), x, line);
-    line += 20;
-    ctx.fillText("yOff: " + mech.yOff.toFixed(1), x, line);
-    line += 20;
-    ctx.fillText("mass: " + player.mass.toFixed(1), x, line);
-    line += 20;
-    ctx.fillText("onGround: " + mech.onGround, x, line);
-    line += 20;
-    ctx.fillText("crouch: " + mech.crouch, x, line);
-    line += 20;
-    ctx.fillText("isHeadClear: " + mech.isHeadClear, x, line);
-    line += 20;
-    ctx.fillText("frictionAir: " + player.frictionAir.toFixed(3), x, line);
-    line += 20;
-    ctx.fillText("stepSize: " + mech.stepSize.toFixed(2), x, line);
-    line += 20;
-    ctx.fillText("zoom: " + game.zoom.toFixed(4), x, line);
-    line += 20;
+    // ctx.fillText("cycle: " + game.cycle, x, line);
+    // line += 20;
+    // ctx.fillText("player cycle: " + mech.cycle, x, line);
+    // line += 20;
+    // ctx.fillText("x: " + player.position.x.toFixed(0), x, line);
+    // line += 20;
+    // ctx.fillText("y: " + player.position.y.toFixed(0), x, line);
+    // line += 20;
+    // ctx.fillText("Vx: " + mech.Vx.toFixed(2), x, line);
+    // line += 20;
+    // ctx.fillText("Vy: " + mech.Vy.toFixed(2), x, line);
+    // line += 20;
+    // ctx.fillText("Fx: " + player.force.x.toFixed(3), x, line);
+    // line += 20;
+    // ctx.fillText("Fy: " + player.force.y.toFixed(3), x, line);
+    // line += 20;
+    // ctx.fillText("yOff: " + mech.yOff.toFixed(1), x, line);
+    // line += 20;
+    // ctx.fillText("mass: " + player.mass.toFixed(1), x, line);
+    // line += 20;
+    // ctx.fillText("onGround: " + mech.onGround, x, line);
+    // line += 20;
+    // ctx.fillText("crouch: " + mech.crouch, x, line);
+    // line += 20;
+    // ctx.fillText("isHeadClear: " + mech.isHeadClear, x, line);
+    // line += 20;
+    // ctx.fillText("frictionAir: " + player.frictionAir.toFixed(3), x, line);
+    // line += 20;
+    // ctx.fillText("stepSize: " + mech.stepSize.toFixed(2), x, line);
+    // line += 20;
+    // ctx.fillText("zoom: " + game.zoom.toFixed(4), x, line);
+    // line += 20;
     ctx.textAlign = "center";
     ctx.fillText(`(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`, game.mouse.x, game.mouse.y - 20);
   },

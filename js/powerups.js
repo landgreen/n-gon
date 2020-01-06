@@ -300,7 +300,7 @@ const powerUps = {
         size: size
       });
       if (mode) {
-        console.log(mode)
+        // console.log(mode)
         powerUp[index].mode = mode
       }
       if (moving) {

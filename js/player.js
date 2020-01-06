@@ -326,11 +326,7 @@ const mech = {
       }
 
       function randomizeField() {
-        if (game.difficulty * (Math.random() + 0.27) > 2) {
-          mech.setField(Math.floor(Math.random() * (mech.fieldUpgrades.length)))
-        } else {
-          mech.setField(0)
-        }
+        mech.setField(Math.floor(Math.random() * (mech.fieldUpgrades.length)))
       }
 
       function randomizeHealth() {
@@ -445,6 +441,9 @@ const mech = {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.93
       }
+    }
+    if (b.modPiezo) {
+      mech.fieldMeter += dmg * b.modPiezo
     }
     mech.health -= dmg;
     if (mech.health < 0) {
@@ -792,8 +791,8 @@ const mech = {
         mech.fieldCDcycle = mech.cycle + 15;
         mech.isHolding = false;
         //bullet-like collisions
-        mech.holdingTarget.collisionFilter.category = cat.body;
-        mech.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+        mech.holdingTarget.collisionFilter.category = cat.bullet;
+        mech.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
         //check every second to see if player is away from thrown body, and make solid
         const solid = function (that) {
           const dx = that.position.x - player.position.x;
@@ -900,6 +899,9 @@ const mech = {
       mech.drawHold(who);
       mech.fieldCDcycle = mech.cycle + 10;
       mech.holdingTarget = null
+      if (b.modBlockDmg) {
+        who.damage(b.modBlockDmg)
+      }
       //knock backs
       const unit = Vector.normalise(Vector.sub(player.position, who.position))
       const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
@@ -1327,7 +1329,7 @@ const mech = {
             mech.holding();
             mech.throwBlock();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
-            const DRAIN = 0.00025
+            const DRAIN = 0.00035
             if (mech.fieldMeter > DRAIN) {
               mech.grabPowerUp();
               mech.lookForPickUp(150);

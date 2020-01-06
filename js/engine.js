@@ -126,7 +126,7 @@ function mobCollisionChecks(event) {
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
               if (mob[k].onHit) mob[k].onHit(k);
-              if (b.isModAnnihilation && mob[k].dropPowerUp) {
+              if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
                 mob[k].death();
                 game.drawList.push({
                   //add dmg to draw queue
@@ -164,8 +164,7 @@ function mobCollisionChecks(event) {
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)));
             let dmg = b.dmgScale * (obj.dmg + b.modExtraDmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            if (mob[k].shield) dmg *= 0.3
-            if (b.isModCrit && !mob[k].seePlayer.recall) dmg *= 5
+            if (b.isModCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn

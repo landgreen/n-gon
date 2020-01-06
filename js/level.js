@@ -16,7 +16,7 @@ const level = {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns(15)
       // mech.setField(3)
-      // b.giveMod(10);
+      b.giveMod(16);
 
       level.intro(); //starting level
       // level.testingMap();
@@ -45,18 +45,18 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.1; //damage done by mobs increases each level
+      game.dmgScale += 0.11; //damage done by mobs increases each level
       b.dmgScale *= 0.94; //damage done by player decreases each level
       game.accelScale *= 1.03 //mob acceleration increases each level
       game.lookFreqScale *= 0.97 //mob cycles between looks decreases each level
       game.CDScale *= 0.97 //mob CD time decreases each level
     }
-    game.healScale = 1 / (1 + game.difficulty * 0.05)
+    game.healScale = 1 / (1 + game.difficulty * 0.06) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.1; //damage done by mobs increases each level
+      game.dmgScale -= 0.11; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.94; //damage done by player decreases each level
       game.accelScale /= 1.03 //mob acceleration increases each level
@@ -64,14 +64,14 @@ const level = {
       game.CDScale /= 0.97 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 1;
-    game.healScale = 1 / (1 + game.difficulty * 0.05)
+    game.healScale = 1 / (1 + game.difficulty * 0.06)
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
   testingMap() {
     //start with all guns
-    level.difficultyIncrease(8)
-    game.zoomScale = 1400 //1400 is normal
+    level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
+    game.zoomScale = 1700 //1400 is normal
     spawn.setSpawnList();
     mech.setPosToSpawn(-75, -60); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
@@ -114,17 +114,17 @@ const level = {
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
-    powerUps.spawn(420, -400, "gun", false);
+    // powerUps.spawn(420, -400, "gun", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(420, -400, "field", false);
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.groupBoss(800, -1050);
-    // spawn.starter(400, -1050);
+    // spawn.bomber(800, -450);
+    spawn.hopper(400, -1050);
     // spawn.starter(1200, -1050);
-    // spawn.groupBoss(-600, -550);
+    // spawn.nodeBoss(-600, -550, "starter");
     // spawn.starter(800, -150);
     // spawn.beamer(800, -150);
     // spawn.grower(800, -250);
@@ -203,14 +203,14 @@ const level = {
     spawn.mapRect(6700, -1800, 800, 2600); //right wall
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-    for (let i = 0; i < 5; ++i) {
-      if (game.difficulty * Math.random() > 3 * i) {
+    for (let i = 0; i < 3; ++i) {
+      if (game.difficulty * Math.random() > 15 * i) {
         spawn.randomBoss(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
-      if (game.difficulty * Math.random() > 2.6 * i) {
+      if (game.difficulty * Math.random() > 10 * i) {
         spawn.randomBoss(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
-      if (game.difficulty * Math.random() > 2.4 * i) {
+      if (game.difficulty * Math.random() > 7 * i) {
         spawn.randomBoss(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
     }
@@ -1468,13 +1468,12 @@ const level = {
     nextLevel() {
       //enter when player isn't falling
       if (player.velocity.y < 0.1) {
-        //increase difficulty based on modes
-        level.difficultyIncrease(game.difficultyMode + level.isBuildRun)
-        //cycles map to next level
         level.levelsCleared++;
-        level.onLevel++;
+        level.onLevel++; //cycles map to next level
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
 
+        level.difficultyIncrease(game.difficultyMode + level.isBuildRun) //increase difficulty based on modes
+        if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
         game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
       }
     },

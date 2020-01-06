@@ -2,8 +2,12 @@
 /* TODO:  *******************************************
 *****************************************************
 
-mod: fields do damage on blocking
-  name: something about radiation?
+add new power up class:  rerolls
+  let you repopulate a power up selection menu
+
+weekly random challenge where everyone playing each week gets the same random setup.
+  The randomness would be determined by the date so it would sync everyone.
+  powerups still drop, but the drops are determined by a preset list that changes each week.
 
 mod: do something at the end of each level
   heal to full

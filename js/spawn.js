@@ -19,23 +19,25 @@ const spawn = {
     "sneaker",
   ],
   allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter"],
-  setSpawnList() {
-    //this is run at the start of each new level to determine the possible mobs for the level
+  setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
     //each level has 2 mobs: one new mob and one from the last level
     spawn.pickList.splice(0, 1);
     spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
   },
+  spawnChance(chance) {
+    return Math.random() < chance + 0.07 * game.difficulty && mob.length < -1 + 16 * Math.log10(game.difficulty + 1)
+  },
   randomMob(x, y, chance = 1) {
-    if (Math.random() < chance + 0.09 * (game.difficulty - 1) && mob.length < 4 + game.difficulty * 1.7) {
+    if (spawn.spawnChance(chance)) {
       const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       this[pick](x, y);
     }
   },
   randomSmallMob(x, y,
-    num = Math.max(Math.min(Math.round(Math.random() * (game.difficulty - 1) * 0.45 - 0.4), 4), 0),
+    num = Math.max(Math.min(Math.round(Math.random() * game.difficulty * 0.2), 4), 0),
     size = 16 + Math.ceil(Math.random() * 15),
     chance = 1) {
-    if (Math.random() < chance + (game.difficulty - 1) * 0.03 && mob.length < 4 + game.difficulty * 1.7) {
+    if (spawn.spawnChance(chance)) {
       for (let i = 0; i < num; ++i) {
         const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
         this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
@@ -43,7 +45,7 @@ const spawn = {
     }
   },
   randomBoss(x, y, chance = 1) {
-    if (Math.random() < chance + (game.difficulty - 1) * 0.14 && game.difficulty !== 1 && mob.length < 4 + game.difficulty * 2 || chance == Infinity) {
+    if (spawn.spawnChance(chance) && game.difficulty > 2 || chance == Infinity) {
       //choose from the possible picklist
       let pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       //is the pick able to be a boss?
@@ -233,7 +235,7 @@ const spawn = {
     me.accelMag = 0.001 * game.accelScale;;
     me.g = me.accelMag * 0.6; //required if using 'gravity'
     me.memory = 50;
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
+    spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -293,32 +295,12 @@ const spawn = {
     me.onDeath = function () {
       this.removeCons();
     };
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
+    spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.searchSpring();
     };
   },
-  // zoomer(x, y, radius = 20 + Math.ceil(Math.random() * 30)) {
-  //   mobs.spawn(x, y, 6, radius, "#ffe2fd");
-  //   let me = mob[mob.length - 1];
-  //   me.trailLength = 20; //required for trails
-  //   me.setupTrail(); //fill trails array up with the current position of mob
-  //   me.trailFill = "#ff00f0";
-  //   me.g = 0.001; //required if using 'gravity'
-  //   me.frictionAir = 0.02;
-  //   me.accelMag = 0.004 * game.accelScale;
-  //   me.memory = 30;
-  //   me.zoomMode = 150;
-  //   me.onHit = function () {
-  //     this.zoomMode = 150;
-  //   };
-  //   me.do = function () {
-  //     this.seePlayerByDistAndLOS();
-  //     this.zoom();
-  //     this.gravity();
-  //   };
-  // },
   hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
     mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
     let me = mob[mob.length - 1];
@@ -329,6 +311,7 @@ const spawn = {
     me.delay = 110;
     me.randomHopFrequency = 50 + Math.floor(Math.random() * 1000);
     me.randomHopCD = game.cycle + me.randomHopFrequency;
+    spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -361,6 +344,7 @@ const spawn = {
     me.frictionAir = 0.022;
     me.lookTorque = 0.0000014;
     me.restitution = 0;
+    spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       //accelerate towards the player after a delay
@@ -464,7 +448,7 @@ const spawn = {
       }
     }
   },
-  suckerBoss(x, y, radius = 20) {
+  suckerBoss(x, y, radius = 25) {
     mobs.spawn(x, y, 12, radius, "#000");
     let me = mob[mob.length - 1];
     me.stroke = "transparent"; //used for drawSneaker
@@ -493,16 +477,11 @@ const spawn = {
         toMe(mob, this.position, this.eventHorizon)
         toMe(bullet, this.position, this.eventHorizon)
 
-
-
-
         //push everything away
-
         // function push(who, pos, range) {
         //   for (let i = 0, len = who.length; i < len; ++i) {
         //     const SUB = Vector.sub(who[i].position, pos)
         //     const DISTANCE = Vector.magnitude(SUB)
-
         //     if (DISTANCE < range) {
         //       const depth = range - DISTANCE
         //       const force = Vector.mult(Vector.normalise(SUB), 30 * who[i].mass / depth)
@@ -515,8 +494,6 @@ const spawn = {
         // push(mob, this.position, this.eventHorizon)
         // push(bullet, this.position, this.eventHorizon)
         // push([player], this.position, this.eventHorizon)
-
-
         // for (let i = 0; i < (game.difficulty - 3); ++i) {
         //   spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 70 * Math.random());
         //   Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -600,7 +577,7 @@ const spawn = {
     me.accelMag = 0.0005 * game.accelScale;
     me.frictionStatic = 0;
     me.friction = 0;
-    if (Math.random() < Math.min(0.2 + (game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
+    spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       this.attraction();
@@ -623,7 +600,7 @@ const spawn = {
     me.onDamage = function () {
       this.laserPos = this.position;
     };
-    // if (Math.random() < Math.min(0.2 + game.difficulty * 0.1, 0.7)) spawn.shield(me, x, y);
+    spawn.shield(me, x, y);
     me.do = function () {
       if (!mech.isBodiesAsleep) {
         this.seePlayerByLookingAt();
@@ -698,6 +675,7 @@ const spawn = {
     me.friction = 0;
     me.delay = 100;
     Matter.Body.rotate(me, Math.PI * 0.1);
+    spawn.shield(me, x, y);
     me.onDamage = function () {
       this.cd = game.cycle + this.delay;
     };
@@ -858,7 +836,7 @@ const spawn = {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
-    Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.0015 + 0.0004 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
     me.stroke = "rgba(255,0,200)"; //used for drawGhost
     me.seeAtDistance2 = 1500000;
@@ -874,7 +852,7 @@ const spawn = {
     // me.memory = 300;
     // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
     me.collisionFilter.mask = cat.player | cat.bullet
-    spawn.shield(me, x, y);
+    spawn.shield(me, x, y, 1);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
@@ -900,30 +878,30 @@ const spawn = {
       x: 0,
       y: 0
     };
-    if (Math.random() < Math.min(0.15 + (game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
+    // spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
       this.fire();
     };
   },
-  shooterBoss(x, y, radius = 85 + Math.ceil(Math.random() * 50)) {
+  shooterBoss(x, y, radius = 130) {
     //boss spawns on skyscraper level
     mobs.spawn(x, y, 3, radius, "rgb(255,70,180)");
     let me = mob[mob.length - 1];
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     me.memory = 240;
-    me.fireFreq = 0.02;
+    me.fireFreq = 0.025;
     me.noseLength = 0;
     me.fireAngle = 0;
     me.accelMag = 0.005 * game.accelScale;
     me.frictionAir = 0.1;
-    me.lookTorque = 0.000005 * (Math.random() > 0.5 ? -1 : 1);
+    me.lookTorque = 0.000007 * (Math.random() > 0.5 ? -1 : 1);
     me.fireDir = {
       x: 0,
       y: 0
     };
-    Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    spawn.shield(me, x, y);
+    Matter.Body.setDensity(me, 0.02 + 0.001 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    // spawn.shield(me, x, y, 1);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
@@ -970,7 +948,7 @@ const spawn = {
         });
       }
     };
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.04, 0.2)) spawn.shield(me, x, y);
+    spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
@@ -1018,8 +996,7 @@ const spawn = {
     me.memory = 200;
     me.laserRange = 500;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
+    spawn.shield(me, x, y, 1);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
@@ -1059,9 +1036,7 @@ const spawn = {
     me.accelMag = 0.002 * game.accelScale;
     me.memory = 20;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    spawn.shield(me, x, y);
-    if (Math.random() < Math.min((game.difficulty - 1) * 0.05, 0.3)) spawn.shield(me, x, y);
-
+    spawn.shield(me, x, y, 1);
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       this.removeCons(); //remove constraint
@@ -1072,46 +1047,57 @@ const spawn = {
       this.attraction();
     };
   },
-  shield(target, x, y, stiffness = 0.4) {
-    if (this.allowShields) {
-      mobs.spawn(x, y, 9, target.radius + 20, "rgba(220,220,255,0.6)");
+  shield(target, x, y, chance = Math.min(0.01 + game.difficulty * 0.01, 0.3)) {
+    if (this.allowShields && Math.random() < chance) {
+      mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
       let me = mob[mob.length - 1];
       me.stroke = "rgb(220,220,255)";
-      Matter.Body.setDensity(me, 0.0001) //very low density to not mess with the original mob's motion
+      Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
       me.shield = true;
       me.collisionFilter.category = cat.mobShield
       me.collisionFilter.mask = cat.bullet;
       consBB[consBB.length] = Constraint.create({
-        //attach shield to last spawned mob
         bodyA: me,
-        bodyB: target,
-        stiffness: stiffness,
+        bodyB: target, //attach shield to target
+        stiffness: 0.4,
         damping: 0.1
       });
       me.onDamage = function () {
         //make sure the mob that owns the shield can tell when damage is done
         this.alertNearByMobs();
+        this.fill = `rgba(220,220,255,${0.3 + 0.6 *this.health})`
       };
       me.leaveBody = false;
       me.dropPowerUp = false;
       me.showHealthBar = false;
+
+      me.shieldTargetID = target.id
+      target.isShielded = true;
+      me.onDeath = function () {
+        //clear isShielded status from target
+        for (let i = 0, len = mob.length; i < len; i++) {
+          if (mob[i].id === this.shieldTargetID) mob[i].isShielded = false;
+        }
+      };
       //swap order of shield and mob, so that mob is behind shield graphically
       mob[mob.length - 1] = mob[mob.length - 2];
       mob[mob.length - 2] = me;
       me.do = function () {};
     }
   },
-  bossShield(nodes, x, y, radius) {
-    mobs.spawn(x, y, 9, radius, "rgba(220,220,255,0.65)");
+  bossShield(targets, x, y, radius) {
+    const nodes = targets.length
+    mobs.spawn(x, y, 9, radius, "rgba(220,220,255,0.9)");
     let me = mob[mob.length - 1];
     me.stroke = "rgb(220,220,255)";
-    Matter.Body.setDensity(me, 0.00005) //very low density to not mess with the original mob's motion
+    Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
     me.frictionAir = 0;
     me.shield = true;
     me.collisionFilter.category = cat.mobShield
     me.collisionFilter.mask = cat.bullet;
-    //constrain to all mob nodes in boss
     for (let i = 0; i < nodes; ++i) {
+      mob[mob.length - i - 2].isShielded = true;
+      //constrain to all mob nodes in boss
       consBB[consBB.length] = Constraint.create({
         bodyA: me,
         bodyB: mob[mob.length - i - 2],
@@ -1120,8 +1106,16 @@ const spawn = {
       });
     }
     me.onDamage = function () {
-      //make sure the mob that owns the shield can tell when damage is done
-      this.alertNearByMobs();
+      this.alertNearByMobs(); //makes sure the mob that owns the shield can tell when damage is done
+      this.fill = `rgba(220,220,255,${0.3 + 0.6 *this.health})`
+    };
+    me.onDeath = function () {
+      //clear isShielded status from target
+      for (let j = 0; j < targets.length; j++) {
+        for (let i = 0, len = mob.length; i < len; i++) {
+          if (mob[i].id === targets[j]) mob[i].isShielded = false;
+        }
+      }
     };
     me.leaveBody = false;
     me.dropPowerUp = false;
@@ -1143,8 +1137,9 @@ const spawn = {
     sideLength = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
     stiffness = Math.random() * 0.03 + 0.005
   ) {
-    this.allowShields = false; //don't want shields on boss mobs
+    this.allowShields = false; //don't want shields on individual boss mobs
     const angle = 2 * Math.PI / nodes
+    let targets = []
     for (let i = 0; i < nodes; ++i) {
       let whoSpawn = spawn;
       if (spawn === "random") {
@@ -1153,6 +1148,7 @@ const spawn = {
         whoSpawn = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       }
       this[whoSpawn](x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
+      targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
     }
     if (Math.random() < 0.3) {
       this.constrain2AdjacentMobs(nodes, stiffness * 2, true);
@@ -1161,8 +1157,7 @@ const spawn = {
     }
     //spawn shield for entire boss
     if (nodes > 2 && Math.random() < 0.998) {
-      this.bossShield(nodes, x, y, sideLength + 2.5 * radius + nodes * 6 - 25);
-      // this.bossShield(nodes, x, y, sideLength / (2 * Math.sin(Math.PI / nodes)));
+      this.bossShield(targets, x, y, sideLength + 2.5 * radius + nodes * 6 - 25);
     }
     this.allowShields = true;
   },
@@ -1176,7 +1171,7 @@ const spawn = {
     l = Math.ceil(Math.random() * 80) + 30,
     stiffness = Math.random() * 0.06 + 0.01
   ) {
-    this.allowShields = false; //don't want shields on boss mobs
+    this.allowShields = false; //don't want shields on individual boss mobs
     for (let i = 0; i < nodes; ++i) {
       let whoSpawn = spawn;
       if (spawn === "random") {

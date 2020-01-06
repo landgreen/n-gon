@@ -932,17 +932,18 @@ const mobs = {
         }
       },
       damage(dmg) {
-        dmg /= Math.sqrt(this.mass)
-        if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
-        if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
-        if (dmg !== Infinity) {
-          if (b.modEnergySiphon) mech.fieldMeter += Math.min(this.health, dmg) * b.modEnergySiphon
-          if (b.modHealthDrain) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
+        if (!this.isShielded) {
+          dmg /= Math.sqrt(this.mass)
+          if (this.shield) dmg *= 0.04
+          if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
+          if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
+          if (b.modEnergySiphon && dmg !== Infinity) mech.fieldMeter += Math.min(this.health, dmg) * b.modEnergySiphon
+          if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
+          this.health -= dmg
+          //this.fill = this.color + this.health + ')';
+          this.onDamage(this); //custom damage effects
+          if (this.health < 0.05) this.death();
         }
-        this.health -= dmg
-        //this.fill = this.color + this.health + ')';
-        if (this.health < 0.05) this.death();
-        this.onDamage(this); //custom damage effects
       },
       onDamage() {
         // a placeholder for custom effects on mob damage
