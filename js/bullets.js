@@ -726,7 +726,7 @@ const b = {
       restitution: 1,
       dmg: 0.13, //damage done in addition to the damage from momentum
       lookFrequency: 83 + Math.floor(41 * Math.random()),
-      endCycle: game.cycle + Math.floor((1080 + 360 * Math.random()) * b.isModBulletsLastLonger),
+      endCycle: game.cycle + Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1712,7 +1712,7 @@ const b = {
       name: "drones", //12
       description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
       ammo: 0,
-      ammoPack: 8,
+      ammoPack: 9,
       have: false,
       isStarterGun: true,
       fire() {
@@ -2446,9 +2446,9 @@ const b = {
         }
 
         //use energy to explode
-        const energy = 0.25 * Math.min(mech.fieldMeter, 1.5)
+        const energy = 0.3 * Math.min(mech.fieldMeter, 1.75)
         mech.fieldMeter -= energy
-        if (best.who) b.explosion(path[1], 1200 * energy)
+        if (best.who) b.explosion(path[1], 950 * energy)
         mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
 
         //draw laser beam
