@@ -169,8 +169,8 @@ const b = {
       }
     },
     {
-      name: "electrostatic repulsion", //11
-      description: "<strong>immune</strong> to harm from <strong>collisions</strong> for +2 seconds<br>activates after being <strong>harmed</strong> from a collision",
+      name: "Pauli exclusion", //11
+      description: "unable to <strong>collide</strong> with enemies for +2 seconds<br>activates after being <strong>harmed</strong> from a collision",
       maxCount: 1,
       count: 0,
       effect() {

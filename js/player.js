@@ -697,9 +697,11 @@ const mech = {
       mech.isHolding = false;
       mech.throwCharge = 0;
       mech.definePlayerMass()
-      mech.holdingTarget = null;
-      mech.holdingTarget.collisionFilter.category = cat.body;
-      mech.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+      if (mech.holdingTarget) {
+        mech.holdingTarget.collisionFilter.category = cat.body;
+        mech.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        mech.holdingTarget = null;
+      }
     }
   },
   definePlayerMass(mass = mech.defaultMass) {
