@@ -849,7 +849,6 @@ const level = {
     spawn.bodyRect(1425, -1110, 115, 25, 0.9); //block on far left building
     spawn.bodyRect(1540, -1110, 300, 25, 0.9); //block on far left building
 
-    if (game.difficulty > 2) spawn.shooterBoss(2200, -1300);
     spawn.randomSmallMob(1300, -70);
     spawn.randomSmallMob(3200, -100);
     spawn.randomSmallMob(4450, -100);
@@ -867,6 +866,7 @@ const level = {
     spawn.randomMob(-100, -900, -0.2);
     spawn.randomBoss(3700, -1500, 0.4);
     spawn.randomBoss(1700, -900, 0.4);
+    if (game.difficulty > 3) spawn.shooterBoss(2200, -1300);
   },
   highrise() {
     level.defaultZoom = 1500
@@ -1009,8 +1009,6 @@ const level = {
     spawn.bodyRect(-3570, -1800, 50, 50);
     spawn.bodyRect(-2970, -2250, 50, 50);
 
-    if (game.difficulty < 4) spawn.bodyRect(-3760, -2400, 50, 50);
-
     spawn.bodyRect(-3080, -2250, 40, 40);
     spawn.bodyRect(-3420, -650, 50, 50);
 
@@ -1045,6 +1043,7 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
+    if (game.difficulty < 4) spawn.bodyRect(-3760, -2400, 50, 50);
   },
   warehouse() {
     level.defaultZoom = 1300
@@ -1344,8 +1343,24 @@ const level = {
     spawn.mapRect(3000, -2000 * 0.25, 2000 - 300, 50); //1st floor
     spawn.spawnStairs(3000 + 2000 - 50, 0, 4, 250, 350, true); //stairs ground
 
-    // tether ball
-    if (game.difficulty > 2) {
+    spawn.randomSmallMob(4575, -560, 1);
+    spawn.randomSmallMob(1315, -880, 1);
+    spawn.randomSmallMob(800, -600);
+    spawn.randomSmallMob(-100, -1600);
+    spawn.randomMob(4100, -225, 0.8);
+    spawn.randomMob(-250, -700, 0.8);
+    spawn.randomMob(4500, -225, 0.15);
+    spawn.randomMob(3250, -225, 0.15);
+    spawn.randomMob(-100, -225, 0.1);
+    spawn.randomMob(1150, -225, 0.15);
+    spawn.randomMob(2000, -225, 0.15);
+    spawn.randomMob(450, -225, 0.15);
+    spawn.randomMob(100, -1200, 1);
+    spawn.randomMob(950, -1150, -0.1);
+    spawn.randomBoss(1800, -800, -0.2);
+    spawn.randomBoss(4150, -1000, 0.6);
+
+    if (game.difficulty > 2) { // tether ball
       level.fillBG.push({
         x: 2495,
         y: -500,
@@ -1365,23 +1380,6 @@ const level = {
       //chance to spawn a ring of exploding mobs around this boss
       if (game.difficulty > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
     }
-
-    spawn.randomSmallMob(4575, -560, 1);
-    spawn.randomSmallMob(1315, -880, 1);
-    spawn.randomSmallMob(800, -600);
-    spawn.randomSmallMob(-100, -1600);
-    spawn.randomMob(4100, -225, 0.8);
-    spawn.randomMob(-250, -700, 0.8);
-    spawn.randomMob(4500, -225, 0.15);
-    spawn.randomMob(3250, -225, 0.15);
-    spawn.randomMob(-100, -225, 0.1);
-    spawn.randomMob(1150, -225, 0.15);
-    spawn.randomMob(2000, -225, 0.15);
-    spawn.randomMob(450, -225, 0.15);
-    spawn.randomMob(100, -1200, 1);
-    spawn.randomMob(950, -1150, -0.1);
-    spawn.randomBoss(1800, -800, -0.2);
-    spawn.randomBoss(4150, -1000, 0.6);
   },
   //*****************************************************************************************************************
   //*****************************************************************************************************************

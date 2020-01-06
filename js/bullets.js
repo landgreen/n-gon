@@ -363,7 +363,7 @@ const b = {
       }
     }
   },
-  bulletActions() {
+  bulletActions() { //run in main loop
     //remove bullet if at end cycle for that bullet
     let i = bullet.length;
     while (i--) {
@@ -961,7 +961,7 @@ const b = {
       name: "shotgun", //1
       description: "fire a <strong>burst</strong> of short range bullets<br><em>crouch to reduce recoil</em>",
       ammo: 0,
-      ammoPack: 5,
+      ammoPack: 6,
       have: false,
       isStarterGun: true,
       fire() {
@@ -997,7 +997,7 @@ const b = {
       name: "super balls", //2
       description: "fire <strong>five</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 5,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1069,7 +1069,7 @@ const b = {
       name: "wave beam", //4
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
       ammo: 0,
-      ammoPack: 30,
+      ammoPack: 32,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1084,7 +1084,7 @@ const b = {
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.2, //damage done in addition to the damage from momentum
+          dmg: 0.3, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
@@ -1420,7 +1420,7 @@ const b = {
       name: "flak", //7
       description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
       ammo: 0,
-      ammoPack: 5,
+      ammoPack: 6,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1473,10 +1473,9 @@ const b = {
         bullet[me].totalCycles = 100;
         bullet[me].endCycle = game.cycle + Math.floor(mech.crouch ? 120 : 80);
         bullet[me].restitution = 0.5;
-        bullet[me].explodeRad = 290;
+        bullet[me].explodeRad = 310;
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].minDmgSpeed = 1;
-        Matter.Body.setDensity(bullet[me], 0.0002);
         bullet[me].onDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
         };
@@ -1598,7 +1597,7 @@ const b = {
       name: "ferro frag", //10
       description: "fire a <strong>grenade</strong> that ejects nails<br>nails are magnetically <strong>attracted</strong> to enemies",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: 4,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1713,7 +1712,7 @@ const b = {
       name: "drones", //12
       description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
       ammo: 0,
-      ammoPack: 5,
+      ammoPack: 8,
       have: false,
       isStarterGun: true,
       fire() {

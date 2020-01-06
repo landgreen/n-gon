@@ -79,7 +79,7 @@ const powerUps = {
         mech.fieldMeter = mech.fieldEnergyMax;
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       } else {
-        let ammo = Math.ceil((target.ammoPack * (1 + 0.05 * Math.random())));
+        let ammo = Math.ceil((target.ammoPack * (1 + 0.1 * Math.random())));
         if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
         target.ammo += ammo;
         game.updateGunHUD();
@@ -207,7 +207,7 @@ const powerUps = {
     game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
-    if (Math.random() * Math.random() - 0.25 > Math.sqrt(mech.health) || Math.random() < 0.04) { //spawn heal chance is higher at low health
+    if (Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) || Math.random() < 0.035) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "heal");
       return;
@@ -222,7 +222,7 @@ const powerUps = {
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0031 * (10 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 7
+    if (Math.random() < 0.0032 * (10 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 7
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod");
       return;
