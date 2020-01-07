@@ -1646,7 +1646,7 @@ const b = {
                 bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
                 Matter.Body.setVelocity(bullet[me], velocity);
                 World.add(engine.world, bullet[me]); //add bullet to world
-                bullet[me].endCycle = game.cycle + 60 + 15 * Math.random();
+                bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
                 bullet[me].dmg = 0.8
                 bullet[me].do = function () {};
               }
