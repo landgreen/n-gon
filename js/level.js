@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(15)
+      b.giveGuns(10)
       // mech.setField(3)
       // b.giveMod(16);
 
@@ -51,7 +51,7 @@ const level = {
       game.lookFreqScale *= 0.97 //mob cycles between looks decreases each level
       game.CDScale *= 0.97 //mob CD time decreases each level
     }
-    game.healScale = 1 / (1 + game.difficulty * 0.06) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
+    game.healScale = 1 / (1 + game.difficulty * 0.065) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
@@ -64,7 +64,7 @@ const level = {
       game.CDScale /= 0.97 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 1;
-    game.healScale = 1 / (1 + game.difficulty * 0.06)
+    game.healScale = 1 / (1 + game.difficulty * 0.065)
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
