@@ -1597,67 +1597,36 @@ const b = {
       name: "mine", //10
       description: "drop a proximity <strong>mine</strong> that ejects nails<br><em>arms after being still for 1 second</em>",
       ammo: 0,
-      ammoPack: 9,
+      ammoPack: 8,
       have: false,
       isStarterGun: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 40 * b.modBulletSize, 12 * b.modBulletSize, b.fireAttributes(0));
-        b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 23 : 5, dir, me); //cd , speed
+        bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 45 * b.modBulletSize, 16 * b.modBulletSize, {
+          angle: 0,
+          friction: 0.3,
+          frictionAir: 0,
+          dmg: 0, //damage done in addition to the damage from momentum
+          classType: "bullet",
+          collisionFilter: {
+            category: cat.bullet,
+            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
+          },
+          minDmgSpeed: 5,
+          onDmg() {},
+          onEnd() {}
+        });
+        b.fireProps(mech.crouch ? 40 : 20, mech.crouch ? 24 : 7, dir, me); //cd , speed
         bullet[me].torque += bullet[me].inertia * 0.0001 * (0.5 - Math.random())
         bullet[me].endCycle = game.cycle + 1800 + 360 * Math.random();
         bullet[me].cycle = 0
-        bullet[me].restitution = 0.1;
+        bullet[me].restitution = 0;
         bullet[me].lookFrequency = 37 + Math.floor(37 * Math.random())
-        bullet[me].onEnd = function () {
-          if (!mech.isBodiesAsleep) {
-            const targets = [] //target nearby mobs
-            for (let i = 0, len = mob.length; i < len; i++) {
-              if (mob[i].dropPowerUp) {
-                const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                if (dist < 2000000 && //1400*1400
-                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                  Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                  targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)))
-                }
-              }
-            }
-            for (let i = 0; i < 14; i++) {
-              const speed = 55 + 10 * Math.random()
-              if (targets.length > 0) { // aim near a random target
-                const index = Math.floor(Math.random() * targets.length)
-                const SPREAD = 150 / targets.length
-                const WHERE = {
-                  x: targets[index].x + SPREAD * (Math.random() - 0.5),
-                  y: targets[index].y + SPREAD * (Math.random() - 0.5)
-                }
-                needle(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed))
-              } else { // aim in random direction
-                const ANGLE = 2 * Math.PI * Math.random()
-                needle(this.position, {
-                  x: speed * Math.cos(ANGLE),
-                  y: speed * Math.sin(ANGLE)
-                })
-              }
-
-              function needle(pos, velocity) {
-                const me = bullet.length;
-                bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
-                Matter.Body.setVelocity(bullet[me], velocity);
-                World.add(engine.world, bullet[me]); //add bullet to world
-                bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
-                bullet[me].dmg = 0.8
-                bullet[me].do = function () {};
-              }
-            }
-          }
-        }
         bullet[me].range = 700
         bullet[me].do = function () {
           this.force.y += this.mass * 0.002; //extra gravity
 
-          if (this.speed < 1 && !mech.isBodiesAsleep) this.cycle++
           if (this.cycle > 10) {
             ctx.setLineDash([40, 100]);
             ctx.lineWidth = 1
@@ -1666,23 +1635,79 @@ const b = {
             ctx.arc(this.position.x, this.position.y, 650, 0, 2 * Math.PI);
             ctx.stroke();
             ctx.setLineDash([0, 0]);
+            this.cycle++
+          } else if (this.speed < 1 && !mech.isBodiesAsleep) {
+            this.cycle++
           }
-          if (this.cycle > 40) {
 
-            // this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobShield | cat.player
+          if (this.cycle > 40) {
             this.do = function () {
               this.force.y += this.mass * 0.002; //extra gravity
               if (!(game.cycle % this.lookFrequency)) { //find mob targets
+                const pos = {
+                  x: this.position.x,
+                  y: this.position.y - 8 //look from a bit higher to see things even with debris
+                }
+
                 for (let i = 0, len = mob.length; i < len; ++i) {
-                  const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                  const dist = Vector.magnitudeSquared(Vector.sub(pos, mob[i].position));
                   if (dist < 500000 && //range2 = 700*700
                     mob[i].dropPowerUp &&
-                    Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                    Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                    Matter.Query.ray(map, pos, mob[i].position).length === 0 &&
+                    Matter.Query.ray(body, pos, mob[i].position).length === 0) {
                     this.endCycle = 0 //end life if mob is near and visible
                   }
                 }
               }
+            }
+          }
+        }
+        bullet[me].onEnd = function () {
+          const pos = {
+            x: this.position.x,
+            y: this.position.y - 8 //aim from a bit higher to hit things even with debris
+          }
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+          ctx.fill();
+          const targets = [] //target nearby mobs
+          for (let i = 0, len = mob.length; i < len; i++) {
+            if (mob[i].dropPowerUp) {
+              const dist = Vector.magnitudeSquared(Vector.sub(pos, mob[i].position));
+              if (dist < 1440000 && //1200*1200
+                Matter.Query.ray(map, pos, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, pos, mob[i].position).length === 0) {
+                //predict where the mob will be in a few cycles
+                targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)))
+              }
+            }
+          }
+          for (let i = 0; i < 14; i++) {
+            const speed = 55 + 10 * Math.random()
+            if (targets.length > 0) { // aim near a random target in array
+              const index = Math.floor(Math.random() * targets.length)
+              const SPREAD = 150 / targets.length
+              const WHERE = {
+                x: targets[index].x + SPREAD * (Math.random() - 0.5),
+                y: targets[index].y + SPREAD * (Math.random() - 0.5)
+              }
+              needle(pos, Vector.mult(Vector.normalise(Vector.sub(WHERE, pos)), speed))
+            } else { // aim in random direction
+              const ANGLE = 2 * Math.PI * Math.random()
+              needle(pos, {
+                x: speed * Math.cos(ANGLE),
+                y: speed * Math.sin(ANGLE)
+              })
+            }
+
+            function needle(pos, velocity) {
+              const me = bullet.length;
+              bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * b.modBulletSize, 2 * b.modBulletSize, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
+              Matter.Body.setVelocity(bullet[me], velocity);
+              World.add(engine.world, bullet[me]); //add bullet to world
+              bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
+              bullet[me].dmg = 0.8
+              bullet[me].do = function () {};
             }
           }
         }

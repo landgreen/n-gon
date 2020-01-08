@@ -432,6 +432,7 @@ const game = {
     b.inventory = []; //removes guns and ammo  
     for (let i = 0, len = b.guns.length; i < len; ++i) {
       b.guns[i].count = 0;
+      b.guns[i].have = false;
       if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
     }
     b.activeGun = null;
