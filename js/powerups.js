@@ -270,7 +270,9 @@ const powerUps = {
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-    if (b.inventory.length < 2) {
+    if (b.modCount < 1) {
+      powerUps.spawn(x, y, "mod", false); //starting gun
+    } else if (b.inventory.length < 2) {
       powerUps.spawn(x, y, "gun", false); //starting gun
     } else {
       powerUps.spawnRandomPowerUp(x, y);

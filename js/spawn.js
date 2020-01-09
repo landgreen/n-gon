@@ -1581,7 +1581,7 @@ const spawn = {
       color: "#f0f0f3"
     });
   },
-  debris(x, y, width, number = Math.floor(3 + Math.random() * 11)) {
+  debris(x, y, width, number = Math.floor(2 + Math.random() * 9)) {
     for (let i = 0; i < number; ++i) {
       if (Math.random() < 0.15) {
         powerUps.chooseRandomPowerUp(x + Math.random() * width, y);

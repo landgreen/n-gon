@@ -1020,7 +1020,7 @@ const mobs = {
           body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
 
           //large mobs or too many bodies go intangible and fall until removed from game to help performance
-          if (body[len].mass > 10 || 40 + 30 * Math.random() < body.length) {
+          if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
             body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
           }
           body[len].classType = "body";

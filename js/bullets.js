@@ -1627,19 +1627,16 @@ const b = {
         bullet[me].do = function () {
           this.force.y += this.mass * 0.002; //extra gravity
 
-          if (this.cycle > 10) {
-            ctx.setLineDash([40, 100]);
-            ctx.lineWidth = 1
-            ctx.strokeStyle = "#357";
-            ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, 650, 0, 2 * Math.PI);
-            ctx.stroke();
-            ctx.setLineDash([0, 0]);
-            this.cycle++
-          } else if (this.speed < 1 && !mech.isBodiesAsleep) {
-            this.cycle++
+          ctx.beginPath(); //draw block as grey
+          ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+          for (let j = 1; j < this.vertices.length; j += 1) {
+            ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
           }
+          ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+          ctx.fillStyle = "#457";
+          ctx.fill();
 
+          if (this.speed < 1 && !mech.isBodiesAsleep) this.cycle++
           if (this.cycle > 40) {
             this.do = function () {
               this.force.y += this.mass * 0.002; //extra gravity

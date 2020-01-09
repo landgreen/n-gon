@@ -21,6 +21,7 @@ const level = {
       level.intro(); //starting level
       // level.testingMap();
       // level.bosses();
+      // level.skyscrapers();
       // level.aerie();
       // level.rooftops();
       // level.warehouse();
@@ -394,7 +395,7 @@ const level = {
     level.enter.y = mech.spawnPos.y + 20;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
-    spawn.debris(1650, -1800, 3800, 20); //20 debris per level
+    spawn.debris(1650, -1800, 3800, 16); //16 debris per level
     powerUps.spawnStartingPowerUps(2450, -1675);
 
     //foreground
@@ -544,7 +545,7 @@ const level = {
     level.defaultZoom = 2100
     game.zoomTransition(level.defaultZoom)
 
-    const backwards = (Math.random() < 0.75) ? false : true;
+    const backwards = (Math.random() < 0.25 && game.difficulty > 8) ? true : false;
     if (backwards) {
       mech.setPosToSpawn(4000, -3300); //normal spawn
       level.exit.x = -100;
@@ -561,10 +562,10 @@ const level = {
     level.enter.y = mech.spawnPos.y + 20;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     powerUps.spawnStartingPowerUps(1075, -550);
-    spawn.debris(-250, 50, 1650, 2); //20 debris per level
-    spawn.debris(2475, 0, 750, 2); //20 debris per level
-    spawn.debris(3450, 0, 2000, 20); //20 debris per level
-    spawn.debris(3500, -2350, 1500, 2); //20 debris per level
+    spawn.debris(-250, 50, 1650, 2); //16 debris per level
+    spawn.debris(2475, 0, 750, 2); //16 debris per level
+    spawn.debris(3450, 0, 2000, 16); //16 debris per level
+    spawn.debris(3500, -2350, 1500, 2); //16 debris per level
     document.body.style.backgroundColor = "#dcdcde";
 
     //foreground
@@ -730,7 +731,7 @@ const level = {
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     powerUps.spawnStartingPowerUps(1475, -1175);
-    spawn.debris(0, -2200, 4500, 20); //20 debris per level
+    spawn.debris(750, -2200, 3700, 16); //16 debris per level
     document.body.style.backgroundColor = "#dcdcde";
 
     //foreground
@@ -885,10 +886,10 @@ const level = {
     // spawn.laserZone(-550, -350, 10, 400, 0.3)
     // spawn.deathQuery(-550, -350, 50, 400)
 
-    // spawn.debris(-3950, -2575, 1050, 4); //20 debris per level
-    spawn.debris(-2325, -1825, 2400); //20 debris per level
-    spawn.debris(-2625, -600, 600, 6); //20 debris per level
-    spawn.debris(-2000, -60, 1200, 6); //20 debris per level
+    // spawn.debris(-3950, -2575, 1050, 4); //16 debris per level
+    spawn.debris(-2325, -1825, 2400); //16 debris per level
+    spawn.debris(-2625, -600, 600, 5); //16 debris per level
+    spawn.debris(-2000, -60, 1200, 5); //16 debris per level
     // if (!game.difficulty) powerUps.spawn(2450, -1675, "gun", false);
     //background
     level.fillBG.push({
@@ -1059,9 +1060,9 @@ const level = {
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     //level.addQueryRegion(-600, -250, 180, 420, "death", [[player]],{});
 
-    spawn.debris(-2250, 1330, 3000, 7); //20 debris per level
-    spawn.debris(-3000, -800, 3280, 7); //20 debris per level
-    spawn.debris(-1400, 410, 2300, 6); //20 debris per level
+    spawn.debris(-2250, 1330, 3000, 6); //16 debris per level
+    spawn.debris(-3000, -800, 3280, 6); //16 debris per level
+    spawn.debris(-1400, 410, 2300, 5); //16 debris per level
     powerUps.spawnStartingPowerUps(25, 500);
 
     //foreground
@@ -1284,10 +1285,10 @@ const level = {
     //mech.setPosToSpawn(600, -1200); //normal spawn
     //mech.setPosToSpawn(525, -150); //ground first building
     //mech.setPosToSpawn(3150, -700); //near exit spawn
-    spawn.debris(-300, -200, 1000, 5); //ground debris //20 debris per level
-    spawn.debris(3500, -200, 800, 5); //ground debris //20 debris per level
-    spawn.debris(-300, -650, 1200, 5); //1st floor debris //20 debris per level
-    spawn.debris(3500, -650, 800, 5); //1st floor debris //20 debris per level
+    spawn.debris(-300, -200, 1000, 4); //ground debris //16 debris per level
+    spawn.debris(3500, -200, 800, 4); //ground debris //16 debris per level
+    spawn.debris(-300, -650, 1200, 4); //1st floor debris //16 debris per level
+    spawn.debris(3500, -650, 800, 5); //1st floor debris //16 debris per level
     powerUps.spawnStartingPowerUps(-525, -700);
 
     spawn.mapRect(-600, 25, 5600, 300); //ground
