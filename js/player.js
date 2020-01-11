@@ -311,8 +311,10 @@ const mech = {
           //find what mods I don't have
           let options = [];
           for (let i = 0, len = b.mods.length; i < len; i++) {
-            //can't get quantum immortality again 
-            if (b.mods[i].name !== "quantum immortality" && b.mods[i].count < b.mods[i].maxCount) options.push(i);
+            //can't get quantum immortality or multiverse
+            if (b.mods[i].name !== "quantum immortality" &&
+              b.mods[i].name !== "level II multiverse" &&
+              b.mods[i].count < b.mods[i].maxCount) options.push(i);
           }
           //add a new mod
           if (options.length > 0) {
@@ -439,11 +441,8 @@ const mech = {
   damage(dmg) {
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
-        dmg *= 0.93
+        dmg *= 0.9
       }
-    }
-    if (b.modPiezo) {
-      mech.fieldMeter += dmg * b.modPiezo
     }
     mech.health -= dmg;
     if (mech.health < 0) {

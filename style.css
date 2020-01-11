@@ -330,6 +330,13 @@ em {
   letter-spacing: 1px;
 }
 
+.color-m {
+  color: rgb(115, 61, 202);
+  letter-spacing: 1px;
+}
+
+
+
 .faded {
   opacity: 0.7;
   font-size: 90%;

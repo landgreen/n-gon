@@ -74,9 +74,21 @@ function playerHeadCheck(event) {
   }
 }
 
-function mobCollisionChecks(event) {
+function collisionChecks(event) {
   const pairs = event.pairs;
   for (let i = 0, j = pairs.length; i != j; i++) {
+
+    // //map + bullet collisions
+    // if (pairs[i].bodyA.collisionFilter.category === cat.map && pairs[i].bodyB.collisionFilter.category === cat.bullet) {
+    //   collideBulletStatic(pairs[i].bodyB)
+    // } else if (pairs[i].bodyB.collisionFilter.category === cat.map && pairs[i].bodyA.collisionFilter.category === cat.bullet) {
+    //   collideBulletStatic(pairs[i].bodyA)
+    // }
+    // //triggers when the bullets hits something static
+    // function collideBulletStatic(obj, speedThreshold = 12, massThreshold = 2) {
+    //   if (obj.onWallHit) obj.onWallHit();
+    // }
+
 
     //body + player collision
     if (game.isBodyDamage) {
@@ -126,6 +138,7 @@ function mobCollisionChecks(event) {
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
               if (mob[k].onHit) mob[k].onHit(k);
+              mech.fieldMeter += b.modPiezo
               if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
                 mob[k].death();
                 game.drawList.push({
@@ -205,7 +218,7 @@ function mobCollisionChecks(event) {
 Events.on(engine, "collisionStart", function (event) {
   playerOnGroundCheck(event);
   playerHeadCheck(event);
-  mobCollisionChecks(event);
+  collisionChecks(event);
 });
 Events.on(engine, "collisionActive", function (event) {
   playerOnGroundCheck(event);

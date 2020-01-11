@@ -2,12 +2,30 @@
 /* TODO:  *******************************************
 *****************************************************
 
-add new power up class:  rerolls
-  let you repopulate a power up selection menu
+add setting for random drops instead of choosing
+
+mines: move targeting position to be perpendicular to stuck wall
+mines change shape of mine (maybe a octagon?)
+mines: collide with bots
+  probably don't have to fix...
+mines: add high friction, like vacuum bomb and trigger static mode after not moving for a bit
+  no need to watch collisions
+
+rework custom mode
+  custom mode grey out mods that are bad, like selection based mods
+  enable recursive mods
+  remove 5 mod cap on custom mode
+
+change nail-bot's movement
+  maybe have it move in a circle around player?
+    high friction very high acceleration towards circle location
+
+add mouse constraint in testing mode
+  https://github.com/liabru/matter-js/blob/master/examples/events.js
 
 weekly random challenge where everyone playing each week gets the same random setup.
   The randomness would be determined by the date so it would sync everyone.
-  powerups still drop, but the drops are determined by a preset list that changes each week.
+  power ups still drop, but the drops are determined by a preset list that changes each week.
 
 mod: do something at the end of each level
   heal to full
@@ -18,27 +36,9 @@ mod: do something at the end of each level
     take no damage
     don't shoot
 
-selection options for field to stay with current
-
-custom mode grey out mods that are bad, like selection based mods
-  not important
-
-custom mode can't use recursive mods
-
-field graphics too dark at high energy
-  not important
-
 rewrite pause as a change to the main loop
   not important
   like testing loop
-
-game setting for slower computers
-  fewer blocks
-  fewer debris
-  fewer mobs
-
-mod: gain energy after taking damage
-  use piezoelectric name  (already used)
 
 mod: ground stomp on enterLand()
 
@@ -89,7 +89,7 @@ new map with repeating endlessness
     
 field power up effects
   field allows player to hold and throw living mobs
-    of hack mobs
+    and hack mobs
 
 give mobs more animal-like behaviors
   like rain world
