@@ -213,9 +213,7 @@ const game = {
   },
   switchGun() {
     if (b.modNoAmmo) b.modNoAmmo = 1 //this prevents hacking the mod by switching guns
-    // if (b.guns[b.activeGun].switchOff) b.guns[b.activeGun].switchOff(); //run code when switching away from a gun
     b.activeGun = b.inventory[b.inventoryGun];
-    // if (b.guns[b.activeGun].switchOn) b.guns[b.activeGun].switchOn(); //run code when switching to a new gun
     game.updateGunHUD();
     game.boldActiveGunHUD();
     // mech.drop();
@@ -437,7 +435,6 @@ const game = {
       b.guns[i].have = false;
       if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
     }
-    // if (b.activeGun && b.guns[b.activeGun].switchOff) b.guns[b.activeGun].switchOff(); //run code when switching away from a gun
     b.activeGun = null;
     b.setModDefaults(); //remove mods
     game.updateModHUD();

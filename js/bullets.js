@@ -1057,9 +1057,7 @@ const b = {
       gun = options[Math.floor(Math.random() * options.length)]
     }
     if (gun === "all") {
-      if (b.guns[b.activeGun].switchOff) b.guns[b.activeGun].switchOff(); //run code when switching away from a gun
       b.activeGun = 0;
-      if (b.guns[b.activeGun].switchOn) b.guns[b.activeGun].switchOn(); //run code when switching to a new gun
       b.inventoryGun = 0;
       for (let i = 0; i < b.guns.length; i++) {
         b.inventory[i] = i;
@@ -1069,7 +1067,6 @@ const b = {
     } else {
       if (!b.guns[gun].have) b.inventory.push(gun);
       if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
-      if (b.guns[b.activeGun].switchOn) b.guns[b.activeGun].switchOn(); //run code when switching to a new gun
       b.guns[gun].have = true;
       b.guns[gun].ammo = b.guns[gun].ammoPack * ammoPacks;
     }
@@ -1813,7 +1810,12 @@ const b = {
             for (let i = 0; i < collide.length; i++) {
               if (collide[i].bodyA.collisionFilter.category === cat.map || collide[i].bodyB.collisionFilter.category === cat.map) {
                 this.seeFrom = Vector.add(this.position, Vector.mult(collide[i].normal, -20)) //find the location 20 pixels perpendicular to the map
-                Matter.Body.setStatic(this, true)
+                // console.log()
+                const angle = Matter.Vector.angle(collide[i].normal, {
+                  x: 1,
+                  y: 0
+                })
+                if (angle > -0.1) Matter.Body.setStatic(this, true)
                 this.arm();
               }
             }
