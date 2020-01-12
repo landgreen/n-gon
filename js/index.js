@@ -139,12 +139,6 @@ if (localSettings) {
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 }
 
-
-
-
-
-
-
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
 const cat = {
@@ -158,66 +152,66 @@ const cat = {
   mobShield: 0x10000000,
 }
 
-
 //build build grid display
 const build = {
   isShowingBuilds: false,
   list: [],
   choosePowerUp(who, index, type) {
-    //check if matching a current power up
-    // if (type === "field" || type === "gun") {
-    for (let i = 0; i < build.list.length; i++) {
-      if (build.list[i].index === index && build.list[i].type === type) { //if already click, toggle off
-        build.list.splice(i, 1);
-        who.style.backgroundColor = "#fff"
-        return
-      }
-    }
-    //check if trying to get a second field
-    if (type === "field") {
+    if (type === "field" || type === "gun") {
+      //if already click, toggle off
       for (let i = 0; i < build.list.length; i++) {
-        if (build.list[i].type === "field") { //if already click, toggle off
-          build.list[i].who.style.backgroundColor = "#fff"
+        if (build.list[i].index === index && build.list[i].type === type) {
           build.list.splice(i, 1);
+          who.style.backgroundColor = "#fff"
+          return
         }
       }
-    }
-    // } else { //type is mod
-
-    //   //count each mod type to check for recursion caps
-    //   let counts = []
-    //   for (let i = 0; i < build.list.length; i++) {
-    //     if (build.list[i].type === "mod") {
-    //       if (!counts[build.list[i].index]) {
-    //         counts[build.list[i].index] = 1
-    //       } else {
-    //         counts[build.list[i].index] = counts[build.list[i].index] + 1
-    //       }
-    //     }
-    //   }
-
-    //   for (let i = 0; i < build.list.length; i++) {
-    //     //if above max count, toggle off
-    //     if (build.list[i].index === index && build.list[i].type === type &&
-    //       counts[index] >= b.mods[index].maxCount) {
-    //       //remove all versions of mod
-
-
-    //       who.style.backgroundColor = "#fff"
-    //       return
-    //     }
-    //   }
-    // }
-
-    if (build.list.length < 5) { //add to build array
+      //check if trying to get a second field
+      if (type === "field") {
+        for (let i = 0; i < build.list.length; i++) {
+          if (build.list[i].type === "field") { //if already click, toggle off
+            build.list[i].who.style.backgroundColor = "#fff"
+            build.list.splice(i, 1);
+          }
+        }
+      }
       who.style.backgroundColor = "#919ba8" //"#868f9a"
       build.list[build.list.length] = {
         who: who,
         index: index,
         type: type,
       }
+    } else if (type === "mod") {
+      if (who.style.backgroundColor !== "#919ba8") who.style.backgroundColor = "#919ba8" //"#868f9a"
+      //if already clicked graphically indicate recursive clicks
+      let count = 0
+      for (let i = 0; i < build.list.length; i++) {
+        if (build.list[i].type === "mod" && build.list[i].index === index) {
+          count++
+        }
+      }
+      if (count < b.mods[index].maxCount) {
+        //add mod to build list
+        build.list[build.list.length] = {
+          who: who,
+          index: index,
+          type: type,
+        }
+        count++
+        //display mod count in grid box text
+        if (count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${count}x)</div> ${b.mods[index].description}`
+      } else {
+        //when above the mod limit remove all of that mod
+        for (let i = build.list.length - 1; i > -1; i--) {
+          if (build.list[i].index === index && build.list[i].type === type) {
+            build.list.splice(i, 1);
+          }
+        }
+        //and reset the text
+        who.style.backgroundColor = "#fff"
+        who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
+      }
     }
-    console.log(build.list)
   },
   removeMod(index) {
     for (let i = build.list.length - 1; i > -1; i--) {
@@ -228,7 +222,8 @@ const build = {
     spawn.setSpawnList();
     spawn.setSpawnList(); //gives random mobs,  not starter
     game.startGame();
-    game.difficulty = 6;
+    level.difficultyIncrease(build.list.length * game.difficultyMode)
+
     level.isBuildRun = true;
     for (let i = 0; i < build.list.length; i++) {
       if (build.list[i].type === "field") {
@@ -252,17 +247,17 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.getElementById("info").style.display = 'inline'
   } else {
     build.list = []
-    // let text = '<p>choose up to 5 powers<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
+    // let text = '<p>The difficulty increases by one level for each power up you choose.<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
     let text =
       `<div style="display: flex; justify-content: center; align-items: center;">
-        <svg class="SVG-button" onclick="build.startBuildRun()" width="90" height="40">
+        <svg class="SVG-button" onclick="build.startBuildRun()" width="90" height="45">
           <g stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Ariel, sans-serif">
-            <text x="15" y="31">start</text>
+            <text x="15" y="32">start</text>
           </g>
         </svg>
       </div>
-      <div class="build-grid-module" style="font-size: 1.05em; line-height: 170%;">
-        Choose five power ups.<br>Click start to begin.
+      <div class="build-grid-module" style="font-size: 1.00em; line-height: 175%;">
+      each power up you select will increase the starting level by one
       </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
@@ -281,6 +276,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.getElementById("info").style.display = 'none'
   }
 });
+
 
 //set up canvas
 var canvas = document.getElementById("canvas");
