@@ -104,24 +104,22 @@ const b = {
       count: 0,
       effect() {
         b.isModFarAwayDmg = true; //used in mob.damage()
-
-        game.drawList.push({ //draw range
-          //add dmg to draw queue
-          x: player.position.x,
-          y: player.position.y,
-          radius: 3000,
-          color: "rgba(255,0,0,0.05)",
-          time: 120
-        });
-        game.drawList.push({ //draw range
-          //add dmg to draw queue
-          x: player.position.x,
-          y: player.position.y,
-          radius: 500,
-          color: "rgba(0,0,0,0.2)",
-          time: 120
-        });
-
+        // game.drawList.push({ //draw range
+        //   //add dmg to draw queue
+        //   x: player.position.x,
+        //   y: player.position.y,
+        //   radius: 3000,
+        //   color: "rgba(255,0,0,0.05)",
+        //   time: 120
+        // });
+        // game.drawList.push({ //draw range
+        //   //add dmg to draw queue
+        //   x: player.position.x,
+        //   y: player.position.y,
+        //   radius: 500,
+        //   color: "rgba(0,0,0,0.2)",
+        //   time: 120
+        // });
       }
     },
     {
@@ -1734,7 +1732,7 @@ const b = {
       name: "mine", //10
       description: "drop a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 4,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1783,20 +1781,20 @@ const b = {
           });
         }
         World.add(engine.world, bullet[me]); //add bullet to world
-        bullet[me].endCycle = game.cycle + 1800 + 360 * Math.random();
-        bullet[me].seeFrom = null;
+        bullet[me].endCycle = game.cycle + 2000 + 360 * Math.random();
         bullet[me].restitution = 0;
         bullet[me].lookFrequency = 41 + Math.floor(23 * Math.random())
         bullet[me].range = 700
+
         bullet[me].arm = function () {
           this.do = function () { //overwrite the do method for this bullet
             this.force.y += this.mass * 0.002; //extra gravity
             if (!(game.cycle % this.lookFrequency)) { //find mob targets
               for (let i = 0, len = mob.length; i < len; ++i) {
-                if (Vector.magnitudeSquared(Vector.sub(this.seeFrom, mob[i].position)) < 500000 &&
+                if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
                   mob[i].dropPowerUp &&
-                  Matter.Query.ray(map, this.seeFrom, mob[i].position).length === 0 &&
-                  Matter.Query.ray(body, this.seeFrom, mob[i].position).length === 0) {
+                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                  Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                   this.endCycle = 0 //end life if mob is near and visible
                 }
               }
@@ -1809,22 +1807,39 @@ const b = {
           if (collide.length > 0) {
             for (let i = 0; i < collide.length; i++) {
               if (collide[i].bodyA.collisionFilter.category === cat.map || collide[i].bodyB.collisionFilter.category === cat.map) {
-                this.seeFrom = Vector.add(this.position, Vector.mult(collide[i].normal, -20)) //find the location 20 pixels perpendicular to the map
-                // console.log()
+                // console.log(collide)
                 const angle = Matter.Vector.angle(collide[i].normal, {
                   x: 1,
                   y: 0
                 })
-                if (angle > -0.1) Matter.Body.setStatic(this, true)
-                this.arm();
+                if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
+                  Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
+                  //move until touching map again after rotation
+                  for (let j = 0; j < 10; j++) {
+                    if (Matter.Query.collides(this, map).length > 0) {
+                      Matter.Body.setStatic(this, true) //don't set to static if not touching map
+                      this.arm();
+
+                      //sometimes the mine can't attach to map and it just needs to explode
+                      const who = this
+                      setTimeout(function () {
+                        if (Matter.Query.collides(who, map).length === 0) who.endCycle = 0 // if not touching map explode
+                      }, 100, who);
+                      break
+                    }
+                    //move until you are touching the wall
+                    Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2)))
+                  }
+                } else if (this.speed < 1) {
+                  this.arm();
+                }
               }
             }
-          } else { //check if collides with a body
+          } else if (this.speed < 1) { //check if collides with a body
             collide = Matter.Query.collides(this, body)
             if (collide.length > 0) {
               for (let i = 0; i < collide.length; i++) {
                 if (collide[i].bodyA.collisionFilter.category === cat.body || collide[i].bodyB.collisionFilter.category === cat.body) {
-                  this.seeFrom = this.position
                   this.arm();
                 }
               }
@@ -1832,20 +1847,19 @@ const b = {
           }
         }
         bullet[me].onEnd = function () {
-          if (!this.seeFrom) this.seeFrom = this.position
           const targets = [] //target nearby mobs
           for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].dropPowerUp) {
-              const dist = Vector.magnitudeSquared(Vector.sub(this.seeFrom, mob[i].position));
+              const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
               if (dist < 1440000 && //1200*1200
-                Matter.Query.ray(map, this.seeFrom, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.seeFrom, mob[i].position).length === 0) {
+                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
               }
             }
           }
-          for (let i = 0; i < 14; i++) {
-            const speed = 55 + 10 * Math.random()
+          for (let i = 0; i < 16; i++) {
+            const speed = 53 + 10 * Math.random()
             if (targets.length > 0) { // aim near a random target in array
               const index = Math.floor(Math.random() * targets.length)
               const SPREAD = 150 / targets.length
@@ -1853,10 +1867,10 @@ const b = {
                 x: targets[index].x + SPREAD * (Math.random() - 0.5),
                 y: targets[index].y + SPREAD * (Math.random() - 0.5)
               }
-              b.nail(this.seeFrom, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.seeFrom)), speed), 0.5)
+              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 0.8)
             } else { // aim in random direction
               const ANGLE = 2 * Math.PI * Math.random()
-              b.nail(this.seeFrom, {
+              b.nail(this.position, {
                 x: speed * Math.cos(ANGLE),
                 y: speed * Math.sin(ANGLE)
               })

@@ -304,7 +304,7 @@ const spawn = {
   hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
     mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.04 * game.accelScale;
+    me.accelMag = 0.04;
     me.g = 0.0015; //required if using 'gravity'
     me.frictionAir = 0.018;
     me.restitution = 0;

@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      // b.giveGuns(10)
+      b.giveGuns(10)
       // mech.setField(3)
       // b.giveMod(3);
 
@@ -49,10 +49,10 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.11; //damage done by mobs increases each level
-      b.dmgScale *= 0.94; //damage done by player decreases each level
-      game.accelScale *= 1.03 //mob acceleration increases each level
-      game.lookFreqScale *= 0.97 //mob cycles between looks decreases each level
+      game.dmgScale += 0.13; //damage done by mobs increases each level
+      b.dmgScale *= 0.93; //damage done by player decreases each level
+      game.accelScale *= 1.02 //mob acceleration increases each level
+      game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
       game.CDScale *= 0.97 //mob CD time decreases each level
     }
     game.healScale = 1 / (1 + game.difficulty * 0.065) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
@@ -60,11 +60,11 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.11; //damage done by mobs increases each level
+      game.dmgScale -= 0.13; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
-      b.dmgScale /= 0.94; //damage done by player decreases each level
-      game.accelScale /= 1.03 //mob acceleration increases each level
-      game.lookFreqScale /= 0.97 //mob cycles between looks decreases each level
+      b.dmgScale /= 0.93; //damage done by player decreases each level
+      game.accelScale /= 1.02 //mob acceleration increases each level
+      game.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
       game.CDScale /= 0.97 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 1;
