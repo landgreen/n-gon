@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
-      b.giveGuns(10)
+      // b.giveGuns(10)
       // mech.setField(3)
       // b.giveMod(3);
 
@@ -1569,7 +1569,17 @@ const level = {
     }
   },
   levelAnnounce() {
-    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel];
+    let mode = document.getElementById("difficulty-select").value
+    if (mode === "0") {
+      mode = "(easy)"
+    } else if (mode === "1") {
+      mode = "(normal)"
+    } else if (mode === "2") {
+      mode = "(hard)"
+    } else if (mode === "6") {
+      mode = "(why)"
+    }
+    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " " + mode;
     // game.makeTextLog(`<div style='font-size: 25px;'>level ${game.difficulty} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
     // if (game.difficulty === 0) text = "";
     // text = "Level " + (game.difficulty + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";

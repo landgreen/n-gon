@@ -4,13 +4,6 @@
 
 add setting for random drops instead of choosing
 
-mines: move targeting position to be perpendicular to stuck wall
-mines change shape of mine (maybe a octagon?)
-mines: collide with bots
-  probably don't have to fix...
-mines: add high friction, like vacuum bomb and trigger static mode after not moving for a bit
-  no need to watch collisions
-
 rework custom mode
   custom mode grey out mods that are bad, like selection based mods
   enable recursive mods

@@ -138,7 +138,7 @@ function collisionChecks(event) {
               let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
               mech.damage(dmg);
               if (mob[k].onHit) mob[k].onHit(k);
-              mech.fieldMeter += b.modPiezo
+              if (b.isModPiezo) mech.fieldMeter = mech.fieldEnergyMax;
               if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
                 mob[k].death();
                 game.drawList.push({

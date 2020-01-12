@@ -31,7 +31,7 @@ const b = {
   modNailBotCount: null,
   modCollisionImmuneCycles: null,
   modBlockDmg: null,
-  modPiezo: null,
+  isModPiezo: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -60,7 +60,7 @@ const b = {
     b.modNailBotCount = 0;
     b.modCollisionImmuneCycles = 30;
     b.modBlockDmg = 0;
-    b.modPiezo = 0;
+    b.isModPiezo = false;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -262,11 +262,12 @@ const b = {
     },
     {
       name: "piezoelectricity", //17
-      description: "after <strong>colliding</strong> with enemies gain 50% <strong class='color-f'>energy</strong>",
+      description: "<strong>colliding</strong> with enemies fills your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       effect() {
-        b.modPiezo = 0.50
+        b.isModPiezo = true;
+        mech.fieldMeter = mech.fieldEnergyMax;
       }
     },
     {
@@ -355,6 +356,7 @@ const b = {
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
         b.setModDefaults(); // remove all mods
+        //have state is checked in mech.death()
       }
     },
     {
@@ -714,8 +716,134 @@ const b = {
         }
       }
     }
+  },
+  mine(where, velocity, angle = 0) {
+    const bIndex = bullet.length;
+    bullet[bIndex] = Bodies.rectangle(where.x, where.y, 45 * b.modBulletSize, 16 * b.modBulletSize, {
+      angle: angle,
+      friction: 1,
+      frictionAir: 0,
+      restitution: 0,
+      dmg: 0, //damage done in addition to the damage from momentum
+      classType: "bullet",
+      collisionFilter: {
+        category: cat.bullet,
+        mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
+      },
+      minDmgSpeed: 5,
+      stillCount: 0,
+      isArmed: false,
+      endCycle: game.cycle + 2000 + 360 * Math.random(),
+      lookFrequency: 41 + Math.floor(23 * Math.random()),
+      range: 700,
+      onDmg() {},
+      do() {
+        this.force.y += this.mass * 0.002; //extra gravity
+        let collide = Matter.Query.collides(this, map) //check if collides with map
+        if (collide.length > 0) {
+          for (let i = 0; i < collide.length; i++) {
+            if (collide[i].bodyA.collisionFilter.category === cat.map || collide[i].bodyB.collisionFilter.category === cat.map) {
+              // console.log(collide)
+              const angle = Matter.Vector.angle(collide[i].normal, {
+                x: 1,
+                y: 0
+              })
+              if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
+                Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
+                //move until touching map again after rotation
+                for (let j = 0; j < 10; j++) {
+                  if (Matter.Query.collides(this, map).length > 0) {
+                    Matter.Body.setStatic(this, true) //don't set to static if not touching map
+                    this.arm();
 
-    // Vector.magnitudeSquared(Vector.sub(bullet[me].position, mob[i].position))
+                    //sometimes the mine can't attach to map and it just needs to explode
+                    const that = this
+                    setTimeout(function () {
+                      if (Matter.Query.collides(that, map).length === 0) {
+                        that.endCycle = 0 // if not touching map explode
+                        that.isArmed = false
+                        b.mine(that.position, that.velocity, that.angle)
+                      }
+                    }, 100, that);
+                    break
+                  }
+                  //move until you are touching the wall
+                  Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2)))
+                }
+              } else if (this.speed < 1 && this.angularSpeed < 0.01 && !mech.isBodiesAsleep) {
+                this.stillCount += 2
+              }
+            }
+          }
+        } else {
+          if (this.speed < 1 && this.angularSpeed < 0.01 && !mech.isBodiesAsleep) {
+            this.stillCount++
+          }
+        }
+        if (this.stillCount > 35) this.arm();
+      },
+      arm() {
+        this.isArmed = true
+        game.drawList.push({
+          //add dmg to draw queue
+          x: this.position.x,
+          y: this.position.y,
+          radius: 10,
+          color: "#f00",
+          time: 4
+        });
+
+        this.do = function () { //overwrite the do method for this bullet
+          this.force.y += this.mass * 0.002; //extra gravity
+          if (!(game.cycle % this.lookFrequency)) { //find mob targets
+            for (let i = 0, len = mob.length; i < len; ++i) {
+              if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
+                mob[i].dropPowerUp &&
+                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                this.endCycle = 0 //end life if mob is near and visible
+              }
+            }
+          }
+        }
+      },
+      onEnd() {
+        if (this.isArmed) {
+          const targets = [] //target nearby mobs
+          for (let i = 0, len = mob.length; i < len; i++) {
+            if (mob[i].dropPowerUp) {
+              const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+              if (dist < 1440000 && //1200*1200
+                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
+              }
+            }
+          }
+          for (let i = 0; i < 16; i++) {
+            const speed = 53 + 10 * Math.random()
+            if (targets.length > 0) { // aim near a random target in array
+              const index = Math.floor(Math.random() * targets.length)
+              const SPREAD = 150 / targets.length
+              const WHERE = {
+                x: targets[index].x + SPREAD * (Math.random() - 0.5),
+                y: targets[index].y + SPREAD * (Math.random() - 0.5)
+              }
+              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1)
+            } else { // aim in random direction
+              const ANGLE = 2 * Math.PI * Math.random()
+              b.nail(this.position, {
+                x: speed * Math.cos(ANGLE),
+                y: speed * Math.sin(ANGLE)
+              })
+            }
+          }
+        }
+      }
+    });
+    bullet[bIndex].torque += bullet[bIndex].inertia * 0.0001 * (0.5 - Math.random())
+    Matter.Body.setVelocity(bullet[bIndex], velocity);
+    World.add(engine.world, bullet[bIndex]); //add bullet to world
   },
   spore(who) { //used with the mod upgrade in mob.death()
     const bIndex = bullet.length;
@@ -1730,153 +1858,21 @@ const b = {
       }
     }, {
       name: "mine", //10
-      description: "drop a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
+      description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 3,
       have: false,
       isStarterGun: false,
       fire() {
-        const me = bullet.length;
-        const dir = mech.angle;
-        if (mech.crouch) {
-          bullet[me] = Bodies.rectangle(mech.pos.x + 35 * Math.cos(mech.angle), mech.pos.y + 35 * Math.sin(mech.angle), 45 * b.modBulletSize, 16 * b.modBulletSize, {
-            angle: 0,
-            friction: 1,
-            frictionAir: 0,
-            dmg: 0, //damage done in addition to the damage from momentum
-            classType: "bullet",
-            collisionFilter: {
-              category: cat.bullet,
-              mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
-            },
-            minDmgSpeed: 5,
-            onDmg() {},
-            onEnd() {}
-          });
-          mech.fireCDcycle = mech.cycle + Math.floor(35 * b.modFireRate); // cool down
-          Matter.Body.setVelocity(bullet[me], {
-            x: mech.Vx / 2 + 26 * Math.cos(dir),
-            y: mech.Vy / 2 + 26 * Math.sin(dir)
-          });
-          bullet[me].torque += bullet[me].inertia * 0.0001 * (0.5 - Math.random())
-        } else {
-          bullet[me] = Bodies.rectangle(mech.pos.x, mech.pos.y + 25, 45 * b.modBulletSize, 16 * b.modBulletSize, {
-            angle: 0,
-            friction: 1,
-            frictionAir: 0,
-            dmg: 0, //damage done in addition to the damage from momentum
-            classType: "bullet",
-            collisionFilter: {
-              category: cat.bullet,
-              mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
-            },
-            minDmgSpeed: 5,
-            onDmg() {},
-            onEnd() {}
-          });
-          mech.fireCDcycle = mech.cycle + Math.floor(20 * b.modFireRate); // cool down
-          Matter.Body.setVelocity(bullet[me], {
-            x: mech.Vx,
-            y: mech.Vy
-          });
-        }
-        World.add(engine.world, bullet[me]); //add bullet to world
-        bullet[me].endCycle = game.cycle + 2000 + 360 * Math.random();
-        bullet[me].restitution = 0;
-        bullet[me].lookFrequency = 41 + Math.floor(23 * Math.random())
-        bullet[me].range = 700
-
-        bullet[me].arm = function () {
-          this.do = function () { //overwrite the do method for this bullet
-            this.force.y += this.mass * 0.002; //extra gravity
-            if (!(game.cycle % this.lookFrequency)) { //find mob targets
-              for (let i = 0, len = mob.length; i < len; ++i) {
-                if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
-                  mob[i].dropPowerUp &&
-                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                  Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                  this.endCycle = 0 //end life if mob is near and visible
-                }
-              }
-            }
-          }
-        }
-        bullet[me].do = function () {
-          this.force.y += this.mass * 0.002; //extra gravity
-          let collide = Matter.Query.collides(this, map) //check if collides with map
-          if (collide.length > 0) {
-            for (let i = 0; i < collide.length; i++) {
-              if (collide[i].bodyA.collisionFilter.category === cat.map || collide[i].bodyB.collisionFilter.category === cat.map) {
-                // console.log(collide)
-                const angle = Matter.Vector.angle(collide[i].normal, {
-                  x: 1,
-                  y: 0
-                })
-                if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
-                  Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
-                  //move until touching map again after rotation
-                  for (let j = 0; j < 10; j++) {
-                    if (Matter.Query.collides(this, map).length > 0) {
-                      Matter.Body.setStatic(this, true) //don't set to static if not touching map
-                      this.arm();
-
-                      //sometimes the mine can't attach to map and it just needs to explode
-                      const who = this
-                      setTimeout(function () {
-                        if (Matter.Query.collides(who, map).length === 0) who.endCycle = 0 // if not touching map explode
-                      }, 100, who);
-                      break
-                    }
-                    //move until you are touching the wall
-                    Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2)))
-                  }
-                } else if (this.speed < 1) {
-                  this.arm();
-                }
-              }
-            }
-          } else if (this.speed < 1) { //check if collides with a body
-            collide = Matter.Query.collides(this, body)
-            if (collide.length > 0) {
-              for (let i = 0; i < collide.length; i++) {
-                if (collide[i].bodyA.collisionFilter.category === cat.body || collide[i].bodyB.collisionFilter.category === cat.body) {
-                  this.arm();
-                }
-              }
-            }
-          }
-        }
-        bullet[me].onEnd = function () {
-          const targets = [] //target nearby mobs
-          for (let i = 0, len = mob.length; i < len; i++) {
-            if (mob[i].dropPowerUp) {
-              const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-              if (dist < 1440000 && //1200*1200
-                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
-              }
-            }
-          }
-          for (let i = 0; i < 16; i++) {
-            const speed = 53 + 10 * Math.random()
-            if (targets.length > 0) { // aim near a random target in array
-              const index = Math.floor(Math.random() * targets.length)
-              const SPREAD = 150 / targets.length
-              const WHERE = {
-                x: targets[index].x + SPREAD * (Math.random() - 0.5),
-                y: targets[index].y + SPREAD * (Math.random() - 0.5)
-              }
-              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 0.8)
-            } else { // aim in random direction
-              const ANGLE = 2 * Math.PI * Math.random()
-              b.nail(this.position, {
-                x: speed * Math.cos(ANGLE),
-                y: speed * Math.sin(ANGLE)
-              })
-            }
-          }
-        }
+        const speed = mech.crouch ? 34 : 20
+        b.mine({
+          x: mech.pos.x + 30 * Math.cos(mech.angle),
+          y: mech.pos.y + 30 * Math.sin(mech.angle)
+        }, {
+          x: speed * Math.cos(mech.angle),
+          y: speed * Math.sin(mech.angle)
+        })
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 60 : 40) * b.modFireRate); // cool down
       }
     },
     {

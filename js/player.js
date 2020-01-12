@@ -307,13 +307,16 @@ const mech = {
 
       function randomizeMods() {
         b.setModDefaults(); //remove all mods
+        //remove all bullets
+        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        bullet = [];
         for (let i = 0; i < totalMods; i++) {
           //find what mods I don't have
           let options = [];
           for (let i = 0, len = b.mods.length; i < len; i++) {
             //can't get quantum immortality or multiverse
             if (b.mods[i].name !== "quantum immortality" &&
-              b.mods[i].name !== "level II multiverse" &&
+              b.mods[i].name !== "Born rule" &&
               b.mods[i].count < b.mods[i].maxCount) options.push(i);
           }
           //add a new mod
