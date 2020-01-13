@@ -276,7 +276,7 @@ const b = {
       maxCount: 4,
       count: 0,
       effect() {
-        b.modEnergySiphon += 0.18;
+        b.modEnergySiphon += 0.15;
         mech.fieldMeter = mech.fieldEnergyMax
       }
     },
@@ -329,6 +329,15 @@ const b = {
       }
     },
     {
+      name: "quantum immortality", //28
+      description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
+      maxCount: 1,
+      count: 0,
+      effect() {
+        b.isModImmortal = true;
+      }
+    },
+    {
       name: "+1 cardinality", //24
       description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
@@ -357,15 +366,6 @@ const b = {
         }
         b.setModDefaults(); // remove all mods
         //have state is checked in mech.death()
-      }
-    },
-    {
-      name: "quantum immortality", //28
-      description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
-      maxCount: 1,
-      count: 0,
-      effect() {
-        b.isModImmortal = true;
       }
     },
   ],

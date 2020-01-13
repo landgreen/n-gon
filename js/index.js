@@ -2,12 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
+show difficulty increase text in custom mode
+
+chart showing info about each mob type
+  can use css-grid chart like custom mod
+
 add setting for random drops instead of choosing
 
-rework custom mode
+custom mode
   custom mode grey out mods that are bad, like selection based mods
-  enable recursive mods
-  remove 5 mod cap on custom mode
 
 change nail-bot's movement
   maybe have it move in a circle around player?
@@ -158,12 +161,14 @@ const build = {
   list: [],
   choosePowerUp(who, index, type) {
     if (type === "field" || type === "gun") {
+      let isDeselect = false
       //if already click, toggle off
       for (let i = 0; i < build.list.length; i++) {
         if (build.list[i].index === index && build.list[i].type === type) {
           build.list.splice(i, 1);
           who.style.backgroundColor = "#fff"
-          return
+          isDeselect = true
+          break
         }
       }
       //check if trying to get a second field
@@ -175,11 +180,13 @@ const build = {
           }
         }
       }
-      who.style.backgroundColor = "#919ba8" //"#868f9a"
-      build.list[build.list.length] = {
-        who: who,
-        index: index,
-        type: type,
+      if (!isDeselect) {
+        who.style.backgroundColor = "#919ba8" //"#868f9a"
+        build.list[build.list.length] = {
+          who: who,
+          index: index,
+          type: type,
+        }
       }
     } else if (type === "mod") {
       if (who.style.backgroundColor !== "#919ba8") who.style.backgroundColor = "#919ba8" //"#868f9a"
@@ -212,6 +219,8 @@ const build = {
         who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
       }
     }
+    document.title = `effective starting level: ${build.list.length * game.difficultyMode}`
+    // document.getElementById("starting-level").innerHTML = `effective starting level: ${build.list.length * game.difficultyMode}`
   },
   removeMod(index) {
     for (let i = build.list.length - 1; i > -1; i--) {
@@ -256,7 +265,7 @@ document.getElementById("build-button").addEventListener("click", () => {
           </g>
         </svg>
       </div>
-      <div class="build-grid-module" style="font-size: 1.00em; line-height: 175%;">
+      <div id ="starting-level" class="build-grid-module" style="font-size: 1.00em; line-height: 175%;">
       each power up you select will increase the starting level by one
       </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
@@ -266,7 +275,11 @@ document.getElementById("build-button").addEventListener("click", () => {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
     }
     for (let i = 0, len = b.mods.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      if (b.mods[i].name === "Born rule" || b.mods[i].name === "Bayesian inference" || b.mods[i].name === "+1 cardinality") {
+        text += `<div class="build-grid-module" style="opacity:0.3;"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      } else {
+        text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      }
     }
     el.innerHTML = text
     el.style.display = "grid"
