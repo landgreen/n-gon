@@ -187,7 +187,7 @@ const b = {
       count: 0,
       effect() {
         b.modLaserBotCount++;
-        b.guardian();
+        b.laserBot();
       }
     },
     {
@@ -1027,7 +1027,7 @@ const b = {
       restitution: 0.4 + 0.5 * Math.random(),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
-      lookFrequency: 45 + Math.floor(17 * Math.random()),
+      lookFrequency: 56 + Math.floor(17 * Math.random()),
       acceleration: 0.0025 + 0.001 * Math.random(),
       range: 300 + Math.floor(70 * Math.random()),
       endCycle: Infinity,
@@ -1076,7 +1076,7 @@ const b = {
       y: speed * Math.sin(dir)
     });
   },
-  guardian(speed = 1) {
+  laserBot(speed = 1) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (14 + 6 * Math.random()) * b.modBulletSize
@@ -1135,7 +1135,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * 0.045;
+            const dmg = b.dmgScale * 0.05;
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 

@@ -38,7 +38,7 @@ const level = {
     level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
     for (let i = 0; i < b.modLaserBotCount; i++) {
-      b.guardian()
+      b.laserBot()
     }
     for (let i = 0; i < b.modNailBotCount; i++) {
       b.nailBot()
