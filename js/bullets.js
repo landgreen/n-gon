@@ -748,31 +748,36 @@ const b = {
                 x: 1,
                 y: 0
               })
-              if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
-                Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
-                //move until touching map again after rotation
-                for (let j = 0; j < 10; j++) {
-                  if (Matter.Query.collides(this, map).length > 0) {
+              Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
+              //move until touching map again after rotation
+              for (let j = 0; j < 10; j++) {
+                if (Matter.Query.collides(this, map).length > 0) {
+                  if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
                     Matter.Body.setStatic(this, true) //don't set to static if not touching map
-                    this.arm();
-
-                    //sometimes the mine can't attach to map and it just needs to explode
-                    const that = this
-                    setTimeout(function () {
-                      if (Matter.Query.collides(that, map).length === 0) {
-                        that.endCycle = 0 // if not touching map explode
-                        that.isArmed = false
-                        b.mine(that.position, that.velocity, that.angle)
-                      }
-                    }, 100, that);
-                    break
+                  } else {
+                    Matter.Body.setVelocity(this, {
+                      x: 0,
+                      y: 0
+                    });
+                    Matter.Body.setAngularVelocity(this, 0)
                   }
-                  //move until you are touching the wall
-                  Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2)))
+                  this.arm();
+
+                  //sometimes the mine can't attach to map and it just needs to be reset
+                  const that = this
+                  setTimeout(function () {
+                    if (Matter.Query.collides(that, map).length === 0) {
+                      that.endCycle = 0 // if not touching map explode
+                      that.isArmed = false
+                      b.mine(that.position, that.velocity, that.angle)
+                    }
+                  }, 100, that);
+                  break
                 }
-              } else if (this.speed < 1 && this.angularSpeed < 0.01 && !mech.isBodiesAsleep) {
-                this.stillCount += 2
+                //move until you are touching the wall
+                Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2)))
               }
+
             }
           }
         } else {
@@ -780,7 +785,7 @@ const b = {
             this.stillCount++
           }
         }
-        if (this.stillCount > 35) this.arm();
+        if (this.stillCount > 25) this.arm();
       },
       arm() {
         this.isArmed = true
@@ -829,7 +834,7 @@ const b = {
                 x: targets[index].x + SPREAD * (Math.random() - 0.5),
                 y: targets[index].y + SPREAD * (Math.random() - 0.5)
               }
-              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1)
+              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
             } else { // aim in random direction
               const ANGLE = 2 * Math.PI * Math.random()
               b.nail(this.position, {
@@ -1758,23 +1763,18 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 35 * b.modBulletSize, b.fireAttributes(dir, false));
-        bullet[me].radius = 22; //used from drawing timer
         b.fireProps(10, mech.crouch ? 42 : 26, dir, me); //cd , speed
 
-        bullet[me].endCycle = Infinity
-        // bullet[me].restitution = 0.3;
-        // bullet[me].frictionAir = 0.01;
-        // bullet[me].friction = 0.15;
-        bullet[me].inertia = Infinity; //prevents rotation
-        bullet[me].restitution = 0;
-        bullet[me].friction = 1;
         Matter.Body.setDensity(bullet[me], 0.0002);
-
+        bullet[me].restitution = 0.2;
+        bullet[me].friction = 0.3;
+        bullet[me].endCycle = Infinity
         bullet[me].explodeRad = 380 + Math.floor(Math.random() * 60);
         bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
         bullet[me].onDmg = function () {
           // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
         };
+        bullet[me].radius = 22; //used from drawing timer
         bullet[me].isArmed = false;
         bullet[me].isSucking = false;
         bullet[me].do = function () {
@@ -1864,7 +1864,7 @@ const b = {
       have: false,
       isStarterGun: false,
       fire() {
-        const speed = mech.crouch ? 34 : 20
+        const speed = mech.crouch ? 36 : 22
         b.mine({
           x: mech.pos.x + 30 * Math.cos(mech.angle),
           y: mech.pos.y + 30 * Math.sin(mech.angle)
@@ -1872,7 +1872,7 @@ const b = {
           x: speed * Math.cos(mech.angle),
           y: speed * Math.sin(mech.angle)
         })
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 60 : 40) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 70 : 45) * b.modFireRate); // cool down
       }
     },
     {
