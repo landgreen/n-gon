@@ -901,11 +901,27 @@ const mech = {
       mech.drawHold(who);
       mech.fieldCDcycle = mech.cycle + 10;
       mech.holdingTarget = null
+      const unit = Vector.normalise(Vector.sub(player.position, who.position))
       if (b.modBlockDmg) {
         who.damage(b.modBlockDmg)
+        //draw electricity
+        const step = mech.grabRange / 5
+        ctx.beginPath();
+        for (let i = 0, len = 2 * b.modBlockDmg / 0.7; i < len; i++) {
+          let x = mech.pos.x - 20 * unit.x;
+          let y = mech.pos.y - 20 * unit.y;
+          ctx.moveTo(x, y);
+          for (let i = 0; i < 8; i++) {
+            x += step * (-unit.x + 1.5 * (Math.random() - 0.5))
+            y += step * (-unit.y + 1.5 * (Math.random() - 0.5))
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "#f0f";
+        ctx.stroke();
       }
       //knock backs
-      const unit = Vector.normalise(Vector.sub(player.position, who.position))
       const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
       Matter.Body.setVelocity(who, {
         x: player.velocity.x - (15 * unit.x) / massRoot,

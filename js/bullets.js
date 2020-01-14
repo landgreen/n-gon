@@ -218,7 +218,7 @@ const b = {
       maxCount: 4,
       count: 0,
       effect() {
-        b.modBlockDmg += 0.7
+        b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
       }
     },
     {
@@ -722,6 +722,7 @@ const b = {
     bullet[bIndex] = Bodies.rectangle(where.x, where.y, 45 * b.modBulletSize, 16 * b.modBulletSize, {
       angle: angle,
       friction: 1,
+      frictionStatic: 1,
       frictionAir: 0,
       restitution: 0,
       dmg: 0, //damage done in addition to the damage from momentum
