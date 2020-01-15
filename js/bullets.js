@@ -1035,7 +1035,7 @@ const b = {
       minDmgSpeed: 2,
       lookFrequency: 56 + Math.floor(17 * Math.random()),
       acceleration: 0.005 * (1 + 0.5 * Math.random()),
-      range: 200 * (1 + 0.3 * Math.random()),
+      range: 100 * (1 + 0.3 * Math.random()),
       endCycle: Infinity,
       classType: "bullet",
       collisionFilter: {
@@ -1070,7 +1070,7 @@ const b = {
         } else { //close to player
           this.frictionAir = 0
           //add player's velocity
-          // Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.9), Vector.mult(player.velocity, 0.1)));
+          Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.9), Vector.mult(player.velocity, 0.1)));
         }
       }
     })
@@ -1117,7 +1117,7 @@ const b = {
         // this.offPlayer.x -= radius * Math.cos(game.cycle * 0.02)
         // this.offPlayer.y -= radius * Math.sin(game.cycle * 0.02)
 
-        const velocityOff = Vector.mult(player.velocity, 20) //look 15 cycles ahead
+        const velocityOff = Vector.mult(player.velocity, 20) //look a few cycles ahead
         let playerPos = Vector.add(Vector.add(this.offPlayer, mech.pos), velocityOff) //also include an offset unique to this bot to keep many bots spread out
         const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.followRange) //linear bounding well 
         let mag = Math.min(farAway, 4) * this.mass * this.acceleration
@@ -1153,7 +1153,7 @@ const b = {
             Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
             Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
             //move towards the target
-            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.001))
+            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.002))
 
             //find the closest vertex
             let bestVertexDistance = Infinity

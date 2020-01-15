@@ -140,6 +140,9 @@ if (localSettings) {
     fpsCapDefault: '72',
   };
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+  document.getElementById("body-damage").checked = localSettings.isBodyDamage
+  document.getElementById("difficulty-select").value = localSettings.difficultyMode
+  document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }
 
 //collision groups
