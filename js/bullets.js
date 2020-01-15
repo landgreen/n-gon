@@ -847,7 +847,7 @@ const b = {
         }
       }
     });
-    bullet[bIndex].torque += bullet[bIndex].inertia * 0.0001 * (0.5 - Math.random())
+    bullet[bIndex].torque += bullet[bIndex].inertia * 0.0002 * (0.5 - Math.random())
     Matter.Body.setVelocity(bullet[bIndex], velocity);
     World.add(engine.world, bullet[bIndex]); //add bullet to world
   },
@@ -1030,12 +1030,12 @@ const b = {
       angle: dir,
       friction: 0,
       frictionStatic: 0,
-      restitution: 0.4 + 0.5 * Math.random(),
+      restitution: 0.6 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
       lookFrequency: 56 + Math.floor(17 * Math.random()),
-      acceleration: 0.0025 + 0.001 * Math.random(),
-      range: 300 + Math.floor(70 * Math.random()),
+      acceleration: 0.005 * (1 + 0.5 * Math.random()),
+      range: 200 * (1 + 0.3 * Math.random()),
       endCycle: Infinity,
       classType: "bullet",
       collisionFilter: {
@@ -1063,16 +1063,14 @@ const b = {
           }
         }
 
-
-
         const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
-        if (distanceToPlayer > this.range * 0.2) { //if far away move towards player
+        if (distanceToPlayer > this.range) { //if far away move towards player
           this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
-          this.frictionAir = 0.04
+          this.frictionAir = 0.06
         } else { //close to player
-          this.frictionAir = 0.005
+          this.frictionAir = 0
           //add player's velocity
-          Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 1), Vector.mult(player.velocity, 0.02)));
+          // Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.9), Vector.mult(player.velocity, 0.1)));
         }
       }
     })
@@ -1090,12 +1088,18 @@ const b = {
       angle: dir,
       friction: 0,
       frictionStatic: 0,
-      restitution: 0.5 + 0.5 * Math.random(),
+      frictionAir: 0.004 * (1 + 0.3 * Math.random()),
+      restitution: 0.5 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
-      lookFrequency: 31 + Math.floor(17 * Math.random()),
-      acceleration: 0.0015 + 0.0013 * Math.random(),
-      range: 500 + Math.floor(200 * Math.random()),
+      lookFrequency: 27 + Math.floor(17 * Math.random()),
+      acceleration: 0.0015 * (1 + 0.3 * Math.random()),
+      range: 300 * (1 + 0.2 * Math.random()),
+      followRange: 150 + Math.floor(30 * Math.random()),
+      offPlayer: {
+        x: 100 * (Math.random() - 0.5),
+        y: 90 * (Math.random() - 0.5) - 20,
+      },
       endCycle: Infinity,
       classType: "bullet",
       collisionFilter: {
@@ -1108,6 +1112,23 @@ const b = {
       },
       onEnd() {},
       do() {
+        //move in a circle
+        // const radius = 1.5
+        // this.offPlayer.x -= radius * Math.cos(game.cycle * 0.02)
+        // this.offPlayer.y -= radius * Math.sin(game.cycle * 0.02)
+
+        const velocityOff = Vector.mult(player.velocity, 20) //look 15 cycles ahead
+        let playerPos = Vector.add(Vector.add(this.offPlayer, mech.pos), velocityOff) //also include an offset unique to this bot to keep many bots spread out
+        const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.followRange) //linear bounding well 
+        let mag = Math.min(farAway, 4) * this.mass * this.acceleration
+        this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
+        //manual friction to not lose rotational velocity
+        Matter.Body.setVelocity(this, {
+          x: this.velocity.x * 0.95,
+          y: this.velocity.y * 0.95
+        });
+
+        //find targets
         if (!(game.cycle % this.lookFrequency)) {
           this.lockedOn = null;
           let closeDist = this.range;
@@ -1123,14 +1144,17 @@ const b = {
           }
         }
 
-        if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > 0.15) { //hit target with laser
-          mech.fieldMeter -= 0.0012
-
+        //hit target with laser
+        if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > 0.15) {
+          mech.fieldMeter -= 0.0014
           //make sure you can still see vertex
           const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
           if (DIST - this.lockedOn.radius < this.range + 150 &&
             Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
             Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
+            //move towards the target
+            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.001))
+
             //find the closest vertex
             let bestVertexDistance = Infinity
             let bestVertex = null
@@ -1141,7 +1165,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * 0.05;
+            const dmg = b.dmgScale * 0.1;
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 
@@ -1159,15 +1183,6 @@ const b = {
             ctx.fillStyle = "#f00";
             ctx.fill();
           }
-        }
-        const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
-        if (distanceToPlayer > this.range * 0.2) { //if far away move towards player
-          this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
-          this.frictionAir = 0.02
-        } else { //close to player
-          this.frictionAir = 0
-          //add player's velocity
-          Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 1), Vector.mult(player.velocity, 0.02)));
         }
       }
     })

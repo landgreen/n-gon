@@ -905,7 +905,7 @@ const mech = {
       if (b.modBlockDmg) {
         who.damage(b.modBlockDmg)
         //draw electricity
-        const step = mech.grabRange / 5
+        const step = 40
         ctx.beginPath();
         for (let i = 0, len = 2 * b.modBlockDmg / 0.7; i < len; i++) {
           let x = mech.pos.x - 20 * unit.x;

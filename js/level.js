@@ -16,10 +16,13 @@ const level = {
       // game.difficulty = 6; //for testing to simulate possible mobs spawns
       // b.giveGuns(10)
       // mech.setField(3)
-      // b.giveMod(13);
+      // b.giveMod(11);
+      // b.giveMod(11);
+      b.giveMod(10);
+      // b.giveMod(11);
 
-      level.intro(); //starting level
-      // level.testingMap();
+      // level.intro(); //starting level
+      level.testingMap();
       // level.bosses();
       // level.skyscrapers();
       // level.aerie();
