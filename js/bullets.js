@@ -46,6 +46,7 @@ const b = {
     b.isModImmortal = false;
     b.modSpores = 0;
     b.modExtraDmg = 0;
+    game.playerDmgColor = "rgba(0,0,0,0.7)"
     b.isModAnnihilation = false;
     b.modRecursiveHealing = 1;
     b.modSquirrelFx = 1;
