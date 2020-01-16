@@ -17,12 +17,12 @@ const level = {
       // b.giveGuns(10)
       // mech.setField(3)
       // b.giveMod(11);
-      b.giveMod(11);
-      b.giveMod(10);
+      // b.giveMod(11);
+      // b.giveMod(10);
       // b.giveMod(11);
 
-      // level.intro(); //starting level
-      level.testingMap();
+      level.intro(); //starting level
+      // level.testingMap();
       // level.bosses();
       // level.skyscrapers();
       // level.aerie();

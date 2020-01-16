@@ -182,7 +182,7 @@ const b = {
     },
     {
       name: "laser-bot", //10
-      description: "a bot <strong>protects</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
+      description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
       maxCount: 4,
       count: 0,
       effect() {
@@ -192,7 +192,7 @@ const b = {
     },
     {
       name: "nail-bot", //11
-      description: "a bot <strong>protects</strong> the space around you<br>fires a <strong>nail</strong> at targets in range",
+      description: "a bot fires <strong>nails</strong> at targets in line of sight",
       maxCount: 4,
       count: 0,
       effect() {
@@ -1030,12 +1030,13 @@ const b = {
       angle: dir,
       friction: 0,
       frictionStatic: 0,
+      frictionAir: 0.05,
       restitution: 0.6 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
       lookFrequency: 56 + Math.floor(17 * Math.random()),
       acceleration: 0.005 * (1 + 0.5 * Math.random()),
-      range: 100 * (1 + 0.3 * Math.random()),
+      range: 70 * (1 + 0.3 * Math.random()),
       endCycle: Infinity,
       classType: "bullet",
       collisionFilter: {
@@ -1052,12 +1053,12 @@ const b = {
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-            if (dist < 2000000 && //1400*1400
+            if (dist < 3000000 && //1400*1400
               Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
               Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
               target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))
               const SPEED = 50
-              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED), 0.5)
+              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED), 0.3)
               break;
             }
           }
@@ -1066,11 +1067,11 @@ const b = {
         const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
         if (distanceToPlayer > this.range) { //if far away move towards player
           this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
-          this.frictionAir = 0.06
+          // this.frictionAir = 0.1
         } else { //close to player
-          this.frictionAir = 0
+          // this.frictionAir = 0
           //add player's velocity
-          Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.9), Vector.mult(player.velocity, 0.1)));
+          Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17)));
         }
       }
     })
@@ -1088,17 +1089,17 @@ const b = {
       angle: dir,
       friction: 0,
       frictionStatic: 0,
-      frictionAir: 0.004 * (1 + 0.3 * Math.random()),
+      frictionAir: 0.008 * (1 + 0.3 * Math.random()),
       restitution: 0.5 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
       lookFrequency: 27 + Math.floor(17 * Math.random()),
       acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-      range: 300 * (1 + 0.2 * Math.random()),
+      range: 600 * (1 + 0.2 * Math.random()),
       followRange: 150 + Math.floor(30 * Math.random()),
       offPlayer: {
-        x: 100 * (Math.random() - 0.5),
-        y: 90 * (Math.random() - 0.5) - 20,
+        x: 0,
+        y: 0,
       },
       endCycle: Infinity,
       classType: "bullet",
@@ -1117,10 +1118,9 @@ const b = {
         // this.offPlayer.x -= radius * Math.cos(game.cycle * 0.02)
         // this.offPlayer.y -= radius * Math.sin(game.cycle * 0.02)
 
-        const velocityOff = Vector.mult(player.velocity, 20) //look a few cycles ahead
-        let playerPos = Vector.add(Vector.add(this.offPlayer, mech.pos), velocityOff) //also include an offset unique to this bot to keep many bots spread out
+        const playerPos = Vector.add(Vector.add(this.offPlayer, mech.pos), Vector.mult(player.velocity, 20)) //also include an offset unique to this bot to keep many bots spread out
         const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.followRange) //linear bounding well 
-        let mag = Math.min(farAway, 4) * this.mass * this.acceleration
+        const mag = Math.min(farAway, 4) * this.mass * this.acceleration
         this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
         //manual friction to not lose rotational velocity
         Matter.Body.setVelocity(this, {
@@ -1142,6 +1142,14 @@ const b = {
               this.lockedOn = mob[i]
             }
           }
+
+          //randomize position relative to player
+          if (Math.random() < 0.15) {
+            this.offPlayer = {
+              x: 100 * (Math.random() - 0.5),
+              y: 90 * (Math.random() - 0.5),
+            }
+          }
         }
 
         //hit target with laser
@@ -1153,7 +1161,7 @@ const b = {
             Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
             Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
             //move towards the target
-            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.002))
+            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.0013))
 
             //find the closest vertex
             let bestVertexDistance = Infinity
@@ -1165,7 +1173,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * 0.1;
+            const dmg = b.dmgScale * 0.05;
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 
