@@ -1477,7 +1477,7 @@ const level = {
         level.onLevel++; //cycles map to next level
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
 
-        level.difficultyIncrease(game.difficultyMode + level.isBuildRun) //increase difficulty based on modes
+        level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
         if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
         game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
       }

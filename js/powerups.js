@@ -75,8 +75,9 @@ const powerUps = {
           }
         }
       } else {
-        //if you don't have any guns just add ammo to a random gun you don't have yet
-        target = b.guns[Math.floor(Math.random() * b.guns.length)];
+        // target = b.guns[Math.floor(Math.random() * b.guns.length)];         //if you don't have any guns just add ammo to a random gun you don't have yet
+        mech.fieldMeter = mech.fieldEnergyMax;
+        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       }
       if (target.ammo === Infinity) {
         mech.fieldMeter = mech.fieldEnergyMax;
@@ -253,16 +254,12 @@ const powerUps = {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
-      if (Math.random() < b.isModBayesian) {
-        powerUps.spawn(x, y, "heal");
-      }
+      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "heal");
     } else {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
-      if (Math.random() < b.isModBayesian) {
-        powerUps.spawn(x, y, "ammo");
-      }
+      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "ammo");
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris

@@ -895,7 +895,7 @@ const mech = {
   pushMass(who) {
     const speed = Vector.magnitude(Vector.sub(who.velocity, player.velocity))
     const fieldBlockCost = 0.03 + Math.sqrt(who.mass) * speed * 0.003 //0.012
-    if (mech.fieldMeter > fieldBlockCost * 0.6) { //shield needs at least some of the cost to block
+    if (mech.fieldMeter > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
       mech.fieldMeter -= fieldBlockCost * mech.fieldShieldingScale;
       if (mech.fieldMeter < 0) mech.fieldMeter = 0;
       mech.drawHold(who);

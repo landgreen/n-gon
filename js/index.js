@@ -117,34 +117,6 @@ game mechanics
 
 */
 
-//  local storage
-let localSettings = JSON.parse(localStorage.getItem("localSettings"));
-// console.log(localSettings)
-if (localSettings) {
-  game.isBodyDamage = localSettings.isBodyDamage
-  document.getElementById("body-damage").checked = localSettings.isBodyDamage
-
-  game.difficultyMode = localSettings.difficultyMode
-  document.getElementById("difficulty-select").value = localSettings.difficultyMode
-
-  if (localSettings.fpsCapDefault === 'max') {
-    game.fpsCapDefault = 999999999;
-  } else {
-    game.fpsCapDefault = Number(localSettings.fpsCapDefault)
-  }
-  document.getElementById("fps-select").value = localSettings.fpsCapDefault
-} else {
-  localSettings = {
-    isBodyDamage: true,
-    difficultyMode: '1',
-    fpsCapDefault: '72',
-  };
-  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-  document.getElementById("body-damage").checked = localSettings.isBodyDamage
-  document.getElementById("difficulty-select").value = localSettings.difficultyMode
-  document.getElementById("fps-select").value = localSettings.fpsCapDefault
-}
-
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
 const cat = {
@@ -222,19 +194,77 @@ const build = {
         who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
       }
     }
-    document.title = `effective starting level: ${build.list.length * game.difficultyMode}`
-    // document.getElementById("starting-level").innerHTML = `effective starting level: ${build.list.length * game.difficultyMode}`
+    // document.title = `effective starting level: ${build.list.length * game.difficultyMode}`
+    build.calculateCustomDifficulty()
   },
-  removeMod(index) {
-    for (let i = build.list.length - 1; i > -1; i--) {
-      if (build.list[i].type === "mod" && build.list[i].index === index) build.list.splice(i, 1);
+  makeGrid() {
+    let text =
+      `<div style="display: flex; justify-content: space-around; align-items: center;">
+      <svg class="SVG-button" onclick="build.startBuildRun()" width="105" height="55">
+          <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
+            <text x="13" y="40">start</text>
+          </g>
+        </svg>
+        <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
+          <g stroke='none' fill='#333' stroke-width="2" font-size="22px" font-family="Ariel, sans-serif">
+            <text x="10" y="24">reset</text>
+          </g>
+        </svg>
+      </div>
+      <div class="build-grid-module" style="text-align:center; font-size: 1.00em; line-height: 175%;background-color:#c4ccd8;">
+      <div id="starting-level"></div>
+      <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
+					<select name="difficulty-select" id="difficulty-select-custom">
+						<option value="0">easy</option>
+						<option value="1" selected>normal</option>
+						<option value="2">hard</option>
+						<option value="6">why...</option>
+					</select>
+    </div>`
+    for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
     }
+    for (let i = 0, len = b.guns.length; i < len; i++) {
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+    }
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      if (b.mods[i].name === "Born rule" || b.mods[i].name === "+1 cardinality") {
+        text += `<div class="build-grid-module" style="opacity:0.3;"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      } else {
+        text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      }
+    }
+    const el = document.getElementById("build-grid")
+    el.innerHTML = text
+    el.style.display = "none"
+
+    document.getElementById("difficulty-select-custom").addEventListener("input", () => {
+      document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
+      game.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
+      localSettings.difficultyMode = game.difficultyMode
+      localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+      build.calculateCustomDifficulty()
+    });
+  },
+  reset() {
+    build.list = []
+    build.makeGrid();
+    document.getElementById("build-grid").style.display = "grid"
+    build.calculateCustomDifficulty()
+    document.getElementById("difficulty-select-custom").value = localSettings.difficultyMode
+  },
+  calculateCustomDifficulty() {
+    let difficulty = build.list.length * game.difficultyMode
+    if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6
+    document.getElementById("starting-level").innerHTML = `starting level: <strong style="font-size:1.1em;">${difficulty}</strong>`
   },
   startBuildRun() {
     spawn.setSpawnList();
     spawn.setSpawnList(); //gives random mobs,  not starter
     game.startGame();
-    level.difficultyIncrease(build.list.length * game.difficultyMode)
+    let difficulty = build.list.length * game.difficultyMode - 1
+    if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6 - 1
+    level.difficultyIncrease(difficulty)
 
     level.isBuildRun = true;
     for (let i = 0; i < build.list.length; i++) {
@@ -249,6 +279,8 @@ const build = {
   }
 }
 
+build.makeGrid();
+
 document.getElementById("build-button").addEventListener("click", () => {
   document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
@@ -260,39 +292,44 @@ document.getElementById("build-button").addEventListener("click", () => {
   } else {
     build.list = []
     // let text = '<p>The difficulty increases by one level for each power up you choose.<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
-    let text =
-      `<div style="display: flex; justify-content: center; align-items: center;">
-        <svg class="SVG-button" onclick="build.startBuildRun()" width="90" height="45">
-          <g stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Ariel, sans-serif">
-            <text x="15" y="32">start</text>
-          </g>
-        </svg>
-      </div>
-      <div id ="starting-level" class="build-grid-module" style="font-size: 1.00em; line-height: 175%;">
-      each power up you select will increase the starting level by one
-      </div>`
-    for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
-    }
-    for (let i = 0, len = b.guns.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
-    }
-    for (let i = 0, len = b.mods.length; i < len; i++) {
-      if (b.mods[i].name === "Born rule" || b.mods[i].name === "Bayesian inference" || b.mods[i].name === "+1 cardinality") {
-        text += `<div class="build-grid-module" style="opacity:0.3;"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
-      } else {
-        text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
-      }
-    }
-    el.innerHTML = text
-    el.style.display = "grid"
     build.isShowingBuilds = true
+    el.style.display = "grid"
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
   }
+  build.calculateCustomDifficulty()
 });
 
+
+//  local storage
+let localSettings = JSON.parse(localStorage.getItem("localSettings"));
+// console.log(localSettings)
+if (localSettings) {
+  game.isBodyDamage = localSettings.isBodyDamage
+  document.getElementById("body-damage").checked = localSettings.isBodyDamage
+
+  game.difficultyMode = localSettings.difficultyMode
+  document.getElementById("difficulty-select").value = localSettings.difficultyMode
+  document.getElementById("difficulty-select-custom").value = localSettings.difficultyMode
+
+  if (localSettings.fpsCapDefault === 'max') {
+    game.fpsCapDefault = 999999999;
+  } else {
+    game.fpsCapDefault = Number(localSettings.fpsCapDefault)
+  }
+  document.getElementById("fps-select").value = localSettings.fpsCapDefault
+} else {
+  localSettings = {
+    isBodyDamage: true,
+    difficultyMode: '1',
+    fpsCapDefault: '72',
+  };
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+  document.getElementById("body-damage").checked = localSettings.isBodyDamage
+  document.getElementById("difficulty-select").value = localSettings.difficultyMode
+  document.getElementById("fps-select").value = localSettings.fpsCapDefault
+}
 
 //set up canvas
 var canvas = document.getElementById("canvas");
@@ -385,7 +422,9 @@ document.getElementById("body-damage").addEventListener("input", () => {
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
+// difficulty-select-custom event listener is set in build.makeGrid
 document.getElementById("difficulty-select").addEventListener("input", () => {
+  document.getElementById("difficulty-select-custom").value = document.getElementById("difficulty-select").value
   game.difficultyMode = Number(document.getElementById("difficulty-select").value)
   localSettings.difficultyMode = game.difficultyMode
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

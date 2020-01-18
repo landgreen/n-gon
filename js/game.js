@@ -463,7 +463,7 @@ const game = {
     if (game.difficultyMode === 0) {
       game.isEasyMode = true;
       game.difficultyMode = 1
-      level.difficultyDecrease(6);
+      level.difficultyDecrease(6); //if this stops being -6  change in build.calculateCustomDifficulty()
     }
 
     game.clearNow = true;

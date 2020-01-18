@@ -102,7 +102,8 @@ function collisionChecks(event) {
     function collidePlayer(obj, speedThreshold = 12, massThreshold = 2) {
       if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > massThreshold) { //dmg from hitting a body
         const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
-        if (v > speedThreshold) {
+        if (v > speedThreshold && mech.collisionImmune < mech.cycle) {
+          mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
           let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
           dmg = Math.min(Math.max(dmg, 0.02), 0.15);
           mech.damage(dmg);
@@ -131,47 +132,45 @@ function collisionChecks(event) {
 
         function collideMob(obj) {
           //player + mob collision
-          if (mech.collisionImmune < mech.cycle) {
-            if (obj === playerBody || obj === playerHead) {
-              mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
-              mob[k].foundPlayer();
-              let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-              mech.damage(dmg);
-              if (mob[k].onHit) mob[k].onHit(k);
-              if (b.isModPiezo) mech.fieldMeter = mech.fieldEnergyMax;
-              if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
-                mob[k].death();
-                game.drawList.push({
-                  //add dmg to draw queue
-                  x: pairs[i].activeContacts[0].vertex.x,
-                  y: pairs[i].activeContacts[0].vertex.y,
-                  radius: dmg * 2000,
-                  color: "rgba(255,0,255,0.2)",
-                  time: game.drawTime
-                });
-              } else {
-                game.drawList.push({
-                  //add dmg to draw queue
-                  x: pairs[i].activeContacts[0].vertex.x,
-                  y: pairs[i].activeContacts[0].vertex.y,
-                  radius: dmg * 500,
-                  color: game.mobDmgColor,
-                  time: game.drawTime
-                });
+          if (mech.collisionImmune < mech.cycle && (obj === playerBody || obj === playerHead)) {
+            mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+            mob[k].foundPlayer();
+            let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
+            mech.damage(dmg);
+            if (mob[k].onHit) mob[k].onHit(k);
+            if (b.isModPiezo) mech.fieldMeter = mech.fieldEnergyMax;
+            if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
+              mob[k].death();
+              game.drawList.push({
+                //add dmg to draw queue
+                x: pairs[i].activeContacts[0].vertex.x,
+                y: pairs[i].activeContacts[0].vertex.y,
+                radius: dmg * 2000,
+                color: "rgba(255,0,255,0.2)",
+                time: game.drawTime
+              });
+            } else {
+              game.drawList.push({
+                //add dmg to draw queue
+                x: pairs[i].activeContacts[0].vertex.x,
+                y: pairs[i].activeContacts[0].vertex.y,
+                radius: dmg * 500,
+                color: game.mobDmgColor,
+                time: game.drawTime
+              });
 
-              }
-              //extra kick between player and mob              //this section would be better with forces but they don't work...
-              let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
-              Matter.Body.setVelocity(player, {
-                x: player.velocity.x + 8 * Math.cos(angle),
-                y: player.velocity.y + 8 * Math.sin(angle)
-              });
-              Matter.Body.setVelocity(mob[k], {
-                x: mob[k].velocity.x - 8 * Math.cos(angle),
-                y: mob[k].velocity.y - 8 * Math.sin(angle)
-              });
-              return;
             }
+            //extra kick between player and mob              //this section would be better with forces but they don't work...
+            let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
+            Matter.Body.setVelocity(player, {
+              x: player.velocity.x + 8 * Math.cos(angle),
+              y: player.velocity.y + 8 * Math.sin(angle)
+            });
+            Matter.Body.setVelocity(mob[k], {
+              x: mob[k].velocity.x - 8 * Math.cos(angle),
+              y: mob[k].velocity.y - 8 * Math.sin(angle)
+            });
+            return;
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {

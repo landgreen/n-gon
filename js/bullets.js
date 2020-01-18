@@ -72,20 +72,20 @@ const b = {
   },
   mods: [{
       name: "depleted uranium rounds", //0
-      description: `your <strong>bullets</strong> are +11% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
+      description: `your <strong>bullets</strong> are +13% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
-      maxCount: 4,
+      maxCount: 33,
       effect() {
-        b.modBulletSize += 0.11
+        b.modBulletSize += 0.13
       }
     },
     {
       name: "fluoroantimonic acid", //1
       description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>instant damage, unaffected by momentum",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
-        b.modExtraDmg += 0.25
+        b.modExtraDmg += 0.3
         game.playerDmgColor = "rgba(0,80,80,0.9)"
       }
     },
@@ -105,22 +105,6 @@ const b = {
       count: 0,
       effect() {
         b.isModFarAwayDmg = true; //used in mob.damage()
-        // game.drawList.push({ //draw range
-        //   //add dmg to draw queue
-        //   x: player.position.x,
-        //   y: player.position.y,
-        //   radius: 3000,
-        //   color: "rgba(255,0,0,0.05)",
-        //   time: 120
-        // });
-        // game.drawList.push({ //draw range
-        //   //add dmg to draw queue
-        //   x: player.position.x,
-        //   y: player.position.y,
-        //   radius: 500,
-        //   color: "rgba(0,0,0,0.2)",
-        //   time: 120
-        // });
       }
     },
     {
@@ -135,7 +119,7 @@ const b = {
     {
       name: "high explosives", //15
       description: "the radius of <strong class='color-e'>explosions</strong> are +20% <strong>larger</strong><br>immune to <strong>harm</strong> from <strong class='color-e'>explosions</strong>",
-      maxCount: 4,
+      maxCount: 1,
       count: 0,
       effect: () => {
         b.modExplosionRadius += 0.2;
@@ -145,7 +129,7 @@ const b = {
     {
       name: "auto-loading heuristics", //5
       description: "your <strong>delay</strong> after firing is +12% <strong>shorter</strong>",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modFireRate *= 0.88
@@ -163,7 +147,7 @@ const b = {
     {
       name: "Lorentzian topology", //7
       description: "your <strong>bullets</strong> last +33% <strong>longer</strong>",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.isModBulletsLastLonger += 0.33
@@ -172,7 +156,7 @@ const b = {
     {
       name: "zoospore vector", //8
       description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modSpores += 0.11;
@@ -184,7 +168,7 @@ const b = {
     {
       name: "laser-bot", //10
       description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modLaserBotCount++;
@@ -194,7 +178,7 @@ const b = {
     {
       name: "nail-bot", //11
       description: "a bot fires <strong>nails</strong> at targets in line of sight",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modNailBotCount++;
@@ -216,7 +200,7 @@ const b = {
     {
       name: "bremsstrahlung radiation", //13
       description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
@@ -244,11 +228,11 @@ const b = {
     },
     {
       name: "Pauli exclusion", //12
-      description: "unable to <strong>collide</strong> with enemies for +2 seconds<br>activates after being <strong>harmed</strong> from a collision",
-      maxCount: 1,
+      description: "unable to <strong>collide</strong> with enemies for +1 second<br>activates after being <strong>harmed</strong> from a collision",
+      maxCount: 9,
       count: 0,
       effect() {
-        b.modCollisionImmuneCycles += 120;
+        b.modCollisionImmuneCycles += 60;
         mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
       }
     },
@@ -274,7 +258,7 @@ const b = {
     {
       name: "energy conservation", //18
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modEnergySiphon += 0.15;
@@ -284,7 +268,7 @@ const b = {
     {
       name: "entropy exchange", //19
       description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modHealthDrain += 0.015;
@@ -293,7 +277,7 @@ const b = {
     {
       name: "overcharge", //20
       description: "charge <strong class='color-f'>energy</strong> <strong>+33%</strong> beyond your <strong>maximum</strong>",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         mech.fieldEnergyMax += 0.33
@@ -303,7 +287,7 @@ const b = {
     {
       name: "supersaturation", //21
       description: "<strong class='color-h'>heal</strong> <strong>+33%</strong> beyond your <strong>max health</strong>",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         mech.maxHealth += 0.33
@@ -313,7 +297,7 @@ const b = {
     {
       name: "recursive healing", //22
       description: "<strong class='color-h'>healing</strong> power ups trigger an extra time.",
-      maxCount: 4,
+      maxCount: 9,
       count: 0,
       effect() {
         b.modRecursiveHealing += 1
@@ -321,7 +305,7 @@ const b = {
     },
     {
       name: "mass-energy equivalence", //23
-      description: "convert the mass of <strong>power ups</strong> into <strong class='color-f'>energy</strong><br>power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +5%",
+      description: "power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +5%",
       maxCount: 1,
       count: 0,
       effect: () => {
@@ -339,21 +323,21 @@ const b = {
       }
     },
     {
-      name: "+1 cardinality", //24
-      description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
-      maxCount: 1,
-      count: 0,
-      effect: () => {
-        b.isModFourOptions = true;
-      }
-    },
-    {
       name: "Bayesian inference", //25
       description: "<strong>20%</strong> chance for double <strong>power ups</strong> to drop<br>one fewer <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
       effect: () => {
         b.isModBayesian = 0.20;
+      }
+    },
+    {
+      name: "+1 cardinality", //24
+      description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
+      maxCount: 1,
+      count: 0,
+      effect: () => {
+        b.isModFourOptions = true;
       }
     },
     {
@@ -1059,7 +1043,7 @@ const b = {
               Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
               target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))
               const SPEED = 50
-              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED), 0.3)
+              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED), 0.4)
               break;
             }
           }
@@ -1294,10 +1278,10 @@ const b = {
       have: false,
       isStarterGun: true,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 35 : 20) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 30 : 20) * b.modFireRate); // cool down
         b.muzzleFlash(20);
         // mobs.alert(450);
-        const SPEED = mech.crouch ? 55 : 35
+        const SPEED = mech.crouch ? 45 : 35
         const SPREAD = mech.crouch ? 0.04 : 0.15
         let dir = mech.angle - SPREAD * 2;
         for (let i = 0; i < 5; i++) {
@@ -1368,7 +1352,7 @@ const b = {
       fire() {
         const me = bullet.length;
         const dir = mech.angle
-        const SCALE = (mech.crouch ? 0.963 : 0.95)
+        const SCALE = (mech.crouch ? 0.963 : 0.95) + 0.03 * Math.min(1, 0.5 * (b.isModBulletsLastLonger - 1))
         const wiggleMag = ((mech.crouch) ? 0.004 : 0.005) * ((mech.flipLegs === 1) ? 1 : -1)
         bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 10, 10 * b.modBulletSize, {
           angle: dir,
@@ -1623,10 +1607,10 @@ const b = {
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
-        const thrust = 0.0005;
         let dir = mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2);
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30 * b.modBulletSize, 4 * b.modBulletSize, b.fireAttributes(dir));
+        const thrust = 0.00417 * bullet[me].mass;
         b.fireProps(mech.crouch ? 55 : 30, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
         // bullet[me].collisionFilter.mask = cat.map | cat.body | cat.mobBullet
         // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
