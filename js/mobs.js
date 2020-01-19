@@ -1013,7 +1013,8 @@ const mobs = {
       },
       //replace dead mob with a regular body
       replace(i) {
-        if (this.leaveBody) {
+        //large mobs or too many bodies go intangible and fall until removed from game to help performance
+        if (this.leaveBody && this.mass < 10 && body.length < 50) {
           const len = body.length;
           body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, this.vertices);
           Matter.Body.setVelocity(body[len], this.velocity);
@@ -1021,10 +1022,9 @@ const mobs = {
           body[len].collisionFilter.category = cat.body;
           body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
 
-          //large mobs or too many bodies go intangible and fall until removed from game to help performance
-          if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
-            body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
-          }
+          // if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
+          //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
+          // }
           body[len].classType = "body";
           World.add(engine.world, body[len]); //add to world
         }

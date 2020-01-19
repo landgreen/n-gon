@@ -2,20 +2,6 @@
 /* TODO:  *******************************************
 *****************************************************
 
-show difficulty increase text in custom mode
-
-chart showing info about each mob type
-  can use css-grid chart like custom mod
-
-add setting for random drops instead of choosing
-
-custom mode
-  custom mode grey out mods that are bad, like selection based mods
-
-change nail-bot's movement
-  maybe have it move in a circle around player?
-    high friction very high acceleration towards circle location
-
 add mouse constraint in testing mode
   https://github.com/liabru/matter-js/blob/master/examples/events.js
 
@@ -199,7 +185,7 @@ const build = {
   },
   makeGrid() {
     let text =
-      `<div style="display: flex; justify-content: space-around; align-items: center;">
+      `<div style="display: flex; justify-content: space-evenly; align-items: center;">
       <svg class="SVG-button" onclick="build.startBuildRun()" width="105" height="55">
           <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
             <text x="13" y="40">start</text>
@@ -256,7 +242,7 @@ const build = {
   calculateCustomDifficulty() {
     let difficulty = build.list.length * game.difficultyMode
     if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6
-    document.getElementById("starting-level").innerHTML = `starting level: <strong style="font-size:1.1em;">${difficulty}</strong>`
+    document.getElementById("starting-level").innerHTML = `starting level: <strong style="font-size:1.05em;">${difficulty}</strong>`
   },
   startBuildRun() {
     spawn.setSpawnList();
@@ -291,6 +277,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.getElementById("info").style.display = 'inline'
   } else {
     build.list = []
+    build.reset()
     // let text = '<p>The difficulty increases by one level for each power up you choose.<br>	<button type="button" id="build-begin-button" onclick="build.startBuildRun()">Begin Run</button></p>'
     build.isShowingBuilds = true
     el.style.display = "grid"

@@ -74,7 +74,7 @@ const b = {
       name: "depleted uranium rounds", //0
       description: `your <strong>bullets</strong> are +13% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
-      maxCount: 33,
+      maxCount: 9,
       effect() {
         b.modBulletSize += 0.13
       }
@@ -119,7 +119,7 @@ const b = {
     {
       name: "high explosives", //15
       description: "the radius of <strong class='color-e'>explosions</strong> are +20% <strong>larger</strong><br>immune to <strong>harm</strong> from <strong class='color-e'>explosions</strong>",
-      maxCount: 1,
+      maxCount: 3,
       count: 0,
       effect: () => {
         b.modExplosionRadius += 0.2;
@@ -129,7 +129,7 @@ const b = {
     {
       name: "auto-loading heuristics", //5
       description: "your <strong>delay</strong> after firing is +12% <strong>shorter</strong>",
-      maxCount: 9,
+      maxCount: 5,
       count: 0,
       effect() {
         b.modFireRate *= 0.88
@@ -147,7 +147,7 @@ const b = {
     {
       name: "Lorentzian topology", //7
       description: "your <strong>bullets</strong> last +33% <strong>longer</strong>",
-      maxCount: 9,
+      maxCount: 3,
       count: 0,
       effect() {
         b.isModBulletsLastLonger += 0.33
@@ -258,7 +258,7 @@ const b = {
     {
       name: "energy conservation", //18
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
-      maxCount: 9,
+      maxCount: 3,
       count: 0,
       effect() {
         b.modEnergySiphon += 0.15;
@@ -268,7 +268,7 @@ const b = {
     {
       name: "entropy exchange", //19
       description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
-      maxCount: 9,
+      maxCount: 3,
       count: 0,
       effect() {
         b.modHealthDrain += 0.015;
@@ -890,7 +890,7 @@ const b = {
         }
       },
     });
-    const SPEED = 8 + 3 * Math.random();
+    const SPEED = 4 + 8 * Math.random();
     const ANGLE = 2 * Math.PI * Math.random()
     Matter.Body.setVelocity(bullet[bIndex], {
       x: SPEED * Math.cos(ANGLE),
@@ -1202,13 +1202,13 @@ const b = {
       for (let i = 0; i < b.guns.length; i++) {
         b.inventory[i] = i;
         b.guns[i].have = true;
-        b.guns[i].ammo = b.guns[i].ammoPack * ammoPacks;
+        b.guns[i].ammo = Math.floor(b.guns[i].ammoPack * ammoPacks);
       }
     } else {
       if (!b.guns[gun].have) b.inventory.push(gun);
       if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
       b.guns[gun].have = true;
-      b.guns[gun].ammo = b.guns[gun].ammoPack * ammoPacks;
+      b.guns[gun].ammo = Math.floor(b.guns[gun].ammoPack * ammoPacks);
     }
     game.makeGunHUD();
   },
@@ -1397,208 +1397,7 @@ const b = {
       }
     },
     {
-      name: "rail gun", //5
-      description: "electro-magnetically launch a dense rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire", //and <strong>repel</strong> enemies
-      ammo: 0,
-      ammoPack: 1,
-      have: false,
-      isStarterGun: false,
-      fire() {
-        const me = bullet.length;
-        bullet[me] = Bodies.rectangle(0, 0, 0.012 * b.modBulletSize, 0.0025 * b.modBulletSize, {
-          density: 0.01, //0.001 is normal
-          //frictionAir: 0.01,			//restitution: 0,
-          // angle: 0,
-          // friction: 0.5,
-          frictionAir: 0,
-          dmg: 0, //damage done in addition to the damage from momentum
-          classType: "bullet",
-          collisionFilter: {
-            category: 0,
-            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-          },
-          minDmgSpeed: 5,
-          onDmg() {}, //this.endCycle = 0  //triggers despawn
-          onEnd() {}
-        });
-        mech.fireCDcycle = Infinity; // cool down
-        World.add(engine.world, bullet[me]); //add bullet to world
-        bullet[me].endCycle = Infinity
-        bullet[me].isCharging = true;
-        bullet[me].charge = 0;
-        bullet[me].do = function () {
-          if (this.isCharging) {
-            if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release
-              this.isCharging = false
-              mech.fireCDcycle = mech.cycle + 2; // set fire cool down
-              Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
-              this.endCycle = game.cycle + 140
-              this.collisionFilter.category = cat.bullet
-              Matter.Body.setPosition(this, {
-                x: mech.pos.x,
-                y: mech.pos.y
-              })
-              Matter.Body.setAngle(this, mech.angle)
-              const speed = 90
-              Matter.Body.setVelocity(this, {
-                x: mech.Vx / 2 + speed * this.charge * Math.cos(mech.angle),
-                y: mech.Vy / 2 + speed * this.charge * Math.sin(mech.angle)
-              });
-
-              //knock back
-              const KNOCK = ((mech.crouch) ? 0.1 : 0.5) * b.modBulletSize * b.modBulletSize * this.charge * this.charge
-              player.force.x -= KNOCK * Math.cos(mech.angle)
-              player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
-
-              //push away blocks when firing
-              let range = 700 * this.charge
-              for (let i = 0, len = body.length; i < len; ++i) {
-                const SUB = Vector.sub(body[i].position, mech.pos)
-                const DISTANCE = Vector.magnitude(SUB)
-
-                if (DISTANCE < range) {
-                  const DEPTH = Math.min(range - DISTANCE, 300)
-                  const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * body[i].mass)
-                  body[i].force.x += FORCE.x;
-                  body[i].force.y += FORCE.y - body[i].mass * (game.g * 1.5); //kick up a bit to give them some arc
-                }
-              }
-              for (let i = 0, len = mob.length; i < len; ++i) {
-                const SUB = Vector.sub(mob[i].position, mech.pos)
-                const DISTANCE = Vector.magnitude(SUB)
-
-                if (DISTANCE < range) {
-                  const DEPTH = Math.min(range - DISTANCE, 300)
-                  const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * mob[i].mass)
-                  mob[i].force.x += 1.5 * FORCE.x;
-                  mob[i].force.y += 1.5 * FORCE.y;
-                }
-              }
-            } else { // charging on mouse down
-              mech.fireCDcycle = Infinity //can't fire until mouse is released
-              if (mech.crouch) {
-                this.charge = this.charge * 0.965 + 0.035 // this.charge converges to 1
-              } else {
-                this.charge = this.charge * 0.985 + 0.015 // this.charge converges to 1
-              }
-              //draw laser targeting
-              let best;
-              let range = 3000
-              const dir = mech.angle
-              const path = [{
-                  x: mech.pos.x + 20 * Math.cos(dir),
-                  y: mech.pos.y + 20 * Math.sin(dir)
-                },
-                {
-                  x: mech.pos.x + range * Math.cos(dir),
-                  y: mech.pos.y + range * Math.sin(dir)
-                }
-              ];
-              const vertexCollision = function (v1, v1End, domain) {
-                for (let i = 0; i < domain.length; ++i) {
-                  let vertices = domain[i].vertices;
-                  const len = vertices.length - 1;
-                  for (let j = 0; j < len; j++) {
-                    results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                    if (results.onLine1 && results.onLine2) {
-                      const dx = v1.x - results.x;
-                      const dy = v1.y - results.y;
-                      const dist2 = dx * dx + dy * dy;
-                      if (dist2 < best.dist2) {
-                        best = {
-                          x: results.x,
-                          y: results.y,
-                          dist2: dist2,
-                          who: domain[i],
-                          v1: vertices[j],
-                          v2: vertices[j + 1]
-                        };
-                      }
-                    }
-                  }
-                  results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-                  if (results.onLine1 && results.onLine2) {
-                    const dx = v1.x - results.x;
-                    const dy = v1.y - results.y;
-                    const dist2 = dx * dx + dy * dy;
-                    if (dist2 < best.dist2) {
-                      best = {
-                        x: results.x,
-                        y: results.y,
-                        dist2: dist2,
-                        who: domain[i],
-                        v1: vertices[0],
-                        v2: vertices[len]
-                      };
-                    }
-                  }
-                }
-              };
-
-              //check for collisions
-              best = {
-                x: null,
-                y: null,
-                dist2: Infinity,
-                who: null,
-                v1: null,
-                v2: null
-              };
-              vertexCollision(path[0], path[1], mob);
-              vertexCollision(path[0], path[1], map);
-              vertexCollision(path[0], path[1], body);
-              if (best.dist2 != Infinity) { //if hitting something
-                path[path.length - 1] = {
-                  x: best.x,
-                  y: best.y
-                };
-              }
-
-              //draw laser beam
-              ctx.beginPath();
-              ctx.moveTo(path[0].x, path[0].y);
-              ctx.lineTo(path[1].x, path[1].y);
-              ctx.strokeStyle = `rgba(100,0,180,0.7)`;
-              ctx.lineWidth = this.charge * 1
-              ctx.setLineDash([10, 20]);
-              ctx.stroke();
-              ctx.setLineDash([0, 0]);
-
-              //draw magnetic field
-              const X = mech.pos.x
-              const Y = mech.pos.y
-              const unitVector = Vector.normalise(Vector.sub(game.mouseInGame, mech.pos))
-              const unitVectorPerp = Vector.perp(unitVector)
-
-              function magField(mag, arc) {
-                ctx.moveTo(X, Y);
-                ctx.bezierCurveTo(
-                  X + unitVector.x * mag, Y + unitVector.y * mag,
-                  X + unitVector.x * mag + unitVectorPerp.x * arc, Y + unitVector.y * mag + unitVectorPerp.y * arc,
-                  X + unitVectorPerp.x * arc, Y + unitVectorPerp.y * arc)
-                ctx.bezierCurveTo(
-                  X - unitVector.x * mag + unitVectorPerp.x * arc, Y - unitVector.y * mag + unitVectorPerp.y * arc,
-                  X - unitVector.x * mag, Y - unitVector.y * mag,
-                  X, Y)
-              }
-              ctx.fillStyle = `rgba(50,0,100,0.05)`;
-              for (let i = 3; i < 7; i++) {
-                const MAG = 8 * i * i * this.charge * (0.93 + 0.07 * Math.random())
-                const ARC = 6 * i * i * this.charge * (0.93 + 0.07 * Math.random())
-                ctx.beginPath();
-                magField(MAG, ARC)
-                magField(MAG, -ARC)
-                ctx.fill();
-              }
-            }
-          } else { //normal bullet behavior
-            this.force.y += this.mass * 0.00015 / this.charge; // low gravity that scales with charge
-          }
-        }
-      }
-    },
-    {
-      name: "missiles", //6
+      name: "missiles", //5
       description: "fire missiles that accelerate towards enemies<br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
       ammoPack: 3,
@@ -1694,7 +1493,7 @@ const b = {
         }
       }
     }, {
-      name: "flak", //7
+      name: "flak", //6
       description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
       ammo: 0,
       ammoPack: 6,
@@ -1735,7 +1534,7 @@ const b = {
         }
       }
     }, {
-      name: "grenades", //8
+      name: "grenades", //7
       description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
       ammo: 0,
       ammoPack: 6,
@@ -1762,7 +1561,7 @@ const b = {
         };
       }
     }, {
-      name: "vacuum bomb", //9
+      name: "vacuum bomb", //8
       description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br>click left mouse again to <strong>detonate</strong>",
       ammo: 0,
       ammoPack: 2,
@@ -1866,7 +1665,7 @@ const b = {
         }
       }
     }, {
-      name: "mine", //10
+      name: "mine", //9
       description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
       ammo: 0,
       ammoPack: 3,
@@ -1885,7 +1684,7 @@ const b = {
       }
     },
     {
-      name: "spores", //11
+      name: "spores", //10
       description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out enemies",
       ammo: 0,
       ammoPack: 4,
@@ -1930,7 +1729,7 @@ const b = {
       }
     },
     {
-      name: "drones", //12
+      name: "drones", //11
       description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
       ammo: 0,
       ammoPack: 9,
@@ -1942,7 +1741,7 @@ const b = {
       }
     },
     {
-      name: "foam", //13
+      name: "foam", //12
       description: "spray bubbly foam that <strong>sticks</strong> to enemies<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
       ammo: 0,
       ammoPack: 35,
@@ -2033,6 +1832,209 @@ const b = {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
         });
+      }
+    },
+    {
+      name: "rail gun", //13
+      description: "electro-magnetically launch a <strong>dense</strong> rod<br><strong>holding</strong> left mouse uses <strong class='color-f'>energy</strong> to charge ",
+      ammo: 0,
+      ammoPack: 2,
+      have: false,
+      isStarterGun: false,
+      fire() {
+        const me = bullet.length;
+        bullet[me] = Bodies.rectangle(0, 0, 0.015 * b.modBulletSize, 0.0015 * b.modBulletSize, {
+          density: 0.01, //0.001 is normal
+          //frictionAir: 0.01,			//restitution: 0,
+          // angle: 0,
+          // friction: 0.5,
+          frictionAir: 0,
+          dmg: 0, //damage done in addition to the damage from momentum
+          classType: "bullet",
+          collisionFilter: {
+            category: 0,
+            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
+          },
+          minDmgSpeed: 5,
+          onDmg() {}, //this.endCycle = 0  //triggers despawn
+          onEnd() {}
+        });
+        mech.fireCDcycle = Infinity; // cool down
+        World.add(engine.world, bullet[me]); //add bullet to world
+        bullet[me].endCycle = Infinity
+        bullet[me].charge = 0;
+        bullet[me].do = function () {
+          const FIELD_DRAIN = 0.002 //laser drains energy as well as bullets
+
+          if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release
+            //normal bullet behavior occurs after firing, overwrite this function
+            this.do = function () {
+              this.force.y += this.mass * 0.00015 / this.charge; // low gravity that scales with charge
+            }
+
+            mech.fireCDcycle = mech.cycle + 2; // set fire cool down
+            Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
+            this.endCycle = game.cycle + 140
+            this.collisionFilter.category = cat.bullet
+            Matter.Body.setPosition(this, {
+              x: mech.pos.x,
+              y: mech.pos.y
+            })
+            Matter.Body.setAngle(this, mech.angle)
+            const speed = 90
+            Matter.Body.setVelocity(this, {
+              x: mech.Vx / 2 + speed * this.charge * Math.cos(mech.angle),
+              y: mech.Vy / 2 + speed * this.charge * Math.sin(mech.angle)
+            });
+
+            //knock back
+            const KNOCK = ((mech.crouch) ? 0.1 : 0.5) * b.modBulletSize * b.modBulletSize * this.charge * this.charge
+            player.force.x -= KNOCK * Math.cos(mech.angle)
+            player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
+
+            //push away blocks when firing
+            let range = 700 * this.charge
+            for (let i = 0, len = body.length; i < len; ++i) {
+              const SUB = Vector.sub(body[i].position, mech.pos)
+              const DISTANCE = Vector.magnitude(SUB)
+
+              if (DISTANCE < range) {
+                const DEPTH = Math.min(range - DISTANCE, 300)
+                const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * body[i].mass)
+                body[i].force.x += FORCE.x;
+                body[i].force.y += FORCE.y - body[i].mass * (game.g * 1.5); //kick up a bit to give them some arc
+              }
+            }
+            for (let i = 0, len = mob.length; i < len; ++i) {
+              const SUB = Vector.sub(mob[i].position, mech.pos)
+              const DISTANCE = Vector.magnitude(SUB)
+
+              if (DISTANCE < range) {
+                const DEPTH = Math.min(range - DISTANCE, 300)
+                const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * mob[i].mass)
+                mob[i].force.x += 1.5 * FORCE.x;
+                mob[i].force.y += 1.5 * FORCE.y;
+              }
+            }
+          } else if (mech.fieldMeter > 0.005) { // charging on mouse down
+            mech.fireCDcycle = Infinity //can't fire until mouse is released
+            const lastCharge = this.charge
+            let chargeRate = (mech.crouch) ? 0.965 : 0.985
+            chargeRate *= Math.pow(b.modFireRate, 0.04)
+            this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
+            mech.fieldMeter -= (this.charge - lastCharge) * 0.25 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+
+            //draw laser targeting
+            let best;
+            let range = 3000
+            const dir = mech.angle
+            const path = [{
+                x: mech.pos.x + 20 * Math.cos(dir),
+                y: mech.pos.y + 20 * Math.sin(dir)
+              },
+              {
+                x: mech.pos.x + range * Math.cos(dir),
+                y: mech.pos.y + range * Math.sin(dir)
+              }
+            ];
+            const vertexCollision = function (v1, v1End, domain) {
+              for (let i = 0; i < domain.length; ++i) {
+                let vertices = domain[i].vertices;
+                const len = vertices.length - 1;
+                for (let j = 0; j < len; j++) {
+                  results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                  if (results.onLine1 && results.onLine2) {
+                    const dx = v1.x - results.x;
+                    const dy = v1.y - results.y;
+                    const dist2 = dx * dx + dy * dy;
+                    if (dist2 < best.dist2) {
+                      best = {
+                        x: results.x,
+                        y: results.y,
+                        dist2: dist2,
+                        who: domain[i],
+                        v1: vertices[j],
+                        v2: vertices[j + 1]
+                      };
+                    }
+                  }
+                }
+                results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                if (results.onLine1 && results.onLine2) {
+                  const dx = v1.x - results.x;
+                  const dy = v1.y - results.y;
+                  const dist2 = dx * dx + dy * dy;
+                  if (dist2 < best.dist2) {
+                    best = {
+                      x: results.x,
+                      y: results.y,
+                      dist2: dist2,
+                      who: domain[i],
+                      v1: vertices[0],
+                      v2: vertices[len]
+                    };
+                  }
+                }
+              }
+            };
+
+            //check for collisions
+            best = {
+              x: null,
+              y: null,
+              dist2: Infinity,
+              who: null,
+              v1: null,
+              v2: null
+            };
+            vertexCollision(path[0], path[1], mob);
+            vertexCollision(path[0], path[1], map);
+            vertexCollision(path[0], path[1], body);
+            if (best.dist2 != Infinity) { //if hitting something
+              path[path.length - 1] = {
+                x: best.x,
+                y: best.y
+              };
+            }
+
+            //draw laser beam
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            ctx.lineTo(path[1].x, path[1].y);
+            ctx.strokeStyle = `rgba(100,0,180,0.7)`;
+            ctx.lineWidth = this.charge * 1
+            ctx.setLineDash([10, 20]);
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+
+            //draw magnetic field
+            const X = mech.pos.x
+            const Y = mech.pos.y
+            const unitVector = Vector.normalise(Vector.sub(game.mouseInGame, mech.pos))
+            const unitVectorPerp = Vector.perp(unitVector)
+
+            function magField(mag, arc) {
+              ctx.moveTo(X, Y);
+              ctx.bezierCurveTo(
+                X + unitVector.x * mag, Y + unitVector.y * mag,
+                X + unitVector.x * mag + unitVectorPerp.x * arc, Y + unitVector.y * mag + unitVectorPerp.y * arc,
+                X + unitVectorPerp.x * arc, Y + unitVectorPerp.y * arc)
+              ctx.bezierCurveTo(
+                X - unitVector.x * mag + unitVectorPerp.x * arc, Y - unitVector.y * mag + unitVectorPerp.y * arc,
+                X - unitVector.x * mag, Y - unitVector.y * mag,
+                X, Y)
+            }
+            ctx.fillStyle = `rgba(50,0,100,0.05)`;
+            for (let i = 3; i < 7; i++) {
+              const MAG = 8 * i * i * this.charge * (0.93 + 0.07 * Math.random())
+              const ARC = 6 * i * i * this.charge * (0.93 + 0.07 * Math.random())
+              ctx.beginPath();
+              magField(MAG, ARC)
+              magField(MAG, -ARC)
+              ctx.fill();
+            }
+          }
+        }
       }
     },
     {
