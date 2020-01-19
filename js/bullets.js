@@ -16,7 +16,8 @@ const b = {
   modSpores: null,
   isModImmuneExplosion: null,
   isModDroneOnDamage: null,
-  modExtraDmg: null,
+  modAcidDmg: null,
+  isModAcidDmg: null,
   annihilation: null,
   modRecursiveHealing: null,
   modSquirrelFx: null,
@@ -45,7 +46,8 @@ const b = {
     b.isModBulletsLastLonger = 1;
     b.isModImmortal = false;
     b.modSpores = 0;
-    b.modExtraDmg = 0;
+    b.modAcidDmg = 0;
+    b.isModAcidDmg = false;
     game.playerDmgColor = "rgba(0,0,0,0.7)"
     b.isModAnnihilation = false;
     b.modRecursiveHealing = 1;
@@ -70,6 +72,15 @@ const b = {
       b.mods[i].count = 0
     }
   },
+  acidModSetCheck() {
+    if (mech.health > 0.9) {
+      game.playerDmgColor = "rgba(0,80,80,0.9)"
+      b.isModAcidDmg = true;
+    } else {
+      game.playerDmgColor = "rgba(0,0,0,0.7)"
+      b.isModAcidDmg = false;
+    }
+  },
   mods: [{
       name: "depleted uranium rounds", //0
       description: `your <strong>bullets</strong> are +13% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
@@ -81,12 +92,12 @@ const b = {
     },
     {
       name: "fluoroantimonic acid", //1
-      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>instant damage, unaffected by momentum",
-      maxCount: 9,
+      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>90% health</strong>",
+      maxCount: 1,
       count: 0,
       effect() {
-        b.modExtraDmg += 0.3
-        game.playerDmgColor = "rgba(0,80,80,0.9)"
+        b.modAcidDmg = 0.9
+        b.acidModSetCheck();
       }
     },
     {
@@ -589,100 +600,6 @@ const b = {
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (mob[i].alive && !mob[i].isShielded) {
         sub = Vector.sub(where, mob[i].position);
-        dist = Vector.magnitude(sub) - mob[i].radius;
-        if (dist < radius) {
-          if (mob[i].shield) dmg *= 3 //balancing explosion dmg to shields
-          mob[i].damage(dmg * damageScale);
-          mob[i].locatePlayer();
-          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 50);
-          mob[i].force.x += knock.x;
-          mob[i].force.y += knock.y;
-          radius *= 0.93 //reduced range for each additional explosion target
-          damageScale *= 0.8 //reduced damage for each additional explosion target 
-        } else if (!mob[i].seePlayer.recall && dist < alertRange) {
-          mob[i].locatePlayer();
-          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 80);
-          mob[i].force.x += knock.x;
-          mob[i].force.y += knock.y;
-        }
-      }
-    }
-  },
-  explode(me) {
-    // typically explode is used for some bullets with .onEnd
-    let radius = bullet[me].explodeRad * b.modExplosionRadius
-    //add dmg to draw queue
-    game.drawList.push({
-      x: bullet[me].position.x,
-      y: bullet[me].position.y,
-      radius: radius,
-      color: "rgba(255,25,0,0.6)",
-      time: game.drawTime
-    });
-    let dist, sub, knock;
-    let dmg = b.dmgScale * radius * 0.009;
-
-    const alertRange = 100 + radius * 2; //alert range
-    //add alert to draw queue
-    game.drawList.push({
-      x: bullet[me].position.x,
-      y: bullet[me].position.y,
-      radius: alertRange,
-      color: "rgba(100,20,0,0.03)",
-      time: game.drawTime
-    });
-
-    //player damage and knock back
-    sub = Vector.sub(bullet[me].position, player.position);
-    dist = Vector.magnitude(sub);
-    if (dist < radius) {
-      if (!b.isModImmuneExplosion) mech.damage(radius * 0.0002);
-      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
-      player.force.x += knock.x;
-      player.force.y += knock.y;
-      mech.drop();
-    } else if (dist < alertRange) {
-      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
-      player.force.x += knock.x;
-      player.force.y += knock.y;
-      mech.drop();
-    }
-
-    //body knock backs
-    for (let i = 0, len = body.length; i < len; ++i) {
-      sub = Vector.sub(bullet[me].position, body[i].position);
-      dist = Vector.magnitude(sub);
-      if (dist < radius) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 18);
-        body[i].force.x += knock.x;
-        body[i].force.y += knock.y;
-      } else if (dist < alertRange) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 40);
-        body[i].force.x += knock.x;
-        body[i].force.y += knock.y;
-      }
-    }
-
-    //power up knock backs
-    for (let i = 0, len = powerUp.length; i < len; ++i) {
-      sub = Vector.sub(bullet[me].position, powerUp[i].position);
-      dist = Vector.magnitude(sub);
-      if (dist < radius) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 30);
-        powerUp[i].force.x += knock.x;
-        powerUp[i].force.y += knock.y;
-      } else if (dist < alertRange) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 45);
-        powerUp[i].force.x += knock.x;
-        powerUp[i].force.y += knock.y;
-      }
-    }
-
-    //mob damage and knock back with alert
-    let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
-    for (let i = 0, len = mob.length; i < len; ++i) {
-      if (mob[i].alive && !mob[i].isShielded) {
-        sub = Vector.sub(bullet[me].position, mob[i].position);
         dist = Vector.magnitude(sub) - mob[i].radius;
         if (dist < radius) {
           if (mob[i].shield) dmg *= 3 //balancing explosion dmg to shields
@@ -1346,22 +1263,22 @@ const b = {
       name: "wave beam", //4
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
       ammo: 0,
-      ammoPack: 32,
+      ammoPack: 35,
       have: false,
       isStarterGun: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle
-        const SCALE = (mech.crouch ? 0.963 : 0.95) + 0.03 * Math.min(1, 0.5 * (b.isModBulletsLastLonger - 1))
+        const SCALE = (mech.crouch ? 0.967 : 0.955) + 0.03 * Math.min(1, 0.5 * (b.isModBulletsLastLonger - 1))
         const wiggleMag = ((mech.crouch) ? 0.004 : 0.005) * ((mech.flipLegs === 1) ? 1 : -1)
         bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 10, 10 * b.modBulletSize, {
           angle: dir,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
-          endCycle: game.cycle + Math.floor((mech.crouch ? 155 : 120) * b.isModBulletsLastLonger),
+          endCycle: game.cycle + Math.floor((mech.crouch ? 170 : 130) * b.isModBulletsLastLonger),
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.3, //damage done in addition to the damage from momentum
+          dmg: 0.4, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
@@ -1418,7 +1335,9 @@ const b = {
         bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
         bullet[me].explodeRad = 170 + 60 * Math.random();
         bullet[me].lookFrequency = Math.floor(31 + Math.random() * 11);
-        bullet[me].onEnd = b.explode; //makes bullet do explosive damage at end
+        bullet[me].onEnd = function () {
+          b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+        }
         bullet[me].onDmg = function () {
           this.tryToLockOn();
           // this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
@@ -1524,7 +1443,9 @@ const b = {
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
           bullet[me].explodeRad = (mech.crouch ? 85 : 60) + (Math.random() - 0.5) * 50;
-          bullet[me].onEnd = b.explode;
+          bullet[me].onEnd = function () {
+            b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+          }
           bullet[me].onDmg = function () {
             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
           };
@@ -1550,7 +1471,9 @@ const b = {
         bullet[me].endCycle = game.cycle + Math.floor(mech.crouch ? 120 : 80);
         bullet[me].restitution = 0.2;
         bullet[me].explodeRad = 275;
-        bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
+        bullet[me].onEnd = function () {
+          b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+        }
         bullet[me].minDmgSpeed = 1;
         bullet[me].onDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
@@ -1578,7 +1501,9 @@ const b = {
         bullet[me].friction = 0.3;
         bullet[me].endCycle = Infinity
         bullet[me].explodeRad = 380 + Math.floor(Math.random() * 60);
-        bullet[me].onEnd = b.explode; //makes bullet do explosive damage before despawn
+        bullet[me].onEnd = function () {
+          b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+        }
         bullet[me].onDmg = function () {
           // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
         };
@@ -1732,7 +1657,7 @@ const b = {
       name: "drones", //11
       description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
       ammo: 0,
-      ammoPack: 9,
+      ammoPack: 10,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1836,7 +1761,7 @@ const b = {
     },
     {
       name: "rail gun", //13
-      description: "electro-magnetically launch a <strong>dense</strong> rod<br><strong>holding</strong> left mouse uses <strong class='color-f'>energy</strong> to charge ",
+      description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
       ammoPack: 2,
       have: false,

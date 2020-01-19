@@ -2,6 +2,11 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: do something when at full health
+  extra damage  (seems too simple)
+  power up drop rate?  (hard to see directly)
+  regenerate (if above 90% max health)
+
 add mouse constraint in testing mode
   https://github.com/liabru/matter-js/blob/master/examples/events.js
 
@@ -184,28 +189,28 @@ const build = {
     build.calculateCustomDifficulty()
   },
   makeGrid() {
-    let text =
-      `<div style="display: flex; justify-content: space-evenly; align-items: center;">
-      <svg class="SVG-button" onclick="build.startBuildRun()" width="105" height="55">
-          <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
-            <text x="13" y="40">start</text>
-          </g>
-        </svg>
-        <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
-          <g stroke='none' fill='#333' stroke-width="2" font-size="22px" font-family="Ariel, sans-serif">
-            <text x="10" y="24">reset</text>
-          </g>
-        </svg>
-      </div>
-      <div class="build-grid-module" style="text-align:center; font-size: 1.00em; line-height: 175%;background-color:#c4ccd8;">
-      <div id="starting-level"></div>
-      <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-					<select name="difficulty-select" id="difficulty-select-custom">
-						<option value="0">easy</option>
-						<option value="1" selected>normal</option>
-						<option value="2">hard</option>
-						<option value="6">why...</option>
-					</select>
+    let text = `
+<div style="display: flex; justify-content: space-around; align-items: center;">
+    <svg class="SVG-button" onclick="build.startBuildRun()" width="105" height="55">
+      <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
+        <text x="13" y="40">start</text>
+      </g>
+    </svg>
+    <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
+      <g stroke='none' fill='#333' stroke-width="2" font-size="22px" font-family="Ariel, sans-serif">
+        <text x="10" y="24">reset</text>
+      </g>
+    </svg>
+  </div>
+  <div class="build-grid-module" style="text-align:center; font-size: 1.00em; line-height: 175%;background-color:#c4ccd8;">
+  <div id="starting-level"></div>
+  <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
+  <select name="difficulty-select" id="difficulty-select-custom">
+    <option value="0">easy</option>
+    <option value="1" selected>normal</option>
+    <option value="2">hard</option>
+    <option value="6">why...</option>
+  </select>
     </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`

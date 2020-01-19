@@ -437,6 +437,7 @@ const mech = {
   addHealth(heal) {
     mech.health += heal * game.healScale;
     if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+    b.acidModSetCheck();
     mech.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
@@ -453,6 +454,7 @@ const mech = {
       mech.death();
       return;
     }
+    b.acidModSetCheck();
     mech.displayHealth();
     document.getElementById("dmg").style.transition = "opacity 0s";
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
