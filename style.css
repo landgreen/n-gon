@@ -21,6 +21,11 @@ select {
   top: "-15px"; */
 }
 
+a {
+  text-decoration: none;
+  color: #08c;
+}
+
 #splash {
   user-select: none;
   position: absolute;
@@ -119,16 +124,55 @@ summary {
   color: #aaa;
 }
 
+.pause-grid {
+  padding: 1px;
+  margin: 0px;
+
+  display: none;
+  grid-template-columns: 316px;
+  /* grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); */
+  grid-auto-rows: minmax(auto, auto);
+  grid-gap: 0px;
+  align-content: space-between;
+
+  z-index: 10;
+  font-size: 1.3em;
+}
+
+#pause-grid-right {
+  justify-content: end;
+  position: relative;
+}
+
+#pause-grid-left {
+  justify-content: start;
+  position: relative;
+}
+
+.pause-grid-module {
+  margin: -1px;
+  padding: 10px;
+  line-height: 170%;
+  /* border-radius: 6px; */
+  border: 2px #000 solid;
+  background-color: #fff;
+  font-size: 0.65em;
+}
+
 #build-grid {
-  padding: 16px;
+  /* align-content: space-between; */
+  padding: 1px;
+  /* padding: 16px; */
   margin: 0px;
   border: 0px;
   background-color: #c4ccd8;
 
   display: none;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  grid-auto-flow: row;
   grid-auto-rows: minmax(auto, auto);
-  grid-gap: 16px;
+  grid-gap: 0px;
+  /* grid-gap: 16px; */
 
   position: relative;
   bottom: 0px;
@@ -137,10 +181,14 @@ summary {
 }
 
 .build-grid-module {
+  margin: -1px;
   padding: 10px;
   line-height: 170%;
-  border-radius: 6px;
-  background: #fff;
+  /* border-radius: 6px; */
+  border: 2px #000 solid;
+  background-color: #fff;
+
+  line-height: 170%;
   font-size: 0.65em;
 }
 
@@ -156,8 +204,8 @@ summary {
 
 #info {
   position: absolute;
-  bottom: 0px;
-  left: 1px;
+  bottom: 3px;
+  left: 3px;
   z-index: 12;
   font-size: 1.5em;
 }
@@ -165,7 +213,8 @@ summary {
 #details-div {
   padding: 10px;
   border-radius: 8px;
-  background-color: #ddd;
+  border: 2px #333 solid;
+  background-color: #eee;
 }
 
 #dmg {

@@ -45,13 +45,13 @@ const game = {
     game.draw.cons();
     game.draw.body();
     mobs.loop();
+    mobs.healthBar();
     mech.draw();
     mech.hold();
     level.drawFills();
     game.draw.drawMapPath();
     b.fire();
     b.bulletActions();
-    mobs.healthBar();
     game.drawCircle();
     ctx.restore();
     game.drawCursor();
@@ -272,19 +272,19 @@ const game = {
 
     if (keys[80] && !game.isChoosing) { //p  for pause
       if (game.paused) {
+        build.unPauseGrid()
         game.paused = false;
+        level.levelAnnounce();
+        document.body.style.cursor = "none";
         requestAnimationFrame(cycle);
       } else {
         game.paused = true;
         game.replaceTextLog = true;
-        game.makeTextLog("<h1>PAUSED</h1>", 1);
-        // let text = "<h1>PAUSED</h1><br><div style='font-size: 85%;'>"
-        // //output current mod, field, and gun info when paused
-        // if (mech.fieldMode !== 0) text += "<br><p><strong style='font-size:130%;'>" + mech.fieldUpgrades[mech.fieldMode].name + "</strong><br>" + mech.fieldUpgrades[mech.fieldMode].description + "</p>"
-        // if (b.mod !== null) text += "<br><p><strong style='font-size:130%;'>" + b.mods[b.mod].name + "</strong><br>" + b.mods[b.mod].description + "</p>"
-        // if (b.activeGun !== null) text += "<br><p><strong style='font-size:130%;'>" + b.guns[b.activeGun].name + "</strong><br>" + b.guns[b.activeGun].description + "</p>"
-        // text += "</div>"
-        // game.makeTextLog(text, 1);
+        // game.makeTextLog("<h1>PAUSED</h1>", 1);
+        //display grid
+        // document.title = "PAUSED: press P to resume";
+        build.pauseGrid()
+        document.body.style.cursor = "auto";
       }
     }
 
@@ -486,6 +486,9 @@ const game = {
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("info").style.display = "inline";
     document.getElementById("build-button").style.display = "inline"
+    document.getElementById("build-grid").style.display = "none"
+    document.getElementById("pause-grid-left").style.display = "none"
+    document.getElementById("pause-grid-right").style.display = "none"
     isShowingBuilds = false
     document.getElementById("splash").style.display = "inline";
     document.getElementById("dmg").style.display = "none";

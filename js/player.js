@@ -293,7 +293,7 @@ const mech = {
     //smoothly move leg height towards height goal
     mech.yOff = mech.yOff * 0.85 + mech.yOffGoal * 0.15;
   },
-  alive: true,
+  alive: false,
   death() {
     if (b.isModImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
       spawn.setSpawnList(); //new mob types
@@ -437,7 +437,7 @@ const mech = {
   addHealth(heal) {
     mech.health += heal * game.healScale;
     if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
-    b.acidModSetCheck();
+    b.modOnHealthChange();
     mech.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
@@ -454,7 +454,7 @@ const mech = {
       mech.death();
       return;
     }
-    b.acidModSetCheck();
+    b.modOnHealthChange();
     mech.displayHealth();
     document.getElementById("dmg").style.transition = "opacity 0s";
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
@@ -520,15 +520,6 @@ const mech = {
     //prevents damage happening too quick
   },
   buttonCD: 0, //cool down for player buttons
-  usePowerUp(i) {
-    powerUp[i].effect();
-    Matter.World.remove(engine.world, powerUp[i]);
-    powerUp.splice(i, 1);
-    if (b.isModMassEnergy) {
-      mech.fieldMeter = mech.fieldEnergyMax;
-      mech.addHealth(0.05);
-    }
-  },
   drawLeg(stroke) {
     // if (game.mouseInGame.x > mech.pos.x) {
     if (mech.angle > -Math.PI / 2 && mech.angle < Math.PI / 2) {
@@ -874,23 +865,40 @@ const mech = {
       const dyP = mech.pos.y - powerUp[i].position.y;
       const dist2 = dxP * dxP + dyP * dyP;
       // float towards player  if looking at and in range  or  if very close to player
-      if (dist2 < grabPowerUpRange2 && mech.lookingAt(powerUp[i]) || dist2 < 16000) {
-        if (dist2 < 5000) { //use power up if it is close enough
-          Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
-            x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
-            y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
+      if (dist2 < grabPowerUpRange2 && (mech.lookingAt(powerUp[i]) || dist2 < 16000)) {
+        // mech.fieldMeter -= mech.fieldRegen * 0.5;
+        if (mech.health === mech.maxHealth && powerUp[i].name === "heal" && dist2 < 16000) {
+          mech.fieldCDcycle = mech.cycle + 30;
+          //push away
+          Matter.Body.setVelocity(powerUp[i], {
+            x: powerUp[i].velocity.x * 0,
+            y: powerUp[i].velocity.y * 0
           });
-          mech.usePowerUp(i);
-          return;
+          powerUp[i].force.x -= 0.0005 * dxP * powerUp[i].mass;
+          powerUp[i].force.y -= 0.0005 * dyP * powerUp[i].mass;
+        } else {
+          powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
+          powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+          //extra friction
+          Matter.Body.setVelocity(powerUp[i], {
+            x: powerUp[i].velocity.x * 0.11,
+            y: powerUp[i].velocity.y * 0.11
+          });
+          if (dist2 < 5000) { //use power up if it is close enough
+            if (b.isModMassEnergy) {
+              mech.fieldMeter = mech.fieldEnergyMax;
+              mech.addHealth(0.05);
+            }
+            Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
+              x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
+              y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
+            });
+            powerUp[i].effect();
+            Matter.World.remove(engine.world, powerUp[i]);
+            powerUp.splice(i, 1);
+            return; //because the array order is messed up after splice
+          }
         }
-        mech.fieldMeter -= mech.fieldRegen * 0.5;
-        powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
-        powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
-        //extra friction
-        Matter.Body.setVelocity(powerUp[i], {
-          x: powerUp[i].velocity.x * 0.11,
-          y: powerUp[i].velocity.y * 0.11
-        });
       }
     }
   },

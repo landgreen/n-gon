@@ -72,13 +72,13 @@ const b = {
       b.mods[i].count = 0
     }
   },
-  acidModSetCheck() {
-    if (mech.health > 0.9) {
+  modOnHealthChange() {
+    if (b.isModAcidDmg && mech.health > 0.9) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
-      b.isModAcidDmg = true;
+      b.modAcidDmg = 1.4
     } else {
       game.playerDmgColor = "rgba(0,0,0,0.7)"
-      b.isModAcidDmg = false;
+      b.modAcidDmg = 0
     }
   },
   mods: [{
@@ -96,8 +96,8 @@ const b = {
       maxCount: 1,
       count: 0,
       effect() {
-        b.modAcidDmg = 0.9
-        b.acidModSetCheck();
+        b.isModAcidDmg = true;
+        b.modOnHealthChange();
       }
     },
     {
@@ -320,7 +320,7 @@ const b = {
       maxCount: 1,
       count: 0,
       effect: () => {
-        b.isModMassEnergy = true // used in mech.usePowerUp
+        b.isModMassEnergy = true // used in mech.grabPowerUp
         mech.fieldMeter = mech.fieldEnergyMax
       }
     },

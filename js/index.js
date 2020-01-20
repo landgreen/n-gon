@@ -2,6 +2,9 @@
 /* TODO:  *******************************************
 *****************************************************
 
+missiles don't explode reliably enough
+  they can bounce, which is cool, but they should still explode right after a bounce
+
 mod: do something when at full health
   extra damage  (seems too simple)
   power up drop rate?  (hard to see directly)
@@ -191,9 +194,9 @@ const build = {
   makeGrid() {
     let text = `
 <div style="display: flex; justify-content: space-around; align-items: center;">
-    <svg class="SVG-button" onclick="build.startBuildRun()" width="105" height="55">
+    <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="55">
       <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
-        <text x="13" y="40">start</text>
+        <text x="18" y="40">start</text>
       </g>
     </svg>
     <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
@@ -202,7 +205,7 @@ const build = {
       </g>
     </svg>
   </div>
-  <div class="build-grid-module" style="text-align:center; font-size: 1.00em; line-height: 175%;background-color:#c4ccd8;">
+  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
   <div id="starting-level"></div>
   <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
   <select name="difficulty-select" id="difficulty-select-custom">
@@ -243,6 +246,42 @@ const build = {
     document.getElementById("build-grid").style.display = "grid"
     build.calculateCustomDifficulty()
     document.getElementById("difficulty-select-custom").value = localSettings.difficultyMode
+  },
+  pauseGrid() {
+    // let text = `<div class="pause-grid-module" style="border:0px;background:none;"></div>`
+    let text = `<div class="pause-grid-module"><span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Press P to unpause</div>`;
+    let countGuns = 0
+    let countMods = 0
+    for (let i = 0, len = b.guns.length; i < len; i++) {
+      if (b.guns[i].have) {
+        text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+        countGuns++
+      }
+    }
+    let el = document.getElementById("pause-grid-left")
+    el.style.display = "grid"
+    el.innerHTML = text
+
+    text = "";
+    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      if (b.mods[i].count > 0) {
+        text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+        countMods++
+      }
+    }
+    el = document.getElementById("pause-grid-right")
+    el.style.display = "grid"
+    el.innerHTML = text
+    if (countMods > 5 || countGuns > 6) {
+      document.body.style.overflowY = "scroll";
+      document.body.style.overflowX = "hidden";
+    }
+  },
+  unPauseGrid() {
+    document.body.style.overflow = "hidden"
+    document.getElementById("pause-grid-left").style.display = "none"
+    document.getElementById("pause-grid-right").style.display = "none"
   },
   calculateCustomDifficulty() {
     let difficulty = build.list.length * game.difficultyMode
@@ -380,7 +419,7 @@ document.body.addEventListener("mousedown", (e) => {
 const keys = [];
 document.body.addEventListener("keydown", (e) => {
   keys[e.keyCode] = true;
-  game.keyPress();
+  if (mech.alive) game.keyPress();
 });
 
 document.body.addEventListener("keyup", (e) => {
@@ -388,10 +427,12 @@ document.body.addEventListener("keyup", (e) => {
 });
 
 document.body.addEventListener("wheel", (e) => {
-  if (e.deltaY > 0) {
-    game.nextGun();
-  } else {
-    game.previousGun();
+  if (!game.paused) {
+    if (e.deltaY > 0) {
+      game.nextGun();
+    } else {
+      game.previousGun();
+    }
   }
 }, {
   passive: true

@@ -14,12 +14,12 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       level.difficultyIncrease(10)
-      b.giveGuns(0)
+      // b.giveGuns(0)
       // mech.setField(3)
       b.giveMod(1);
 
-      // level.intro(); //starting level
-      level.testingMap();
+      level.intro(); //starting level
+      // level.testingMap();
       // level.bosses();
       // level.skyscrapers();
       // level.aerie();
