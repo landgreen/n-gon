@@ -74,7 +74,7 @@ const level = {
   //******************************************************************************************************************
   testingMap() {
     //start with all guns
-    level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
+    // level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
     game.zoomScale = 1700 //1400 is normal
     spawn.setSpawnList();
     mech.setPosToSpawn(-75, -60); //normal spawn
@@ -126,8 +126,9 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.bomber(800, -450);
-    spawn.hopper(400, -1050);
-    // spawn.starter(1200, -1050);
+    spawn.laserBoss(400, -750);
+    // spawn.laser(400, -550);
+    spawn.starter(1200, -1050);
     // spawn.nodeBoss(-600, -550, "starter");
     // spawn.starter(800, -150);
     // spawn.beamer(800, -150);

@@ -4,19 +4,19 @@ const powerUps = {
   choose(type, index) {
     if (type === "gun") {
       b.giveGuns(index)
-      game.replaceTextLog = true;
-      game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[index].name}</strong><br><br>${b.guns[index].description}`, 500);
-      game.replaceTextLog = false;
+      // game.replaceTextLog = true;
+      // game.makeTextLog(`${game.SVGleftMouse} <strong style='font-size:30px;'>${b.guns[index].name}</strong><br><br>${b.guns[index].description}`, 500);
+      // game.replaceTextLog = false;
     } else if (type === "field") {
       mech.setField(index)
-      game.replaceTextLog = true;
-      game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
-      game.replaceTextLog = false;
+      // game.replaceTextLog = true;
+      // game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
+      // game.replaceTextLog = false;
     } else if (type === "mod") {
       b.giveMod(index)
-      game.replaceTextLog = true;
-      game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[index].name}</strong><br><br> ${b.mods[index].description}`, 500);
-      game.replaceTextLog = false;
+      // game.replaceTextLog = true;
+      // game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[index].name}</strong><br><br> ${b.mods[index].description}`, 500);
+      // game.replaceTextLog = false;
     }
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
@@ -139,7 +139,12 @@ const powerUps = {
       function doNotHave(who, skip1 = -1, skip2 = -1, skip3 = -1) {
         let options = [];
         for (let i = 0; i < who.length; i++) {
-          if (who[i].count < who[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
+          if (who[i].count < who[i].maxCount &&
+            i !== skip1 && i !== skip2 && i !== skip3 &&
+            (b.modCount > 4 || who[i].name !== "Born rule")
+          ) {
+            options.push(i);
+          }
         }
         if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
       }

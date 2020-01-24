@@ -650,7 +650,6 @@ const spawn = {
     }
   },
   laser(x, y, radius = 30) {
-    //only on level 1
     mobs.spawn(x, y, 3, radius, "#f00");
     let me = mob[mob.length - 1];
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
@@ -664,6 +663,128 @@ const spawn = {
       this.seePlayerByLookingAt();
       this.attraction();
       this.laser();
+    };
+  },
+  laserBoss(x, y, radius = 130) {
+    mobs.spawn(x, y, 3, radius, "#f00");
+    let me = mob[mob.length - 1];
+    me.startingPosition = {
+      x: x,
+      y: y
+    }
+    // me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+    // Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+    Matter.Body.setDensity(me, 0.004 + 0.001 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    // spawn.shield(me, x, y, 1);
+    me.onDeath = function () {
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    };
+    me.laser = function (where, angle) {
+      const vertexCollision = function (v1, v1End, domain) {
+        for (let i = 0; i < domain.length; ++i) {
+          let vertices = domain[i].vertices;
+          const len = vertices.length - 1;
+          for (let j = 0; j < len; j++) {
+            results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+            if (results.onLine1 && results.onLine2) {
+              const dx = v1.x - results.x;
+              const dy = v1.y - results.y;
+              const dist2 = dx * dx + dy * dy;
+              if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = {
+                x: results.x,
+                y: results.y,
+                dist2: dist2,
+                who: domain[i],
+                v1: vertices[j],
+                v2: vertices[j + 1]
+              };
+            }
+          }
+          results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+          if (results.onLine1 && results.onLine2) {
+            const dx = v1.x - results.x;
+            const dy = v1.y - results.y;
+            const dist2 = dx * dx + dy * dy;
+            if (dist2 < best.dist2) best = {
+              x: results.x,
+              y: results.y,
+              dist2: dist2,
+              who: domain[i],
+              v1: vertices[0],
+              v2: vertices[len]
+            };
+          }
+        }
+      };
+
+      const seeRange = 4000;
+      best = {
+        x: null,
+        y: null,
+        dist2: Infinity,
+        who: null,
+        v1: null,
+        v2: null
+      };
+      const look = {
+        x: where.x + seeRange * Math.cos(angle),
+        y: where.y + seeRange * Math.sin(angle)
+      };
+      vertexCollision(where, look, mob);
+      vertexCollision(where, look, map);
+      vertexCollision(where, look, body);
+      if (!mech.isStealth) vertexCollision(where, look, [player]);
+      //hitting mob
+      if (best.who) {
+        if (best.who.mob) {
+          // dmg = 0.03 * game.dmgScale;
+          best.who.damage(0.1);
+          //draw damage
+          game.drawList.push({ //add dmg to draw queue
+            x: best.x,
+            y: best.y,
+            radius: Math.sqrt(dmg) * 50,
+            color: game.playerDmgColor,
+            time: game.drawTime
+          });
+        }
+        // hitting player
+        if (best.who === player) {
+          dmg = 0.03 * game.dmgScale;
+          mech.damage(dmg);
+          //draw damage
+          game.drawList.push({ //add dmg to draw queue
+            x: best.x,
+            y: best.y,
+            radius: dmg * 2000,
+            color: game.mobDmgColor,
+            time: game.drawTime
+          });
+        }
+      }
+      //draw beam
+      if (best.dist2 === Infinity) best = look;
+      ctx.moveTo(where.x, where.y);
+      ctx.lineTo(best.x, best.y);
+    }
+    me.do = function () {
+      this.torque = this.lookTorque * this.inertia * 0.2;
+      Matter.Body.setVelocity(this, {
+        x: 0,
+        y: 0
+      });
+      Matter.Body.setPosition(this, this.startingPosition);
+
+      ctx.beginPath();
+      this.laser(this.vertices[0], this.angle + Math.PI / 3);
+      this.laser(this.vertices[1], this.angle + Math.PI);
+      this.laser(this.vertices[2], this.angle - Math.PI / 3);
+      ctx.strokeStyle = "#f00"; // Purple path
+      ctx.lineWidth = 3;
+      ctx.setLineDash([50 + 120 * Math.random(), 55 * Math.random()]);
+      ctx.stroke(); // Draw it
+      ctx.setLineDash([0, 0]);
+      // this.laser(this.vertices[2], this.angle + Math.PI / 3);
     };
   },
   striker(x, y, radius = 14 + Math.ceil(Math.random() * 25)) {

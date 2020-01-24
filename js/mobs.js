@@ -359,7 +359,7 @@ const mobs = {
             dmg = 0.002 * game.dmgScale;
             mech.damage(dmg);
             //draw damage
-            ctx.fillStyle = color;
+            ctx.fillStyle = "#f00";
             ctx.beginPath();
             ctx.arc(best.x, best.y, dmg * 2000, 0, 2 * Math.PI);
             ctx.fill();

@@ -2,6 +2,11 @@
 /* TODO:  *******************************************
 *****************************************************
 
+gun/field: portals
+  use the code from mines to get them to stick to walls
+    or lasers
+  alternate red and blue portals
+  
 missiles don't explode reliably enough
   they can bounce, which is cool, but they should still explode right after a bounce
 
@@ -249,7 +254,14 @@ const build = {
   },
   pauseGrid() {
     // let text = `<div class="pause-grid-module" style="border:0px;background:none;"></div>`
-    let text = `<div class="pause-grid-module"><span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Press P to unpause</div>`;
+    let text = `
+    <div class="pause-grid-module">
+      <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
+    </div>`;
+    // <div class="pause-grid-module" style="display: flex; justify-content: space-between;padding-bottom:20px;">
+    // <span>${game.SVGleftMouse} fire gun</span>
+    // <span>${game.SVGrightMouse} use field</span>
+    // </div>
     let countGuns = 0
     let countMods = 0
     for (let i = 0, len = b.guns.length; i < len; i++) {

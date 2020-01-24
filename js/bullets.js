@@ -111,7 +111,7 @@ const b = {
     },
     {
       name: "kinetic bombardment", //3
-      description: "do up to 33% more <strong class='color-d'>damage</strong> at a distance<br><em>increase starts at about 6 steps away</em>",
+      description: "do up to 33% more <strong class='color-d'>damage</strong> at a distance<br><em>increase maxes out at about 40 steps away</em>",
       maxCount: 1,
       count: 0,
       effect() {
@@ -139,11 +139,11 @@ const b = {
     },
     {
       name: "auto-loading heuristics", //5
-      description: "your <strong>delay</strong> after firing is +12% <strong>shorter</strong>",
-      maxCount: 5,
+      description: "your <strong>delay</strong> after firing is +14% <strong>shorter</strong>",
+      maxCount: 3,
       count: 0,
       effect() {
-        b.modFireRate *= 0.88
+        b.modFireRate *= 0.86
       }
     },
     {
@@ -239,11 +239,11 @@ const b = {
     },
     {
       name: "Pauli exclusion", //12
-      description: "unable to <strong>collide</strong> with enemies for +1 second<br>activates after being <strong>harmed</strong> from a collision",
+      description: "unable to <strong>collide</strong> with enemies for +2 second<br>activates after being <strong>harmed</strong> from a collision",
       maxCount: 9,
       count: 0,
       effect() {
-        b.modCollisionImmuneCycles += 60;
+        b.modCollisionImmuneCycles += 120;
         mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
       }
     },
@@ -307,7 +307,7 @@ const b = {
     },
     {
       name: "recursive healing", //22
-      description: "<strong class='color-h'>healing</strong> power ups trigger an extra time.",
+      description: "<strong class='color-h'>healing</strong> power ups trigger one extra time.",
       maxCount: 9,
       count: 0,
       effect() {
@@ -1191,7 +1191,7 @@ const b = {
       name: "super balls", //2
       description: "fire <strong>five</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 5,
+      ammoPack: 6,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1317,7 +1317,7 @@ const b = {
       name: "missiles", //5
       description: "fire missiles that accelerate towards enemies<br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: 4,
       have: false,
       isStarterGun: false,
       fireCycle: 0,
@@ -1327,7 +1327,7 @@ const b = {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30 * b.modBulletSize, 4 * b.modBulletSize, b.fireAttributes(dir));
         const thrust = 0.00417 * bullet[me].mass;
-        b.fireProps(mech.crouch ? 55 : 30, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
+        b.fireProps(mech.crouch ? 50 : 25, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
         // bullet[me].collisionFilter.mask = cat.map | cat.body | cat.mobBullet
         // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
         bullet[me].force.y += 0.0005; //a small push down at first to make it seem like the missile is briefly falling
@@ -1458,7 +1458,7 @@ const b = {
       name: "grenades", //7
       description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 7,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1500,7 +1500,7 @@ const b = {
         bullet[me].restitution = 0.2;
         bullet[me].friction = 0.3;
         bullet[me].endCycle = Infinity
-        bullet[me].explodeRad = 380 + Math.floor(Math.random() * 60);
+        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 60);
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
         }
@@ -1844,10 +1844,10 @@ const b = {
           } else if (mech.fieldMeter > 0.005) { // charging on mouse down
             mech.fireCDcycle = Infinity //can't fire until mouse is released
             const lastCharge = this.charge
-            let chargeRate = (mech.crouch) ? 0.965 : 0.985
+            let chargeRate = (mech.crouch) ? 0.975 : 0.987
             chargeRate *= Math.pow(b.modFireRate, 0.04)
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
-            mech.fieldMeter -= (this.charge - lastCharge) * 0.25 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+            mech.fieldMeter -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
 
             //draw laser targeting
             let best;
@@ -1970,7 +1970,7 @@ const b = {
       have: false,
       isStarterGun: true,
       fire() {
-        const FIELD_DRAIN = 0.002 //laser drains energy as well as bullets
+        const FIELD_DRAIN = 0.0018 //laser drains energy as well as bullets
         const damage = 0.05
         if (mech.fieldMeter < FIELD_DRAIN) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
@@ -2217,7 +2217,7 @@ const b = {
         //use energy to explode
         const energy = 0.3 * Math.min(mech.fieldMeter, 1.75)
         mech.fieldMeter -= energy
-        if (best.who) b.explosion(path[1], 950 * energy)
+        if (best.who) b.explosion(path[1], 1000 * energy)
         mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
 
         //draw laser beam
