@@ -2,6 +2,20 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: make player invisible when...
+  use the flag from phase field
+
+mod: ground stomp on enterLand()
+  immunity to falling damage
+  triggers when you press down
+    maybe rewrite the function to look for down key
+    with added down speed
+  spawn spores
+
+field: a larger radius that attracted enemies
+  still deflected them near the robot
+  convert the health of mobs into energy when they are being attracted
+
 mod: chance to not die from fatal damage
   also push mobs and bodies away?
   also heal?
@@ -12,9 +26,6 @@ mod: bot that fires minigun bullets
 mod: do extra damage based on your speed
   do more damage when not moving?
   take less damage when not moving?
-
-mod: ground stomp on enterLand()
-  spawn spores
 
 gun/field: portals
   use the code from mines to get them to stick to walls
