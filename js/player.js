@@ -1335,9 +1335,9 @@ const mech = {
       description: "use <strong class='color-f'>energy</strong> to nullify &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br><strong>launch</strong> larger blocks at much higher speeds",
       effect: () => {
         mech.fieldFire = true;
-        mech.throwChargeRate = 4;
-        mech.throwChargeMax = 150;
-        mech.holdingMassScale = 0.05; //can hold heavier blocks with lower cost to jumping
+        mech.throwChargeRate = 3;
+        mech.throwChargeMax = 110;
+        mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
 
         mech.hold = function () {
           if (mech.isHolding) {

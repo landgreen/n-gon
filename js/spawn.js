@@ -28,7 +28,7 @@ const spawn = {
     return Math.random() < chance + 0.07 * game.difficulty && mob.length < -1 + 16 * Math.log10(game.difficulty + 1)
   },
   randomMob(x, y, chance = 1) {
-    if (spawn.spawnChance(chance)) {
+    if (spawn.spawnChance(chance) || chance === Infinity) {
       const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
       this[pick](x, y);
     }
@@ -665,19 +665,45 @@ const spawn = {
       this.laser();
     };
   },
-  laserBoss(x, y, radius = 130) {
+  laserBoss(x, y, radius = 30) {
     mobs.spawn(x, y, 3, radius, "#f00");
     let me = mob[mob.length - 1];
     me.startingPosition = {
       x: x,
       y: y
     }
-    // me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
-    // Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-    Matter.Body.setDensity(me, 0.004 + 0.001 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    // spawn.shield(me, x, y, 1);
+    me.dmg = 0.2 * game.dmgScale;
+    me.frictionAir = 0.03;
+    me.torque -= me.inertia * 0.005
+    Matter.Body.rotate(me, 0.25);
+    Matter.Body.setDensity(me, 0.04 * (1 + Math.sqrt(game.difficulty))); //extra dense //normal is 0.001 //makes effective life much larger
+    // spawn.shield(me, x, y, 1);  //not working, not sure why
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    };
+    me.do = function () {
+      this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
+      // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))
+      this.torque -= this.inertia * 0.00000145 / (4 + this.health);
+      Matter.Body.setVelocity(this, {
+        x: 0,
+        y: 0
+      });
+      Matter.Body.setPosition(this, this.startingPosition);
+
+      ctx.beginPath();
+      this.laser(this.vertices[0], this.angle + Math.PI / 3);
+      this.laser(this.vertices[1], this.angle + Math.PI);
+      this.laser(this.vertices[2], this.angle - Math.PI / 3);
+      ctx.strokeStyle = "#50f";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+      ctx.stroke(); // Draw it
+      ctx.setLineDash([0, 0]);
+      ctx.lineWidth = 20;
+      ctx.strokeStyle = "rgba(80,0,255,0.07)";
+      ctx.stroke(); // Draw it
+      // this.laser(this.vertices[2], this.angle + Math.PI / 3);
     };
     me.laser = function (where, angle) {
       const vertexCollision = function (v1, v1End, domain) {
@@ -717,7 +743,7 @@ const spawn = {
         }
       };
 
-      const seeRange = 4000;
+      const seeRange = 7000;
       best = {
         x: null,
         y: null,
@@ -730,35 +756,34 @@ const spawn = {
         x: where.x + seeRange * Math.cos(angle),
         y: where.y + seeRange * Math.sin(angle)
       };
-      vertexCollision(where, look, mob);
+      // vertexCollision(where, look, mob);
       vertexCollision(where, look, map);
       vertexCollision(where, look, body);
       if (!mech.isStealth) vertexCollision(where, look, [player]);
       //hitting mob
       if (best.who) {
-        if (best.who.mob) {
-          // dmg = 0.03 * game.dmgScale;
-          best.who.damage(0.1);
-          //draw damage
-          game.drawList.push({ //add dmg to draw queue
-            x: best.x,
-            y: best.y,
-            radius: Math.sqrt(dmg) * 50,
-            color: game.playerDmgColor,
-            time: game.drawTime
-          });
-        }
+        // if (best.who.mob) {
+        //   best.who.damage(Infinity);
+        //   //draw damage
+        //   game.drawList.push({ //add dmg to draw queue
+        //     x: best.x,
+        //     y: best.y,
+        //     radius: 50,
+        //     color: game.playerDmgColor,
+        //     time: game.drawTime
+        //   });
+        // }
         // hitting player
-        if (best.who === player) {
-          dmg = 0.03 * game.dmgScale;
-          mech.damage(dmg);
+        if (best.who === player && mech.collisionImmune < mech.cycle) {
+          mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+          mech.damage(this.dmg);
           //draw damage
           game.drawList.push({ //add dmg to draw queue
             x: best.x,
             y: best.y,
-            radius: dmg * 2000,
-            color: game.mobDmgColor,
-            time: game.drawTime
+            radius: this.dmg * 2000,
+            color: "rgba(80,0,255,0.5)",
+            time: 20
           });
         }
       }
@@ -767,25 +792,6 @@ const spawn = {
       ctx.moveTo(where.x, where.y);
       ctx.lineTo(best.x, best.y);
     }
-    me.do = function () {
-      this.torque = this.lookTorque * this.inertia * 0.2;
-      Matter.Body.setVelocity(this, {
-        x: 0,
-        y: 0
-      });
-      Matter.Body.setPosition(this, this.startingPosition);
-
-      ctx.beginPath();
-      this.laser(this.vertices[0], this.angle + Math.PI / 3);
-      this.laser(this.vertices[1], this.angle + Math.PI);
-      this.laser(this.vertices[2], this.angle - Math.PI / 3);
-      ctx.strokeStyle = "#f00"; // Purple path
-      ctx.lineWidth = 3;
-      ctx.setLineDash([50 + 120 * Math.random(), 55 * Math.random()]);
-      ctx.stroke(); // Draw it
-      ctx.setLineDash([0, 0]);
-      // this.laser(this.vertices[2], this.angle + Math.PI / 3);
-    };
   },
   striker(x, y, radius = 14 + Math.ceil(Math.random() * 25)) {
     mobs.spawn(x, y, 5, radius, "rgb(221,102,119)");

@@ -2,6 +2,20 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: chance to not die from fatal damage
+  also push mobs and bodies away?
+  also heal?
+
+mod: bot that fires minigun bullets
+  only fires when your mouse is held down
+
+mod: do extra damage based on your speed
+  do more damage when not moving?
+  take less damage when not moving?
+
+mod: ground stomp on enterLand()
+  spawn spores
+
 gun/field: portals
   use the code from mines to get them to stick to walls
     or lasers
@@ -9,11 +23,6 @@ gun/field: portals
   
 missiles don't explode reliably enough
   they can bounce, which is cool, but they should still explode right after a bounce
-
-mod: do something when at full health
-  extra damage  (seems too simple)
-  power up drop rate?  (hard to see directly)
-  regenerate (if above 90% max health)
 
 add mouse constraint in testing mode
   https://github.com/liabru/matter-js/blob/master/examples/events.js
@@ -31,17 +40,9 @@ mod: do something at the end of each level
     take no damage
     don't shoot
 
-rewrite pause as a change to the main loop
-  not important
-  like testing loop
-
-mod: ground stomp on enterLand()
-
 mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
   10% max health
   20% of your current health
-
-Boss mob:  triangle that fires three lasers
 
 mob: has 2 or 3 shields that can regenerate over time
   could be just a boss
@@ -52,6 +53,7 @@ gun:  Spirit Bomb (singularity)
   suck in nearby mobs, power ups?, blocks?
     sucked in stuff increase size
   uses energy
+  hold above the player's head
 
 atmosphere levels
   large rotating fan that the player has to move through

@@ -13,14 +13,15 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(10)
-      // b.giveGuns(0)
-      // mech.setField(3)
-      // b.giveMod(1);
+      level.difficultyIncrease(4)
+      b.giveGuns(0)
+      mech.setField(3)
+      b.giveMod(0);
 
-      level.intro(); //starting level
+      // level.intro(); //starting level
       // level.testingMap();
       // level.bosses();
+      level.satellite();
       // level.skyscrapers();
       // level.aerie();
       // level.rooftops();
@@ -72,6 +73,204 @@ const level = {
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
+  satellite() {
+    game.zoomScale = 4500 // remove
+    level.defaultZoom = 4500 // 1400
+    game.zoomTransition(level.defaultZoom)
+    mech.setPosToSpawn(-50, -50); //normal spawn
+    level.enter.x = mech.spawnPos.x - 50;
+    level.enter.y = mech.spawnPos.y + 20;
+    level.exit.x = -100;
+    level.exit.y = -425;
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+
+    powerUps.spawnStartingPowerUps(4500, -250);
+    spawn.debris(1000, 20, 1800, 3); //16 debris per level //but less here because a few mobs die from laser
+    spawn.debris(4830, -1330, 850, 3); //16 debris per level
+    spawn.debris(3035, -3900, 1500, 3); //16 debris per level
+
+    document.body.style.backgroundColor = "#dbdcde";
+
+    //spawn start building
+    spawn.mapRect(-300, -800, 50, 800);
+    spawn.mapRect(-100, -20, 100, 30);
+    spawn.mapRect(-300, -10, 500, 50);
+    spawn.mapRect(150, -525, 50, 375);
+    spawn.bodyRect(170, -130, 14, 140, 1, spawn.propsFriction); //door to starting room
+    level.fill.push({
+      x: -250,
+      y: -350,
+      width: 2950,
+      height: 650,
+      color: "rgba(0,20,40,0.2)"
+    });
+
+    spawn.mapRect(-300, 0, 1000, 300); //ground
+    spawn.mapRect(-300, 250, 6400, 300); //deeper ground
+    spawn.bodyRect(2100, 50, 100, 100);
+    spawn.bodyRect(2500, 50, 300, 200);
+    spawn.bodyRect(3350, -150, 300, 200);
+
+
+    //far right structure
+    spawn.mapRect(5200, -775, 100, 920);
+    spawn.mapRect(5300, -1075, 350, 1220);
+    spawn.boost(5850, 235, 1400);
+    level.fillBG.push({
+      x: 5200,
+      y: 125,
+      width: 450,
+      height: 200,
+      color: "rgba(0,20,40,0.2)"
+    });
+
+    //far right stairs
+    // spawn.mapRect(5200, -775, 100, 900);
+    // spawn.mapRect(5300, -1075, 100, 900);
+    // spawn.mapRect(5400, -1075, 100, 600);
+    // spawn.mapRect(5500, -1075, 100, 300);
+    // spawn.mapRect(5500, -100, 100, 500);
+    // spawn.mapRect(5600, -425, 100, 800);
+    // spawn.mapRect(5700, -750, 100, 1100);
+    // spawn.mapRect(5800, -1075, 100, 1400);
+    // level.fillBG.push({
+    //   x: 5200,
+    //   y: -1075,
+    //   width: 600,
+    //   height: 1350,
+    //   color: "#c8cbcf"
+    // });
+
+
+    //structure bellow tall stairs
+    level.fill.push({
+      x: 4000,
+      y: -1200,
+      width: 1050,
+      height: 1500,
+      color: "rgba(0,20,40,0.13)"
+    });
+    spawn.mapRect(4000, -400, 325, 50);
+    spawn.mapRect(4725, -400, 325, 50);
+    spawn.mapRect(4000, -1300, 1050, 100);
+    // spawn.mapRect(5200, -1000, 450, 900);
+    // spawn.mapRect(5600, -1300, 600, 1850);
+
+    //steep stairs
+    spawn.mapRect(4100, -1700, 100, 300);
+    spawn.mapRect(4200, -2050, 100, 650);
+    spawn.mapRect(4300, -2400, 100, 1000);
+    spawn.mapRect(4400, -2750, 100, 1350);
+    spawn.mapRect(4500, -3100, 100, 1700);
+    spawn.mapRect(4600, -3450, 100, 2050);
+    spawn.mapRect(4100, -3450, 100, 900); //left top shelf
+    spawn.mapRect(4200, -3450, 100, 600); //left top shelf
+    spawn.mapRect(4300, -3450, 100, 300); //left top shelf
+    level.fillBG.push({
+      x: 4100,
+      y: -3450,
+      width: 500,
+      height: 1750,
+      color: "#d0d4d6"
+    });
+    level.fill.push({
+      x: 4100,
+      y: -1400,
+      width: 600,
+      height: 100,
+      color: "rgba(0,20,40,0.25)"
+    });
+
+    // spawn.mapRect(4100, -3750, 100, 2050); //top ledge
+    // spawn.mapRect(2300, -3750, 2000, 50); //ledge above boss
+    // spawn.bodyRect(2300, -4250, 300, 300);
+
+    //tall platform
+    spawn.mapVertex(3350, 250, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
+    spawn.mapRect(2950, -3150, 800, 50); //super high shade
+    spawn.bodyRect(3675, -3470, 525, 20); //plank
+    spawn.bodyRect(3600, -3450, 200, 300); //plank support block
+    level.fillBG.push({
+      x: 3125,
+      y: -3100,
+      width: 450,
+      height: 3300,
+      color: "#d0d4d6"
+    });
+    // spawn.boost(3300, 165, 1000);
+    //tall platform
+    spawn.mapVertex(2225, -350, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
+    spawn.mapRect(1825, -2800, 800, 50); //super high shade
+    spawn.bodyRect(2350, -3100, 150, 300); //shield from laser
+    level.fillBG.push({
+      x: 2000,
+      y: -2750,
+      width: 450,
+      height: 2450,
+      color: "#d0d4d6"
+    });
+    //tall platform
+    spawn.mapVertex(1125, -350, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
+    spawn.mapRect(725, -2450, 800, 50); //super high shade
+    level.fillBG.push({
+      x: 900,
+      y: -2450,
+      width: 450,
+      height: 2100,
+      color: "#d0d4d6"
+    });
+    //tall platform above exit
+    spawn.mapRect(-400, -1900, 300, 50); //super high shade
+    spawn.mapRect(0, -1900, 300, 50); //super high shade
+    spawn.mapRect(-150, -1350, 200, 25); //super high shade
+    level.fillBG.push({
+      x: -300,
+      y: -1900,
+      width: 500,
+      height: 1100,
+      color: "#d0d4d6"
+    });
+
+    //exit building
+    spawn.mapRect(-100, -410, 100, 30);
+    spawn.mapRect(-300, -800, 500, 50);
+    spawn.mapRect(150, -800, 50, 100);
+    spawn.bodyRect(170, -700, 14, 175, 1, spawn.propsFriction); //door to exit room
+    spawn.mapRect(-300, -400, 3000, 100); //far left starting ceiling
+    level.fillBG.push({
+      x: -250,
+      y: -750,
+      width: 420,
+      height: 450,
+      color: "#d4f4f4"
+    });
+
+    // spawn.randomSmallMob(2200, -1775);
+    spawn.randomSmallMob(4400, -3500);
+    spawn.randomSmallMob(4800, -800);
+    spawn.randomSmallMob(800, 150);
+    spawn.randomMob(700, -600, 0.8);
+    spawn.randomMob(3100, -3600, 0.7);
+    spawn.randomMob(4200, -250, 0.7);
+    spawn.randomMob(4900, -1500, 0.6);
+    spawn.randomMob(1200, 100, 0.4);
+    spawn.randomMob(5900, -1500, 0.4);
+    spawn.randomMob(4700, -800, 0.4);
+    spawn.randomMob(1400, -400, 0.3);
+    spawn.randomMob(1200, 100, 0.3);
+    spawn.randomMob(2550, -100, 0.2);
+    spawn.randomMob(2000, -2800, 0.2);
+    spawn.randomMob(2000, -500, 0.2);
+    spawn.randomMob(4475, -3550, 0.1);
+    spawn.randomBoss(5000, -2150, 1);
+    spawn.randomBoss(3700, -4100, 0.3);
+    spawn.randomBoss(2700, -1600, 0.1);
+    spawn.randomBoss(1600, -100, 0);
+    spawn.randomBoss(5000, -3900, -0.3);
+    // spawn.laserBoss(2750, -2600);
+    if (game.difficulty > 3) spawn.laserBoss(1980, -2180);
+
+  },
   testingMap() {
     //start with all guns
     // level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
