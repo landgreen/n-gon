@@ -674,7 +674,7 @@ const spawn = {
     }
     me.dmg = 0.2 * game.dmgScale;
     me.frictionAir = 0.03;
-    me.torque -= me.inertia * 0.005
+    me.torque -= me.inertia * 0.002
     Matter.Body.rotate(me, 0.25);
     Matter.Body.setDensity(me, 0.04 * (1 + Math.sqrt(game.difficulty))); //extra dense //normal is 0.001 //makes effective life much larger
     // spawn.shield(me, x, y, 1);  //not working, not sure why
@@ -684,7 +684,7 @@ const spawn = {
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
       // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))
-      this.torque -= this.inertia * 0.00000145 / (4 + this.health);
+      this.torque -= this.inertia * 0.000002 / (4 + this.health);
       Matter.Body.setVelocity(this, {
         x: 0,
         y: 0
@@ -781,7 +781,7 @@ const spawn = {
           game.drawList.push({ //add dmg to draw queue
             x: best.x,
             y: best.y,
-            radius: this.dmg * 2000,
+            radius: this.dmg * 1500,
             color: "rgba(80,0,255,0.5)",
             time: 20
           });
