@@ -33,6 +33,7 @@ const b = {
   modCollisionImmuneCycles: null,
   modBlockDmg: null,
   isModPiezo: null,
+  isModFastDrones: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -44,6 +45,7 @@ const b = {
     b.modHealthDrain = 0;
     b.modNoAmmo = 0;
     b.isModBulletsLastLonger = 1;
+    b.isModFastDrones = false;
     b.isModImmortal = false;
     b.modSpores = 0;
     b.modAcidDmg = 0;
@@ -86,6 +88,9 @@ const b = {
       description: `your <strong>bullets</strong> are +13% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
       maxCount: 9,
+      allowed() {
+        return true
+      },
       effect() {
         b.modBulletSize += 0.13
       }
@@ -95,6 +100,9 @@ const b = {
       description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>90% health</strong>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModAcidDmg = true;
         b.modOnHealthChange();
@@ -105,6 +113,9 @@ const b = {
       description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModCrit = true;
       }
@@ -114,6 +125,9 @@ const b = {
       description: "do up to 33% more <strong class='color-d'>damage</strong> at a distance<br><em>increase maxes out at about 40 steps away</em>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModFarAwayDmg = true; //used in mob.damage()
       }
@@ -123,6 +137,9 @@ const b = {
       description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to 50% increase when near death</em>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModLowHealthDmg = true; //used in mob.damage()
       }
@@ -132,6 +149,9 @@ const b = {
       description: "the radius of <strong class='color-e'>explosions</strong> are +20% <strong>larger</strong><br>immune to <strong>harm</strong> from <strong class='color-e'>explosions</strong>",
       maxCount: 3,
       count: 0,
+      allowed() {
+        return true
+      },
       effect: () => {
         b.modExplosionRadius += 0.2;
         b.isModImmuneExplosion = true;
@@ -142,6 +162,9 @@ const b = {
       description: "your <strong>delay</strong> after firing is +14% <strong>shorter</strong>",
       maxCount: 3,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modFireRate *= 0.86
       }
@@ -151,6 +174,9 @@ const b = {
       description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modNoAmmo = 1
       }
@@ -160,6 +186,9 @@ const b = {
       description: "your <strong>bullets</strong> last +33% <strong>longer</strong>",
       maxCount: 3,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModBulletsLastLonger += 0.33
       }
@@ -169,6 +198,9 @@ const b = {
       description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modSpores += 0.11;
         for (let i = 0; i < 10; i++) {
@@ -181,6 +213,9 @@ const b = {
       description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modLaserBotCount++;
         b.laserBot();
@@ -191,6 +226,9 @@ const b = {
       description: "a bot fires <strong>nails</strong> at targets in line of sight",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modNailBotCount++;
         b.nailBot();
@@ -201,6 +239,9 @@ const b = {
       description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModDroneOnDamage = true;
         for (let i = 0; i < 3; i++) {
@@ -213,6 +254,9 @@ const b = {
       description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
       }
@@ -222,6 +266,9 @@ const b = {
       description: "using your first gun reduces <strong>harm</strong><br>scales by <strong>10%</strong> for each gun in your inventory",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModEntanglement = true
       }
@@ -231,6 +278,9 @@ const b = {
       description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() { // good with melee builds, content skipping builds
         b.modSquirrelFx = 1.2;
         mech.Fx = 0.015 * b.modSquirrelFx;
@@ -242,6 +292,9 @@ const b = {
       description: "unable to <strong>collide</strong> with enemies for +2 second<br>activates after being <strong>harmed</strong> from a collision",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modCollisionImmuneCycles += 120;
         mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
@@ -252,6 +305,9 @@ const b = {
       description: "after <strong>touching</strong> enemies, they are annihilated",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModAnnihilation = true
       }
@@ -261,6 +317,9 @@ const b = {
       description: "<strong>colliding</strong> with enemies fills your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModPiezo = true;
         mech.fieldMeter = mech.fieldEnergyMax;
@@ -271,6 +330,9 @@ const b = {
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
       maxCount: 3,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modEnergySiphon += 0.15;
         mech.fieldMeter = mech.fieldEnergyMax
@@ -281,6 +343,9 @@ const b = {
       description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
       maxCount: 3,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modHealthDrain += 0.015;
       }
@@ -290,6 +355,9 @@ const b = {
       description: "charge <strong class='color-f'>energy</strong> <strong>+33%</strong> beyond your <strong>maximum</strong>",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         mech.fieldEnergyMax += 0.33
         mech.fieldMeter += 0.33
@@ -300,6 +368,9 @@ const b = {
       description: "<strong class='color-h'>heal</strong> <strong>+33%</strong> beyond your <strong>max health</strong>",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         mech.maxHealth += 0.33
         mech.addHealth(0.33)
@@ -310,6 +381,9 @@ const b = {
       description: "<strong class='color-h'>healing</strong> power ups trigger one extra time.",
       maxCount: 9,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.modRecursiveHealing += 1
       }
@@ -319,6 +393,9 @@ const b = {
       description: "power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +5%",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect: () => {
         b.isModMassEnergy = true // used in mech.grabPowerUp
         mech.fieldMeter = mech.fieldEnergyMax
@@ -329,6 +406,9 @@ const b = {
       description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect() {
         b.isModImmortal = true;
       }
@@ -338,6 +418,9 @@ const b = {
       description: "<strong>20%</strong> chance for double <strong>power ups</strong> to drop<br>one fewer <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect: () => {
         b.isModBayesian = 0.20;
       }
@@ -347,6 +430,9 @@ const b = {
       description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return true
+      },
       effect: () => {
         b.isModFourOptions = true;
       }
@@ -356,6 +442,9 @@ const b = {
       description: "<strong>remove</strong> all current <strong class='color-m'>mods</strong><br>spawn new <strong class='color-m'>mods</strong> to replace them",
       maxCount: 1,
       count: 0,
+      allowed() {
+        return (b.modCount > 6)
+      },
       effect: () => {
         for (let i = 0; i < b.modCount; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
@@ -364,12 +453,25 @@ const b = {
         //have state is checked in mech.death()
       }
     },
+    {
+      name: "accelerated drones", //7
+      description: "your <strong>drones</strong> accelerate 50% <strong>faster</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("drones")
+      },
+      effect() {
+        b.isModFastDrones = true
+      }
+    },
   ],
   giveMod(index = 'random') {
     if (index === 'random') {
       let options = [];
       for (let i = 0; i < b.mods.length; i++) {
-        if (b.mods[i].count < b.mods[i].maxCount) options.push(i);
+        if (b.mods[i].count < b.mods[i].maxCount && b.mods[i].allowed())
+          options.push(i);
       }
 
       // give a random mod from the mods I don't have
@@ -383,6 +485,12 @@ const b = {
       b.modCount++ //used in power up randomization
       game.updateModHUD();
     }
+  },
+  haveGunCheck(name) {
+    for (i = 0, len = b.inventory.length; i < len; i++) {
+      if (b.guns[b.inventory[i]].name === name) return true
+    }
+    return false
   },
   activeGun: null, //current gun in use by player
   inventoryGun: 0,
@@ -817,7 +925,7 @@ const b = {
   },
   drone(speed = 1) {
     const me = bullet.length;
-    const THRUST = 0.0015
+    const THRUST = b.isModFastDrones ? 0.003 : 0.0015
     const dir = mech.angle + 0.2 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random()) * b.modBulletSize
     bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 8, RADIUS, {

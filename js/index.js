@@ -2,6 +2,23 @@
 /* TODO:  *******************************************
 *****************************************************
 
+field that pushes everything back, and can destroy smaller blocks
+  converts blocks into ammo power ups
+
+give mods a requirement
+  check for require before choosing mods displayed in selection
+  require: {
+    type: "gun"
+    name: "drone"
+  }
+    drones move faster
+  require: {
+    type: "mod"
+    name: "high explosives"
+  }
+    immunity to explosions
+      remove immunity from high explosives, but buff explosion radius a bit
+
 mod: make player invisible when...
   use the flag from phase field
 
