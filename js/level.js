@@ -8,20 +8,20 @@ const level = {
   maxJump: 390,
   defaultZoom: 1400,
   boostScale: 0.000023,
-  levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie"],
+  levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite"],
   onLevel: 0,
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(4)
+      // level.difficultyIncrease(7)
       // b.giveGuns(0)
       // mech.setField(3)
       // b.giveMod(0);
 
-      // level.intro(); //starting level
+      level.intro(); //starting level
       // level.testingMap();
       // level.bosses();
-      level.satellite();
+      // level.satellite();
       // level.skyscrapers();
       // level.aerie();
       // level.rooftops();
@@ -75,7 +75,7 @@ const level = {
   //******************************************************************************************************************
   satellite() {
     // game.zoomScale = 4500 // remove
-    level.defaultZoom = 1600 // 4500 // 1400
+    level.defaultZoom = 1700 // 4500 // 1400
     game.zoomTransition(level.defaultZoom)
     mech.setPosToSpawn(-50, -50); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
@@ -102,7 +102,8 @@ const level = {
     spawn.bodyRect(2100, 50, 80, 80);
     spawn.bodyRect(2000, 50, 60, 60);
     // spawn.bodyRect(1650, 50, 300, 200);
-    spawn.bodyRect(3350, -150, 300, 200);
+    spawn.bodyRect(3175, -155, 325, 325);
+    spawn.mapRect(1800, 175, 800, 100); //stops above body from moving to right
 
     //exit building
     spawn.mapRect(-100, -410, 100, 30);
@@ -157,10 +158,9 @@ const level = {
     });
     //tall platform
     spawn.mapVertex(2225, -450, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
-    spawn.mapRect(1725, -2800, 450, 50); //super high shade
-    spawn.mapRect(2275, -2800, 450, 50); //super high shade
+    spawn.mapRect(1725, -2800, 1000, 50); //super high shade
     spawn.mapRect(1800, -500, 850, 100); //far left starting ceiling
-    spawn.bodyRect(2225, -2950, 150, 150); //shield from laser
+    spawn.bodyRect(2400, -2950, 150, 150); //shield from laser
     level.fillBG.push({
       x: 2000,
       y: -2800,
@@ -235,6 +235,7 @@ const level = {
     spawn.randomSmallMob(800, 150);
     spawn.randomMob(700, -600, 0.8);
     spawn.randomMob(3100, -3600, 0.7);
+    spawn.randomMob(3300, -1000, 0.7);
     spawn.randomMob(4200, -250, 0.7);
     spawn.randomMob(4900, -1500, 0.6);
     spawn.randomMob(1200, 100, 0.4);
@@ -252,8 +253,7 @@ const level = {
     spawn.randomBoss(1600, -100, 0);
     spawn.randomBoss(5000, -3900, -0.3);
     // spawn.laserBoss(2750, -2600);
-    // if (game.difficulty > 3) 
-    spawn.laserBoss(2225, -2400);
+    if (game.difficulty > 3) spawn.laserBoss(3050, -2850);
 
   },
   testingMap() {
