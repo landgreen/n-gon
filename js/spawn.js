@@ -672,7 +672,7 @@ const spawn = {
       x: x,
       y: y
     }
-    me.dmg = 0.2 * game.dmgScale;
+    me.dmg = 0.14 * game.dmgScale;
     me.frictionAir = 0.03;
     me.torque -= me.inertia * 0.002
     Matter.Body.rotate(me, 0.25);
@@ -684,7 +684,7 @@ const spawn = {
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
       // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))
-      this.torque -= this.inertia * 0.000002 / (4 + this.health);
+      this.torque -= this.inertia * 0.0000025 / (4 + this.health);
       Matter.Body.setVelocity(this, {
         x: 0,
         y: 0

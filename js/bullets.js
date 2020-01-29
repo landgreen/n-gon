@@ -146,14 +146,25 @@ const b = {
     },
     {
       name: "high explosives", //15
-      description: "the radius of <strong class='color-e'>explosions</strong> are +20% <strong>larger</strong><br>immune to <strong>harm</strong> from <strong class='color-e'>explosions</strong>",
+      description: "the radius of <strong class='color-e'>explosions</strong> are +25% <strong>larger</strong>",
       maxCount: 3,
       count: 0,
       allowed() {
         return true
       },
       effect: () => {
-        b.modExplosionRadius += 0.2;
+        b.modExplosionRadius += 0.25;
+      }
+    },
+    {
+      name: "electric reactive armour", //15
+      description: "<strong class='color-e'>explosions</strong> drain <strong class='color-f'>energy</strong> instead of doing <strong>harm</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return (b.modExplosionRadius > 1) ? true : false;
+      },
+      effect: () => {
         b.isModImmuneExplosion = true;
       }
     },
@@ -454,7 +465,7 @@ const b = {
       }
     },
     {
-      name: "accelerated drones", //7
+      name: "brushless motors", //7
       description: "your <strong>drones</strong> accelerate 50% <strong>faster</strong>",
       maxCount: 1,
       count: 0,
@@ -660,8 +671,13 @@ const b = {
     //player damage and knock back
     sub = Vector.sub(where, player.position);
     dist = Vector.magnitude(sub);
+
     if (dist < radius) {
-      if (!b.isModImmuneExplosion) mech.damage(radius * 0.0002);
+      if (!b.isModImmuneExplosion && mech.fieldMeter > 0.1) {
+        mech.damage(radius * 0.0002);
+      } else {
+        mech.fieldMeter -= radius * 0.0006
+      }
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
       player.force.x += knock.x;
       player.force.y += knock.y;
