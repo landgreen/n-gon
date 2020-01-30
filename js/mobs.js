@@ -125,13 +125,10 @@ const mobs = {
         if (this.seePlayer.recall < 0) this.seePlayer.recall = 0;
       },
       memory: 120, //default time to remember player's location
-      locatePlayer() {
-        if (!mech.isStealth) {
-          // updates mob's memory of player location
-          this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
-          this.seePlayer.position.x = player.position.x;
-          this.seePlayer.position.y = player.position.y;
-        }
+      locatePlayer() { // updates mob's memory of player location
+        this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
+        this.seePlayer.position.x = player.position.x;
+        this.seePlayer.position.y = player.position.y
       },
       // locatePlayerByDist() {
       //   if (this.distanceToPlayer2() < this.locateRange) {
@@ -143,7 +140,8 @@ const mobs = {
           if (
             this.distanceToPlayer2() < this.seeAtDistance2 &&
             Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0
+            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+            !mech.isStealth
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -153,7 +151,7 @@ const mobs = {
       },
       seePlayerCheckByDistance() {
         if (!(game.cycle % this.seePlayerFreq)) {
-          if (this.distanceToPlayer2() < this.seeAtDistance2) {
+          if (this.distanceToPlayer2() < this.seeAtDistance2 && !mech.isStealth) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
             this.lostPlayer();
@@ -163,8 +161,8 @@ const mobs = {
       seePlayerByDistOrLOS() {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
-            this.distanceToPlayer2() < this.seeAtDistance2 ||
-            (Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0)
+            (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0)) &&
+            !mech.isStealth
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -176,7 +174,9 @@ const mobs = {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
             this.distanceToPlayer2() < this.seeAtDistance2 &&
-            (Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0)
+            Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
+            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+            !mech.isStealth
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -207,7 +207,8 @@ const mobs = {
           if (
             this.distanceToPlayer2() < this.seeAtDistance2 &&
             Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0
+            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+            !mech.isStealth
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -391,7 +392,8 @@ const mobs = {
             (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange)) &&
             this.distanceToPlayer2() < this.seeAtDistance2 &&
             Matter.Query.ray(map, this.position, player.position).length === 0 &&
-            Matter.Query.ray(body, this.position, player.position).length === 0
+            Matter.Query.ray(body, this.position, player.position).length === 0 &&
+            !mech.isStealth
           ) {
             this.foundPlayer();
             if (!(game.cycle % (this.seePlayerFreq * 2))) {

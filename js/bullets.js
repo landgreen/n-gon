@@ -34,6 +34,7 @@ const b = {
   modBlockDmg: null,
   isModPiezo: null,
   isModFastDrones: null,
+  isModStomp: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -66,6 +67,7 @@ const b = {
     b.modCollisionImmuneCycles = 30;
     b.modBlockDmg = 0;
     b.isModPiezo = false;
+    b.isModStomp = false;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -84,7 +86,7 @@ const b = {
     }
   },
   mods: [{
-      name: "depleted uranium rounds", //0
+      name: "depleted uranium rounds",
       description: `your <strong>bullets</strong> are +13% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
       maxCount: 9,
@@ -96,7 +98,7 @@ const b = {
       }
     },
     {
-      name: "fluoroantimonic acid", //1
+      name: "fluoroantimonic acid",
       description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>90% health</strong>",
       maxCount: 1,
       count: 0,
@@ -109,7 +111,7 @@ const b = {
       }
     },
     {
-      name: "fracture analysis", //2
+      name: "fracture analysis",
       description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
       maxCount: 1,
       count: 0,
@@ -121,7 +123,7 @@ const b = {
       }
     },
     {
-      name: "kinetic bombardment", //3
+      name: "kinetic bombardment",
       description: "do up to 33% more <strong class='color-d'>damage</strong> at a distance<br><em>increase maxes out at about 40 steps away</em>",
       maxCount: 1,
       count: 0,
@@ -133,7 +135,7 @@ const b = {
       }
     },
     {
-      name: "quasistatic equilibrium", //4
+      name: "quasistatic equilibrium",
       description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to 50% increase when near death</em>",
       maxCount: 1,
       count: 0,
@@ -145,7 +147,7 @@ const b = {
       }
     },
     {
-      name: "high explosives", //15
+      name: "high explosives",
       description: "the radius of <strong class='color-e'>explosions</strong> are +25% <strong>larger</strong>",
       maxCount: 3,
       count: 0,
@@ -157,7 +159,7 @@ const b = {
       }
     },
     {
-      name: "electric reactive armour", //15
+      name: "electric reactive armour",
       description: "<strong class='color-e'>explosions</strong> drain <strong class='color-f'>energy</strong> instead of doing <strong>harm</strong>",
       maxCount: 1,
       count: 0,
@@ -169,7 +171,7 @@ const b = {
       }
     },
     {
-      name: "auto-loading heuristics", //5
+      name: "auto-loading heuristics",
       description: "your <strong>delay</strong> after firing is +14% <strong>shorter</strong>",
       maxCount: 3,
       count: 0,
@@ -181,7 +183,7 @@ const b = {
       }
     },
     {
-      name: "desublimated ammunition", //6
+      name: "desublimated ammunition",
       description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
       maxCount: 1,
       count: 0,
@@ -193,7 +195,7 @@ const b = {
       }
     },
     {
-      name: "Lorentzian topology", //7
+      name: "Lorentzian topology",
       description: "your <strong>bullets</strong> last +33% <strong>longer</strong>",
       maxCount: 3,
       count: 0,
@@ -205,7 +207,7 @@ const b = {
       }
     },
     {
-      name: "zoospore vector", //8
+      name: "zoospore vector",
       description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
       maxCount: 9,
       count: 0,
@@ -220,7 +222,7 @@ const b = {
       }
     },
     {
-      name: "laser-bot", //10
+      name: "laser-bot",
       description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
       maxCount: 9,
       count: 0,
@@ -233,7 +235,7 @@ const b = {
       }
     },
     {
-      name: "nail-bot", //11
+      name: "nail-bot",
       description: "a bot fires <strong>nails</strong> at targets in line of sight",
       maxCount: 9,
       count: 0,
@@ -246,7 +248,7 @@ const b = {
       }
     },
     {
-      name: "ablative synthesis", //9
+      name: "ablative synthesis",
       description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
       maxCount: 1,
       count: 0,
@@ -261,7 +263,7 @@ const b = {
       }
     },
     {
-      name: "bremsstrahlung radiation", //13
+      name: "bremsstrahlung radiation",
       description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
       maxCount: 9,
       count: 0,
@@ -273,7 +275,7 @@ const b = {
       }
     },
     {
-      name: "entanglement", //16
+      name: "entanglement",
       description: "using your first gun reduces <strong>harm</strong><br>scales by <strong>10%</strong> for each gun in your inventory",
       maxCount: 1,
       count: 0,
@@ -285,7 +287,7 @@ const b = {
       }
     },
     {
-      name: "squirrel-cage rotor", //27
+      name: "squirrel-cage rotor",
       description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
       maxCount: 1,
       count: 0,
@@ -298,8 +300,20 @@ const b = {
         mech.jumpForce = 0.38 * 1.1;
       }
     },
+    // {
+    //   name: "ground stomp",
+    //   description: "hard landings release <strong>spores</strong>",
+    //   maxCount: 1,
+    //   count: 0,
+    //   allowed() {
+    //     return b.modSquirrelFx === 1.2 ? true : false;
+    //   },
+    //   effect() {
+    //     b.isModStomp = true
+    //   }
+    // },
     {
-      name: "Pauli exclusion", //12
+      name: "Pauli exclusion",
       description: "unable to <strong>collide</strong> with enemies for +2 second<br>activates after being <strong>harmed</strong> from a collision",
       maxCount: 9,
       count: 0,
@@ -312,7 +326,7 @@ const b = {
       }
     },
     {
-      name: "annihilation", //14
+      name: "annihilation",
       description: "after <strong>touching</strong> enemies, they are annihilated",
       maxCount: 1,
       count: 0,
@@ -324,7 +338,7 @@ const b = {
       }
     },
     {
-      name: "piezoelectricity", //17
+      name: "piezoelectricity",
       description: "<strong>colliding</strong> with enemies fills your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
@@ -337,7 +351,7 @@ const b = {
       }
     },
     {
-      name: "energy conservation", //18
+      name: "energy conservation",
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
       maxCount: 3,
       count: 0,
@@ -350,7 +364,7 @@ const b = {
       }
     },
     {
-      name: "entropy exchange", //19
+      name: "entropy exchange",
       description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
       maxCount: 3,
       count: 0,
@@ -362,7 +376,7 @@ const b = {
       }
     },
     {
-      name: "overcharge", //20
+      name: "overcharge",
       description: "charge <strong class='color-f'>energy</strong> <strong>+33%</strong> beyond your <strong>maximum</strong>",
       maxCount: 9,
       count: 0,
@@ -375,7 +389,7 @@ const b = {
       }
     },
     {
-      name: "supersaturation", //21
+      name: "supersaturation",
       description: "<strong class='color-h'>heal</strong> <strong>+33%</strong> beyond your <strong>max health</strong>",
       maxCount: 9,
       count: 0,
@@ -388,7 +402,7 @@ const b = {
       }
     },
     {
-      name: "recursive healing", //22
+      name: "recursive healing",
       description: "<strong class='color-h'>healing</strong> power ups trigger one extra time.",
       maxCount: 9,
       count: 0,
@@ -400,7 +414,7 @@ const b = {
       }
     },
     {
-      name: "mass-energy equivalence", //23
+      name: "mass-energy equivalence",
       description: "power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +5%",
       maxCount: 1,
       count: 0,
@@ -413,7 +427,7 @@ const b = {
       }
     },
     {
-      name: "quantum immortality", //28
+      name: "quantum immortality",
       description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
       maxCount: 1,
       count: 0,
@@ -425,7 +439,7 @@ const b = {
       }
     },
     {
-      name: "Bayesian inference", //25
+      name: "Bayesian inference",
       description: "<strong>20%</strong> chance for double <strong>power ups</strong> to drop<br>one fewer <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
@@ -437,7 +451,7 @@ const b = {
       }
     },
     {
-      name: "+1 cardinality", //24
+      name: "+1 cardinality",
       description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
@@ -449,7 +463,7 @@ const b = {
       }
     },
     {
-      name: "Born rule", //26
+      name: "Born rule",
       description: "<strong>remove</strong> all current <strong class='color-m'>mods</strong><br>spawn new <strong class='color-m'>mods</strong> to replace them",
       maxCount: 1,
       count: 0,
@@ -465,7 +479,7 @@ const b = {
       }
     },
     {
-      name: "brushless motors", //7
+      name: "brushless motors",
       description: "your <strong>drones</strong> accelerate 40% <strong>faster</strong>",
       maxCount: 1,
       count: 0,
@@ -491,6 +505,12 @@ const b = {
         b.giveMod(newMod)
       }
     } else {
+      if (isNaN(index)) { //find index by name
+        for (let i = 0; i < b.mods.length; i++) {
+          if (index === b.mods[i].name) index = i
+        }
+      }
+
       b.mods[index].effect(); //give specific mod
       b.mods[index].count++
       b.modCount++ //used in power up randomization
@@ -1246,6 +1266,12 @@ const b = {
         b.guns[i].ammo = Math.floor(b.guns[i].ammoPack * ammoPacks);
       }
     } else {
+      if (isNaN(gun)) { //find gun by name
+        for (let i = 0; i < b.guns.length; i++) {
+          if (gun === b.guns[i].name) gun = i
+        }
+      }
+
       if (!b.guns[gun].have) b.inventory.push(gun);
       if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
       b.guns[gun].have = true;

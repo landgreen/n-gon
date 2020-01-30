@@ -206,7 +206,12 @@ const mech = {
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
-        if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
+        if (b.isModStomp) {
+          // const len = Math.min(10, momentum * 0.03)
+          // for (let i = 0; i < 10; i++) {
+          //   b.spore(player) //spawn drone
+          // }
+        } else if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
           let dmg = Math.sqrt(momentum - 165) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
           mech.damage(dmg);
@@ -268,7 +273,6 @@ const mech = {
           y: player.velocity.y * stoppingFriction
         });
       }
-
     } else { // in air **********************************
       //check for short jumps
       if (
@@ -288,6 +292,15 @@ const mech = {
       } else if (keys[68] || keys[39]) {
         if (player.velocity.x < limit) player.force.x += mech.FxAir; //move player  right / d
       }
+      // if ((keys[83] || keys[40])) { //ground stomp when pressing down
+      //   player.force.y += 0.1;
+      //   if (player.velocity.y > 50) {
+      //     Matter.Body.setVelocity(player, {
+      //       x: 0,
+      //       y: 50
+      //     });
+      //   }
+      // }
     }
 
     //smoothly move leg height towards height goal
@@ -1069,6 +1082,12 @@ const mech = {
   },
   hold() {},
   setField(index) {
+    if (isNaN(index)) { //find index by name
+      for (let i = 0; i < mech.fieldUpgrades.length; i++) {
+        if (index === mech.fieldUpgrades[i].name) index = i
+      }
+    }
+
     mech.fieldMode = index;
     document.getElementById("field").innerHTML = mech.fieldUpgrades[index].name
     mech.setHoldDefaults();
@@ -1494,7 +1513,7 @@ const mech = {
       effect: () => {
         // mech.grabRange = 230
         mech.hold = function () {
-          mech.isStealth = false //isStealth is checked in mob foundPlayer()
+          mech.isStealth = false //isStealth disables most uses of foundPlayer() 
           player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1505,7 +1524,7 @@ const mech = {
             if (mech.fieldMeter > DRAIN) {
               mech.fieldMeter -= DRAIN;
 
-              mech.isStealth = true //isStealth is checked in mob foundPlayer() 
+              mech.isStealth = true //isStealth disables most uses of foundPlayer() 
               player.collisionFilter.mask = cat.map
 
               ctx.beginPath();

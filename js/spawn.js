@@ -676,7 +676,7 @@ const spawn = {
     me.frictionAir = 0.03;
     me.torque -= me.inertia * 0.002
     Matter.Body.rotate(me, 0.25);
-    Matter.Body.setDensity(me, 0.04 * (1 + Math.sqrt(game.difficulty))); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
     // spawn.shield(me, x, y, 1);  //not working, not sure why
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
