@@ -2,6 +2,10 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: remove all guns from the game, but double health, shields, and damage
+
+mod: like Born rule, but for guns
+
 field that pushes everything back, and can destroy smaller blocks
   converts blocks into ammo power ups
 

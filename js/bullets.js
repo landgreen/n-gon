@@ -466,7 +466,7 @@ const b = {
     },
     {
       name: "brushless motors", //7
-      description: "your <strong>drones</strong> accelerate 50% <strong>faster</strong>",
+      description: "your <strong>drones</strong> accelerate 40% <strong>faster</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -941,7 +941,7 @@ const b = {
   },
   drone(speed = 1) {
     const me = bullet.length;
-    const THRUST = b.isModFastDrones ? 0.003 : 0.0015
+    const THRUST = b.isModFastDrones ? 0.0023 : 0.0015
     const dir = mech.angle + 0.2 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random()) * b.modBulletSize
     bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 8, RADIUS, {
