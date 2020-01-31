@@ -141,6 +141,39 @@ const spawn = {
       this.attraction();
     };
   },
+  cellBoss(x, y, radius = 30, dropPowerUp = true) {
+    //easy mob for on level 1
+    mobs.spawn(x, y, 8, radius, "#9ccdc6");
+    let me = mob[mob.length - 1];
+    me.accelMag = 0.0005 * game.accelScale;
+    me.memory = 60;
+    me.spawnFrequency = Math.floor(150 + Math.random() * 60)
+    me.seeAtDistance2 = 1400000 //1200 vision range
+    Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+
+    me.do = function () {
+      this.seePlayerByLookingAt();
+      this.attraction();
+      //look for player and spawn if player is close
+      const range = 500
+      //draw range
+      ctx.beginPath();
+      ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(0,0,0,0.1)";
+      ctx.fill();
+      if (!(game.cycle % this.spawnFrequency) && this.distanceToPlayer2() < range * range) {
+        spawn.cellBoss(this.position.x, this.position.y, 30, false);
+      }
+      //spread out away from other cells
+      for (let i = 0, len = mob.length; i < len; i++) {
+
+      }
+    };
+    me.onDeath = function () {
+      if (dropPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    };
+  },
+
   // healer(x, y, radius = 20) {
   //   mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
   //   let me = mob[mob.length - 1];
