@@ -143,35 +143,67 @@ const spawn = {
   },
   cellBoss(x, y, radius = 30, dropPowerUp = true) {
     //easy mob for on level 1
-    mobs.spawn(x, y, 8, radius, "#9ccdc6");
+
+    mobs.spawn(x, y, 8, radius, "rgb(70,170,140)");
     let me = mob[mob.length - 1];
+    me.isCell = true;
     me.accelMag = 0.0005 * game.accelScale;
     me.memory = 60;
-    me.spawnFrequency = Math.floor(150 + Math.random() * 60)
-    me.seeAtDistance2 = 1400000 //1200 vision range
-    Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+    me.spawnFrequency = Math.floor(15 + Math.random() * 8)
+    me.cellRadiusMax = 1000
+    me.cellRadius = 100
+    me.seeAtDistance2 = me.cellRadius * me.cellRadius // vision range
+    // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+
+    //count other cells
+    let count = 0
+    for (let i = 0, len = mob.length; i < len; i++) {
+      if (mob[i].isCell) count++
+    }
+    me.growRate = 4 / count //grow proportional to the number of cells alive when born
 
     me.do = function () {
-      this.seePlayerByLookingAt();
-      this.attraction();
-      //look for player and spawn if player is close
-      const range = 500
+      //grow cell radius
+      if (this.cellRadius < 700) {
+        this.cellRadius += this.growRate
+        this.seeAtDistance2 = this.cellRadius * this.cellRadius
+      } else {
+        this.seePlayerByDistOrLOS();
+        this.attraction();
+        if (!(game.cycle % this.spawnFrequency) && this.distanceToPlayer() < this.cellRadius) {
+          spawn.cellBoss(this.position.x, this.position.y, 30, false);
+          this.cellRadius = 100
+        }
+      }
+
+
       //draw range
       ctx.beginPath();
-      ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(0,0,0,0.1)";
+      ctx.arc(this.position.x, this.position.y, this.cellRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(70,170,140,0.3)";
       ctx.fill();
-      if (!(game.cycle % this.spawnFrequency) && this.distanceToPlayer2() < range * range) {
-        spawn.cellBoss(this.position.x, this.position.y, 30, false);
-      }
-      //spread out away from other cells
-      for (let i = 0, len = mob.length; i < len; i++) {
 
-      }
+      //spread out away from other cells
+      // for (let i = 0, len = mob.length; i < len; i++) {
+
+      // }
     };
     me.onDeath = function () {
-      if (dropPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-    };
+      if (dropPowerUp) {
+        powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+      } else {
+        this.dropPowerUp = false;
+      }
+      //find other cells and have them reset their growth rate
+      let count = 0
+      for (let i = 0, len = mob.length; i < len; i++) {
+        if (mob[i].isCell) count++
+      }
+      const growRate = 4 / count //grow proportional to the number of cells alive when born
+      for (let i = 0, len = mob.length; i < len; i++) {
+        if (mob[i].isCell) mob[i].growRate = growRate
+      }
+    }
   },
 
   // healer(x, y, radius = 20) {
