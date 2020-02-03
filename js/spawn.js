@@ -142,16 +142,16 @@ const spawn = {
       this.attraction();
     };
   },
-  cellBoss(x, y, radius = 20 + 60 * Math.random()) {
+  cellBoss(x, y, radius = 20 + 40 * Math.random()) {
     mobs.spawn(x, y, 0, radius, "rgba(0,150,155,0.7)");
     let me = mob[mob.length - 1];
     me.isCell = true;
-    me.accelMag = 0.00024 * game.accelScale;
-    me.memory = 60;
+    me.accelMag = 0.00018 * game.accelScale;
+    me.memory = 40;
     me.frictionAir = 0.012
     me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
-    me.seeAtDistance2 = 1500000;
-    me.cellMassMax = 90
+    me.seeAtDistance2 = 1400000;
+    me.cellMassMax = 80
 
     me.collisionFilter.mask = cat.player | cat.bullet
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
@@ -166,14 +166,14 @@ const spawn = {
       this.split();
     };
     me.onDamage = function (dmg) {
-      if (Math.random() < 0.16 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
+      if (Math.random() < 0.18 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
     }
     me.do = function () {
       if (!mech.isBodiesAsleep) {
         this.seePlayerByDistOrLOS();
         this.attraction();
 
-        if (this.mass < this.cellMassMax) { //grow cell radius
+        if (this.seePlayer.recall && this.mass < this.cellMassMax) { //grow cell radius
           const scale = 1 + 0.0002 * this.cellMassMax / this.mass;
           Matter.Body.scale(this, scale, scale);
           this.radius = Math.sqrt(this.mass * k / Math.PI)

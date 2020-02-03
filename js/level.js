@@ -1180,13 +1180,14 @@ const level = {
     //building 2
     spawn.mapRect(-4450, -600, 2300, 750);
     spawn.mapRect(-2225, -500, 175, 550);
-    spawn.boost(-2800, -600, 1150);
+    spawn.mapRect(-2600, -975, 450, 50);
+    // spawn.boost(-2800, -600, 1150);
     spawn.mapRect(-3450, -1325, 550, 50);
     spawn.mapRect(-3425, -2200, 525, 50);
-    spawn.mapRect(-2600, -1750, 450, 50);
+    spawn.mapRect(-2600, -1700, 450, 50);
     spawn.mapRect(-2600, -2450, 450, 50);
     spawn.bodyRect(-2275, -2700, 50, 60);
-    spawn.bodyRect(-2600, -1975, 250, 225);
+    spawn.bodyRect(-2600, -1925, 250, 225);
     spawn.bodyRect(-3415, -1425, 100, 100);
     spawn.bodyRect(-3400, -1525, 100, 100);
     spawn.bodyRect(-3305, -1425, 100, 100);
@@ -1240,7 +1241,7 @@ const level = {
       const x = -2000 - Math.floor(1600 * Math.random());
       const y = -2700 - Math.floor(600 * Math.random());
       const d = 800;
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 6; i++) {
         spawn.cellBoss(x + Math.floor(d * (Math.random() - 0.5)), y + Math.floor(d * (Math.random() - 0.5)));
       }
     }
