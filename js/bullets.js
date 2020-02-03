@@ -160,7 +160,7 @@ const b = {
     },
     {
       name: "electric reactive armour",
-      description: "<strong class='color-e'>explosions</strong> do no <strong>harm</strong>, but drain <strong class='color-f'>energy</strong>",
+      description: "<strong class='color-e'>explosions</strong> do you no <strong>harm</strong>, but drain <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {

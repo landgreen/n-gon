@@ -146,47 +146,49 @@ const spawn = {
     mobs.spawn(x, y, 0, radius, "rgba(0,150,155,0.7)");
     let me = mob[mob.length - 1];
     me.isCell = true;
-    me.accelMag = 0.00025 * game.accelScale;
+    me.accelMag = 0.00024 * game.accelScale;
     me.memory = 60;
     me.frictionAir = 0.012
-    me.seePlayerFreq = Math.floor(5 + 5 * Math.random())
-    me.seeAtDistance2 = 9000000;
-    me.cellMassMax = 100
+    me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
+    me.seeAtDistance2 = 1500000;
+    me.cellMassMax = 90
 
     me.collisionFilter.mask = cat.player | cat.bullet
-    // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+    Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+    // console.log(me.mass, me.radius)
+    const k = 642 //k=r^2/m
     me.split = function () {
-      Matter.Body.scale(this, 0.5, 0.5);
-      this.radius = Math.sqrt(this.mass * 1100 / Math.PI)
+      Matter.Body.scale(this, 0.4, 0.4);
+      this.radius = Math.sqrt(this.mass * k / Math.PI)
       spawn.cellBoss(this.position.x, this.position.y, this.radius);
     }
     me.onHit = function () { //run this function on hitting player
       this.split();
     };
     me.onDamage = function (dmg) {
-      if (Math.random() * 1.8 < dmg && this.health > dmg) this.split();
+      if (Math.random() < 0.16 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
     }
     me.do = function () {
       if (!mech.isBodiesAsleep) {
-        this.seePlayerByDistAndLOS();
+        this.seePlayerByDistOrLOS();
         this.attraction();
 
         if (this.mass < this.cellMassMax) { //grow cell radius
-          const scale = 1 + 0.00015 * this.cellMassMax / this.mass;
+          const scale = 1 + 0.0002 * this.cellMassMax / this.mass;
           Matter.Body.scale(this, scale, scale);
-          this.radius = Math.sqrt(this.mass * 1100 / Math.PI)
+          this.radius = Math.sqrt(this.mass * k / Math.PI)
         }
         if (!(game.cycle % this.seePlayerFreq)) { //move away from other mobs
-          const repelRange = 70
-          const attractRange = 600
+          const repelRange = 200
+          const attractRange = 800
           for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].isCell && mob[i].id !== this.id) {
               const sub = Vector.sub(this.position, mob[i].position)
               const dist = Vector.magnitude(sub)
               if (dist < repelRange) {
-                this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.002)
+                this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.006)
               } else if (dist > attractRange) {
-                this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.0015)
+                this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.004)
               }
             }
           }

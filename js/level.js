@@ -13,7 +13,7 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      level.difficultyIncrease(4)
+      level.difficultyIncrease(5)
       b.giveGuns("minigun")
       // mech.setField("phase decoherence field")
       // b.giveMod("ground stomp");
@@ -1236,11 +1236,11 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
-    if (game.difficulty > 3) {
+    if (game.difficulty > 4) {
       const x = -2000 - Math.floor(1600 * Math.random());
       const y = -2700 - Math.floor(600 * Math.random());
       const d = 800;
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 7; i++) {
         spawn.cellBoss(x + Math.floor(d * (Math.random() - 0.5)), y + Math.floor(d * (Math.random() - 0.5)));
       }
     }
