@@ -127,10 +127,11 @@ const spawn = {
       }
     }
   },
-  starter(x, y, radius = 30) {
+  starter(x, y, radius = Math.floor(20 + 20 * Math.random())) {
     //easy mob for on level 1
     mobs.spawn(x, y, 8, radius, "#9ccdc6");
     let me = mob[mob.length - 1];
+    // console.log(`mass=${me.mass}, radius = ${radius}`)
     me.accelMag = 0.0005 * game.accelScale;
     me.memory = 60;
     me.seeAtDistance2 = 1400000 //1200 vision range
@@ -141,70 +142,146 @@ const spawn = {
       this.attraction();
     };
   },
-  cellBoss(x, y, radius = 30, dropPowerUp = true) {
-    //easy mob for on level 1
-
-    mobs.spawn(x, y, 8, radius, "rgb(70,170,140)");
+  cellBoss(x, y, radius = 20 + 60 * Math.random()) {
+    mobs.spawn(x, y, 0, radius, "rgba(0,150,155,0.7)");
     let me = mob[mob.length - 1];
     me.isCell = true;
-    me.accelMag = 0.0005 * game.accelScale;
+    me.accelMag = 0.00025 * game.accelScale;
     me.memory = 60;
-    me.spawnFrequency = Math.floor(15 + Math.random() * 8)
-    me.cellRadiusMax = 1000
-    me.cellRadius = 100
-    me.seeAtDistance2 = me.cellRadius * me.cellRadius // vision range
+    me.frictionAir = 0.012
+    me.seePlayerFreq = Math.floor(5 + 5 * Math.random())
+    me.seeAtDistance2 = 9000000;
+    me.cellMassMax = 100
+
+    me.collisionFilter.mask = cat.player | cat.bullet
     // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
-
-    //count other cells
-    let count = 0
-    for (let i = 0, len = mob.length; i < len; i++) {
-      if (mob[i].isCell) count++
+    me.split = function () {
+      Matter.Body.scale(this, 0.5, 0.5);
+      this.radius = Math.sqrt(this.mass * 1100 / Math.PI)
+      spawn.cellBoss(this.position.x, this.position.y, this.radius);
     }
-    me.growRate = 4 / count //grow proportional to the number of cells alive when born
-
+    me.onHit = function () { //run this function on hitting player
+      this.split();
+    };
+    me.onDamage = function (dmg) {
+      if (Math.random() * 1.8 < dmg && this.health > dmg) this.split();
+    }
     me.do = function () {
-      //grow cell radius
-      if (this.cellRadius < 700) {
-        this.cellRadius += this.growRate
-        this.seeAtDistance2 = this.cellRadius * this.cellRadius
-      } else {
-        this.seePlayerByDistOrLOS();
+      if (!mech.isBodiesAsleep) {
+        this.seePlayerByDistAndLOS();
         this.attraction();
-        if (!(game.cycle % this.spawnFrequency) && this.distanceToPlayer() < this.cellRadius) {
-          spawn.cellBoss(this.position.x, this.position.y, 30, false);
-          this.cellRadius = 100
+
+        if (this.mass < this.cellMassMax) { //grow cell radius
+          const scale = 1 + 0.00015 * this.cellMassMax / this.mass;
+          Matter.Body.scale(this, scale, scale);
+          this.radius = Math.sqrt(this.mass * 1100 / Math.PI)
         }
+        if (!(game.cycle % this.seePlayerFreq)) { //move away from other mobs
+          const repelRange = 70
+          const attractRange = 600
+          for (let i = 0, len = mob.length; i < len; i++) {
+            if (mob[i].isCell && mob[i].id !== this.id) {
+              const sub = Vector.sub(this.position, mob[i].position)
+              const dist = Vector.magnitude(sub)
+              if (dist < repelRange) {
+                this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.002)
+              } else if (dist > attractRange) {
+                this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.0015)
+              }
+            }
+          }
+        }
+        // if (!(game.cycle % this.seePlayerFreq)) { //move away from other mobs
+        //   let q = Matter.Query.point(mob, this.position)
+        //   for (let i = 0; i < q.length; i++) {
+        //     if (q[i].id !== this.id) {
+        //       THRUST = 0.005
+        //       this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, q[i].position)), this.mass * THRUST)
+        //     }
+        //   }
+        // }
       }
-
-
-      //draw range
-      ctx.beginPath();
-      ctx.arc(this.position.x, this.position.y, this.cellRadius, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(70,170,140,0.3)";
-      ctx.fill();
-
-      //spread out away from other cells
-      // for (let i = 0, len = mob.length; i < len; i++) {
-
-      // }
     };
     me.onDeath = function () {
-      if (dropPowerUp) {
+      let count = 0 //count other cells
+      for (let i = 0, len = mob.length; i < len; i++) {
+        if (mob[i].isCell) count++
+      }
+      if (count === 1) { //only drop a power up if this is the last cell
         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       } else {
         this.dropPowerUp = false;
       }
-      //find other cells and have them reset their growth rate
-      let count = 0
-      for (let i = 0, len = mob.length; i < len; i++) {
-        if (mob[i].isCell) count++
-      }
-      const growRate = 4 / count //grow proportional to the number of cells alive when born
-      for (let i = 0, len = mob.length; i < len; i++) {
-        if (mob[i].isCell) mob[i].growRate = growRate
-      }
     }
   },
+  // cellBoss(x, y, radius = 30) {
+  //   mobs.spawn(x, y, 8, radius, "rgb(70,170,140)");
+  //   let me = mob[mob.length - 1];
+  //   me.isCell = true;
+  //   me.accelMag = 0.0003 * game.accelScale;
+  //   me.memory = 60;
+  //   me.spawnFrequency = Math.floor(15 + Math.random() * 8)
+  //   me.cellRadiusMax = 600
+  //   me.cellRadius = 100
+  //   me.seeAtDistance2 = me.cellRadius * me.cellRadius // vision range
+  //   // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+
+  //   //count other cells
+  //   let count = 0
+  //   for (let i = 0, len = mob.length; i < len; i++) {
+  //     if (mob[i].isCell) count++
+  //   }
+  //   me.growRate = 4 / count //grow proportional to the number of cells alive when born
+
+  //   me.do = function () {
+  //     //grow cell radius
+  //     if (this.cellRadius < this.cellRadiusMax) {
+  //       this.cellRadius += this.growRate
+  //       this.seeAtDistance2 = this.cellRadius * this.cellRadius
+  //     }
+  //     if (this.cellRadius > this.cellRadiusMax / 2) {
+  //       this.seePlayerByDistOrLOS();
+  //       this.attraction();
+  //       //when near player split and hurt player
+  //       if (!(game.cycle % this.spawnFrequency) && this.distanceToPlayer() < this.cellRadius) {
+  //         spawn.cellBoss(this.position.x, this.position.y, 30);
+  //         this.cellRadius = 100
+  //         // let dmg = 0.1 * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
+  //         // mech.damage(dmg);
+  //       }
+
+  //       //eat blocks and power ups, gain an increases in radius, and split
+  //       //remember what was eaten and release it out on death
+  //     }
+
+  //     ctx.beginPath(); //draw range
+  //     ctx.arc(this.position.x, this.position.y, this.cellRadius, 0, 2 * Math.PI);
+  //     ctx.fillStyle = `rgba(70,170,140,${0.7*this.cellRadius/this.cellRadiusMax})`
+  //     ctx.fill();
+
+  //     //flocking behavior?
+  //     // for (let i = 0, len = mob.length; i < len; i++) {
+
+  //     // }
+  //   };
+  //   me.onDeath = function () {
+  //     //find other cells and have them reset their growth rate
+  //     let count = 0
+  //     for (let i = 0, len = mob.length; i < len; i++) {
+  //       if (mob[i].isCell) count++
+  //     }
+  //     const growRate = 4 / count //grow proportional to the number of cells alive when born
+  //     for (let i = 0, len = mob.length; i < len; i++) {
+  //       if (mob[i].isCell) mob[i].growRate = growRate
+  //     }
+  //     //only drop a power up if this is the last cell
+  //     if (count === 1) {
+  //       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+  //     } else {
+  //       this.dropPowerUp = false;
+  //     }
+  //   }
+  // },
 
   // healer(x, y, radius = 20) {
   //   mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
@@ -541,31 +618,6 @@ const spawn = {
         toMe(body, this.position, this.eventHorizon)
         toMe(mob, this.position, this.eventHorizon)
         toMe(bullet, this.position, this.eventHorizon)
-
-        //push everything away
-        // function push(who, pos, range) {
-        //   for (let i = 0, len = who.length; i < len; ++i) {
-        //     const SUB = Vector.sub(who[i].position, pos)
-        //     const DISTANCE = Vector.magnitude(SUB)
-        //     if (DISTANCE < range) {
-        //       const depth = range - DISTANCE
-        //       const force = Vector.mult(Vector.normalise(SUB), 30 * who[i].mass / depth)
-        //       who[i].force.x += force.x;
-        //       who[i].force.y += force.y;
-        //     }
-        //   }
-        // }
-        // push(body, this.position, this.eventHorizon)
-        // push(mob, this.position, this.eventHorizon)
-        // push(bullet, this.position, this.eventHorizon)
-        // push([player], this.position, this.eventHorizon)
-        // for (let i = 0; i < (game.difficulty - 3); ++i) {
-        //   spawn.sucker(this.position.x + (Math.random() - 0.5) * radius * 2, this.position.y + (Math.random() - 0.5) * radius * 2, 70 * Math.random());
-        //   Matter.Body.setVelocity(mob[mob.length - 1], {
-        //     x: (Math.random() - 0.5) * 70,
-        //     y: (Math.random() - 0.5) * 70
-        //   });
-        // }
       }
     };
     me.do = function () {
@@ -613,8 +665,11 @@ const spawn = {
         ctx.fill();
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
-          mech.damage(0.00015 * game.dmgScale);
-          if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.0045
+          if (mech.fieldMeter > 0.1) {
+            mech.fieldMeter -= 0.0055
+          } else {
+            mech.damage(0.0003 * game.dmgScale);
+          }
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 1.3 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
           player.force.y -= 1.2 * Math.sin(angle) * player.mass * game.g;

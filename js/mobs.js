@@ -727,7 +727,7 @@ const mobs = {
         //accelerate towards the searchTarget
         if (!this.seePlayer.recall) {
           const newTarget = function (that) {
-            if (Math.random() < 0.025) {
+            if (Math.random() < 0.0005) {
               that.searchTarget = player.position; //chance to target player
             } else {
               //target random body
@@ -945,7 +945,7 @@ const mobs = {
           if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
           this.health -= dmg
           //this.fill = this.color + this.health + ')';
-          this.onDamage(this); //custom damage effects
+          this.onDamage(dmg); //custom damage effects
           if (this.health < 0.05) this.death();
         }
       },
@@ -966,7 +966,8 @@ const mobs = {
         if (this.dropPowerUp) {
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
           if (Math.random() < b.modSpores) {
-            for (let i = 0, len = Math.floor(4 + this.mass * Math.random()); i < len; i++) {
+            const len = Math.min(30, Math.floor(4 + this.mass * Math.random()))
+            for (let i = 0; i < len; i++) {
               b.spore(this) //spawn drone
             }
           }

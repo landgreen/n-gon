@@ -19,14 +19,14 @@ const level = {
       // b.giveMod("ground stomp");
 
       // level.intro(); //starting level
-      level.testingMap();
+      // level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
       // level.aerie();
       // level.rooftops();
       // level.warehouse();
-      // level.highrise();
+      level.highrise();
       // level.office();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
@@ -50,7 +50,7 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.13; //damage done by mobs increases each level
+      game.dmgScale += 0.135; //damage done by mobs increases each level
       b.dmgScale *= 0.93; //damage done by player decreases each level
       game.accelScale *= 1.02 //mob acceleration increases each level
       game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
@@ -61,7 +61,7 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.13; //damage done by mobs increases each level
+      game.dmgScale -= 0.135; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.93; //damage done by player decreases each level
       game.accelScale /= 1.02 //mob acceleration increases each level
@@ -127,6 +127,8 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.bomber(800, -450);
+    spawn.cellBoss(400, -750);
+    spawn.cellBoss(400, -750);
     spawn.cellBoss(400, -750);
 
     // spawn.laser(400, -550);
@@ -1207,6 +1209,7 @@ const level = {
     spawn.mapRect(-4450, -3075, 450, 25);
     spawn.mapRect(-4025, -3075, 25, 100);
     spawn.mapRect(-4275, -2785, 100, 25);
+    if (game.difficulty < 4) spawn.bodyRect(-3760, -2400, 50, 50);
 
     //mobs
     spawn.randomMob(-2500, -2700, 1);
@@ -1233,7 +1236,14 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
-    if (game.difficulty < 4) spawn.bodyRect(-3760, -2400, 50, 50);
+    if (game.difficulty > 3) {
+      const x = -2000 - Math.floor(1600 * Math.random());
+      const y = -2700 - Math.floor(600 * Math.random());
+      const d = 800;
+      for (let i = 0; i < 5; i++) {
+        spawn.cellBoss(x + Math.floor(d * (Math.random() - 0.5)), y + Math.floor(d * (Math.random() - 0.5)));
+      }
+    }
   },
   warehouse() {
     level.defaultZoom = 1300
