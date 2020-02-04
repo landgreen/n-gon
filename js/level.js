@@ -13,13 +13,13 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(5)
+      // level.difficultyIncrease(15)
       // b.giveGuns("minigun")
       // mech.setField("phase decoherence field")
       // b.giveMod("ground stomp");
 
-      // level.intro(); //starting level
-      level.testingMap();
+      level.intro(); //starting level
+      // level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
@@ -728,7 +728,7 @@ const level = {
     spawn.randomBoss(2225, -1325, 0.4);
     spawn.randomBoss(4900, -1200, 0);
     //spawn.randomBoss(4850, -1250,0.7);
-    if (game.difficulty > 4) spawn.randomLevelBoss(3000, -2400);
+    if (game.difficulty > 4) spawn.randomLevelBoss(3200, -2050);
   },
   aerie() {
     // game.setZoom(3000);
@@ -1237,7 +1237,7 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
-    if (game.difficulty > 4) spawn.randomLevelBoss(-2400, -3100);
+    if (game.difficulty > 4) spawn.randomLevelBoss(-3400, -2800);
 
   },
   warehouse() {

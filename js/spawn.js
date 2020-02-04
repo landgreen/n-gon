@@ -155,7 +155,7 @@ const spawn = {
     mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,150,155,0.7)");
     let me = mob[mob.length - 1];
     me.isCell = true;
-    me.accelMag = 0.00018 * game.accelScale;
+    me.accelMag = 0.00015 * game.accelScale;
     me.memory = 40;
     me.frictionAir = 0.012
     me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
@@ -175,7 +175,7 @@ const spawn = {
       this.split();
     };
     me.onDamage = function (dmg) {
-      if (Math.random() < 0.18 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
+      if (Math.random() < 0.17 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
     }
     me.do = function () {
       if (!mech.isBodiesAsleep) {
@@ -1093,11 +1093,9 @@ const spawn = {
       this.seePlayerByLookingAt();
       this.fire();
       //gently return to starting location
-      if (!(game.cycle % this.seePlayerFreq)) {
-        const sub = Vector.sub(this.homePosition, this.position)
-        const dist = Vector.magnitude(sub)
-        if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.001)
-      }
+      const sub = Vector.sub(this.homePosition, this.position)
+      const dist = Vector.magnitude(sub)
+      if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
     };
   },
   bullet(x, y, radius = 6, sides = 0) {
