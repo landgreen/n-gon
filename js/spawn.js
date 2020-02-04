@@ -78,7 +78,11 @@ const spawn = {
       }
     }
   },
-
+  randomLevelBoss(x, y) {
+    // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss"]
+    spawn[options[Math.floor(Math.random() * options.length)]](x, y)
+  },
   //mob templates *********************************************************************************************
   //***********************************************************************************************************
   groupBoss(x, y, num = 3 + Math.random() * 8) {
@@ -142,8 +146,13 @@ const spawn = {
       this.attraction();
     };
   },
-  cellBoss(x, y, radius = 20 + 40 * Math.random()) {
-    mobs.spawn(x, y, 0, radius, "rgba(0,150,155,0.7)");
+  cellBossCulture(x, y, radius = 20, num = 5) {
+    for (let i = 0; i < num; i++) {
+      spawn.cellBoss(x, y, radius)
+    }
+  },
+  cellBoss(x, y, radius = 20) {
+    mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,150,155,0.7)");
     let me = mob[mob.length - 1];
     me.isCell = true;
     me.accelMag = 0.00018 * game.accelScale;
@@ -193,15 +202,6 @@ const spawn = {
             }
           }
         }
-        // if (!(game.cycle % this.seePlayerFreq)) { //move away from other mobs
-        //   let q = Matter.Query.point(mob, this.position)
-        //   for (let i = 0; i < q.length; i++) {
-        //     if (q[i].id !== this.id) {
-        //       THRUST = 0.005
-        //       this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, q[i].position)), this.mass * THRUST)
-        //     }
-        //   }
-        // }
       }
     };
     me.onDeath = function () {
@@ -212,79 +212,11 @@ const spawn = {
       if (count === 1) { //only drop a power up if this is the last cell
         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       } else {
+        this.leaveBody = false;
         this.dropPowerUp = false;
       }
     }
   },
-  // cellBoss(x, y, radius = 30) {
-  //   mobs.spawn(x, y, 8, radius, "rgb(70,170,140)");
-  //   let me = mob[mob.length - 1];
-  //   me.isCell = true;
-  //   me.accelMag = 0.0003 * game.accelScale;
-  //   me.memory = 60;
-  //   me.spawnFrequency = Math.floor(15 + Math.random() * 8)
-  //   me.cellRadiusMax = 600
-  //   me.cellRadius = 100
-  //   me.seeAtDistance2 = me.cellRadius * me.cellRadius // vision range
-  //   // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
-
-  //   //count other cells
-  //   let count = 0
-  //   for (let i = 0, len = mob.length; i < len; i++) {
-  //     if (mob[i].isCell) count++
-  //   }
-  //   me.growRate = 4 / count //grow proportional to the number of cells alive when born
-
-  //   me.do = function () {
-  //     //grow cell radius
-  //     if (this.cellRadius < this.cellRadiusMax) {
-  //       this.cellRadius += this.growRate
-  //       this.seeAtDistance2 = this.cellRadius * this.cellRadius
-  //     }
-  //     if (this.cellRadius > this.cellRadiusMax / 2) {
-  //       this.seePlayerByDistOrLOS();
-  //       this.attraction();
-  //       //when near player split and hurt player
-  //       if (!(game.cycle % this.spawnFrequency) && this.distanceToPlayer() < this.cellRadius) {
-  //         spawn.cellBoss(this.position.x, this.position.y, 30);
-  //         this.cellRadius = 100
-  //         // let dmg = 0.1 * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-  //         // mech.damage(dmg);
-  //       }
-
-  //       //eat blocks and power ups, gain an increases in radius, and split
-  //       //remember what was eaten and release it out on death
-  //     }
-
-  //     ctx.beginPath(); //draw range
-  //     ctx.arc(this.position.x, this.position.y, this.cellRadius, 0, 2 * Math.PI);
-  //     ctx.fillStyle = `rgba(70,170,140,${0.7*this.cellRadius/this.cellRadiusMax})`
-  //     ctx.fill();
-
-  //     //flocking behavior?
-  //     // for (let i = 0, len = mob.length; i < len; i++) {
-
-  //     // }
-  //   };
-  //   me.onDeath = function () {
-  //     //find other cells and have them reset their growth rate
-  //     let count = 0
-  //     for (let i = 0, len = mob.length; i < len; i++) {
-  //       if (mob[i].isCell) count++
-  //     }
-  //     const growRate = 4 / count //grow proportional to the number of cells alive when born
-  //     for (let i = 0, len = mob.length; i < len; i++) {
-  //       if (mob[i].isCell) mob[i].growRate = growRate
-  //     }
-  //     //only drop a power up if this is the last cell
-  //     if (count === 1) {
-  //       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-  //     } else {
-  //       this.dropPowerUp = false;
-  //     }
-  //   }
-  // },
-
   // healer(x, y, radius = 20) {
   //   mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
   //   let me = mob[mob.length - 1];
@@ -1081,7 +1013,7 @@ const spawn = {
   //     }
   //   };
   // },
-  bomber(x, y, radius = 120 + Math.ceil(Math.random() * 70)) {
+  bomberBoss(x, y, radius = 90 + Math.ceil(Math.random() * 20)) {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
@@ -1139,24 +1071,33 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     me.memory = 240;
+    me.homePosition = {
+      x: x,
+      y: y
+    };
     me.fireFreq = 0.025;
     me.noseLength = 0;
     me.fireAngle = 0;
     me.accelMag = 0.005 * game.accelScale;
-    me.frictionAir = 0.1;
+    me.frictionAir = 0.05;
     me.lookTorque = 0.000007 * (Math.random() > 0.5 ? -1 : 1);
     me.fireDir = {
       x: 0,
       y: 0
     };
-    Matter.Body.setDensity(me, 0.02 + 0.001 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    // spawn.shield(me, x, y, 1);
+    Matter.Body.setDensity(me, 0.023 + 0.001 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
       this.seePlayerByLookingAt();
       this.fire();
+      //gently return to starting location
+      if (!(game.cycle % this.seePlayerFreq)) {
+        const sub = Vector.sub(this.homePosition, this.position)
+        const dist = Vector.magnitude(sub)
+        if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.001)
+      }
     };
   },
   bullet(x, y, radius = 6, sides = 0) {
@@ -1237,7 +1178,7 @@ const spawn = {
       this.attraction();
     };
   },
-  snaker(x, y, radius = 80) {
+  snakeBoss(x, y, radius = 80) {
     //snake boss with a laser head
     mobs.spawn(x, y, 8, radius, "rgb(255,50,130)");
     let me = mob[mob.length - 1];
@@ -1276,7 +1217,7 @@ const spawn = {
     });
 
   },
-  tether(x, y, radius = 90) {
+  tetherBoss(x, y, radius = 90) {
     // constrained mob boss for the towers level
     // often has a ring of mobs around it
     mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");

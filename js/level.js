@@ -13,20 +13,20 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      level.difficultyIncrease(5)
-      b.giveGuns("minigun")
+      // level.difficultyIncrease(5)
+      // b.giveGuns("minigun")
       // mech.setField("phase decoherence field")
       // b.giveMod("ground stomp");
 
       // level.intro(); //starting level
-      // level.testingMap();
+      level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
       // level.aerie();
       // level.rooftops();
       // level.warehouse();
-      level.highrise();
+      // level.highrise();
       // level.office();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
@@ -126,10 +126,10 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.bomber(800, -450);
-    spawn.cellBoss(400, -750);
-    spawn.cellBoss(400, -750);
-    spawn.cellBoss(400, -750);
+    // spawn.bomberBoss(800, -450);
+    // spawn.cellBoss(400, -750);
+
+    spawn.randomLevelBoss(400, -750)
 
     // spawn.laser(400, -550);
     // spawn.starter(1200, -1050);
@@ -728,7 +728,7 @@ const level = {
     spawn.randomBoss(2225, -1325, 0.4);
     spawn.randomBoss(4900, -1200, 0);
     //spawn.randomBoss(4850, -1250,0.7);
-    if (game.difficulty > 4) spawn.bomber(2500, -2400, 100);
+    if (game.difficulty > 4) spawn.randomLevelBoss(3000, -2400);
   },
   aerie() {
     // game.setZoom(3000);
@@ -1058,7 +1058,7 @@ const level = {
     spawn.randomMob(-100, -900, -0.2);
     spawn.randomBoss(3700, -1500, 0.4);
     spawn.randomBoss(1700, -900, 0.4);
-    if (game.difficulty > 3) spawn.shooterBoss(2200, -1300);
+    if (game.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
   },
   highrise() {
     level.defaultZoom = 1500
@@ -1237,14 +1237,8 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
-    if (game.difficulty > 4) {
-      const x = -2000 - Math.floor(1600 * Math.random());
-      const y = -2700 - Math.floor(600 * Math.random());
-      const d = 800;
-      for (let i = 0; i < 6; i++) {
-        spawn.cellBoss(x + Math.floor(d * (Math.random() - 0.5)), y + Math.floor(d * (Math.random() - 0.5)));
-      }
-    }
+    if (game.difficulty > 4) spawn.randomLevelBoss(-2400, -3100);
+
   },
   warehouse() {
     level.defaultZoom = 1300
@@ -1420,7 +1414,7 @@ const level = {
     //spawn.randomMob(1120, -1200, 0.3);
     //spawn.randomSmallMob(2200, -1775);
 
-    if (game.difficulty > 2) spawn.snaker(-1300 + Math.random() * 2000, -2200); //boss snake with head
+    if (game.difficulty > 2) spawn.snakeBoss(-1300 + Math.random() * 2000, -2200); //boss snake with head
   },
   office() {
     level.defaultZoom = 1400
@@ -1569,7 +1563,7 @@ const level = {
         height: 525,
         color: "#ccc"
       });
-      spawn.tether(2850, -80)
+      spawn.tetherBoss(2850, -80)
       cons[cons.length] = Constraint.create({
         pointA: {
           x: 2500,

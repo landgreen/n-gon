@@ -962,7 +962,7 @@ const mobs = {
       death() {
         this.onDeath(this); //custom death effects
         this.removeConsBB();
-        this.alive = false;
+        this.alive = false; //triggers mob removal in mob[i].replace(i)
         if (this.dropPowerUp) {
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
           if (Math.random() < b.modSpores) {
