@@ -257,7 +257,7 @@ const b = {
       },
       effect() {
         b.isModDroneOnDamage = true;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 4; i++) {
           b.drone() //spawn drone
         }
       }
@@ -696,7 +696,7 @@ const b = {
       if (!b.isModImmuneExplosion && mech.fieldMeter > 0.1) {
         mech.damage(radius * 0.0002);
       } else {
-        mech.fieldMeter -= radius * 0.0006
+        mech.fieldMeter -= Math.max(radius * 0.0006, 0.1)
       }
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
       player.force.x += knock.x;
@@ -1305,34 +1305,33 @@ const b = {
       name: "shotgun", //1
       description: "fire a <strong>burst</strong> of short range bullets<br><em>crouch to reduce recoil</em>",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 8,
       have: false,
       isStarterGun: true,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 50 : 35) * b.modFireRate); // cool down
-
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 55 : 30) * b.modFireRate); // cool down
         b.muzzleFlash(35);
         // mobs.alert(650);
-        const side = 11 * b.modBulletSize
-        for (let i = 0; i < 9; i++) {
+        const side = 13 * b.modBulletSize
+        for (let i = 0; i < 11; i++) {
           const me = bullet.length;
-          const dir = mech.angle + (Math.random() - 0.5) * (mech.crouch ? 0.22 : 0.7)
+          const dir = mech.angle + (Math.random() - 0.5) * (mech.crouch ? 0.35 : 1.1)
           bullet[me] = Bodies.rectangle(mech.pos.x + 35 * Math.cos(mech.angle) + 15 * (Math.random() - 0.5), mech.pos.y + 35 * Math.sin(mech.angle) + 15 * (Math.random() - 0.5), side, side, b.fireAttributes(dir));
           World.add(engine.world, bullet[me]); //add bullet to world
-          const SPEED = 40 + Math.random() * 11
+          const SPEED = 50 + Math.random() * 10
           Matter.Body.setVelocity(bullet[me], {
             x: SPEED * Math.cos(dir),
             y: SPEED * Math.sin(dir)
           });
           bullet[me].endCycle = game.cycle + 55
-          bullet[me].frictionAir = 0.03;
+          bullet[me].frictionAir = 0.04;
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
           };
         }
 
         //knock back
-        const KNOCK = ((mech.crouch) ? 0.013 : 0.15) * b.modBulletSize * b.modBulletSize
+        const KNOCK = ((mech.crouch) ? 0.01 : 0.08) * b.modBulletSize * b.modBulletSize
         player.force.x -= KNOCK * Math.cos(mech.angle)
         player.force.y -= KNOCK * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
       }

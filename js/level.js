@@ -50,7 +50,7 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.135; //damage done by mobs increases each level
+      game.dmgScale += 0.11; //damage done by mobs increases each level
       b.dmgScale *= 0.93; //damage done by player decreases each level
       game.accelScale *= 1.02 //mob acceleration increases each level
       game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
@@ -61,7 +61,7 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.135; //damage done by mobs increases each level
+      game.dmgScale -= 0.11; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.93; //damage done by player decreases each level
       game.accelScale /= 1.02 //mob acceleration increases each level

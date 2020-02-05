@@ -474,7 +474,7 @@ const mech = {
 
     //chance to build a drone on damage  from mod
     if (b.isModDroneOnDamage) {
-      const len = (dmg - 0.08 + 0.05 * Math.random()) / 0.05
+      const len = (dmg - 0.06 + 0.07 * Math.random()) / 0.05
       for (let i = 0; i < len; i++) {
         if (Math.random() < 0.6) b.drone() //spawn drone
       }

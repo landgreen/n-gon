@@ -160,7 +160,7 @@ const spawn = {
     me.frictionAir = 0.012
     me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
     me.seeAtDistance2 = 1400000;
-    me.cellMassMax = 80
+    me.cellMassMax = 70
 
     me.collisionFilter.mask = cat.player | cat.bullet
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
@@ -504,8 +504,11 @@ const spawn = {
 
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
-          mech.damage(0.00015 * game.dmgScale);
-          if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.0045
+          if (mech.fieldMeter > 0.1) {
+            mech.fieldMeter -= 0.005
+          } else {
+            mech.damage(0.0002 * game.dmgScale);
+          }
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 1.25 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.8 : 1);
           player.force.y -= 0.96 * player.mass * game.g * Math.sin(angle);
@@ -600,7 +603,7 @@ const spawn = {
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
           if (mech.fieldMeter > 0.1) {
-            mech.fieldMeter -= 0.0055
+            mech.fieldMeter -= 0.0075
           } else {
             mech.damage(0.0003 * game.dmgScale);
           }
@@ -1235,7 +1238,7 @@ const spawn = {
       this.attraction();
     };
   },
-  shield(target, x, y, chance = Math.min(0.01 + game.difficulty * 0.01, 0.3)) {
+  shield(target, x, y, chance = Math.min(0.02 + game.difficulty * 0.005, 0.2)) {
     if (this.allowShields && Math.random() < chance) {
       mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
       let me = mob[mob.length - 1];

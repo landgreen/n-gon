@@ -2,6 +2,8 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: bullets neutralize forward mob velocity on hit
+
 boss: bacteria boss, duplicates when player is in range
 
 mod: remove all guns from the game, but double health, shields, and damage
@@ -327,7 +329,11 @@ const build = {
     spawn.setSpawnList(); //gives random mobs,  not starter
     game.startGame();
     let difficulty = build.list.length * game.difficultyMode - 1
-    if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6 - 1
+    if (game.difficultyMode === 0) {
+      difficulty = build.list.length * 1 - 6 - 1
+      game.isEasyMode = true;
+    }
+    if (game.difficultyMode === 4) level.difficultyIncrease(6)
     level.difficultyIncrease(difficulty)
 
     level.isBuildRun = true;
