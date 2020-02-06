@@ -16,10 +16,11 @@ const level = {
       // level.difficultyIncrease(15)
       // b.giveGuns("minigun")
       // mech.setField("phase decoherence field")
-      // b.giveMod("ground stomp");
+      b.giveMod("squirrel-cage rotor");
+      b.giveMod("ground stomp");
 
-      level.intro(); //starting level
-      // level.testingMap();
+      // level.intro(); //starting level
+      level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
@@ -50,7 +51,7 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.11; //damage done by mobs increases each level
+      game.dmgScale += 0.13; //damage done by mobs increases each level
       b.dmgScale *= 0.93; //damage done by player decreases each level
       game.accelScale *= 1.02 //mob acceleration increases each level
       game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
@@ -61,7 +62,7 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.11; //damage done by mobs increases each level
+      game.dmgScale -= 0.13; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.93; //damage done by player decreases each level
       game.accelScale /= 1.02 //mob acceleration increases each level
@@ -129,7 +130,7 @@ const level = {
     // spawn.bomberBoss(800, -450);
     // spawn.cellBoss(400, -750);
 
-    spawn.randomLevelBoss(400, -750)
+    // spawn.randomLevelBoss(400, -750)
 
     // spawn.laser(400, -550);
     // spawn.starter(1200, -1050);
@@ -1180,8 +1181,8 @@ const level = {
     //building 2
     spawn.mapRect(-4450, -600, 2300, 750);
     spawn.mapRect(-2225, -500, 175, 550);
-    spawn.mapRect(-2600, -975, 450, 50);
-    // spawn.boost(-2800, -600, 1150);
+    // spawn.mapRect(-2600, -975, 450, 50);
+    spawn.boost(-2800, -600, 1150);
     spawn.mapRect(-3450, -1325, 550, 50);
     spawn.mapRect(-3425, -2200, 525, 50);
     spawn.mapRect(-2600, -1700, 450, 50);

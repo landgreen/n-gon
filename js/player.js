@@ -206,11 +206,14 @@ const mech = {
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
+        if (b.isModStompPauli) {
+          mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        }
         if (b.isModStomp) {
-          // const len = Math.min(10, momentum * 0.03)
-          // for (let i = 0; i < 10; i++) {
-          //   b.spore(player) //spawn drone
-          // }
+          const len = Math.min(20, (momentum - 110) * 0.07)
+          for (let i = 0; i < len; i++) {
+            b.spore(player) //spawn drone
+          }
         } else if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
           let dmg = Math.sqrt(momentum - 165) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
