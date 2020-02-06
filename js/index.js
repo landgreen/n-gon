@@ -2,6 +2,8 @@
 /* TODO:  *******************************************
 *****************************************************
 
+css transition for pause menu
+
 mod: bullets neutralize forward mob velocity on hit
 
 boss: bacteria boss, duplicates when player is in range
@@ -46,9 +48,6 @@ gun/field: portals
 missiles don't explode reliably enough
   they can bounce, which is cool, but they should still explode right after a bounce
 
-add mouse constraint in testing mode
-  https://github.com/liabru/matter-js/blob/master/examples/events.js
-
 weekly random challenge where everyone playing each week gets the same random setup.
   The randomness would be determined by the date so it would sync everyone.
   power ups still drop, but the drops are determined by a preset list that changes each week.
@@ -65,9 +64,6 @@ mod: do something at the end of each level
 mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
   10% max health
   20% of your current health
-
-mob: has 2 or 3 shields that can regenerate over time
-  could be just a boss
 
 gun:  Spirit Bomb (singularity)
   use charge up like rail gun
@@ -86,12 +82,9 @@ atmosphere levels
   more graphics
   
 Boss levels
-  boss grows and spilt, if you don't kill it fast
-    sensor that locks you in after you enter the boss room
+  sensor that locks you in after you enter the boss room
   boss that eats other mobs and gains stats from them
     chance to spawn on any level (past level 5)
-  boss that knows how to shoot (player) bullets that collide with player 
-    overwrite custom engine collision bullet mob function.
 
 add a key that player picks up and needs to set on the exit door to open it
 
@@ -241,7 +234,7 @@ const build = {
     <option value="0">easy</option>
     <option value="1" selected>normal</option>
     <option value="2">hard</option>
-    <option value="6">why...</option>
+    <option value="4">why...</option>
   </select>
     </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
@@ -322,7 +315,8 @@ const build = {
   calculateCustomDifficulty() {
     let difficulty = build.list.length * game.difficultyMode
     if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6
-    document.getElementById("starting-level").innerHTML = `starting level: <strong style="font-size:1.05em;">${difficulty}</strong>`
+    if (game.difficultyMode === 4) difficulty = build.list.length * 4 + 8
+    document.getElementById("starting-level").innerHTML = `starting difficulty: <strong style="font-size:1.05em;">${difficulty}</strong>`
   },
   startBuildRun() {
     spawn.setSpawnList();
