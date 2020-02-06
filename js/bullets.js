@@ -64,10 +64,10 @@ const b = {
     b.isModMassEnergy = false;
     b.modLaserBotCount = 0;
     b.modNailBotCount = 0;
-    b.modCollisionImmuneCycles = 30;
     b.modBlockDmg = 0;
     b.isModPiezo = false;
     b.isModStomp = false;
+    b.modCollisionImmuneCycles = 30;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -152,7 +152,7 @@ const b = {
       maxCount: 3,
       count: 0,
       allowed() {
-        return true
+        return b.haveGunCheck("missiles") || b.haveGunCheck("flak") || b.haveGunCheck("grenades") || b.haveGunCheck("vacuum bomb") || b.haveGunCheck("pulse");
       },
       effect: () => {
         b.modExplosionRadius += 0.2;
@@ -164,7 +164,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return (b.modExplosionRadius > 1) ? true : false;
+        return (b.modExplosionRadius > 1)
       },
       effect: () => {
         b.isModImmuneExplosion = true;
@@ -300,21 +300,21 @@ const b = {
         mech.jumpForce = 0.38 * 1.1;
       }
     },
-    // {
-    //   name: "ground stomp",
-    //   description: "hard landings release <strong>spores</strong>",
-    //   maxCount: 1,
-    //   count: 0,
-    //   allowed() {
-    //     return b.modSquirrelFx === 1.2 ? true : false;
-    //   },
-    //   effect() {
-    //     b.isModStomp = true
-    //   }
-    // },
+    {
+      name: "ground stomp",
+      description: "hard landings release <strong style='letter-spacing: 2px;'>spores</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.modSquirrelFx === 1.2
+      },
+      effect() {
+        b.isModStomp = true
+      }
+    },
     {
       name: "Pauli exclusion",
-      description: "unable to <strong>collide</strong> with enemies for +2 second<br>activates after being <strong>harmed</strong> from a collision",
+      description: `unable to <strong>collide</strong> with enemies for +120 seconds<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -331,7 +331,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return b.modCollisionImmuneCycles > 120 || b.isModPiezo
       },
       effect() {
         b.isModAnnihilation = true
