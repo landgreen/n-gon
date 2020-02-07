@@ -35,6 +35,7 @@ const b = {
   isModPiezo: null,
   isModFastDrones: null,
   isModStomp: null,
+  modSuperBallNumber: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -68,6 +69,7 @@ const b = {
     b.isModPiezo = false;
     b.isModStomp = false;
     b.modCollisionImmuneCycles = 30;
+    b.modSuperBallNumber = 4;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -173,7 +175,7 @@ const b = {
     {
       name: "auto-loading heuristics",
       description: "your <strong>delay</strong> after firing is +14% <strong>shorter</strong>",
-      maxCount: 3,
+      maxCount: 9,
       count: 0,
       allowed() {
         return true
@@ -289,20 +291,20 @@ const b = {
     {
       name: "squirrel-cage rotor",
       description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
-      maxCount: 1,
+      maxCount: 9,
       count: 0,
       allowed() {
         return true
       },
       effect() { // good with melee builds, content skipping builds
-        b.modSquirrelFx = 1.2;
+        b.modSquirrelFx += 0.2;
         mech.Fx = 0.015 * b.modSquirrelFx;
-        mech.jumpForce = 0.38 * 1.1;
+        mech.jumpForce += 0.038;
       }
     },
     {
-      name: "ground stomp",
-      description: "hard landings release <strong style='letter-spacing: 2px;'>spores</strong>",
+      name: "Calvatia",
+      description: "hard landings disrupt <strong style='letter-spacing: 2px;'>spores</strong> from the ground",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -314,7 +316,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with enemies for +120 seconds<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `unable to <strong>collide</strong> with enemies for +2 seconds<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -490,6 +492,19 @@ const b = {
         b.isModFastDrones = true
       }
     },
+    {
+      name: "super duper balls",
+      description: "your <strong>super balls</strong> fire +1 extra ball",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("super balls")
+      },
+      effect() {
+        b.modSuperBallNumber++
+      }
+    },
+
   ],
   giveMod(index = 'random') {
     if (index === 'random') {
@@ -907,7 +922,7 @@ const b = {
       angle: Math.random() * 2 * Math.PI,
       friction: 0,
       frictionAir: 0.025,
-      dmg: 2.5, //damage done in addition to the damage from momentum
+      dmg: 2.2, //damage done in addition to the damage from momentum
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1340,17 +1355,18 @@ const b = {
       name: "super balls", //2
       description: "fire <strong>five</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 8,
       have: false,
+      num: 5,
       isStarterGun: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 30 : 20) * b.modFireRate); // cool down
         b.muzzleFlash(20);
         // mobs.alert(450);
-        const SPEED = mech.crouch ? 45 : 35
+        const SPEED = mech.crouch ? 40 : 30
         const SPREAD = mech.crouch ? 0.04 : 0.15
-        let dir = mech.angle - SPREAD * 2;
-        for (let i = 0; i < 5; i++) {
+        let dir = mech.angle - SPREAD * (b.modSuperBallNumber - 1) / 2;
+        for (let i = 0; i < b.modSuperBallNumber; i++) {
           const me = bullet.length;
           bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 7 * b.modBulletSize, b.fireAttributes(dir, false));
           World.add(engine.world, bullet[me]); //add bullet to world
@@ -1359,7 +1375,7 @@ const b = {
             y: SPEED * Math.sin(dir)
           });
           // Matter.Body.setDensity(bullet[me], 0.0001);
-          bullet[me].endCycle = game.cycle + Math.floor(360 * b.isModBulletsLastLonger);
+          bullet[me].endCycle = game.cycle + Math.floor((300 + 60 * Math.random()) * b.isModBulletsLastLonger);
           bullet[me].dmg = 0;
           bullet[me].minDmgSpeed = 0;
           bullet[me].restitution = 0.99;
@@ -1742,7 +1758,7 @@ const b = {
       name: "mine", //9
       description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: (game.difficultyMode > 3) ? 2 : 3,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1761,7 +1777,7 @@ const b = {
       name: "spores", //10
       description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out enemies",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: (game.difficultyMode > 3) ? 3 : 4,
       have: false,
       isStarterGun: false,
       fire() {
@@ -1806,7 +1822,7 @@ const b = {
       name: "drones", //11
       description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
       ammo: 0,
-      ammoPack: 10,
+      ammoPack: (game.difficultyMode > 3) ? 8 : 10,
       have: false,
       isStarterGun: true,
       fire() {

@@ -14,10 +14,13 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(15)
-      // b.giveGuns("minigun")
+      b.giveGuns("super balls")
       // mech.setField("phase decoherence field")
-      b.giveMod("squirrel-cage rotor");
-      b.giveMod("ground stomp");
+      // b.giveMod("squirrel-cage rotor");
+      b.giveMod("super duper balls");
+      b.giveMod("super duper balls");
+      b.giveMod("super duper balls");
+
 
       // level.intro(); //starting level
       level.testingMap();
@@ -128,7 +131,7 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     // spawn.bomberBoss(800, -450);
-    // spawn.cellBoss(400, -750);
+    spawn.cellBoss(400, -750);
 
     // spawn.randomLevelBoss(400, -750)
 

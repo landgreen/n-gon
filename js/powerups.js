@@ -212,9 +212,14 @@ const powerUps = {
   giveRandomAmmo() {
     const ammoTarget = Math.floor(Math.random() * (b.guns.length));
     const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 6);
-    b.guns[ammoTarget].ammo += ammo;
-    game.updateGunHUD();
-    game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
+    if (ammo === Infinity) {
+      b.guns[ammoTarget].ammo += ammo;
+      game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
+    } else {
+      b.guns[ammoTarget].ammo += ammo;
+      game.updateGunHUD();
+      game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
+    }
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
     if (Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) || Math.random() < 0.035) { //spawn heal chance is higher at low health

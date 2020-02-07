@@ -2,11 +2,15 @@
 /* TODO:  *******************************************
 *****************************************************
 
+phase decoherence energy drain is proportional to player speed
+
+add recursive mod counts to pause screen
+
+key required to open the exit to some levels
+  must hold key like a block
+  could the key be any block?
+
 css transition for pause menu
-
-mod: bullets neutralize forward mob velocity on hit
-
-boss: bacteria boss, duplicates when player is in range
 
 mod: remove all guns from the game, but double health, shields, and damage
 
@@ -17,13 +21,6 @@ field that pushes everything back, and can destroy smaller blocks
 
 mod: make player invisible when...
   use the flag from phase field
-
-mod: ground stomp on enterLand()
-  immunity to falling damage
-  triggers when you press down
-    maybe rewrite the function to look for down key
-    with added down speed
-  spawn spores
 
 field: a larger radius that attracted enemies
   still deflected them near the robot
