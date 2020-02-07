@@ -2,6 +2,8 @@
 /* TODO:  *******************************************
 *****************************************************
 
+add difficulty slider to custom?
+
 phase decoherence energy drain is proportional to player speed
 
 add recursive mod counts to pause screen
@@ -12,7 +14,7 @@ key required to open the exit to some levels
 
 css transition for pause menu
 
-mod: remove all guns from the game, but double health, shields, and damage
+mod: remove all ammo drops from the game, but double player damage
 
 mod: like Born rule, but for guns
 
