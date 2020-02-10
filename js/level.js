@@ -16,7 +16,7 @@ const level = {
       // level.difficultyIncrease(5)
       // b.giveGuns("laser")
       // mech.setField("phase decoherence field")
-      // b.giveMod("optimized shell packing");
+      // b.giveMod("mass-energy equivalence");
 
       level.intro(); //starting level
       // level.testingMap();

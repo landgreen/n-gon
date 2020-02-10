@@ -77,7 +77,7 @@ const b = {
     b.modSuperBallNumber = 4;
     b.modLaserReflections = 2;
     b.isModNoAmmo = false;
-    b.isModAmmoFromHealth = false;
+    b.isModAmmoFromHealth = 0;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -352,7 +352,7 @@ const b = {
     },
     {
       name: "piezoelectricity",
-      description: "<strong>colliding</strong> with enemies fills your <strong class='color-f'>energy</strong>",
+      description: "<strong>colliding</strong> with enemies charges your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -366,7 +366,7 @@ const b = {
     {
       name: "energy conservation",
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
-      maxCount: 3,
+      maxCount: 9,
       count: 0,
       allowed() {
         return true
@@ -379,7 +379,7 @@ const b = {
     {
       name: "entropy exchange",
       description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
-      maxCount: 3,
+      maxCount: 9,
       count: 0,
       allowed() {
         return true
@@ -390,7 +390,7 @@ const b = {
     },
     {
       name: "overcharge",
-      description: "charge <strong class='color-f'>energy</strong> <strong>+50%</strong> beyond your <strong>maximum</strong>",
+      description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>+50%</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -428,7 +428,7 @@ const b = {
     },
     {
       name: "mass-energy equivalence",
-      description: "power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for <strong>+5%</strong><br><em>applies to guns, ammo, fields, mods, and heals</em>",
+      description: "<strong>power ups</strong> overcharge your <strong class='color-f'>energy</strong><br>temporarily gain <strong>150%</strong> of maximum",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -436,7 +436,7 @@ const b = {
       },
       effect: () => {
         b.isModMassEnergy = true // used in mech.grabPowerUp
-        mech.fieldMeter = mech.fieldEnergyMax
+        mech.fieldMeter = mech.fieldEnergyMax * 2
       }
     },
     {
@@ -465,14 +465,14 @@ const b = {
     },
     {
       name: "catabolism",
-      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>5%</strong> health into an <strong>ammo</strong> power up",
+      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>3%</strong> of current health into <strong>ammo</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
         return true
       },
       effect: () => {
-        b.isModAmmoFromHealth = true;
+        b.isModAmmoFromHealth = 0.03;
       }
     },
     {
@@ -487,9 +487,11 @@ const b = {
         b.isModNoAmmo = true;
         for (let i = 0; i < 6; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
         for (let i = 0; i < 3; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
         }
       }
     },
@@ -635,9 +637,10 @@ const b = {
         }
       } else {
 
-        if (b.isModAmmoFromHealth && mech.health > 0.05) {
-          mech.damage(0.05);
+        if (b.isModAmmoFromHealth && mech.health > b.isModAmmoFromHealth) {
+          mech.damage(b.isModAmmoFromHealth * mech.health);
           powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
         }
         mech.fireCDcycle = mech.cycle + 30; //fire cooldown
         // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><strong class = 'box'>E</strong> / <strong class = 'box'>Q</strong>", 200);

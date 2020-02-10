@@ -684,9 +684,10 @@ const mech = {
       ctx.fillRect(xOff, yOff, range * mech.fieldEnergyMax, 10);
       ctx.fillStyle = "#0cf";
       ctx.fillRect(xOff, yOff, range * mech.fieldMeter, 10);
-    } else {
-      mech.fieldMeter = mech.fieldEnergyMax
     }
+    // else {
+    //   mech.fieldMeter = mech.fieldEnergyMax
+    // }
   },
   lookingAt(who) {
     //calculate a vector from body to player and make it length 1
@@ -891,8 +892,8 @@ const mech = {
         });
         if (dist2 < 5000) { //use power up if it is close enough
           if (b.isModMassEnergy) {
-            mech.fieldMeter = mech.fieldEnergyMax;
-            mech.addHealth(0.05);
+            mech.fieldMeter = mech.fieldEnergyMax * 1.5;
+            // mech.addHealth(0.01);
           }
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
@@ -1523,7 +1524,7 @@ const mech = {
             mech.holding();
             mech.throwBlock();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-            const DRAIN = 0.0002 + 0.00027 * player.speed
+            const DRAIN = 0.00015 + 0.00027 * player.speed
             if (mech.fieldMeter > DRAIN) {
               mech.fieldMeter -= DRAIN;
 

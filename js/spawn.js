@@ -503,7 +503,7 @@ const spawn = {
         ctx.fill();
 
         //when player is inside event horizon
-        if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
+        if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
           if (mech.fieldMeter > 0.1) {
             mech.fieldMeter -= 0.005
           } else {
@@ -601,7 +601,7 @@ const spawn = {
         ctx.fillStyle = "rgba(0,0,0,0.05)";
         ctx.fill();
         //when player is inside event horizon
-        if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon && !mech.isStealth) {
+        if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
           if (mech.fieldMeter > 0.1) {
             mech.fieldMeter -= 0.0075
           } else {

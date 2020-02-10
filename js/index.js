@@ -2,14 +2,25 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod: flechettes - each burst fires an extra flechette
+mod: flechettes - stick into mobs and do poison damage, like foam
+
+mod: foam - does extra poison dmg  (to get past shields)
+
+mod: vacuum bomb - does a constant suck
+
+mod: shield harmonics - large field radius
+
+mod: shotgun - fire extra shot
+  but also increase spread?
+
+mod: wave beam - speed up the wave beam and reduce the wave amplitude to improve targeting at range
+
+
 speed up movement
   higher gravity, larger jump force
   faster horizontal acceleration
   only increase top speed a bit
-
-mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
-  10% max health
-  20% of your current health
 
 mob: targeting laser, then a high speed, no gravity bullet
 
