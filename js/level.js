@@ -13,17 +13,13 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(15)
-      b.giveGuns("super balls")
+      // level.difficultyIncrease(5)
+      // b.giveGuns("laser")
       // mech.setField("phase decoherence field")
-      // b.giveMod("squirrel-cage rotor");
-      b.giveMod("super duper balls");
-      b.giveMod("super duper balls");
-      b.giveMod("super duper balls");
+      // b.giveMod("optimized shell packing");
 
-
-      // level.intro(); //starting level
-      level.testingMap();
+      level.intro(); //starting level
+      // level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
@@ -38,6 +34,7 @@ const level = {
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
       level.levelAnnounce();
     }
+    // if (level.isBuildRun) build.givePowerUps();
     game.noCameraScroll();
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
@@ -54,26 +51,39 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.13; //damage done by mobs increases each level
-      b.dmgScale *= 0.93; //damage done by player decreases each level
+      game.dmgScale += 0.17; //damage done by mobs increases each level
+      b.dmgScale *= 0.91; //damage done by player decreases each level
       game.accelScale *= 1.02 //mob acceleration increases each level
       game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
       game.CDScale *= 0.97 //mob CD time decreases each level
     }
-    game.healScale = 1 / (1 + game.difficulty * 0.065) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
+    game.healScale = 1 / (1 + game.difficulty * 0.09) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.13; //damage done by mobs increases each level
+      game.dmgScale -= 0.17; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
-      b.dmgScale /= 0.93; //damage done by player decreases each level
+      b.dmgScale /= 0.91; //damage done by player decreases each level
       game.accelScale /= 1.02 //mob acceleration increases each level
       game.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
       game.CDScale /= 0.97 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 1;
-    game.healScale = 1 / (1 + game.difficulty * 0.065)
+    game.healScale = 1 / (1 + game.difficulty * 0.09)
+  },
+  levelAnnounce() {
+    let mode = document.getElementById("difficulty-select").value
+    if (mode === "0") {
+      mode = "(easy)"
+    } else if (mode === "1") {
+      mode = "(normal)"
+    } else if (mode === "2") {
+      mode = "(hard)"
+    } else if (mode === "4") {
+      mode = "(why)"
+    }
+    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " " + mode;
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
@@ -1559,25 +1569,32 @@ const level = {
     spawn.randomBoss(1800, -800, -0.2);
     spawn.randomBoss(4150, -1000, 0.6);
 
-    if (game.difficulty > 2) { // tether ball
-      level.fillBG.push({
-        x: 2495,
-        y: -500,
-        width: 10,
-        height: 525,
-        color: "#ccc"
-      });
-      spawn.tetherBoss(2850, -80)
-      cons[cons.length] = Constraint.create({
-        pointA: {
-          x: 2500,
-          y: -500
-        },
-        bodyB: mob[mob.length - 1],
-        stiffness: 0.00012
-      });
-      //chance to spawn a ring of exploding mobs around this boss
-      if (game.difficulty > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
+    if (game.difficulty > 2) {
+      if (Math.random() < 0.7) {
+        // tether ball
+        level.fillBG.push({
+          x: 2495,
+          y: -500,
+          width: 10,
+          height: 525,
+          color: "#ccc"
+        });
+        spawn.tetherBoss(2850, -80)
+        cons[cons.length] = Constraint.create({
+          pointA: {
+            x: 2500,
+            y: -500
+          },
+          bodyB: mob[mob.length - 1],
+          stiffness: 0.00012
+        });
+        //chance to spawn a ring of exploding mobs around this boss
+        if (game.difficulty > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
+      } else if (game.difficulty > 3) {
+        spawn.shooterBoss(2200, -650);
+
+      }
+
     }
   },
   //*****************************************************************************************************************
@@ -1763,32 +1780,7 @@ const level = {
       target.death();
     }
   },
-  levelAnnounce() {
-    let mode = document.getElementById("difficulty-select").value
-    if (mode === "0") {
-      mode = "(easy)"
-    } else if (mode === "1") {
-      mode = "(normal)"
-    } else if (mode === "2") {
-      mode = "(hard)"
-    } else if (mode === "6") {
-      mode = "(why)"
-    }
-    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " " + mode;
-    // game.makeTextLog(`<div style='font-size: 25px;'>level ${game.difficulty} </div> <div style='font-size: 32px;'>${level.levels[level.onLevel]} </div>`, 300);
-    // if (game.difficulty === 0) text = "";
-    // text = "Level " + (game.difficulty + 1) + ": " + spawn.pickList[0] + "s + " + spawn.pickList[1] + "s";
-
-    // text = text + " with population: ";
-    // for (let i = 0, len = spawn.pickList.length; i < len; ++i) {
-    //     if (spawn.pickList[i] != spawn.pickList[i - 1]) {
-    //         text += spawn.pickList[i] + ", ";
-    //     }
-    // }
-    // this.speech(text);
-    // game.makeTextLog(text, 360);
-  },
-  addToWorld(mapName) {
+  addToWorld() {
     //needs to be run to put bodies into the world
     for (let i = 0; i < body.length; i++) {
       //body[i].collisionFilter.group = 0;

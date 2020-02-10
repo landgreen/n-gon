@@ -2,9 +2,18 @@
 /* TODO:  *******************************************
 *****************************************************
 
-add difficulty slider to custom?
+speed up movement
+  higher gravity, larger jump force
+  faster horizontal acceleration
+  only increase top speed a bit
 
-phase decoherence energy drain is proportional to player speed
+mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
+  10% max health
+  20% of your current health
+
+mob: targeting laser, then a high speed, no gravity bullet
+
+add difficulty slider to custom?
 
 add recursive mod counts to pause screen
 
@@ -14,8 +23,6 @@ key required to open the exit to some levels
 
 css transition for pause menu
 
-mod: remove all ammo drops from the game, but double player damage
-
 mod: like Born rule, but for guns
 
 field that pushes everything back, and can destroy smaller blocks
@@ -23,6 +30,7 @@ field that pushes everything back, and can destroy smaller blocks
 
 mod: make player invisible when...
   use the flag from phase field
+  when health is low?
 
 field: a larger radius that attracted enemies
   still deflected them near the robot
@@ -59,10 +67,6 @@ mod: do something at the end of each level
     how to track goals?
     take no damage
     don't shoot
-
-mod: if you fire when out of ammo you gain 1 ammo pack at the cost of
-  10% max health
-  20% of your current health
 
 gun:  Spirit Bomb (singularity)
   use charge up like rail gun
@@ -243,7 +247,7 @@ const build = {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
     }
     for (let i = 0, len = b.mods.length; i < len; i++) {
-      if (b.mods[i].name === "Born rule" || b.mods[i].name === "+1 cardinality") {
+      if (b.mods[i].name === "Born rule" || b.mods[i].name === "+1 cardinality" || b.mods[i].name === "leveraged investment") {
         text += `<div class="build-grid-module" style="opacity:0.3;"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
       } else {
         text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
@@ -318,8 +322,8 @@ const build = {
     document.getElementById("starting-level").innerHTML = `starting difficulty: <strong style="font-size:1.05em;">${difficulty}</strong>`
   },
   startBuildRun() {
+    spawn.setSpawnList(); //gives random mobs,  not starter mobs
     spawn.setSpawnList();
-    spawn.setSpawnList(); //gives random mobs,  not starter
     game.startGame();
     let difficulty = build.list.length * game.difficultyMode - 1
     if (game.difficultyMode === 0) {
@@ -330,6 +334,9 @@ const build = {
     level.difficultyIncrease(difficulty)
 
     level.isBuildRun = true;
+    build.givePowerUps();
+  },
+  givePowerUps() {
     for (let i = 0; i < build.list.length; i++) {
       if (build.list[i].type === "field") {
         mech.setField(build.list[i].index)

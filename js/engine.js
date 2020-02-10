@@ -100,7 +100,9 @@ function collisionChecks(event) {
     }
 
     function collidePlayer(obj, speedThreshold = 12, massThreshold = 2) {
-      if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > massThreshold) { //dmg from hitting a body
+      //player dmg from hitting a body
+      if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > massThreshold &&
+        (obj.velocity.y > 0 || player.velocity.y > 0)) {
         const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
         if (v > speedThreshold && mech.collisionImmune < mech.cycle) {
           mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles

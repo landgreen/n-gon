@@ -79,7 +79,7 @@ const powerUps = {
           if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
         } else {
           let ammo = Math.ceil((target.ammoPack * (1 + 0.1 * Math.random())));
-          if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
+          // if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
           target.ammo += ammo;
           game.updateGunHUD();
           game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
@@ -227,17 +227,17 @@ const powerUps = {
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "heal");
       return;
     }
-    if (Math.random() < 0.15 && b.inventory.length > 0) {
+    if (Math.random() < 0.15 && b.inventory.length > 0 && !b.isModNoAmmo) {
       powerUps.spawn(x, y, "ammo");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.0025 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
+    if (Math.random() < 0.002 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
       powerUps.spawn(x, y, "gun");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.003 * (12 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 7
+    if (Math.random() < 0.0027 * (14 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod");
       return;
@@ -252,13 +252,13 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.75) {
+    } else if (Math.random() < 0.80) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.2) {
+    } else if (Math.random() < 0.35) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun")
-    } else if (Math.random() < 0.6) {
+    } else if (Math.random() < 0.65) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
     } else if (mech.health < 0.7) {
@@ -270,7 +270,7 @@ const powerUps = {
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
       }
-    } else {
+    } else if (!b.isModNoAmmo) {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
@@ -286,7 +286,7 @@ const powerUps = {
     if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
     } else {
-      powerUps.spawn(x, y, "ammo", false);
+      if (!b.isModNoAmmo) powerUps.spawn(x, y, "ammo", false);
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun

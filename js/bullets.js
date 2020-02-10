@@ -33,9 +33,13 @@ const b = {
   modCollisionImmuneCycles: null,
   modBlockDmg: null,
   isModPiezo: null,
-  isModFastDrones: null,
+  isModDroneCollide: null,
+  isModFastSpores: null,
   isModStomp: null,
   modSuperBallNumber: null,
+  modLaserReflections: null,
+  isModNoAmmo: null,
+  isModAmmoFromHealth: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -47,7 +51,8 @@ const b = {
     b.modHealthDrain = 0;
     b.modNoAmmo = 0;
     b.isModBulletsLastLonger = 1;
-    b.isModFastDrones = false;
+    b.isModDroneCollide = true;
+    b.isModFastSpores = false
     b.isModImmortal = false;
     b.modSpores = 0;
     b.modAcidDmg = 0;
@@ -70,18 +75,24 @@ const b = {
     b.isModStomp = false;
     b.modCollisionImmuneCycles = 30;
     b.modSuperBallNumber = 4;
+    b.modLaserReflections = 2;
+    b.isModNoAmmo = false;
+    b.isModAmmoFromHealth = false;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
     mech.fieldEnergyMax = 1;
+    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+      if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+    }
     for (let i = 0; i < b.mods.length; i++) {
       b.mods[i].count = 0
     }
   },
   modOnHealthChange() {
-    if (b.isModAcidDmg && mech.health > 0.9) {
+    if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
-      b.modAcidDmg = 1.4
+      b.modAcidDmg = 1.1
     } else {
       game.playerDmgColor = "rgba(0,0,0,0.7)"
       b.modAcidDmg = 0
@@ -101,11 +112,11 @@ const b = {
     },
     {
       name: "fluoroantimonic acid",
-      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>90% health</strong>",
+      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>80% health</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return mech.health > 0.8
       },
       effect() {
         b.isModAcidDmg = true;
@@ -138,11 +149,11 @@ const b = {
     },
     {
       name: "quasistatic equilibrium",
-      description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to 50% increase when near death</em>",
+      description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to <strong>50%</strong> increase when near death</em>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return mech.health < 0.75
       },
       effect() {
         b.isModLowHealthDmg = true; //used in mob.damage()
@@ -150,7 +161,7 @@ const b = {
     },
     {
       name: "high explosives",
-      description: "<strong class='color-e'>explosions</strong> do +20% more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is +44% <strong>larger</strong>",
+      description: "<strong class='color-e'>explosions</strong> do <strong>+20%</strong> more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is +44% <strong>larger</strong>",
       maxCount: 3,
       count: 0,
       allowed() {
@@ -174,7 +185,7 @@ const b = {
     },
     {
       name: "auto-loading heuristics",
-      description: "your <strong>delay</strong> after firing is +14% <strong>shorter</strong>",
+      description: "your <strong>delay</strong> after firing is <strong>+14% shorter</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -186,7 +197,7 @@ const b = {
     },
     {
       name: "desublimated ammunition",
-      description: "use 50% less <strong>ammo</strong> when <strong>crouching</strong>",
+      description: "use <strong>50%</strong> less <strong>ammo</strong> when <strong>crouching</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -198,11 +209,11 @@ const b = {
     },
     {
       name: "Lorentzian topology",
-      description: "your <strong>bullets</strong> last +33% <strong>longer</strong>",
+      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
       maxCount: 3,
       count: 0,
       allowed() {
-        return true
+        return b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam")
       },
       effect() {
         b.isModBulletsLastLonger += 0.33
@@ -219,7 +230,7 @@ const b = {
       effect() {
         b.modSpores += 0.11;
         for (let i = 0; i < 10; i++) {
-          b.spore(player) //spawn drone
+          b.spore(player)
         }
       }
     },
@@ -270,7 +281,7 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return true
+        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
       },
       effect() {
         b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
@@ -278,7 +289,7 @@ const b = {
     },
     {
       name: "entanglement",
-      description: "when your first gun is equipped<br>reduce <strong>harm</strong> by <strong>10%</strong> for each gun you have",
+      description: "only when your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>10%</strong> for each gun you have",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -303,7 +314,7 @@ const b = {
       }
     },
     {
-      name: "Calvatia",
+      name: "basidio-stomp",
       description: "hard landings disrupt <strong style='letter-spacing: 2px;'>spores</strong> from the ground",
       maxCount: 1,
       count: 0,
@@ -316,7 +327,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with enemies for +2 seconds<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `unable to <strong>collide</strong> with enemies for <strong>+2</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -329,7 +340,7 @@ const b = {
     },
     {
       name: "annihilation",
-      description: "after <strong>touching</strong> enemies, they are annihilated",
+      description: "after <strong>touching</strong> enemies, they are <strong>annihilated</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -409,7 +420,7 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return true
+        return mech.health < 0.7
       },
       effect() {
         b.modRecursiveHealing += 1
@@ -417,7 +428,7 @@ const b = {
     },
     {
       name: "mass-energy equivalence",
-      description: "power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for +5%",
+      description: "power ups fill your <strong class='color-f'>energy</strong> and <strong class='color-h'>heal</strong> for <strong>+5%</strong><br><em>applies to guns, ammo, fields, mods, and heals</em>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -453,6 +464,36 @@ const b = {
       }
     },
     {
+      name: "catabolism",
+      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>5%</strong> health into an <strong>ammo</strong> power up",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      effect: () => {
+        b.isModAmmoFromHealth = true;
+      }
+    },
+    {
+      name: "leveraged investment",
+      description: "<strong>remove</strong> all future <strong>ammo</strong> power ups<br>spawn 6 <strong class='color-m'>mods</strong> and 3 <strong class='color-h'>healing</strong> power ups",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      effect: () => {
+        b.isModNoAmmo = true;
+        for (let i = 0; i < 6; i++) { // spawn new mods
+          powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+        }
+        for (let i = 0; i < 3; i++) { // spawn new mods
+          powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+        }
+      }
+    },
+    {
       name: "+1 cardinality",
       description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
@@ -481,20 +522,32 @@ const b = {
       }
     },
     {
-      name: "brushless motors",
-      description: "your <strong>drones</strong> accelerate 33% <strong>faster</strong>",
+      name: "redundant systems",
+      description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("drones")
+        return b.haveGunCheck("drones") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
       },
       effect() {
-        b.isModFastDrones = true
+        b.isModDroneCollide = true
       }
     },
     {
-      name: "super duper balls",
-      description: "your <strong>super balls</strong> fire +1 extra ball",
+      name: "tinsellated flagella",
+      description: "your <strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("spores") || b.modSpores > 0 || b.isModStomp
+      },
+      effect() {
+        b.isModFastSpores = true
+      }
+    },
+    {
+      name: "super duper",
+      description: "you fire <strong>+1</strong> additional <strong>super ball</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -504,7 +557,32 @@ const b = {
         b.modSuperBallNumber++
       }
     },
-
+    {
+      name: "specular reflection",
+      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("laser")
+      },
+      effect() {
+        b.modLaserReflections++;
+      }
+    },
+    {
+      name: "optimized shell packing",
+      description: "<strong>flak</strong> ammo drops contain <strong>2x</strong> more shells",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("flak")
+      },
+      effect() {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
+        }
+      }
+    },
   ],
   giveMod(index = 'random') {
     if (index === 'random') {
@@ -556,7 +634,12 @@ const b = {
           game.updateGunHUD();
         }
       } else {
-        mech.fireCDcycle = mech.cycle + 30; //cooldown
+
+        if (b.isModAmmoFromHealth && mech.health > 0.05) {
+          mech.damage(0.05);
+          powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+        }
+        mech.fireCDcycle = mech.cycle + 30; //fire cooldown
         // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><strong class = 'box'>E</strong> / <strong class = 'box'>Q</strong>", 200);
         game.replaceTextLog = true;
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
@@ -922,6 +1005,7 @@ const b = {
       angle: Math.random() * 2 * Math.PI,
       friction: 0,
       frictionAir: 0.025,
+      thrust: b.isModFastSpores ? 0.0008 : 0.0004,
       dmg: 2.2, //damage done in addition to the damage from momentum
       classType: "bullet",
       collisionFilter: {
@@ -956,9 +1040,8 @@ const b = {
           }
         }
         //accelerate towards mobs
-        const THRUST = 0.0004
         if (this.lockedOn && this.lockedOn.alive) {
-          this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+          this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * this.thrust)
           // this.force.x -= THRUST * this.lockedOn.x
           // this.force.y -= THRUST * this.lockedOn.y
         } else {
@@ -976,7 +1059,7 @@ const b = {
   },
   drone(speed = 1) {
     const me = bullet.length;
-    const THRUST = b.isModFastDrones ? 0.002 : 0.0015
+    const THRUST = 0.0015
     const dir = mech.angle + 0.2 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random()) * b.modBulletSize
     bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 8, RADIUS, {
@@ -998,7 +1081,7 @@ const b = {
       isFollowMouse: true,
       onDmg() {
         this.lockedOn = null
-        if (this.endCycle > game.cycle + 180) {
+        if (this.endCycle > game.cycle + 180 && b.isModDroneCollide) {
           this.endCycle -= 60
           if (game.cycle + 180 > this.endCycle) this.endCycle = game.cycle + 180
         }
@@ -1110,7 +1193,7 @@ const b = {
       },
       onEnd() {},
       do() {
-        if (!(game.cycle % this.lookFrequency)) {
+        if (!(game.cycle % this.lookFrequency) && !mech.isStealth) {
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1190,7 +1273,7 @@ const b = {
         });
 
         //find targets
-        if (!(game.cycle % this.lookFrequency)) {
+        if (!(game.cycle % this.lookFrequency) && !mech.isStealth) {
           this.lockedOn = null;
           let closeDist = this.range;
           for (let i = 0, len = mob.length; i < len; ++i) {
@@ -1328,9 +1411,9 @@ const b = {
         b.muzzleFlash(35);
         // mobs.alert(650);
         const side = 13 * b.modBulletSize
-        for (let i = 0; i < 11; i++) {
+        for (let i = 0; i < 12; i++) {
           const me = bullet.length;
-          const dir = mech.angle + (Math.random() - 0.5) * (mech.crouch ? 0.35 : 1.1)
+          const dir = mech.angle + (Math.random() - 0.5) * (mech.crouch ? 0.40 : 1.2)
           bullet[me] = Bodies.rectangle(mech.pos.x + 35 * Math.cos(mech.angle) + 15 * (Math.random() - 0.5), mech.pos.y + 35 * Math.sin(mech.angle) + 15 * (Math.random() - 0.5), side, side, b.fireAttributes(dir));
           World.add(engine.world, bullet[me]); //add bullet to world
           const SPEED = 50 + Math.random() * 10
@@ -1479,7 +1562,7 @@ const b = {
       }
     },
     {
-      name: "missiles", //5
+      name: "missiles",
       description: "fire missiles that accelerate towards enemies<br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
       ammoPack: 4,
@@ -1577,10 +1660,11 @@ const b = {
         }
       }
     }, {
-      name: "flak", //6
+      name: "flak",
       description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
       ammo: 0,
       ammoPack: 6,
+      defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
       have: false,
       isStarterGun: true,
       fire() {
@@ -1820,7 +1904,7 @@ const b = {
     },
     {
       name: "drones", //11
-      description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce drone <strong>cycles</strong> by 1 second",
+      description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 8 : 10,
       have: false,
@@ -1849,7 +1933,7 @@ const b = {
           frictionAir: 0.003,
           friction: 0.2,
           restitution: 0.2,
-          dmg: 0, //damage done in addition to the damage from momentum
+          dmg: 0.1, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
@@ -1954,8 +2038,6 @@ const b = {
         bullet[me].endCycle = Infinity
         bullet[me].charge = 0;
         bullet[me].do = function () {
-          const FIELD_DRAIN = 0.002 //laser drains energy as well as bullets
-
           if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release
             //normal bullet behavior occurs after firing, overwrite this function
             this.do = function () {
@@ -2014,7 +2096,7 @@ const b = {
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
             mech.fieldMeter -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
 
-            //draw laser targeting
+            //draw targeting
             let best;
             let range = 3000
             const dir = mech.angle
@@ -2087,7 +2169,7 @@ const b = {
               };
             }
 
-            //draw laser beam
+            //draw beam
             ctx.beginPath();
             ctx.moveTo(path[0].x, path[0].y);
             ctx.lineTo(path[1].x, path[1].y);
@@ -2136,12 +2218,20 @@ const b = {
       isStarterGun: true,
       fire() {
         const FIELD_DRAIN = 0.0018 //laser drains energy as well as bullets
-        const damage = 0.05
+        const reflectivity = 1 - 1 / (b.modLaserReflections * 1.5)
+        let damage = b.dmgScale * 0.05
         if (mech.fieldMeter < FIELD_DRAIN) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
           mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
-          let best;
+          let best = {
+            x: null,
+            y: null,
+            dist2: Infinity,
+            who: null,
+            v1: null,
+            v2: null
+          };
           const color = "#f00";
           const range = 3000;
           const path = [{
@@ -2207,92 +2297,71 @@ const b = {
             vertexCollision(path[path.length - 2], path[path.length - 1], map);
             vertexCollision(path[path.length - 2], path[path.length - 1], body);
           };
-          const laserHitMob = function (dmg) {
+          const laserHitMob = function () {
             if (best.who.alive) {
-              dmg *= b.dmgScale * damage;
-              best.who.damage(dmg);
+              best.who.damage(damage);
               best.who.locatePlayer();
-              //draw mob damage circle
-              ctx.fillStyle = color;
+              ctx.fillStyle = color; //draw mob damage circle
               ctx.beginPath();
-              ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
+              ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(damage) * 100, 0, 2 * Math.PI);
               ctx.fill();
             }
           };
-
-          const reflection = function () {
-            // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+          const reflection = function () { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
             const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
             const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
             const nn = Vector.mult(n, 2 * Vector.dot(d, n));
             const r = Vector.normalise(Vector.sub(d, nn));
             path[path.length] = Vector.add(Vector.mult(r, range), path[path.length - 1]);
           };
-          //beam before reflection
+
           checkForCollisions();
-          if (best.dist2 != Infinity) {
+          let lastBestOdd
+          let lastBestEven = best.who //used in hack below
+          if (best.dist2 !== Infinity) {
             //if hitting something
             path[path.length - 1] = {
               x: best.x,
               y: best.y
             };
-            laserHitMob(1);
+            laserHitMob();
+            for (let i = 0; i < b.modLaserReflections; i++) {
+              reflection();
+              checkForCollisions();
+              if (best.dist2 !== Infinity) { //if hitting something
+                lastReflection = best
 
-            //1st reflection beam
-            reflection();
-            //ugly bug fix: this stops the reflection on a bug where the beam gets trapped inside a body
-            let who = best.who;
-            checkForCollisions();
-            if (best.dist2 != Infinity) {
-              //if hitting something
-              path[path.length - 1] = {
-                x: best.x,
-                y: best.y
-              };
-              laserHitMob(0.8);
-
-              //2nd reflection beam
-              //ugly bug fix: this stops the reflection on a bug where the beam gets trapped inside a body
-              if (who !== best.who) {
-                reflection();
-                checkForCollisions();
-                if (best.dist2 != Infinity) {
-                  //if hitting something
-                  path[path.length - 1] = {
-                    x: best.x,
-                    y: best.y
-                  };
-                  laserHitMob(0.63);
-
-
-                  reflection();
-                  checkForCollisions();
-                  if (best.dist2 != Infinity) {
-                    //if hitting something
-                    path[path.length - 1] = {
-                      x: best.x,
-                      y: best.y
-                    };
-                    laserHitMob(0.5);
-                  }
+                path[path.length - 1] = {
+                  x: best.x,
+                  y: best.y
+                };
+                damage *= reflectivity
+                laserHitMob();
+                //I'm not clear on how this works, but it gets ride of a bug where the laser reflects inside a block, often vertically.
+                //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
+                if (i % 2) {
+                  if (lastBestOdd === best.who) break
+                } else {
+                  lastBestOdd = best.who
+                  if (lastBestEven === best.who) break
                 }
+              } else {
+                break
               }
             }
           }
+
           ctx.fillStyle = color;
           ctx.strokeStyle = color;
           ctx.lineWidth = 2;
           ctx.lineDashOffset = 300 * Math.random()
-          // ctx.setLineDash([200 * Math.random(), 250 * Math.random()]);
-
           ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
           for (let i = 1, len = path.length; i < len; ++i) {
             ctx.beginPath();
             ctx.moveTo(path[i - 1].x, path[i - 1].y);
             ctx.lineTo(path[i].x, path[i].y);
             ctx.stroke();
-            ctx.globalAlpha *= 0.65; //reflections are less intense
-            // ctx.globalAlpha -= 0.1; //reflections are less intense
+            ctx.globalAlpha *= reflectivity; //reflections are less intense
           }
           ctx.setLineDash([0, 0]);
           ctx.globalAlpha = 1;

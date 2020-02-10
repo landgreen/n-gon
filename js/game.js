@@ -557,7 +557,6 @@ const game = {
     game.reset();
     game.firstRun = false;
 
-
     //setup FPS cap
     game.fpsInterval = 1000 / game.fpsCap;
     game.then = Date.now();

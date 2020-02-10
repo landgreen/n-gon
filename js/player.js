@@ -477,9 +477,9 @@ const mech = {
 
     //chance to build a drone on damage  from mod
     if (b.isModDroneOnDamage) {
-      const len = (dmg - 0.06 + 0.07 * Math.random()) / 0.05
+      const len = (dmg - 0.06 * Math.random()) * 40
       for (let i = 0; i < len; i++) {
-        if (Math.random() < 0.6) b.drone() //spawn drone
+        if (Math.random() < 0.75) b.drone() //spawn drone
       }
     }
 
@@ -1512,7 +1512,7 @@ const mech = {
     },
     {
       name: "phase decoherence field",
-      description: "use <strong class='color-f'>energy</strong> to to become <strong>intangible</strong><br><em style='opacity: 0.6;'>can't see or be seen outside field</em>",
+      description: "become <strong>intangible</strong> and <strong>invisible</strong><br>drains <strong class='color-f'>energy</strong> as you move",
       effect: () => {
         // mech.grabRange = 230
         mech.hold = function () {
@@ -1523,7 +1523,7 @@ const mech = {
             mech.holding();
             mech.throwBlock();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-            const DRAIN = 0.0015
+            const DRAIN = 0.0002 + 0.00027 * player.speed
             if (mech.fieldMeter > DRAIN) {
               mech.fieldMeter -= DRAIN;
 
