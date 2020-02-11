@@ -1516,22 +1516,22 @@ const b = {
       name: "wave beam", //4
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
       ammo: 0,
-      ammoPack: 35,
+      ammoPack: 40,
       have: false,
       isStarterGun: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle
-        const SCALE = (mech.crouch ? 0.967 : 0.955) + 0.03 * Math.min(1, 0.5 * (b.isModBulletsLastLonger - 1))
-        const wiggleMag = ((mech.crouch) ? 0.004 : 0.005) * ((mech.flipLegs === 1) ? 1 : -1)
-        bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 10, 10 * b.modBulletSize, {
+        const SCALE = 0.955 + 0.03 * Math.min(1, 0.5 * (b.isModBulletsLastLonger - 1))
+        const wiggleMag = ((mech.crouch) ? 0.01 : 0.024) * ((mech.flipLegs === 1) ? 1 : -1)
+        bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 10, 13 * b.modBulletSize, {
           angle: dir,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
-          endCycle: game.cycle + Math.floor((mech.crouch ? 170 : 130) * b.isModBulletsLastLonger),
+          endCycle: game.cycle + Math.floor(130 * b.isModBulletsLastLonger),
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.4, //damage done in addition to the damage from momentum
+          dmg: 0.6, //damage done in addition to the damage from momentum
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
@@ -1542,7 +1542,7 @@ const b = {
           do() {
             if (!mech.isBodiesAsleep) {
               this.cycle++
-              const THRUST = wiggleMag * Math.cos(this.cycle * 0.3)
+              const THRUST = wiggleMag * Math.cos(this.cycle * 0.35)
               this.force = Vector.mult(Vector.normalise(this.direction), this.mass * THRUST) //wiggle
 
               if (this.cycle > 0 && !(Math.floor(this.cycle) % 6)) Matter.Body.scale(this, SCALE, SCALE); //shrink
@@ -1550,19 +1550,13 @@ const b = {
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 8 : 4) * b.modFireRate); // cool down
-        const SPEED = 8.5;
+        mech.fireCDcycle = mech.cycle + Math.floor(4 * b.modFireRate); // cool down
+        const SPEED = 8;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
         });
         bullet[me].direction = Vector.perp(bullet[me].velocity)
-        // if (mech.angle + Math.PI / 2 > 0) {
-        //   bullet[me].direction = Vector.perp(bullet[me].velocity, true)
-        // } else {
-        //   bullet[me].direction = Vector.perp(bullet[me].velocity)
-        // }
-
       }
     },
     {
