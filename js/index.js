@@ -2,6 +2,30 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod - energy recharges fast when not moving
+
+lore - a mech gains self awareness
+  each mod/gun/field is a new tech
+    all the technology leads to the singularity
+  each game run is actually the mech simulating a possible escape
+    this is why the graphics are so bad, its just a simulation
+    final mod is "this is just a simulation"
+      you get immortality and Infinity damage
+      the next level is the final level
+  atmosphere levels that explore lore
+    give the user a rest, between combat
+    low combat more graphics
+    large rotating fan that the player has to move through
+    nonaggressive mobs one mob attacking the passive mobs
+    in the final level you see your self at the starting level, with the wires
+      you shoot your self to wake up?
+
+wave beam - needs a serious buff, its not fun, and it needs more damage
+  shorter range, higher dmg, faster wiggle
+mod: wave beam - speed up the wave beam and reduce the wave amplitude to improve targeting at range
+
+shotgun - even more short range effects
+
 mod: flechettes - each burst fires an extra flechette
 mod: flechettes - stick into mobs and do poison damage, like foam
 
@@ -13,9 +37,6 @@ mod: shield harmonics - large field radius
 
 mod: shotgun - fire extra shot
   but also increase spread?
-
-mod: wave beam - speed up the wave beam and reduce the wave amplitude to improve targeting at range
-
 
 speed up movement
   higher gravity, larger jump force
@@ -33,8 +54,6 @@ key required to open the exit to some levels
   could the key be any block?
 
 css transition for pause menu
-
-mod: like Born rule, but for guns
 
 field that pushes everything back, and can destroy smaller blocks
   converts blocks into ammo power ups
@@ -87,14 +106,6 @@ gun:  Spirit Bomb (singularity)
   uses energy
   hold above the player's head
 
-atmosphere levels
-  large rotating fan that the player has to move through
-  give the user a rest, between combat
-  low combat
-    nonaggressive mobs
-      one mob attacking the passive mobs
-  more graphics
-  
 Boss levels
   sensor that locks you in after you enter the boss room
   boss that eats other mobs and gains stats from them

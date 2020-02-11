@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(5)
-      // b.giveGuns("laser")
+      b.giveGuns("wave beam")
       // mech.setField("phase decoherence field")
       // b.giveMod("mass-energy equivalence");
 

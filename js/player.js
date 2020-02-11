@@ -330,9 +330,9 @@ const mech = {
           //find what mods I don't have
           let options = [];
           for (let i = 0, len = b.mods.length; i < len; i++) {
-            //can't get quantum immortality or multiverse
             if (b.mods[i].name !== "quantum immortality" &&
               b.mods[i].name !== "Born rule" &&
+              b.mods[i].name !== "leveraged investment" &&
               b.mods[i].count < b.mods[i].maxCount) options.push(i);
           }
           //add a new mod
@@ -659,7 +659,7 @@ const mech = {
     mech.fieldThreshold = Math.cos(mech.fieldArc * Math.PI)
   },
   setHoldDefaults() {
-    mech.fieldMeter = mech.fieldEnergyMax;
+    if (mech.fieldMeter < mech.fieldEnergyMax) mech.fieldMeter = mech.fieldEnergyMax;
     mech.fieldRegen = 0.001;
     mech.fieldFire = false;
     mech.fieldCDcycle = 0;

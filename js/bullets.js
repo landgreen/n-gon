@@ -485,7 +485,7 @@ const b = {
       },
       effect: () => {
         b.isModNoAmmo = true;
-        for (let i = 0; i < 6; i++) { // spawn new mods
+        for (let i = 0; i < 6; i++) { //if you change the six also change it in Born rule
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
           if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
@@ -516,7 +516,9 @@ const b = {
         return (b.modCount > 6)
       },
       effect: () => {
-        for (let i = 0; i < b.modCount; i++) { // spawn new mods
+        let count = b.modCount
+        if (b.isModNoAmmo) count - 6 //remove the 6 bonus mods when getting rid of leveraged investment
+        for (let i = 0; i < count; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
         b.setModDefaults(); // remove all mods
@@ -1549,7 +1551,7 @@ const b = {
         });
         World.add(engine.world, bullet[me]); //add bullet to world
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 8 : 4) * b.modFireRate); // cool down
-        const SPEED = mech.crouch ? 5.2 : 4.5;
+        const SPEED = 8.5;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
@@ -1561,7 +1563,6 @@ const b = {
         //   bullet[me].direction = Vector.perp(bullet[me].velocity)
         // }
 
-        World.add(engine.world, bullet[me]); //add bullet to world
       }
     },
     {
@@ -1662,7 +1663,8 @@ const b = {
           }
         }
       }
-    }, {
+    },
+    {
       name: "flak",
       description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
       ammo: 0,
@@ -1706,7 +1708,8 @@ const b = {
           }
         }
       }
-    }, {
+    },
+    {
       name: "grenades", //7
       description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
       ammo: 0,
@@ -1735,7 +1738,8 @@ const b = {
           this.force.y += this.mass * 0.0025;
         };
       }
-    }, {
+    },
+    {
       name: "vacuum bomb", //8
       description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br>click left mouse again to <strong>detonate</strong>",
       ammo: 0,
@@ -1841,7 +1845,8 @@ const b = {
           }
         }
       }
-    }, {
+    },
+    {
       name: "mine", //9
       description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
       ammo: 0,
