@@ -1551,7 +1551,7 @@ const b = {
                   x: this.position.x,
                   y: this.position.y,
                   radius: Math.log(2 * dmg + 1.1) * 40,
-                  color: game.playerDmgColor,
+                  color: 'rgba(0,0,0,0.4)',
                   time: game.drawTime
                 });
               }
@@ -1560,7 +1560,7 @@ const b = {
         });
         World.add(engine.world, bullet[me]); //add bullet to world
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
-        const wiggleMag = bullet[me].mass * ((mech.crouch) ? 0.01 : 0.03) * ((mech.flipLegs === 1) ? 1 : -1)
+        const wiggleMag = bullet[me].mass * ((mech.crouch) ? 0.01 : 0.02) * ((mech.flipLegs === 1) ? 1 : -1)
         const SPEED = 8;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
