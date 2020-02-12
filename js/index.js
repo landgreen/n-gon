@@ -2,7 +2,7 @@
 /* TODO:  *******************************************
 *****************************************************
 
-mod - energy recharges fast when not moving
+mod - energy recharges faster when not moving
 
 lore - a mech gains self awareness
   each mod/gun/field is a new tech

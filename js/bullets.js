@@ -1434,7 +1434,7 @@ const b = {
         }
 
         //knock back
-        const KNOCK = ((mech.crouch) ? 0.01 : 0.08) * b.modBulletSize * b.modBulletSize
+        const KNOCK = ((mech.crouch) ? 0.01 : 0.07) * b.modBulletSize * b.modBulletSize
         player.force.x -= KNOCK * Math.cos(mech.angle)
         player.force.y -= KNOCK * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
       }
@@ -1500,7 +1500,7 @@ const b = {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(mech.angle));
         bullet[me].endCycle = game.cycle + 180;
-        bullet[me].dmg = 1;
+        bullet[me].dmg = 1.1;
         bullet[me].do = function () {
           if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
         };
@@ -1516,41 +1516,51 @@ const b = {
       name: "wave beam", //4
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
       ammo: 0,
-      ammoPack: 40,
+      ammoPack: 65,
       have: false,
       isStarterGun: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle
-        const SCALE = 0.955 + 0.03 * Math.min(1, 0.5 * (b.isModBulletsLastLonger - 1))
-        const wiggleMag = ((mech.crouch) ? 0.01 : 0.024) * ((mech.flipLegs === 1) ? 1 : -1)
-        bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 10, 13 * b.modBulletSize, {
+        bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, 5 * b.modBulletSize, {
           angle: dir,
           cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
-          endCycle: game.cycle + Math.floor(130 * b.isModBulletsLastLonger),
+          endCycle: game.cycle + Math.floor(100 * b.isModBulletsLastLonger),
           inertia: Infinity,
           frictionAir: 0,
           minDmgSpeed: 0,
-          dmg: 0.6, //damage done in addition to the damage from momentum
+          dmg: 0,
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
-            mask: cat.mob | cat.mobBullet | cat.mobShield
+            mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
           },
           onDmg() {},
           onEnd() {},
           do() {
             if (!mech.isBodiesAsleep) {
               this.cycle++
-              const THRUST = wiggleMag * Math.cos(this.cycle * 0.35)
-              this.force = Vector.mult(Vector.normalise(this.direction), this.mass * THRUST) //wiggle
-
-              if (this.cycle > 0 && !(Math.floor(this.cycle) % 6)) Matter.Body.scale(this, SCALE, SCALE); //shrink
+              this.force = Vector.mult(Vector.normalise(this.direction), wiggleMag * Math.cos(this.cycle * 0.35)) //wiggle
+              //check if inside a mob
+              const q = Matter.Query.point(mob, this.position)
+              for (let i = 0; i < q.length; i++) {
+                let dmg = b.dmgScale * 0.5
+                q[i].foundPlayer();
+                q[i].damage(dmg);
+                game.drawList.push({ //add dmg to draw queue
+                  x: this.position.x,
+                  y: this.position.y,
+                  radius: Math.log(2 * dmg + 1.1) * 40,
+                  color: game.playerDmgColor,
+                  time: game.drawTime
+                });
+              }
             }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        mech.fireCDcycle = mech.cycle + Math.floor(4 * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
+        const wiggleMag = bullet[me].mass * ((mech.crouch) ? 0.01 : 0.03) * ((mech.flipLegs === 1) ? 1 : -1)
         const SPEED = 8;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
@@ -1580,7 +1590,7 @@ const b = {
         bullet[me].frictionAir = 0.023
         bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
         bullet[me].explodeRad = 170 + 60 * Math.random();
-        bullet[me].lookFrequency = Math.floor(31 + Math.random() * 11);
+        bullet[me].lookFrequency = Math.floor(21 + Math.random() * 7);
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
         }
@@ -1610,7 +1620,7 @@ const b = {
             }
           }
           //explode when bullet is close enough to target
-          if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad * 0.95) {
+          if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
             // console.log('hit')
             this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
             const dmg = b.dmgScale * 5;
