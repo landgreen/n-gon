@@ -315,7 +315,7 @@ const b = {
     },
     {
       name: "basidio-stomp",
-      description: "hard landings disrupt <strong style='letter-spacing: 2px;'>spores</strong> from the ground",
+      description: "hard landings disrupt <strong style='letter-spacing: 2px;'>spores</strong> from the ground<br>immune to <strong>harm</strong> from <strong>falling</strong>",
       maxCount: 1,
       count: 0,
       allowed() {

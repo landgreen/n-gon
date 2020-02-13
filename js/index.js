@@ -2,6 +2,11 @@
 /* TODO:  *******************************************
 *****************************************************
 
+mod - mobs die at 15% life  (default is 5%)
+
+mod - negative mass field - mke block orbit player, like black hole boss
+  named rotational frame-dragging
+
 mod - energy recharges faster when not moving
 
 lore - a mech gains self awareness

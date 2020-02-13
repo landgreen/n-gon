@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(5)
-      // b.giveGuns("foam")
+      b.giveGuns("wave beam")
       // mech.setField("phase decoherence field")
       // for (let i = 0; i < 9; i++) {
       //   b.giveMod("auto-loading heuristics");

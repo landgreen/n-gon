@@ -206,9 +206,9 @@ const mech = {
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
 
-        if (b.isModStompPauli) {
-          mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
-        }
+        // if (b.isModStompPauli) {
+        //   mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        // }
         if (b.isModStomp) {
           const len = Math.min(25, (momentum - 110) * 0.1)
           for (let i = 0; i < len; i++) {
