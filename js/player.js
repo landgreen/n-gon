@@ -210,7 +210,7 @@ const mech = {
           mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
         }
         if (b.isModStomp) {
-          const len = Math.min(20, (momentum - 110) * 0.07)
+          const len = Math.min(25, (momentum - 110) * 0.1)
           for (let i = 0; i < len; i++) {
             b.spore(player) //spawn drone
           }

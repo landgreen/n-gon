@@ -1977,10 +1977,10 @@ const b = {
           },
           onEnd() {},
           do() {
-            ctx.beginPath() //draw white circle
-            ctx.arc(this.position.x, this.position.y, this.radius * 0.97 - 1.6, 0, 2 * Math.PI);
-            ctx.fillStyle = "#fff"
-            ctx.fill()
+            // ctx.beginPath() //draw white circle
+            // ctx.arc(this.position.x, this.position.y, this.radius * 0.97 - 1.6, 0, 2 * Math.PI);
+            // ctx.fillStyle = "#fff"
+            // ctx.fill()
 
             if (!mech.isBodiesAsleep) { //if time dilation isn't active
               this.force.y += this.mass * 0.00006; //gravity
