@@ -40,6 +40,7 @@ const b = {
   modLaserReflections: null,
   isModNoAmmo: null,
   isModAmmoFromHealth: null,
+  mobDieAtHealth: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -78,6 +79,7 @@ const b = {
     b.modLaserReflections = 2;
     b.isModNoAmmo = false;
     b.isModAmmoFromHealth = 0;
+    b.mobDieAtHealth = 0.05;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -217,6 +219,18 @@ const b = {
       },
       effect() {
         b.isModBulletsLastLonger += 0.33
+      }
+    },
+    {
+      name: "reaction inhibitor",
+      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return true
+      },
+      effect: () => {
+        b.mobDieAtHealth = 0.15
       }
     },
     {
@@ -587,6 +601,18 @@ const b = {
         }
       }
     },
+    // {
+    //   name: "super mines",
+    //   description: "mines fire super balls when triggered",
+    //   maxCount: 1,
+    //   count: 0,
+    //   allowed() {
+    //     return b.haveGunCheck("mines")
+    //   },
+    //   effect() {
+
+    //   }
+    // },
   ],
   giveMod(index = 'random') {
     if (index === 'random') {
@@ -893,7 +919,6 @@ const b = {
         if (collide.length > 0) {
           for (let i = 0; i < collide.length; i++) {
             if (collide[i].bodyA.collisionFilter.category === cat.map || collide[i].bodyB.collisionFilter.category === cat.map) {
-              // console.log(collide)
               const angle = Matter.Vector.angle(collide[i].normal, {
                 x: 1,
                 y: 0

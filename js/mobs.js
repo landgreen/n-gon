@@ -523,57 +523,57 @@ const mobs = {
         //     time: game.drawTime
         // });
       },
-      zoom() {
-        this.zoomMode--;
-        if (this.zoomMode > 150) {
-          this.drawTrail();
-          if (this.seePlayer.recall) {
-            //attraction to player
-            const forceMag = this.accelMag * this.mass;
-            const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-            this.force.x += forceMag * Math.cos(angle);
-            this.force.y += forceMag * Math.sin(angle);
-          }
-        } else if (this.zoomMode < 0) {
-          this.zoomMode = 300;
-          this.setupTrail();
-        }
-      },
-      setupTrail() {
-        this.trail = [];
-        for (let i = 0; i < this.trailLength; ++i) {
-          this.trail.push({
-            x: this.position.x,
-            y: this.position.y
-          });
-        }
-      },
-      drawTrail() {
-        //dont' forget to run setupTrail() after mob spawn
-        const t = this.trail;
-        const len = t.length;
-        t.pop();
-        t.unshift({
-          x: this.position.x,
-          y: this.position.y
-        });
-        //draw
-        ctx.strokeStyle = this.trailFill;
-        ctx.beginPath();
-        // ctx.moveTo(t[0].x, t[0].y);
-        // ctx.lineTo(t[0].x, t[0].y);
-        // ctx.globalAlpha = 0.2;
-        // ctx.lineWidth = this.radius * 3;
-        // ctx.stroke();
-        ctx.globalAlpha = 0.5 / len;
-        ctx.lineWidth = this.radius * 1.95;
-        for (let i = 0; i < len; ++i) {
-          // ctx.lineWidth *= 0.96;
-          ctx.lineTo(t[i].x, t[i].y);
-          ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-      },
+      // zoom() {
+      //   this.zoomMode--;
+      //   if (this.zoomMode > 150) {
+      //     this.drawTrail();
+      //     if (this.seePlayer.recall) {
+      //       //attraction to player
+      //       const forceMag = this.accelMag * this.mass;
+      //       const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
+      //       this.force.x += forceMag * Math.cos(angle);
+      //       this.force.y += forceMag * Math.sin(angle);
+      //     }
+      //   } else if (this.zoomMode < 0) {
+      //     this.zoomMode = 300;
+      //     this.setupTrail();
+      //   }
+      // },
+      // setupTrail() {
+      //   this.trail = [];
+      //   for (let i = 0; i < this.trailLength; ++i) {
+      //     this.trail.push({
+      //       x: this.position.x,
+      //       y: this.position.y
+      //     });
+      //   }
+      // },
+      // drawTrail() {
+      //   //dont' forget to run setupTrail() after mob spawn
+      //   const t = this.trail;
+      //   const len = t.length;
+      //   t.pop();
+      //   t.unshift({
+      //     x: this.position.x,
+      //     y: this.position.y
+      //   });
+      //   //draw
+      //   ctx.strokeStyle = this.trailFill;
+      //   ctx.beginPath();
+      //   // ctx.moveTo(t[0].x, t[0].y);
+      //   // ctx.lineTo(t[0].x, t[0].y);
+      //   // ctx.globalAlpha = 0.2;
+      //   // ctx.lineWidth = this.radius * 3;
+      //   // ctx.stroke();
+      //   ctx.globalAlpha = 0.5 / len;
+      //   ctx.lineWidth = this.radius * 1.95;
+      //   for (let i = 0; i < len; ++i) {
+      //     // ctx.lineWidth *= 0.96;
+      //     ctx.lineTo(t[i].x, t[i].y);
+      //     ctx.stroke();
+      //   }
+      //   ctx.globalAlpha = 1;
+      // },
       curl(range = 1000, mag = -10) {
         //cause all mobs, and bodies to rotate in a circle
         applyCurl = function (center, array) {
@@ -946,7 +946,7 @@ const mobs = {
           this.health -= dmg
           //this.fill = this.color + this.health + ')';
           this.onDamage(dmg); //custom damage effects
-          if (this.health < 0.05 && this.alive) this.death();
+          if (this.health < b.mobDieAtHealth && this.alive) this.death();
         }
       },
       onDamage() {

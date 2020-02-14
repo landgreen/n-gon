@@ -12,7 +12,7 @@ const game = {
     level.checkQuery();
     mech.move();
     mech.look();
-    game.fallChecks();
+    game.checks();
     ctx.save();
     game.camera();
     mech.draw();
@@ -34,7 +34,7 @@ const game = {
     level.checkQuery();
     mech.move();
     mech.look();
-    game.fallChecks();
+    game.checks();
     ctx.save();
     game.camera();
     level.drawFillBGs();
@@ -634,7 +634,7 @@ const game = {
       }
     }
   },
-  fallChecks() {
+  checks() {
     // if 4000px deep
     if (mech.pos.y > game.fallHeight) {
       mech.death();
@@ -664,7 +664,11 @@ const game = {
       // }
     }
 
-    if (!(mech.cycle % 420)) {
+    if (!(mech.cycle % 60)) { //once a second check
+
+    }
+
+    if (!(game.cycle % 420)) { //once every 7 seconds
       fallCheck = function (who) {
         let i = who.length;
         while (i--) {

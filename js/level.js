@@ -14,10 +14,10 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(5)
-      b.giveGuns("wave beam")
-      // mech.setField("phase decoherence field")
+      // b.giveGuns("wave beam")
+      // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
-      //   b.giveMod("auto-loading heuristics");
+      // b.giveMod("reaction inhibitor");
       // }
 
       level.intro(); //starting level
