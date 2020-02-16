@@ -664,7 +664,18 @@ const game = {
       // }
     }
 
-    if (!(mech.cycle % 60)) { //once a second check
+    if (!(mech.cycle % 60)) { //once a second checks
+
+      if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
+        if (b.isModEnergyRecovery) {
+          mech.fieldMeter += mech.fieldEnergyMax * 0.07
+          if (mech.fieldMeter > mech.fieldEnergyMax) mech.fieldMeter = mech.fieldEnergyMax;
+        }
+        if (b.isModHealthRecovery) {
+          mech.addHealth(0.01)
+        }
+      }
+
 
     }
 

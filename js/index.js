@@ -77,14 +77,14 @@ const build = {
       }
     }
     // document.title = `effective starting level: ${build.list.length * game.difficultyMode}`
-    build.calculateCustomDifficulty()
+    // build.calculateCustomDifficulty()
   },
   makeGrid() {
     let text = `
 <div style="display: flex; justify-content: space-around; align-items: center;">
-    <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="55">
+    <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="51">
       <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
-        <text x="18" y="40">start</text>
+        <text x="18" y="38">start</text>
       </g>
     </svg>
     <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
@@ -94,15 +94,15 @@ const build = {
     </svg>
   </div>
   <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
-  <div id="starting-level"></div>
-  <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-  <select name="difficulty-select" id="difficulty-select-custom">
-    <option value="0">easy</option>
-    <option value="1" selected>normal</option>
-    <option value="2">hard</option>
-    <option value="4">why...</option>
-  </select>
-    </div>`
+  <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
+    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
+    <select name="difficulty-select" id="difficulty-select-custom">
+      <option value="0">easy</option>
+      <option value="1" selected>normal</option>
+      <option value="2">hard</option>
+      <option value="4">why...</option>
+    </select>
+  </div>`
     for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
     }
@@ -125,14 +125,14 @@ const build = {
       game.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
       localSettings.difficultyMode = game.difficultyMode
       localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-      build.calculateCustomDifficulty()
+      // build.calculateCustomDifficulty()
     });
   },
   reset() {
     build.list = []
     build.makeGrid();
     document.getElementById("build-grid").style.display = "grid"
-    build.calculateCustomDifficulty()
+    // build.calculateCustomDifficulty()
     document.getElementById("difficulty-select-custom").value = localSettings.difficultyMode
   },
   pauseGrid() {
@@ -178,25 +178,23 @@ const build = {
     document.getElementById("pause-grid-left").style.display = "none"
     document.getElementById("pause-grid-right").style.display = "none"
   },
-  calculateCustomDifficulty() {
-    let difficulty = build.list.length * game.difficultyMode
-    if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6
-    if (game.difficultyMode === 4) difficulty = build.list.length * 4 + 8
-    document.getElementById("starting-level").innerHTML = `starting difficulty: <strong style="font-size:1.05em;">${difficulty}</strong>`
-  },
+  // calculateCustomDifficulty() {
+  //   let difficulty = build.list.length * game.difficultyMode
+  //   if (game.difficultyMode === 0) difficulty = build.list.length * 1 - 6
+  //   if (game.difficultyMode === 4) difficulty = build.list.length * 4 + 8
+  //   document.getElementById("starting-level").innerHTML = `starting difficulty: <strong style="font-size:1.05em;">${difficulty}</strong>`
+  // },
   startBuildRun() {
     spawn.setSpawnList(); //gives random mobs,  not starter mobs
     spawn.setSpawnList();
     game.startGame();
-    let difficulty = build.list.length * game.difficultyMode - 1
-    if (game.difficultyMode === 0) {
-      difficulty = build.list.length * 1 - 6 - 1
-      game.isEasyMode = true;
-    }
-    if (game.difficultyMode === 4) level.difficultyIncrease(6)
-    level.difficultyIncrease(difficulty)
 
     level.isBuildRun = true;
+    const increase = Number(document.getElementById("starting-level").value) * game.difficultyMode
+    level.levelsCleared += increase;
+    level.difficultyIncrease(increase) //increase difficulty based on modes
+
+    level.onLevel = 1;
     build.givePowerUps();
   },
   givePowerUps() {
@@ -232,7 +230,7 @@ document.getElementById("build-button").addEventListener("click", () => {
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
   }
-  build.calculateCustomDifficulty()
+  // build.calculateCustomDifficulty()
 });
 
 

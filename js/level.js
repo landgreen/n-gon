@@ -14,10 +14,11 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(5)
-      // b.giveGuns("wave beam")
+      // b.giveGuns("laser")
       // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
-      // b.giveMod("reaction inhibitor");
+      // b.giveMod("waste energy recycling");
+      // b.giveMod("field superposition");
       // }
 
       level.intro(); //starting level
@@ -71,7 +72,7 @@ const level = {
       game.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
       game.CDScale /= 0.97 //mob CD time decreases each level
     }
-    if (game.difficulty < 1) game.difficulty = 1;
+    if (game.difficulty < 1) game.difficulty = 0;
     game.healScale = 1 / (1 + game.difficulty * 0.09)
   },
   levelAnnounce() {

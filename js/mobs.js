@@ -965,6 +965,7 @@ const mobs = {
         this.alive = false; //triggers mob removal in mob[i].replace(i)
         if (this.dropPowerUp) {
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
+          mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in game.checks()
           if (Math.random() < b.modSpores) {
             const len = Math.min(30, Math.floor(4 + this.mass * Math.random()))
             for (let i = 0; i < len; i++) {

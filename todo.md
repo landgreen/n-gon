@@ -1,10 +1,6 @@
-make a var that tracks the last time a kill was made
-  mod - squirrel cage rotor - effect is only active for 10 seconds after killing a mob
-    turn this off in game.checks()
-  mod - do more damage for 10 seconds after killing a mob
-  mod - energy or health regeneration for 10 seconds after killing a mob
-    run this effect in game.checks()
+<!-- 
 
+mod - nano scale field makes spores instead of drones
 
 mod - mines - fire something instead of needles on activation
   foam?, flak?, vacuum bomb, super balls
@@ -154,4 +150,4 @@ game mechanics
   map zones
     water
     low friction ground
-    bouncy ground
+    bouncy ground -->

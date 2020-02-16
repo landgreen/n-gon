@@ -38,9 +38,13 @@ const b = {
   isModStomp: null,
   modSuperBallNumber: null,
   modLaserReflections: null,
+  modLaserDamage: null,
+  modLaserFieldDrain: null,
   isModNoAmmo: null,
   isModAmmoFromHealth: null,
   mobDieAtHealth: null,
+  isModEnergyRecovery: null,
+  isModHealthRecovery: null,
   setModDefaults() {
     b.modCount = 0;
     b.modFireRate = 1;
@@ -77,9 +81,14 @@ const b = {
     b.modCollisionImmuneCycles = 30;
     b.modSuperBallNumber = 4;
     b.modLaserReflections = 2;
+    b.modLaserDamage = 0.05;
+    b.modLaserFieldDrain = 0.002;
     b.isModNoAmmo = false;
     b.isModAmmoFromHealth = 0;
     b.mobDieAtHealth = 0.05;
+    b.isModEnergyRecovery = false;
+    b.isModHealthRecovery = false;
+    mech.fieldRange = 175;
     mech.Fx = 0.015;
     mech.jumpForce = 0.38;
     mech.maxHealth = 1;
@@ -94,7 +103,7 @@ const b = {
   modOnHealthChange() {
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
-      b.modAcidDmg = 1.1
+      b.modAcidDmg = 0.9
     } else {
       game.playerDmgColor = "rgba(0,0,0,0.7)"
       b.modAcidDmg = 0
@@ -224,7 +233,7 @@ const b = {
     {
       name: "reaction inhibitor",
       description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
-      maxCount: 3,
+      maxCount: 1,
       count: 0,
       allowed() {
         return true
@@ -302,6 +311,18 @@ const b = {
       }
     },
     {
+      name: "field superposition",
+      description: "increase your field <strong>radius</strong> by <strong>40%</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.modBlockDmg > 0
+      },
+      effect() {
+        mech.fieldRange = 175 * 1.4 //175 is default
+      }
+    },
+    {
       name: "entanglement",
       description: "only when your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>10%</strong> for each gun you have",
       maxCount: 1,
@@ -311,6 +332,30 @@ const b = {
       },
       effect() {
         b.isModEntanglement = true
+      }
+    },
+    {
+      name: "waste energy recycling",
+      description: "regen <strong>7%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      effect() {
+        b.isModEnergyRecovery = true;
+      }
+    },
+    {
+      name: "waste scrap recycling",
+      description: "regen up to <strong>1%</strong> of max <strong class='color-h'>health</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModEnergyRecovery
+      },
+      effect() {
+        b.isModHealthRecovery = true;
       }
     },
     {
@@ -577,7 +622,7 @@ const b = {
     },
     {
       name: "specular reflection",
-      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection",
+      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+20%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -585,6 +630,8 @@ const b = {
       },
       effect() {
         b.modLaserReflections++;
+        b.modLaserDamage += 0.010; //base is 0.05
+        b.modLaserFieldDrain += 0.0004 //base is 0.002
       }
     },
     {
@@ -2049,7 +2096,7 @@ const b = {
       name: "rail gun", //13
       description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
-      ammoPack: 2,
+      ammoPack: 2.84,
       have: false,
       isStarterGun: false,
       fire() {
@@ -2067,7 +2114,17 @@ const b = {
             mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
           },
           minDmgSpeed: 5,
-          onDmg() {}, //this.endCycle = 0  //triggers despawn
+          onDmg(who) {
+            if (who.shield) {
+              Matter.Body.setVelocity(this, {
+                x: -0.1 * this.velocity.x,
+                y: -0.1 * this.velocity.y
+              });
+              Matter.Body.setDensity(this, 0.001);
+              // this.endCycle = 0;
+            }
+
+          }, //this.endCycle = 0  //triggers despawn
           onEnd() {}
         });
         mech.fireCDcycle = Infinity; // cool down
@@ -2254,13 +2311,12 @@ const b = {
       have: false,
       isStarterGun: true,
       fire() {
-        const FIELD_DRAIN = 0.0018 //laser drains energy as well as bullets
         const reflectivity = 1 - 1 / (b.modLaserReflections * 1.5)
-        let damage = b.dmgScale * 0.05
-        if (mech.fieldMeter < FIELD_DRAIN) {
+        let damage = b.dmgScale * b.modLaserDamage
+        if (mech.fieldMeter < b.modLaserFieldDrain) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
-          mech.fieldMeter -= mech.fieldRegen + FIELD_DRAIN
+          mech.fieldMeter -= mech.fieldRegen + b.modLaserFieldDrain
           let best = {
             x: null,
             y: null,
