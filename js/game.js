@@ -436,12 +436,12 @@ const game = {
       if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
     }
     b.activeGun = null;
-    b.setModDefaults(); //remove mods
+
+    b.removeAllMods(); //sets mods to defauls values
     game.updateModHUD();
     mech.maxHealth = 1
     mech.fieldEnergyMax = 1
     game.paused = false;
-    build.isShowingBuilds = false
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
     game.makeGunHUD();
@@ -460,6 +460,7 @@ const game = {
     game.CDScale = 1;
     game.difficulty = 0;
     game.difficultyMode = Number(document.getElementById("difficulty-select").value)
+    level.isBuildRun = false;
     if (game.difficultyMode === 0) {
       game.isEasyMode = true;
       game.difficultyMode = 1
@@ -490,7 +491,6 @@ const game = {
     document.getElementById("build-grid").style.display = "none"
     document.getElementById("pause-grid-left").style.display = "none"
     document.getElementById("pause-grid-right").style.display = "none"
-    isShowingBuilds = false
     document.getElementById("splash").style.display = "inline";
     document.getElementById("dmg").style.display = "none";
     document.getElementById("health-bg").style.display = "none";
@@ -499,9 +499,11 @@ const game = {
   fpsInterval: 0, //set in startGame
   then: null,
   startGame() {
-    level.isBuildRun = false; //can get set back to true in build.startBuildRun()
+    if (!level.isBuildRun) { //if a build run logic flow returns to "build-button").addEventListener
+      document.body.style.cursor = "none";
+      document.body.style.overflow = "hidden"
+    }
     game.onTitlePage = false;
-    document.body.style.overflow = "hidden"
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("build-grid").style.display = "none"
     document.getElementById("info").style.display = "none";
@@ -529,7 +531,6 @@ const game = {
     //   // mech.throwBlock();
     // };
 
-    document.body.style.cursor = "none";
     if (game.firstRun) {
       mech.spawn(); //spawns the player
       b.setModDefaults(); //doesn't run on reset so that gun mods carry over to new runs
@@ -673,6 +674,9 @@ const game = {
         }
         if (b.isModHealthRecovery) {
           mech.addHealth(0.01)
+        }
+        if (b.isModEnergyLoss) {
+          mech.fieldMeter = 0.05;
         }
       }
 

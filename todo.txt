@@ -1,4 +1,17 @@
-mod - nano scale field makes spores instead of drones
+************** TODO - n-gon **************
+
+add in requirements to custom mode
+  grey out mods that don't meet requirements
+  make custom undo method for mods
+    this makes toggleing mods on and off easier in custom
+
+mod - acute stress response
+  permanently increase damage by 30%
+    for 5 seconds after a mob dies
+      drain energy down to zero
+
+
+mod - nano-scale field makes spores instead of drones
 
 mod - mines - fire something instead of needles on activation
   foam?, flak?, vacuum bomb, super balls
@@ -35,8 +48,6 @@ mod: shotgun - fire extra shot
   but also increase spread?
 
 mob: targeting laser, then a high speed, no gravity bullet
-
-add recursive mod counts to pause screen
 
 css transition for pause menu
 
@@ -109,10 +120,6 @@ new map with repeating endlessness
     I tried it, but had trouble getting the camera to adjust to the teleportation
     this can apply to blocks mobs, and power ups as well
     
-field power up effects
-  field allows player to hold and throw living mobs
-    and hack mobs
-
 give mobs more animal-like behaviors
   like rain world
   give mobs something to do when they don't see player

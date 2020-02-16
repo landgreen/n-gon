@@ -67,7 +67,7 @@ const mech = {
   defaultMass: 5,
   mass: 5,
   FxNotHolding: 0.015,
-  Fx: null, //run Force on ground //0.015 //this is set in b.setModDefaults()
+  Fx: 0.015, //run Force on ground //
   FxAir: 0.016, //run Force in Air
   yOff: 70,
   yOffGoal: 70,
@@ -105,7 +105,7 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  jumpForce: null, //0.38 //this is reset in b.setModDefaults()
+  jumpForce: 0.38, //0.38 //this is reset in b.setModDefaults()
   gravity: 0.0024, //0.0019  //game.g is 0.001
   friction: {
     ground: 0.01,
@@ -653,7 +653,7 @@ const mech = {
   throwChargeRate: 0,
   throwChargeMax: 0,
   fieldShieldingScale: 0,
-  fieldRange: 0,
+  fieldRange: 175,
   fieldArc: 0,
   fieldThreshold: 0,
   calculateFieldThreshold() {
@@ -1375,11 +1375,11 @@ const mech = {
               mech.lookForPickUp();
               mech.pushMobs360();
               //look for nearby objects to make zero-g
-              function zeroG(who, mag = 1.06) {
+              function zeroG(who, range, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
                   sub = Vector.sub(who[i].position, mech.pos);
                   dist = Vector.magnitude(sub);
-                  if (dist < mech.fieldRange) {
+                  if (dist < range) {
                     who[i].force.y -= who[i].mass * (game.g * mag); //add a bit more then standard gravity
                   }
                 }
@@ -1390,20 +1390,20 @@ const mech = {
               if (keys[83] || keys[40]) { //down
                 player.force.y -= 0.5 * player.mass * mech.gravity;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 400 * 0.03;
-                zeroG(powerUp, 0.7);
-                zeroG(body, 0.7);
+                zeroG(powerUp, this.fieldDrawRadius, 0.7);
+                zeroG(body, this.fieldDrawRadius, 0.7);
               } else if (keys[87] || keys[38]) { //up
                 mech.fieldMeter -= 5 * DRAIN;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
                 player.force.y -= 1.45 * player.mass * mech.gravity;
-                zeroG(powerUp, 1.38);
-                zeroG(body, 1.38);
+                zeroG(powerUp, this.fieldDrawRadius, 1.38);
+                zeroG(body, this.fieldDrawRadius, 1.38);
               } else {
                 mech.fieldMeter -= DRAIN;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 650 * 0.03;
                 player.force.y -= 1.07 * player.mass * mech.gravity; // slow upward drift
-                zeroG(powerUp);
-                zeroG(body);
+                zeroG(powerUp, this.fieldDrawRadius);
+                zeroG(body, this.fieldDrawRadius);
               }
 
               //add extra friction for horizontal motion

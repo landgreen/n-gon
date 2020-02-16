@@ -17,8 +17,9 @@ const level = {
       // b.giveGuns("laser")
       // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
-      // b.giveMod("waste energy recycling");
-      // b.giveMod("field superposition");
+      // b.giveMod("waste energy recovery");
+      // b.giveMod("scrap recycling");
+      // b.giveMod("acute stress response");
       // }
 
       level.intro(); //starting level
@@ -37,7 +38,6 @@ const level = {
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
       level.levelAnnounce();
     }
-    // if (level.isBuildRun) build.givePowerUps();
     game.noCameraScroll();
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
@@ -1261,7 +1261,7 @@ const level = {
     level.defaultZoom = 1300
     game.zoomTransition(level.defaultZoom)
 
-    document.body.style.backgroundColor = "#f2f5f3";
+    document.body.style.backgroundColor = "#dcdcde" //"#f2f5f3";
     mech.setPosToSpawn(25, -60); //normal spawn
     //mech.setPosToSpawn(-2000, -1700); // left ledge spawn
     level.enter.x = mech.spawnPos.x - 50;

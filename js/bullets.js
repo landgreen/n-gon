@@ -42,65 +42,26 @@ const b = {
   modLaserFieldDrain: null,
   isModNoAmmo: null,
   isModAmmoFromHealth: null,
-  mobDieAtHealth: null,
+  modMobDieAtHealth: null,
   isModEnergyRecovery: null,
   isModHealthRecovery: null,
-  setModDefaults() {
-    b.modCount = 0;
-    b.modFireRate = 1;
-    b.modExplosionRadius = 1;
-    b.isModImmuneExplosion = false;
-    b.modBulletSize = 1;
-    b.isModDroneOnDamage = false;
-    b.modEnergySiphon = 0;
-    b.modHealthDrain = 0;
-    b.modNoAmmo = 0;
-    b.isModBulletsLastLonger = 1;
-    b.isModDroneCollide = true;
-    b.isModFastSpores = false
-    b.isModImmortal = false;
-    b.modSpores = 0;
-    b.modAcidDmg = 0;
-    b.isModAcidDmg = false;
-    game.playerDmgColor = "rgba(0,0,0,0.7)"
-    b.isModAnnihilation = false;
-    b.modRecursiveHealing = 1;
-    b.modSquirrelFx = 1;
-    b.isModCrit = false;
-    b.isModBayesian = 0;
-    b.isModFourOptions = false;
-    b.isModLowHealthDmg = false;
-    b.isModFarAwayDmg = false;
-    b.isModEntanglement = false;
-    b.isModMassEnergy = false;
-    b.modLaserBotCount = 0;
-    b.modNailBotCount = 0;
-    b.modBlockDmg = 0;
-    b.isModPiezo = false;
-    b.isModStomp = false;
-    b.modCollisionImmuneCycles = 30;
-    b.modSuperBallNumber = 4;
-    b.modLaserReflections = 2;
-    b.modLaserDamage = 0.05;
-    b.modLaserFieldDrain = 0.002;
-    b.isModNoAmmo = false;
-    b.isModAmmoFromHealth = 0;
-    b.mobDieAtHealth = 0.05;
-    b.isModEnergyRecovery = false;
-    b.isModHealthRecovery = false;
-    mech.fieldRange = 175;
-    mech.Fx = 0.016; //if this changes update the values in  definePlayerMass
-    mech.jumpForce = 0.42; //was 0.38 at 0.0019 gravity
-    mech.maxHealth = 1;
-    mech.fieldEnergyMax = 1;
-    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-      if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-    }
-    for (let i = 0; i < b.mods.length; i++) {
+  isModEnergyLoss: null,
+  removeAllMods() {
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      b.mods[i].remove();
       b.mods[i].count = 0
     }
+    b.modCount = 0;
+
   },
-  modOnHealthChange() {
+  setModDefaults() {
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      if (b.mods[i].count) b.mods[i].remove();
+      b.mods[i].count = 0
+    }
+    b.modCount = 0;
+  },
+  modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
       b.modAcidDmg = 0.9
@@ -119,6 +80,9 @@ const b = {
       },
       effect() {
         b.modBulletSize += 0.13
+      },
+      remove() {
+        b.modBulletSize = 1;
       }
     },
     {
@@ -127,11 +91,16 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.health > 0.8
+        return mech.health > 0.8 || level.isBuildRun
       },
       effect() {
         b.isModAcidDmg = true;
         b.modOnHealthChange();
+      },
+      remove() {
+        b.modAcidDmg = 0;
+        b.isModAcidDmg = false;
+        game.playerDmgColor = "rgba(0,0,0,0.7)"
       }
     },
     {
@@ -144,6 +113,9 @@ const b = {
       },
       effect() {
         b.isModCrit = true;
+      },
+      remove() {
+        b.isModCrit = false;
       }
     },
     {
@@ -156,6 +128,9 @@ const b = {
       },
       effect() {
         b.isModFarAwayDmg = true; //used in mob.damage()
+      },
+      remove() {
+        b.isModFarAwayDmg = false;
       }
     },
     {
@@ -168,6 +143,9 @@ const b = {
       },
       effect() {
         b.isModLowHealthDmg = true; //used in mob.damage()
+      },
+      remove() {
+        b.isModLowHealthDmg = false;
       }
     },
     {
@@ -180,11 +158,14 @@ const b = {
       },
       effect: () => {
         b.modExplosionRadius += 0.2;
+      },
+      remove() {
+        b.modExplosionRadius = 1;
       }
     },
     {
       name: "electric reactive armour",
-      description: "<strong class='color-e'>explosions</strong> do you no <strong>harm</strong>, but drain <strong class='color-f'>energy</strong>",
+      description: "<strong class='color-e'>explosions</strong> do no <strong>harm</strong><br> <strong class='color-e'>explosions</strong> drain <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -192,6 +173,10 @@ const b = {
       },
       effect: () => {
         b.isModImmuneExplosion = true;
+      },
+      remove() {
+        b.isModImmuneExplosion = false;
+
       }
     },
     {
@@ -204,6 +189,9 @@ const b = {
       },
       effect() {
         b.modFireRate *= 0.86
+      },
+      remove() {
+        b.modFireRate = 1;
       }
     },
     {
@@ -216,6 +204,9 @@ const b = {
       },
       effect() {
         b.modNoAmmo = 1
+      },
+      remove() {
+        b.modNoAmmo = 0;
       }
     },
     {
@@ -228,6 +219,9 @@ const b = {
       },
       effect() {
         b.isModBulletsLastLonger += 0.33
+      },
+      remove() {
+        b.isModBulletsLastLonger = 1;
       }
     },
     {
@@ -239,7 +233,10 @@ const b = {
         return true
       },
       effect: () => {
-        b.mobDieAtHealth = 0.15
+        b.modMobDieAtHealth = 0.15
+      },
+      remove() {
+        b.modMobDieAtHealth = 0.05;
       }
     },
     {
@@ -255,6 +252,9 @@ const b = {
         for (let i = 0; i < 10; i++) {
           b.spore(player)
         }
+      },
+      remove() {
+        b.modSpores = 0;
       }
     },
     {
@@ -268,6 +268,9 @@ const b = {
       effect() {
         b.modLaserBotCount++;
         b.laserBot();
+      },
+      remove() {
+        b.modLaserBotCount = 0;
       }
     },
     {
@@ -281,6 +284,9 @@ const b = {
       effect() {
         b.modNailBotCount++;
         b.nailBot();
+      },
+      remove() {
+        b.modNailBotCount = 0;
       }
     },
     {
@@ -296,6 +302,9 @@ const b = {
         for (let i = 0; i < 4; i++) {
           b.drone() //spawn drone
         }
+      },
+      remove() {
+        b.isModDroneOnDamage = false;
       }
     },
     {
@@ -308,6 +317,9 @@ const b = {
       },
       effect() {
         b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+      },
+      remove() {
+        b.modBlockDmg = 0;
       }
     },
     {
@@ -319,7 +331,10 @@ const b = {
         return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
       },
       effect() {
-        mech.fieldRange = 175 * 1.4 //175 is default
+        mech.fieldRange = 175 * 1.4
+      },
+      remove() {
+        mech.fieldRange = 175;
       }
     },
     {
@@ -332,10 +347,13 @@ const b = {
       },
       effect() {
         b.isModEntanglement = true
+      },
+      remove() {
+        b.isModEntanglement = false;
       }
     },
     {
-      name: "waste energy recycling",
+      name: "waste energy recovery",
       description: "regen <strong>7%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
       maxCount: 1,
       count: 0,
@@ -344,10 +362,13 @@ const b = {
       },
       effect() {
         b.isModEnergyRecovery = true;
+      },
+      remove() {
+        b.isModEnergyRecovery = false;
       }
     },
     {
-      name: "waste scrap recycling",
+      name: "scrap recycling",
       description: "regen up to <strong>1%</strong> of max <strong class='color-h'>health</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
       maxCount: 1,
       count: 0,
@@ -356,6 +377,24 @@ const b = {
       },
       effect() {
         b.isModHealthRecovery = true;
+      },
+      remove() {
+        b.isModHealthRecovery = false;
+      }
+    },
+    {
+      name: "acute stress response",
+      description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>no <strong class='color-f'>energy</strong> for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModHealthRecovery
+      },
+      effect() {
+        b.isModEnergyLoss = true;
+      },
+      remove() {
+        b.isModEnergyLoss = false;
       }
     },
     {
@@ -370,6 +409,11 @@ const b = {
         b.modSquirrelFx += 0.2;
         mech.Fx = 0.016 * b.modSquirrelFx;
         mech.jumpForce += 0.038;
+      },
+      remove() {
+        b.modSquirrelFx = 1;
+        mech.Fx = 0.016; //if this changes update the values in  definePlayerMass
+        mech.jumpForce = 0.42; //was 0.38 at 0.0019 gravity
       }
     },
     {
@@ -382,6 +426,9 @@ const b = {
       },
       effect() {
         b.isModStomp = true
+      },
+      remove() {
+        b.isModStomp = false;
       }
     },
     {
@@ -395,6 +442,9 @@ const b = {
       effect() {
         b.modCollisionImmuneCycles += 120;
         mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+      },
+      remove() {
+        b.modCollisionImmuneCycles = 30;
       }
     },
     {
@@ -407,6 +457,9 @@ const b = {
       },
       effect() {
         b.isModAnnihilation = true
+      },
+      remove() {
+        b.isModAnnihilation = false;
       }
     },
     {
@@ -420,6 +473,9 @@ const b = {
       effect() {
         b.isModPiezo = true;
         mech.fieldMeter = mech.fieldEnergyMax;
+      },
+      remove() {
+        b.isModPiezo = false;
       }
     },
     {
@@ -433,6 +489,9 @@ const b = {
       effect() {
         b.modEnergySiphon += 0.15;
         mech.fieldMeter = mech.fieldEnergyMax
+      },
+      remove() {
+        b.modEnergySiphon = 0;
       }
     },
     {
@@ -445,6 +504,9 @@ const b = {
       },
       effect() {
         b.modHealthDrain += 0.015;
+      },
+      remove() {
+        b.modHealthDrain = 0;
       }
     },
     {
@@ -458,6 +520,9 @@ const b = {
       effect() {
         mech.fieldEnergyMax += 0.5
         mech.fieldMeter += 0.5
+      },
+      remove() {
+        mech.fieldEnergyMax = 1;
       }
     },
     {
@@ -471,6 +536,9 @@ const b = {
       effect() {
         mech.maxHealth += 0.50
         mech.addHealth(0.50)
+      },
+      remove() {
+        mech.maxHealth = 1;
       }
     },
     {
@@ -483,6 +551,9 @@ const b = {
       },
       effect() {
         b.modRecursiveHealing += 1
+      },
+      remove() {
+        b.modRecursiveHealing = 1;
       }
     },
     {
@@ -496,6 +567,9 @@ const b = {
       effect: () => {
         b.isModMassEnergy = true // used in mech.grabPowerUp
         mech.fieldMeter = mech.fieldEnergyMax * 2
+      },
+      remove() {
+        b.isModMassEnergy = false;
       }
     },
     {
@@ -508,6 +582,9 @@ const b = {
       },
       effect() {
         b.isModImmortal = true;
+      },
+      remove() {
+        b.isModImmortal = false;
       }
     },
     {
@@ -520,6 +597,9 @@ const b = {
       },
       effect: () => {
         b.isModBayesian = 0.20;
+      },
+      remove() {
+        b.isModBayesian = 0;
       }
     },
     {
@@ -532,6 +612,9 @@ const b = {
       },
       effect: () => {
         b.isModAmmoFromHealth = 0.03;
+      },
+      remove() {
+        b.isModAmmoFromHealth = 0;
       }
     },
     {
@@ -552,6 +635,9 @@ const b = {
           powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
           if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
         }
+      },
+      remove() {
+        b.isModNoAmmo = false;
       }
     },
     {
@@ -564,6 +650,9 @@ const b = {
       },
       effect: () => {
         b.isModFourOptions = true;
+      },
+      remove() {
+        b.isModFourOptions = false;
       }
     },
     {
@@ -582,6 +671,9 @@ const b = {
         }
         b.setModDefaults(); // remove all mods
         //have state is checked in mech.death()
+      },
+      remove() {
+        //nothing to undo
       }
     },
     {
@@ -594,6 +686,9 @@ const b = {
       },
       effect() {
         b.isModDroneCollide = true
+      },
+      remove() {
+        b.isModDroneCollide = true;
       }
     },
     {
@@ -606,6 +701,9 @@ const b = {
       },
       effect() {
         b.isModFastSpores = true
+      },
+      remove() {
+        b.isModFastSpores = false
       }
     },
     {
@@ -618,6 +716,9 @@ const b = {
       },
       effect() {
         b.modSuperBallNumber++
+      },
+      remove() {
+        b.modSuperBallNumber = 4;
       }
     },
     {
@@ -632,6 +733,11 @@ const b = {
         b.modLaserReflections++;
         b.modLaserDamage += 0.010; //base is 0.05
         b.modLaserFieldDrain += 0.0004 //base is 0.002
+      },
+      remove() {
+        b.modLaserReflections = 2;
+        b.modLaserDamage = 0.05;
+        b.modLaserFieldDrain = 0.002;
       }
     },
     {
@@ -645,6 +751,11 @@ const b = {
       effect() {
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
+        }
+      },
+      remove() {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
       }
     },
@@ -1551,7 +1662,7 @@ const b = {
       name: "fléchettes", //3
       description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 20,
+      ammoPack: 22,
       have: false,
       isStarterGun: true,
       count: 0, //used to track how many shots are in a volley before a big CD
@@ -1572,7 +1683,7 @@ const b = {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(mech.angle));
         bullet[me].endCycle = game.cycle + 180;
-        bullet[me].dmg = 1.1;
+        bullet[me].dmg = 1.15;
         bullet[me].do = function () {
           if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
         };
