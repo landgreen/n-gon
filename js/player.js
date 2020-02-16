@@ -67,8 +67,8 @@ const mech = {
   defaultMass: 5,
   mass: 5,
   FxNotHolding: 0.015,
-  Fx: 0.015, //run Force on ground  //this is reset in b.setModDefaults()
-  FxAir: 0.015, //run Force in Air
+  Fx: null, //run Force on ground //0.015 //this is set in b.setModDefaults()
+  FxAir: 0.016, //run Force in Air
   yOff: 70,
   yOffGoal: 70,
   onGround: false, //checks if on ground or in air
@@ -105,8 +105,8 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  jumpForce: 0.38, //this is reset in b.setModDefaults()
-  gravity: 0.0019,
+  jumpForce: null, //0.38 //this is reset in b.setModDefaults()
+  gravity: 0.0024, //0.0019  //game.g is 0.001
   friction: {
     ground: 0.01,
     air: 0.0025
@@ -202,21 +202,21 @@ const mech = {
       //sets a hard land where player stays in a crouch for a bit and can't jump
       //crouch is forced in keyMove() on ground section below
       const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 20 down velocity, unless the player is holding something
-      if (momentum > 120) {
+      if (momentum > 130) {
         mech.doCrouch();
         mech.yOff = mech.yOffWhen.jump;
-        mech.hardLandCD = mech.cycle + Math.min(momentum / 6 - 6, 40)
+        mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
 
         // if (b.isModStompPauli) {
         //   mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
         // }
         if (b.isModStomp) {
-          const len = Math.min(25, (momentum - 110) * 0.1)
+          const len = Math.min(25, (momentum - 120) * 0.1)
           for (let i = 0; i < len; i++) {
             b.spore(player) //spawn drone
           }
-        } else if (game.isBodyDamage && player.velocity.y > 26 && momentum > 165 * b.modSquirrelFx) { //falling damage
-          let dmg = Math.sqrt(momentum - 165) * 0.01
+        } else if (game.isBodyDamage && player.velocity.y > 27 && momentum > 180 * b.modSquirrelFx) { //falling damage
+          let dmg = Math.sqrt(momentum - 180) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
           mech.damage(dmg);
         }
@@ -719,8 +719,8 @@ const mech = {
   definePlayerMass(mass = mech.defaultMass) {
     Matter.Body.setMass(player, mass);
     //reduce air and ground move forces
-    mech.Fx = 0.075 / mass * b.modSquirrelFx
-    mech.FxAir = 0.375 / mass / mass
+    mech.Fx = 0.08 / mass * b.modSquirrelFx //base player mass is 5
+    mech.FxAir = 0.4 / mass / mass //base player mass is 5
     //make player stand a bit lower when holding heavy masses
     mech.yOffWhen.stand = Math.max(mech.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
     if (mech.onGround && !mech.crouch) mech.yOffGoal = mech.yOffWhen.stand;

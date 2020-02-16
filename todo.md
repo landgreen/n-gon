@@ -1,5 +1,3 @@
-<!-- 
-
 mod - nano scale field makes spores instead of drones
 
 mod - mines - fire something instead of needles on activation
@@ -33,19 +31,10 @@ mod: foam - does extra poison dmg  (to get past shields)
 
 mod: vacuum bomb - does a constant suck
 
-mod: shield harmonics - large field radius
-
 mod: shotgun - fire extra shot
   but also increase spread?
 
-speed up movement for all gameplay
-  higher gravity, larger jump force
-  faster horizontal acceleration
-  only increase top speed a bit
-
 mob: targeting laser, then a high speed, no gravity bullet
-
-add difficulty slider to custom?
 
 add recursive mod counts to pause screen
 
@@ -150,4 +139,4 @@ game mechanics
   map zones
     water
     low friction ground
-    bouncy ground -->
+    bouncy ground

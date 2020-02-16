@@ -1756,16 +1756,24 @@ const level = {
       });
       target.torque = (Math.random() - 0.5) * 2 * target.mass;
     },
-    boost(target, info) {
+    boost(target, yVelocity) {
       // if (target.velocity.y < 0) {
       // mech.undoCrouch();
       // mech.enterAir();
       mech.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
       mech.hardLandCD = 0 // disable hard landing
-      Matter.Body.setVelocity(target, {
-        x: target.velocity.x + (Math.random() - 0.5) * 2,
-        y: info
-      });
+      if (target.velocity.y > 30) {
+        Matter.Body.setVelocity(target, {
+          x: target.velocity.x + (Math.random() - 0.5) * 2,
+          y: -23 //gentle bounce if coming down super fast
+        });
+      } else {
+        Matter.Body.setVelocity(target, {
+          x: target.velocity.x + (Math.random() - 0.5) * 2,
+          y: yVelocity
+        });
+      }
+
     },
     force(target, info) {
       if (target.velocity.y < 0) {

@@ -89,8 +89,8 @@ const b = {
     b.isModEnergyRecovery = false;
     b.isModHealthRecovery = false;
     mech.fieldRange = 175;
-    mech.Fx = 0.015;
-    mech.jumpForce = 0.38;
+    mech.Fx = 0.016; //if this changes update the values in  definePlayerMass
+    mech.jumpForce = 0.42; //was 0.38 at 0.0019 gravity
     mech.maxHealth = 1;
     mech.fieldEnergyMax = 1;
     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
@@ -312,11 +312,11 @@ const b = {
     },
     {
       name: "field superposition",
-      description: "increase your field <strong>radius</strong> by <strong>40%</strong>",
+      description: "increase your <strong>field radius</strong> by <strong>40%</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modBlockDmg > 0
+        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
       },
       effect() {
         mech.fieldRange = 175 * 1.4 //175 is default
@@ -368,7 +368,7 @@ const b = {
       },
       effect() { // good with melee builds, content skipping builds
         b.modSquirrelFx += 0.2;
-        mech.Fx = 0.015 * b.modSquirrelFx;
+        mech.Fx = 0.016 * b.modSquirrelFx;
         mech.jumpForce += 0.038;
       }
     },

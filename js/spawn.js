@@ -510,8 +510,8 @@ const spawn = {
             mech.damage(0.0002 * game.dmgScale);
           }
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-          player.force.x -= 1.25 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.8 : 1);
-          player.force.y -= 0.96 * player.mass * game.g * Math.sin(angle);
+          player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (mech.onGround ? 1.8 : 1);
+          player.force.y -= 0.0001 * player.mass * Math.sin(angle);
           //draw line to player
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
@@ -608,8 +608,8 @@ const spawn = {
             mech.damage(0.0003 * game.dmgScale);
           }
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-          player.force.x -= 1.3 * Math.cos(angle) * player.mass * game.g * (mech.onGround ? 1.7 : 1);
-          player.force.y -= 1.2 * Math.sin(angle) * player.mass * game.g;
+          player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (mech.onGround ? 1.7 : 1);
+          player.force.y -= 0.0013 * Math.sin(angle) * player.mass;
           //draw line to player
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
@@ -1713,7 +1713,7 @@ const spawn = {
     // level.addZone(x, y, 100, 30, "fling", {Vx:Vx, Vy: Vy});
     level.addQueryRegion(x, y - 20, 100, 20, "boost", [
       [player], body, mob, powerUp, bullet
-    ], -1.1 * Math.sqrt(Math.abs(height)));
+    ], -1.21 * Math.sqrt(Math.abs(height)));
     let color = "rgba(200,0,255,";
     level.fillBG.push({
       x: x,
