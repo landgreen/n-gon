@@ -437,7 +437,7 @@ const game = {
     }
     b.activeGun = null;
 
-    b.removeAllMods(); //sets mods to defauls values
+    b.setupAllMods(); //sets mods to default values
     game.updateModHUD();
     mech.maxHealth = 1
     mech.fieldEnergyMax = 1
@@ -533,7 +533,7 @@ const game = {
 
     if (game.firstRun) {
       mech.spawn(); //spawns the player
-      b.setModDefaults(); //doesn't run on reset so that gun mods carry over to new runs
+      b.setupAllMods(); //doesn't run on reset so that gun mods carry over to new runs
 
       function shuffle(array) {
         var currentIndex = array.length,

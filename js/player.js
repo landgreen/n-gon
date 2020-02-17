@@ -105,7 +105,7 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  jumpForce: 0.38, //0.38 //this is reset in b.setModDefaults()
+  jumpForce: 0.38, //0.38 //this is reset in b.setupAllMods()
   gravity: 0.0024, //0.0019  //game.g is 0.001
   friction: {
     ground: 0.01,
@@ -323,7 +323,7 @@ const mech = {
       }
 
       function randomizeMods() {
-        b.setModDefaults(); //remove all mods
+        b.setupAllMods(); //remove all mods
         //remove all bullets
         for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
         bullet = [];

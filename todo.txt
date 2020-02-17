@@ -1,5 +1,8 @@
 ************** TODO - n-gon **************
 
+consider making jumping cost energy  (like stamina)
+  should walking cost energy too?
+
 add in requirements to custom mode
   grey out mods that don't meet requirements
   make custom undo method for mods

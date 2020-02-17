@@ -214,6 +214,18 @@ summary {
   background-color: #efeff5;
 }
 
+.build-grid-selected {
+  background-color: #919ba8;
+}
+
+.build-grid-selected:hover {
+  background-color: #919ba8;
+}
+
+.build-grid-disabled {
+  opacity: 0.15;
+}
+
 #info {
   position: absolute;
   bottom: 3px;

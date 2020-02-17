@@ -14,147 +14,6 @@ const cat = {
 
 //build build grid display
 const build = {
-  choosePowerUp(who, index, type) {
-
-    //       mech.setField(build.list[i].index)
-    //       b.giveGuns(build.list[i].index)
-    //       b.giveMod(build.list[i].index)
-
-
-    if (type === "field" || type === "gun") {
-      let isDeselect = false
-      //if already click, toggle off
-      for (let i = 0; i < build.list.length; i++) {
-        if (build.list[i].index === index && build.list[i].type === type) {
-          build.list.splice(i, 1);
-          who.style.backgroundColor = "#fff"
-          isDeselect = true
-          break
-        }
-      }
-      //check if trying to get a second field
-      if (type === "field") {
-        mech.setField(index)
-        for (let i = 0; i < build.list.length; i++) {
-          if (build.list[i].type === "field") { //if already click, toggle off
-            build.list[i].who.style.backgroundColor = "#fff"
-            build.list.splice(i, 1);
-          }
-        }
-      }
-      if (!isDeselect) {
-        who.style.backgroundColor = "#919ba8" //"#868f9a"
-        build.list[build.list.length] = {
-          who: who,
-          index: index,
-          type: type,
-        }
-      }
-    } else if (type === "mod") {
-      if (who.style.backgroundColor !== "#919ba8") who.style.backgroundColor = "#919ba8" //"#868f9a"
-      //if already clicked graphically indicate recursive clicks
-      let count = 0
-      for (let i = 0; i < build.list.length; i++) {
-        if (build.list[i].type === "mod" && build.list[i].index === index) {
-          count++
-        }
-      }
-      if (count < b.mods[index].maxCount) {
-        //add mod to build list
-        build.list[build.list.length] = {
-          who: who,
-          index: index,
-          type: type,
-        }
-        count++
-        //display mod count in grid box text
-        if (count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${count}x)</div> ${b.mods[index].description}`
-      } else {
-        //when above the mod limit remove all of that mod
-        for (let i = build.list.length - 1; i > -1; i--) {
-          if (build.list[i].index === index && build.list[i].type === type) {
-            build.list.splice(i, 1);
-          }
-        }
-        //and reset the text
-        who.style.backgroundColor = "#fff"
-        who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
-      }
-    }
-    // document.title = `effective starting level: ${build.list.length * game.difficultyMode}`
-    // build.calculateCustomDifficulty()
-  },
-  populateGrid() {
-    let text = `
-  <div style="display: flex; justify-content: space-around; align-items: center;">
-    <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="51">
-      <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
-        <text x="18" y="38">start</text>
-      </g>
-    </svg>
-    <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
-      <g stroke='none' fill='#333' stroke-width="2" font-size="22px" font-family="Ariel, sans-serif">
-        <text x="10" y="24">reset</text>
-      </g>
-    </svg>
-  </div>
-  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
-    <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
-    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-    <select name="difficulty-select" id="difficulty-select-custom">
-      <option value="0">easy</option>
-      <option value="1" selected>normal</option>
-      <option value="2">hard</option>
-      <option value="4">why...</option>
-    </select>
-  </div>`
-    for (let i = 1, len = mech.fieldUpgrades.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
-    }
-    for (let i = 0, len = b.guns.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
-    }
-    for (let i = 0, len = b.mods.length; i < len; i++) {
-      if (
-        !b.mods[i].allowed() ||
-        b.mods[i].name === "+1 cardinality" || b.mods[i].name === "leveraged investment"
-      ) {
-        text += `<div class="build-grid-module" style="opacity:0.3;"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
-      } else {
-        text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
-      }
-    }
-    document.getElementById("build-grid").innerHTML = text
-  },
-  reset() {
-    build.populateGrid();
-
-    document.getElementById("difficulty-select-custom").value = localSettings.difficultyMode
-    document.getElementById("difficulty-select-custom").addEventListener("input", () => {
-      document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
-      game.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
-      localSettings.difficultyMode = game.difficultyMode
-      localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-      // build.calculateCustomDifficulty()
-    });
-
-    document.getElementById("build-grid").style.display = "grid"
-    // build.calculateCustomDifficulty()
-    document.getElementById("difficulty-select-custom").value = localSettings.difficultyMode
-  },
-
-  startBuildRun() {
-    spawn.setSpawnList(); //gives random mobs,  not starter mobs
-    spawn.setSpawnList();
-    const increase = Number(document.getElementById("starting-level").value) * game.difficultyMode
-    level.levelsCleared += increase;
-    level.difficultyIncrease(increase) //increase difficulty based on modes
-    document.body.style.cursor = "none";
-    document.body.style.overflow = "hidden"
-    document.getElementById("build-grid").style.display = "none"
-    game.paused = false;
-    requestAnimationFrame(cycle);
-  },
   pauseGrid() {
     // let text = `<div class="pause-grid-module" style="border:0px;background:none;"></div>`
     let text = `
@@ -202,6 +61,156 @@ const build = {
     document.getElementById("pause-grid-left").style.display = "none"
     document.getElementById("pause-grid-right").style.display = "none"
   },
+  choosePowerUp(who, index, type) {
+    if (type === "gun") {
+      let isDeselect = false
+      for (let i = 0, len = b.inventory.length; i < len; i++) { //look for selection in inventory
+        if (b.guns[b.inventory[i]].name === b.guns[index].name) { //if already clicked, remove gun
+          isDeselect = true
+          who.classList.remove("build-grid-selected");
+          //remove gun
+          b.inventory.splice(i, 1)
+          b.guns[index].count = 0;
+          b.guns[index].have = false;
+          if (b.guns[index].ammo != Infinity) b.guns[index].ammo = 0;
+          game.makeGunHUD();
+          break
+        }
+      }
+      if (!isDeselect) { //add gun
+        who.classList.add("build-grid-selected");
+        b.giveGuns(index)
+      }
+    } else if (type === "field") {
+      if (mech.fieldMode !== index) {
+        document.getElementById("field-" + mech.fieldMode).classList.remove("build-grid-selected");
+        mech.setField(index)
+        who.classList.add("build-grid-selected");
+      }
+    } else if (type === "mod") { //remove mod if you have too many
+      if (b.mods[index].count < b.mods[index].maxCount) {
+        if (!who.classList.contains("build-grid-selected")) who.classList.add("build-grid-selected");
+        b.giveMod(index)
+        if (b.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${b.mods[index].count}x)</div> ${b.mods[index].description}`
+      } else {
+        b.removeMod(index);
+        who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
+        who.classList.remove("build-grid-selected");
+      }
+    }
+    //disable not allowed mods
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      const modID = document.getElementById("mod-" + i)
+
+      if (b.mods[i].allowed()) {
+        if (modID.classList.contains("build-grid-disabled")) {
+          modID.classList.remove("build-grid-disabled");
+          modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
+        }
+      } else {
+        if (!modID.classList.contains("build-grid-disabled")) {
+          modID.classList.add("build-grid-disabled");
+          modID.onclick = null
+        }
+        if (b.mods[i].count > 0) {
+          b.removeMod(i)
+        }
+        if (modID.classList.contains("build-grid-selected")) {
+          modID.classList.remove("build-grid-selected");
+        }
+      }
+    }
+  },
+  populateGrid() {
+    level.isBuildRun = true;
+    let text = `
+  <div style="display: flex; justify-content: space-around; align-items: center;">
+    <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="51">
+      <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
+        <text x="18" y="38">start</text>
+      </g>
+    </svg>
+    <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
+      <g stroke='none' fill='#333' stroke-width="2" font-size="22px" font-family="Ariel, sans-serif">
+        <text x="10" y="24">reset</text>
+      </g>
+    </svg>
+  </div>
+  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
+    <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
+    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
+    <select name="difficulty-select" id="difficulty-select-custom">
+      <option value="0">easy</option>
+      <option value="1" selected>normal</option>
+      <option value="2">hard</option>
+      <option value="4">why...</option>
+    </select>
+  </div>`
+    for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
+      text += `<div id ="field-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
+    }
+    for (let i = 0, len = b.guns.length; i < len; i++) {
+      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+    }
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      if (!b.mods[i].allowed()) { // || b.mods[i].name === "+1 cardinality") { //|| b.mods[i].name === "leveraged investment"
+        text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      } else if (b.mods[i].count > 1) {
+        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name} (${b.mods[i].count}x)</div> ${b.mods[i].description}</div>`
+      } else {
+        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+      }
+    }
+    document.getElementById("build-grid").innerHTML = text
+    document.getElementById("difficulty-select-custom").value = document.getElementById("difficulty-select").value
+    document.getElementById("difficulty-select-custom").addEventListener("input", () => {
+      game.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
+      localSettings.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
+      document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
+      localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    });
+  },
+  reset() {
+    mech.setField(0)
+
+    b.inventory = []; //removes guns and ammo  
+    for (let i = 0, len = b.guns.length; i < len; ++i) {
+      b.guns[i].count = 0;
+      b.guns[i].have = false;
+      if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
+    }
+    b.activeGun = null;
+    game.makeGunHUD();
+
+    b.setupAllMods();
+
+    build.populateGrid();
+    document.getElementById("field-0").classList.add("build-grid-selected");
+    document.getElementById("build-grid").style.display = "grid"
+  },
+
+  startBuildRun() {
+    spawn.setSpawnList(); //gives random mobs,  not starter mobs
+    spawn.setSpawnList();
+    if (b.inventory.length > 0) {
+      b.activeGun = b.inventory[0] //set first gun to active gun
+      game.makeGunHUD();
+    }
+
+    //remove any bullets that might have spawned from mods
+    for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+    bullet = [];
+
+    const increase = Number(document.getElementById("starting-level").value) * game.difficultyMode
+    level.levelsCleared += increase;
+    level.difficultyIncrease(increase) //increase difficulty based on modes
+
+    document.body.style.cursor = "none";
+    document.body.style.overflow = "hidden"
+    document.getElementById("build-grid").style.display = "none"
+    game.paused = false;
+    requestAnimationFrame(cycle);
+  }
 }
 
 document.getElementById("build-button").addEventListener("click", () => { //setup build run

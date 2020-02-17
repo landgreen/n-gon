@@ -46,21 +46,6 @@ const b = {
   isModEnergyRecovery: null,
   isModHealthRecovery: null,
   isModEnergyLoss: null,
-  removeAllMods() {
-    for (let i = 0, len = b.mods.length; i < len; i++) {
-      b.mods[i].remove();
-      b.mods[i].count = 0
-    }
-    b.modCount = 0;
-
-  },
-  setModDefaults() {
-    for (let i = 0, len = b.mods.length; i < len; i++) {
-      if (b.mods[i].count) b.mods[i].remove();
-      b.mods[i].count = 0
-    }
-    b.modCount = 0;
-  },
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -139,7 +124,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.health < 0.75
+        return mech.health < 0.75 || level.isBuildRun
       },
       effect() {
         b.isModLowHealthDmg = true; //used in mob.damage()
@@ -215,7 +200,7 @@ const b = {
       maxCount: 3,
       count: 0,
       allowed() {
-        return b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam")
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam")
       },
       effect() {
         b.isModBulletsLastLonger += 0.33
@@ -369,7 +354,7 @@ const b = {
     },
     {
       name: "scrap recycling",
-      description: "regen up to <strong>1%</strong> of max <strong class='color-h'>health</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+      description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -388,7 +373,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.isModHealthRecovery
+        return b.isModEnergyRecovery
       },
       effect() {
         b.isModEnergyLoss = true;
@@ -422,7 +407,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modSquirrelFx === 1.2
+        return b.modSquirrelFx > 1
       },
       effect() {
         b.isModStomp = true
@@ -547,7 +532,7 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.health < 0.7
+        return mech.health < 0.7 || level.isBuildRun
       },
       effect() {
         b.modRecursiveHealing += 1
@@ -661,7 +646,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return (b.modCount > 6)
+        return (b.modCount > 6) && !level.isBuildRun
       },
       effect: () => {
         let count = b.modCount
@@ -669,7 +654,7 @@ const b = {
         for (let i = 0; i < count; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
-        b.setModDefaults(); // remove all mods
+        b.setupAllMods(); // remove all mods
         //have state is checked in mech.death()
       },
       remove() {
@@ -723,7 +708,7 @@ const b = {
     },
     {
       name: "specular reflection",
-      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+20%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+30%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -731,8 +716,8 @@ const b = {
       },
       effect() {
         b.modLaserReflections++;
-        b.modLaserDamage += 0.010; //base is 0.05
-        b.modLaserFieldDrain += 0.0004 //base is 0.002
+        b.modLaserDamage += 0.015; //base is 0.05
+        b.modLaserFieldDrain += 0.0006 //base is 0.002
       },
       remove() {
         b.modLaserReflections = 2;
@@ -772,6 +757,27 @@ const b = {
     //   }
     // },
   ],
+  removeMod(index) {
+    b.mods[index].remove();
+    b.mods[index].count = 0;
+    game.updateModHUD();
+  },
+  setupAllMods() {
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      b.mods[i].remove();
+      b.mods[i].count = 0
+    }
+    b.modCount = 0;
+    game.updateModHUD();
+  },
+  // setupAllMods() {
+  //   for (let i = 0, len = b.mods.length; i < len; i++) {
+  //     if (b.mods[i].count) b.mods[i].remove();
+  //     b.mods[i].count = 0
+  //   }
+  //   b.modCount = 0;
+  //   game.updateModHUD();
+  // },
   giveMod(index = 'random') {
     if (index === 'random') {
       let options = [];
