@@ -973,6 +973,7 @@ const mobs = {
               b.spore(this) //spawn drone
             }
           }
+          if (b.isModExplodeMob) b.explosion(this.position, Math.min(500, Math.sqrt(this.mass + 2) * 80))
         }
 
       },

@@ -61,6 +61,7 @@ const build = {
     document.getElementById("pause-grid-left").style.display = "none"
     document.getElementById("pause-grid-right").style.display = "none"
   },
+  isCustomSelection: false,
   choosePowerUp(who, index, type) {
     if (type === "gun") {
       let isDeselect = false
@@ -91,23 +92,30 @@ const build = {
       if (b.mods[index].count < b.mods[index].maxCount) {
         if (!who.classList.contains("build-grid-selected")) who.classList.add("build-grid-selected");
         b.giveMod(index)
-        if (b.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${b.mods[index].count}x)</div> ${b.mods[index].description}`
+        // if (b.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${b.mods[index].count}x)</div> ${b.mods[index].description}`
       } else {
         b.removeMod(index);
-        who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
+        // who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
         who.classList.remove("build-grid-selected");
       }
     }
-    //disable not allowed mods
+    //update mod text //disable not allowed mods
     for (let i = 0, len = b.mods.length; i < len; i++) {
       const modID = document.getElementById("mod-" + i)
 
       if (b.mods[i].allowed()) {
+        if (b.mods[i].count > 1) {
+          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name} (${b.mods[i].count}x)</div>${b.mods[i].description}</div>`
+        } else {
+          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div>${b.mods[i].description}</div>`
+        }
+
         if (modID.classList.contains("build-grid-disabled")) {
           modID.classList.remove("build-grid-disabled");
           modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
         }
       } else {
+        modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${b.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${b.mods[i].requires}</span></div>`
         if (!modID.classList.contains("build-grid-disabled")) {
           modID.classList.add("build-grid-disabled");
           modID.onclick = null
@@ -122,7 +130,6 @@ const build = {
     }
   },
   populateGrid() {
-    level.isBuildRun = true;
     let text = `
   <div style="display: flex; justify-content: space-around; align-items: center;">
     <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="51">
@@ -154,7 +161,7 @@ const build = {
     }
     for (let i = 0, len = b.mods.length; i < len; i++) {
       if (!b.mods[i].allowed()) { // || b.mods[i].name === "+1 cardinality") { //|| b.mods[i].name === "leveraged investment"
-        text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+        text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${b.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${b.mods[i].requires}</span></div>`
       } else if (b.mods[i].count > 1) {
         text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name} (${b.mods[i].count}x)</div> ${b.mods[i].description}</div>`
       } else {
@@ -183,13 +190,14 @@ const build = {
     game.makeGunHUD();
 
     b.setupAllMods();
-
+    build.isCustomSelection = true;
     build.populateGrid();
     document.getElementById("field-0").classList.add("build-grid-selected");
     document.getElementById("build-grid").style.display = "grid"
   },
 
   startBuildRun() {
+    build.isCustomSelection = false;
     spawn.setSpawnList(); //gives random mobs,  not starter mobs
     spawn.setSpawnList();
     if (b.inventory.length > 0) {

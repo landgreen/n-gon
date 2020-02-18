@@ -215,15 +215,16 @@ summary {
 }
 
 .build-grid-selected {
-  background-color: #919ba8;
+  background-color: #76808d;
 }
 
 .build-grid-selected:hover {
-  background-color: #919ba8;
+  background-color: #76808d;
 }
 
 .build-grid-disabled {
-  opacity: 0.15;
+  opacity: 0.5;
+  color: #ccc;
 }
 
 #info {
@@ -442,6 +443,10 @@ em {
 
 .mod {
   background: #96e;
+}
+
+.grey {
+  background: #ccc;
 }
 
 .gun {

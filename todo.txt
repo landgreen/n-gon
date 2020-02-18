@@ -1,18 +1,9 @@
 ************** TODO - n-gon **************
 
+level - decrease all lips from 15 to 10  (under the new gravity players get stuck)
+
 consider making jumping cost energy  (like stamina)
   should walking cost energy too?
-
-add in requirements to custom mode
-  grey out mods that don't meet requirements
-  make custom undo method for mods
-    this makes toggleing mods on and off easier in custom
-
-mod - acute stress response
-  permanently increase damage by 30%
-    for 5 seconds after a mob dies
-      drain energy down to zero
-
 
 mod - nano-scale field makes spores instead of drones
 

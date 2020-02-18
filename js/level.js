@@ -18,7 +18,7 @@ const level = {
       // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
       // b.giveMod("waste energy recovery");
-      // b.giveMod("scrap recycling");
+      // b.giveMod("thermal runaway");
       // b.giveMod("acute stress response");
       // }
 

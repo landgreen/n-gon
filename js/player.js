@@ -411,7 +411,6 @@ const mech = {
         }
         game.replaceTextLog = true;
         game.makeTextLog("your quantum probability has stabilized", 1000);
-        document.title = "n-gon: L" + (game.difficulty) + " " + level.levels[level.onLevel];
       }, 8000);
 
     } else if (mech.alive) { //normal death code here

@@ -15,6 +15,7 @@ const b = {
   isModImmortal: null,
   modSpores: null,
   isModImmuneExplosion: null,
+  isModExplodeMob: null,
   isModDroneOnDamage: null,
   modAcidDmg: null,
   isModAcidDmg: null,
@@ -61,8 +62,9 @@ const b = {
       count: 0,
       maxCount: 9,
       allowed() {
-        return true
+        return b.haveGunCheck("minigun") || b.haveGunCheck("shotgun") || b.haveGunCheck("super balls") || b.haveGunCheck("foam")
       },
+      requires: "minigun, shotgun, super balls, foam",
       effect() {
         b.modBulletSize += 0.13
       },
@@ -76,8 +78,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.health > 0.8 || level.isBuildRun
+        return mech.health > 0.8 || build.isCustomSelection
       },
+      requires: "health above 80%",
       effect() {
         b.isModAcidDmg = true;
         b.modOnHealthChange();
@@ -89,21 +92,6 @@ const b = {
       }
     },
     {
-      name: "fracture analysis",
-      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      effect() {
-        b.isModCrit = true;
-      },
-      remove() {
-        b.isModCrit = false;
-      }
-    },
-    {
       name: "kinetic bombardment",
       description: "do up to 33% more <strong class='color-d'>damage</strong> at a distance<br><em>increase maxes out at about 40 steps away</em>",
       maxCount: 1,
@@ -111,6 +99,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.isModFarAwayDmg = true; //used in mob.damage()
       },
@@ -119,18 +108,67 @@ const b = {
       }
     },
     {
+      name: "fracture analysis",
+      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModFarAwayDmg
+      },
+      requires: "kinetic bombardment",
+      effect() {
+        b.isModCrit = true;
+      },
+      remove() {
+        b.isModCrit = false;
+      }
+    },
+    {
       name: "quasistatic equilibrium",
       description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to <strong>50%</strong> increase when near death</em>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.health < 0.75 || level.isBuildRun
+        return mech.health < 0.8 || build.isCustomSelection
       },
+      requires: "health below 80%",
       effect() {
         b.isModLowHealthDmg = true; //used in mob.damage()
       },
       remove() {
         b.isModLowHealthDmg = false;
+      }
+    },
+    {
+      name: "reaction inhibitor",
+      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModLowHealthDmg
+      },
+      requires: "quasistatic equilibrium",
+      effect: () => {
+        b.modMobDieAtHealth = 0.15
+      },
+      remove() {
+        b.modMobDieAtHealth = 0.05;
+      }
+    },
+    {
+      name: "thermal runaway",
+      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.modMobDieAtHealth > 0.05
+      },
+      requires: "reaction inhibitor",
+      effect: () => {
+        b.isModExplodeMob = true;
+      },
+      remove() {
+        b.isModExplodeMob = false;
       }
     },
     {
@@ -141,6 +179,7 @@ const b = {
       allowed() {
         return b.haveGunCheck("missiles") || b.haveGunCheck("flak") || b.haveGunCheck("grenades") || b.haveGunCheck("vacuum bomb") || b.haveGunCheck("pulse");
       },
+      requires: "an explosive gun",
       effect: () => {
         b.modExplosionRadius += 0.2;
       },
@@ -154,16 +193,17 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return (b.modExplosionRadius > 1)
+        return b.modExplosionRadius > 1
       },
+      requires: "high explosives",
       effect: () => {
         b.isModImmuneExplosion = true;
       },
       remove() {
         b.isModImmuneExplosion = false;
-
       }
     },
+
     {
       name: "auto-loading heuristics",
       description: "your <strong>delay</strong> after firing is <strong>+14% shorter</strong>",
@@ -172,6 +212,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modFireRate *= 0.86
       },
@@ -187,6 +228,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modNoAmmo = 1
       },
@@ -202,6 +244,7 @@ const b = {
       allowed() {
         return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam")
       },
+      requires: "drones, spores, super balls, or foam",
       effect() {
         b.isModBulletsLastLonger += 0.33
       },
@@ -209,21 +252,7 @@ const b = {
         b.isModBulletsLastLonger = 1;
       }
     },
-    {
-      name: "reaction inhibitor",
-      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      effect: () => {
-        b.modMobDieAtHealth = 0.15
-      },
-      remove() {
-        b.modMobDieAtHealth = 0.05;
-      }
-    },
+
     {
       name: "zoospore vector",
       description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
@@ -232,6 +261,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modSpores += 0.11;
         for (let i = 0; i < 10; i++) {
@@ -250,6 +280,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modLaserBotCount++;
         b.laserBot();
@@ -266,6 +297,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modNailBotCount++;
         b.nailBot();
@@ -282,6 +314,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.isModDroneOnDamage = true;
         for (let i = 0; i < 4; i++) {
@@ -300,6 +333,7 @@ const b = {
       allowed() {
         return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
       },
+      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
       effect() {
         b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
       },
@@ -315,6 +349,7 @@ const b = {
       allowed() {
         return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
       },
+      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
       effect() {
         mech.fieldRange = 175 * 1.4
       },
@@ -330,6 +365,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.isModEntanglement = true
       },
@@ -345,6 +381,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.isModEnergyRecovery = true;
       },
@@ -360,6 +397,7 @@ const b = {
       allowed() {
         return b.isModEnergyRecovery
       },
+      requires: "waste energy recovery",
       effect() {
         b.isModHealthRecovery = true;
       },
@@ -375,6 +413,7 @@ const b = {
       allowed() {
         return b.isModEnergyRecovery
       },
+      requires: "waste energy recovery",
       effect() {
         b.isModEnergyLoss = true;
       },
@@ -390,6 +429,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() { // good with melee builds, content skipping builds
         b.modSquirrelFx += 0.2;
         mech.Fx = 0.016 * b.modSquirrelFx;
@@ -409,6 +449,7 @@ const b = {
       allowed() {
         return b.modSquirrelFx > 1
       },
+      requires: "squirrel-cage rotor",
       effect() {
         b.isModStomp = true
       },
@@ -424,6 +465,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modCollisionImmuneCycles += 120;
         mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
@@ -438,8 +480,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modCollisionImmuneCycles > 120 || b.isModPiezo
+        return b.modCollisionImmuneCycles > 120
       },
+      requires: "Pauli exclusion",
       effect() {
         b.isModAnnihilation = true
       },
@@ -455,6 +498,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.isModPiezo = true;
         mech.fieldMeter = mech.fieldEnergyMax;
@@ -471,6 +515,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modEnergySiphon += 0.15;
         mech.fieldMeter = mech.fieldEnergyMax
@@ -487,6 +532,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.modHealthDrain += 0.015;
       },
@@ -502,6 +548,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         mech.fieldEnergyMax += 0.5
         mech.fieldMeter += 0.5
@@ -512,12 +559,13 @@ const b = {
     },
     {
       name: "supersaturation",
-      description: "<strong class='color-h'>heal</strong> <strong>+50%</strong> beyond your <strong>max health</strong>",
+      description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>+50%</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         mech.maxHealth += 0.50
         mech.addHealth(0.50)
@@ -532,8 +580,9 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.health < 0.7 || level.isBuildRun
+        return mech.health < 0.7 || build.isCustomSelection
       },
+      requires: "health below 70%",
       effect() {
         b.modRecursiveHealing += 1
       },
@@ -543,12 +592,13 @@ const b = {
     },
     {
       name: "mass-energy equivalence",
-      description: "<strong>power ups</strong> overcharge your <strong class='color-f'>energy</strong><br>temporarily gain <strong>150%</strong> of maximum",
+      description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>50%</strong> above your max",
       maxCount: 1,
       count: 0,
       allowed() {
         return true
       },
+      requires: "",
       effect: () => {
         b.isModMassEnergy = true // used in mech.grabPowerUp
         mech.fieldMeter = mech.fieldEnergyMax * 2
@@ -565,6 +615,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect() {
         b.isModImmortal = true;
       },
@@ -580,6 +631,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect: () => {
         b.isModBayesian = 0.20;
       },
@@ -589,12 +641,13 @@ const b = {
     },
     {
       name: "catabolism",
-      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>3%</strong> of current health into <strong>ammo</strong>",
+      description: "convert <strong>3%</strong> of current health into <strong>ammo</strong><br>when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
         return true
       },
+      requires: "",
       effect: () => {
         b.isModAmmoFromHealth = 0.03;
       },
@@ -610,6 +663,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect: () => {
         b.isModNoAmmo = true;
         for (let i = 0; i < 6; i++) { //if you change the six also change it in Born rule
@@ -633,6 +687,7 @@ const b = {
       allowed() {
         return true
       },
+      requires: "",
       effect: () => {
         b.isModFourOptions = true;
       },
@@ -646,8 +701,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return (b.modCount > 6) && !level.isBuildRun
+        return (b.modCount > 6) && !build.isCustomSelection
       },
+      requires: "more than 6 mods",
       effect: () => {
         let count = b.modCount
         if (b.isModNoAmmo) count - 6 //remove the 6 bonus mods when getting rid of leveraged investment
@@ -669,6 +725,7 @@ const b = {
       allowed() {
         return b.haveGunCheck("drones") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
       },
+      requires: "drones",
       effect() {
         b.isModDroneCollide = true
       },
@@ -684,6 +741,7 @@ const b = {
       allowed() {
         return b.haveGunCheck("spores") || b.modSpores > 0 || b.isModStomp
       },
+      requires: "spores",
       effect() {
         b.isModFastSpores = true
       },
@@ -699,6 +757,7 @@ const b = {
       allowed() {
         return b.haveGunCheck("super balls")
       },
+      requires: "super balls",
       effect() {
         b.modSuperBallNumber++
       },
@@ -714,6 +773,7 @@ const b = {
       allowed() {
         return b.haveGunCheck("laser")
       },
+      requires: "laser",
       effect() {
         b.modLaserReflections++;
         b.modLaserDamage += 0.015; //base is 0.05
@@ -733,6 +793,7 @@ const b = {
       allowed() {
         return b.haveGunCheck("flak")
       },
+      requires: "flak",
       effect() {
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
@@ -752,6 +813,7 @@ const b = {
     //   allowed() {
     //     return b.haveGunCheck("mines")
     //   },
+    // requires: "",
     //   effect() {
 
     //   }
@@ -986,11 +1048,17 @@ const b = {
     dist = Vector.magnitude(sub);
 
     if (dist < radius) {
-      if (!b.isModImmuneExplosion && mech.fieldMeter > 0.1) {
-        mech.damage(radius * 0.0002);
+      if (b.isModImmuneExplosion) {
+        const drain = Math.max(radius * 0.0006, 0.2)
+        if (mech.fieldMeter > drain) {
+          mech.fieldMeter -= drain
+        } else {
+          mech.damage(radius * 0.0001); //do half damage if have the mod, but out of mana
+        }
       } else {
-        mech.fieldMeter -= Math.max(radius * 0.0006, 0.1)
+        mech.damage(radius * 0.0002); //normal player damage from explosions
       }
+
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
       player.force.x += knock.x;
       player.force.y += knock.y;
