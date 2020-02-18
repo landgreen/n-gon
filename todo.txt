@@ -1,5 +1,7 @@
 ************** TODO - n-gon **************
 
+randomize boss laser spawn locations
+
 consider making jumping cost energy  (like stamina)
   should walking cost energy too?
 
