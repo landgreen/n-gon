@@ -193,6 +193,8 @@ const level = {
     mech.setPosToSpawn(0, -750); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+
     level.exit.x = 6500;
     level.exit.y = -230;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
@@ -253,6 +255,8 @@ const level = {
     level.exit.x = 2800;
     level.exit.y = -335;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+
     document.body.style.backgroundColor = "#fff";
     level.fillBG.push({
       x: 2600,
@@ -331,7 +335,6 @@ const level = {
     spawn.mapRect(-250, -2800, 3600, 1800); //roof
     spawn.mapRect(2600, -300, 500, 500); //exit shelf
     spawn.mapRect(2600, -1200, 500, 600); //exit roof
-    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
     spawn.mapRect(-95, -1100, 80, 110); //wire source
     spawn.mapRect(410, -10, 90, 20); //small platform for player
 
@@ -389,6 +392,8 @@ const level = {
     level.exit.x = -100;
     level.exit.y = -425;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    spawn.mapRect(level.exit.x, level.exit.y + 15, 100, 50); //exit bump
+
 
     powerUps.spawnStartingPowerUps(4450, -1400);
     spawn.debris(1000, 20, 1800, 3); //16 debris per level //but less here because a few mobs die from laser
@@ -412,7 +417,7 @@ const level = {
     spawn.mapRect(1800, 175, 800, 100); //stops above body from moving to right
 
     //exit building
-    spawn.mapRect(-100, -410, 100, 30);
+    // spawn.mapRect(-100, -410, 100, 30);
     spawn.mapRect(-300, -800, 500, 50);
     spawn.mapRect(150, -800, 50, 110);
     spawn.bodyRect(170, -690, 14, 175, 1, spawn.propsFriction); //door to exit room
@@ -569,7 +574,7 @@ const level = {
 
     if (Math.random() < 0.75) {
       //normal direction start in top left
-      mech.setPosToSpawn(-450, -2050);
+      mech.setPosToSpawn(-450, -2060);
       level.exit.x = 3600;
       level.exit.y = -300;
       spawn.mapRect(3600, -285, 100, 50); //ground bump wall
@@ -586,7 +591,7 @@ const level = {
       });
     } else {
       //reverse direction, start in bottom right
-      mech.setPosToSpawn(3650, -310);
+      mech.setPosToSpawn(3650, -325);
       level.exit.x = -550;
       level.exit.y = -2030;
       spawn.mapRect(-550, -2015, 100, 50); //ground bump wall
@@ -601,6 +606,7 @@ const level = {
     }
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     spawn.debris(1650, -1800, 3800, 16); //16 debris per level
@@ -768,6 +774,7 @@ const level = {
 
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     powerUps.spawnStartingPowerUps(1075, -550);
     spawn.debris(-250, 50, 1650, 2); //16 debris per level
@@ -840,7 +847,6 @@ const level = {
     }
 
     // starting room
-    spawn.mapRect(-100, -1010, 100, 30);
     spawn.mapRect(-300, -1000, 600, 50);
     spawn.mapRect(-300, -1300, 450, 50);
     spawn.mapRect(-300, -1300, 50, 350);
@@ -929,11 +935,13 @@ const level = {
     level.defaultZoom = 2000
     game.zoomTransition(level.defaultZoom)
 
-    mech.setPosToSpawn(-50, -50); //normal spawn
+    mech.setPosToSpawn(-50, -60); //normal spawn
     //mech.setPosToSpawn(1550, -1200); //spawn left high
     //mech.setPosToSpawn(1800, -2000); //spawn near exit
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+
     level.exit.x = 1500;
     level.exit.y = -1875;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
@@ -1086,6 +1094,8 @@ const level = {
     //mech.setPosToSpawn(-2000, -1700); // left ledge spawn
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+
     level.exit.x = -4275;
     level.exit.y = -2805;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
@@ -1262,12 +1272,12 @@ const level = {
     game.zoomTransition(level.defaultZoom)
 
     document.body.style.backgroundColor = "#dcdcde" //"#f2f5f3";
-    mech.setPosToSpawn(25, -60); //normal spawn
+    mech.setPosToSpawn(25, -55); //normal spawn
     //mech.setPosToSpawn(-2000, -1700); // left ledge spawn
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
     level.exit.x = 425;
-    level.exit.y = -35;
+    level.exit.y = -30;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     //level.addQueryRegion(-600, -250, 180, 420, "death", [[player]],{});
 
@@ -1323,16 +1333,16 @@ const level = {
     spawn.mapRect(-1900, -600, 100, 1300);
     //house
     spawn.mapRect(-175, -550, 50, 400);
-    spawn.mapRect(-175, -15, 350, 50);
-    spawn.mapRect(-25, -25, 100, 50);
+    spawn.mapRect(-175, -10, 350, 50);
+    spawn.mapRect(-25, -20, 100, 50);
     // spawn.mapRect(-175, -275, 350, 25);
     // spawn.mapRect(-175, -250, 25, 75);
     // spawn.bodyRect(-170, -175, 14, 160, 1, spawn.propsFriction); //door to starting room
     //exit house
-    spawn.mapRect(300, -15, 350, 50);
+    spawn.mapRect(300, -10, 350, 50);
     spawn.mapRect(-150, -300, 800, 50);
     spawn.mapRect(600, -275, 50, 75);
-    spawn.mapRect(425, -25, 100, 25);
+    spawn.mapRect(425, -20, 100, 25);
     // spawn.mapRect(-1900, 600, 2700, 100);
     spawn.mapRect(1100, 0, 150, 1500);
     spawn.mapRect(-2850, 1400, 4100, 100);
@@ -1445,7 +1455,7 @@ const level = {
       // spawn.randomSmallMob(3550, -550);
     } else {
       //reverse direction, start in bottom right
-      mech.setPosToSpawn(3250, -530); //normal spawn
+      mech.setPosToSpawn(3250, -550); //normal spawn
       level.exit.x = 1375;
       level.exit.y = -1530;
       spawn.bodyRect(3655, -650, 40, 150); //door
@@ -1453,6 +1463,8 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     document.body.style.backgroundColor = "#e0e5e0";

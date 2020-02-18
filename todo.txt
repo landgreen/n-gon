@@ -1,7 +1,5 @@
 ************** TODO - n-gon **************
 
-level - decrease all lips from 15 to 10  (under the new gravity players get stuck)
-
 consider making jumping cost energy  (like stamina)
   should walking cost energy too?
 

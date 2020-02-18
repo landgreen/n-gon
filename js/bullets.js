@@ -145,9 +145,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.isModLowHealthDmg
+        return true
       },
-      requires: "quasistatic equilibrium",
+      requires: "",
       effect: () => {
         b.modMobDieAtHealth = 0.15
       },
