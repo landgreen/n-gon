@@ -1,10 +1,5 @@
 ************** TODO - n-gon **************
 
-randomize boss laser spawn locations
-
-consider making jumping cost energy  (like stamina)
-  should walking cost energy too?
-
 mod - nano-scale field makes spores instead of drones
 
 mod - mines - fire something instead of needles on activation
@@ -21,11 +16,15 @@ lore - a robot (the player) gains self awareness
     final mod is "this is just a simulation"
       you get immortality and Infinity damage
       the next level is the final level
-  atmosphere levels that explore lore
-    give the user a rest, between combat
-    low combat more graphics
+
+atmosphere levels: change the pace, give the user a rest between combat
+  low or no combat, but more graphics
+  explore lore
+    add text for player thoughts?
+  simple puzzles
+  cool looking stuff
     large rotating fan that the player has to move through
-    nonaggressive mobs one mob attacking the passive mobs
+    nonaggressive mobs
     in the final level you see your self at the starting level, with the wires
       you shoot your self to wake up?
 

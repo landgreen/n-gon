@@ -68,7 +68,7 @@ const build = {
       for (let i = 0, len = b.inventory.length; i < len; i++) { //look for selection in inventory
         if (b.guns[b.inventory[i]].name === b.guns[index].name) { //if already clicked, remove gun
           isDeselect = true
-          who.classList.remove("build-grid-selected");
+          who.classList.remove("build-gun-selected");
           //remove gun
           b.inventory.splice(i, 1)
           b.guns[index].count = 0;
@@ -79,24 +79,24 @@ const build = {
         }
       }
       if (!isDeselect) { //add gun
-        who.classList.add("build-grid-selected");
+        who.classList.add("build-gun-selected");
         b.giveGuns(index)
       }
     } else if (type === "field") {
       if (mech.fieldMode !== index) {
-        document.getElementById("field-" + mech.fieldMode).classList.remove("build-grid-selected");
+        document.getElementById("field-" + mech.fieldMode).classList.remove("build-field-selected");
         mech.setField(index)
-        who.classList.add("build-grid-selected");
+        who.classList.add("build-field-selected");
       }
     } else if (type === "mod") { //remove mod if you have too many
       if (b.mods[index].count < b.mods[index].maxCount) {
-        if (!who.classList.contains("build-grid-selected")) who.classList.add("build-grid-selected");
+        if (!who.classList.contains("build-mod-selected")) who.classList.add("build-mod-selected");
         b.giveMod(index)
         // if (b.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${b.mods[index].count}x)</div> ${b.mods[index].description}`
       } else {
         b.removeMod(index);
         // who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
-        who.classList.remove("build-grid-selected");
+        who.classList.remove("build-mod-selected");
       }
     }
     //update mod text //disable not allowed mods
@@ -123,8 +123,8 @@ const build = {
         if (b.mods[i].count > 0) {
           b.removeMod(i)
         }
-        if (modID.classList.contains("build-grid-selected")) {
-          modID.classList.remove("build-grid-selected");
+        if (modID.classList.contains("build-mod-selected")) {
+          modID.classList.remove("build-mod-selected");
         }
       }
     }
@@ -192,7 +192,7 @@ const build = {
     b.setupAllMods();
     build.isCustomSelection = true;
     build.populateGrid();
-    document.getElementById("field-0").classList.add("build-grid-selected");
+    document.getElementById("field-0").classList.add("build-field-selected");
     document.getElementById("build-grid").style.display = "grid"
   },
 

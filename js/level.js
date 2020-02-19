@@ -13,7 +13,7 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(5)
+      // level.difficultyIncrease(4)
       // b.giveGuns("laser")
       // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
@@ -448,6 +448,8 @@ const level = {
     spawn.mapRect(-500, -1900, 400, 50); //super high shade
     spawn.mapRect(0, -1900, 400, 50); //super high shade
     spawn.mapRect(-150, -1350, 200, 25); //super high shade
+    spawn.bodyRect(140, -2100, 150, 200); //shield from laser
+
     level.fillBG.push({
       x: -300,
       y: -1900,
@@ -563,9 +565,17 @@ const level = {
     spawn.randomBoss(2700, -1600, 0.1);
     spawn.randomBoss(1600, -100, 0);
     spawn.randomBoss(5000, -3900, -0.3);
-    // spawn.laserBoss(2750, -2600);
-    if (game.difficulty > 3) spawn.laserBoss(3050, -2850);
-
+    if (game.difficulty > 3) {
+      if (Math.random() < 0.25) {
+        spawn.laserBoss(2900 + 300 * Math.random(), -2950 + 150 * Math.random());
+      } else if (Math.random() < 0.33) {
+        spawn.laserBoss(1800 + 250 * Math.random(), -2600 + 150 * Math.random());
+      } else if (Math.random() < 0.5) {
+        spawn.laserBoss(3500 + 250 * Math.random(), -2600 + 1000 * Math.random());
+      } else {
+        spawn.laserBoss(600 + 200 * Math.random(), -2150 + 250 * Math.random());
+      }
+    }
   },
   rooftops() {
     level.defaultZoom = 1700

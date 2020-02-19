@@ -214,12 +214,28 @@ summary {
   background-color: #efeff5;
 }
 
-.build-grid-selected {
-  background-color: #76808d;
+.build-field-selected {
+  background-color: hsl(193, 100%, 75%);
 }
 
-.build-grid-selected:hover {
-  background-color: #76808d;
+.build-field-selected:hover {
+  background-color: hsl(193, 100%, 68%);
+}
+
+.build-gun-selected {
+  background-color: hsl(218, 100%, 81%);
+}
+
+.build-gun-selected:hover {
+  background-color: hsl(218, 100%, 76%);
+}
+
+.build-mod-selected {
+  background-color: hsl(247, 100%, 84%);
+}
+
+.build-mod-selected:hover {
+  background-color: hsl(247, 100%, 81%);
 }
 
 .build-grid-disabled {
@@ -412,7 +428,7 @@ em {
 }
 
 .color-m {
-  color: rgb(115, 61, 202);
+  color: hsl(246, 57%, 52%);
   letter-spacing: 1px;
 }
 
@@ -442,7 +458,8 @@ em {
 }
 
 .mod {
-  background: #96e;
+  /* background: rgb(116, 102, 238); */
+  background: hsl(246, 80%, 67%);
 }
 
 .grey {

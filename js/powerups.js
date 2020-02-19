@@ -130,7 +130,7 @@ const powerUps = {
   },
   mod: {
     name: "mod",
-    color: "#a8f",
+    color: "hsl(246,100%,77%)", //"#a8f",
     size() {
       return 42;
     },
