@@ -406,8 +406,8 @@ const level = {
     spawn.mapRect(-300, -800, 50, 800);
     spawn.mapRect(-100, -20, 100, 30);
     spawn.mapRect(-300, -10, 500, 50);
-    spawn.mapRect(150, -515, 50, 365);
-    spawn.bodyRect(170, -130, 14, 140, 1, spawn.propsFriction); //door to starting room
+    spawn.mapRect(150, -510, 50, 365);
+    spawn.bodyRect(170, -130, 14, 145, 1, spawn.propsFriction); //door to starting room
     spawn.mapRect(-300, 0, 1000, 300); //ground
     spawn.mapRect(-300, 250, 6300, 300); //deeper ground
     spawn.bodyRect(2100, 50, 80, 80);

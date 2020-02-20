@@ -1,7 +1,5 @@
 ************** TODO - n-gon **************
 
-mod - nano-scale field makes spores instead of drones
-
 mod - mines - fire something instead of needles on activation
   foam?, flak?, vacuum bomb, super balls
   make a different mod for each type of bullet mine can fire

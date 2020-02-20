@@ -243,6 +243,10 @@ summary {
   color: #ccc;
 }
 
+.build-grid-disabled:hover {
+  background-color: #fff;
+}
+
 #info {
   position: absolute;
   bottom: 3px;

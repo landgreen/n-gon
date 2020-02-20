@@ -636,33 +636,8 @@ const game = {
     }
   },
   checks() {
-    // if 4000px deep
-    if (mech.pos.y > game.fallHeight) {
+    if (mech.pos.y > game.fallHeight) { // if 4000px deep
       mech.death();
-      // if (b.modNonEuclidean) {
-      //   Matter.Body.setPosition(player, {
-      //     x: player.position.x,
-      //     y: player.position.y - 12000
-      //   });
-      //   Matter.Body.setVelocity(player, {
-      //     x: player.velocity.x,
-      //     y: player.velocity.y * 0
-      //   });
-
-      //   mech.pos.x = player.position.x;
-      //   mech.pos.y = playerBody.position.y - mech.yOff;
-
-      //   //smoothed mouse look translations
-      //   const scale = 10;
-      //   mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
-      //   mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
-
-      //   mech.transX = mech.transSmoothX
-      //   mech.transY = mech.transSmoothY
-
-      // } else {
-      // mech.death();
-      // }
     }
 
     if (!(mech.cycle % 60)) { //once a second checks
@@ -680,22 +655,20 @@ const game = {
         }
       }
 
-
-    }
-
-    if (!(game.cycle % 420)) { //once every 7 seconds
-      fallCheck = function (who) {
-        let i = who.length;
-        while (i--) {
-          if (who[i].position.y > game.fallHeight) {
-            Matter.World.remove(engine.world, who[i]);
-            who.splice(i, 1);
+      if (!(game.cycle % 420)) { //once every 7 seconds
+        fallCheck = function (who) {
+          let i = who.length;
+          while (i--) {
+            if (who[i].position.y > game.fallHeight) {
+              Matter.World.remove(engine.world, who[i]);
+              who.splice(i, 1);
+            }
           }
-        }
-      };
-      fallCheck(mob);
-      fallCheck(body);
-      fallCheck(powerUp);
+        };
+        fallCheck(mob);
+        fallCheck(body);
+        fallCheck(powerUp);
+      }
     }
   },
   testingOutput() {
