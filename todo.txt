@@ -1,5 +1,8 @@
 ************** TODO - n-gon **************
 
+mod - Collision avoidance system
+  10% chance to dodge a collision
+
 mod - mines - fire something instead of needles on activation
   foam?, flak?, vacuum bomb, super balls
   make a different mod for each type of bullet mine can fire
@@ -44,14 +47,6 @@ css transition for pause menu
 
 field that pushes everything back, and can destroy smaller blocks
   converts blocks into ammo power ups
-
-mod: make player invisible when...
-  use the flag from phase field
-  when health is low?
-
-field: a larger radius that attracted enemies
-  still deflected them near the robot
-  convert the health of mobs into energy when they are being attracted
 
 mod: chance to not die from fatal damage
   also push mobs and bodies away?

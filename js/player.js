@@ -317,7 +317,7 @@ const mech = {
       game.clearNow = true; //triggers a map reset
 
       //count mods
-      let totalMods = -2; //lose 2 mods for balance reasons
+      let totalMods = 0;
       for (let i = 0; i < b.mods.length; i++) {
         totalMods += b.mods[i].count
       }
@@ -352,13 +352,14 @@ const mech = {
       }
 
       function randomizeHealth() {
-        mech.health = 0.5 + Math.random()
+        mech.health = 0.55 + Math.random()
         if (mech.health > 1) mech.health = 1;
         mech.displayHealth();
       }
 
       function randomizeGuns() {
-        const length = Math.round(b.inventory.length * (1 + 0.4 * (Math.random() - 0.5)))
+        // const length = Math.round(b.inventory.length * (1 + 0.4 * (Math.random() - 0.5)))
+        const length = b.inventory.length
         //removes guns and ammo  
         b.inventory = [];
         b.activeGun = null;
@@ -367,16 +368,12 @@ const mech = {
           b.guns[i].have = false;
           if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
         }
-
         //give random guns
-        for (let i = 0; i < length; i++) {
-          b.giveGuns()
-        }
-
+        for (let i = 0; i < length; i++) b.giveGuns()
         //randomize ammo
         for (let i = 0, len = b.inventory.length; i < len; i++) {
           if (b.guns[b.inventory[i]].ammo !== Infinity) {
-            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(6 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.3)))
+            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(6 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.1)))
           }
         }
         game.makeGunHUD(); //update gun HUD
@@ -466,9 +463,31 @@ const mech = {
     }
     mech.health -= dmg;
     if (mech.health < 0) {
-      mech.health = 0;
-      mech.death();
-      return;
+      console.log(b.isModDeathAvoid, b.isModDeathAvoidOnCD)
+      if (b.isModDeathAvoid && !b.isModDeathAvoidOnCD) { //&& Math.random() < 0.5
+        b.isModDeathAvoidOnCD = true;
+        mech.health += dmg //undo the damage
+        mech.collisionImmune = mech.cycle + 30 //disable this.collisionImmune bonus seconds
+
+        game.wipe = function () { //set wipe to have trails
+          ctx.fillStyle = "rgba(255,255,255,0.02)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        setTimeout(function () {
+          game.wipe = function () { //set wipe to normal
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+          // game.replaceTextLog = true;
+          // game.makeTextLog("death avoided", 360);
+          b.isModDeathAvoidOnCD = false;
+        }, 3000);
+
+        return;
+      } else {
+        mech.health = 0;
+        mech.death();
+        return;
+      }
     }
     b.modOnHealthChange();
     mech.displayHealth();

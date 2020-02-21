@@ -47,6 +47,9 @@ const b = {
   isModEnergyRecovery: null,
   isModHealthRecovery: null,
   isModEnergyLoss: null,
+  isModFoamShieldHit: null,
+  isModDeathAvoid: null,
+  isModDeathAvoidOnCD: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -358,22 +361,6 @@ const b = {
       }
     },
     {
-      name: "entanglement",
-      description: "only when your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>10%</strong> for each gun you have",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.isModEntanglement = true
-      },
-      remove() {
-        b.isModEntanglement = false;
-      }
-    },
-    {
       name: "waste energy recovery",
       description: "regen <strong>7%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
       maxCount: 1,
@@ -458,6 +445,22 @@ const b = {
       }
     },
     {
+      name: "entanglement",
+      description: "only when your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>10%</strong> for each gun you have",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModEntanglement = true
+      },
+      remove() {
+        b.isModEntanglement = false;
+      }
+    },
+    {
       name: "Pauli exclusion",
       description: `unable to <strong>collide</strong> with enemies for <strong>+2</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
@@ -488,6 +491,40 @@ const b = {
       },
       remove() {
         b.isModAnnihilation = false;
+      }
+    },
+    {
+      name: "quantum immortality",
+      description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModImmortal = true;
+      },
+      remove() {
+        b.isModImmortal = false;
+      }
+    },
+    {
+      name: "weak anthropic principle",
+      description: "<strong>avoid harm</strong> that should be <strong>fatal</strong><br>can occur once every <strong>3</strong> seconds",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModImmortal
+      },
+      requires: "quantum immortality",
+      effect() {
+        b.isModDeathAvoid = true;
+        b.isModDeathAvoidOnCD = false;
+      },
+      remove() {
+        b.isModDeathAvoid = false;
+        b.isModDeathAvoidOnCD = false;
       }
     },
     {
@@ -576,7 +613,7 @@ const b = {
     },
     {
       name: "recursive healing",
-      description: "<strong class='color-h'>healing</strong> power ups trigger one extra time.",
+      description: "<strong class='color-h'>healing</strong> power ups trigger one extra time",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -605,22 +642,6 @@ const b = {
       },
       remove() {
         b.isModMassEnergy = false;
-      }
-    },
-    {
-      name: "quantum immortality",
-      description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.isModImmortal = true;
-      },
-      remove() {
-        b.isModImmortal = false;
       }
     },
     {
@@ -803,6 +824,22 @@ const b = {
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
+      }
+    },
+    {
+      name: "foam stabilization",
+      description: "<strong>foam</strong> can stick to shields",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("foam")
+      },
+      requires: "foam",
+      effect() {
+        b.isModFoamShieldHit = true;
+      },
+      remove() {
+        b.isModFoamShieldHit = false;
       }
     },
     // {
@@ -1705,11 +1742,11 @@ const b = {
       num: 5,
       isStarterGun: true,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 30 : 20) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 20) * b.modFireRate); // cool down
         b.muzzleFlash(20);
         // mobs.alert(450);
         const SPEED = mech.crouch ? 40 : 30
-        const SPREAD = mech.crouch ? 0.04 : 0.15
+        const SPREAD = mech.crouch ? 0.08 : 0.15
         let dir = mech.angle - SPREAD * (b.modSuperBallNumber - 1) / 2;
         for (let i = 0; i < b.modSuperBallNumber; i++) {
           const me = bullet.length;
@@ -2215,7 +2252,7 @@ const b = {
           target: null,
           targetVertex: null,
           onDmg(who) {
-            if (!this.target && who.alive && who.dropPowerUp && !who.isShielded) {
+            if (!this.target && who.alive && (who.dropPowerUp || b.isModFoamShieldHit) && (!who.isShielded || b.isModFoamShieldHit)) {
               this.target = who;
               this.collisionFilter.category = cat.body;
               this.collisionFilter.mask = null;
@@ -2260,7 +2297,12 @@ const b = {
                 Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
                 Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.9))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
-                this.target.damage(b.dmgScale * 0.005);
+                if (this.target.isShielded) {
+                  this.target.damage(b.dmgScale * 0.001);
+                } else {
+                  this.target.damage(b.dmgScale * 0.005);
+                }
+
               } else if (this.target !== null) { //look for a new target
                 this.target = null
                 this.collisionFilter.category = cat.bullet;

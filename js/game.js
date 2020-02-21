@@ -640,7 +640,7 @@ const game = {
       mech.death();
     }
 
-    if (!(mech.cycle % 60)) { //once a second checks
+    if (!(mech.cycle % 60)) { //once a second
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
         if (b.isModEnergyRecovery) {
@@ -653,6 +653,9 @@ const game = {
         if (b.isModEnergyLoss) {
           mech.fieldMeter = 0.05;
         }
+
+      } else { //haven't killed a mob in the last 5 seconds
+
       }
 
       if (!(game.cycle % 420)) { //once every 7 seconds

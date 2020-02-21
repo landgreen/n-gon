@@ -13,12 +13,12 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(4)
-      // b.giveGuns("laser")
+      // level.difficultyIncrease(14)
+      // b.giveGuns("foam")
       // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
-      // b.giveMod("waste energy recovery");
-      // b.giveMod("thermal runaway");
+      // b.giveMod("foam stabilization");
+      // b.giveMod("anthropic principle");
       // b.giveMod("acute stress response");
       // }
 
@@ -143,8 +143,8 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.bomberBoss(800, -450);
-    spawn.cellBoss(400, -750);
+    spawn.bomberBoss(800, -450);
+    // spawn.cellBoss(400, -750);
 
     // spawn.randomLevelBoss(400, -750)
 
@@ -362,7 +362,9 @@ const level = {
     powerUps.spawn(1900, -150, "heal", false); //starting gun
     powerUps.spawn(2050, -150, "heal", false); //starting gun
     // powerUps.spawn(2050, -150, "field", false); //starting gun
-    powerUps.spawn(2300, -150, "gun", false); //starting gun
+    powerUps.spawnStartingPowerUps(2300, -150);
+
+    // powerUps.spawn(2300, -150, "gun", false); //starting gun
     // if (game.isEasyMode) {
     //   // powerUps.spawn(2050, -150, "mod", false); //starting gun
     //   // powerUps.spawn(2050, -150, "mod", false); //starting gun
@@ -785,6 +787,9 @@ const level = {
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+    spawn.mapRect(level.exit.x, level.exit.y + 15, 100, 20);
+    // spawn.mapRect(3950, -3260, 100, 30);
+
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     powerUps.spawnStartingPowerUps(1075, -550);
     spawn.debris(-250, 50, 1650, 2); //16 debris per level
@@ -914,7 +919,6 @@ const level = {
     spawn.mapRect(3700, -3700, 50, 500);
     spawn.mapRect(4250, -3700, 50, 300);
     spawn.mapRect(3700, -3250, 1100, 100);
-    spawn.mapRect(3950, -3260, 100, 30);
 
     spawn.randomSmallMob(-225, 25);
     spawn.randomSmallMob(1000, -1100);
