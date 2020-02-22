@@ -330,15 +330,15 @@ const spawn = {
     };
   },
   springer(x, y, radius = 20 + Math.ceil(Math.random() * 35)) {
-    mobs.spawn(x, y, 8, radius, "#b386e8");
+    mobs.spawn(x, y, 10, radius, "#b386e8");
     let me = mob[mob.length - 1];
     me.friction = 0;
-    me.frictionAir = 0.1;
-    me.lookTorque = 0.000005;
+    me.frictionAir = 0.006;
+    me.lookTorque = 0.0000008; //controls spin while looking for player
     me.g = 0.0002; //required if using 'gravity'
     me.seePlayerFreq = Math.round((40 + 25 * Math.random()) * game.lookFreqScale);
-    const springStiffness = 0.002;
-    const springDampening = 0.1;
+    const springStiffness = 0.00014;
+    const springDampening = 0.0005;
 
     me.springTarget = {
       x: me.position.x,

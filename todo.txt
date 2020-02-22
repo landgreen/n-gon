@@ -1,7 +1,17 @@
 ************** TODO - n-gon **************
 
-mod - Collision avoidance system
-  10% chance to dodge a collision
+level - add wrecking ball boss to other levels
+  it could work on rooftops and satellite
+
+mod - make bodies destroyable
+  they drop ammo and heals
+
+mod - BIOS update
+  lose all mods other than BIOS update
+  deal +100% damage from all sources
+mod - Infrared Sensors
+  You can see invisible enemies
+  this seems weak, maybe add to one of the fields
 
 mod - mines - fire something instead of needles on activation
   foam?, flak?, vacuum bomb, super balls

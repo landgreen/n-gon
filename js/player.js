@@ -331,10 +331,12 @@ const mech = {
           //find what mods I don't have
           let options = [];
           for (let i = 0, len = b.mods.length; i < len; i++) {
-            if (b.mods[i].name !== "quantum immortality" &&
+            if (b.mods[i].count < b.mods[i].maxCount &&
+              b.mods[i].name !== "quantum immortality" &&
               b.mods[i].name !== "Born rule" &&
               b.mods[i].name !== "leveraged investment" &&
-              b.mods[i].count < b.mods[i].maxCount) options.push(i);
+              b.mods[i].allowed()
+            ) options.push(i);
           }
           //add a new mod
           if (options.length > 0) {
@@ -383,16 +385,16 @@ const mech = {
         ctx.fillStyle = "rgba(255,255,255,0)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
-      randomizeMods()
-      randomizeGuns()
-      randomizeField()
       randomizeHealth()
+      randomizeField()
+      randomizeGuns()
+      randomizeMods()
       for (let i = 0, len = 7; i < len; i++) {
         setTimeout(function () {
-          randomizeMods()
-          randomizeGuns()
-          randomizeField()
           randomizeHealth()
+          randomizeField()
+          randomizeGuns()
+          randomizeMods()
           game.replaceTextLog = true;
           game.makeTextLog(`probability amplitude will synchronize in ${len-i-1} seconds`, 1000);
           game.wipe = function () { //set wipe to have trails
@@ -463,7 +465,6 @@ const mech = {
     }
     mech.health -= dmg;
     if (mech.health < 0) {
-      console.log(b.isModDeathAvoid, b.isModDeathAvoidOnCD)
       if (b.isModDeathAvoid && !b.isModDeathAvoidOnCD) { //&& Math.random() < 0.5
         b.isModDeathAvoidOnCD = true;
         mech.health += dmg //undo the damage

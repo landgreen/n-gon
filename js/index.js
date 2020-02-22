@@ -209,7 +209,7 @@ const build = {
     for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
     bullet = [];
 
-    const increase = Number(document.getElementById("starting-level").value) * game.difficultyMode
+    const increase = Math.min(99, Number(document.getElementById("starting-level").value) * game.difficultyMode)
     level.levelsCleared += increase;
     level.difficultyIncrease(increase) //increase difficulty based on modes
 

@@ -13,21 +13,21 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      // level.difficultyIncrease(14)
-      // b.giveGuns("foam")
+      level.difficultyIncrease(5)
+      // b.giveGuns("wave beam")
       // mech.setField("negative mass field")
       // for (let i = 0; i < 9; i++) {
-      // b.giveMod("foam stabilization");
+      // b.giveMod("wave phase velocity");
       // b.giveMod("anthropic principle");
       // b.giveMod("acute stress response");
       // }
 
-      level.intro(); //starting level
+      // level.intro(); //starting level
       // level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
-      // level.aerie();
+      level.aerie();
       // level.rooftops();
       // level.warehouse();
       // level.highrise();
@@ -143,7 +143,7 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.bomberBoss(800, -450);
+    spawn.springer(800, -450);
     // spawn.cellBoss(400, -750);
 
     // spawn.randomLevelBoss(400, -750)
@@ -889,17 +889,6 @@ const level = {
     spawn.mapRect(2000, -75, 450, 275);
     spawn.bodyRect(2450, 150, 150, 150, 0.4);
     spawn.mapRect(1550, 300, 4600, 200); //ground
-    //floor below right tall tower
-    spawn.bodyRect(3000, 50, 150, 250, 0.9);
-    spawn.bodyRect(4500, -500, 300, 250, 0.7);
-    spawn.bodyRect(3500, -100, 100, 150, 0.7);
-    spawn.bodyRect(4200, -500, 110, 30, 0.7);
-    spawn.bodyRect(3800, -500, 150, 130, 0.7);
-    spawn.bodyRect(4000, 50, 200, 150, 0.9);
-    spawn.bodyRect(4500, 50, 300, 200, 0.9);
-    spawn.bodyRect(4200, -350, 200, 50, 0.9);
-    spawn.bodyRect(4700, -350, 50, 200, 0.9);
-    spawn.bodyRect(4900, -100, 300, 300, 0.7);
     spawn.boost(5350, 275, 2850);
     // spawn.mapRect(6050, -700, 450, 1200);
     spawn.mapRect(6050, -1060, 450, 1560);
@@ -941,8 +930,33 @@ const level = {
     spawn.randomBoss(350, -500, 1)
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
-    if (game.difficulty > 2) spawn.suckerBoss(4500, -400);
-
+    if (game.difficulty > 2) {
+      if (Math.random() < 0.3) { // tether ball
+        spawn.tetherBoss(4250, 0)
+        cons[cons.length] = Constraint.create({
+          pointA: {
+            x: 4250,
+            y: -675
+          },
+          bodyB: mob[mob.length - 1],
+          stiffness: 0.00007
+        });
+        if (game.difficulty > 4) spawn.nodeBoss(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
+      } else {
+        //floor below right tall tower
+        spawn.bodyRect(3000, 50, 150, 250, 0.9);
+        spawn.bodyRect(4500, -500, 300, 250, 0.7);
+        spawn.bodyRect(3500, -100, 100, 150, 0.7);
+        spawn.bodyRect(4200, -500, 110, 30, 0.7);
+        spawn.bodyRect(3800, -500, 150, 130, 0.7);
+        spawn.bodyRect(4000, 50, 200, 150, 0.9);
+        spawn.bodyRect(4500, 50, 300, 200, 0.9);
+        spawn.bodyRect(4200, -350, 200, 50, 0.9);
+        spawn.bodyRect(4700, -350, 50, 200, 0.9);
+        spawn.bodyRect(4900, -100, 300, 300, 0.7);
+        spawn.suckerBoss(4500, -400);
+      }
+    }
     //add mini boss, giant hopper?   or a black hole that spawns hoppers?
   },
   skyscrapers() {
@@ -1599,7 +1613,7 @@ const level = {
     spawn.randomBoss(4150, -1000, 0.6);
 
     if (game.difficulty > 2) {
-      if (Math.random() < 0.7) {
+      if (Math.random() < 0.75) {
         // tether ball
         level.fillBG.push({
           x: 2495,
@@ -1621,9 +1635,7 @@ const level = {
         if (game.difficulty > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
       } else if (game.difficulty > 3) {
         spawn.shooterBoss(2200, -650);
-
       }
-
     }
   },
   //*****************************************************************************************************************

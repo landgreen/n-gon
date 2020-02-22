@@ -50,6 +50,8 @@ const b = {
   isModFoamShieldHit: null,
   isModDeathAvoid: null,
   isModDeathAvoidOnCD: null,
+  modWaveSpeedMap: null,
+  modWaveSpeedBody: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -245,9 +247,9 @@ const b = {
       maxCount: 3,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam")
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam")
       },
-      requires: "drones, spores, super balls, or foam",
+      requires: "drones, spores, super balls,<br> foam, or wave beam",
       effect() {
         b.isModBulletsLastLonger += 0.33
       },
@@ -771,6 +773,38 @@ const b = {
       }
     },
     {
+      name: "ice crystal nucleation",
+      description: "fire <strong>ice crystals</strong> formed from water vapour<br>your <strong>minigun</strong> no longer requires <strong>ammo<strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("minigun")
+      },
+      requires: "minigun",
+      effect() {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "minigun") {
+            b.guns[i].ammoPack = Infinity
+            b.guns[i].recordedAmmo = b.guns[i].ammo
+            b.guns[i].ammo = Infinity
+            game.updateGunHUD();
+            break;
+          }
+        }
+      },
+      remove() {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "minigun") {
+            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+            b.guns[i].ammo = b.guns[i].recordedAmmo
+            game.updateGunHUD();
+            break;
+          }
+        }
+
+      }
+    },
+    {
       name: "super duper",
       description: "you fire <strong>+1</strong> additional <strong>super ball</strong>",
       maxCount: 9,
@@ -842,6 +876,25 @@ const b = {
         b.isModFoamShieldHit = false;
       }
     },
+    {
+      name: "wave phase velocity",
+      description: "your <strong>wave beam</strong> propagates faster through solids",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("wave beam")
+      },
+      requires: "wave beam",
+      effect() {
+        b.modWaveSpeedMap = 3
+        b.modWaveSpeedBody = 1.9
+      },
+      remove() {
+        b.modWaveSpeedMap = 0.08
+        b.modWaveSpeedBody = 0.25
+      }
+    },
+
     // {
     //   name: "super mines",
     //   description: "mines fire super balls when triggered",
@@ -1681,6 +1734,8 @@ const b = {
       description: "rapidly fire a stream of small <strong>bullets</strong>",
       ammo: 0,
       ammoPack: 55,
+      defaultAmmoPack: 55,
+      recordedAmmo: 0,
       have: false,
       isStarterGun: true,
       fire() {
@@ -1808,59 +1863,77 @@ const b = {
     },
     {
       name: "wave beam", //4
-      description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles propagate through <strong>walls</strong>",
+      description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles <strong>slowly</strong> propagate through <strong>solids</strong>",
       ammo: 0,
-      ammoPack: 65,
+      ammoPack: 100,
       have: false,
       isStarterGun: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle
+        const SPEED = 10
+        const wiggleMag = mech.crouch ? 4 : 11
         bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, 5 * b.modBulletSize, {
           angle: dir,
-          cycle: -0.43, //adjust this number until the bullets line up with the cross hairs
-          endCycle: game.cycle + Math.floor(100 * b.isModBulletsLastLonger),
+          cycle: 0,
+          endCycle: game.cycle + Math.floor(120 * b.isModBulletsLastLonger),
           inertia: Infinity,
           frictionAir: 0,
+          slow: 0,
           minDmgSpeed: 0,
           dmg: 0,
           classType: "bullet",
           collisionFilter: {
-            category: cat.bullet,
+            category: 0,
             mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
           },
           onDmg() {},
           onEnd() {},
           do() {
             if (!mech.isBodiesAsleep) {
-              this.cycle++
-              this.force = Vector.mult(Vector.normalise(this.direction), wiggleMag * Math.cos(this.cycle * 0.35)) //wiggle
-              //check if inside a mob
-              const q = Matter.Query.point(mob, this.position)
-              for (let i = 0; i < q.length; i++) {
-                let dmg = b.dmgScale * 0.5
-                q[i].foundPlayer();
-                q[i].damage(dmg);
-                game.drawList.push({ //add dmg to draw queue
-                  x: this.position.x,
-                  y: this.position.y,
-                  radius: Math.log(2 * dmg + 1.1) * 40,
-                  color: 'rgba(0,0,0,0.4)',
-                  time: game.drawTime
-                });
+              let slowCheck = 1;
+              if (Matter.Query.point(map, this.position).length) { //check if inside map
+                slowCheck = b.modWaveSpeedMap
+              } else { //check if inside a body
+                let q = Matter.Query.point(body, this.position)
+                if (q.length) {
+                  slowCheck = b.modWaveSpeedBody
+                  Matter.Body.setPosition(this, Vector.add(this.position, q[0].velocity)) //move with the medium
+                } else { // check if inside a mob
+                  q = Matter.Query.point(mob, this.position)
+                  for (let i = 0; i < q.length; i++) {
+                    slowCheck = 0.3;
+                    Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
+                    let dmg = b.dmgScale * 0.1
+                    q[i].foundPlayer();
+                    q[i].damage(dmg);
+                    game.drawList.push({ //add dmg to draw queue
+                      x: this.position.x,
+                      y: this.position.y,
+                      radius: Math.log(2 * dmg + 1.1) * 40,
+                      color: 'rgba(0,0,0,0.4)',
+                      time: game.drawTime
+                    });
+                  }
+                }
               }
+              if (slowCheck !== this.slow) { //toggle velocity based on inside and outside status change
+                this.slow = slowCheck
+                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), SPEED * slowCheck));
+              }
+              this.cycle++
+              const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.35))
+              Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
             }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
-        const wiggleMag = bullet[me].mass * ((mech.crouch) ? 0.01 : 0.02) * ((mech.flipLegs === 1) ? 1 : -1)
-        const SPEED = 8;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
         });
-        bullet[me].direction = Vector.perp(bullet[me].velocity)
+        const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
       }
     },
     {
@@ -1994,7 +2067,7 @@ const b = {
           bullet[me].endCycle = 2 * i + game.cycle + END
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
-          bullet[me].explodeRad = (mech.crouch ? 85 : 60) + (Math.random() - 0.5) * 50;
+          bullet[me].explodeRad = (mech.crouch ? 95 : 70) + (Math.random() - 0.5) * 50;
           bullet[me].onEnd = function () {
             b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
           }
