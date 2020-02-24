@@ -25,12 +25,14 @@ const powerUps = {
     game.isChoosing = false; //stops p from un pausing on key down
     requestAnimationFrame(cycle);
   },
-  cancel() {
+  isCanceledField: false,
+  cancel(what) {
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("choose-background").style.display = "none"
     game.paused = false;
     game.isChoosing = false; //stops p from un pausing on key down
+    if (what === "field") powerUps.isCanceledField = true;
     requestAnimationFrame(cycle);
   },
   showDraft() {
@@ -109,7 +111,7 @@ const powerUps = {
       let choice2 = pick(mech.fieldUpgrades, choice1)
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.cancel()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
+        let text = `<div class='cancel' onclick='powerUps.cancel("field")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
         if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
         if (!b.isModBayesian) {
@@ -153,7 +155,7 @@ const powerUps = {
       let choice2 = pick(choice1)
       let choice3 = -1
       if (choice1 > -1) {
-        let text = "<div class='cancel' onclick='powerUps.cancel()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>"
+        let text = `<div class='cancel' onclick='powerUps.cancel("mod")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
         if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
         if (!b.isModBayesian) {
@@ -190,7 +192,7 @@ const powerUps = {
       let choice2 = pick(b.guns, choice1)
       let choice3 = -1
       if (choice1 > -1) {
-        let text = "<div class='cancel' onclick='powerUps.cancel()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>"
+        let text = `<div class='cancel' onclick='powerUps.cancel("gun")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
         if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
         if (!b.isModBayesian) {
@@ -248,7 +250,7 @@ const powerUps = {
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
-    if (mech.fieldMode === 0) {
+    if (mech.fieldMode === 0 && !powerUps.isCanceledField) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.80) {

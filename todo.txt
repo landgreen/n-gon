@@ -1,7 +1,11 @@
 ************** TODO - n-gon **************
 
-level - add wrecking ball boss to other levels
-  it could work on rooftops and satellite
+mod - ice crystal nucleaution should slow down mobs
+  add an on hit effect to *1.1 air friction?
+
+mod - starter field can block attacks with out draining energy
+
+mod - rail gun burst on impact into nails
 
 mod - make bodies destroyable
   they drop ammo and heals

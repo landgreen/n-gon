@@ -13,21 +13,21 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
-      level.difficultyIncrease(5)
+      // level.difficultyIncrease(9)
       // b.giveGuns("wave beam")
-      // mech.setField("negative mass field")
+      // mech.setField("nano-scale manufacturing")
       // for (let i = 0; i < 9; i++) {
-      // b.giveMod("wave phase velocity");
+      // b.giveMod("mycelium manufacturing");
       // b.giveMod("anthropic principle");
       // b.giveMod("acute stress response");
       // }
 
-      // level.intro(); //starting level
+      level.intro(); //starting level
       // level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
-      level.aerie();
+      // level.aerie();
       // level.rooftops();
       // level.warehouse();
       // level.highrise();
@@ -144,7 +144,7 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
     spawn.springer(800, -450);
-    // spawn.cellBoss(400, -750);
+    spawn.cellBoss(400, -750);
 
     // spawn.randomLevelBoss(400, -750)
 

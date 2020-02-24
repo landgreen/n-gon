@@ -663,6 +663,7 @@ const mech = {
   fieldMode: 0, //basic field mode before upgrades
   fieldEnergyMax: 1, //can be increased by a mod
   holdingTarget: null,
+  fieldShieldingScale: 1,
   // these values are set on reset by setHoldDefaults()
   fieldMeter: 0,
   fieldRegen: 0,
@@ -671,7 +672,6 @@ const mech = {
   holdingMassScale: 0,
   throwChargeRate: 0,
   throwChargeMax: 0,
-  fieldShieldingScale: 0,
   fieldRange: 175,
   fieldArc: 0,
   fieldThreshold: 0,
@@ -685,7 +685,7 @@ const mech = {
     mech.fieldCDcycle = 0;
     mech.isStealth = false;
     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-    mech.fieldShieldingScale = 1; //scale energy loss after collision with mob
+    // mech.fieldShieldingScale = 1; //scale energy loss after collision with mob
     mech.holdingMassScale = 0.5;
     mech.throwChargeRate = 2;
     mech.throwChargeMax = 50;
@@ -932,6 +932,7 @@ const mech = {
     if (mech.fieldMeter > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
       mech.fieldMeter -= fieldBlockCost * mech.fieldShieldingScale;
       if (mech.fieldMeter < 0) mech.fieldMeter = 0;
+      if (mech.fieldMeter > mech.fieldEnergyMax) mech.fieldMeter = mech.fieldEnergyMax;
       mech.drawHold(who);
       mech.fieldCDcycle = mech.cycle + 10;
       mech.holdingTarget = null
@@ -1120,6 +1121,7 @@ const mech = {
       name: "field emitter",
       description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br>lets you <strong>pick up</strong> and <strong>throw</strong> objects",
       effect: () => {
+        mech.fieldShieldingScale = Number(b.modFieldEfficiency);
         game.replaceTextLog = true; //allow text over write
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1510,8 +1512,17 @@ const mech = {
         mech.hold = function () {
           if (mech.fieldMeter > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-            mech.fieldMeter -= 0.35;
-            b.drone(1)
+            if (b.isModSporeField) {
+              const len = Math.floor(6 + 3 * Math.random())
+              mech.fieldMeter -= len * 0.12;
+              for (let i = 0; i < len; i++) {
+                b.spore(player)
+              }
+            } else {
+              mech.fieldMeter -= 0.33;
+              b.drone(1)
+            }
+
           }
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);

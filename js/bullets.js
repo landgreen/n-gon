@@ -13,7 +13,7 @@ const b = {
   modNoAmmo: null,
   isModBulletsLastLonger: null,
   isModImmortal: null,
-  modSpores: null,
+  modSporesOnDeath: null,
   isModImmuneExplosion: null,
   isModExplodeMob: null,
   isModDroneOnDamage: null,
@@ -52,6 +52,8 @@ const b = {
   isModDeathAvoidOnCD: null,
   modWaveSpeedMap: null,
   modWaveSpeedBody: null,
+  modFieldEfficiency: null,
+  isModSporeField: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -268,13 +270,13 @@ const b = {
       },
       requires: "",
       effect() {
-        b.modSpores += 0.11;
+        b.modSporesOnDeath += 0.11;
         for (let i = 0; i < 10; i++) {
           b.spore(player)
         }
       },
       remove() {
-        b.modSpores = 0;
+        b.modSporesOnDeath = 0;
       }
     },
     {
@@ -513,7 +515,7 @@ const b = {
     },
     {
       name: "weak anthropic principle",
-      description: "<strong>avoid harm</strong> that should be <strong>fatal</strong><br>can occur once every <strong>3</strong> seconds",
+      description: "<strong>fatal harm</strong> can't happen<br>saves you up to once every <strong>3</strong> seconds",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -746,7 +748,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("drones") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField)
       },
       requires: "drones",
       effect() {
@@ -762,7 +764,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("spores") || b.modSpores > 0 || b.isModStomp
+        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
       },
       requires: "spores",
       effect() {
@@ -773,8 +775,8 @@ const b = {
       }
     },
     {
-      name: "ice crystal nucleation",
-      description: "fire <strong>ice crystals</strong> formed from water vapour<br>your <strong>minigun</strong> no longer requires <strong>ammo<strong>",
+      name: "crystal nucleation",
+      description: "fire <strong>crystals</strong> formed from the air<br>your <strong>minigun</strong> no longer requires <strong>ammo<strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -892,6 +894,40 @@ const b = {
       remove() {
         b.modWaveSpeedMap = 0.08
         b.modWaveSpeedBody = 0.25
+      }
+    },
+    {
+      name: "perfect diamagnetism",
+      description: "when <strong>blocking</strong> with the basic <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "field emitter"
+      },
+      requires: "basic field emitter",
+      effect() {
+        b.modFieldEfficiency = -1
+        mech.fieldShieldingScale = b.modFieldEfficiency;
+      },
+      remove() {
+        b.modFieldEfficiency = 1;
+        if (mech.fieldUpgrades[mech.fieldMode].name === "field emitter") mech.fieldShieldingScale = b.modFieldEfficiency;
+      }
+    },
+    {
+      name: "mycelium manufacturing",
+      description: "<strong>nano-scale manufacturing</strong> is modified to<br>grow <strong style='letter-spacing: 2px;'>spores</strong> instead of drones",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+      },
+      requires: "nano-scale manufacturing",
+      effect() {
+        b.isModSporeField = true;
+      },
+      remove() {
+        b.isModSporeField = false;
       }
     },
 
