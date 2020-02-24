@@ -466,7 +466,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with enemies for <strong>+2</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `unable to <strong>collide</strong> with enemies for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -474,7 +474,7 @@ const b = {
       },
       requires: "",
       effect() {
-        b.modCollisionImmuneCycles += 120;
+        b.modCollisionImmuneCycles += 60;
         mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
       },
       remove() {
@@ -542,7 +542,7 @@ const b = {
       requires: "",
       effect() {
         b.isModPiezo = true;
-        mech.fieldMeter = mech.fieldEnergyMax;
+        mech.energy = mech.fieldEnergyMax;
       },
       remove() {
         b.isModPiezo = false;
@@ -559,7 +559,7 @@ const b = {
       requires: "",
       effect() {
         b.modEnergySiphon += 0.15;
-        mech.fieldMeter = mech.fieldEnergyMax
+        mech.energy = mech.fieldEnergyMax
       },
       remove() {
         b.modEnergySiphon = 0;
@@ -592,7 +592,7 @@ const b = {
       requires: "",
       effect() {
         mech.fieldEnergyMax += 0.5
-        mech.fieldMeter += 0.5
+        mech.energy += 0.5
       },
       remove() {
         mech.fieldEnergyMax = 1;
@@ -642,7 +642,7 @@ const b = {
       requires: "",
       effect: () => {
         b.isModMassEnergy = true // used in mech.grabPowerUp
-        mech.fieldMeter = mech.fieldEnergyMax * 2
+        mech.energy = mech.fieldEnergyMax * 2
       },
       remove() {
         b.isModMassEnergy = false;
@@ -1176,8 +1176,8 @@ const b = {
     if (dist < radius) {
       if (b.isModImmuneExplosion) {
         const drain = Math.max(radius * 0.0006, 0.2)
-        if (mech.fieldMeter > drain) {
-          mech.fieldMeter -= drain
+        if (mech.energy > drain) {
+          mech.energy -= drain
         } else {
           mech.damage(radius * 0.0001); //do half damage if have the mod, but out of mana
         }
@@ -1685,8 +1685,8 @@ const b = {
         }
 
         //hit target with laser
-        if (this.lockedOn && this.lockedOn.alive && mech.fieldMeter > 0.15) {
-          mech.fieldMeter -= 0.0014
+        if (this.lockedOn && this.lockedOn.alive && mech.energy > 0.15) {
+          mech.energy -= 0.0014
           //make sure you can still see vertex
           const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
           if (DIST - this.lockedOn.radius < this.range + 150 &&
@@ -2518,13 +2518,13 @@ const b = {
                 mob[i].force.y += 1.5 * FORCE.y;
               }
             }
-          } else if (mech.fieldMeter > 0.005) { // charging on mouse down
+          } else if (mech.energy > 0.005) { // charging on mouse down
             mech.fireCDcycle = Infinity //can't fire until mouse is released
             const lastCharge = this.charge
             let chargeRate = (mech.crouch) ? 0.975 : 0.987
             chargeRate *= Math.pow(b.modFireRate, 0.04)
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
-            mech.fieldMeter -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+            mech.energy -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
 
             //draw targeting
             let best;
@@ -2649,10 +2649,10 @@ const b = {
       fire() {
         const reflectivity = 1 - 1 / (b.modLaserReflections * 1.5)
         let damage = b.dmgScale * b.modLaserDamage
-        if (mech.fieldMeter < b.modLaserFieldDrain) {
+        if (mech.energy < b.modLaserFieldDrain) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
-          mech.fieldMeter -= mech.fieldRegen + b.modLaserFieldDrain
+          mech.energy -= mech.fieldRegen + b.modLaserFieldDrain
           let best = {
             x: null,
             y: null,
@@ -2878,8 +2878,8 @@ const b = {
         }
 
         //use energy to explode
-        const energy = 0.3 * Math.min(mech.fieldMeter, 1.75)
-        mech.fieldMeter -= energy
+        const energy = 0.3 * Math.min(mech.energy, 1.75)
+        mech.energy -= energy
         if (best.who) b.explosion(path[1], 1000 * energy)
         mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
 

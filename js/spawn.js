@@ -504,8 +504,8 @@ const spawn = {
 
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (mech.fieldMeter > 0.1) {
-            mech.fieldMeter -= 0.005
+          if (mech.energy > 0.1) {
+            mech.energy -= 0.005
           } else {
             mech.damage(0.0002 * game.dmgScale);
           }
@@ -602,8 +602,8 @@ const spawn = {
         ctx.fill();
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (mech.fieldMeter > 0.1) {
-            mech.fieldMeter -= 0.0075
+          if (mech.energy > 0.1) {
+            mech.energy -= 0.0075
           } else {
             mech.damage(0.0003 * game.dmgScale);
           }

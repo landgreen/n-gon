@@ -597,9 +597,16 @@ const level = {
       level.fill.push({
         x: -650,
         y: -2300,
-        width: 450,
+        width: 440,
         height: 300,
         color: "rgba(0,0,0,0.15)"
+      });
+      level.fillBG.push({
+        x: 3460,
+        y: -700,
+        width: 1090,
+        height: 800,
+        color: "#d4f4f4"
       });
     } else {
       //reverse direction, start in bottom right
@@ -611,9 +618,16 @@ const level = {
       level.fillBG.push({
         x: -650,
         y: -2300,
-        width: 450,
+        width: 440,
         height: 300,
         color: "#d4f4f4"
+      });
+      level.fill.push({
+        x: 3460,
+        y: -700,
+        width: 1090,
+        height: 800,
+        color: "rgba(0,0,0,0.1)"
       });
     }
     level.enter.x = mech.spawnPos.x - 50;
@@ -627,10 +641,10 @@ const level = {
     //foreground
 
     level.fill.push({
-      x: 3450,
+      x: 3460,
       y: -1250,
-      width: 1100,
-      height: 1250,
+      width: 1080,
+      height: 550,
       color: "rgba(0,0,0,0.1)"
     });
     level.fill.push({
@@ -656,17 +670,17 @@ const level = {
     });
 
     level.fill.push({
-      x: 1950,
+      x: 1860,
       y: -1950,
-      width: 600,
+      width: 630,
       height: 350,
       color: "rgba(0,0,0,0.1)"
     });
 
     level.fill.push({
-      x: 1950,
+      x: 1760,
       y: -1550,
-      width: 1025,
+      width: 1290,
       height: 550,
       color: "rgba(0,0,0,0.1)"
     });
@@ -678,16 +692,16 @@ const level = {
       color: "rgba(0,0,0,0.1)"
     });
     level.fill.push({
-      x: 3450,
+      x: 3510,
       y: -1550,
-      width: 350,
+      width: 330,
       height: 300,
       color: "rgba(0,0,0,0.1)"
     });
     level.fill.push({
-      x: 700,
+      x: 710,
       y: -2225,
-      width: 700,
+      width: 580,
       height: 225,
       color: "rgba(0,0,0,0.1)"
     });
@@ -705,11 +719,11 @@ const level = {
     spawn.bodyRect(-240, -2115, 30, 36); //door to starting room
     spawn.bodyRect(-240, -2080, 30, 35); //door to starting room
     spawn.bodyRect(-240, -2045, 30, 35); //door to starting room
-    spawn.mapRect(1950, -2000, 600, 50);
+    spawn.mapRect(1850, -2000, 650, 50);
     spawn.bodyRect(200, -2150, 200, 220, 0.8);
-    spawn.mapRect(700, -2275, 700, 50);
+    spawn.mapRect(700, -2275, 600, 50);
     spawn.bodyRect(1050, -2350, 30, 30, 0.8);
-    spawn.boost(1800, -1000, 1200);
+    // spawn.boost(1800, -1000, 1200);
     spawn.bodyRect(1625, -1100, 100, 75);
     spawn.bodyRect(1350, -1025, 400, 25); // ground plank
     spawn.mapRect(-725, -1000, 2150, 100); //lower left ledge
@@ -724,8 +738,8 @@ const level = {
     spawn.bodyRect(2700, -1125, 125, 125, 0.8);
     spawn.bodyRect(2710, -1250, 125, 125, 0.8);
     spawn.bodyRect(2705, -1350, 75, 100, 0.8);
-    spawn.mapRect(3450, -1600, 350, 50);
-    spawn.mapRect(1950, -1600, 1025, 50);
+    spawn.mapRect(3500, -1600, 350, 50);
+    spawn.mapRect(1750, -1600, 1310, 50);
     spawn.bodyRect(3100, -1015, 375, 15);
     spawn.bodyRect(3500, -850, 75, 125, 0.8);
     spawn.mapRect(3450, -1000, 50, 580); //left building wall
@@ -734,7 +748,7 @@ const level = {
     spawn.bodyRect(4850, -750, 300, 25, 0.8);
     spawn.bodyRect(3925, -1400, 100, 150, 0.8);
     spawn.mapRect(3450, -1250, 1100, 50);
-    spawn.mapRect(3450, -1225, 50, 75);
+    // spawn.mapRect(3450, -1225, 50, 75);
     spawn.mapRect(4500, -1225, 50, 390);
     spawn.mapRect(3450, -725, 1500, 50);
     spawn.mapRect(5100, -725, 400, 50);
@@ -909,6 +923,7 @@ const level = {
     spawn.mapRect(4250, -3700, 50, 300);
     spawn.mapRect(3700, -3250, 1100, 100);
 
+    spawn.randomBoss(350, -500, 1)
     spawn.randomSmallMob(-225, 25);
     spawn.randomSmallMob(1000, -1100);
     spawn.randomSmallMob(4000, -250);
@@ -927,7 +942,6 @@ const level = {
     spawn.randomMob(1700, -50, 0.3)
     spawn.randomMob(2350, -900, 0.3)
     spawn.randomMob(4700, -150, 0.2);
-    spawn.randomBoss(350, -500, 1)
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
     if (game.difficulty > 2) {
@@ -1481,12 +1495,26 @@ const level = {
       level.exit.x = 3250;
       level.exit.y = -530;
       // spawn.randomSmallMob(3550, -550);
+      level.fillBG.push({
+        x: 3050,
+        y: -950,
+        width: 625,
+        height: 500,
+        color: "#dff"
+      });
     } else {
       //reverse direction, start in bottom right
       mech.setPosToSpawn(3250, -550); //normal spawn
       level.exit.x = 1375;
       level.exit.y = -1530;
-      spawn.bodyRect(3655, -650, 40, 150); //door
+      // spawn.bodyRect(3655, -650, 40, 150); //door
+      level.fillBG.push({
+        x: 725,
+        y: -1950,
+        width: 825,
+        height: 450,
+        color: "#dff"
+      });
     }
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
     level.enter.x = mech.spawnPos.x - 50;
@@ -1554,8 +1582,9 @@ const level = {
     spawn.mapRect(-600, -2000 + 250, 2000 - 700, 50); //roof left
     spawn.mapRect(-600 + 1300, -2000, 50, 300); //right roof wall
     spawn.mapRect(-600 + 1300, -2000, 900, 50); //center wall
-    map[map.length] = Bodies.polygon(425, -1700, 0, 15); //circle above door
-    spawn.bodyRect(420, -1675, 15, 170, 1, spawn.propsDoor); // door
+
+    map[map.length] = Bodies.polygon(725, -1700, 0, 15); //circle above door
+    spawn.bodyRect(720, -1675, 15, 170, 1, spawn.propsDoor); // door
     body[body.length - 1].isNotHoldable = true;
     //makes door swing
     consBB[consBB.length] = Constraint.create({
@@ -1590,6 +1619,8 @@ const level = {
     spawn.mapRect(4150, -600, 350, 150); //table
     spawn.mapRect(3650, -1300, 50, 650); //exit wall
     spawn.mapRect(3650, -1300, 1350, 50); //exit wall
+    spawn.bodyRect(3665, -650, 20, 150); //door
+
 
     spawn.mapRect(3000, -2000 * 0.5, 700, 50); //exit roof
     spawn.mapRect(3000, -2000 * 0.25, 2000 - 300, 50); //1st floor

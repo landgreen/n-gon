@@ -330,7 +330,7 @@ const game = {
         b.giveGuns("all", 1000)
       } else if (keys[72]) { // heal with H
         mech.addHealth(Infinity)
-        mech.fieldMeter = mech.fieldEnergyMax;
+        mech.energy = mech.fieldEnergyMax;
       } else if (keys[89]) { //add mods with y
         b.giveMod()
       } else if (keys[82]) { // teleport to mouse with R
@@ -644,14 +644,14 @@ const game = {
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
         if (b.isModEnergyRecovery) {
-          mech.fieldMeter += mech.fieldEnergyMax * 0.07
-          if (mech.fieldMeter > mech.fieldEnergyMax) mech.fieldMeter = mech.fieldEnergyMax;
+          mech.energy += mech.fieldEnergyMax * 0.07
+          if (mech.energy > mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
         }
         if (b.isModHealthRecovery) {
           mech.addHealth(0.01)
         }
         if (b.isModEnergyLoss) {
-          mech.fieldMeter = 0.05;
+          mech.energy = 0.05;
         }
 
       } else { //haven't killed a mob in the last 5 seconds

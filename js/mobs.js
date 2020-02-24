@@ -270,7 +270,7 @@ const mobs = {
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange && !mech.isStealth) {
             mech.damage(0.0003 * game.dmgScale);
-            if (mech.fieldMeter > 0.1) mech.fieldMeter -= 0.003
+            if (mech.energy > 0.1) mech.energy -= 0.003
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
             ctx.lineTo(mech.pos.x, mech.pos.y);
@@ -933,8 +933,8 @@ const mobs = {
           ctx.fillRect(x, y, w * this.health, h);
         }
       },
-      damage(dmg) {
-        if (!this.isShielded) {
+      damage(dmg, isBypassShield = false) {
+        if (!this.isShielded || isBypassShield) {
           dmg /= Math.sqrt(this.mass)
           if (this.shield) dmg *= 0.04
           if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
@@ -942,7 +942,7 @@ const mobs = {
           // if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
           if (b.isModEnergyLoss) dmg *= 1.5;
           if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
-          if (b.modEnergySiphon && dmg !== Infinity) mech.fieldMeter += Math.min(this.health, dmg) * b.modEnergySiphon
+          if (b.modEnergySiphon && dmg !== Infinity) mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
           if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
           this.health -= dmg
           //this.fill = this.color + this.health + ')';

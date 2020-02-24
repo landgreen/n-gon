@@ -76,7 +76,7 @@ const powerUps = {
           }
         }
         if (target.ammo === Infinity) {
-          mech.fieldMeter = mech.fieldEnergyMax;
+          mech.energy = mech.fieldEnergyMax;
           if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
         } else {
           let ammo = Math.ceil((target.ammoPack * (1 + 0.1 * Math.random())));
@@ -87,7 +87,7 @@ const powerUps = {
         }
       } else {
         // target = b.guns[Math.floor(Math.random() * b.guns.length)];         //if you don't have any guns just add ammo to a random gun you don't have yet
-        mech.fieldMeter = mech.fieldEnergyMax;
+        mech.energy = mech.fieldEnergyMax;
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       }
     }

@@ -140,7 +140,7 @@ function collisionChecks(event) {
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
             mech.damage(dmg);
             if (mob[k].onHit) mob[k].onHit(k);
-            if (b.isModPiezo) mech.fieldMeter = mech.fieldEnergyMax;
+            if (b.isModPiezo) mech.energy = mech.fieldEnergyMax;
             if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
               mob[k].death();
               game.drawList.push({
@@ -196,7 +196,7 @@ function collisionChecks(event) {
             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 8) {
               let dmg = b.dmgScale * (b.modAcidDmg + v * Math.sqrt(obj.mass) * 0.07);
-              mob[k].damage(dmg);
+              mob[k].damage(dmg, true);
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
               game.drawList.push({
                 //add dmg to draw queue
