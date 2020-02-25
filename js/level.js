@@ -14,11 +14,11 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("wave beam")
+      b.giveGuns("shotgun")
       // mech.setField("nano-scale manufacturing")
       // for (let i = 0; i < 9; i++) {
       // b.giveMod("mycelium manufacturing");
-      // b.giveMod("anthropic principle");
+      b.giveMod("shotgun spin-statistics");
       // b.giveMod("acute stress response");
       // }
 
@@ -753,7 +753,7 @@ const level = {
     spawn.mapRect(3450, -725, 1500, 50);
     spawn.mapRect(5100, -725, 400, 50);
     spawn.mapRect(4500, -735, 50, 635);
-    spawn.bodyRect(4510, -100, 30, 100, 0.8);
+    spawn.bodyRect(4500, -100, 50, 100);
     spawn.mapRect(4500, -885, 100, 50);
     spawn.spawnStairs(3800, 0, 3, 150, 206); //stairs top exit
     spawn.mapRect(3400, -275, 450, 275); //exit platform

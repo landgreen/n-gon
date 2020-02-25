@@ -19,11 +19,7 @@ engine.world.gravity.scale = 0; //turn off gravity (it's added back in later)
 // engine.positionIterations = 100
 // engine.enableSleeping = true
 
-// matter events *********************************************************
-//************************************************************************
-//************************************************************************
-//************************************************************************
-
+// matter events
 function playerOnGroundCheck(event) {
   //runs on collisions events
   function enter() {
@@ -104,8 +100,8 @@ function collisionChecks(event) {
       if (obj.classType === "body" && obj.speed > speedThreshold && obj.mass > massThreshold &&
         (obj.velocity.y > 0 || player.velocity.y > 0)) {
         const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
-        if (v > speedThreshold && mech.collisionImmune < mech.cycle) {
-          mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        if (v > speedThreshold && mech.collisionImmuneCycle < mech.cycle) {
+          mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
           let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
           dmg = Math.min(Math.max(dmg, 0.02), 0.15);
           mech.damage(dmg);
@@ -134,8 +130,8 @@ function collisionChecks(event) {
 
         function collideMob(obj) {
           //player + mob collision
-          if (mech.collisionImmune < mech.cycle && (obj === playerBody || obj === playerHead)) {
-            mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+          if (mech.collisionImmuneCycle < mech.cycle && (obj === playerBody || obj === playerHead)) {
+            mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
             mob[k].foundPlayer();
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
             mech.damage(dmg);

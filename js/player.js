@@ -208,7 +208,7 @@ const mech = {
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
 
         // if (b.isModStompPauli) {
-        //   mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        //   mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
         // }
         if (b.isModStomp) {
           const len = Math.min(25, (momentum - 120) * 0.1)
@@ -456,7 +456,7 @@ const mech = {
     mech.displayHealth();
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
-  collisionImmune: 0, //used in engine
+  collisionImmuneCycle: 0, //used in engine
   damage(dmg) {
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -468,7 +468,7 @@ const mech = {
       if (b.isModDeathAvoid && !b.isModDeathAvoidOnCD) { //&& Math.random() < 0.5
         b.isModDeathAvoidOnCD = true;
         mech.health += dmg //undo the damage
-        mech.collisionImmune = mech.cycle + 30 //disable this.collisionImmune bonus seconds
+        mech.collisionImmuneCycle = mech.cycle + 30 //disable this.collisionImmuneCycle bonus seconds
 
         game.wipe = function () { //set wipe to have trails
           ctx.fillStyle = "rgba(255,255,255,0.02)";
@@ -617,13 +617,13 @@ const mech = {
     mech.knee.y = (l / d) * (mech.foot.y - mech.hip.y) + (h / d) * (mech.foot.x - mech.hip.x) + mech.hip.y;
   },
   draw() {
-    // mech.fillColor = (mech.collisionImmune < mech.cycle) ? "#fff" : "rgba(255,255,255,0.1)" //"#cff"
+    // mech.fillColor = (mech.collisionImmuneCycle < mech.cycle) ? "#fff" : "rgba(255,255,255,0.1)" //"#cff"
     ctx.fillStyle = mech.fillColor;
     mech.walk_cycle += mech.flipLegs * mech.Vx;
 
     //draw body
     ctx.save();
-    ctx.globalAlpha = (mech.collisionImmune < mech.cycle) ? 1 : 0.7
+    ctx.globalAlpha = (mech.collisionImmuneCycle < mech.cycle) ? 1 : 0.7
     ctx.translate(mech.pos.x, mech.pos.y);
     mech.calcLeg(Math.PI, -3);
     mech.drawLeg("#4a4a4a");

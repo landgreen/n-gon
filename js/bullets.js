@@ -475,7 +475,7 @@ const b = {
       requires: "",
       effect() {
         b.modCollisionImmuneCycles += 60;
-        mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
       },
       remove() {
         b.modCollisionImmuneCycles = 30;
@@ -896,6 +896,23 @@ const b = {
         b.modWaveSpeedBody = 0.25
       }
     },
+    {
+      name: "shotgun spin-statistics",
+      description: "firing your <strong>shotgun</strong> makes you <br><strong>immune</strong> to collisions for <strong>1/2</strong> a second",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("shotgun")
+      },
+      requires: "shotgun",
+      effect() {
+        b.isModShotgunImmune = true;
+      },
+      remove() {
+        b.isModShotgunImmune = false;
+      }
+    },
+
     {
       name: "perfect diamagnetism",
       description: "when <strong>blocking</strong> with the basic <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
@@ -1798,6 +1815,7 @@ const b = {
       isStarterGun: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 55 : 30) * b.modFireRate); // cool down
+        if (b.isModShotgunImmune) mech.collisionImmuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
         b.muzzleFlash(35);
         // mobs.alert(650);
         const side = 13 * b.modBulletSize

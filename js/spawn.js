@@ -831,8 +831,8 @@ const spawn = {
         //   });
         // }
         // hitting player
-        if (best.who === player && mech.collisionImmune < mech.cycle) {
-          mech.collisionImmune = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        if (best.who === player && mech.collisionImmuneCycle < mech.cycle) {
+          mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
           mech.damage(this.dmg);
           //draw damage
           game.drawList.push({ //add dmg to draw queue

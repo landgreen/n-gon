@@ -1,9 +1,20 @@
 ************** TODO - n-gon **************
 
-mod - ice crystal nucleaution should slow down mobs
-  add an on hit effect to *1.1 air friction?
+mod - mines return ammo if they don't fire
 
-mod - starter field can block attacks with out draining energy
+mod - firing shotgun makes player collision immune for one second.
+
+gun - buff vacuum bomb
+  its weak late game
+    can't spam it faster
+    bad vs. shields
+    doesn't scale up to huge groups
+  buff collision damage?
+  mod - double explosions?
+  mod - doesn't suck player in?
+  
+
+mod - negative mass field does damage to mobs in zone
 
 mod - rail gun burst on impact into nails
 
