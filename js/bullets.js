@@ -666,7 +666,7 @@ const b = {
     },
     {
       name: "catabolism",
-      description: "convert <strong>3%</strong> of current health into <strong>ammo</strong><br>when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong>",
+      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>3%</strong> of current health into <strong>ammo</strong>",
       maxCount: 1,
       count: 0,
       allowed() {

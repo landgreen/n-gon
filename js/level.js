@@ -14,11 +14,11 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      b.giveGuns("shotgun")
+      // b.giveGuns("shotgun")
       // mech.setField("nano-scale manufacturing")
       // for (let i = 0; i < 9; i++) {
       // b.giveMod("mycelium manufacturing");
-      b.giveMod("shotgun spin-statistics");
+      // b.giveMod("basidio-stomp");
       // b.giveMod("acute stress response");
       // }
 

@@ -1,8 +1,8 @@
 ************** TODO - n-gon **************
 
-mod - mines return ammo if they don't fire
+disable automatic zoom if you have pressed + or -
 
-mod - firing shotgun makes player collision immune for one second.
+mod - mines return ammo if they don't fire
 
 gun - buff vacuum bomb
   its weak late game
@@ -13,7 +13,6 @@ gun - buff vacuum bomb
   mod - double explosions?
   mod - doesn't suck player in?
   
-
 mod - negative mass field does damage to mobs in zone
 
 mod - rail gun burst on impact into nails
