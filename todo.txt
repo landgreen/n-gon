@@ -1,8 +1,9 @@
 ************** TODO - n-gon **************
 
-disable automatic zoom if you have pressed + or -
+mod - flechettes mod for poison damage
+  other flechettes multi-shot is disabled
+mod - flechettes are guided towards targets
 
-mod - mines return ammo if they don't fire
 
 gun - buff vacuum bomb
   its weak late game

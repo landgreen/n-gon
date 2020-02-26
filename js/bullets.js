@@ -54,6 +54,8 @@ const b = {
   modWaveSpeedBody: null,
   modFieldEfficiency: null,
   isModSporeField: null,
+  isModFlechetteMultiShot: null,
+  isModMineAmmoBack: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -912,7 +914,54 @@ const b = {
         b.isModShotgunImmune = false;
       }
     },
-
+    {
+      name: "fléchettes cartridges",
+      description: "<strong>fléchettes</strong> release <strong>three</strong> needles in each shot<br><strong>ammo</strong> cost are increases by <strong>3x</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("fléchettes")
+      },
+      requires: "fléchettes",
+      effect() {
+        b.isModFlechetteMultiShot = true;
+        //cut current ammo by 1/3
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+        }
+        //cut ammo packs by 1/3
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+        }
+        game.updateGunHUD();
+      },
+      remove() {
+        b.isModFlechetteMultiShot = false;
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
+        }
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+        }
+        game.updateGunHUD();
+      }
+    },
+    {
+      name: "mine reclamation",
+      description: "<strong>ammo</strong> from undetonated <strong>mines</strong> is returned<br><em>at the end of a level or after 2000 second</em>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("mine")
+      },
+      requires: "mine",
+      effect() {
+        b.isModMineAmmoBack = true;
+      },
+      remove() {
+        b.isModMineAmmoBack = false;
+      }
+    },
     {
       name: "perfect diamagnetism",
       description: "when <strong>blocking</strong> with the basic <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
@@ -947,20 +996,6 @@ const b = {
         b.isModSporeField = false;
       }
     },
-
-    // {
-    //   name: "super mines",
-    //   description: "mines fire super balls when triggered",
-    //   maxCount: 1,
-    //   count: 0,
-    //   allowed() {
-    //     return b.haveGunCheck("mines")
-    //   },
-    // requires: "",
-    //   effect() {
-
-    //   }
-    // },
   ],
   removeMod(index) {
     b.mods[index].remove();
@@ -1267,7 +1302,7 @@ const b = {
       }
     }
   },
-  mine(where, velocity, angle = 0) {
+  mine(where, velocity, angle = 0, isAmmoBack = false) {
     const bIndex = bullet.length;
     bullet[bIndex] = Bodies.rectangle(where.x, where.y, 45 * b.modBulletSize, 16 * b.modBulletSize, {
       angle: angle,
@@ -1277,6 +1312,7 @@ const b = {
       restitution: 0,
       dmg: 0, //damage done in addition to the damage from momentum
       classType: "bullet",
+      bulletType: "mine",
       collisionFilter: {
         category: cat.bullet,
         mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
@@ -1357,12 +1393,23 @@ const b = {
                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                 this.endCycle = 0 //end life if mob is near and visible
+                isAmmoBack = false;
               }
             }
           }
         }
       },
       onEnd() {
+        if (isAmmoBack) {
+          for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+            if (b.guns[i].name === "mine") {
+              b.guns[i].ammo++
+              game.updateGunHUD();
+              break;
+            }
+          }
+          return
+        }
         if (this.isArmed) {
           const targets = [] //target nearby mobs
           for (let i = 0, len = mob.length; i < len; i++) {
@@ -1882,7 +1929,8 @@ const b = {
       name: "fléchettes", //3
       description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 22,
+      ammoPack: 24,
+      defaultAmmoPack: 24,
       have: false,
       isStarterGun: true,
       count: 0, //used to track how many shots are in a volley before a big CD
@@ -1900,19 +1948,26 @@ const b = {
           mech.fireCDcycle = mech.cycle + Math.floor(2 * b.modFireRate); // cool down
         }
 
-        const me = bullet.length;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(mech.angle));
-        bullet[me].endCycle = game.cycle + 180;
-        bullet[me].dmg = 1.15;
-        bullet[me].do = function () {
-          if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
-        };
-        const SPEED = 50
-        Matter.Body.setVelocity(bullet[me], {
-          x: mech.Vx / 2 + SPEED * Math.cos(mech.angle),
-          y: mech.Vy / 2 + SPEED * Math.sin(mech.angle)
-        });
-        World.add(engine.world, bullet[me]); //add bullet to world
+        function makeFlechette(angle = mech.angle) {
+          const me = bullet.length;
+          bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(angle));
+          bullet[me].endCycle = game.cycle + 180;
+          bullet[me].dmg = 1.15;
+          bullet[me].do = function () {
+            if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
+          };
+          const SPEED = 50
+          Matter.Body.setVelocity(bullet[me], {
+            x: mech.Vx / 2 + SPEED * Math.cos(angle),
+            y: mech.Vy / 2 + SPEED * Math.sin(angle)
+          });
+          World.add(engine.world, bullet[me]); //add bullet to world
+        }
+        makeFlechette()
+        if (b.isModFlechetteMultiShot) {
+          makeFlechette(mech.angle + 0.01 + 0.01 * Math.random())
+          makeFlechette(mech.angle - 0.01 - 0.01 * Math.random())
+        }
       }
     },
     {
@@ -2286,7 +2341,7 @@ const b = {
         }, {
           x: speed * Math.cos(mech.angle),
           y: speed * Math.sin(mech.angle)
-        })
+        }, 0, b.isModMineAmmoBack)
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 70 : 45) * b.modFireRate); // cool down
       }
     },

@@ -236,10 +236,12 @@ const game = {
   keyPress() { //runs on key down event
     if (keys[189]) {
       // - key
+      game.isAutoZoom = false;
       game.zoomScale /= 0.9;
       game.setZoom();
     } else if (keys[187]) {
       // = key
+      game.isAutoZoom = false;
       game.zoomScale *= 0.9;
       game.setZoom();
     }
@@ -347,6 +349,7 @@ const game = {
   },
   zoom: null,
   zoomScale: 1000,
+  isAutoZoom: true,
   setZoom(zoomScale = game.zoomScale) { //use in window resize in index.js
     game.zoomScale = zoomScale
     game.zoom = canvas.height / zoomScale; //sets starting zoom scale
@@ -362,29 +365,31 @@ const game = {
     mech.transY += (mech.transSmoothY - mech.transY) * 1;
   },
   zoomTransition(newZoomScale, step = 2) {
-    const isBigger = (newZoomScale - game.zoomScale > 0) ? true : false;
-    requestAnimationFrame(zLoop);
-    const currentLevel = level.onLevel
-
-    function zLoop() {
-      if (currentLevel != level.onLevel) return //stop the zoom if player goes to a new level
-
-      if (isBigger) {
-        game.zoomScale += step
-        if (game.zoomScale >= newZoomScale) {
-          game.setZoom(newZoomScale);
-          return
-        }
-      } else {
-        game.zoomScale -= step
-        if (game.zoomScale <= newZoomScale) {
-          game.setZoom(newZoomScale);
-          return
-        }
-      }
-
-      game.setZoom();
+    if (game.isAutoZoom) {
+      const isBigger = (newZoomScale - game.zoomScale > 0) ? true : false;
       requestAnimationFrame(zLoop);
+      const currentLevel = level.onLevel
+
+      function zLoop() {
+        if (currentLevel !== level.onLevel || game.isAutoZoom === false) return //stop the zoom if player goes to a new level
+
+        if (isBigger) {
+          game.zoomScale += step
+          if (game.zoomScale >= newZoomScale) {
+            game.setZoom(newZoomScale);
+            return
+          }
+        } else {
+          game.zoomScale -= step
+          if (game.zoomScale <= newZoomScale) {
+            game.setZoom(newZoomScale);
+            return
+          }
+        }
+
+        game.setZoom();
+        requestAnimationFrame(zLoop);
+      }
     }
   },
   camera() {
@@ -444,6 +449,7 @@ const game = {
     game.paused = false;
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
+    game.isAutoZoom = true;
     game.makeGunHUD();
     mech.drop();
     mech.holdingTarget = null
@@ -565,6 +571,21 @@ const game = {
   },
   clearNow: false,
   clearMap() {
+
+    if (b.isModMineAmmoBack) {
+      let count = 0;
+      for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
+        if (bullet[i].bulletType === "mine") count++
+      }
+      for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
+        if (b.guns[i].name === "mine") {
+          b.guns[i].ammo += count
+          game.updateGunHUD();
+          break;
+        }
+      }
+    }
+
     //if player is holding something this remembers it before it gets deleted
     let holdTarget;
     if (mech.holdingTarget) {
