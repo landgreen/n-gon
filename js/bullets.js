@@ -75,7 +75,7 @@ const b = {
       },
       requires: "minigun, shotgun, super balls, foam",
       effect() {
-        b.modBulletSize += 1.00
+        b.modBulletSize += 0.50
       },
       remove() {
         b.modBulletSize = 1;
