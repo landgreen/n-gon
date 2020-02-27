@@ -56,6 +56,7 @@ const b = {
   isModSporeField: null,
   isModFlechetteMultiShot: null,
   isModMineAmmoBack: null,
+  isModRailNails: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -149,38 +150,6 @@ const b = {
       }
     },
     {
-      name: "reaction inhibitor",
-      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect: () => {
-        b.modMobDieAtHealth = 0.15
-      },
-      remove() {
-        b.modMobDieAtHealth = 0.05;
-      }
-    },
-    {
-      name: "thermal runaway",
-      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.modMobDieAtHealth > 0.05
-      },
-      requires: "reaction inhibitor",
-      effect: () => {
-        b.isModExplodeMob = true;
-      },
-      remove() {
-        b.isModExplodeMob = false;
-      }
-    },
-    {
       name: "high explosives",
       description: "<strong class='color-e'>explosions</strong> do <strong>+20%</strong> more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is +44% <strong>larger</strong>",
       maxCount: 3,
@@ -246,42 +215,6 @@ const b = {
       }
     },
     {
-      name: "Lorentzian topology",
-      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
-      maxCount: 3,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam")
-      },
-      requires: "drones, spores, super balls,<br> foam, or wave beam",
-      effect() {
-        b.isModBulletsLastLonger += 0.33
-      },
-      remove() {
-        b.isModBulletsLastLonger = 1;
-      }
-    },
-
-    {
-      name: "zoospore vector",
-      description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.modSporesOnDeath += 0.11;
-        for (let i = 0; i < 10; i++) {
-          b.spore(player)
-        }
-      },
-      remove() {
-        b.modSporesOnDeath = 0;
-      }
-    },
-    {
       name: "laser-bot",
       description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
       maxCount: 9,
@@ -335,35 +268,71 @@ const b = {
       }
     },
     {
-      name: "bremsstrahlung radiation",
-      description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
+      name: "Lorentzian topology",
+      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam")
+      },
+      requires: "drones, spores, super balls,<br> foam, or wave beam",
+      effect() {
+        b.isModBulletsLastLonger += 0.33
+      },
+      remove() {
+        b.isModBulletsLastLonger = 1;
+      }
+    },
+
+    {
+      name: "zoospore vector",
+      description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+        return true
       },
-      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
+      requires: "",
       effect() {
-        b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+        b.modSporesOnDeath += 0.11;
+        for (let i = 0; i < 10; i++) {
+          b.spore(player)
+        }
       },
       remove() {
-        b.modBlockDmg = 0;
+        b.modSporesOnDeath = 0;
       }
     },
     {
-      name: "field superposition",
-      description: "increase your <strong>field radius</strong> by <strong>40%</strong>",
+      name: "reaction inhibitor",
+      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+        return true
       },
-      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
-      effect() {
-        mech.fieldRange = 175 * 1.4
+      requires: "",
+      effect: () => {
+        b.modMobDieAtHealth = 0.15
       },
       remove() {
-        mech.fieldRange = 175;
+        b.modMobDieAtHealth = 0.05;
+      }
+    },
+    {
+      name: "thermal runaway",
+      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.modMobDieAtHealth > 0.05
+      },
+      requires: "reaction inhibitor",
+      effect: () => {
+        b.isModExplodeMob = true;
+      },
+      remove() {
+        b.isModExplodeMob = false;
       }
     },
     {
@@ -548,6 +517,38 @@ const b = {
       },
       remove() {
         b.isModPiezo = false;
+      }
+    },
+    {
+      name: "bremsstrahlung radiation",
+      description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+      },
+      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
+      effect() {
+        b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+      },
+      remove() {
+        b.modBlockDmg = 0;
+      }
+    },
+    {
+      name: "field superposition",
+      description: "increase your <strong>field radius</strong> by <strong>40%</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+      },
+      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
+      effect() {
+        mech.fieldRange = 175 * 1.4
+      },
+      remove() {
+        mech.fieldRange = 175;
       }
     },
     {
@@ -744,38 +745,8 @@ const b = {
         //nothing to undo
       }
     },
-    {
-      name: "redundant systems",
-      description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField)
-      },
-      requires: "drones",
-      effect() {
-        b.isModDroneCollide = true
-      },
-      remove() {
-        b.isModDroneCollide = true;
-      }
-    },
-    {
-      name: "tinsellated flagella",
-      description: "your <strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
-      },
-      requires: "spores",
-      effect() {
-        b.isModFastSpores = true
-      },
-      remove() {
-        b.isModFastSpores = false
-      }
-    },
+
+
     {
       name: "crystal nucleation",
       description: "fire <strong>crystals</strong> formed from the air<br>your <strong>minigun</strong> no longer requires <strong>ammo<strong>",
@@ -805,97 +776,6 @@ const b = {
             break;
           }
         }
-
-      }
-    },
-    {
-      name: "super duper",
-      description: "you fire <strong>+1</strong> additional <strong>super ball</strong>",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("super balls")
-      },
-      requires: "super balls",
-      effect() {
-        b.modSuperBallNumber++
-      },
-      remove() {
-        b.modSuperBallNumber = 4;
-      }
-    },
-    {
-      name: "specular reflection",
-      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+30%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("laser")
-      },
-      requires: "laser",
-      effect() {
-        b.modLaserReflections++;
-        b.modLaserDamage += 0.015; //base is 0.05
-        b.modLaserFieldDrain += 0.0006 //base is 0.002
-      },
-      remove() {
-        b.modLaserReflections = 2;
-        b.modLaserDamage = 0.05;
-        b.modLaserFieldDrain = 0.002;
-      }
-    },
-    {
-      name: "optimized shell packing",
-      description: "<strong>flak</strong> ammo drops contain <strong>2x</strong> more shells",
-      maxCount: 3,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("flak")
-      },
-      requires: "flak",
-      effect() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-          if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
-        }
-      },
-      remove() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-          if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-        }
-      }
-    },
-    {
-      name: "foam stabilization",
-      description: "<strong>foam</strong> can stick to shields",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("foam")
-      },
-      requires: "foam",
-      effect() {
-        b.isModFoamShieldHit = true;
-      },
-      remove() {
-        b.isModFoamShieldHit = false;
-      }
-    },
-    {
-      name: "wave phase velocity",
-      description: "your <strong>wave beam</strong> propagates faster through solids",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("wave beam")
-      },
-      requires: "wave beam",
-      effect() {
-        b.modWaveSpeedMap = 3
-        b.modWaveSpeedBody = 1.9
-      },
-      remove() {
-        b.modWaveSpeedMap = 0.08
-        b.modWaveSpeedBody = 0.25
       }
     },
     {
@@ -912,6 +792,22 @@ const b = {
       },
       remove() {
         b.isModShotgunImmune = false;
+      }
+    },
+    {
+      name: "super duper",
+      description: "you fire <strong>+1</strong> additional <strong>super ball</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("super balls")
+      },
+      requires: "super balls",
+      effect() {
+        b.modSuperBallNumber++
+      },
+      remove() {
+        b.modSuperBallNumber = 4;
       }
     },
     {
@@ -947,6 +843,44 @@ const b = {
       }
     },
     {
+      name: "wave phase velocity",
+      description: "your <strong>wave beam</strong> propagates faster through solids",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("wave beam")
+      },
+      requires: "wave beam",
+      effect() {
+        b.modWaveSpeedMap = 3
+        b.modWaveSpeedBody = 1.9
+      },
+      remove() {
+        b.modWaveSpeedMap = 0.08
+        b.modWaveSpeedBody = 0.25
+      }
+    },
+    {
+      name: "optimized shell packing",
+      description: "<strong>flak</strong> ammo drops contain <strong>2x</strong> more shells",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("flak")
+      },
+      requires: "flak",
+      effect() {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
+        }
+      },
+      remove() {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+          if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+        }
+      }
+    },
+    {
       name: "mine reclamation",
       description: "<strong>ammo</strong> from undetonated <strong>mines</strong> is returned<br><em>at the end of a level or after 2000 second</em>",
       maxCount: 1,
@@ -960,6 +894,90 @@ const b = {
       },
       remove() {
         b.isModMineAmmoBack = false;
+      }
+    },
+    {
+      name: "tinsellated flagella",
+      description: "your <strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
+      },
+      requires: "spores",
+      effect() {
+        b.isModFastSpores = true
+      },
+      remove() {
+        b.isModFastSpores = false
+      }
+    },
+    {
+      name: "redundant systems",
+      description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField)
+      },
+      requires: "drones",
+      effect() {
+        b.isModDroneCollide = true
+      },
+      remove() {
+        b.isModDroneCollide = true;
+      }
+    },
+    {
+      name: "foam stabilization",
+      description: "<strong>foam</strong> can stick to shields",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("foam")
+      },
+      requires: "foam",
+      effect() {
+        b.isModFoamShieldHit = true;
+      },
+      remove() {
+        b.isModFoamShieldHit = false;
+      }
+    },
+    {
+      name: "stress fragmentation",
+      description: "<strong>rail gun</strong> fragments into nails after hitting mobs at high speeds",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("rail gun")
+      },
+      requires: "rail gun",
+      effect() {
+        b.isModRailNails = true;
+      },
+      remove() {
+        b.isModRailNails = false;
+      }
+    },
+    {
+      name: "specular reflection",
+      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+30%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("laser")
+      },
+      requires: "laser",
+      effect() {
+        b.modLaserReflections++;
+        b.modLaserDamage += 0.015; //base is 0.05
+        b.modLaserFieldDrain += 0.0006 //base is 0.002
+      },
+      remove() {
+        b.modLaserReflections = 2;
+        b.modLaserDamage = 0.05;
+        b.modLaserFieldDrain = 0.002;
       }
     },
     {
@@ -2531,6 +2549,37 @@ const b = {
               });
               Matter.Body.setDensity(this, 0.001);
               // this.endCycle = 0;
+            }
+            if (b.isModRailNails && this.speed > 10) {
+              const targets = [] //target nearby mobs
+              for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].dropPowerUp) {
+                  const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                  if (dist < 1000000 && //1000*1000
+                    Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                    Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                    targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
+                  }
+                }
+              }
+              for (let i = 0; i < this.speed - 10; i++) {
+                const speed = 50 + 10 * Math.random()
+                if (targets.length > 0) { // aim near a random target in array
+                  const index = Math.floor(Math.random() * targets.length)
+                  const SPREAD = 150 / targets.length
+                  const WHERE = {
+                    x: targets[index].x + SPREAD * (Math.random() - 0.5),
+                    y: targets[index].y + SPREAD * (Math.random() - 0.5)
+                  }
+                  b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
+                } else { // aim in random direction
+                  const ANGLE = 2 * Math.PI * Math.random()
+                  b.nail(this.position, {
+                    x: speed * Math.cos(ANGLE),
+                    y: speed * Math.sin(ANGLE)
+                  })
+                }
+              }
             }
 
           }, //this.endCycle = 0  //triggers despawn

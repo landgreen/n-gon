@@ -14,13 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("fléchettes")
+      // b.giveGuns("rail gun")
       // mech.setField("nano-scale manufacturing")
-      // for (let i = 0; i < 9; i++) {
       // b.giveMod("fléchettes multishot");
-      // b.giveMod("basidio-stomp");
-      // b.giveMod("acute stress response");
-      // }
 
       level.intro(); //starting level
       // level.testingMap();
