@@ -74,6 +74,7 @@ const build = {
           b.guns[index].count = 0;
           b.guns[index].have = false;
           if (b.guns[index].ammo != Infinity) b.guns[index].ammo = 0;
+          if (b.inventory.length === 0) b.activeGun = null;
           game.makeGunHUD();
           break
         }
