@@ -119,7 +119,7 @@ const b = {
     },
     {
       name: "fracture analysis",
-      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
+      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware mobs<br><em>unaware mobs don't have a health bar</em>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -286,7 +286,7 @@ const b = {
 
     {
       name: "zoospore vector",
-      description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
+      description: "mobs discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -437,7 +437,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with enemies for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `unable to <strong>collide</strong> with mobs for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -454,7 +454,7 @@ const b = {
     },
     {
       name: "annihilation",
-      description: "after <strong>touching</strong> enemies, they are <strong>annihilated</strong>",
+      description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -504,7 +504,7 @@ const b = {
     },
     {
       name: "piezoelectricity",
-      description: "<strong>colliding</strong> with enemies charges your <strong class='color-f'>energy</strong>",
+      description: "<strong>colliding</strong> with mobs charges your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -945,7 +945,7 @@ const b = {
       }
     },
     {
-      name: "stress fragmentation",
+      name: "fragmenting projectiles",
       description: "<strong>rail gun</strong> fragments into nails after hitting mobs at high speeds",
       maxCount: 1,
       count: 0,
@@ -2065,7 +2065,7 @@ const b = {
     },
     {
       name: "missiles",
-      description: "fire missiles that accelerate towards enemies<br><strong class='color-e'>explodes</strong> when near target",
+      description: "fire missiles that accelerate towards mobs<br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
       ammoPack: 4,
       have: false,
@@ -2248,13 +2248,13 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 35 * b.modBulletSize, b.fireAttributes(dir, false));
-        b.fireProps(10, mech.crouch ? 42 : 26, dir, me); //cd , speed
+        b.fireProps(10, mech.crouch ? 42 : 28, dir, me); //cd , speed
 
         Matter.Body.setDensity(bullet[me], 0.0002);
         bullet[me].restitution = 0.2;
         bullet[me].friction = 0.3;
         bullet[me].endCycle = Infinity
-        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 60);
+        bullet[me].explodeRad = 440 + Math.floor(Math.random() * 30);
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
         }
@@ -2282,7 +2282,7 @@ const b = {
               const that = this
               let mag = 0.1
 
-              function suck(who, radius = that.explodeRad * 2) {
+              function suck(who, radius = that.explodeRad * 3) {
                 for (i = 0, len = who.length; i < len; i++) {
                   const sub = Vector.sub(that.position, who[i].position);
                   const dist = Vector.magnitude(sub);
@@ -2295,18 +2295,18 @@ const b = {
               }
               if (game.cycle > this.endCycle - 5) {
                 mag = -0.22
-                suck(body)
-                suck(mob)
-                suck(powerUp)
-                suck(bullet)
-                suck([player])
+                suck(mob, this.explodeRad * 3)
+                suck(body, this.explodeRad * 2)
+                suck(powerUp, this.explodeRad * 1.5)
+                suck(bullet, this.explodeRad * 1.5)
+                suck([player], this.explodeRad * 1.5)
               } else {
                 mag = 0.1
-                suck(body)
-                suck(mob)
-                suck(powerUp)
-                suck(bullet)
-                suck([player])
+                suck(mob, this.explodeRad * 3)
+                suck(body, this.explodeRad * 2)
+                suck(powerUp, this.explodeRad * 1.5)
+                suck(bullet, this.explodeRad * 1.5)
+                suck([player], this.explodeRad * 1.5)
               }
               //keep bomb in place
               Matter.Body.setVelocity(this, {
@@ -2314,7 +2314,7 @@ const b = {
                 y: 0
               });
               //draw suck
-              const radius = 2.5 * this.explodeRad * (this.endCycle - game.cycle) / 35
+              const radius = 3 * this.explodeRad * (this.endCycle - game.cycle) / 35
               ctx.fillStyle = "rgba(0,0,0,0.1)";
               ctx.beginPath();
               ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
@@ -2346,7 +2346,7 @@ const b = {
     },
     {
       name: "mine", //9
-      description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
+      description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 2 : 3,
       have: false,
@@ -2365,7 +2365,7 @@ const b = {
     },
     {
       name: "spores", //10
-      description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out enemies",
+      description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out mobs",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 3 : 4,
       have: false,
@@ -2410,7 +2410,7 @@ const b = {
     },
     {
       name: "drones", //11
-      description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce their <strong>lifespan</strong> by 1 second",
+      description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 8 : 10,
       have: false,
@@ -2422,7 +2422,7 @@ const b = {
     },
     {
       name: "foam", //12
-      description: "spray bubbly foam that <strong>sticks</strong> to enemies<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
+      description: "spray bubbly foam that <strong>sticks</strong> to mobs<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
       ammo: 0,
       ammoPack: 35,
       have: false,

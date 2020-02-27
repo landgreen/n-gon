@@ -4,7 +4,6 @@ mod - flechettes mod for poison damage
   other flechettes multi-shot is disabled
 mod - flechettes are guided towards targets
 
-
 gun - buff vacuum bomb
   its weak late game
     can't spam it faster
