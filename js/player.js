@@ -1442,6 +1442,15 @@ const mech = {
               ctx.globalCompositeOperation = "difference";
               ctx.fill();
               ctx.globalCompositeOperation = "source-over";
+
+              if (b.isModHawking) {
+                for (let i = 0, len = mob.length; i < len; i++) {
+                  if (Vector.magnitude(Vector.sub(mob[i].position, mech.pos)) < this.fieldDrawRadius) {
+
+                  }
+                }
+              }
+
             } else {
               //trigger cool down
               mech.fieldCDcycle = mech.cycle + 120;

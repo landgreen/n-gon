@@ -57,13 +57,14 @@ const b = {
   isModFlechetteMultiShot: null,
   isModMineAmmoBack: null,
   isModRailNails: null,
+  isModHawking: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
-      b.modAcidDmg = 0.9
+      b.modAcidDmg = 1.5
     } else {
       game.playerDmgColor = "rgba(0,0,0,0.7)"
-      b.modAcidDmg = 0
+      b.modAcidDmg = 1
     }
   },
   mods: [{
@@ -1012,6 +1013,22 @@ const b = {
       },
       remove() {
         b.isModSporeField = false;
+      }
+    },
+    {
+      name: "hawking radiation",
+      description: "<strong>negative mass field</strong> releases virtual particles that<br><strong class='color-d'>damage</strong> mobs within range",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+      },
+      requires: "negative mass field",
+      effect() {
+        b.isModHawking = true;
+      },
+      remove() {
+        b.isModHawking = false;
       }
     },
   ],

@@ -1,5 +1,7 @@
 ************** TODO - n-gon **************
 
+mod - negative mass field does damage to mobs in zone
+
 mod - flechettes mod for poison damage
   other flechettes multi-shot is disabled
 mod - flechettes are guided towards targets
@@ -13,10 +15,6 @@ gun - buff vacuum bomb
   mod - double explosions?
   mod - doesn't suck player in?
   
-mod - negative mass field does damage to mobs in zone
-
-mod - rail gun burst on impact into nails
-
 mod - make bodies destroyable
   they drop ammo and heals
 
