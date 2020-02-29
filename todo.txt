@@ -1,5 +1,13 @@
 ************** TODO - n-gon **************
 
+mod - missiles release smaller missiles after 2s hits
+
+mod - grenades release smaller explosions
+
+mod - rocket propelled grenades
+  grenades do +20% damage and move in an accelerating path
+  maybe explode on collision with map?
+
 mod - negative mass field does damage to mobs in zone
 
 mod - flechettes mod for poison damage

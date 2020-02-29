@@ -1389,7 +1389,6 @@ const mech = {
             if (mech.energy > DRAIN) {
               mech.grabPowerUp();
               mech.lookForPickUp();
-              mech.pushMobs360();
               //look for nearby objects to make zero-g
               function zeroG(who, range, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -1441,15 +1440,38 @@ const mech = {
               ctx.fillStyle = "#f5f5ff";
               ctx.globalCompositeOperation = "difference";
               ctx.fill();
-              ctx.globalCompositeOperation = "source-over";
-
               if (b.isModHawking) {
                 for (let i = 0, len = mob.length; i < len; i++) {
-                  if (Vector.magnitude(Vector.sub(mob[i].position, mech.pos)) < this.fieldDrawRadius) {
+                  if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
+                    mob[i].damage(b.dmgScale * 0.09);
+                    mob[i].locatePlayer();
+
+                    //draw electricity
+                    const sub = Vector.sub(mob[i].position, mech.pos)
+                    const unit = Vector.normalise(sub);
+                    const steps = 6
+                    const step = Vector.magnitude(sub) / steps;
+                    ctx.beginPath();
+                    let x = mech.pos.x + 30 * unit.x;
+                    let y = mech.pos.y + 30 * unit.y;
+                    ctx.moveTo(x, y);
+                    for (let i = 0; i < steps; i++) {
+                      x += step * (unit.x + 0.7 * (Math.random() - 0.5))
+                      y += step * (unit.y + 0.7 * (Math.random() - 0.5))
+                      ctx.lineTo(x, y);
+                    }
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "rgba(0,255,0,0.5)" //"#fff";
+                    ctx.stroke();
 
                   }
                 }
+              } else {
+                mech.pushMobs360();
               }
+              ctx.globalCompositeOperation = "source-over";
+
+
 
             } else {
               //trigger cool down
@@ -1514,11 +1536,21 @@ const mech = {
           if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
             if (b.isModSporeField) {
-              const len = Math.floor(6 + 3 * Math.random())
-              mech.energy -= len * 0.12;
+              const len = Math.floor(7 + 3 * Math.random())
+              mech.energy -= len * 0.1;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
+            }
+            if (b.isModMissileField) {
+              mech.energy -= 0.55;
+              b.missile({
+                  x: mech.pos.x + 40 * Math.cos(mech.angle),
+                  y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
+                },
+                mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
+                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
+                1, b.modBabyMissiles)
             } else {
               mech.energy -= 0.33;
               b.drone(1)

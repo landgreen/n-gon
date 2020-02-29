@@ -54,17 +54,19 @@ const b = {
   modWaveSpeedBody: null,
   modFieldEfficiency: null,
   isModSporeField: null,
+  isModMissileField: null,
   isModFlechetteMultiShot: null,
   isModMineAmmoBack: null,
   isModRailNails: null,
   isModHawking: null,
+  modBabyMissiles: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
-      b.modAcidDmg = 1.5
+      b.modAcidDmg = 0.7
     } else {
       game.playerDmgColor = "rgba(0,0,0,0.7)"
-      b.modAcidDmg = 1
+      b.modAcidDmg = 0
     }
   },
   mods: [{
@@ -85,7 +87,7 @@ const b = {
     },
     {
       name: "fluoroantimonic acid",
-      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>80% health</strong>",
+      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -156,7 +158,7 @@ const b = {
       maxCount: 3,
       count: 0,
       allowed() {
-        return b.haveGunCheck("missiles") || b.haveGunCheck("flak") || b.haveGunCheck("grenades") || b.haveGunCheck("vacuum bomb") || b.haveGunCheck("pulse");
+        return b.haveGunCheck("missiles") || b.haveGunCheck("flak") || b.haveGunCheck("grenades") || b.haveGunCheck("vacuum bomb") || b.haveGunCheck("pulse") || b.isModMissileField;
       },
       requires: "an explosive gun",
       effect: () => {
@@ -526,7 +528,7 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field" && !(b.isModHawking && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field")
       },
       requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
       effect() {
@@ -862,6 +864,22 @@ const b = {
       }
     },
     {
+      name: "self-replication",
+      description: "when your <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they fire <strong>+1</strong> smaller <strong>missiles</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("missiles") || b.isModMissileField
+      },
+      requires: "missiles",
+      effect() {
+        b.modBabyMissiles++
+      },
+      remove() {
+        b.modBabyMissiles = 0;
+      }
+    },
+    {
       name: "optimized shell packing",
       description: "<strong>flak</strong> ammo drops contain <strong>2x</strong> more shells",
       maxCount: 3,
@@ -919,7 +937,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField)
+        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField))
       },
       requires: "drones",
       effect() {
@@ -963,7 +981,7 @@ const b = {
     },
     {
       name: "specular reflection",
-      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+30%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+33%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -972,12 +990,12 @@ const b = {
       requires: "laser",
       effect() {
         b.modLaserReflections++;
-        b.modLaserDamage += 0.015; //base is 0.05
+        b.modLaserDamage += 0.02; //base is 0.05
         b.modLaserFieldDrain += 0.0006 //base is 0.002
       },
       remove() {
         b.modLaserReflections = 2;
-        b.modLaserDamage = 0.05;
+        b.modLaserDamage = 0.06;
         b.modLaserFieldDrain = 0.002;
       }
     },
@@ -1001,11 +1019,11 @@ const b = {
     },
     {
       name: "mycelium manufacturing",
-      description: "<strong>nano-scale manufacturing</strong> is modified to<br>grow <strong style='letter-spacing: 2px;'>spores</strong> instead of drones",
+      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong style='letter-spacing: 2px;'>spores</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModMissileField
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -1016,8 +1034,24 @@ const b = {
       }
     },
     {
+      name: "missile manufacturing",
+      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField
+      },
+      requires: "nano-scale manufacturing",
+      effect() {
+        b.isModMissileField = true;
+      },
+      remove() {
+        b.isModMissileField = false;
+      }
+    },
+    {
       name: "hawking radiation",
-      description: "<strong>negative mass field</strong> releases virtual particles that<br><strong class='color-d'>damage</strong> mobs within range",
+      description: "<strong>negative mass field</strong> can no longer <strong>block</strong><br>instead it <strong class='color-d'>damages</strong> mobs within range",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1334,6 +1368,101 @@ const b = {
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
         }
+      }
+    }
+  },
+  missile(where, dir, speed, size = 1, spawn = 0) {
+    const me = bullet.length;
+    bullet[me] = Bodies.rectangle(where.x, where.y, 30 * b.modBulletSize * size, 4 * b.modBulletSize * size, b.fireAttributes(dir));
+    const thrust = 0.00417 * bullet[me].mass;
+    Matter.Body.setVelocity(bullet[me], {
+      x: mech.Vx / 2 + speed * Math.cos(dir),
+      y: mech.Vy / 2 + speed * Math.sin(dir)
+    });
+    World.add(engine.world, bullet[me]); //add bullet to world
+    bullet[me].frictionAir = 0.023
+    bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
+    bullet[me].explodeRad = 170 + 60 * Math.random();
+    bullet[me].lookFrequency = Math.floor(21 + Math.random() * 7);
+    bullet[me].onEnd = function () {
+      b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
+      for (let i = 0; i < spawn; i++) {
+        b.missile(this.position, 2 * Math.PI * Math.random(), 0, 0.75)
+      }
+    }
+    bullet[me].onDmg = function () {
+      this.tryToLockOn();
+      // this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
+    };
+    bullet[me].lockedOn = null;
+    bullet[me].tryToLockOn = function () {
+      this.lockedOn = null;
+      let closeDist = Infinity;
+
+      //look for closest target to where the missile will be in 30 cycles
+      const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 30))
+      for (let i = 0, len = mob.length; i < len; ++i) {
+        if (
+          mob[i].alive && mob[i].dropPowerUp &&
+          Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+          Matter.Query.ray(body, this.position, mob[i].position).length === 0
+        ) {
+          const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
+          if (futureDist < closeDist) {
+            closeDist = futureDist;
+            this.lockedOn = mob[i];
+            this.frictionAir = 0.05; //extra friction once a target it locked
+          }
+        }
+      }
+      //explode when bullet is close enough to target
+      if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
+        // console.log('hit')
+        this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
+        this.lockedOn.damage(b.dmgScale * 5 * size); //does extra damage to target
+      }
+    };
+    bullet[me].do = function () {
+      if (!mech.isBodiesAsleep) {
+        if (!(mech.cycle % this.lookFrequency)) {
+          this.tryToLockOn();
+        }
+
+        //rotate missile towards the target
+        if (this.lockedOn) {
+          const face = {
+            x: Math.cos(this.angle),
+            y: Math.sin(this.angle)
+          };
+          const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
+          if (Vector.dot(target, face) > -0.98) {
+            if (Vector.cross(target, face) > 0) {
+              Matter.Body.rotate(this, 0.08);
+            } else {
+              Matter.Body.rotate(this, -0.08);
+            }
+          }
+        }
+        //accelerate in direction bullet is facing
+        const dir = this.angle; // + (Math.random() - 0.5);
+        this.force.x += Math.cos(dir) * thrust;
+        this.force.y += Math.sin(dir) * thrust;
+
+        //draw rocket
+        ctx.beginPath();
+        ctx.arc(this.position.x - Math.cos(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          this.position.y - Math.sin(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          11 * size, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255,155,0,0.5)";
+        ctx.fill();
+      } else {
+        //draw rocket  with time stop
+        ctx.beginPath();
+        ctx.arc(this.position.x - Math.cos(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          this.position.y - Math.sin(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          11 * size, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255,155,0,0.5)";
+        ctx.fill();
       }
     }
   },
@@ -2090,93 +2219,15 @@ const b = {
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
-        let dir = mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2);
-        const me = bullet.length;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30 * b.modBulletSize, 4 * b.modBulletSize, b.fireAttributes(dir));
-        const thrust = 0.00417 * bullet[me].mass;
-        b.fireProps(mech.crouch ? 50 : 25, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
-        // bullet[me].collisionFilter.mask = cat.map | cat.body | cat.mobBullet
-        // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
-        bullet[me].force.y += 0.0005; //a small push down at first to make it seem like the missile is briefly falling
-        bullet[me].frictionAir = 0.023
-        bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
-        bullet[me].explodeRad = 170 + 60 * Math.random();
-        bullet[me].lookFrequency = Math.floor(21 + Math.random() * 7);
-        bullet[me].onEnd = function () {
-          b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-        }
-        bullet[me].onDmg = function () {
-          this.tryToLockOn();
-          // this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
-        };
-        bullet[me].lockedOn = null;
-        bullet[me].tryToLockOn = function () {
-          this.lockedOn = null;
-          let closeDist = Infinity;
-
-          //look for closest target to where the missile will be in 30 cycles
-          const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 30))
-          for (let i = 0, len = mob.length; i < len; ++i) {
-            if (
-              mob[i].alive && mob[i].dropPowerUp &&
-              Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-              Matter.Query.ray(body, this.position, mob[i].position).length === 0
-            ) {
-              const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
-              if (futureDist < closeDist) {
-                closeDist = futureDist;
-                this.lockedOn = mob[i];
-                this.frictionAir = 0.05; //extra friction once a target it locked
-              }
-            }
-          }
-          //explode when bullet is close enough to target
-          if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
-            // console.log('hit')
-            this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
-            const dmg = b.dmgScale * 5;
-            this.lockedOn.damage(dmg); //does extra damage to target
-          }
-        };
-        bullet[me].do = function () {
-          if (!mech.isBodiesAsleep) {
-            if (!(mech.cycle % this.lookFrequency)) {
-              this.tryToLockOn();
-            }
-
-            //rotate missile towards the target
-            if (this.lockedOn) {
-              const face = {
-                x: Math.cos(this.angle),
-                y: Math.sin(this.angle)
-              };
-              const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
-              if (Vector.dot(target, face) > -0.98) {
-                if (Vector.cross(target, face) > 0) {
-                  Matter.Body.rotate(this, 0.08);
-                } else {
-                  Matter.Body.rotate(this, -0.08);
-                }
-              }
-            }
-            //accelerate in direction bullet is facing
-            const dir = this.angle; // + (Math.random() - 0.5);
-            this.force.x += Math.cos(dir) * thrust;
-            this.force.y += Math.sin(dir) * thrust;
-
-            //draw rocket
-            ctx.beginPath();
-            ctx.arc(this.position.x - Math.cos(this.angle) * 27 + (Math.random() - 0.5) * 4, this.position.y - Math.sin(this.angle) * 27 + (Math.random() - 0.5) * 4, 11, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255,155,0,0.5)";
-            ctx.fill();
-          } else {
-            //draw rocket  with time stop
-            ctx.beginPath();
-            ctx.arc(this.position.x - Math.cos(this.angle) * 27, this.position.y - Math.sin(this.angle) * 27, 11, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255,155,0,0.5)";
-            ctx.fill();
-          }
-        }
+        mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 50 : 25); // cool down
+        b.missile({
+            x: mech.pos.x + 40 * Math.cos(mech.angle),
+            y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
+          },
+          mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
+          -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
+          1, b.modBabyMissiles)
+        bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
       }
     },
     {
@@ -2429,7 +2480,7 @@ const b = {
       name: "drones", //11
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: (game.difficultyMode > 3) ? 8 : 10,
+      ammoPack: 10,
       have: false,
       isStarterGun: true,
       fire() {

@@ -14,9 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("rail gun")
-      // mech.setField("nano-scale manufacturing")
-      // b.giveMod("fléchettes multishot");
+      // b.giveGuns("missiles")
+      // mech.setField("negative mass field")
+      // b.giveMod("self-replication");
 
       level.intro(); //starting level
       // level.testingMap();
