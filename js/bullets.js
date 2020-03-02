@@ -1019,7 +1019,7 @@ const b = {
       }
     },
     {
-      name: "plasma torch",
+      name: "plasma jet",
       description: "increase <strong>plasma torch's</strong> range by <strong>33%</strong>",
       maxCount: 9,
       count: 0,
