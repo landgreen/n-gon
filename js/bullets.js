@@ -57,6 +57,7 @@ const b = {
   isModMissileField: null,
   isModFlechetteMultiShot: null,
   isModMineAmmoBack: null,
+  isModPlasmaRange: null,
   isModRailNails: null,
   isModHawking: null,
   modBabyMissiles: null,
@@ -539,22 +540,6 @@ const b = {
       }
     },
     {
-      name: "field superposition",
-      description: "increase your <strong>field radius</strong> by <strong>40%</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
-      },
-      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
-      effect() {
-        mech.fieldRange = 175 * 1.4
-      },
-      remove() {
-        mech.fieldRange = 175;
-      }
-    },
-    {
       name: "energy conservation",
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
       maxCount: 9,
@@ -672,7 +657,7 @@ const b = {
     },
     {
       name: "catabolism",
-      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>3%</strong> of current health into <strong>ammo</strong>",
+      description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong>health</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -783,7 +768,7 @@ const b = {
     },
     {
       name: "shotgun spin-statistics",
-      description: "firing your <strong>shotgun</strong> makes you <br><strong>immune</strong> to collisions for <strong>1/2</strong> a second",
+      description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to collisions for <strong>1/2</strong> a second",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -799,7 +784,7 @@ const b = {
     },
     {
       name: "super duper",
-      description: "you fire <strong>+1</strong> additional <strong>super ball</strong>",
+      description: "fire <strong>+1</strong> additional <strong>super ball</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -847,7 +832,7 @@ const b = {
     },
     {
       name: "wave phase velocity",
-      description: "your <strong>wave beam</strong> propagates faster through solids",
+      description: "the <strong>wave beam</strong> propagates faster in solids",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -864,8 +849,24 @@ const b = {
       }
     },
     {
+      name: "pocket universe",
+      description: "<strong>wave beam</strong> bullets last <strong>4</strong> times longer<br>bullets are <strong>confined</strong> to a <strong>region</strong> around player",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("wave beam")
+      },
+      requires: "wave beam",
+      effect() {
+        b.isModWaveReflect = true
+      },
+      remove() {
+        b.isModWaveReflect = false
+      }
+    },
+    {
       name: "self-replication",
-      description: "when your <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they fire <strong>+1</strong> smaller <strong>missiles</strong>",
+      description: "when <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they fire <strong>+1</strong> smaller <strong>missiles</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -901,7 +902,7 @@ const b = {
     },
     {
       name: "mine reclamation",
-      description: "<strong>ammo</strong> from undetonated <strong>mines</strong> is returned<br><em>at the end of a level or after 2000 second</em>",
+      description: "retrieve <strong>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -917,7 +918,7 @@ const b = {
     },
     {
       name: "tinsellated flagella",
-      description: "your <strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
+      description: "<strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -981,7 +982,7 @@ const b = {
     },
     {
       name: "specular reflection",
-      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+33%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      description: "the <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+33%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -1005,7 +1006,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "field emitter"
+        return mech.fieldUpgrades[mech.fieldMode].name === "field emitter" && !game.isEasyToAimMode
       },
       requires: "basic field emitter",
       effect() {
@@ -1015,6 +1016,54 @@ const b = {
       remove() {
         b.modFieldEfficiency = 1;
         if (mech.fieldUpgrades[mech.fieldMode].name === "field emitter") mech.fieldShieldingScale = b.modFieldEfficiency;
+      }
+    },
+    {
+      name: "plasma torch",
+      description: "increase <strong>plasma torch's</strong> range by <strong>33%</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+      },
+      requires: "plasma torch",
+      effect() {
+        b.isModPlasmaRange += 0.33;
+      },
+      remove() {
+        b.isModPlasmaRange = 1;
+      }
+    },
+    {
+      name: "Hawking radiation",
+      description: "<strong>negative mass field</strong> leaks virtual particles<br>mobs inside the field take <strong class='color-d'>damage</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+      },
+      requires: "negative mass field",
+      effect() {
+        b.isModHawking = true;
+      },
+      remove() {
+        b.isModHawking = 0;
+      }
+    },
+    {
+      name: "field superposition",
+      description: "increase <strong>field radii</strong> by <strong>40%</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+      },
+      requires: "standing wave harmonics",
+      effect() {
+        mech.fieldRange = 175 * 1.4
+      },
+      remove() {
+        mech.fieldRange = 175;
       }
     },
     {
@@ -1047,22 +1096,6 @@ const b = {
       },
       remove() {
         b.isModMissileField = false;
-      }
-    },
-    {
-      name: "hawking radiation",
-      description: "<strong>negative mass field</strong> can no longer <strong>block</strong><br>instead it <strong class='color-d'>damages</strong> mobs within range",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
-      },
-      requires: "negative mass field",
-      effect() {
-        b.isModHawking = true;
-      },
-      remove() {
-        b.isModHawking = false;
       }
     },
   ],
@@ -1484,7 +1517,7 @@ const b = {
       minDmgSpeed: 5,
       stillCount: 0,
       isArmed: false,
-      endCycle: game.cycle + 2000 + 360 * Math.random(),
+      endCycle: Infinity,
       lookFrequency: 41 + Math.floor(23 * Math.random()),
       range: 700,
       onDmg() {},
@@ -1557,23 +1590,13 @@ const b = {
                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                 this.endCycle = 0 //end life if mob is near and visible
-                isAmmoBack = false;
+                if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back from undetonated mines
               }
             }
           }
         }
       },
       onEnd() {
-        if (isAmmoBack) {
-          for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-            if (b.guns[i].name === "mine") {
-              b.guns[i].ammo++
-              game.updateGunHUD();
-              break;
-            }
-          }
-          return
-        }
         if (this.isArmed) {
           const targets = [] //target nearby mobs
           for (let i = 0, len = mob.length; i < len; i++) {
@@ -1602,6 +1625,15 @@ const b = {
                 x: speed * Math.cos(ANGLE),
                 y: speed * Math.sin(ANGLE)
               })
+            }
+          }
+        }
+        if (isAmmoBack) {
+          for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+            if (b.guns[i].name === "mine") {
+              b.guns[i].ammo++
+              game.updateGunHUD();
+              break;
             }
           }
         }
@@ -2002,6 +2034,7 @@ const b = {
       recordedAmmo: 0,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         b.muzzleFlash(15);
@@ -2024,6 +2057,7 @@ const b = {
       ammoPack: 8,
       have: false,
       isStarterGun: true,
+      isEasyToAim: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 55 : 30) * b.modFireRate); // cool down
         if (b.isModShotgunImmune) mech.collisionImmuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
@@ -2055,12 +2089,13 @@ const b = {
     },
     {
       name: "super balls", //2
-      description: "fire <strong>five</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
+      description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 8,
+      ammoPack: 9,
       have: false,
       num: 5,
       isStarterGun: true,
+      isEasyToAim: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 20) * b.modFireRate); // cool down
         b.muzzleFlash(20);
@@ -2093,10 +2128,11 @@ const b = {
       name: "fléchettes", //3
       description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 24,
-      defaultAmmoPack: 24,
+      ammoPack: 22,
+      defaultAmmoPack: 22,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
@@ -2116,7 +2152,7 @@ const b = {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(angle));
           bullet[me].endCycle = game.cycle + 180;
-          bullet[me].dmg = 1.15;
+          bullet[me].dmg = 1.3;
           bullet[me].do = function () {
             if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
           };
@@ -2141,6 +2177,7 @@ const b = {
       ammoPack: 100,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle
@@ -2149,12 +2186,13 @@ const b = {
         bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, 5 * b.modBulletSize, {
           angle: dir,
           cycle: 0,
-          endCycle: game.cycle + Math.floor(120 * b.isModBulletsLastLonger),
+          endCycle: game.cycle + Math.floor((b.isModWaveReflect ? 480 : 120) * b.isModBulletsLastLonger),
           inertia: Infinity,
           frictionAir: 0,
           slow: 0,
           minDmgSpeed: 0,
           dmg: 0,
+          isJustReflected: false,
           classType: "bullet",
           collisionFilter: {
             category: 0,
@@ -2177,9 +2215,9 @@ const b = {
                   for (let i = 0; i < q.length; i++) {
                     slowCheck = 0.3;
                     Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                    let dmg = b.dmgScale * 0.1
-                    q[i].foundPlayer();
+                    let dmg = b.dmgScale * 0.5 / Math.sqrt(q[i].mass)
                     q[i].damage(dmg);
+                    q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue
                       x: this.position.x,
                       y: this.position.y,
@@ -2198,6 +2236,40 @@ const b = {
               const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.35))
               Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
             }
+            // if (b.isModWaveReflect) { //single reflection
+            //   const sub = Vector.sub(this.position, mech.pos)
+            //   if (Vector.magnitude(sub) > 630) {
+            //     // Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * POCKET_RANGE))) //teleport to opposite side
+            //     if (!this.isJustReflected) {
+            //       Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1)); //reflect
+            //       this.isJustReflected = true;
+            //     }
+            //   }
+            // }
+
+            if (b.isModWaveReflect) {
+              Matter.Body.setPosition(this, Vector.add(this.position, player.velocity)) //bullets move with player
+              const sub = Vector.sub(this.position, mech.pos)
+              if (Vector.magnitude(sub) > 630) {
+                Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * 630))) //teleport to opposite side
+              }
+            }
+
+            // if (b.isModWaveReflect) {
+            //   Matter.Body.setPosition(this, Vector.add(this.position, player.velocity))  //bullets move with player
+
+            // Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * POCKET_RANGE))) //teleport to opposite side
+
+            // const sub = Vector.sub(this.position, mech.pos)
+            // if (Vector.magnitude(sub) > 630) {  
+            //   if (!this.isJustReflected) {
+            //     Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1)); //reflect
+            //     this.isJustReflected = true;
+            //   }
+            // } else {
+            //   this.isJustReflected = false
+            // }
+            // }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
@@ -2216,6 +2288,7 @@ const b = {
       ammoPack: 4,
       have: false,
       isStarterGun: false,
+      isEasyToAim: true,
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
@@ -2238,6 +2311,7 @@ const b = {
       defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * b.modFireRate); // cool down
         b.muzzleFlash(30);
@@ -2282,6 +2356,7 @@ const b = {
       ammoPack: 7,
       have: false,
       isStarterGun: false,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
@@ -2312,6 +2387,7 @@ const b = {
       ammoPack: 2,
       have: false,
       isStarterGun: false,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
@@ -2419,6 +2495,7 @@ const b = {
       ammoPack: (game.difficultyMode > 3) ? 2 : 3,
       have: false,
       isStarterGun: false,
+      isEasyToAim: true,
       fire() {
         const speed = mech.crouch ? 36 : 22
         b.mine({
@@ -2438,6 +2515,7 @@ const b = {
       ammoPack: (game.difficultyMode > 3) ? 3 : 4,
       have: false,
       isStarterGun: false,
+      isEasyToAim: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
@@ -2483,6 +2561,7 @@ const b = {
       ammoPack: 10,
       have: false,
       isStarterGun: true,
+      isEasyToAim: true,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 5) * b.modFireRate); // cool down
@@ -2495,6 +2574,7 @@ const b = {
       ammoPack: 35,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 12 : 5) * b.modFireRate); // cool down
         const me = bullet.length;
@@ -2594,6 +2674,7 @@ const b = {
       ammoPack: 2.84,
       have: false,
       isStarterGun: false,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(0, 0, 0.015 * b.modBulletSize, 0.0015 * b.modBulletSize, {
@@ -2836,6 +2917,7 @@ const b = {
       ammoPack: Infinity,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         const reflectivity = 1 - 1 / (b.modLaserReflections * 1.5)
         let damage = b.dmgScale * b.modLaserDamage
@@ -2994,6 +3076,7 @@ const b = {
       ammoPack: Infinity,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         //calculate laser collision
         let best;

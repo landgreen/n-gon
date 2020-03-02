@@ -69,10 +69,11 @@ const game = {
   onTitlePage: true,
   paused: false,
   isChoosing: false,
-  testing: false, //testing mode: shows wireframe and some variables
+  testing: false, //testing mode: shows wire frame and some variables
   cycle: 0, //total cycles, 60 per second
   fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
   fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
+  isEasyToAimMode: true, //removes power ups that don't work well with a track pad
   cyclePaused: 0,
   fallHeight: 3000, //below this y position the player dies
   lastTimeStamp: 0, //tracks time stamps for measuring delta
@@ -571,7 +572,6 @@ const game = {
   },
   clearNow: false,
   clearMap() {
-
     if (b.isModMineAmmoBack) {
       let count = 0;
       for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map

@@ -1119,6 +1119,7 @@ const mech = {
   fieldUpgrades: [{
       name: "field emitter",
       description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br>lets you <strong>pick up</strong> and <strong>throw</strong> objects",
+      isEasyToAim: false,
       effect: () => {
         mech.fieldShieldingScale = Number(b.modFieldEfficiency);
         game.replaceTextLog = true; //allow text over write
@@ -1144,6 +1145,7 @@ const mech = {
     {
       name: "time dilation field",
       description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><em>can fire bullets while field is active</em>",
+      isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         // mech.fieldRange = 130
@@ -1210,6 +1212,7 @@ const mech = {
     {
       name: "plasma torch",
       description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br><em>effective at close range</em>",
+      isEasyToAim: false,
       effect: () => {
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1226,7 +1229,7 @@ const mech = {
 
               //calculate laser collision
               let best;
-              let range = mech.fieldRange * 0.5 + (mech.crouch ? 500 : 300) * Math.sqrt(Math.random()) //+ 100 * Math.sin(mech.cycle * 0.3);
+              let range = b.isModPlasmaRange * (175 + (mech.crouch ? 450 : 350) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
               const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
               const path = [{
                   x: mech.pos.x + 20 * Math.cos(dir),
@@ -1373,6 +1376,7 @@ const mech = {
       name: "negative mass field",
       description: "use <strong class='color-f'>energy</strong> to nullify &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br><strong>launch</strong> larger blocks at much higher speeds",
       fieldDrawRadius: 0,
+      isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         mech.throwChargeRate = 3;
@@ -1389,6 +1393,7 @@ const mech = {
             if (mech.energy > DRAIN) {
               mech.grabPowerUp();
               mech.lookForPickUp();
+              mech.pushMobs360();
               //look for nearby objects to make zero-g
               function zeroG(who, range, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -1443,7 +1448,7 @@ const mech = {
               if (b.isModHawking) {
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
-                    mob[i].damage(b.dmgScale * 0.09);
+                    mob[i].damage(b.dmgScale * 0.08);
                     mob[i].locatePlayer();
 
                     //draw electricity
@@ -1466,13 +1471,8 @@ const mech = {
 
                   }
                 }
-              } else {
-                mech.pushMobs360();
               }
               ctx.globalCompositeOperation = "source-over";
-
-
-
             } else {
               //trigger cool down
               mech.fieldCDcycle = mech.cycle + 120;
@@ -1491,6 +1491,7 @@ const mech = {
     {
       name: "standing wave harmonics",
       description: "three oscillating <strong>shields</strong> are permanently active<br><strong class='color-f'>energy</strong> regenerates while field is active",
+      isEasyToAim: true,
       effect: () => {
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1530,6 +1531,7 @@ const mech = {
     {
       name: "nano-scale manufacturing",
       description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>2x</strong> <strong class='color-f'>energy</strong> regeneration",
+      isEasyToAim: true,
       effect: () => {
         mech.fieldRegen *= 2;
         mech.hold = function () {
@@ -1578,6 +1580,7 @@ const mech = {
     {
       name: "phase decoherence field",
       description: "become <strong>intangible</strong> and <strong>invisible</strong><br>drains <strong class='color-f'>energy</strong> as you move",
+      isEasyToAim: true,
       effect: () => {
         // mech.fieldRange = 230
         mech.hold = function () {

@@ -1,8 +1,17 @@
 ************** TODO - n-gon **************
 
-mod - missiles release smaller missiles after 2s hits
+mod - get your next recursive mod 3 times
+  are players aware of what a recursive mod is?
+  too much of a nova drift rip off?
 
-mod - grenades release smaller explosions
+mod - grenade needs a mod
+mod - time dilation field needs a mod
+mod - phase decoherence field needs a mod
+
+buff mod field radius for standing wave harmonics
+
+settings - auto aim at nearest mob
+settings - custom keys binding
 
 mod - rocket propelled grenades
   grenades do +20% damage and move in an accelerating path
@@ -51,6 +60,9 @@ lore - a robot (the player) gains self awareness
 atmosphere levels: change the pace, give the user a rest between combat
   low or no combat, but more graphics
   explore lore
+    find power ups in "wrecked" mechs representing previous simulations
+      how you could leave something in one simulation that effects a different simulation
+        Maybe some strange quantum physics principle.
     add text for player thoughts?
   simple puzzles
   cool looking stuff

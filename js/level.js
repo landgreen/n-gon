@@ -14,9 +14,10 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("missiles")
+      // b.giveGuns("wave beam")
       // mech.setField("negative mass field")
-      // b.giveMod("self-replication");
+      // b.giveMod("wave phase velocity");
+      // b.giveMod("reflective cavity");
 
       level.intro(); //starting level
       // level.testingMap();
@@ -676,7 +677,7 @@ const level = {
     level.fill.push({
       x: 1760,
       y: -1550,
-      width: 1290,
+      width: 1390,
       height: 550,
       color: "rgba(0,0,0,0.1)"
     });
@@ -735,7 +736,7 @@ const level = {
     spawn.bodyRect(2710, -1250, 125, 125, 0.8);
     spawn.bodyRect(2705, -1350, 75, 100, 0.8);
     spawn.mapRect(3500, -1600, 350, 50);
-    spawn.mapRect(1750, -1600, 1310, 50);
+    spawn.mapRect(1750, -1600, 1410, 50);
     spawn.bodyRect(3100, -1015, 375, 15);
     spawn.bodyRect(3500, -850, 75, 125, 0.8);
     spawn.mapRect(3450, -1000, 50, 580); //left building wall
