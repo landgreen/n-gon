@@ -185,7 +185,22 @@ const b = {
         b.isModImmuneExplosion = false;
       }
     },
-
+    {
+      name: "thermal runaway",
+      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModImmuneExplosion
+      },
+      requires: "electric reactive armour",
+      effect: () => {
+        b.isModExplodeMob = true;
+      },
+      remove() {
+        b.isModExplodeMob = false;
+      }
+    },
     {
       name: "auto-loading heuristics",
       description: "your <strong>delay</strong> after firing is <strong>+14% shorter</strong>",
@@ -321,22 +336,6 @@ const b = {
       },
       remove() {
         b.modMobDieAtHealth = 0.05;
-      }
-    },
-    {
-      name: "thermal runaway",
-      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.modMobDieAtHealth > 0.05
-      },
-      requires: "reaction inhibitor",
-      effect: () => {
-        b.isModExplodeMob = true;
-      },
-      remove() {
-        b.isModExplodeMob = false;
       }
     },
     {
@@ -1002,7 +1001,7 @@ const b = {
     },
     {
       name: "perfect diamagnetism",
-      description: "when <strong>blocking</strong> with the basic <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
+      description: "when <strong>blocking</strong> with the starting <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1051,19 +1050,21 @@ const b = {
       }
     },
     {
-      name: "field superposition",
-      description: "increase <strong>field radii</strong> by <strong>40%</strong>",
-      maxCount: 1,
+      name: "frequency resonance",
+      description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>30%</strong>",
+      maxCount: 9,
       count: 0,
       allowed() {
         return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
       },
       requires: "standing wave harmonics",
       effect() {
-        mech.fieldRange = 175 * 1.4
+        mech.fieldRange += 175 * 0.2
+        mech.fieldShieldingScale *= 0.7
       },
       remove() {
         mech.fieldRange = 175;
+        mech.fieldShieldingScale = 1;
       }
     },
     {
@@ -1329,7 +1330,7 @@ const b = {
 
     if (dist < radius) {
       if (b.isModImmuneExplosion) {
-        const drain = Math.max(radius * 0.0006, 0.2)
+        const drain = Math.max(radius * 0.0004, 0.2)
         if (mech.energy > drain) {
           mech.energy -= drain
         } else {
@@ -2091,7 +2092,7 @@ const b = {
       name: "super balls", //2
       description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 9,
+      ammoPack: 10,
       have: false,
       num: 5,
       isStarterGun: true,
@@ -2105,7 +2106,7 @@ const b = {
         let dir = mech.angle - SPREAD * (b.modSuperBallNumber - 1) / 2;
         for (let i = 0; i < b.modSuperBallNumber; i++) {
           const me = bullet.length;
-          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 7 * b.modBulletSize, b.fireAttributes(dir, false));
+          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 7 * b.modBulletSize, b.fireAttributes(dir, false));
           World.add(engine.world, bullet[me]); //add bullet to world
           Matter.Body.setVelocity(bullet[me], {
             x: SPEED * Math.cos(dir),
@@ -2182,7 +2183,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle
         const SPEED = 10
-        const wiggleMag = mech.crouch ? 4 : 11
+        const wiggleMag = mech.crouch ? 3 : 10
         bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, 5 * b.modBulletSize, {
           angle: dir,
           cycle: 0,

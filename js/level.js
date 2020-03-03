@@ -15,7 +15,7 @@ const level = {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
       // b.giveGuns("wave beam")
-      // mech.setField("negative mass field")
+      // mech.setField("plasma torch")
       // b.giveMod("wave phase velocity");
       // b.giveMod("reflective cavity");
 

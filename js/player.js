@@ -664,6 +664,7 @@ const mech = {
   fieldEnergyMax: 1, //can be increased by a mod
   holdingTarget: null,
   fieldShieldingScale: 1,
+  fieldRange: 175,
   // these values are set on reset by setHoldDefaults()
   energy: 0,
   fieldRegen: 0,
@@ -672,7 +673,6 @@ const mech = {
   holdingMassScale: 0,
   throwChargeRate: 0,
   throwChargeMax: 0,
-  fieldRange: 175,
   fieldArc: 0,
   fieldThreshold: 0,
   calculateFieldThreshold() {
@@ -681,6 +681,7 @@ const mech = {
   setHoldDefaults() {
     if (mech.energy < mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
     mech.fieldRegen = 0.001;
+    mech.fieldShieldingScale = 1;
     mech.fieldFire = false;
     mech.fieldCDcycle = 0;
     mech.isStealth = false;
@@ -1148,7 +1149,6 @@ const mech = {
       isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
-        // mech.fieldRange = 130
         mech.isBodiesAsleep = false;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1346,7 +1346,8 @@ const mech = {
               let y = mech.pos.y + 20 * Dy;
               ctx.beginPath();
               ctx.moveTo(x, y);
-              const step = range / 10
+              const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 10
+
               for (let i = 0; i < 8; i++) {
                 x += step * (Dx + 1.5 * (Math.random() - 0.5))
                 y += step * (Dy + 1.5 * (Math.random() - 0.5))
@@ -1538,13 +1539,12 @@ const mech = {
           if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
             if (b.isModSporeField) {
-              const len = Math.floor(7 + 3 * Math.random())
-              mech.energy -= len * 0.1;
+              const len = Math.floor(6 + 3 * Math.random())
+              mech.energy -= len * 0.08;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
-            }
-            if (b.isModMissileField) {
+            } else if (b.isModMissileField) {
               mech.energy -= 0.55;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
@@ -1582,7 +1582,6 @@ const mech = {
       description: "become <strong>intangible</strong> and <strong>invisible</strong><br>drains <strong class='color-f'>energy</strong> as you move",
       isEasyToAim: true,
       effect: () => {
-        // mech.fieldRange = 230
         mech.hold = function () {
           mech.isStealth = false //isStealth disables most uses of foundPlayer() 
           player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
@@ -1630,7 +1629,6 @@ const mech = {
     //     mech.fieldText();
     //     mech.setHoldDefaults();
     //     mech.hackProgress = 0;
-    //     // mech.fieldRange = 230
     //     mech.hold = function () {
     //       mech.isStealth = false //isStealth is checked in mob foundPlayer()
     //       player.collisionFilter.mask = 0x010011

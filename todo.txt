@@ -3,11 +3,13 @@
 mobs - add in a function to the main loops that does injected code for each mob
   each mob would get an object with a game.cycle for ending and a method to run each cycle until the end is met
   this could be a DOT, graphics, slow
+  mod - flechettes mod for poison damage
 
 mod - get your next recursive mod 3 times
   are players aware of what a recursive mod is?
   too much of a nova drift rip off?
 
+mod - vacuum bomb needs a mod
 mod - grenade needs a mod
 mod - time dilation field needs a mod
 mod - phase decoherence field needs a mod
@@ -20,12 +22,6 @@ settings - custom keys binding
 mod - rocket propelled grenades
   grenades do +20% damage and move in an accelerating path
   maybe explode on collision with map?
-
-mod - negative mass field does damage to mobs in zone
-
-mod - flechettes mod for poison damage
-  other flechettes multi-shot is disabled
-mod - flechettes are guided towards targets
 
 gun - buff vacuum bomb
   its weak late game
