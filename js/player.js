@@ -664,6 +664,7 @@ const mech = {
   fieldEnergyMax: 1, //can be increased by a mod
   holdingTarget: null,
   fieldShieldingScale: 1,
+  fieldRange: 175,
   // these values are set on reset by setHoldDefaults()
   energy: 0,
   fieldRegen: 0,
@@ -672,7 +673,6 @@ const mech = {
   holdingMassScale: 0,
   throwChargeRate: 0,
   throwChargeMax: 0,
-  fieldRange: 175,
   fieldArc: 0,
   fieldThreshold: 0,
   calculateFieldThreshold() {
@@ -681,6 +681,7 @@ const mech = {
   setHoldDefaults() {
     if (mech.energy < mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
     mech.fieldRegen = 0.001;
+    mech.fieldShieldingScale = 1;
     mech.fieldFire = false;
     mech.fieldCDcycle = 0;
     mech.isStealth = false;
@@ -1119,6 +1120,7 @@ const mech = {
   fieldUpgrades: [{
       name: "field emitter",
       description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br>lets you <strong>pick up</strong> and <strong>throw</strong> objects",
+      isEasyToAim: false,
       effect: () => {
         mech.fieldShieldingScale = Number(b.modFieldEfficiency);
         game.replaceTextLog = true; //allow text over write
@@ -1144,9 +1146,9 @@ const mech = {
     {
       name: "time dilation field",
       description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><em>can fire bullets while field is active</em>",
+      isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
-        // mech.fieldRange = 130
         mech.isBodiesAsleep = false;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1210,6 +1212,7 @@ const mech = {
     {
       name: "plasma torch",
       description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br><em>effective at close range</em>",
+      isEasyToAim: false,
       effect: () => {
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1226,7 +1229,7 @@ const mech = {
 
               //calculate laser collision
               let best;
-              let range = mech.fieldRange * 0.5 + (mech.crouch ? 500 : 300) * Math.sqrt(Math.random()) //+ 100 * Math.sin(mech.cycle * 0.3);
+              let range = b.isModPlasmaRange * (175 + (mech.crouch ? 450 : 350) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
               const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
               const path = [{
                   x: mech.pos.x + 20 * Math.cos(dir),
@@ -1343,7 +1346,8 @@ const mech = {
               let y = mech.pos.y + 20 * Dy;
               ctx.beginPath();
               ctx.moveTo(x, y);
-              const step = range / 10
+              const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 10
+
               for (let i = 0; i < 8; i++) {
                 x += step * (Dx + 1.5 * (Math.random() - 0.5))
                 y += step * (Dy + 1.5 * (Math.random() - 0.5))
@@ -1373,6 +1377,7 @@ const mech = {
       name: "negative mass field",
       description: "use <strong class='color-f'>energy</strong> to nullify &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br><strong>launch</strong> larger blocks at much higher speeds",
       fieldDrawRadius: 0,
+      isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         mech.throwChargeRate = 3;
@@ -1441,6 +1446,33 @@ const mech = {
               ctx.fillStyle = "#f5f5ff";
               ctx.globalCompositeOperation = "difference";
               ctx.fill();
+              if (b.isModHawking) {
+                for (let i = 0, len = mob.length; i < len; i++) {
+                  if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
+                    mob[i].damage(b.dmgScale * 0.08);
+                    mob[i].locatePlayer();
+
+                    //draw electricity
+                    const sub = Vector.sub(mob[i].position, mech.pos)
+                    const unit = Vector.normalise(sub);
+                    const steps = 6
+                    const step = Vector.magnitude(sub) / steps;
+                    ctx.beginPath();
+                    let x = mech.pos.x + 30 * unit.x;
+                    let y = mech.pos.y + 30 * unit.y;
+                    ctx.moveTo(x, y);
+                    for (let i = 0; i < steps; i++) {
+                      x += step * (unit.x + 0.7 * (Math.random() - 0.5))
+                      y += step * (unit.y + 0.7 * (Math.random() - 0.5))
+                      ctx.lineTo(x, y);
+                    }
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "rgba(0,255,0,0.5)" //"#fff";
+                    ctx.stroke();
+
+                  }
+                }
+              }
               ctx.globalCompositeOperation = "source-over";
             } else {
               //trigger cool down
@@ -1460,6 +1492,7 @@ const mech = {
     {
       name: "standing wave harmonics",
       description: "three oscillating <strong>shields</strong> are permanently active<br><strong class='color-f'>energy</strong> regenerates while field is active",
+      isEasyToAim: true,
       effect: () => {
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1499,6 +1532,7 @@ const mech = {
     {
       name: "nano-scale manufacturing",
       description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>2x</strong> <strong class='color-f'>energy</strong> regeneration",
+      isEasyToAim: true,
       effect: () => {
         mech.fieldRegen *= 2;
         mech.hold = function () {
@@ -1506,10 +1540,19 @@ const mech = {
             mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
             if (b.isModSporeField) {
               const len = Math.floor(6 + 3 * Math.random())
-              mech.energy -= len * 0.12;
+              mech.energy -= len * 0.08;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
+            } else if (b.isModMissileField) {
+              mech.energy -= 0.55;
+              b.missile({
+                  x: mech.pos.x + 40 * Math.cos(mech.angle),
+                  y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
+                },
+                mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
+                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
+                1, b.modBabyMissiles)
             } else {
               mech.energy -= 0.33;
               b.drone(1)
@@ -1537,8 +1580,8 @@ const mech = {
     {
       name: "phase decoherence field",
       description: "become <strong>intangible</strong> and <strong>invisible</strong><br>drains <strong class='color-f'>energy</strong> as you move",
+      isEasyToAim: true,
       effect: () => {
-        // mech.fieldRange = 230
         mech.hold = function () {
           mech.isStealth = false //isStealth disables most uses of foundPlayer() 
           player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
@@ -1566,6 +1609,19 @@ const mech = {
 
               mech.grabPowerUp();
               mech.lookForPickUp();
+
+              if (mech.energy > 0.006 && b.isModPhaseFieldDamage) { //damage mobs inside the player
+                let inPlayer = Matter.Query.region(mob, player.bounds)
+                if (inPlayer.length > 0) {
+                  for (let i = 0; i < inPlayer.length; i++) {
+                    if (inPlayer[i].dropPowerUp && !inPlayer[i].isShielded) {
+                      inPlayer[i].damage(0.2 * b.dmgScale);
+                      mech.energy -= 0.002;
+                      break;
+                    }
+                  }
+                }
+              }
             } else {
               mech.fieldCDcycle = mech.cycle + 120;
             }
@@ -1586,7 +1642,6 @@ const mech = {
     //     mech.fieldText();
     //     mech.setHoldDefaults();
     //     mech.hackProgress = 0;
-    //     // mech.fieldRange = 230
     //     mech.hold = function () {
     //       mech.isStealth = false //isStealth is checked in mob foundPlayer()
     //       player.collisionFilter.mask = 0x010011
