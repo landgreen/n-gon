@@ -125,10 +125,12 @@ const mobs = {
         if (this.seePlayer.recall < 0) this.seePlayer.recall = 0;
       },
       memory: 120, //default time to remember player's location
-      locatePlayer() { // updates mob's memory of player location
-        this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
+      locatePlayer() {
+        // updates mob's memory of player location
+        this.seePlayer.recall =
+          this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
         this.seePlayer.position.x = player.position.x;
-        this.seePlayer.position.y = player.position.y
+        this.seePlayer.position.y = player.position.y;
       },
       // locatePlayerByDist() {
       //   if (this.distanceToPlayer2() < this.locateRange) {
@@ -139,8 +141,10 @@ const mobs = {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
             this.distanceToPlayer2() < this.seeAtDistance2 &&
-            Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+            Matter.Query.ray(map, this.position, this.mechPosRange()).length ===
+              0 &&
+            Matter.Query.ray(body, this.position, this.mechPosRange())
+              .length === 0 &&
             !mech.isStealth
           ) {
             this.foundPlayer();
@@ -151,7 +155,10 @@ const mobs = {
       },
       seePlayerCheckByDistance() {
         if (!(game.cycle % this.seePlayerFreq)) {
-          if (this.distanceToPlayer2() < this.seeAtDistance2 && !mech.isStealth) {
+          if (
+            this.distanceToPlayer2() < this.seeAtDistance2 &&
+            !mech.isStealth
+          ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
             this.lostPlayer();
@@ -161,7 +168,11 @@ const mobs = {
       seePlayerByDistOrLOS() {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
-            (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0)) &&
+            (this.distanceToPlayer2() < this.seeAtDistance2 ||
+              (Matter.Query.ray(map, this.position, this.mechPosRange())
+                .length === 0 &&
+                Matter.Query.ray(body, this.position, this.mechPosRange())
+                  .length === 0)) &&
             !mech.isStealth
           ) {
             this.foundPlayer();
@@ -174,8 +185,10 @@ const mobs = {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
             this.distanceToPlayer2() < this.seeAtDistance2 &&
-            Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+            Matter.Query.ray(map, this.position, this.mechPosRange()).length ===
+              0 &&
+            Matter.Query.ray(body, this.position, this.mechPosRange())
+              .length === 0 &&
             !mech.isStealth
           ) {
             this.foundPlayer();
@@ -185,7 +198,9 @@ const mobs = {
         }
       },
       isLookingAtPlayer(threshold) {
-        const diff = Vector.normalise(Vector.sub(player.position, this.position));
+        const diff = Vector.normalise(
+          Vector.sub(player.position, this.position)
+        );
         //make a vector for the mob's direction of length 1
         const dir = {
           x: Math.cos(this.angle),
@@ -203,11 +218,16 @@ const mobs = {
       lookRange: 0.2 + Math.random() * 0.2,
       lookTorque: 0.0000004 * (Math.random() > 0.5 ? -1 : 1),
       seePlayerByLookingAt() {
-        if (!(game.cycle % this.seePlayerFreq) && (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange))) {
+        if (
+          !(game.cycle % this.seePlayerFreq) &&
+          (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange))
+        ) {
           if (
             this.distanceToPlayer2() < this.seeAtDistance2 &&
-            Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+            Matter.Query.ray(map, this.position, this.mechPosRange()).length ===
+              0 &&
+            Matter.Query.ray(body, this.position, this.mechPosRange())
+              .length === 0 &&
             !mech.isStealth
           ) {
             this.foundPlayer();
@@ -221,8 +241,21 @@ const mobs = {
           //draw
           const range = Math.PI * this.lookRange;
           ctx.beginPath();
-          ctx.arc(this.position.x, this.position.y, this.radius * 2.5, this.angle - range, this.angle + range);
-          ctx.arc(this.position.x, this.position.y, this.radius * 1.4, this.angle + range, this.angle - range, true);
+          ctx.arc(
+            this.position.x,
+            this.position.y,
+            this.radius * 2.5,
+            this.angle - range,
+            this.angle + range
+          );
+          ctx.arc(
+            this.position.x,
+            this.position.y,
+            this.radius * 1.4,
+            this.angle + range,
+            this.angle - range,
+            true
+          );
           ctx.fillStyle = "rgba(0,0,0,0.07)";
           ctx.fill();
         }
@@ -242,16 +275,21 @@ const mobs = {
         // return targetPos;
       },
 
-      hacked() { //set this.hackedTarget variable before running this method
+      hacked() {
+        //set this.hackedTarget variable before running this method
         //find a new target
         if (!(game.cycle % this.seePlayerFreq)) {
-          this.hackedTarget = null
+          this.hackedTarget = null;
           for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i] !== this) {
               // const DIST = Vector.magnitude(Vector.sub(this.position, mob[j]));
-              if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                this.hackedTarget = mob[i]
+              if (
+                Matter.Query.ray(map, this.position, mob[i].position).length ===
+                  0 &&
+                Matter.Query.ray(body, this.position, mob[i].position)
+                  .length === 0
+              ) {
+                this.hackedTarget = mob[i];
               }
             }
           }
@@ -259,9 +297,13 @@ const mobs = {
 
         //acceleration towards targets
         if (this.hackedTarget) {
-          this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
+          this.force = Vector.mult(
+            Vector.normalise(
+              Vector.sub(this.hackedTarget.position, this.position)
+            ),
+            this.mass * 0.0015
+          );
         }
-
       },
 
       laserBeam() {
@@ -270,11 +312,14 @@ const mobs = {
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange && !mech.isStealth) {
             mech.damage(0.0003 * game.dmgScale);
-            if (mech.energy > 0.1) mech.energy -= 0.003
+            if (mech.energy > 0.1) mech.energy -= 0.003;
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
             ctx.lineTo(mech.pos.x, mech.pos.y);
-            ctx.lineTo(mech.pos.x + (Math.random() - 0.5) * 3000, mech.pos.y + (Math.random() - 0.5) * 3000);
+            ctx.lineTo(
+              mech.pos.x + (Math.random() - 0.5) * 3000,
+              mech.pos.y + (Math.random() - 0.5) * 3000
+            );
             ctx.lineWidth = 2;
             ctx.strokeStyle = "rgb(255,0,170)";
             ctx.stroke();
@@ -283,10 +328,15 @@ const mobs = {
             ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(255,0,170,0.15)";
             ctx.fill();
-
           }
           ctx.beginPath();
-          ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);
+          ctx.arc(
+            this.position.x,
+            this.position.y,
+            this.laserRange * 0.9,
+            0,
+            2 * Math.PI
+          );
           ctx.strokeStyle = "rgba(255,0,170,0.5)";
           ctx.lineWidth = 1;
           ctx.stroke();
@@ -296,12 +346,17 @@ const mobs = {
         }
       },
       laser() {
-        const vertexCollision = function (v1, v1End, domain) {
+        const vertexCollision = function(v1, v1End, domain) {
           for (let i = 0; i < domain.length; ++i) {
             let vertices = domain[i].vertices;
             const len = vertices.length - 1;
             for (let j = 0; j < len; j++) {
-              results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+              results = game.checkLineIntersection(
+                v1,
+                v1End,
+                vertices[j],
+                vertices[j + 1]
+              );
               if (results.onLine1 && results.onLine2) {
                 const dx = v1.x - results.x;
                 const dy = v1.y - results.y;
@@ -318,7 +373,12 @@ const mobs = {
                 }
               }
             }
-            results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+            results = game.checkLineIntersection(
+              v1,
+              v1End,
+              vertices[0],
+              vertices[len]
+            );
             if (results.onLine1 && results.onLine2) {
               const dx = v1.x - results.x;
               const dy = v1.y - results.y;
@@ -391,8 +451,10 @@ const mobs = {
           if (
             (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange)) &&
             this.distanceToPlayer2() < this.seeAtDistance2 &&
-            Matter.Query.ray(map, this.position, player.position).length === 0 &&
-            Matter.Query.ray(body, this.position, player.position).length === 0 &&
+            Matter.Query.ray(map, this.position, player.position).length ===
+              0 &&
+            Matter.Query.ray(body, this.position, player.position).length ===
+              0 &&
             !mech.isStealth
           ) {
             this.foundPlayer();
@@ -417,22 +479,43 @@ const mobs = {
           //draw
           const range = Math.PI * this.lookRange;
           ctx.beginPath();
-          ctx.arc(this.position.x, this.position.y, this.radius * 2.5, this.angle - range, this.angle + range);
-          ctx.arc(this.position.x, this.position.y, this.radius * 1.4, this.angle + range, this.angle - range, true);
+          ctx.arc(
+            this.position.x,
+            this.position.y,
+            this.radius * 2.5,
+            this.angle - range,
+            this.angle + range
+          );
+          ctx.arc(
+            this.position.x,
+            this.position.y,
+            this.radius * 1.4,
+            this.angle + range,
+            this.angle - range,
+            true
+          );
           ctx.fillStyle = "rgba(0,0,0,0.07)";
           ctx.fill();
           //spring to random place on map
-          const vertexCollision = function (v1, v1End, domain) {
+          const vertexCollision = function(v1, v1End, domain) {
             for (let i = 0; i < domain.length; ++i) {
               let vertices = domain[i].vertices;
               const len = vertices.length - 1;
               for (let j = 0; j < len; j++) {
-                results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                results = game.checkLineIntersection(
+                  v1,
+                  v1End,
+                  vertices[j],
+                  vertices[j + 1]
+                );
                 if (results.onLine1 && results.onLine2) {
                   const dx = v1.x - results.x;
                   const dy = v1.y - results.y;
                   const dist2 = dx * dx + dy * dy;
-                  if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                  if (
+                    dist2 < best.dist2 &&
+                    (!domain[i].mob || domain[i].alive)
+                  ) {
                     best = {
                       x: results.x,
                       y: results.y,
@@ -444,7 +527,12 @@ const mobs = {
                   }
                 }
               }
-              results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+              results = game.checkLineIntersection(
+                v1,
+                v1End,
+                vertices[0],
+                vertices[len]
+              );
               if (results.onLine1 && results.onLine2) {
                 const dx = v1.x - results.x;
                 const dy = v1.y - results.y;
@@ -484,7 +572,9 @@ const mobs = {
               this.cons2.length = 100 + 1.5 * this.radius;
             }
           }
-          if (!((game.cycle + this.seePlayerFreq * 5) % (this.seePlayerFreq * 10))) {
+          if (
+            !((game.cycle + this.seePlayerFreq * 5) % (this.seePlayerFreq * 10))
+          ) {
             best = {
               x: null,
               y: null,
@@ -510,7 +600,12 @@ const mobs = {
       alertNearByMobs() {
         //this.alertRange2 is set at the very bottom of this mobs, after mob is made
         for (let i = 0; i < mob.length; i++) {
-          if (!mob[i].seePlayer.recall && Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < this.alertRange2) {
+          if (
+            !mob[i].seePlayer.recall &&
+            Vector.magnitudeSquared(
+              Vector.sub(this.position, mob[i].position)
+            ) < this.alertRange2
+          ) {
             mob[i].locatePlayer();
           }
         }
@@ -576,19 +671,22 @@ const mobs = {
       // },
       curl(range = 1000, mag = -10) {
         //cause all mobs, and bodies to rotate in a circle
-        applyCurl = function (center, array) {
+        applyCurl = function(center, array) {
           for (let i = 0; i < array.length; ++i) {
-            const sub = Vector.sub(center, array[i].position)
+            const sub = Vector.sub(center, array[i].position);
             const radius2 = Vector.magnitudeSquared(sub);
 
             //if too close, like center mob or shield, don't curl   // if too far don't curl
             if (radius2 < range * range && radius2 > 10000) {
-              const curlVector = Vector.mult(Vector.perp(Vector.normalise(sub)), mag)
+              const curlVector = Vector.mult(
+                Vector.perp(Vector.normalise(sub)),
+                mag
+              );
               //apply curl force
               Matter.Body.setVelocity(array[i], {
                 x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
                 y: array[i].velocity.y * 0.94 + curlVector.y * 0.06
-              })
+              });
               // //draw curl
               // ctx.beginPath();
               // ctx.moveTo(array[i].position.x, array[i].position.y);
@@ -598,7 +696,7 @@ const mobs = {
               // ctx.stroke();
             }
           }
-        }
+        };
         applyCurl(this.position, mob);
         applyCurl(this.position, body);
         applyCurl(this.position, powerUp);
@@ -612,10 +710,23 @@ const mobs = {
         // ctx.fill();
       },
       pullPlayer() {
-        if (this.seePlayer.yes && Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < 1000000) {
-          const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-          player.force.x -= game.accelScale * 0.00113 * player.mass * Math.cos(angle) * (mech.onGround ? 2 : 1);
-          player.force.y -= game.accelScale * 0.00084 * player.mass * Math.sin(angle);
+        if (
+          this.seePlayer.yes &&
+          Vector.magnitudeSquared(Vector.sub(this.position, player.position)) <
+            1000000
+        ) {
+          const angle = Math.atan2(
+            player.position.y - this.position.y,
+            player.position.x - this.position.x
+          );
+          player.force.x -=
+            game.accelScale *
+            0.00113 *
+            player.mass *
+            Math.cos(angle) *
+            (mech.onGround ? 2 : 1);
+          player.force.y -=
+            game.accelScale * 0.00084 * player.mass * Math.sin(angle);
 
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
@@ -655,7 +766,10 @@ const mobs = {
         if (this.seePlayer.recall) {
           // && dx * dx + dy * dy < 2000000) {
           const forceMag = this.accelMag * this.mass;
-          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+          const angle = Math.atan2(
+            this.seePlayer.position.y - this.position.y,
+            this.seePlayer.position.x - this.position.x
+          );
           this.force.x += forceMag * Math.cos(angle);
           this.force.y += forceMag * Math.sin(angle);
         }
@@ -663,10 +777,16 @@ const mobs = {
       repulsionRange: 500000,
       repulsion() {
         //accelerate towards the player
-        if (this.seePlayer.recall && this.distanceToPlayer2() < this.repulsionRange) {
+        if (
+          this.seePlayer.recall &&
+          this.distanceToPlayer2() < this.repulsionRange
+        ) {
           // && dx * dx + dy * dy < 2000000) {
           const forceMag = this.accelMag * this.mass;
-          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+          const angle = Math.atan2(
+            this.seePlayer.position.y - this.position.y,
+            this.seePlayer.position.x - this.position.x
+          );
           this.force.x -= 2 * forceMag * Math.cos(angle);
           this.force.y -= 2 * forceMag * Math.sin(angle); // - 0.0007 * this.mass; //antigravity
         }
@@ -675,8 +795,12 @@ const mobs = {
         //accelerate towards the player after a delay
         if (this.cd < game.cycle && this.seePlayer.recall && this.speed < 1) {
           this.cd = game.cycle + this.delay;
-          const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
-          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+          const forceMag =
+            (this.accelMag + this.accelMag * Math.random()) * this.mass;
+          const angle = Math.atan2(
+            this.seePlayer.position.y - this.position.y,
+            this.seePlayer.position.x - this.position.x
+          );
           this.force.x += forceMag * Math.cos(angle);
           this.force.y += forceMag * Math.sin(angle) - 0.04 * this.mass; //antigravity
         }
@@ -685,16 +809,28 @@ const mobs = {
         if (this.seePlayer.recall) {
           // vertical positioning
           const rangeY = 250;
-          if (this.position.y > this.seePlayer.position.y - this.hoverElevation + rangeY) {
+          if (
+            this.position.y >
+            this.seePlayer.position.y - this.hoverElevation + rangeY
+          ) {
             this.force.y -= this.accelMag * this.mass;
-          } else if (this.position.y < this.seePlayer.position.y - this.hoverElevation - rangeY) {
+          } else if (
+            this.position.y <
+            this.seePlayer.position.y - this.hoverElevation - rangeY
+          ) {
             this.force.y += this.accelMag * this.mass;
           }
           // horizontal positioning
           const rangeX = 150;
-          if (this.position.x > this.seePlayer.position.x + this.hoverXOff + rangeX) {
+          if (
+            this.position.x >
+            this.seePlayer.position.x + this.hoverXOff + rangeX
+          ) {
             this.force.x -= this.accelMag * this.mass;
-          } else if (this.position.x < this.seePlayer.position.x + this.hoverXOff - rangeX) {
+          } else if (
+            this.position.x <
+            this.seePlayer.position.x + this.hoverXOff - rangeX
+          ) {
             this.force.x += this.accelMag * this.mass;
           }
         }
@@ -726,12 +862,13 @@ const mobs = {
         //be sure to declare searchTarget in mob spawn
         //accelerate towards the searchTarget
         if (!this.seePlayer.recall) {
-          const newTarget = function (that) {
+          const newTarget = function(that) {
             if (Math.random() < 0.0005) {
               that.searchTarget = player.position; //chance to target player
             } else {
               //target random body
-              that.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position;
+              that.searchTarget =
+                map[Math.floor(Math.random() * (map.length - 1))].position;
             }
           };
 
@@ -743,7 +880,10 @@ const mobs = {
             // ctx.lineTo(this.searchTarget.x,this.searchTarget.y);
             // ctx.stroke();
             //accelerate at 0.1 of normal acceleration
-            this.force = Vector.mult(Vector.normalise(sub), this.accelMag * this.mass * 0.2);
+            this.force = Vector.mult(
+              Vector.normalise(sub),
+              this.accelMag * this.mass * 0.2
+            );
           } else {
             //after reaching random target switch to new target
             newTarget(this);
@@ -763,7 +903,10 @@ const mobs = {
             this.cd = game.cycle + this.delay;
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
-            Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), distMag - 20 - radius));
+            Matter.Body.translate(
+              this,
+              Vector.mult(Vector.normalise(dist), distMag - 20 - radius)
+            );
             ctx.lineTo(this.position.x, this.position.y);
             ctx.lineWidth = radius * 2;
             ctx.strokeStyle = this.fill; //"rgba(0,0,0,0.5)"; //'#000'
@@ -781,9 +924,15 @@ const mobs = {
           const unitVector = Vector.normalise(dist);
           const rando = (Math.random() - 0.5) * 50;
           if (distMag < this.blinkLength) {
-            Matter.Body.translate(this, Vector.mult(unitVector, distMag + rando));
+            Matter.Body.translate(
+              this,
+              Vector.mult(unitVector, distMag + rando)
+            );
           } else {
-            Matter.Body.translate(this, Vector.mult(unitVector, this.blinkLength + rando));
+            Matter.Body.translate(
+              this,
+              Vector.mult(unitVector, this.blinkLength + rando)
+            );
           }
           ctx.lineTo(this.position.x, this.position.y);
           ctx.lineWidth = radius * 2;
@@ -822,12 +971,22 @@ const mobs = {
         if (
           !(game.cycle % this.fireFreq) &&
           Math.abs(this.position.x - this.seePlayer.position.x) < 400 && //above player
-          Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && //see player
-          Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0
+          Matter.Query.ray(map, this.position, this.mechPosRange()).length ===
+            0 && //see player
+          Matter.Query.ray(body, this.position, this.mechPosRange()).length ===
+            0
         ) {
-          spawn.bullet(this.position.x, this.position.y + this.radius * 0.5, 10 + Math.ceil(this.radius / 15), 5);
+          spawn.bullet(
+            this.position.x,
+            this.position.y + this.radius * 0.5,
+            10 + Math.ceil(this.radius / 15),
+            5
+          );
           //add spin and speed
-          Matter.Body.setAngularVelocity(mob[mob.length - 1], (Math.random() - 0.5) * 0.5);
+          Matter.Body.setAngularVelocity(
+            mob[mob.length - 1],
+            (Math.random() - 0.5) * 0.5
+          );
           Matter.Body.setVelocity(mob[mob.length - 1], {
             x: this.velocity.x,
             y: this.velocity.y
@@ -847,13 +1006,18 @@ const mobs = {
           if (this.seePlayer.recall) {
             //set direction to turn to fire
             if (!(game.cycle % this.seePlayerFreq)) {
-              this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-              this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 1600; //gives the bullet an arc
+              this.fireDir = Vector.normalise(
+                Vector.sub(this.seePlayer.position, this.position)
+              );
+              this.fireDir.y -=
+                Math.abs(this.seePlayer.position.x - this.position.x) / 1600; //gives the bullet an arc
               this.fireAngle = Math.atan2(this.fireDir.y, this.fireDir.x);
             }
             //rotate towards fireAngle
             const angle = this.angle + Math.PI / 2;
-            c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+            c =
+              Math.cos(angle) * this.fireDir.x +
+              Math.sin(angle) * this.fireDir.y;
             const threshold = 0.1;
             if (c > threshold) {
               this.torque += 0.000004 * this.inertia;
@@ -861,7 +1025,12 @@ const mobs = {
               this.torque -= 0.000004 * this.inertia;
             } else if (this.noseLength > 1.5) {
               //fire
-              spawn.bullet(this.vertices[1].x, this.vertices[1].y, 5 + Math.ceil(this.radius / 15), 5);
+              spawn.bullet(
+                this.vertices[1].x,
+                this.vertices[1].y,
+                5 + Math.ceil(this.radius / 15),
+                5
+              );
               const v = 15;
               Matter.Body.setVelocity(mob[mob.length - 1], {
                 x: this.velocity.x + this.fireDir.x * v + Math.random(),
@@ -903,12 +1072,16 @@ const mobs = {
         }
       },
       facePlayer() {
-        const unitVector = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+        const unitVector = Vector.normalise(
+          Vector.sub(this.seePlayer.position, this.position)
+        );
         const angle = Math.atan2(unitVector.y, unitVector.x);
         Matter.Body.setAngle(this, angle - Math.PI);
       },
       explode(mass = this.mass) {
-        mech.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * game.dmgScale);
+        mech.damage(
+          Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * game.dmgScale
+        );
         this.dropPowerUp = false;
         this.death(); //death with no power up or body
       },
@@ -921,7 +1094,8 @@ const mobs = {
           }
         }
       },
-      healthBar() { //draw health by mob //most health bars are drawn in mobs.healthbar();
+      healthBar() {
+        //draw health by mob //most health bars are drawn in mobs.healthbar();
         if (this.seePlayer.recall) {
           const h = this.radius * 0.3;
           const w = this.radius * 2;
@@ -935,16 +1109,24 @@ const mobs = {
       },
       damage(dmg, isBypassShield = false) {
         if (!this.isShielded || isBypassShield) {
-          dmg /= Math.sqrt(this.mass)
-          if (this.shield) dmg *= 0.04
-          if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
+          dmg /= Math.sqrt(this.mass);
+          if (this.shield) dmg *= 0.04;
+          if (b.isModLowHealthDmg) dmg *= 3 / (2 + mech.health); //up to 50% dmg at zero player health
 
           // if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
           if (b.isModEnergyLoss) dmg *= 1.5;
-          if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
-          if (b.modEnergySiphon && dmg !== Infinity) mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
-          if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
-          this.health -= dmg
+          if (b.isModFarAwayDmg)
+            dmg *=
+              1 +
+              Math.sqrt(
+                Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500
+              ) *
+                0.0067; //up to 50% dmg at max range of 3500
+          if (b.modEnergySiphon && dmg !== Infinity)
+            mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon;
+          if (b.modHealthDrain && dmg !== Infinity)
+            mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain);
+          this.health -= dmg;
           //this.fill = this.color + this.health + ')';
           this.onDamage(dmg); //custom damage effects
           if (this.health < b.modMobDieAtHealth && this.alive) this.death();
@@ -965,23 +1147,31 @@ const mobs = {
         this.removeConsBB();
         this.alive = false; //triggers mob removal in mob[i].replace(i)
         if (this.dropPowerUp) {
-          powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
+          powerUps.spawnRandomPowerUp(
+            this.position.x,
+            this.position.y,
+            this.mass,
+            radius
+          );
           mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in game.checks()
           if (Math.random() < b.modSporesOnDeath) {
-            const len = Math.min(30, Math.floor(4 + this.mass * Math.random()))
+            const len = Math.min(30, Math.floor(4 + this.mass * Math.random()));
             for (let i = 0; i < len; i++) {
-              b.spore(this) //spawn drone
+              b.spore(this); //spawn drone
             }
           }
-          if (b.isModExplodeMob) b.explosion(this.position, Math.min(500, Math.sqrt(this.mass + 2) * 80))
+          if (b.isModExplodeMob)
+            b.explosion(
+              this.position,
+              Math.min(500, Math.sqrt(this.mass + 2) * 80)
+            );
         }
-
       },
       removeConsBB() {
         for (let i = 0, len = consBB.length; i < len; ++i) {
           if (consBB[i].bodyA === this) {
             if (consBB[i].bodyB.shield) {
-              consBB[i].bodyB.do = function () {
+              consBB[i].bodyB.do = function() {
                 this.death();
               };
             }
@@ -991,7 +1181,7 @@ const mobs = {
             break;
           } else if (consBB[i].bodyB === this) {
             if (consBB[i].bodyA.shield) {
-              consBB[i].bodyA.do = function () {
+              consBB[i].bodyA.do = function() {
                 this.death();
               };
             }
@@ -1022,11 +1212,21 @@ const mobs = {
         //large mobs or too many bodies go intangible and fall until removed from game to help performance
         if (this.leaveBody && this.mass < 10 && body.length < 50) {
           const len = body.length;
-          body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, this.vertices);
+          body[len] = Matter.Bodies.fromVertices(
+            this.position.x,
+            this.position.y,
+            this.vertices
+          );
           Matter.Body.setVelocity(body[len], this.velocity);
           Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
           body[len].collisionFilter.category = cat.body;
-          body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+          body[len].collisionFilter.mask =
+            cat.player |
+            cat.map |
+            cat.body |
+            cat.bullet |
+            cat.mob |
+            cat.mobBullet;
 
           // if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
           //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;

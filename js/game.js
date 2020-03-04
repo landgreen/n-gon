@@ -123,7 +123,13 @@ const game = {
     let i = game.drawList.length;
     while (i--) {
       ctx.beginPath(); //draw circle
-      ctx.arc(game.drawList[i].x, game.drawList[i].y, game.drawList[i].radius, 0, 2 * Math.PI);
+      ctx.arc(
+        game.drawList[i].x,
+        game.drawList[i].y,
+        game.drawList[i].radius,
+        0,
+        2 * Math.PI
+      );
       ctx.fillStyle = game.drawList[i].color;
       ctx.fill();
       if (game.drawList[i].time) {
@@ -143,12 +149,14 @@ const game = {
         document.getElementById(b.inventory[i]).style.opacity = "0.3";
       }
       // document.getElementById(b.activeGun).style.fontSize = "30px";
-      if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
+      if (document.getElementById(b.activeGun))
+        document.getElementById(b.activeGun).style.opacity = "1";
     }
   },
   updateGunHUD() {
     for (let i = 0, len = b.inventory.length; i < len; ++i) {
-      document.getElementById(b.inventory[i]).innerHTML = b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo;
+      document.getElementById(b.inventory[i]).innerHTML =
+        b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo;
     }
   },
   makeGunHUD() {
@@ -161,28 +169,33 @@ const game = {
     for (let i = 0, len = b.inventory.length; i < len; ++i) {
       const node = document.createElement("div");
       node.setAttribute("id", b.inventory[i]);
-      let textnode = document.createTextNode(b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo);
+      let textnode = document.createTextNode(
+        b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo
+      );
       node.appendChild(textnode);
       document.getElementById("guns").appendChild(node);
     }
     game.boldActiveGunHUD();
   },
   updateModHUD() {
-    let text = ""
-    for (let i = 0, len = b.mods.length; i < len; i++) { //add mods
+    let text = "";
+    for (let i = 0, len = b.mods.length; i < len; i++) {
+      //add mods
       if (b.mods[i].count > 0) {
-        if (text) text += "<br>" //add a new line, but not on the first line
-        text += b.mods[i].name
-        if (b.mods[i].count > 1) text += ` (${b.mods[i].count}x)`
+        if (text) text += "<br>"; //add a new line, but not on the first line
+        text += b.mods[i].name;
+        if (b.mods[i].count > 1) text += ` (${b.mods[i].count}x)`;
       }
     }
-    document.getElementById("mods").innerHTML = text
+    document.getElementById("mods").innerHTML = text;
   },
   replaceTextLog: true,
   // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
   // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
-  SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-  SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
+  SVGleftMouse:
+    '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
+  SVGrightMouse:
+    '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
   makeTextLog(text, time = 180) {
     if (game.replaceTextLog) {
       document.getElementById("text-log").innerHTML = text;
@@ -193,7 +206,7 @@ const game = {
   textLog() {
     if (game.lastLogTime && game.lastLogTime < mech.cycle) {
       game.lastLogTime = 0;
-      game.replaceTextLog = true
+      game.replaceTextLog = true;
       // document.getElementById("text-log").innerHTML = " ";
       document.getElementById("text-log").style.opacity = 0;
     }
@@ -213,7 +226,7 @@ const game = {
     }
   },
   switchGun() {
-    if (b.modNoAmmo) b.modNoAmmo = 1 //this prevents hacking the mod by switching guns
+    if (b.modNoAmmo) b.modNoAmmo = 1; //this prevents hacking the mod by switching guns
     b.activeGun = b.inventory[b.inventoryGun];
     game.updateGunHUD();
     game.boldActiveGunHUD();
@@ -234,7 +247,8 @@ const game = {
   //   "You jump higher if you hold down the jump button.",
   //   "Crouching while firing makes bullets go faster, but slows the rate of fire.",
   // ]
-  keyPress() { //runs on key down event
+  keyPress() {
+    //runs on key down event
     if (keys[189]) {
       // - key
       game.isAutoZoom = false;
@@ -264,7 +278,6 @@ const game = {
     //   setupCanvas();
     // }
 
-
     if (keys[69]) {
       // e    swap to next active gun
       game.nextGun();
@@ -273,9 +286,10 @@ const game = {
       game.previousGun();
     }
 
-    if (keys[80] && !game.isChoosing) { //p  for pause
+    if (keys[80] && !game.isChoosing) {
+      //p  for pause
       if (game.paused) {
-        build.unPauseGrid()
+        build.unPauseGrid();
         game.paused = false;
         level.levelAnnounce();
         document.body.style.cursor = "none";
@@ -286,7 +300,7 @@ const game = {
         // game.makeTextLog("<h1>PAUSED</h1>", 1);
         //display grid
         // document.title = "PAUSED: press P to resume";
-        build.pauseGrid()
+        build.pauseGrid();
         document.body.style.cursor = "auto";
       }
     }
@@ -296,54 +310,79 @@ const game = {
       // 84 = t
       if (game.testing) {
         game.testing = false;
-        game.loop = game.normalLoop
+        game.loop = game.normalLoop;
       } else {
         game.testing = true;
-        game.loop = game.testingLoop
+        game.loop = game.testingLoop;
       }
     }
     //in testing mode
     if (game.testing) {
-      if (keys[49]) { // give power ups with 1
+      if (keys[49]) {
+        // give power ups with 1
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
-      } else if (keys[50]) { // 2
+      } else if (keys[50]) {
+        // 2
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
-      } else if (keys[51]) { // 3
+      } else if (keys[51]) {
+        // 3
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
-      } else if (keys[52]) { // 4
+      } else if (keys[52]) {
+        // 4
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
-      } else if (keys[53]) { // 5
+      } else if (keys[53]) {
+        // 5
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
-      } else if (keys[54]) { // 6  spawn mob
-        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+      } else if (keys[54]) {
+        // 6  spawn mob
+        const pick =
+          spawn.fullPickList[
+            Math.floor(Math.random() * spawn.fullPickList.length)
+          ];
         spawn.allowShields = false;
         spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
         spawn.allowShields = true;
-      } else if (keys[55]) { // 7  spawn body
-        index = body.length
+      } else if (keys[55]) {
+        // 7  spawn body
+        index = body.length;
         spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
         body[index].collisionFilter.category = cat.body;
-        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        body[index].collisionFilter.mask =
+          cat.player |
+          cat.map |
+          cat.body |
+          cat.bullet |
+          cat.mob |
+          cat.mobBullet;
         body[index].classType = "body";
         World.add(engine.world, body[index]); //add to world
-      } else if (keys[70]) { //cycle fields with F
-        const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
-        mech.setField(mode)
-      } else if (keys[71]) { // give all guns with G
-        b.giveGuns("all", 1000)
-      } else if (keys[72]) { // heal with H
-        mech.addHealth(Infinity)
+      } else if (keys[70]) {
+        //cycle fields with F
+        const mode =
+          mech.fieldMode === mech.fieldUpgrades.length - 1
+            ? 0
+            : mech.fieldMode + 1;
+        mech.setField(mode);
+      } else if (keys[71]) {
+        // give all guns with G
+        b.giveGuns("all", 1000);
+      } else if (keys[72]) {
+        // heal with H
+        mech.addHealth(Infinity);
         mech.energy = mech.fieldEnergyMax;
-      } else if (keys[89]) { //add mods with y
-        b.giveMod()
-      } else if (keys[82]) { // teleport to mouse with R
+      } else if (keys[89]) {
+        //add mods with y
+        b.giveMod();
+      } else if (keys[82]) {
+        // teleport to mouse with R
         Matter.Body.setPosition(player, game.mouseInGame);
         Matter.Body.setVelocity(player, {
           x: 0,
           y: 0
         });
         // game.noCameraScroll()
-      } else if (keys[85]) { // next level with U
+      } else if (keys[85]) {
+        // next level with U
         level.zoneActions.nextLevel();
       }
     }
@@ -351,8 +390,9 @@ const game = {
   zoom: null,
   zoomScale: 1000,
   isAutoZoom: true,
-  setZoom(zoomScale = game.zoomScale) { //use in window resize in index.js
-    game.zoomScale = zoomScale
+  setZoom(zoomScale = game.zoomScale) {
+    //use in window resize in index.js
+    game.zoomScale = zoomScale;
     game.zoom = canvas.height / zoomScale; //sets starting zoom scale
   },
   noCameraScroll() {
@@ -360,31 +400,33 @@ const game = {
     mech.pos.x = player.position.x;
     mech.pos.y = playerBody.position.y - mech.yOff;
     const scale = 0.8;
-    mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
-    mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
+    mech.transSmoothX =
+      canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
+    mech.transSmoothY =
+      canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
     mech.transX += (mech.transSmoothX - mech.transX) * 1;
     mech.transY += (mech.transSmoothY - mech.transY) * 1;
   },
   zoomTransition(newZoomScale, step = 2) {
     if (game.isAutoZoom) {
-      const isBigger = (newZoomScale - game.zoomScale > 0) ? true : false;
+      const isBigger = newZoomScale - game.zoomScale > 0 ? true : false;
       requestAnimationFrame(zLoop);
-      const currentLevel = level.onLevel
+      const currentLevel = level.onLevel;
 
       function zLoop() {
-        if (currentLevel !== level.onLevel || game.isAutoZoom === false) return //stop the zoom if player goes to a new level
+        if (currentLevel !== level.onLevel || game.isAutoZoom === false) return; //stop the zoom if player goes to a new level
 
         if (isBigger) {
-          game.zoomScale += step
+          game.zoomScale += step;
           if (game.zoomScale >= newZoomScale) {
             game.setZoom(newZoomScale);
-            return
+            return;
           }
         } else {
-          game.zoomScale -= step
+          game.zoomScale -= step;
           if (game.zoomScale <= newZoomScale) {
             game.setZoom(newZoomScale);
-            return
+            return;
           }
         }
 
@@ -399,8 +441,12 @@ const game = {
     ctx.scale(game.zoom, game.zoom); //zoom in once centered
     ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
     //calculate in game mouse position by undoing the zoom and translations
-    game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom + canvas.width2 - mech.transX;
-    game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom + canvas.height2 - mech.transY;
+    game.mouseInGame.x =
+      (game.mouse.x - canvas.width2) / game.zoom + canvas.width2 - mech.transX;
+    game.mouseInGame.y =
+      (game.mouse.y - canvas.height2) / game.zoom +
+      canvas.height2 -
+      mech.transY;
   },
   restoreCamera() {
     ctx.restore();
@@ -434,8 +480,9 @@ const game = {
     addGravity(body, game.g);
     player.force.y += player.mass * mech.gravity;
   },
-  reset() { //run on first run, and each later run after you die
-    b.inventory = []; //removes guns and ammo  
+  reset() {
+    //run on first run, and each later run after you die
+    b.inventory = []; //removes guns and ammo
     for (let i = 0, len = b.guns.length; i < len; ++i) {
       b.guns[i].count = 0;
       b.guns[i].have = false;
@@ -445,15 +492,15 @@ const game = {
 
     b.setupAllMods(); //sets mods to default values
     game.updateModHUD();
-    mech.maxHealth = 1
-    mech.fieldEnergyMax = 1
+    mech.maxHealth = 1;
+    mech.fieldEnergyMax = 1;
     game.paused = false;
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
     game.isAutoZoom = true;
     game.makeGunHUD();
     mech.drop();
-    mech.holdingTarget = null
+    mech.holdingTarget = null;
     mech.addHealth(Infinity);
     mech.alive = true;
     level.onLevel = 0;
@@ -466,14 +513,16 @@ const game = {
     game.lookFreqScale = 1;
     game.CDScale = 1;
     game.difficulty = 0;
-    game.difficultyMode = Number(document.getElementById("difficulty-select").value)
+    game.difficultyMode = Number(
+      document.getElementById("difficulty-select").value
+    );
     level.isBuildRun = false;
     if (game.difficultyMode === 0) {
       game.isEasyMode = true;
-      game.difficultyMode = 1
+      game.difficultyMode = 1;
       level.difficultyDecrease(6); //if this stops being -6  change in build.calculateCustomDifficulty()
     }
-    if (game.difficultyMode === 4) level.difficultyIncrease(6)
+    if (game.difficultyMode === 4) level.difficultyIncrease(6);
 
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
@@ -482,22 +531,29 @@ const game = {
     //set to default field
     mech.fieldMode = 0;
     game.replaceTextLog = true;
-    game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
-    mech.setField(mech.fieldMode)
+    game.makeTextLog(
+      `${game.SVGrightMouse}<strong style='font-size:30px;'> ${
+        mech.fieldUpgrades[mech.fieldMode].name
+      }</strong><br><span class='faded'></span><br>${
+        mech.fieldUpgrades[mech.fieldMode].description
+      }`,
+      600
+    );
+    mech.setField(mech.fieldMode);
   },
   firstRun: true,
   splashReturn() {
     game.onTitlePage = true;
     // document.getElementById('splash').onclick = 'run(this)';
-    document.getElementById("splash").onclick = function () {
+    document.getElementById("splash").onclick = function() {
       game.startGame();
     };
-    document.getElementById("choose-grid").style.display = "none"
+    document.getElementById("choose-grid").style.display = "none";
     document.getElementById("info").style.display = "inline";
-    document.getElementById("build-button").style.display = "inline"
-    document.getElementById("build-grid").style.display = "none"
-    document.getElementById("pause-grid-left").style.display = "none"
-    document.getElementById("pause-grid-right").style.display = "none"
+    document.getElementById("build-button").style.display = "inline";
+    document.getElementById("build-grid").style.display = "none";
+    document.getElementById("pause-grid-left").style.display = "none";
+    document.getElementById("pause-grid-right").style.display = "none";
     document.getElementById("splash").style.display = "inline";
     document.getElementById("dmg").style.display = "none";
     document.getElementById("health-bg").style.display = "none";
@@ -506,13 +562,14 @@ const game = {
   fpsInterval: 0, //set in startGame
   then: null,
   startGame() {
-    if (!level.isBuildRun) { //if a build run logic flow returns to "build-button").addEventListener
+    if (!level.isBuildRun) {
+      //if a build run logic flow returns to "build-button").addEventListener
       document.body.style.cursor = "none";
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = "hidden";
     }
     game.onTitlePage = false;
-    document.getElementById("choose-grid").style.display = "none"
-    document.getElementById("build-grid").style.display = "none"
+    document.getElementById("choose-grid").style.display = "none";
+    document.getElementById("build-grid").style.display = "none";
     document.getElementById("info").style.display = "none";
     document.getElementById("build-button").style.display = "none";
     document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
@@ -574,12 +631,14 @@ const game = {
   clearMap() {
     if (b.isModMineAmmoBack) {
       let count = 0;
-      for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
-        if (bullet[i].bulletType === "mine") count++
+      for (i = 0, len = bullet.length; i < len; i++) {
+        //count mines left on map
+        if (bullet[i].bulletType === "mine") count++;
       }
-      for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
+      for (i = 0, len = b.guns.length; i < len; i++) {
+        //find which gun is mine
         if (b.guns[i].name === "mine") {
-          b.guns[i].ammo += count
+          b.guns[i].ammo += count;
           game.updateGunHUD();
           break;
         }
@@ -591,7 +650,7 @@ const game = {
     if (mech.holdingTarget) {
       holdTarget = mech.holdingTarget;
     }
-    mech.fireCDcycle = 0
+    mech.fireCDcycle = 0;
     mech.drop();
     level.fill = [];
     level.fillBG = [];
@@ -600,7 +659,8 @@ const game = {
     game.drawList = [];
 
     function removeAll(array) {
-      for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
+      for (let i = 0; i < array.length; ++i)
+        Matter.World.remove(engine.world, array[i]);
     }
     removeAll(map);
     map = [];
@@ -652,35 +712,44 @@ const game = {
         window.getSelection().addRange(range);
         document.execCommand("copy");
         window.getSelection().removeAllRanges();
-        console.log(`spawn.mapRect(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2.y - game.getCoords.pos1.y}); //`);
+        console.log(
+          `spawn.mapRect(${game.getCoords.pos1.x}, ${
+            game.getCoords.pos1.y
+          }, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords
+            .pos2.y - game.getCoords.pos1.y}); //`
+        );
       }
     }
   },
   checks() {
-    if (mech.pos.y > game.fallHeight) { // if 4000px deep
+    if (mech.pos.y > game.fallHeight) {
+      // if 4000px deep
       mech.death();
     }
 
-    if (!(mech.cycle % 60)) { //once a second
+    if (!(mech.cycle % 60)) {
+      //once a second
 
-      if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
+      if (mech.lastKillCycle + 300 > mech.cycle) {
+        //effects active for 5 seconds after killing a mob
         if (b.isModEnergyRecovery) {
-          mech.energy += mech.fieldEnergyMax * 0.07
-          if (mech.energy > mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
+          mech.energy += mech.fieldEnergyMax * 0.07;
+          if (mech.energy > mech.fieldEnergyMax)
+            mech.energy = mech.fieldEnergyMax;
         }
         if (b.isModHealthRecovery) {
-          mech.addHealth(0.01)
+          mech.addHealth(0.01);
         }
         if (b.isModEnergyLoss) {
           mech.energy = 0.05;
         }
-
-      } else { //haven't killed a mob in the last 5 seconds
-
+      } else {
+        //haven't killed a mob in the last 5 seconds
       }
 
-      if (!(game.cycle % 420)) { //once every 7 seconds
-        fallCheck = function (who) {
+      if (!(game.cycle % 420)) {
+        //once every 7 seconds
+        fallCheck = function(who) {
           let i = who.length;
           while (i--) {
             if (who[i].position.y > game.fallHeight) {
@@ -750,7 +819,11 @@ const game = {
     // ctx.fillText("zoom: " + game.zoom.toFixed(4), x, line);
     // line += 20;
     ctx.textAlign = "center";
-    ctx.fillText(`(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`, game.mouse.x, game.mouse.y - 20);
+    ctx.fillText(
+      `(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`,
+      game.mouse.x,
+      game.mouse.y - 20
+    );
   },
   draw: {
     powerUp() {
@@ -771,7 +844,13 @@ const game = {
       ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
       for (let i = 0, len = powerUp.length; i < len; ++i) {
         ctx.beginPath();
-        ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+        ctx.arc(
+          powerUp[i].position.x,
+          powerUp[i].position.y,
+          powerUp[i].size,
+          0,
+          2 * Math.PI
+        );
         ctx.fillStyle = powerUp[i].color;
         ctx.fill();
       }
@@ -991,7 +1070,12 @@ const game = {
       //zones
       ctx.beginPath();
       for (let i = 0, len = level.zones.length; i < len; ++i) {
-        ctx.rect(level.zones[i].x1, level.zones[i].y1 + 70, level.zones[i].x2 - level.zones[i].x1, level.zones[i].y2 - level.zones[i].y1);
+        ctx.rect(
+          level.zones[i].x1,
+          level.zones[i].y1 + 70,
+          level.zones[i].x2 - level.zones[i].x1,
+          level.zones[i].y2 - level.zones[i].y1
+        );
       }
       ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
       ctx.fill();
@@ -1063,7 +1147,8 @@ const game = {
       onLine1: false,
       onLine2: false
     };
-    denominator = (v2End.y - v2.y) * (v1End.x - v1.x) - (v2End.x - v2.x) * (v1End.y - v1.y);
+    denominator =
+      (v2End.y - v2.y) * (v1End.x - v1.x) - (v2End.x - v2.x) * (v1End.y - v1.y);
     if (denominator == 0) {
       return result;
     }
@@ -1092,8 +1177,10 @@ const game = {
       let out;
 
       //body rect mode
-      out = `spawn.mapRect(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2.y -
-        game.getCoords.pos1.y});`;
+      out = `spawn.mapRect(${game.getCoords.pos1.x}, ${
+        game.getCoords.pos1.y
+      }, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2
+        .y - game.getCoords.pos1.y});`;
 
       //mob spawn
       //out = `spawn.randomMob(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, 0.3);`
