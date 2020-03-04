@@ -1099,6 +1099,22 @@ const b = {
         b.isModMissileField = false;
       }
     },
+    {
+      name: "quantum dissipation",
+      description: "<strong>phase decoherence field</strong> uses <strong class='color-f'>energy</strong> to <br><strong class='color-d'>damage</strong> unshielded <strong>mobs</strong> that you <strong>overlap</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
+      },
+      requires: "phase decoherence field",
+      effect() {
+        b.isModPhaseFieldDamage = true;
+      },
+      remove() {
+        b.isModPhaseFieldDamage = false;
+      }
+    },
   ],
   removeMod(index) {
     b.mods[index].remove();

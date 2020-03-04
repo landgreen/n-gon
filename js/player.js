@@ -1609,6 +1609,19 @@ const mech = {
 
               mech.grabPowerUp();
               mech.lookForPickUp();
+
+              if (mech.energy > 0.006 && b.isModPhaseFieldDamage) { //damage mobs inside the player
+                let inPlayer = Matter.Query.region(mob, player.bounds)
+                if (inPlayer.length > 0) {
+                  for (let i = 0; i < inPlayer.length; i++) {
+                    if (inPlayer[i].dropPowerUp && !inPlayer[i].isShielded) {
+                      inPlayer[i].damage(0.2 * b.dmgScale);
+                      mech.energy -= 0.002;
+                      break;
+                    }
+                  }
+                }
+              }
             } else {
               mech.fieldCDcycle = mech.cycle + 120;
             }

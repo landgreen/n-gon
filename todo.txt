@@ -1,5 +1,22 @@
 ************** TODO - n-gon **************
 
+mod - blocking with nano-scale is more efficient
+
+mod - time dilation - Quantum Recovery
+  Expending all your energy while using the field will
+    cause the player to go back in time to 3 seconds before the field was activated
+      resets ammo?, health, position, velocity
+      need to track player info in game.checks() in an array
+        put the array in the time field object
+    cause the player to go back in time when the field was first activated (easier then going back to 3 seconds before)
+
+mod - phase decoherence - Atomic Reconfigure
+  While moving and using the field, any enemies you pass through are damaged
+
+mod - grenade explosions stun enemies
+  stun - blind, slow, but increase gravity effects
+    use status effect code
+
 bug getting stuck in crouch mode
   press T to see it visually
   happened twice
@@ -18,10 +35,6 @@ mod - get your next recursive mod 3 times
 
 mod - vacuum bomb needs a mod
 mod - grenade needs a mod
-mod - time dilation field needs a mod
-mod - phase decoherence field needs a mod
-
-buff mod field radius for standing wave harmonics
 
 settings - auto aim at nearest mob
 settings - custom keys binding
