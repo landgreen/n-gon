@@ -241,6 +241,7 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
 let localSettings = JSON.parse(localStorage.getItem("localSettings"));
 // console.log(localSettings)
 if (localSettings) {
+  console.log('exist')
   game.isBodyDamage = localSettings.isBodyDamage
   document.getElementById("body-damage").checked = localSettings.isBodyDamage
 
@@ -266,6 +267,7 @@ if (localSettings) {
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
   document.getElementById("body-damage").checked = localSettings.isBodyDamage
   document.getElementById("track-pad-mode").checked = localSettings.isEasyToAimMode
+  game.isEasyToAimMode = localSettings.isEasyToAimMode
   document.getElementById("difficulty-select").value = localSettings.difficultyMode
   document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }

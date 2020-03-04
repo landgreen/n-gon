@@ -461,7 +461,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modCollisionImmuneCycles > 120
+        return b.modCollisionImmuneCycles > 30
       },
       requires: "Pauli exclusion",
       effect() {
@@ -744,7 +744,7 @@ const b = {
       },
       requires: "minigun",
       effect() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "minigun") {
             b.guns[i].ammoPack = Infinity
             b.guns[i].recordedAmmo = b.guns[i].ammo
@@ -755,7 +755,7 @@ const b = {
         }
       },
       remove() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "minigun") {
             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
             b.guns[i].ammo = b.guns[i].recordedAmmo
@@ -809,21 +809,21 @@ const b = {
       effect() {
         b.isModFlechetteMultiShot = true;
         //cut current ammo by 1/3
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
         }
         //cut ammo packs by 1/3
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
           if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
         }
         game.updateGunHUD();
       },
       remove() {
         b.isModFlechetteMultiShot = false;
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
         }
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
         game.updateGunHUD();
@@ -889,12 +889,12 @@ const b = {
       },
       requires: "flak",
       effect() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
         }
       },
       remove() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
       }
@@ -2320,7 +2320,7 @@ const b = {
         const END = Math.floor(mech.crouch ? 30 : 18);
         const side1 = 17 * b.modBulletSize
         const side2 = 4 * b.modBulletSize
-        const totalBullets = 5
+        const totalBullets = 6
         const angleStep = (mech.crouch ? 0.06 : 0.25) / totalBullets
         let dir = mech.angle - angleStep * totalBullets / 2;
 
@@ -2337,7 +2337,7 @@ const b = {
           bullet[me].endCycle = 2 * i + game.cycle + END
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
-          bullet[me].explodeRad = (mech.crouch ? 95 : 70) + (Math.random() - 0.5) * 50;
+          bullet[me].explodeRad = (mech.crouch ? 95 : 75) + (Math.random() - 0.5) * 50;
           bullet[me].onEnd = function () {
             b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
           }
