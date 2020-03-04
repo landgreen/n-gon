@@ -357,7 +357,7 @@ const mobs = {
           if (!mech.isStealth) vertexCollision(this.position, look, [player]);
           // hitting player
           if (best.who === player) {
-            dmg = 0.0015 * game.dmgScale;
+            dmg = 0.0012 * game.dmgScale;
             mech.damage(dmg);
             //draw damage
             ctx.fillStyle = "#f00";

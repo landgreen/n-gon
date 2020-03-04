@@ -102,7 +102,7 @@ const powerUps = {
       function pick(who, skip1 = -1, skip2 = -1, skip3 = -1) {
         let options = [];
         for (let i = 1; i < who.length; i++) {
-          if (i !== mech.fieldMode && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
+          if (i !== mech.fieldMode && (!game.isEasyToAimMode || mech.fieldUpgrades[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
         }
         if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
       }
@@ -183,7 +183,7 @@ const powerUps = {
       function pick(who, skip1 = -1, skip2 = -1, skip3 = -1) {
         let options = [];
         for (let i = 0; i < who.length; i++) {
-          if (!who[i].have && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
+          if (!who[i].have && (!game.isEasyToAimMode || b.guns[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
         }
         if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
       }

@@ -104,15 +104,18 @@
 					</select>
 					<br>
 					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
-					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:16px; height:16px;">
+					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;">
 					<br>
-					<label for="fps-select" title="use this to slow the game down">frames per second cap:</label>
+					<label for="track-pad-mode" title="remove random power ups that don't work well with a track pad">remove power ups that require aiming:</label>
+					<input type="checkbox" id="track-pad-mode" name="track-pad-mode" style="width:17px; height:17px;">
+					<br>
+					<label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
 					<select name="fps-select" id="fps-select">
-						<option value="max">no fps cap</option>
-						<option value="72" selected>72 fps cap</option>
-						<option value="60">60 fps cap</option>
-						<option value="45">45 fps cap</option>
-						<option value="30">30 fps cap</option>
+						<option value="max" selected>no cap</option>
+						<option value="72">72 fps</option>
+						<option value="60">60 fps</option>
+						<option value="45">45 fps</option>
+						<option value="30">30 fps</option>
 					</select>
 				</div>
 			</details>

@@ -1,9 +1,47 @@
 ************** TODO - n-gon **************
 
-mod - flechettes mod for poison damage
-  other flechettes multi-shot is disabled
-mod - flechettes are guided towards targets
+mod - blocking with nano-scale is more efficient
 
+mod - time dilation - Quantum Recovery
+  Expending all your energy while using the field will
+    cause the player to go back in time to 3 seconds before the field was activated
+      resets ammo?, health, position, velocity
+      need to track player info in game.checks() in an array
+        put the array in the time field object
+    cause the player to go back in time when the field was first activated (easier then going back to 3 seconds before)
+
+mod - phase decoherence - Atomic Reconfigure
+  While moving and using the field, any enemies you pass through are damaged
+
+mod - grenade explosions stun enemies
+  stun - blind, slow, but increase gravity effects
+    use status effect code
+
+bug getting stuck in crouch mode
+  press T to see it visually
+  happened twice
+    once right after selecting a mod  lots of blocks around
+      I don't think I was holding a block
+      might have been standing on a block... not sure
+
+mobs - add in a function to the main loops that does injected code for each mob
+  each mob would get an object with a game.cycle for ending and a method to run each cycle until the end is met
+  this could be a DOT, graphics, slow
+  mod - flechettes mod for poison damage
+
+mod - get your next recursive mod 3 times
+  are players aware of what a recursive mod is?
+  too much of a nova drift rip off?
+
+mod - vacuum bomb needs a mod
+mod - grenade needs a mod
+
+settings - auto aim at nearest mob
+settings - custom keys binding
+
+mod - rocket propelled grenades
+  grenades do +20% damage and move in an accelerating path
+  maybe explode on collision with map?
 
 gun - buff vacuum bomb
   its weak late game
@@ -14,10 +52,6 @@ gun - buff vacuum bomb
   mod - double explosions?
   mod - doesn't suck player in?
   
-mod - negative mass field does damage to mobs in zone
-
-mod - rail gun burst on impact into nails
-
 mod - make bodies destroyable
   they drop ammo and heals
 
@@ -46,6 +80,9 @@ lore - a robot (the player) gains self awareness
 atmosphere levels: change the pace, give the user a rest between combat
   low or no combat, but more graphics
   explore lore
+    find power ups in "wrecked" mechs representing previous simulations
+      how you could leave something in one simulation that effects a different simulation
+        Maybe some strange quantum physics principle.
     add text for player thoughts?
   simple puzzles
   cool looking stuff

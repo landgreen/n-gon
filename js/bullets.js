@@ -54,12 +54,17 @@ const b = {
   modWaveSpeedBody: null,
   modFieldEfficiency: null,
   isModSporeField: null,
+  isModMissileField: null,
   isModFlechetteMultiShot: null,
   isModMineAmmoBack: null,
+  isModPlasmaRange: null,
+  isModRailNails: null,
+  isModHawking: null,
+  modBabyMissiles: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
-      b.modAcidDmg = 0.9
+      b.modAcidDmg = 0.7
     } else {
       game.playerDmgColor = "rgba(0,0,0,0.7)"
       b.modAcidDmg = 0
@@ -83,7 +88,7 @@ const b = {
     },
     {
       name: "fluoroantimonic acid",
-      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br>only <strong>active</strong> when you are above <strong>80% health</strong>",
+      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -118,7 +123,7 @@ const b = {
     },
     {
       name: "fracture analysis",
-      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware enemies<br><em>unaware enemies don't have a health bar</em>",
+      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware mobs<br><em>unaware mobs don't have a health bar</em>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -149,44 +154,12 @@ const b = {
       }
     },
     {
-      name: "reaction inhibitor",
-      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect: () => {
-        b.modMobDieAtHealth = 0.15
-      },
-      remove() {
-        b.modMobDieAtHealth = 0.05;
-      }
-    },
-    {
-      name: "thermal runaway",
-      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.modMobDieAtHealth > 0.05
-      },
-      requires: "reaction inhibitor",
-      effect: () => {
-        b.isModExplodeMob = true;
-      },
-      remove() {
-        b.isModExplodeMob = false;
-      }
-    },
-    {
       name: "high explosives",
       description: "<strong class='color-e'>explosions</strong> do <strong>+20%</strong> more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is +44% <strong>larger</strong>",
       maxCount: 3,
       count: 0,
       allowed() {
-        return b.haveGunCheck("missiles") || b.haveGunCheck("flak") || b.haveGunCheck("grenades") || b.haveGunCheck("vacuum bomb") || b.haveGunCheck("pulse");
+        return b.haveGunCheck("missiles") || b.haveGunCheck("flak") || b.haveGunCheck("grenades") || b.haveGunCheck("vacuum bomb") || b.haveGunCheck("pulse") || b.isModMissileField;
       },
       requires: "an explosive gun",
       effect: () => {
@@ -212,7 +185,22 @@ const b = {
         b.isModImmuneExplosion = false;
       }
     },
-
+    {
+      name: "thermal runaway",
+      description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModImmuneExplosion
+      },
+      requires: "electric reactive armour",
+      effect: () => {
+        b.isModExplodeMob = true;
+      },
+      remove() {
+        b.isModExplodeMob = false;
+      }
+    },
     {
       name: "auto-loading heuristics",
       description: "your <strong>delay</strong> after firing is <strong>+14% shorter</strong>",
@@ -243,42 +231,6 @@ const b = {
       },
       remove() {
         b.modNoAmmo = 0;
-      }
-    },
-    {
-      name: "Lorentzian topology",
-      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
-      maxCount: 3,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam")
-      },
-      requires: "drones, spores, super balls,<br> foam, or wave beam",
-      effect() {
-        b.isModBulletsLastLonger += 0.33
-      },
-      remove() {
-        b.isModBulletsLastLonger = 1;
-      }
-    },
-
-    {
-      name: "zoospore vector",
-      description: "enemies discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.modSporesOnDeath += 0.11;
-        for (let i = 0; i < 10; i++) {
-          b.spore(player)
-        }
-      },
-      remove() {
-        b.modSporesOnDeath = 0;
       }
     },
     {
@@ -335,35 +287,55 @@ const b = {
       }
     },
     {
-      name: "bremsstrahlung radiation",
-      description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
+      name: "Lorentzian topology",
+      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam")
+      },
+      requires: "drones, spores, super balls,<br> foam, or wave beam",
+      effect() {
+        b.isModBulletsLastLonger += 0.33
+      },
+      remove() {
+        b.isModBulletsLastLonger = 1;
+      }
+    },
+
+    {
+      name: "zoospore vector",
+      description: "mobs discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+        return true
       },
-      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
+      requires: "",
       effect() {
-        b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+        b.modSporesOnDeath += 0.11;
+        for (let i = 0; i < 10; i++) {
+          b.spore(player)
+        }
       },
       remove() {
-        b.modBlockDmg = 0;
+        b.modSporesOnDeath = 0;
       }
     },
     {
-      name: "field superposition",
-      description: "increase your <strong>field radius</strong> by <strong>40%</strong>",
+      name: "reaction inhibitor",
+      description: "mobs <strong>die</strong> if their life goes below <strong>12%</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field"
+        return true
       },
-      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
-      effect() {
-        mech.fieldRange = 175 * 1.4
+      requires: "",
+      effect: () => {
+        b.modMobDieAtHealth = 0.15
       },
       remove() {
-        mech.fieldRange = 175;
+        b.modMobDieAtHealth = 0.05;
       }
     },
     {
@@ -468,7 +440,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with enemies for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `unable to <strong>collide</strong> with mobs for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -485,11 +457,11 @@ const b = {
     },
     {
       name: "annihilation",
-      description: "after <strong>touching</strong> enemies, they are <strong>annihilated</strong>",
+      description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modCollisionImmuneCycles > 120
+        return b.modCollisionImmuneCycles > 30
       },
       requires: "Pauli exclusion",
       effect() {
@@ -535,7 +507,7 @@ const b = {
     },
     {
       name: "piezoelectricity",
-      description: "<strong>colliding</strong> with enemies charges your <strong class='color-f'>energy</strong>",
+      description: "<strong>colliding</strong> with mobs charges your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -548,6 +520,22 @@ const b = {
       },
       remove() {
         b.isModPiezo = false;
+      }
+    },
+    {
+      name: "bremsstrahlung radiation",
+      description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field" && !(b.isModHawking && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field")
+      },
+      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
+      effect() {
+        b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+      },
+      remove() {
+        b.modBlockDmg = 0;
       }
     },
     {
@@ -668,7 +656,7 @@ const b = {
     },
     {
       name: "catabolism",
-      description: "when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>convert <strong>3%</strong> of current health into <strong>ammo</strong>",
+      description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong>health</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -744,38 +732,8 @@ const b = {
         //nothing to undo
       }
     },
-    {
-      name: "redundant systems",
-      description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField)
-      },
-      requires: "drones",
-      effect() {
-        b.isModDroneCollide = true
-      },
-      remove() {
-        b.isModDroneCollide = true;
-      }
-    },
-    {
-      name: "tinsellated flagella",
-      description: "your <strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
-      },
-      requires: "spores",
-      effect() {
-        b.isModFastSpores = true
-      },
-      remove() {
-        b.isModFastSpores = false
-      }
-    },
+
+
     {
       name: "crystal nucleation",
       description: "fire <strong>crystals</strong> formed from the air<br>your <strong>minigun</strong> no longer requires <strong>ammo<strong>",
@@ -786,7 +744,7 @@ const b = {
       },
       requires: "minigun",
       effect() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "minigun") {
             b.guns[i].ammoPack = Infinity
             b.guns[i].recordedAmmo = b.guns[i].ammo
@@ -797,7 +755,7 @@ const b = {
         }
       },
       remove() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "minigun") {
             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
             b.guns[i].ammo = b.guns[i].recordedAmmo
@@ -805,12 +763,27 @@ const b = {
             break;
           }
         }
-
+      }
+    },
+    {
+      name: "shotgun spin-statistics",
+      description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to collisions for <strong>1/2</strong> a second",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("shotgun")
+      },
+      requires: "shotgun",
+      effect() {
+        b.isModShotgunImmune = true;
+      },
+      remove() {
+        b.isModShotgunImmune = false;
       }
     },
     {
       name: "super duper",
-      description: "you fire <strong>+1</strong> additional <strong>super ball</strong>",
+      description: "fire <strong>+1</strong> additional <strong>super ball</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -825,23 +798,85 @@ const b = {
       }
     },
     {
-      name: "specular reflection",
-      description: "your <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+30%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      name: "fléchettes cartridges",
+      description: "<strong>fléchettes</strong> release <strong>three</strong> needles in each shot<br><strong>ammo</strong> cost are increases by <strong>3x</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("fléchettes")
+      },
+      requires: "fléchettes",
+      effect() {
+        b.isModFlechetteMultiShot = true;
+        //cut current ammo by 1/3
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+        }
+        //cut ammo packs by 1/3
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+        }
+        game.updateGunHUD();
+      },
+      remove() {
+        b.isModFlechetteMultiShot = false;
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
+        }
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+        }
+        game.updateGunHUD();
+      }
+    },
+    {
+      name: "wave phase velocity",
+      description: "the <strong>wave beam</strong> propagates faster in solids",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("wave beam")
+      },
+      requires: "wave beam",
+      effect() {
+        b.modWaveSpeedMap = 3
+        b.modWaveSpeedBody = 1.9
+      },
+      remove() {
+        b.modWaveSpeedMap = 0.08
+        b.modWaveSpeedBody = 0.25
+      }
+    },
+    {
+      name: "pocket universe",
+      description: "<strong>wave beam</strong> bullets last <strong>4</strong> times longer<br>bullets are <strong>confined</strong> to a <strong>region</strong> around player",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("wave beam")
+      },
+      requires: "wave beam",
+      effect() {
+        b.isModWaveReflect = true
+      },
+      remove() {
+        b.isModWaveReflect = false
+      }
+    },
+    {
+      name: "self-replication",
+      description: "when <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they fire <strong>+1</strong> smaller <strong>missiles</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
-        return b.haveGunCheck("laser")
+        return b.haveGunCheck("missiles") || b.isModMissileField
       },
-      requires: "laser",
+      requires: "missiles",
       effect() {
-        b.modLaserReflections++;
-        b.modLaserDamage += 0.015; //base is 0.05
-        b.modLaserFieldDrain += 0.0006 //base is 0.002
+        b.modBabyMissiles++
       },
       remove() {
-        b.modLaserReflections = 2;
-        b.modLaserDamage = 0.05;
-        b.modLaserFieldDrain = 0.002;
+        b.modBabyMissiles = 0;
       }
     },
     {
@@ -854,14 +889,62 @@ const b = {
       },
       requires: "flak",
       effect() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 + this.count);
         }
       },
       remove() {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
+      }
+    },
+    {
+      name: "mine reclamation",
+      description: "retrieve <strong>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("mine")
+      },
+      requires: "mine",
+      effect() {
+        b.isModMineAmmoBack = true;
+      },
+      remove() {
+        b.isModMineAmmoBack = false;
+      }
+    },
+    {
+      name: "tinsellated flagella",
+      description: "<strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
+      },
+      requires: "spores",
+      effect() {
+        b.isModFastSpores = true
+      },
+      remove() {
+        b.isModFastSpores = false
+      }
+    },
+    {
+      name: "redundant systems",
+      description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField))
+      },
+      requires: "drones",
+      effect() {
+        b.isModDroneCollide = true
+      },
+      remove() {
+        b.isModDroneCollide = true;
       }
     },
     {
@@ -881,94 +964,48 @@ const b = {
       }
     },
     {
-      name: "wave phase velocity",
-      description: "your <strong>wave beam</strong> propagates faster through solids",
+      name: "fragmenting projectiles",
+      description: "<strong>rail gun</strong> fragments into nails after hitting mobs at high speeds",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("wave beam")
+        return b.haveGunCheck("rail gun")
       },
-      requires: "wave beam",
+      requires: "rail gun",
       effect() {
-        b.modWaveSpeedMap = 3
-        b.modWaveSpeedBody = 1.9
+        b.isModRailNails = true;
       },
       remove() {
-        b.modWaveSpeedMap = 0.08
-        b.modWaveSpeedBody = 0.25
+        b.isModRailNails = false;
       }
     },
     {
-      name: "shotgun spin-statistics",
-      description: "firing your <strong>shotgun</strong> makes you <br><strong>immune</strong> to collisions for <strong>1/2</strong> a second",
-      maxCount: 1,
+      name: "specular reflection",
+      description: "the <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+33%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      maxCount: 9,
       count: 0,
       allowed() {
-        return b.haveGunCheck("shotgun")
+        return b.haveGunCheck("laser")
       },
-      requires: "shotgun",
+      requires: "laser",
       effect() {
-        b.isModShotgunImmune = true;
+        b.modLaserReflections++;
+        b.modLaserDamage += 0.02; //base is 0.05
+        b.modLaserFieldDrain += 0.0006 //base is 0.002
       },
       remove() {
-        b.isModShotgunImmune = false;
-      }
-    },
-    {
-      name: "fléchettes cartridges",
-      description: "<strong>fléchettes</strong> release <strong>three</strong> needles in each shot<br><strong>ammo</strong> cost are increases by <strong>3x</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("fléchettes")
-      },
-      requires: "fléchettes",
-      effect() {
-        b.isModFlechetteMultiShot = true;
-        //cut current ammo by 1/3
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
-        }
-        //cut ammo packs by 1/3
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
-        }
-        game.updateGunHUD();
-      },
-      remove() {
-        b.isModFlechetteMultiShot = false;
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
-        }
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is flak
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-        }
-        game.updateGunHUD();
-      }
-    },
-    {
-      name: "mine reclamation",
-      description: "<strong>ammo</strong> from undetonated <strong>mines</strong> is returned<br><em>at the end of a level or after 2000 second</em>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("mine")
-      },
-      requires: "mine",
-      effect() {
-        b.isModMineAmmoBack = true;
-      },
-      remove() {
-        b.isModMineAmmoBack = false;
+        b.modLaserReflections = 2;
+        b.modLaserDamage = 0.06;
+        b.modLaserFieldDrain = 0.002;
       }
     },
     {
       name: "perfect diamagnetism",
-      description: "when <strong>blocking</strong> with the basic <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
+      description: "when <strong>blocking</strong> with the starting <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "field emitter"
+        return mech.fieldUpgrades[mech.fieldMode].name === "field emitter" && !game.isEasyToAimMode
       },
       requires: "basic field emitter",
       effect() {
@@ -981,12 +1018,62 @@ const b = {
       }
     },
     {
-      name: "mycelium manufacturing",
-      description: "<strong>nano-scale manufacturing</strong> is modified to<br>grow <strong style='letter-spacing: 2px;'>spores</strong> instead of drones",
+      name: "plasma jet",
+      description: "increase <strong>plasma torch's</strong> range by <strong>33%</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+      },
+      requires: "plasma torch",
+      effect() {
+        b.isModPlasmaRange += 0.33;
+      },
+      remove() {
+        b.isModPlasmaRange = 1;
+      }
+    },
+    {
+      name: "Hawking radiation",
+      description: "<strong>negative mass field</strong> leaks virtual particles<br>mobs inside the field take <strong class='color-d'>damage</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+        return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+      },
+      requires: "negative mass field",
+      effect() {
+        b.isModHawking = true;
+      },
+      remove() {
+        b.isModHawking = 0;
+      }
+    },
+    {
+      name: "frequency resonance",
+      description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>30%</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+      },
+      requires: "standing wave harmonics",
+      effect() {
+        mech.fieldRange += 175 * 0.2
+        mech.fieldShieldingScale *= 0.7
+      },
+      remove() {
+        mech.fieldRange = 175;
+        mech.fieldShieldingScale = 1;
+      }
+    },
+    {
+      name: "mycelium manufacturing",
+      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong style='letter-spacing: 2px;'>spores</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModMissileField
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -994,6 +1081,38 @@ const b = {
       },
       remove() {
         b.isModSporeField = false;
+      }
+    },
+    {
+      name: "missile manufacturing",
+      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField
+      },
+      requires: "nano-scale manufacturing",
+      effect() {
+        b.isModMissileField = true;
+      },
+      remove() {
+        b.isModMissileField = false;
+      }
+    },
+    {
+      name: "quantum dissipation",
+      description: "<strong>phase decoherence field</strong> uses <strong class='color-f'>energy</strong> to <br><strong class='color-d'>damage</strong> unshielded <strong>mobs</strong> that you <strong>overlap</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
+      },
+      requires: "phase decoherence field",
+      effect() {
+        b.isModPhaseFieldDamage = true;
+      },
+      remove() {
+        b.isModPhaseFieldDamage = false;
       }
     },
   ],
@@ -1227,7 +1346,7 @@ const b = {
 
     if (dist < radius) {
       if (b.isModImmuneExplosion) {
-        const drain = Math.max(radius * 0.0006, 0.2)
+        const drain = Math.max(radius * 0.0004, 0.2)
         if (mech.energy > drain) {
           mech.energy -= drain
         } else {
@@ -1302,6 +1421,101 @@ const b = {
       }
     }
   },
+  missile(where, dir, speed, size = 1, spawn = 0) {
+    const me = bullet.length;
+    bullet[me] = Bodies.rectangle(where.x, where.y, 30 * b.modBulletSize * size, 4 * b.modBulletSize * size, b.fireAttributes(dir));
+    const thrust = 0.00417 * bullet[me].mass;
+    Matter.Body.setVelocity(bullet[me], {
+      x: mech.Vx / 2 + speed * Math.cos(dir),
+      y: mech.Vy / 2 + speed * Math.sin(dir)
+    });
+    World.add(engine.world, bullet[me]); //add bullet to world
+    bullet[me].frictionAir = 0.023
+    bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
+    bullet[me].explodeRad = 170 + 60 * Math.random();
+    bullet[me].lookFrequency = Math.floor(21 + Math.random() * 7);
+    bullet[me].onEnd = function () {
+      b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
+      for (let i = 0; i < spawn; i++) {
+        b.missile(this.position, 2 * Math.PI * Math.random(), 0, 0.75)
+      }
+    }
+    bullet[me].onDmg = function () {
+      this.tryToLockOn();
+      // this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
+    };
+    bullet[me].lockedOn = null;
+    bullet[me].tryToLockOn = function () {
+      this.lockedOn = null;
+      let closeDist = Infinity;
+
+      //look for closest target to where the missile will be in 30 cycles
+      const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 30))
+      for (let i = 0, len = mob.length; i < len; ++i) {
+        if (
+          mob[i].alive && mob[i].dropPowerUp &&
+          Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+          Matter.Query.ray(body, this.position, mob[i].position).length === 0
+        ) {
+          const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
+          if (futureDist < closeDist) {
+            closeDist = futureDist;
+            this.lockedOn = mob[i];
+            this.frictionAir = 0.05; //extra friction once a target it locked
+          }
+        }
+      }
+      //explode when bullet is close enough to target
+      if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
+        // console.log('hit')
+        this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
+        this.lockedOn.damage(b.dmgScale * 5 * size); //does extra damage to target
+      }
+    };
+    bullet[me].do = function () {
+      if (!mech.isBodiesAsleep) {
+        if (!(mech.cycle % this.lookFrequency)) {
+          this.tryToLockOn();
+        }
+
+        //rotate missile towards the target
+        if (this.lockedOn) {
+          const face = {
+            x: Math.cos(this.angle),
+            y: Math.sin(this.angle)
+          };
+          const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
+          if (Vector.dot(target, face) > -0.98) {
+            if (Vector.cross(target, face) > 0) {
+              Matter.Body.rotate(this, 0.08);
+            } else {
+              Matter.Body.rotate(this, -0.08);
+            }
+          }
+        }
+        //accelerate in direction bullet is facing
+        const dir = this.angle; // + (Math.random() - 0.5);
+        this.force.x += Math.cos(dir) * thrust;
+        this.force.y += Math.sin(dir) * thrust;
+
+        //draw rocket
+        ctx.beginPath();
+        ctx.arc(this.position.x - Math.cos(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          this.position.y - Math.sin(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          11 * size, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255,155,0,0.5)";
+        ctx.fill();
+      } else {
+        //draw rocket  with time stop
+        ctx.beginPath();
+        ctx.arc(this.position.x - Math.cos(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          this.position.y - Math.sin(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+          11 * size, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255,155,0,0.5)";
+        ctx.fill();
+      }
+    }
+  },
   mine(where, velocity, angle = 0, isAmmoBack = false) {
     const bIndex = bullet.length;
     bullet[bIndex] = Bodies.rectangle(where.x, where.y, 45 * b.modBulletSize, 16 * b.modBulletSize, {
@@ -1320,7 +1534,7 @@ const b = {
       minDmgSpeed: 5,
       stillCount: 0,
       isArmed: false,
-      endCycle: game.cycle + 2000 + 360 * Math.random(),
+      endCycle: Infinity,
       lookFrequency: 41 + Math.floor(23 * Math.random()),
       range: 700,
       onDmg() {},
@@ -1393,23 +1607,13 @@ const b = {
                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                 this.endCycle = 0 //end life if mob is near and visible
-                isAmmoBack = false;
+                if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back from undetonated mines
               }
             }
           }
         }
       },
       onEnd() {
-        if (isAmmoBack) {
-          for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-            if (b.guns[i].name === "mine") {
-              b.guns[i].ammo++
-              game.updateGunHUD();
-              break;
-            }
-          }
-          return
-        }
         if (this.isArmed) {
           const targets = [] //target nearby mobs
           for (let i = 0, len = mob.length; i < len; i++) {
@@ -1438,6 +1642,15 @@ const b = {
                 x: speed * Math.cos(ANGLE),
                 y: speed * Math.sin(ANGLE)
               })
+            }
+          }
+        }
+        if (isAmmoBack) {
+          for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+            if (b.guns[i].name === "mine") {
+              b.guns[i].ammo++
+              game.updateGunHUD();
+              break;
             }
           }
         }
@@ -1838,6 +2051,7 @@ const b = {
       recordedAmmo: 0,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         b.muzzleFlash(15);
@@ -1860,6 +2074,7 @@ const b = {
       ammoPack: 8,
       have: false,
       isStarterGun: true,
+      isEasyToAim: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 55 : 30) * b.modFireRate); // cool down
         if (b.isModShotgunImmune) mech.collisionImmuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
@@ -1891,12 +2106,13 @@ const b = {
     },
     {
       name: "super balls", //2
-      description: "fire <strong>five</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
+      description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 8,
+      ammoPack: 10,
       have: false,
       num: 5,
       isStarterGun: true,
+      isEasyToAim: true,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 20) * b.modFireRate); // cool down
         b.muzzleFlash(20);
@@ -1906,7 +2122,7 @@ const b = {
         let dir = mech.angle - SPREAD * (b.modSuperBallNumber - 1) / 2;
         for (let i = 0; i < b.modSuperBallNumber; i++) {
           const me = bullet.length;
-          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 7 * b.modBulletSize, b.fireAttributes(dir, false));
+          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 7 * b.modBulletSize, b.fireAttributes(dir, false));
           World.add(engine.world, bullet[me]); //add bullet to world
           Matter.Body.setVelocity(bullet[me], {
             x: SPEED * Math.cos(dir),
@@ -1929,10 +2145,11 @@ const b = {
       name: "fléchettes", //3
       description: "fire a volley of <strong>precise</strong> high velocity needles",
       ammo: 0,
-      ammoPack: 24,
-      defaultAmmoPack: 24,
+      ammoPack: 22,
+      defaultAmmoPack: 22,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
@@ -1952,7 +2169,7 @@ const b = {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(angle));
           bullet[me].endCycle = game.cycle + 180;
-          bullet[me].dmg = 1.15;
+          bullet[me].dmg = 1.3;
           bullet[me].do = function () {
             if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
           };
@@ -1977,20 +2194,22 @@ const b = {
       ammoPack: 100,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle
         const SPEED = 10
-        const wiggleMag = mech.crouch ? 4 : 11
+        const wiggleMag = mech.crouch ? 3 : 10
         bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, 5 * b.modBulletSize, {
           angle: dir,
           cycle: 0,
-          endCycle: game.cycle + Math.floor(120 * b.isModBulletsLastLonger),
+          endCycle: game.cycle + Math.floor((b.isModWaveReflect ? 480 : 120) * b.isModBulletsLastLonger),
           inertia: Infinity,
           frictionAir: 0,
           slow: 0,
           minDmgSpeed: 0,
           dmg: 0,
+          isJustReflected: false,
           classType: "bullet",
           collisionFilter: {
             category: 0,
@@ -2013,9 +2232,9 @@ const b = {
                   for (let i = 0; i < q.length; i++) {
                     slowCheck = 0.3;
                     Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                    let dmg = b.dmgScale * 0.1
-                    q[i].foundPlayer();
+                    let dmg = b.dmgScale * 0.5 / Math.sqrt(q[i].mass)
                     q[i].damage(dmg);
+                    q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue
                       x: this.position.x,
                       y: this.position.y,
@@ -2034,6 +2253,40 @@ const b = {
               const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.35))
               Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
             }
+            // if (b.isModWaveReflect) { //single reflection
+            //   const sub = Vector.sub(this.position, mech.pos)
+            //   if (Vector.magnitude(sub) > 630) {
+            //     // Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * POCKET_RANGE))) //teleport to opposite side
+            //     if (!this.isJustReflected) {
+            //       Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1)); //reflect
+            //       this.isJustReflected = true;
+            //     }
+            //   }
+            // }
+
+            if (b.isModWaveReflect) {
+              Matter.Body.setPosition(this, Vector.add(this.position, player.velocity)) //bullets move with player
+              const sub = Vector.sub(this.position, mech.pos)
+              if (Vector.magnitude(sub) > 630) {
+                Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * 630))) //teleport to opposite side
+              }
+            }
+
+            // if (b.isModWaveReflect) {
+            //   Matter.Body.setPosition(this, Vector.add(this.position, player.velocity))  //bullets move with player
+
+            // Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * POCKET_RANGE))) //teleport to opposite side
+
+            // const sub = Vector.sub(this.position, mech.pos)
+            // if (Vector.magnitude(sub) > 630) {  
+            //   if (!this.isJustReflected) {
+            //     Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1)); //reflect
+            //     this.isJustReflected = true;
+            //   }
+            // } else {
+            //   this.isJustReflected = false
+            // }
+            // }
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
@@ -2047,101 +2300,24 @@ const b = {
     },
     {
       name: "missiles",
-      description: "fire missiles that accelerate towards enemies<br><strong class='color-e'>explodes</strong> when near target",
+      description: "fire missiles that accelerate towards mobs<br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
       ammoPack: 4,
       have: false,
       isStarterGun: false,
+      isEasyToAim: true,
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
-        let dir = mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2);
-        const me = bullet.length;
-        bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle) - 3, 30 * b.modBulletSize, 4 * b.modBulletSize, b.fireAttributes(dir));
-        const thrust = 0.00417 * bullet[me].mass;
-        b.fireProps(mech.crouch ? 50 : 25, -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8), dir, me); //cd , speed
-        // bullet[me].collisionFilter.mask = cat.map | cat.body | cat.mobBullet
-        // Matter.Body.setDensity(bullet[me], 0.01)  //doesn't help with reducing explosion knock backs
-        bullet[me].force.y += 0.0005; //a small push down at first to make it seem like the missile is briefly falling
-        bullet[me].frictionAir = 0.023
-        bullet[me].endCycle = game.cycle + Math.floor((280 + 40 * Math.random()) * b.isModBulletsLastLonger);
-        bullet[me].explodeRad = 170 + 60 * Math.random();
-        bullet[me].lookFrequency = Math.floor(21 + Math.random() * 7);
-        bullet[me].onEnd = function () {
-          b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-        }
-        bullet[me].onDmg = function () {
-          this.tryToLockOn();
-          // this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
-        };
-        bullet[me].lockedOn = null;
-        bullet[me].tryToLockOn = function () {
-          this.lockedOn = null;
-          let closeDist = Infinity;
-
-          //look for closest target to where the missile will be in 30 cycles
-          const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 30))
-          for (let i = 0, len = mob.length; i < len; ++i) {
-            if (
-              mob[i].alive && mob[i].dropPowerUp &&
-              Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-              Matter.Query.ray(body, this.position, mob[i].position).length === 0
-            ) {
-              const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
-              if (futureDist < closeDist) {
-                closeDist = futureDist;
-                this.lockedOn = mob[i];
-                this.frictionAir = 0.05; //extra friction once a target it locked
-              }
-            }
-          }
-          //explode when bullet is close enough to target
-          if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
-            // console.log('hit')
-            this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
-            const dmg = b.dmgScale * 5;
-            this.lockedOn.damage(dmg); //does extra damage to target
-          }
-        };
-        bullet[me].do = function () {
-          if (!mech.isBodiesAsleep) {
-            if (!(mech.cycle % this.lookFrequency)) {
-              this.tryToLockOn();
-            }
-
-            //rotate missile towards the target
-            if (this.lockedOn) {
-              const face = {
-                x: Math.cos(this.angle),
-                y: Math.sin(this.angle)
-              };
-              const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
-              if (Vector.dot(target, face) > -0.98) {
-                if (Vector.cross(target, face) > 0) {
-                  Matter.Body.rotate(this, 0.08);
-                } else {
-                  Matter.Body.rotate(this, -0.08);
-                }
-              }
-            }
-            //accelerate in direction bullet is facing
-            const dir = this.angle; // + (Math.random() - 0.5);
-            this.force.x += Math.cos(dir) * thrust;
-            this.force.y += Math.sin(dir) * thrust;
-
-            //draw rocket
-            ctx.beginPath();
-            ctx.arc(this.position.x - Math.cos(this.angle) * 27 + (Math.random() - 0.5) * 4, this.position.y - Math.sin(this.angle) * 27 + (Math.random() - 0.5) * 4, 11, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255,155,0,0.5)";
-            ctx.fill();
-          } else {
-            //draw rocket  with time stop
-            ctx.beginPath();
-            ctx.arc(this.position.x - Math.cos(this.angle) * 27, this.position.y - Math.sin(this.angle) * 27, 11, 0, 2 * Math.PI);
-            ctx.fillStyle = "rgba(255,155,0,0.5)";
-            ctx.fill();
-          }
-        }
+        mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 50 : 25); // cool down
+        b.missile({
+            x: mech.pos.x + 40 * Math.cos(mech.angle),
+            y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
+          },
+          mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
+          -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
+          1, b.modBabyMissiles)
+        bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
       }
     },
     {
@@ -2152,6 +2328,7 @@ const b = {
       defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * b.modFireRate); // cool down
         b.muzzleFlash(30);
@@ -2159,7 +2336,7 @@ const b = {
         const END = Math.floor(mech.crouch ? 30 : 18);
         const side1 = 17 * b.modBulletSize
         const side2 = 4 * b.modBulletSize
-        const totalBullets = 5
+        const totalBullets = 6
         const angleStep = (mech.crouch ? 0.06 : 0.25) / totalBullets
         let dir = mech.angle - angleStep * totalBullets / 2;
 
@@ -2176,7 +2353,7 @@ const b = {
           bullet[me].endCycle = 2 * i + game.cycle + END
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
-          bullet[me].explodeRad = (mech.crouch ? 95 : 70) + (Math.random() - 0.5) * 50;
+          bullet[me].explodeRad = (mech.crouch ? 95 : 75) + (Math.random() - 0.5) * 50;
           bullet[me].onEnd = function () {
             b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
           }
@@ -2196,6 +2373,7 @@ const b = {
       ammoPack: 7,
       have: false,
       isStarterGun: false,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
@@ -2226,17 +2404,18 @@ const b = {
       ammoPack: 2,
       have: false,
       isStarterGun: false,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 35 * b.modBulletSize, b.fireAttributes(dir, false));
-        b.fireProps(10, mech.crouch ? 42 : 26, dir, me); //cd , speed
+        b.fireProps(10, mech.crouch ? 42 : 28, dir, me); //cd , speed
 
         Matter.Body.setDensity(bullet[me], 0.0002);
         bullet[me].restitution = 0.2;
         bullet[me].friction = 0.3;
         bullet[me].endCycle = Infinity
-        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 60);
+        bullet[me].explodeRad = 440 + Math.floor(Math.random() * 30);
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
         }
@@ -2264,7 +2443,7 @@ const b = {
               const that = this
               let mag = 0.1
 
-              function suck(who, radius = that.explodeRad * 2) {
+              function suck(who, radius = that.explodeRad * 3) {
                 for (i = 0, len = who.length; i < len; i++) {
                   const sub = Vector.sub(that.position, who[i].position);
                   const dist = Vector.magnitude(sub);
@@ -2277,18 +2456,18 @@ const b = {
               }
               if (game.cycle > this.endCycle - 5) {
                 mag = -0.22
-                suck(body)
-                suck(mob)
-                suck(powerUp)
-                suck(bullet)
-                suck([player])
+                suck(mob, this.explodeRad * 3)
+                suck(body, this.explodeRad * 2)
+                suck(powerUp, this.explodeRad * 1.5)
+                suck(bullet, this.explodeRad * 1.5)
+                suck([player], this.explodeRad * 1.5)
               } else {
                 mag = 0.1
-                suck(body)
-                suck(mob)
-                suck(powerUp)
-                suck(bullet)
-                suck([player])
+                suck(mob, this.explodeRad * 3)
+                suck(body, this.explodeRad * 2)
+                suck(powerUp, this.explodeRad * 1.5)
+                suck(bullet, this.explodeRad * 1.5)
+                suck([player], this.explodeRad * 1.5)
               }
               //keep bomb in place
               Matter.Body.setVelocity(this, {
@@ -2296,7 +2475,7 @@ const b = {
                 y: 0
               });
               //draw suck
-              const radius = 2.5 * this.explodeRad * (this.endCycle - game.cycle) / 35
+              const radius = 3 * this.explodeRad * (this.endCycle - game.cycle) / 35
               ctx.fillStyle = "rgba(0,0,0,0.1)";
               ctx.beginPath();
               ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
@@ -2328,11 +2507,12 @@ const b = {
     },
     {
       name: "mine", //9
-      description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at enemies within range",
+      description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 2 : 3,
       have: false,
       isStarterGun: false,
+      isEasyToAim: true,
       fire() {
         const speed = mech.crouch ? 36 : 22
         b.mine({
@@ -2347,11 +2527,12 @@ const b = {
     },
     {
       name: "spores", //10
-      description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out enemies",
+      description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out mobs",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 3 : 4,
       have: false,
       isStarterGun: false,
+      isEasyToAim: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
@@ -2392,11 +2573,12 @@ const b = {
     },
     {
       name: "drones", //11
-      description: "deploy drones that <strong>crash</strong> into enemies<br>collisions reduce their <strong>lifespan</strong> by 1 second",
+      description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: (game.difficultyMode > 3) ? 8 : 10,
+      ammoPack: 10,
       have: false,
       isStarterGun: true,
+      isEasyToAim: true,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 5) * b.modFireRate); // cool down
@@ -2404,11 +2586,12 @@ const b = {
     },
     {
       name: "foam", //12
-      description: "spray bubbly foam that <strong>sticks</strong> to enemies<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
+      description: "spray bubbly foam that <strong>sticks</strong> to mobs<br>does <strong class='color-d'>damage</strong> over time and <strong>slows</strong> movement",
       ammo: 0,
       ammoPack: 35,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 12 : 5) * b.modFireRate); // cool down
         const me = bullet.length;
@@ -2508,6 +2691,7 @@ const b = {
       ammoPack: 2.84,
       have: false,
       isStarterGun: false,
+      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(0, 0, 0.015 * b.modBulletSize, 0.0015 * b.modBulletSize, {
@@ -2531,6 +2715,37 @@ const b = {
               });
               Matter.Body.setDensity(this, 0.001);
               // this.endCycle = 0;
+            }
+            if (b.isModRailNails && this.speed > 10) {
+              const targets = [] //target nearby mobs
+              for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].dropPowerUp) {
+                  const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                  if (dist < 1000000 && //1000*1000
+                    Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                    Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                    targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
+                  }
+                }
+              }
+              for (let i = 0; i < this.speed - 10; i++) {
+                const speed = 50 + 10 * Math.random()
+                if (targets.length > 0) { // aim near a random target in array
+                  const index = Math.floor(Math.random() * targets.length)
+                  const SPREAD = 150 / targets.length
+                  const WHERE = {
+                    x: targets[index].x + SPREAD * (Math.random() - 0.5),
+                    y: targets[index].y + SPREAD * (Math.random() - 0.5)
+                  }
+                  b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
+                } else { // aim in random direction
+                  const ANGLE = 2 * Math.PI * Math.random()
+                  b.nail(this.position, {
+                    x: speed * Math.cos(ANGLE),
+                    y: speed * Math.sin(ANGLE)
+                  })
+                }
+              }
             }
 
           }, //this.endCycle = 0  //triggers despawn
@@ -2719,6 +2934,7 @@ const b = {
       ammoPack: Infinity,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         const reflectivity = 1 - 1 / (b.modLaserReflections * 1.5)
         let damage = b.dmgScale * b.modLaserDamage
@@ -2877,6 +3093,7 @@ const b = {
       ammoPack: Infinity,
       have: false,
       isStarterGun: true,
+      isEasyToAim: false,
       fire() {
         //calculate laser collision
         let best;
