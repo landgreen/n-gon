@@ -1,5 +1,8 @@
 ************** TODO - n-gon **************
 
+mod - vacuum bomb pulls shields off the mob
+  or just greatly damages shields during the suck phase if the pulling doesn't work
+
 mod - blocking with nano-scale is more efficient
 
 mod - time dilation - Quantum Recovery
@@ -10,31 +13,24 @@ mod - time dilation - Quantum Recovery
         put the array in the time field object
     cause the player to go back in time when the field was first activated (easier then going back to 3 seconds before)
 
-mod - phase decoherence - Atomic Reconfigure
-  While moving and using the field, any enemies you pass through are damaged
-
-mod - grenade explosions stun enemies
-  stun - blind, slow, but increase gravity effects
-    use status effect code
-
 bug getting stuck in crouch mode
   press T to see it visually
   happened twice
-    once right after selecting a mod  lots of blocks around
+    once right after selecting a mod lots of blocks around
       I don't think I was holding a block
       might have been standing on a block... not sure
 
 mobs - add in a function to the main loops that does injected code for each mob
   each mob would get an object with a game.cycle for ending and a method to run each cycle until the end is met
-  this could be a DOT, graphics, slow
-  mod - flechettes mod for poison damage
+  this could be a DoT, graphics, slow, blind
+    stun - blind, slow, but increased gravity effects
+  mod - flechettes mod for DoT poison damage
+  mod - grenade explosions stun enemies
+
 
 mod - get your next recursive mod 3 times
   are players aware of what a recursive mod is?
   too much of a nova drift rip off?
-
-mod - vacuum bomb needs a mod
-mod - grenade needs a mod
 
 settings - auto aim at nearest mob
 settings - custom keys binding

@@ -1579,7 +1579,7 @@ const mech = {
     },
     {
       name: "phase decoherence field",
-      description: "become <strong>intangible</strong> and <strong>invisible</strong><br>drains <strong class='color-f'>energy</strong> as you move",
+      description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>moving</strong> and touching <strong>shields</strong> amplifies <strong>cost<strong>",
       isEasyToAim: true,
       effect: () => {
         mech.hold = function () {
@@ -1590,7 +1590,7 @@ const mech = {
             mech.holding();
             mech.throwBlock();
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
-            const DRAIN = 0.00015 + 0.00027 * player.speed
+            const DRAIN = 0.0001 + 0.00017 * player.speed
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
 
@@ -1610,15 +1610,15 @@ const mech = {
               mech.grabPowerUp();
               mech.lookForPickUp();
 
-              if (mech.energy > 0.006 && b.isModPhaseFieldDamage) { //damage mobs inside the player
-                let inPlayer = Matter.Query.region(mob, player.bounds)
-                if (inPlayer.length > 0) {
-                  for (let i = 0; i < inPlayer.length; i++) {
-                    if (inPlayer[i].dropPowerUp && !inPlayer[i].isShielded) {
-                      inPlayer[i].damage(0.2 * b.dmgScale);
-                      mech.energy -= 0.002;
-                      break;
-                    }
+              let inPlayer = Matter.Query.region(mob, player.bounds)
+              if (inPlayer.length > 0) {
+                for (let i = 0; i < inPlayer.length; i++) {
+                  if (inPlayer[i].shield) {
+                    mech.energy -= 0.01; //shields drain player energy
+                  } else if (b.isModPhaseFieldDamage && mech.energy > 0.006 && inPlayer[i].dropPowerUp && !inPlayer[i].isShielded) {
+                    inPlayer[i].damage(0.2 * b.dmgScale); //damage mobs inside the player
+                    mech.energy -= 0.002;
+                    break;
                   }
                 }
               }
