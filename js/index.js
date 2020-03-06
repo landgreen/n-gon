@@ -241,7 +241,6 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
 let localSettings = JSON.parse(localStorage.getItem("localSettings"));
 // console.log(localSettings)
 if (localSettings) {
-  console.log('exist')
   game.isBodyDamage = localSettings.isBodyDamage
   document.getElementById("body-damage").checked = localSettings.isBodyDamage
 

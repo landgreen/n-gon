@@ -1615,9 +1615,31 @@ const mech = {
                 for (let i = 0; i < inPlayer.length; i++) {
                   if (inPlayer[i].shield) {
                     mech.energy -= 0.01; //shields drain player energy
+                    //draw outline of shield
+                    ctx.fillStyle = `rgba(0, 204, 255,0.6)`
+                    ctx.fill()
                   } else if (b.isModPhaseFieldDamage && mech.energy > 0.006 && inPlayer[i].dropPowerUp && !inPlayer[i].isShielded) {
-                    inPlayer[i].damage(0.2 * b.dmgScale); //damage mobs inside the player
+                    inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
                     mech.energy -= 0.002;
+
+                    //draw outline of mob in a few random locations to show blurriness
+                    const vertices = inPlayer[i].vertices;
+                    const off = 30
+                    for (let k = 0; k < 3; k++) {
+                      const xOff = off * (Math.random() - 0.5)
+                      const yOff = off * (Math.random() - 0.5)
+                      ctx.beginPath();
+                      ctx.moveTo(xOff + vertices[0].x, yOff + vertices[0].y);
+                      for (let j = 1, len = vertices.length; j < len; ++j) {
+                        ctx.lineTo(xOff + vertices[j].x, yOff + vertices[j].y);
+                      }
+                      ctx.lineTo(xOff + vertices[0].x, yOff + vertices[0].y);
+                      // ctx.strokeStyle = "#000"
+                      // ctx.lineWidth = 1
+                      // ctx.stroke()
+                      ctx.fillStyle = "rgba(0,0,0,0.3)"
+                      ctx.fill()
+                    }
                     break;
                   }
                 }
