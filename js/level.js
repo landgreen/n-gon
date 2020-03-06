@@ -15,8 +15,8 @@ const level = {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
       // b.giveGuns("wave beam")
-      mech.setField("phase decoherence field")
-      b.giveMod("quantum dissipation");
+      // mech.setField("phase decoherence field")
+      // b.giveMod("quantum dissipation");
       // b.giveMod("reflective cavity");
 
       level.intro(); //starting level

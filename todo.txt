@@ -1,12 +1,12 @@
 ************** TODO - n-gon **************
 
+mod - lose your field, gain a gun and some ammo
+  gain two guns?
+
 mod - vacuum bomb pulls shields off the mob
   or just greatly damages shields during the suck phase if the pulling doesn't work
 mod - vacuum bomb stuns after the explosion
   maybe it also does DoT damage
-
-mod - improve blocking with nano-scale is more efficient
-  like perfect diamagnetism maybe
 
 mod - time dilation - Quantum Recovery
   Expending all your energy while using the field will

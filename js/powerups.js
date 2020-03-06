@@ -25,14 +25,12 @@ const powerUps = {
     game.isChoosing = false; //stops p from un pausing on key down
     requestAnimationFrame(cycle);
   },
-  isCanceledField: false,
   cancel(what) {
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("choose-background").style.display = "none"
     game.paused = false;
     game.isChoosing = false; //stops p from un pausing on key down
-    if (what === "field") powerUps.isCanceledField = true;
     requestAnimationFrame(cycle);
   },
   showDraft() {
@@ -250,7 +248,7 @@ const powerUps = {
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
-    if (mech.fieldMode === 0 && !powerUps.isCanceledField) {
+    if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.80) {

@@ -1000,24 +1000,6 @@ const b = {
       }
     },
     {
-      name: "perfect diamagnetism",
-      description: "you <strong>don't</strong> lose <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>with <strong>nano-scale manufacturing</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
-      },
-      requires: "nano-scale manufacturing",
-      effect() {
-        b.modFieldEfficiency = 0
-        mech.fieldShieldingScale = b.modFieldEfficiency;
-      },
-      remove() {
-        b.modFieldEfficiency = 1;
-        if (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") mech.fieldShieldingScale = b.modFieldEfficiency;
-      }
-    },
-    {
       name: "plasma jet",
       description: "increase <strong>plasma torch's</strong> range by <strong>33%</strong>",
       maxCount: 9,
@@ -1065,6 +1047,24 @@ const b = {
       remove() {
         mech.fieldRange = 175;
         mech.fieldShieldingScale = 1;
+      }
+    },
+    {
+      name: "perfect diamagnetism",
+      description: "you <strong>don't</strong> lose <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>with <strong>nano-scale manufacturing</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+      },
+      requires: "nano-scale manufacturing",
+      effect() {
+        b.modFieldEfficiency = 0
+        mech.fieldShieldingScale = b.modFieldEfficiency;
+      },
+      remove() {
+        b.modFieldEfficiency = 1;
+        if (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") mech.fieldShieldingScale = b.modFieldEfficiency;
       }
     },
     {
