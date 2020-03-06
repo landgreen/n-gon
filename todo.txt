@@ -5,7 +5,8 @@ mod - vacuum bomb pulls shields off the mob
 mod - vacuum bomb stuns after the explosion
   maybe it also does DoT damage
 
-mod - blocking with nano-scale is more efficient, like perfect diamagnetism
+mod - improve blocking with nano-scale is more efficient
+  like perfect diamagnetism maybe
 
 mod - time dilation - Quantum Recovery
   Expending all your energy while using the field will
@@ -15,10 +16,10 @@ mod - time dilation - Quantum Recovery
         put the array in the time field object
     cause the player to go back in time when the field was first activated (easier then going back to 3 seconds before)
 
-bug getting stuck in crouch mode
+bug - getting stuck in crouch mode
   press T to see it visually
-  happened twice
-    once right after selecting a mod lots of blocks around
+  happened twice to me so far
+    once right after selecting a mod with lots of blocks around
       I don't think I was holding a block
       might have been standing on a block... not sure
 

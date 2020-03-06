@@ -1111,7 +1111,6 @@ const mech = {
         if (index === mech.fieldUpgrades[i].name) index = i
       }
     }
-
     mech.fieldMode = index;
     document.getElementById("field").innerHTML = mech.fieldUpgrades[index].name
     mech.setHoldDefaults();
@@ -1122,7 +1121,6 @@ const mech = {
       description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br>lets you <strong>pick up</strong> and <strong>throw</strong> objects",
       isEasyToAim: false,
       effect: () => {
-        mech.fieldShieldingScale = Number(b.modFieldEfficiency);
         game.replaceTextLog = true; //allow text over write
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1535,6 +1533,7 @@ const mech = {
       isEasyToAim: true,
       effect: () => {
         mech.fieldRegen *= 2;
+        mech.fieldShieldingScale = b.modFieldEfficiency;
         mech.hold = function () {
           if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
@@ -1579,7 +1578,7 @@ const mech = {
     },
     {
       name: "phase decoherence field",
-      description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>moving</strong> and touching <strong>shields</strong> amplifies <strong>cost<strong>",
+      description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>moving</strong> and touching <strong>shields</strong> amplifies <strong>cost</strong>",
       isEasyToAim: true,
       effect: () => {
         mech.hold = function () {

@@ -1001,20 +1001,20 @@ const b = {
     },
     {
       name: "perfect diamagnetism",
-      description: "when <strong>blocking</strong> with the starting <strong>field emitter</strong><br>gain <strong class='color-f'>energy</strong> instead losing it",
+      description: "you <strong>don't</strong> lose <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>with <strong>nano-scale manufacturing</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "field emitter" && !game.isEasyToAimMode
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
       },
-      requires: "basic field emitter",
+      requires: "nano-scale manufacturing",
       effect() {
-        b.modFieldEfficiency = -1
+        b.modFieldEfficiency = 0
         mech.fieldShieldingScale = b.modFieldEfficiency;
       },
       remove() {
         b.modFieldEfficiency = 1;
-        if (mech.fieldUpgrades[mech.fieldMode].name === "field emitter") mech.fieldShieldingScale = b.modFieldEfficiency;
+        if (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") mech.fieldShieldingScale = b.modFieldEfficiency;
       }
     },
     {
