@@ -2062,6 +2062,19 @@ const b = {
         bullet[me].endCycle = game.cycle + 70;
         bullet[me].dmg = 0.07;
         bullet[me].frictionAir = mech.crouch ? 0.007 : 0.01;
+        bullet[me].onDmg = function (who) {
+
+          who.status.push({ //slow
+            endCycle: game.cycle + 60,
+            effect() {
+
+              Matter.Body.setVelocity(who, {
+                x: who.velocity.x * 0.8,
+                y: who.velocity.y * 0.8
+              });
+            },
+          })
+        };
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0005;
         };

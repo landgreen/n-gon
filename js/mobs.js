@@ -7,6 +7,11 @@ const mobs = {
     while (i--) {
       if (mob[i].alive) {
         mob[i].do();
+        // let j = mob[i].status.length;
+        // while (j--) {
+        //   mob[i].status[j].effect();
+        //   if (mob[i].status[j].endCycle > game.cycle) mob[i].status.splice(j, 0);
+        // }
       } else {
         mob[i].replace(i); //removing mob and replace with body, this is done here to avoid an array index bug with drawing I think
       }
@@ -96,6 +101,14 @@ const mobs = {
       spawnPos: {
         x: xPos,
         y: yPos
+      },
+      status: [], // [ { effect(), endCycle } ]
+      checkStatus() {
+        let j = this.status.length;
+        while (j--) {
+          this.status[j].effect();
+          if (this.status[j].endCycle < game.cycle) this.status.splice(j, 1);
+        }
       },
       seeAtDistance2: 4000000, //sqrt(4000000) = 2000 = max seeing range
       distanceToPlayer() {

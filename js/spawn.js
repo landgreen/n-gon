@@ -142,6 +142,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
 
     me.do = function () {
+      this.checkStatus()
       this.seePlayerByLookingAt();
       this.attraction();
     };

@@ -14,13 +14,13 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("wave beam")
+      b.giveGuns("minigun")
       // mech.setField("phase decoherence field")
       // b.giveMod("quantum dissipation");
       // b.giveMod("reflective cavity");
 
-      level.intro(); //starting level
-      // level.testingMap();
+      // level.intro(); //starting level
+      level.testingMap();
       // level.bosses();
       // level.satellite();
       // level.skyscrapers();
@@ -140,8 +140,8 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.springer(800, -450);
-    spawn.cellBoss(400, -750);
+    spawn.starter(800, -450);
+    // spawn.cellBoss(400, -750);
 
     // spawn.randomLevelBoss(400, -750)
 

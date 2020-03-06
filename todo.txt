@@ -3,11 +3,6 @@
 mod - lose your field, gain a gun and some ammo
   gain two guns?
 
-mod - vacuum bomb pulls shields off the mob
-  or just greatly damages shields during the suck phase if the pulling doesn't work
-mod - vacuum bomb stuns after the explosion
-  maybe it also does DoT damage
-
 mod - time dilation - Quantum Recovery
   Expending all your energy while using the field will
     cause the player to go back in time to 3 seconds before the field was activated
@@ -30,6 +25,7 @@ mobs - add in a function to the main loops that does injected code for each mob
   mod - flechettes mod for DoT poison damage
   mod - grenade explosions stun enemies
   mod - give crystal minigun a slowing effect and rename it ice crystals 
+  mod - vacuum bomb does DoT damage after exploding
 
 mod - get your next recursive mod 3 times
   are players aware of what a recursive mod is?
@@ -37,10 +33,6 @@ mod - get your next recursive mod 3 times
 
 settings - auto aim at nearest mob
 settings - custom keys binding
-
-mod - rocket propelled grenades
-  grenades do +20% damage and move in an accelerating path
-  maybe explode on collision with map?
 
 gun - buff vacuum bomb
   its weak late game
