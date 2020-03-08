@@ -1,7 +1,7 @@
 ************** TODO - n-gon **************
 
 mod - status effects last 1 second longer
-  stun, slow, poison
+  wait until you have more status effects written
 
 mod - time dilation - Quantum Recovery
   Expending all your energy while using the field will
@@ -71,28 +71,12 @@ atmosphere levels: change the pace, give the user a rest between combat
     in the final level you see your self at the starting level, with the wires
       you shoot your self to wake up?
 
-shotgun - even more short range effects
-
-mod: flechettes - each burst fires an extra flechettes
-mod: flechettes - stick into mobs and do poison damage, like foam
-
-mod: foam - does extra poison dmg  (to get past shields)
-
-mod: vacuum bomb - does a constant suck
-
-mod: shotgun - fire extra shot
-  but also increase spread?
-
 mob: targeting laser, then a high speed, no gravity bullet
 
 css transition for pause menu
 
 field that pushes everything back, and can destroy smaller blocks
   converts blocks into ammo power ups
-
-mod: chance to not die from fatal damage
-  also push mobs and bodies away?
-  also heal?
 
 mod: bot that fires minigun bullets
   only fires when your mouse is held down
