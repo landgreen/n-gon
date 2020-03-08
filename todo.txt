@@ -1,7 +1,7 @@
 ************** TODO - n-gon **************
 
-mod - lose your field, gain a gun and some ammo
-  gain two guns?
+mod - lose your field, gain two guns?
+  lose a random mod, gain a gun?
 
 mod - time dilation - Quantum Recovery
   Expending all your energy while using the field will
@@ -24,12 +24,7 @@ mobs - add in a function to the main loops that does injected code for each mob
     stun - blind, slow, but increased gravity effects
   mod - flechettes mod for DoT poison damage
   mod - grenade explosions stun enemies
-  mod - give crystal minigun a slowing effect and rename it ice crystals 
   mod - vacuum bomb does DoT damage after exploding
-
-mod - get your next recursive mod 3 times
-  are players aware of what a recursive mod is?
-  too much of a nova drift rip off?
 
 settings - auto aim at nearest mob
 settings - custom keys binding

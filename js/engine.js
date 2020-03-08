@@ -138,9 +138,12 @@ function collisionChecks(event) {
             mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
             mob[k].foundPlayer();
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
+            if (b.isModPiezo) {
+              mech.energy = mech.fieldEnergyMax;
+              dmg *= 0.9
+            }
             mech.damage(dmg);
             if (mob[k].onHit) mob[k].onHit(k);
-            if (b.isModPiezo) mech.energy = mech.fieldEnergyMax;
             if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
               mob[k].death();
               game.drawList.push({
@@ -193,17 +196,19 @@ function collisionChecks(event) {
             return;
           }
           //mob + body collisions
-          if (obj.classType === "body" && obj.speed > 5) {
+          if (obj.classType === "body" && obj.speed > 6) {
             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
-            if (v > 8) {
-              let dmg = b.dmgScale * (v * Math.sqrt(obj.mass) * 0.07);
+            if (v > 9) {
+              let dmg = b.dmgScale * (v * obj.mass * 0.07);
+              if (b.isModCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
+              if (mob[k].isShielded) dmg *= 0.5
               mob[k].damage(dmg, true);
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
               game.drawList.push({
                 //add dmg to draw queue
                 x: pairs[i].activeContacts[0].vertex.x,
                 y: pairs[i].activeContacts[0].vertex.y,
-                radius: Math.sqrt(dmg) * 40,
+                radius: Math.log(2 * dmg + 1.1) * 40,
                 color: game.playerDmgColor,
                 time: game.drawTime
               });

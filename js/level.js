@@ -14,9 +14,9 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      b.giveGuns("minigun")
+      b.giveGuns("fléchettes")
       // mech.setField("phase decoherence field")
-      // b.giveMod("quantum dissipation");
+      b.giveMod("irradiated needles");
       // b.giveMod("reflective cavity");
 
       // level.intro(); //starting level
@@ -129,7 +129,7 @@ const level = {
     // powerUps.spawn(950, -425, "gun", false);
     // }
 
-    // spawn.nodeBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
+    spawn.nodeBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     // spawn.bodyRect(-135, -50, 50, 50);
     // spawn.bodyRect(-140, -100, 50, 50);
@@ -140,7 +140,7 @@ const level = {
     // powerUps.spawn(450, -400, "mod", false, 6);
     // powerUps.spawn(450, -400, "mod", false);
     // spawn.bodyRect(-45, -100, 40, 50);
-    spawn.starter(800, -450);
+    spawn.starter(800, -450, 150);
     // spawn.cellBoss(400, -750);
 
     // spawn.randomLevelBoss(400, -750)

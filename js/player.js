@@ -822,20 +822,20 @@ const mech = {
         mech.fieldCDcycle = mech.cycle + 15;
         mech.isHolding = false;
         //bullet-like collisions
-        mech.holdingTarget.collisionFilter.category = cat.bullet;
+        mech.holdingTarget.collisionFilter.category = cat.body; //cat.bullet;
         mech.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
         //check every second to see if player is away from thrown body, and make solid
         const solid = function (that) {
           const dx = that.position.x - player.position.x;
           const dy = that.position.y - player.position.y;
-          if (dx * dx + dy * dy > 10000 && that.speed < 3 && that !== mech.holdingTarget) {
-            that.collisionFilter.category = cat.body; //make solid
-            that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+          if (dx * dx + dy * dy > 10000 && that !== mech.holdingTarget) {
+            // that.collisionFilter.category = cat.body; //make solid
+            that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
           } else {
-            setTimeout(solid, 50, that);
+            setTimeout(solid, 25, that);
           }
         };
-        setTimeout(solid, 200, mech.holdingTarget);
+        setTimeout(solid, 150, mech.holdingTarget);
         //throw speed scales a bit with mass
         const speed = Math.min(85, Math.min(54 / mech.holdingTarget.mass + 5, 48) * Math.min(mech.throwCharge, mech.throwChargeMax) / 50);
 

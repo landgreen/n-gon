@@ -142,9 +142,9 @@ const spawn = {
     Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
 
     me.do = function () {
-      this.checkStatus()
       this.seePlayerByLookingAt();
       this.attraction();
+      this.checkStatus();
     };
   },
   cellBossCulture(x, y, radius = 20, num = 5) {
@@ -204,6 +204,7 @@ const spawn = {
           }
         }
       }
+      this.checkStatus()
     };
     me.onDeath = function () {
       let count = 0 //count other cells
@@ -317,6 +318,7 @@ const spawn = {
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
+      this.checkStatus();
     };
   },
   grower(x, y, radius = 15) {
@@ -328,6 +330,7 @@ const spawn = {
       this.seePlayerByLookingAt();
       this.attraction();
       this.grow();
+      this.checkStatus();
     };
   },
   springer(x, y, radius = 20 + Math.ceil(Math.random() * 35)) {
@@ -376,6 +379,7 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.searchSpring();
+      this.checkStatus();
     };
   },
   hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
@@ -403,6 +407,7 @@ const spawn = {
         this.force.x += forceMag * Math.cos(angle);
         this.force.y += forceMag * Math.sin(angle) - 0.04 * this.mass; //antigravity
       }
+      this.checkStatus();
     };
   },
   spinner(x, y, radius = 30 + Math.ceil(Math.random() * 35)) {
@@ -457,6 +462,7 @@ const spawn = {
       } else {
         this.cdBurst2 = 0;
       }
+      this.checkStatus();
     };
   },
   sucker(x, y, radius = 30 + Math.ceil(Math.random() * 70)) {
@@ -526,6 +532,7 @@ const spawn = {
           ctx.fill();
         }
       }
+      this.checkStatus();
     }
   },
   suckerBoss(x, y, radius = 25) {
@@ -625,6 +632,7 @@ const spawn = {
         }
         this.curl(eventHorizon);
       }
+      this.checkStatus();
     }
   },
   beamer(x, y, radius = 15 + Math.ceil(Math.random() * 15)) {
@@ -642,6 +650,7 @@ const spawn = {
       this.repulsion();
       //laser beam
       this.laserBeam();
+      this.checkStatus();
     };
   },
   focuser(x, y, radius = 30 + Math.ceil(Math.random() * 10)) {
@@ -705,6 +714,7 @@ const spawn = {
           this.laserPos = this.position;
         }
       };
+      this.checkStatus();
     }
   },
   laser(x, y, radius = 30) {
@@ -721,6 +731,7 @@ const spawn = {
       this.seePlayerByLookingAt();
       this.attraction();
       this.laser();
+      this.checkStatus();
     };
   },
   laserBoss(x, y, radius = 30) {
@@ -762,6 +773,7 @@ const spawn = {
       ctx.strokeStyle = "rgba(80,0,255,0.07)";
       ctx.stroke(); // Draw it
       // this.laser(this.vertices[2], this.angle + Math.PI / 3);
+      this.checkStatus();
     };
     me.laser = function (where, angle) {
       const vertexCollision = function (v1, v1End, domain) {
@@ -869,6 +881,7 @@ const spawn = {
       this.attraction();
       this.gravity();
       this.strike();
+      this.checkStatus();
     };
   },
   sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {
@@ -885,7 +898,6 @@ const spawn = {
     me.showHealthBar = false;
     // me.memory = 420;
     me.do = function () {
-
       this.seePlayerCheck();
       this.attraction();
       this.gravity();
@@ -919,6 +931,7 @@ const spawn = {
         this.canTouchPlayer = false;
         this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
       }
+      this.checkStatus();
     };
   },
   ghoster(x, y, radius = 40 + Math.ceil(Math.random() * 100)) {
@@ -976,6 +989,7 @@ const spawn = {
         this.canTouchPlayer = false;
         this.collisionFilter.mask = cat.bullet; //can't touch player or walls
       }
+      this.checkStatus();
     };
   },
   // blinker(x, y, radius = 45 + Math.ceil(Math.random() * 70)) {
@@ -1046,6 +1060,7 @@ const spawn = {
       this.hoverOverPlayer();
       this.bomb();
       this.search();
+      this.checkStatus();
     };
   },
   shooter(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
@@ -1067,6 +1082,7 @@ const spawn = {
     me.do = function () {
       this.seePlayerByLookingAt();
       this.fire();
+      this.checkStatus();
     };
   },
   shooterBoss(x, y, radius = 130) {
@@ -1100,6 +1116,7 @@ const spawn = {
       const sub = Vector.sub(this.homePosition, this.position)
       const dist = Vector.magnitude(sub)
       if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+      this.checkStatus();
     };
   },
   bullet(x, y, radius = 6, sides = 0) {
@@ -1145,6 +1162,7 @@ const spawn = {
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
+      this.checkStatus();
     };
   },
   spawns(x, y, radius = 15 + Math.ceil(Math.random() * 5)) {
@@ -1164,6 +1182,7 @@ const spawn = {
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
+      this.checkStatus();
     };
   },
   exploder(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
@@ -1178,6 +1197,7 @@ const spawn = {
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
+      this.checkStatus();
     };
   },
   snakeBoss(x, y, radius = 80) {
@@ -1196,6 +1216,7 @@ const spawn = {
       this.seePlayerCheck();
       this.attraction();
       this.laserBeam();
+      this.checkStatus();
     };
 
     //snake tail
@@ -1237,6 +1258,7 @@ const spawn = {
       this.gravity();
       this.seePlayerCheck();
       this.attraction();
+      this.checkStatus();
     };
   },
   shield(target, x, y, chance = Math.min(0.02 + game.difficulty * 0.005, 0.2)) {
@@ -1274,7 +1296,9 @@ const spawn = {
       //swap order of shield and mob, so that mob is behind shield graphically
       mob[mob.length - 1] = mob[mob.length - 2];
       mob[mob.length - 2] = me;
-      me.do = function () {};
+      me.do = function () {
+        this.checkStatus();
+      };
     }
   },
   bossShield(targets, x, y, radius) {
@@ -1314,7 +1338,9 @@ const spawn = {
     me.showHealthBar = false;
     mob[mob.length - 1] = mob[mob.length - 1 - nodes];
     mob[mob.length - 1 - nodes] = me;
-    me.do = function () {};
+    me.do = function () {
+      this.checkStatus();
+    };
   },
   //complex constrained mob templates**********************************************************************
   //*******************************************************************************************************

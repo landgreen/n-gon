@@ -61,6 +61,7 @@ const b = {
   isModRailNails: null,
   isModHawking: null,
   modBabyMissiles: null,
+  isModIceCrystals: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -423,22 +424,6 @@ const b = {
       }
     },
     {
-      name: "entanglement",
-      description: "only when your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>10%</strong> for each gun you have",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.isModEntanglement = true
-      },
-      remove() {
-        b.isModEntanglement = false;
-      }
-    },
-    {
       name: "Pauli exclusion",
       description: `unable to <strong>collide</strong> with mobs for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
@@ -506,8 +491,24 @@ const b = {
       }
     },
     {
+      name: "entanglement",
+      description: "<strong>10%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> when your <strong>first gun</strong> is equipped",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModEntanglement = true
+      },
+      remove() {
+        b.isModEntanglement = false;
+      }
+    },
+    {
       name: "piezoelectricity",
-      description: "<strong>colliding</strong> with mobs charges your <strong class='color-f'>energy</strong>",
+      description: "<strong>colliding</strong> with mobs charges your <strong class='color-f'>energy</strong><br><strong>10%</strong> less <strong>harm</strong> from mob collisions",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -735,8 +736,8 @@ const b = {
 
 
     {
-      name: "crystal nucleation",
-      description: "fire <strong>crystals</strong> formed from the air<br>your <strong>minigun</strong> no longer requires <strong>ammo<strong>",
+      name: "ice crystal nucleation",
+      description: "your <strong>minigun</strong> condenses unlimited <strong>ammo</strong><br>ice bullets made from water vapor <strong>slow</strong> mobs",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -744,6 +745,7 @@ const b = {
       },
       requires: "minigun",
       effect() {
+        b.isModIceCrystals = true;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "minigun") {
             b.guns[i].ammoPack = Infinity
@@ -755,6 +757,7 @@ const b = {
         }
       },
       remove() {
+        b.isModIceCrystals = false;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
           if (b.guns[i].name === "minigun") {
             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
@@ -827,6 +830,22 @@ const b = {
           if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
         game.updateGunHUD();
+      }
+    },
+    {
+      name: "irradiated needles",
+      description: "<strong>fléchette</strong> needles are exposed to <strong>radiation</strong><br>needles do <strong>3x</strong> <strong class='color-d'>damage</strong> over <strong>6</strong> seconds",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("fléchettes")
+      },
+      requires: "fléchettes",
+      effect() {
+        b.isModDotFlechette = true;
+      },
+      remove() {
+        b.isModDotFlechette = false;
       }
     },
     {
@@ -2062,19 +2081,11 @@ const b = {
         bullet[me].endCycle = game.cycle + 70;
         bullet[me].dmg = 0.07;
         bullet[me].frictionAir = mech.crouch ? 0.007 : 0.01;
-        bullet[me].onDmg = function (who) {
-
-          who.status.push({ //slow
-            endCycle: game.cycle + 60,
-            effect() {
-
-              Matter.Body.setVelocity(who, {
-                x: who.velocity.x * 0.8,
-                y: who.velocity.y * 0.8
-              });
-            },
-          })
-        };
+        if (b.isModIceCrystals) {
+          bullet[me].onDmg = function (who) {
+            if (!who.shield) mobs.statusSlow(who, 60)
+          };
+        }
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0005;
         };
@@ -2169,7 +2180,6 @@ const b = {
         const CD = (mech.crouch) ? 45 : 25
         if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
         this.lastFireCycle = mech.cycle
-
         if (this.count > ((mech.crouch) ? 6 : 1)) {
           this.count = 0
           mech.fireCDcycle = mech.cycle + Math.floor(CD * b.modFireRate); // cool down
@@ -2181,8 +2191,17 @@ const b = {
         function makeFlechette(angle = mech.angle) {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(angle));
+          Matter.Body.setDensity(bullet[me], 0.0001); //0.001 is normal
           bullet[me].endCycle = game.cycle + 180;
-          bullet[me].dmg = 1.3;
+          if (b.isModDotFlechette) {
+            bullet[me].dmg = 0;
+            bullet[me].onDmg = function (who) {
+              mobs.statusDot(who, 0.35, 360) // (1.4) * 3 / 12 ticks (6 seconds)
+            };
+          } else {
+            bullet[me].dmg = 1.4;
+          }
+
           bullet[me].do = function () {
             if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
           };
@@ -2245,7 +2264,7 @@ const b = {
                   for (let i = 0; i < q.length; i++) {
                     slowCheck = 0.3;
                     Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                    let dmg = b.dmgScale * 0.5 / Math.sqrt(q[i].mass)
+                    let dmg = b.dmgScale * 0.6 / Math.sqrt(q[i].mass)
                     q[i].damage(dmg);
                     q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue

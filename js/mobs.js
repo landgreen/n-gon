@@ -48,20 +48,57 @@ const mobs = {
       }
     }
   },
-  // alert(range) {
-  //   range = range * range;
-  //   for (let i = 0; i < mob.length; i++) {
-  //     if (mob[i].distanceToPlayer2() < range) mob[i].locatePlayer();
-  //   }
-  // },
-  // startle(amount) {
-  //   for (let i = 0; i < mob.length; i++) {
-  //     if (!mob[i].seePlayer.yes) {
-  //       mob[i].force.x += amount * mob[i].mass * (Math.random() - 0.5);
-  //       mob[i].force.y += amount * mob[i].mass * (Math.random() - 0.5);
-  //     }
-  //   }
-  // },
+  statusSlow(who, cycles = 60) {
+    //remove other "slow" effects on this mob
+    let i = who.status.length
+    while (i--) {
+      if (who.status[i].type === "slow") who.status.splice(i, 1);
+    }
+    //add a new slow effect
+    who.status.push({
+      effect() {
+        Matter.Body.setVelocity(who, {
+          x: 0,
+          y: 0
+        });
+        Matter.Body.setAngularVelocity(who, 0);
+        ctx.beginPath();
+        ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
+        for (let j = 1, len = who.vertices.length; j < len; ++j) {
+          ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
+        }
+        ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
+        ctx.strokeStyle = "rgba(0,100,255,0.5)";
+        ctx.lineWidth = 30;
+        ctx.stroke();
+        ctx.fillStyle = who.fill
+        ctx.fill();
+      },
+      type: "slow",
+      endCycle: game.cycle + cycles,
+    })
+  },
+  statusDot(who, tickDamage, cycles = 180) {
+    who.status.push({
+      effect() {
+        if ((game.cycle - this.startCycle) % 30 === 0) {
+          let dmg = b.dmgScale * tickDamage
+          who.damage(dmg);
+          game.drawList.push({ //add dmg to draw queue
+            x: who.position.x,
+            y: who.position.y,
+            radius: Math.log(2 * dmg + 1.1) * 40,
+            color: game.playerDmgColor,
+            time: game.drawTime
+          });
+        }
+      },
+      type: "dot",
+      endCycle: game.cycle + cycles,
+      startCycle: game.cycle
+    })
+  },
+
   //**********************************************************************************************
   //**********************************************************************************************
   spawn(xPos, yPos, sides, radius, color) {
