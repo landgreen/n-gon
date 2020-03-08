@@ -54,7 +54,6 @@ const mobs = {
     while (i--) {
       if (who.status[i].type === "slow") who.status.splice(i, 1);
     }
-    //add a new slow effect
     who.status.push({
       effect() {
         Matter.Body.setVelocity(who, {
@@ -78,7 +77,25 @@ const mobs = {
       endCycle: game.cycle + cycles,
     })
   },
-  statusDot(who, tickDamage, cycles = 180) {
+  statusBlind(who, cycles = 60) {
+    //remove other "stun" effects on this mob
+    let i = who.status.length
+    while (i--) {
+      if (who.status[i].type === "blind") who.status.splice(i, 1);
+    }
+    who.status.push({
+      effect() {
+        // Matter.Body.setVelocity(who, {
+        //   x: 0,
+        //   y: 0
+        // });
+        // Matter.Body.setAngularVelocity(who, 0);
+      },
+      type: "blind",
+      endCycle: game.cycle + cycles,
+    })
+  },
+  statusPoison(who, tickDamage, cycles = 180) {
     who.status.push({
       effect() {
         if ((game.cycle - this.startCycle) % 30 === 0) {
@@ -88,12 +105,37 @@ const mobs = {
             x: who.position.x,
             y: who.position.y,
             radius: Math.log(2 * dmg + 1.1) * 40,
-            color: game.playerDmgColor,
+            color: "rgba(0,80,80,0.9)",
             time: game.drawTime
           });
         }
       },
-      type: "dot",
+      type: "poison",
+      endCycle: game.cycle + cycles,
+      startCycle: game.cycle
+    })
+  },
+  statusBurn(who, tickDamage, cycles = 90 + Math.floor(90 * Math.random())) {
+    //remove other "burn" effects on this mob
+    let i = who.status.length
+    while (i--) {
+      if (who.status[i].type === "burn") who.status.splice(i, 1);
+    }
+    who.status.push({
+      effect() {
+        if ((game.cycle - this.startCycle) % 15 === 0) {
+          let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
+          who.damage(dmg);
+          game.drawList.push({ //add dmg to draw queue
+            x: who.position.x,
+            y: who.position.y,
+            radius: Math.log(2 * dmg + 1.1) * 40,
+            color: `rgba(255,${Math.floor(255*Math.random())},0,0.9)`,
+            time: game.drawTime
+          });
+        }
+      },
+      type: "burn",
       endCycle: game.cycle + cycles,
       startCycle: game.cycle
     })
@@ -282,38 +324,26 @@ const mobs = {
           x: player.position.x, // + (Math.random() - 0.5) * 50,
           y: player.position.y + (Math.random() - 0.5) * 110
         };
-        //mob vision for testing
-        // ctx.beginPath();
-        // ctx.lineWidth = "5";
-        // ctx.strokeStyle = "#ff0";
-        // ctx.moveTo(this.position.x, this.position.y);
-        // ctx.lineTo(targetPos.x, targetPos.y);
-        // ctx.stroke();
-        // return targetPos;
       },
-
-      hacked() { //set this.hackedTarget variable before running this method
-        //find a new target
-        if (!(game.cycle % this.seePlayerFreq)) {
-          this.hackedTarget = null
-          for (let i = 0, len = mob.length; i < len; i++) {
-            if (mob[i] !== this) {
-              // const DIST = Vector.magnitude(Vector.sub(this.position, mob[j]));
-              if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                this.hackedTarget = mob[i]
-              }
-            }
-          }
-        }
-
-        //acceleration towards targets
-        if (this.hackedTarget) {
-          this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
-        }
-
-      },
-
+      // hacked() { //set this.hackedTarget variable before running this method
+      //   //find a new target
+      //   if (!(game.cycle % this.seePlayerFreq)) {
+      //     this.hackedTarget = null
+      //     for (let i = 0, len = mob.length; i < len; i++) {
+      //       if (mob[i] !== this) {
+      //         // const DIST = Vector.magnitude(Vector.sub(this.position, mob[j]));
+      //         if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+      //           Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+      //           this.hackedTarget = mob[i]
+      //         }
+      //       }
+      //     }
+      //   }
+      //   //acceleration towards targets
+      //   if (this.hackedTarget) {
+      //     this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
+      //   }
+      // },
       laserBeam() {
         if (game.cycle % 7 && this.seePlayer.yes) {
           ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
@@ -564,66 +594,7 @@ const mobs = {
             mob[i].locatePlayer();
           }
         }
-        //add alert to draw queue
-        // game.drawList.push({
-        //     x: this.position.x,
-        //     y: this.position.y,
-        //     radius: Math.sqrt(this.alertRange2),
-        //     color: "rgba(0,0,0,0.02)",
-        //     time: game.drawTime
-        // });
       },
-      // zoom() {
-      //   this.zoomMode--;
-      //   if (this.zoomMode > 150) {
-      //     this.drawTrail();
-      //     if (this.seePlayer.recall) {
-      //       //attraction to player
-      //       const forceMag = this.accelMag * this.mass;
-      //       const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-      //       this.force.x += forceMag * Math.cos(angle);
-      //       this.force.y += forceMag * Math.sin(angle);
-      //     }
-      //   } else if (this.zoomMode < 0) {
-      //     this.zoomMode = 300;
-      //     this.setupTrail();
-      //   }
-      // },
-      // setupTrail() {
-      //   this.trail = [];
-      //   for (let i = 0; i < this.trailLength; ++i) {
-      //     this.trail.push({
-      //       x: this.position.x,
-      //       y: this.position.y
-      //     });
-      //   }
-      // },
-      // drawTrail() {
-      //   //dont' forget to run setupTrail() after mob spawn
-      //   const t = this.trail;
-      //   const len = t.length;
-      //   t.pop();
-      //   t.unshift({
-      //     x: this.position.x,
-      //     y: this.position.y
-      //   });
-      //   //draw
-      //   ctx.strokeStyle = this.trailFill;
-      //   ctx.beginPath();
-      //   // ctx.moveTo(t[0].x, t[0].y);
-      //   // ctx.lineTo(t[0].x, t[0].y);
-      //   // ctx.globalAlpha = 0.2;
-      //   // ctx.lineWidth = this.radius * 3;
-      //   // ctx.stroke();
-      //   ctx.globalAlpha = 0.5 / len;
-      //   ctx.lineWidth = this.radius * 1.95;
-      //   for (let i = 0; i < len; ++i) {
-      //     // ctx.lineWidth *= 0.96;
-      //     ctx.lineTo(t[i].x, t[i].y);
-      //     ctx.stroke();
-      //   }
-      //   ctx.globalAlpha = 1;
-      // },
       curl(range = 1000, mag = -10) {
         //cause all mobs, and bodies to rotate in a circle
         applyCurl = function (center, array) {

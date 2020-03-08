@@ -73,7 +73,7 @@ const b = {
   },
   mods: [{
       name: "depleted uranium rounds",
-      description: `your <strong>bullets</strong> are +13% larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
+      description: `your <strong>bullets</strong> are <strong>+13%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
       maxCount: 9,
       allowed() {
@@ -89,7 +89,7 @@ const b = {
     },
     {
       name: "fluoroantimonic acid",
-      description: "each <strong>bullet</strong> does extra chemical <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
+      description: "each <strong>bullet</strong> does instant <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -108,7 +108,7 @@ const b = {
     },
     {
       name: "kinetic bombardment",
-      description: "do up to 33% more <strong class='color-d'>damage</strong> at a distance<br><em>increase maxes out at about 40 steps away</em>",
+      description: "do up to <strong>33%</strong> more <strong class='color-d'>damage</strong> at a distance<br><em>increase maxes out at about 40 steps away</em>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -156,7 +156,7 @@ const b = {
     },
     {
       name: "high explosives",
-      description: "<strong class='color-e'>explosions</strong> do <strong>+20%</strong> more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is +44% <strong>larger</strong>",
+      description: "<strong class='color-e'>explosions</strong> do <strong>+20%</strong> more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is <strong>+44% larger</strong>",
       maxCount: 3,
       count: 0,
       allowed() {
@@ -172,7 +172,7 @@ const b = {
     },
     {
       name: "electric reactive armour",
-      description: "<strong class='color-e'>explosions</strong> do no <strong>harm</strong><br> <strong class='color-e'>explosions</strong> drain <strong class='color-f'>energy</strong>",
+      description: "<strong class='color-e'>explosions</strong> drain your <strong class='color-f'>energy</strong><br>instead of <strong>harming</strong> you",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -306,7 +306,7 @@ const b = {
 
     {
       name: "zoospore vector",
-      description: "mobs discharge <strong style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br>+11% chance",
+      description: "mobs discharge <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br><strong>+11%</strong> chance",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -409,7 +409,7 @@ const b = {
     },
     {
       name: "basidio-stomp",
-      description: "hard landings disrupt <strong style='letter-spacing: 2px;'>spores</strong> from the ground<br>immune to <strong>harm</strong> from <strong>falling</strong>",
+      description: "hard <strong>landings</strong> disrupt <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> in the ground<br>immune to <strong>harm</strong> from <strong>falling</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -656,6 +656,22 @@ const b = {
       }
     },
     {
+      name: "+1 cardinality",
+      description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect: () => {
+        b.isModFourOptions = true;
+      },
+      remove() {
+        b.isModFourOptions = false;
+      }
+    },
+    {
       name: "catabolism",
       description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong>health</strong>",
       maxCount: 1,
@@ -696,19 +712,31 @@ const b = {
       }
     },
     {
-      name: "+1 cardinality",
-      description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
+      name: "reallocation",
+      description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods can lose all stacks</em>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return (b.modCount > 0) && !build.isCustomSelection
       },
-      requires: "",
+      requires: "at least 1 mod",
       effect: () => {
-        b.isModFourOptions = true;
+        const have = [] //find which mods you have
+        for (let i = 0; i < b.mods.length; i++) {
+          if (b.mods[i].count > 0) have.push(i)
+        }
+        const choose = have[Math.floor(Math.random() * have.length)]
+        b.mods[choose].remove(); // remove a random mod form the list of mods you have
+        b.mods[choose].count = 0;
+        game.updateModHUD();
+
+        for (let i = 0; i < 2; i++) {
+          powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+        }
       },
       remove() {
-        b.isModFourOptions = false;
+        //nothing to remove
       }
     },
     {
@@ -737,7 +765,7 @@ const b = {
 
     {
       name: "ice crystal nucleation",
-      description: "your <strong>minigun</strong> condenses unlimited <strong>ammo</strong><br>ice bullets made from water vapor <strong>slow</strong> mobs",
+      description: "your <strong>minigun</strong> condenses <strong>unlimited ammo</strong><br>ice bullets made from water vapor <strong>slow</strong> mobs",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -834,7 +862,7 @@ const b = {
     },
     {
       name: "irradiated needles",
-      description: "<strong>fléchette</strong> needles are exposed to <strong>radiation</strong><br>needles do <strong>3x</strong> <strong class='color-d'>damage</strong> over <strong>6</strong> seconds",
+      description: "<strong>fléchette</strong> needles are exposed to <strong class='color-p'>radiation</strong><br>needles do <strong>2x</strong> <strong class='color-d'>damage</strong> spread over <strong>6</strong> seconds",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -936,7 +964,7 @@ const b = {
     },
     {
       name: "tinsellated flagella",
-      description: "<strong style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
+      description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>33% faster</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1088,7 +1116,7 @@ const b = {
     },
     {
       name: "mycelium manufacturing",
-      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong style='letter-spacing: 2px;'>spores</strong>",
+      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1335,7 +1363,7 @@ const b = {
       }
     }
   },
-  explosion(where, radius) {
+  explosion(where, radius, isBurn = false) {
     radius *= b.modExplosionRadius
     // typically explode is used for some bullets with .onEnd
     //add dmg to draw queue
@@ -1430,7 +1458,9 @@ const b = {
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
           radius *= 0.93 //reduced range for each additional explosion target
-          damageScale *= 0.8 //reduced damage for each additional explosion target 
+          damageScale *= 0.8 //reduced damage for each additional explosion target
+          // mobs.statusBlind(mob[i])
+          // if (isBurn) mobs.statusBurn(mob[i], 0.4) // (2.2) * 1.3 * 30/180  // 6 ticks (3 seconds)
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
           knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 80);
@@ -1690,7 +1720,7 @@ const b = {
       friction: 0,
       frictionAir: 0.025,
       thrust: b.isModFastSpores ? 0.0008 : 0.0004,
-      dmg: 2.2, //damage done in addition to the damage from momentum
+      dmg: 0, //2.2, //damage done in addition to the damage from momentum
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1698,7 +1728,8 @@ const b = {
       },
       endCycle: game.cycle + Math.floor((660 + Math.floor(Math.random() * 240)) * b.isModBulletsLastLonger),
       minDmgSpeed: 0,
-      onDmg() {
+      onDmg(who) {
+        mobs.statusPoison(who, 0.5, 180) // (2.2) * 1.3 * 30/180  // 6 ticks (3 seconds)
         this.endCycle = 0; //bullet ends cycle after doing damage 
       },
       onEnd() {},
@@ -2063,7 +2094,7 @@ const b = {
   },
   guns: [{
       name: "minigun", //0
-      description: "rapidly fire a stream of small <strong>bullets</strong>",
+      description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong>",
       ammo: 0,
       ammoPack: 55,
       defaultAmmoPack: 55,
@@ -2167,7 +2198,7 @@ const b = {
     },
     {
       name: "fléchettes", //3
-      description: "fire a volley of <strong>precise</strong> high velocity needles",
+      description: "fire a <strong>precise</strong> volley of <strong>high velocity</strong> needles<br>needles deliver <strong class='color-p'>chemical</strong> damage over 3 seconds",
       ammo: 0,
       ammoPack: 22,
       defaultAmmoPack: 22,
@@ -2193,14 +2224,14 @@ const b = {
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45 * b.modBulletSize, 1.4 * b.modBulletSize, b.fireAttributes(angle));
           Matter.Body.setDensity(bullet[me], 0.0001); //0.001 is normal
           bullet[me].endCycle = game.cycle + 180;
-          if (b.isModDotFlechette) {
-            bullet[me].dmg = 0;
-            bullet[me].onDmg = function (who) {
-              mobs.statusDot(who, 0.35, 360) // (1.4) * 3 / 12 ticks (6 seconds)
-            };
-          } else {
-            bullet[me].dmg = 1.4;
-          }
+          bullet[me].dmg = 0;
+          bullet[me].onDmg = function (who) {
+            if (b.isModDotFlechette) {
+              mobs.statusPoison(who, 0.38, 360) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+            } else {
+              mobs.statusPoison(who, 0.38, 180) // (2.3) / 6 ticks (3 seconds)
+            }
+          };
 
           bullet[me].do = function () {
             if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
@@ -2332,7 +2363,7 @@ const b = {
     },
     {
       name: "missiles",
-      description: "fire missiles that accelerate towards mobs<br><strong class='color-e'>explodes</strong> when near target",
+      description: "fire missiles that <strong>accelerate</strong> towards <strong>mobs</strong><br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
       ammoPack: 4,
       have: false,
@@ -2354,7 +2385,7 @@ const b = {
     },
     {
       name: "flak",
-      description: "fire a cluster of short range projectiles<br><strong class='color-e'>explodes</strong> on contact or after half a second",
+      description: "fire a <strong>cluster</strong> of short range <strong>projectiles</strong><br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after half a second",
       ammo: 0,
       ammoPack: 6,
       defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
@@ -2400,7 +2431,7 @@ const b = {
     },
     {
       name: "grenades", //7
-      description: "lob a single bouncy projectile<br><strong class='color-e'>explodes</strong> on contact or after one second",
+      description: "lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second",
       ammo: 0,
       ammoPack: 7,
       have: false,
@@ -2559,7 +2590,7 @@ const b = {
     },
     {
       name: "spores", //10
-      description: "fire orbs that discharge <strong style='letter-spacing: 2px;'>spores</strong><br><strong style='letter-spacing: 2px;'>spores</strong> seek out mobs",
+      description: "fire <strong>sporangiums</strong> that discharge <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 3 : 4,
       have: false,
@@ -3120,7 +3151,7 @@ const b = {
     },
     {
       name: "pulse", //15
-      description: "convert 25% of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
+      description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
       ammo: 0,
       ammoPack: Infinity,
       have: false,
@@ -3202,7 +3233,7 @@ const b = {
         //use energy to explode
         const energy = 0.3 * Math.min(mech.energy, 1.75)
         mech.energy -= energy
-        if (best.who) b.explosion(path[1], 1000 * energy)
+        if (best.who) b.explosion(path[1], 1000 * energy, true)
         mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
 
         //draw laser beam

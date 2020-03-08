@@ -1,7 +1,7 @@
 ************** TODO - n-gon **************
 
-mod - lose your field, gain two guns?
-  lose a random mod, gain a gun?
+mod - status effects last 1 second longer
+  stun, slow, poison
 
 mod - time dilation - Quantum Recovery
   Expending all your energy while using the field will
@@ -21,11 +21,12 @@ bug - getting stuck in crouch mode
 mobs - add in a function to the main loops that does injected code for each mob
   each mob would get an object with a game.cycle for ending and a method to run each cycle until the end is met
   this could be a DoT, graphics, slow, blind
-    stun - blind, slow, but increased gravity effects
-  mod - flechettes mod for DoT poison damage
+  stun - combine blind, slow
+    with increased gravity effects, but how
+  burn effect doesn't look right, too similar to poison
   mod - grenade explosions stun enemies
   mod - vacuum bomb does DoT damage after exploding
-
+  
 settings - auto aim at nearest mob
 settings - custom keys binding
 
@@ -40,13 +41,6 @@ gun - buff vacuum bomb
   
 mod - make bodies destroyable
   they drop ammo and heals
-
-mod - BIOS update
-  lose all mods other than BIOS update
-  deal +100% damage from all sources
-mod - Infrared Sensors
-  You can see invisible enemies
-  this seems weak, maybe add to one of the fields
 
 mod - mines - fire something instead of needles on activation
   foam?, flak?, vacuum bomb, super balls
