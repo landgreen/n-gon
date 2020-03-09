@@ -1234,14 +1234,12 @@ const b = {
           game.updateGunHUD();
         }
       } else {
-
         if (b.isModAmmoFromHealth && mech.health > b.isModAmmoFromHealth) {
           mech.damage(b.isModAmmoFromHealth * mech.health);
           powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
           if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
         }
         mech.fireCDcycle = mech.cycle + 30; //fire cooldown
-        // game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div><strong class = 'box'>E</strong> / <strong class = 'box'>Q</strong>", 200);
         game.replaceTextLog = true;
         game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
       }
@@ -1264,7 +1262,6 @@ const b = {
         }
       }
     }
-
     //draw
     ctx.beginPath();
     for (let i = 0, len = bullet.length; i < len; i++) {
@@ -2084,11 +2081,10 @@ const b = {
           if (gun === b.guns[i].name) gun = i
         }
       }
-
       if (!b.guns[gun].have) b.inventory.push(gun);
-      if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
       b.guns[gun].have = true;
       b.guns[gun].ammo = Math.floor(b.guns[gun].ammoPack * ammoPacks);
+      if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
     }
     game.makeGunHUD();
   },

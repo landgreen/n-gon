@@ -895,7 +895,7 @@ const mech = {
     ctx.stroke();
   },
   grabPowerUp() { //look for power ups to grab with field
-    const grabPowerUpRange2 = (mech.fieldRange + 220) * (mech.fieldRange + 220)
+    const grabPowerUpRange2 = 156000 //(mech.fieldRange + 220) * (mech.fieldRange + 220)
     for (let i = 0, len = powerUp.length; i < len; ++i) {
       const dxP = mech.pos.x - powerUp[i].position.x;
       const dyP = mech.pos.y - powerUp[i].position.y;
@@ -1024,11 +1024,11 @@ const mech = {
   //     }
   //   }
   // },
-  lookForPickUp(range = mech.fieldRange) { //find body to pickup
+  lookForPickUp() { //find body to pickup
     mech.energy -= mech.fieldRegen;
     const grabbing = {
       targetIndex: null,
-      targetRange: range,
+      targetRange: 150,
       // lookingAt: false //false to pick up object in range, but not looking at
     };
     for (let i = 0, len = body.length; i < len; ++i) {
