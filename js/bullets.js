@@ -1459,7 +1459,7 @@ const b = {
           mob[i].force.y += knock.y;
           radius *= 0.93 //reduced range for each additional explosion target
           damageScale *= 0.8 //reduced damage for each additional explosion target
-          mobs.statusStun(mob[i])
+          // mobs.statusStun(mob[i])
           // if (isBurn) mobs.statusBurn(mob[i], 0.4) // (2.2) * 1.3 * 30/180  // 6 ticks (3 seconds)
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
