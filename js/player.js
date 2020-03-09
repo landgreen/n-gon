@@ -1613,7 +1613,7 @@ const mech = {
               if (inPlayer.length > 0) {
                 for (let i = 0; i < inPlayer.length; i++) {
                   if (inPlayer[i].shield) {
-                    mech.energy -= 0.01; //shields drain player energy
+                    mech.energy -= 0.005; //shields drain player energy
                     //draw outline of shield
                     ctx.fillStyle = `rgba(0, 204, 255,0.6)`
                     ctx.fill()

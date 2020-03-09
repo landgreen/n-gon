@@ -184,6 +184,7 @@ function collisionChecks(event) {
             // console.log(obj.dmg / (0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity))))
             if (b.isModCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
+            // console.log(dmg)
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn
             game.drawList.push({ //add dmg to draw queue

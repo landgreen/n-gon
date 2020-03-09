@@ -24,8 +24,11 @@ mobs - add in a function to the main loops that does injected code for each mob
   stun - combine blind, slow
     with increased gravity effects, but how
   burn effect doesn't look right, too similar to poison
+    burn status could spread to player
   mod - grenade explosions stun enemies
   mod - vacuum bomb does DoT damage after exploding
+  mod - super balls become fire balls?
+  mod - laser mod has a chance to set things on fire
   
 settings - auto aim at nearest mob
 settings - custom keys binding

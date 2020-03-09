@@ -49,51 +49,72 @@ const mobs = {
     }
   },
   statusSlow(who, cycles = 60) {
-    //remove other "slow" effects on this mob
-    let i = who.status.length
-    while (i--) {
-      if (who.status[i].type === "slow") who.status.splice(i, 1);
+    if (!who.shield && !who.isShielded) {
+      //remove other "slow" effects on this mob
+      let i = who.status.length
+      while (i--) {
+        if (who.status[i].type === "slow") who.status.splice(i, 1);
+      }
+      who.status.push({
+        effect() {
+          Matter.Body.setVelocity(who, {
+            x: 0,
+            y: 0
+          });
+          Matter.Body.setAngularVelocity(who, 0);
+          ctx.beginPath();
+          ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
+          for (let j = 1, len = who.vertices.length; j < len; ++j) {
+            ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
+          }
+          ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
+          ctx.strokeStyle = "rgba(0,100,255,0.5)";
+          ctx.lineWidth = 30;
+          ctx.stroke();
+          ctx.fillStyle = who.fill
+          ctx.fill();
+        },
+        type: "slow",
+        endCycle: game.cycle + cycles,
+      })
     }
-    who.status.push({
-      effect() {
-        Matter.Body.setVelocity(who, {
-          x: 0,
-          y: 0
-        });
-        Matter.Body.setAngularVelocity(who, 0);
-        ctx.beginPath();
-        ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
-        for (let j = 1, len = who.vertices.length; j < len; ++j) {
-          ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
-        }
-        ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
-        ctx.strokeStyle = "rgba(0,100,255,0.5)";
-        ctx.lineWidth = 30;
-        ctx.stroke();
-        ctx.fillStyle = who.fill
-        ctx.fill();
-      },
-      type: "slow",
-      endCycle: game.cycle + cycles,
-    })
   },
-  statusBlind(who, cycles = 60) {
-    //remove other "stun" effects on this mob
-    let i = who.status.length
-    while (i--) {
-      if (who.status[i].type === "blind") who.status.splice(i, 1);
+  statusStun(who, cycles = 60) {
+    if (!who.shield && !who.isShielded) {
+      Matter.Body.setVelocity(who, {
+        x: 0,
+        y: 0
+      });
+      Matter.Body.setAngularVelocity(who, 0);
+      //remove other "stun" effects on this mob
+      let i = who.status.length
+      while (i--) {
+        if (who.status[i].type === "stun") who.status.splice(i, 1);
+      }
+      who.status.push({
+        effect() {
+          who.seePlayer.yes = false;
+          who.seePlayer.position = {
+            x: who.position.x + 100 * (Math.random() - 0.5),
+            y: who.position.y + 100 * (Math.random() - 0.5)
+          }
+          who.force.y += who.mass * 0.002 //extra gravity
+
+          ctx.beginPath();
+          ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
+          for (let j = 1, len = who.vertices.length; j < len; ++j) {
+            ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
+          }
+          ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
+          ctx.stroke();
+          ctx.fillStyle = `rgba(${Math.floor(255*Math.random())},${Math.floor(255*Math.random())},${Math.floor(255*Math.random())},0.5)`
+          // ctx.fillStyle = `rgba(255,255,255,${Math.random()})`
+          ctx.fill();
+        },
+        type: "stun",
+        endCycle: game.cycle + cycles,
+      })
     }
-    who.status.push({
-      effect() {
-        // Matter.Body.setVelocity(who, {
-        //   x: 0,
-        //   y: 0
-        // });
-        // Matter.Body.setAngularVelocity(who, 0);
-      },
-      type: "blind",
-      endCycle: game.cycle + cycles,
-    })
   },
   statusPoison(who, tickDamage, cycles = 180) {
     who.status.push({
