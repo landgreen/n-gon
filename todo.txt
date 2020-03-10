@@ -1,5 +1,12 @@
 ************** TODO - n-gon **************
 
+mod - super balls fire one ball at a time
+  ammo and fire rate is improved by the number of balls fired
+
+mod - robot that attack nearby mobs, and delivers a stun status effect
+  use laser bot code for the attack
+  large and 5 sided?
+
 consider using the "e" key for picking up blocks and just q for gun swaps
   good for: plasma torch, time dilation, negative mass
   bad for: basic, nano-scale, harmonic

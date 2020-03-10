@@ -68,8 +68,8 @@ const mobs = {
             ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
           }
           ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
-          ctx.strokeStyle = "rgba(0,100,255,0.5)";
-          ctx.lineWidth = 30;
+          ctx.strokeStyle = "rgba(0,100,255,0.8)";
+          ctx.lineWidth = 15;
           ctx.stroke();
           ctx.fillStyle = who.fill
           ctx.fill();
@@ -1015,7 +1015,7 @@ const mobs = {
               b.spore(this) //spawn drone
             }
           }
-          if (b.isModExplodeMob) b.explosion(this.position, Math.min(500, Math.sqrt(this.mass + 2) * 80))
+          if (b.isModExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
         }
 
       },
