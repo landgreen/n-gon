@@ -815,15 +815,15 @@ const b = {
     },
     {
       name: "super duper",
-      description: "fire <strong>+1</strong> additional <strong>super ball</strong>",
+      description: "fire <strong>+2</strong> additional <strong>super ball</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
-        return b.haveGunCheck("super balls")
+        return b.haveGunCheck("super balls") && !b.modOneSuperBall
       },
       requires: "super balls",
       effect() {
-        b.modSuperBallNumber++
+        b.modSuperBallNumber += 2
       },
       remove() {
         b.modSuperBallNumber = 4;
@@ -831,34 +831,18 @@ const b = {
     },
     {
       name: "super ball",
-      description: "rapidly fire <strong>one</strong> <strong>ball</strong> at a time<br><strong>ammo</strong> costs are reduced by <strong>50%</strong>",
+      description: "fire a single <strong>huge</strong> super <strong>ball</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("super balls")
+        return b.haveGunCheck("super balls") && b.modSuperBallNumber === 4
       },
       requires: "super balls",
       effect() {
         b.modOneSuperBall = true;
-        // current ammo
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "super balls") b.guns[i].ammo = b.guns[i].ammo * 2;
-        }
-        //ammo power ups
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "super balls") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 2;
-        }
       },
       remove() {
         b.modOneSuperBall = false;
-        // current ammo
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "super balls") b.guns[i].ammo = Math.floor(b.guns[i].ammo / 2);
-        }
-        //ammo power ups
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "super balls") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-        }
       }
     },
     {
@@ -2197,20 +2181,18 @@ const b = {
       name: "super balls", //2
       description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 12,
-      defaultAmmoPack: 12, //use to revert ammoPack after mod changes drop rate
+      ammoPack: 13,
       have: false,
       num: 5,
       isStarterGun: true,
       isEasyToAim: true,
       fire() {
-        b.muzzleFlash(20);
         const SPEED = mech.crouch ? 40 : 30
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 28 : 20) * b.modFireRate); // cool down
         if (b.modOneSuperBall) {
-          mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 32 : 20) * b.modFireRate / (b.modSuperBallNumber)); // cool down
           let dir = mech.angle
           const me = bullet.length;
-          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 7 * b.modBulletSize, b.fireAttributes(dir, false));
+          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 22 * b.modBulletSize, b.fireAttributes(dir, false));
           World.add(engine.world, bullet[me]); //add bullet to world
           Matter.Body.setVelocity(bullet[me], {
             x: SPEED * Math.cos(dir),
@@ -2218,15 +2200,14 @@ const b = {
           });
           // Matter.Body.setDensity(bullet[me], 0.0001);
           bullet[me].endCycle = game.cycle + Math.floor((300 + 60 * Math.random()) * b.isModBulletsLastLonger);
-          bullet[me].dmg = 0;
           bullet[me].minDmgSpeed = 0;
-          bullet[me].restitution = 0.99;
+          bullet[me].restitution = 0.999;
           bullet[me].friction = 0;
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
           };
         } else {
-          mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 20) * b.modFireRate); // cool down
+          b.muzzleFlash(20);
           const SPREAD = mech.crouch ? 0.08 : 0.15
           let dir = mech.angle - SPREAD * (b.modSuperBallNumber - 1) / 2;
           for (let i = 0; i < b.modSuperBallNumber; i++) {
@@ -2239,7 +2220,6 @@ const b = {
             });
             // Matter.Body.setDensity(bullet[me], 0.0001);
             bullet[me].endCycle = game.cycle + Math.floor((300 + 60 * Math.random()) * b.isModBulletsLastLonger);
-            bullet[me].dmg = 0;
             bullet[me].minDmgSpeed = 0;
             bullet[me].restitution = 0.99;
             bullet[me].friction = 0;
