@@ -475,7 +475,7 @@ const b = {
     },
     {
       name: "weak anthropic principle",
-      description: "<strong>fatal harm</strong> can't happen<br>saves you up to once every <strong>3</strong> seconds",
+      description: "<strong>fatal harm</strong> can't happen<br><strong>saves</strong> you up to once every <strong>3</strong> seconds",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -493,7 +493,7 @@ const b = {
     },
     {
       name: "entanglement",
-      description: "<strong>10%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> when your <strong>first gun</strong> is equipped",
+      description: "<strong>10%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -509,7 +509,7 @@ const b = {
     },
     {
       name: "piezoelectricity",
-      description: "<strong>colliding</strong> with mobs charges your <strong class='color-f'>energy</strong><br><strong>10%</strong> less <strong>harm</strong> from mob collisions",
+      description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>10%</strong> less <strong>harm</strong> from mob collisions",
       maxCount: 1,
       count: 0,
       allowed() {
