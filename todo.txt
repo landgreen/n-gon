@@ -1,7 +1,6 @@
 ************** TODO - n-gon **************
 
-mod - super balls fire one ball at a time
-  ammo and fire rate is improved by the number of balls fired
+mod or field - turn blocks into spores or drones
 
 mod - robot that attack nearby mobs, and delivers a stun status effect
   use laser bot code for the attack

@@ -766,7 +766,7 @@ const b = {
 
     {
       name: "ice crystal nucleation",
-      description: "your <strong>minigun</strong> condenses <strong>unlimited ammo</strong><br>ice bullets made from water vapor <strong>slow</strong> mobs",
+      description: "your <strong>minigun</strong> uses <strong class='color-f'>energy</strong> to condense<br><strong>bullets</strong> from water vapor that <strong>slow</strong> mobs",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -815,7 +815,7 @@ const b = {
     },
     {
       name: "super duper",
-      description: "fire <strong>+2</strong> additional <strong>super ball</strong>",
+      description: "fire <strong>+2</strong> additional <strong>super balls</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -831,7 +831,7 @@ const b = {
     },
     {
       name: "super ball",
-      description: "fire a single <strong>huge</strong> super <strong>ball</strong>",
+      description: "fire one <strong>large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>2</strong> second",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1251,8 +1251,8 @@ const b = {
           game.updateGunHUD();
         }
       } else {
-        if (b.isModAmmoFromHealth && mech.health > b.isModAmmoFromHealth) {
-          mech.damage(b.isModAmmoFromHealth * mech.health);
+        if (b.isModAmmoFromHealth && mech.health > 0.05) {
+          mech.damage(Math.max(0.01, b.isModAmmoFromHealth * mech.health));
           powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
           if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
         }
@@ -2123,12 +2123,14 @@ const b = {
         bullet[me].endCycle = game.cycle + 70;
         bullet[me].dmg = 0.07;
         bullet[me].frictionAir = mech.crouch ? 0.007 : 0.01;
-        if (b.isModIceCrystals) {
+        if (b.isModIceCrystals && mech.energy > 0.01) {
+          mech.energy -= mech.fieldRegen + 0.007
           bullet[me].onDmg = function (who) {
             mobs.statusSlow(who, 60)
           };
           //ice muzzleFlash
           ctx.fillStyle = "rgb(0,100,255)";
+
           ctx.beginPath();
           ctx.arc(mech.pos.x + 35 * Math.cos(mech.angle), mech.pos.y + 35 * Math.sin(mech.angle), 15, 0, 2 * Math.PI);
           ctx.fill();
@@ -2192,7 +2194,7 @@ const b = {
         if (b.modOneSuperBall) {
           let dir = mech.angle
           const me = bullet.length;
-          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 22 * b.modBulletSize, b.fireAttributes(dir, false));
+          bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 20 * b.modBulletSize, b.fireAttributes(dir, false));
           World.add(engine.world, bullet[me]); //add bullet to world
           Matter.Body.setVelocity(bullet[me], {
             x: SPEED * Math.cos(dir),
@@ -2205,6 +2207,9 @@ const b = {
           bullet[me].friction = 0;
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
+          };
+          bullet[me].onDmg = function (who) {
+            mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
           };
         } else {
           b.muzzleFlash(20);
@@ -2261,12 +2266,10 @@ const b = {
           bullet[me].endCycle = game.cycle + 180;
           bullet[me].dmg = 0;
           bullet[me].onDmg = function (who) {
-            if (!who.isShielded) {
-              if (b.isModDotFlechette) {
-                mobs.statusPoison(who, 0.33, 360) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
-              } else {
-                mobs.statusPoison(who, 0.33, 180) // (2.3) / 6 ticks (3 seconds)
-              }
+            if (b.isModDotFlechette) {
+              mobs.statusPoison(who, 0.33, 360) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+            } else {
+              mobs.statusPoison(who, 0.33, 180) // (2.3) / 6 ticks (3 seconds)
             }
           };
 

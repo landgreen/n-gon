@@ -79,13 +79,13 @@ const mobs = {
       })
     }
   },
-  statusStun(who, cycles = 60) {
+  statusStun(who, cycles = 120) {
     if (!who.shield && !who.isShielded) {
       Matter.Body.setVelocity(who, {
-        x: 0,
-        y: 0
+        x: who.velocity.x * 0.8,
+        y: who.velocity.y * 0.8
       });
-      Matter.Body.setAngularVelocity(who, 0);
+      Matter.Body.setAngularVelocity(who, who.angularVelocity * 0.8);
       //remove other "stun" effects on this mob
       let i = who.status.length
       while (i--) {
@@ -98,7 +98,7 @@ const mobs = {
             x: who.position.x + 100 * (Math.random() - 0.5),
             y: who.position.y + 100 * (Math.random() - 0.5)
           }
-          who.force.y += who.mass * 0.002 //extra gravity
+          who.force.y += who.mass * 0.001 //extra gravity
 
           ctx.beginPath();
           ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
@@ -117,49 +117,53 @@ const mobs = {
     }
   },
   statusPoison(who, tickDamage, cycles = 180) {
-    who.status.push({
-      effect() {
-        if ((game.cycle - this.startCycle) % 30 === 0) {
-          let dmg = b.dmgScale * tickDamage
-          who.damage(dmg);
-          game.drawList.push({ //add dmg to draw queue
-            x: who.position.x,
-            y: who.position.y,
-            radius: Math.log(2 * dmg + 1.1) * 40,
-            color: "rgba(0,80,80,0.9)",
-            time: game.drawTime
-          });
-        }
-      },
-      type: "poison",
-      endCycle: game.cycle + cycles,
-      startCycle: game.cycle
-    })
+    if (!who.isShielded) {
+      who.status.push({
+        effect() {
+          if ((game.cycle - this.startCycle) % 30 === 0) {
+            let dmg = b.dmgScale * tickDamage
+            who.damage(dmg);
+            game.drawList.push({ //add dmg to draw queue
+              x: who.position.x,
+              y: who.position.y,
+              radius: Math.log(2 * dmg + 1.1) * 40,
+              color: "rgba(0,80,80,0.9)",
+              time: game.drawTime
+            });
+          }
+        },
+        type: "poison",
+        endCycle: game.cycle + cycles,
+        startCycle: game.cycle
+      })
+    }
   },
   statusBurn(who, tickDamage, cycles = 90 + Math.floor(90 * Math.random())) {
-    //remove other "burn" effects on this mob
-    let i = who.status.length
-    while (i--) {
-      if (who.status[i].type === "burn") who.status.splice(i, 1);
+    if (!who.isShielded) {
+      //remove other "burn" effects on this mob
+      let i = who.status.length
+      while (i--) {
+        if (who.status[i].type === "burn") who.status.splice(i, 1);
+      }
+      who.status.push({
+        effect() {
+          if ((game.cycle - this.startCycle) % 15 === 0) {
+            let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
+            who.damage(dmg);
+            game.drawList.push({ //add dmg to draw queue
+              x: who.position.x,
+              y: who.position.y,
+              radius: Math.log(2 * dmg + 1.1) * 40,
+              color: `rgba(255,${Math.floor(255*Math.random())},0,0.9)`,
+              time: game.drawTime
+            });
+          }
+        },
+        type: "burn",
+        endCycle: game.cycle + cycles,
+        startCycle: game.cycle
+      })
     }
-    who.status.push({
-      effect() {
-        if ((game.cycle - this.startCycle) % 15 === 0) {
-          let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
-          who.damage(dmg);
-          game.drawList.push({ //add dmg to draw queue
-            x: who.position.x,
-            y: who.position.y,
-            radius: Math.log(2 * dmg + 1.1) * 40,
-            color: `rgba(255,${Math.floor(255*Math.random())},0,0.9)`,
-            time: game.drawTime
-          });
-        }
-      },
-      type: "burn",
-      endCycle: game.cycle + cycles,
-      startCycle: game.cycle
-    })
   },
 
   //**********************************************************************************************
