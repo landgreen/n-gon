@@ -205,6 +205,8 @@ function collisionChecks(event) {
               if (mob[k].isShielded) dmg *= 0.5
               mob[k].damage(dmg, true);
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
+              // mobs.statusStun(mob[k], 120)
+
               game.drawList.push({
                 //add dmg to draw queue
                 x: pairs[i].activeContacts[0].vertex.x,

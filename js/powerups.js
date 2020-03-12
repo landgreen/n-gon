@@ -236,12 +236,12 @@ const powerUps = {
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0027 * (14 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 15
+    if (Math.random() < 0.0027 * (15 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod");
       return;
     }
-    if (Math.random() < 0.003) {
+    if (Math.random() < 0.002) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
       return;
@@ -251,13 +251,13 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.80) {
+    } else if (Math.random() < 0.85) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.35) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun")
-    } else if (Math.random() < 0.65) {
+    } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
     } else if (mech.health < 0.7) {

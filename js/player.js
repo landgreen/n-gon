@@ -458,6 +458,7 @@ const mech = {
   defaultFPSCycle: 0, //tracks when to return to normal fps
   collisionImmuneCycle: 0, //used in engine
   damage(dmg) {
+    dmg *= mech.fieldDamageResistance
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.9
@@ -670,6 +671,7 @@ const mech = {
   fieldRegen: 0,
   fieldMode: 0,
   fieldFire: false,
+  fieldDamageResistance: 1,
   holdingMassScale: 0,
   throwChargeRate: 0,
   throwChargeMax: 0,
@@ -682,6 +684,7 @@ const mech = {
     if (mech.energy < mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
     mech.fieldRegen = 0.001;
     mech.fieldShieldingScale = 1;
+    mech.fieldDamageResistance = 1;
     mech.fieldFire = false;
     mech.fieldCDcycle = 0;
     mech.isStealth = false;
@@ -1223,7 +1226,8 @@ const mech = {
               mech.energy -= DRAIN;
               mech.grabPowerUp();
               mech.lookForPickUp();
-              mech.pushMobs360();
+              // mech.pushMobs360();
+              // mech.pushMobsFacing();
 
               //calculate laser collision
               let best;
@@ -1297,7 +1301,7 @@ const mech = {
                   y: best.y
                 };
                 if (best.who.alive) {
-                  const dmg = 0.4 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                  const dmg = 0.5 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
                   best.who.damage(dmg);
                   best.who.locatePlayer();
 
@@ -1354,10 +1358,10 @@ const mech = {
               ctx.lineWidth = 2 * Math.random();
               ctx.stroke();
               //draw shield around player
-              ctx.beginPath();
-              ctx.arc(mech.pos.x, mech.pos.y, mech.fieldRange * 0.75, 0, 2 * Math.PI);
-              ctx.fillStyle = "rgba(255,0,255,0.05)"
-              ctx.fill();
+              // ctx.beginPath();
+              // ctx.arc(mech.pos.x, mech.pos.y, mech.fieldRange * 0.75, 0, 2 * Math.PI);
+              // ctx.fillStyle = "rgba(255,0,255,0.05)"
+              // ctx.fill();
               // mech.pushBody360(100); //disabled because doesn't work at short range
             } else {
               mech.fieldCDcycle = mech.cycle + 120; //if out of energy
@@ -1373,16 +1377,17 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br><strong>launch</strong> larger blocks at much higher speeds",
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>and reduce <strong>harm</strong> by <strong>50%</strong>", //<br><strong>launch</strong> larger blocks at much higher speeds
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
-        mech.throwChargeRate = 3;
-        mech.throwChargeMax = 110;
+        // mech.throwChargeRate = 3;
+        // mech.throwChargeMax = 110;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
 
         mech.hold = function () {
+          mech.fieldDamageResistance = 1;
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
@@ -1390,9 +1395,23 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
             const DRAIN = 0.00035
             if (mech.energy > DRAIN) {
+              mech.fieldDamageResistance = 0.5;
               mech.grabPowerUp();
               mech.lookForPickUp();
-              mech.pushMobs360();
+              // mech.pushMobs360();
+
+              //repulse mobs
+              // for (let i = 0, len = mob.length; i < len; ++i) {
+              //   sub = Vector.sub(mob[i].position, mech.pos);
+              //   dist2 = Vector.magnitudeSquared(sub);
+              //   if (dist2 < this.fieldDrawRadius * this.fieldDrawRadius) {
+              //     const force = Vector.mult(Vector.perp(Vector.normalise(sub)), 0.002)
+              //     mob[i].force.x = force.x
+              //     mob[i].force.y = force.y
+              //   }
+              // }
+
+
               //look for nearby objects to make zero-g
               function zeroG(who, range, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -1428,7 +1447,7 @@ const mech = {
               //add extra friction for horizontal motion
               if (keys[65] || keys[68] || keys[37] || keys[39]) {
                 Matter.Body.setVelocity(player, {
-                  x: player.velocity.x * 0.95,
+                  x: player.velocity.x * 0.99,
                   y: player.velocity.y * 0.97
                 });
               } else { //slow rise and fall
@@ -1447,7 +1466,7 @@ const mech = {
               if (b.isModHawking) {
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
-                    mob[i].damage(b.dmgScale * 0.08);
+                    mob[i].damage(b.dmgScale * 0.085);
                     mob[i].locatePlayer();
 
                     //draw electricity

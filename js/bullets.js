@@ -525,22 +525,6 @@ const b = {
       }
     },
     {
-      name: "bremsstrahlung radiation",
-      description: "when your <strong>field blocks</strong> it also does <strong class='color-d'>damage</strong>",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name !== "time dilation field" && mech.fieldUpgrades[mech.fieldMode].name !== "phase decoherence field" && !(b.isModHawking && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field")
-      },
-      requires: "not time dilation field<br><strong>requires</strong> not phase decoherence field",
-      effect() {
-        b.modBlockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
-      },
-      remove() {
-        b.modBlockDmg = 0;
-      }
-    },
-    {
       name: "energy conservation",
       description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
       maxCount: 9,
@@ -1093,6 +1077,22 @@ const b = {
       },
       remove() {
         b.isModHawking = 0;
+      }
+    },
+    {
+      name: "bremsstrahlung radiation",
+      description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br><strong class='color-d'>damages</strong> the blocked mob ",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+      },
+      requires: "standing wave harmonics",
+      effect() {
+        b.modBlockDmg += 0.6 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+      },
+      remove() {
+        b.modBlockDmg = 0;
       }
     },
     {
