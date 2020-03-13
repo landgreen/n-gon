@@ -373,7 +373,7 @@ const mobs = {
           ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
           // ctx.lineDashOffset = 6*(game.cycle % 215);
           if (this.distanceToPlayer() < this.laserRange && !mech.isStealth) {
-            mech.damage(0.0003 * game.dmgScale);
+            if (mech.collisionImmuneCycle < mech.cycle) mech.damage(0.0003 * game.dmgScale);
             if (mech.energy > 0.1) mech.energy -= 0.003
             ctx.beginPath();
             ctx.moveTo(this.position.x, this.position.y);
@@ -461,7 +461,7 @@ const mobs = {
           if (!mech.isStealth) vertexCollision(this.position, look, [player]);
           // hitting player
           if (best.who === player) {
-            dmg = 0.0012 * game.dmgScale;
+            if (mech.collisionImmuneCycle < mech.cycle) dmg = 0.0012 * game.dmgScale;
             mech.damage(dmg);
             //draw damage
             ctx.fillStyle = "#f00";

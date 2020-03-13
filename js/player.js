@@ -469,6 +469,7 @@ const mech = {
       if (b.isModDeathAvoid && !b.isModDeathAvoidOnCD) { //&& Math.random() < 0.5
         b.isModDeathAvoidOnCD = true;
         mech.health += dmg //undo the damage
+        if (mech.health < 0.05) mech.health = 0.05
         mech.collisionImmuneCycle = mech.cycle + 30 //disable this.collisionImmuneCycle bonus seconds
 
         game.wipe = function () { //set wipe to have trails
@@ -1404,8 +1405,8 @@ const mech = {
               // for (let i = 0, len = mob.length; i < len; ++i) {
               //   sub = Vector.sub(mob[i].position, mech.pos);
               //   dist2 = Vector.magnitudeSquared(sub);
-              //   if (dist2 < this.fieldDrawRadius * this.fieldDrawRadius) {
-              //     const force = Vector.mult(Vector.perp(Vector.normalise(sub)), 0.002)
+              //   if (dist2 < this.fieldDrawRadius * this.fieldDrawRadius && mob[i].speed > 6) {
+              //     const force = Vector.mult(Vector.perp(Vector.normalise(sub)), 0.00004 * mob[i].speed * mob[i].mass)
               //     mob[i].force.x = force.x
               //     mob[i].force.y = force.y
               //   }
