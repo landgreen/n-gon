@@ -15,7 +15,7 @@ const level = {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
       // b.giveGuns("mine")
-      // mech.setField("negative mass field")
+      mech.setField("perfect diamagnetism")
       // b.giveMod("irradiated needles");
       // b.giveMod("reflective cavity");
 

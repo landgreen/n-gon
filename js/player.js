@@ -666,7 +666,7 @@ const mech = {
   fieldEnergyMax: 1, //can be increased by a mod
   holdingTarget: null,
   fieldShieldingScale: 1,
-  fieldRange: 175,
+  fieldRange: 155,
   // these values are set on reset by setHoldDefaults()
   energy: 0,
   fieldRegen: 0,
@@ -866,7 +866,7 @@ const mech = {
       ctx.strokeStyle = "rgba(110, 200, 235, " + (0.6 + 0.2 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
     }
     // const off = 2 * Math.cos(game.cycle * 0.1)
-    const range = mech.fieldRange - 20;
+    const range = mech.fieldRange;
     ctx.beginPath();
     ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
     ctx.lineWidth = 2;
@@ -894,6 +894,34 @@ const mech = {
     ctx.strokeStyle = "rgba(120,170,255,0.6)";
     ctx.lineWidth = 1;
     ctx.stroke();
+  },
+  drawDiamagneticField(wave) {
+    if (mech.holdingTarget) {
+      ctx.fillStyle = "rgba(110,170,200," + (0.06 + 0.03 * Math.random()) + ")";
+      ctx.strokeStyle = "rgba(110, 200, 235, " + (0.35 + 0.05 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
+    } else {
+      ctx.fillStyle = "rgba(110,170,200," + (0.20 + 0.07 * Math.random() - 0.07 * wave) + ")";
+      ctx.strokeStyle = "rgba(110, 200, 235, " + (0.3 + 0.5 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
+    }
+    // const off = 2 * Math.cos(game.cycle * 0.1)
+    const range = mech.fieldRange;
+    ctx.beginPath();
+    ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
+    ctx.lineWidth = 2.5 - 1.5 * wave;
+    ctx.lineCap = "butt"
+    ctx.stroke();
+    let eye = 13;
+    const curve = 0.6 + 0.08 * wave
+    let aMag = (1 - curve) * Math.PI * mech.fieldArc
+    let a = mech.angle + aMag
+    let cp1x = mech.pos.x + curve * range * Math.cos(a)
+    let cp1y = mech.pos.y + curve * range * Math.sin(a)
+    ctx.quadraticCurveTo(cp1x, cp1y, mech.pos.x + eye * Math.cos(mech.angle), mech.pos.y + eye * Math.sin(mech.angle))
+    a = mech.angle - aMag
+    cp1x = mech.pos.x + curve * range * Math.cos(a)
+    cp1y = mech.pos.y + curve * range * Math.sin(a)
+    ctx.quadraticCurveTo(cp1x, cp1y, mech.pos.x + 1 * range * Math.cos(mech.angle - Math.PI * mech.fieldArc), mech.pos.y + 1 * range * Math.sin(mech.angle - Math.PI * mech.fieldArc))
+    ctx.fill();
   },
   grabPowerUp() { //look for power ups to grab with field
     const grabPowerUpRange2 = 156000 //(mech.fieldRange + 220) * (mech.fieldRange + 220)
@@ -935,7 +963,6 @@ const mech = {
       if (mech.energy < 0) mech.energy = 0;
       if (mech.energy > mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
       mech.drawHold(who);
-      mech.fieldCDcycle = mech.cycle + 10;
       mech.holdingTarget = null
       const unit = Vector.normalise(Vector.sub(player.position, who.position))
       if (b.modBlockDmg) {
@@ -958,29 +985,38 @@ const mech = {
         ctx.stroke();
       }
       //knock backs
-      const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
-      Matter.Body.setVelocity(who, {
-        x: player.velocity.x - (15 * unit.x) / massRoot,
-        y: player.velocity.y - (15 * unit.y) / massRoot
-      });
-      if (mech.crouch) {
-        Matter.Body.setVelocity(player, {
-          x: player.velocity.x + 0.4 * unit.x * massRoot,
-          y: player.velocity.y + 0.4 * unit.y * massRoot
+      if (mech.fieldShieldingScale > 0) {
+        const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
+        Matter.Body.setVelocity(who, {
+          x: player.velocity.x - (15 * unit.x) / massRoot,
+          y: player.velocity.y - (15 * unit.y) / massRoot
         });
+        mech.fieldCDcycle = mech.cycle + 10;
+        if (mech.crouch) {
+          Matter.Body.setVelocity(player, {
+            x: player.velocity.x + 0.4 * unit.x * massRoot,
+            y: player.velocity.y + 0.4 * unit.y * massRoot
+          });
+        } else {
+          Matter.Body.setVelocity(player, {
+            x: player.velocity.x + 5 * unit.x * massRoot,
+            y: player.velocity.y + 5 * unit.y * massRoot
+          });
+        }
       } else {
-        Matter.Body.setVelocity(player, {
-          x: player.velocity.x + 5 * unit.x * massRoot,
-          y: player.velocity.y + 5 * unit.y * massRoot
+        const massRoot = Math.sqrt(Math.max(0.15, who.mass)); // masses above 12 can start to overcome the push back
+        Matter.Body.setVelocity(who, {
+          x: player.velocity.x - (15 * unit.x) / massRoot,
+          y: player.velocity.y - (15 * unit.y) / massRoot
         });
       }
-
     }
   },
   pushMobsFacing() { // find mobs in range and in direction looking
+
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
-        Vector.magnitude(Vector.sub(mob[i].position, player.position)) < mech.fieldRange &&
+        Vector.magnitude(Vector.sub(mob[i].position, player.position)) - mob[i].radius < mech.fieldRange &&
         mech.lookingAt(mob[i]) &&
         Matter.Query.ray(map, mob[i].position, mech.pos).length === 0
       ) {
@@ -1119,7 +1155,7 @@ const mech = {
   },
   fieldUpgrades: [{
       name: "field emitter",
-      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br>lets you <strong>pick up</strong> and <strong>throw</strong> objects",
+      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
       isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
@@ -1130,6 +1166,38 @@ const mech = {
             mech.throwBlock();
           } else if ((keys[32] || game.mouseDownRight && mech.energy > 0.05 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.drawField();
+            mech.grabPowerUp();
+            mech.lookForPickUp();
+            mech.pushMobsFacing();
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle && mech.energy > 0.05) { //holding, but field button is released
+            mech.pickUp();
+          } else {
+            mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+          }
+          mech.drawFieldMeter()
+        }
+      }
+    },
+    {
+      name: "perfect diamagnetism",
+      // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
+      description: "<strong>blocking</strong> produces <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>recoil</strong> or <strong>cool down</strong>",
+      isEasyToAim: false,
+      effect: () => {
+        mech.fieldShieldingScale = -2;
+        // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+        // mech.calculateFieldThreshold();
+        mech.hold = function () {
+          const wave = Math.sin(mech.cycle * 0.025);
+          mech.fieldRange = 165 + 10 * wave
+          mech.fieldArc = 0.31 + 0.03 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+          mech.calculateFieldThreshold();
+          if (mech.isHolding) {
+            mech.drawHold(mech.holdingTarget);
+            mech.holding();
+            mech.throwBlock();
+          } else if ((keys[32] || game.mouseDownRight && mech.energy > 0.05 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+            mech.drawDiamagneticField(wave);
             mech.grabPowerUp();
             mech.lookForPickUp();
             mech.pushMobsFacing();
@@ -1375,7 +1443,7 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>and reduce <strong>harm</strong> by <strong>66%</strong>", //<br><strong>launch</strong> larger blocks at much higher speeds
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>66%</strong> while field is active", //<br><strong>launch</strong> larger blocks at much higher speeds
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {

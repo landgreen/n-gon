@@ -1,6 +1,11 @@
 
 ************** TODO - n-gon **************
 
+field - the basic field emitter, but no energy loss and no knock back on blocks
+  this field should make blocking a viable strategy
+  gain energy on blocking?
+  call it diamagnetic field and remove the diamagnetism mod?
+
 mod - nails do poison damage
 mod - increase laser bot range, and reduce energy drain
 

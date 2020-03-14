@@ -239,7 +239,7 @@ const b = {
     },
     {
       name: "mass driver",
-      description: "<strong>blocks</strong> do <strong>3x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge block <strong>throws</strong> in <strong>3x</strong> less time",
+      description: "<strong>objects</strong> do <strong>3x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge <strong>throws</strong> in <strong>3x</strong> less time",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1099,13 +1099,13 @@ const b = {
     },
     {
       name: "bremsstrahlung radiation",
-      description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br><strong class='color-d'>damages</strong> the blocked mob ",
+      description: "<strong>blocking</strong> with your field does <strong class='color-d'>damage</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics" || mech.fieldUpgrades[mech.fieldMode].name === "diamagnetic field"
       },
-      requires: "standing wave harmonics",
+      requires: "standing wave harmonics<br>or diamagnetic field",
       effect() {
         b.modBlockDmg += 0.6 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
       },
@@ -1129,24 +1129,6 @@ const b = {
       remove() {
         mech.fieldRange = 175;
         mech.fieldShieldingScale = 1;
-      }
-    },
-    {
-      name: "perfect diamagnetism",
-      description: "you <strong>don't</strong> lose <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>with <strong>nano-scale manufacturing</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
-      },
-      requires: "nano-scale manufacturing",
-      effect() {
-        b.modFieldEfficiency = 0
-        mech.fieldShieldingScale = b.modFieldEfficiency;
-      },
-      remove() {
-        b.modFieldEfficiency = 1;
-        if (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") mech.fieldShieldingScale = b.modFieldEfficiency;
       }
     },
     {
