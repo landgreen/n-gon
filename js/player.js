@@ -674,8 +674,6 @@ const mech = {
   fieldFire: false,
   fieldDamageResistance: 1,
   holdingMassScale: 0,
-  throwChargeRate: 0,
-  throwChargeMax: 0,
   fieldArc: 0,
   fieldThreshold: 0,
   calculateFieldThreshold() {
@@ -691,8 +689,6 @@ const mech = {
     mech.isStealth = false;
     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
     mech.holdingMassScale = 0.5;
-    mech.throwChargeRate = 2;
-    mech.throwChargeMax = 50;
     mech.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.isBodiesAsleep = true;
@@ -796,12 +792,12 @@ const mech = {
       if (keys[32] || game.mouseDownRight) {
         if (mech.energy > 0.0007) {
           mech.energy -= 0.0007;
-          mech.throwCharge += mech.throwChargeRate;;
+          mech.throwCharge += 1 / mech.holdingTarget.mass * b.modThrowChargeRate
           //draw charge
           const x = mech.pos.x + 15 * Math.cos(mech.angle);
           const y = mech.pos.y + 15 * Math.sin(mech.angle);
           const len = mech.holdingTarget.vertices.length - 1;
-          const edge = mech.throwCharge * mech.throwCharge * 0.02;
+          const edge = mech.throwCharge * mech.throwCharge * mech.throwCharge;
           const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
           grd.addColorStop(0, "rgba(255,50,150,0.3)");
           grd.addColorStop(1, "transparent");
@@ -840,8 +836,9 @@ const mech = {
           }
         };
         setTimeout(solid, 150, mech.holdingTarget);
-        //throw speed scales a bit with mass
-        const speed = Math.min(85, Math.min(54 / mech.holdingTarget.mass + 5, 48) * Math.min(mech.throwCharge, mech.throwChargeMax) / 50);
+
+        const charge = Math.min(mech.throwCharge / 5, 1)
+        const speed = charge * Math.min(80, 64 / Math.pow(mech.holdingTarget.mass, 0.25));
 
         mech.throwCharge = 0;
         Matter.Body.setVelocity(mech.holdingTarget, {
@@ -1378,13 +1375,11 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>and reduce <strong>harm</strong> by <strong>50%</strong>", //<br><strong>launch</strong> larger blocks at much higher speeds
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>and reduce <strong>harm</strong> by <strong>66%</strong>", //<br><strong>launch</strong> larger blocks at much higher speeds
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
-        // mech.throwChargeRate = 3;
-        // mech.throwChargeMax = 110;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
 
         mech.hold = function () {
@@ -1396,7 +1391,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
             const DRAIN = 0.00035
             if (mech.energy > DRAIN) {
-              mech.fieldDamageResistance = 0.5;
+              mech.fieldDamageResistance = 0.66;
               mech.grabPowerUp();
               mech.lookForPickUp();
               // mech.pushMobs360();

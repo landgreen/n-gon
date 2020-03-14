@@ -63,6 +63,8 @@ const b = {
   isModHawking: null,
   modBabyMissiles: null,
   isModIceCrystals: null,
+  modThrowChargeRate: null,
+  isModBlockStun: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -233,6 +235,22 @@ const b = {
       },
       remove() {
         b.modNoAmmo = 0;
+      }
+    },
+    {
+      name: "mass driver",
+      description: "<strong>blocks</strong> do <strong>3x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge block <strong>throws</strong> in <strong>3x</strong> less time",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.modThrowChargeRate = 3
+      },
+      remove() {
+        b.modThrowChargeRate = 1
       }
     },
     {

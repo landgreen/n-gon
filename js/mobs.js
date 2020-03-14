@@ -94,6 +94,7 @@ const mobs = {
       who.status.push({
         effect() {
           who.seePlayer.yes = false;
+          who.seePlayer.recall = 0;
           who.seePlayer.position = {
             x: who.position.x + 100 * (Math.random() - 0.5),
             y: who.position.y + 100 * (Math.random() - 0.5)

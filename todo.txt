@@ -1,9 +1,17 @@
+new patch
+throwing blocks works better for larger blocks, even with no mods
+new mod - mass driver: blocks do 3x damage and charge 3x faster
+negative mass field
+  moves faster horizontally
+  doesn't increase throw speed (but still lets you move with huge blocks)
+  can't block
+  take 66% less damage while field is active
+bremsstrahlung radiation only applies to the harmonic field
+
 ************** TODO - n-gon **************
 
+mod - nails do poison damage
 mod - increase laser bot range, and reduce energy drain
-
-scale block throwing by mech.holdingMassScale
-  (and simplify the code in throw)
 
 mod - mines become a turret that fires nails
   it could float to the mouse location on fire
@@ -12,20 +20,9 @@ dash - mod  when pressing left or right on the ground, teleport to the right unt
   do repeated horizontal zone queries until they hit map or block
   up to a max range of like 10 player widths
 
-weak anthropic principle - sets health to 3% if it's lower than 3% when triggered.
-
 bug - mech.fieldShieldingScale doesn't reset when switching fields
 
-negative mass field needs a buff
-  repel blocks away
-    scale repulsion force with speed of projectile
-    choose clockwise or counter clock wise base on which force direction makes the smallest angle with the velocity
-  no longer blocks, but the player takes 50% less damage from all sources while the field is active
-  allow player to hold larger block, but give throwing blocks at high speed for no energy to a mob
-
 mod - blocks stun mobs
-mod - throwing blocks at full power converts the block into nails
-  would this cause problems for block based puzzles?
 mod or field - turn blocks into spores or drones
 
 mod - robot that attack nearby mobs, and delivers a stun status effect
