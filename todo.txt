@@ -1,12 +1,3 @@
-new patch
-throwing blocks works better for larger blocks, even with no mods
-new mod - mass driver: blocks do 3x damage and charge 3x faster
-negative mass field
-  moves faster horizontally
-  doesn't increase throw speed (but still lets you move with huge blocks)
-  can't block
-  take 66% less damage while field is active
-bremsstrahlung radiation only applies to the harmonic field
 
 ************** TODO - n-gon **************
 

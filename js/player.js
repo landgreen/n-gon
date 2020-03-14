@@ -1391,7 +1391,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
             const DRAIN = 0.00035
             if (mech.energy > DRAIN) {
-              mech.fieldDamageResistance = 0.66;
+              mech.fieldDamageResistance = 0.33; // 1 - 0.66
               mech.grabPowerUp();
               mech.lookForPickUp();
               // mech.pushMobs360();
