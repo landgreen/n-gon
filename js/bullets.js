@@ -511,7 +511,7 @@ const b = {
     },
     {
       name: "entanglement",
-      description: "<strong>10%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
+      description: "<strong>13%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1047,7 +1047,7 @@ const b = {
     },
     {
       name: "specular reflection",
-      description: "the <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+33%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      description: "the <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+50%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -1056,8 +1056,8 @@ const b = {
       requires: "laser",
       effect() {
         b.modLaserReflections++;
-        b.modLaserDamage += 0.02; //base is 0.05
-        b.modLaserFieldDrain += 0.0006 //base is 0.002
+        b.modLaserDamage += 0.025; //base is 0.05
+        b.modLaserFieldDrain += 0.001 //base is 0.002
       },
       remove() {
         b.modLaserReflections = 2;
@@ -1103,9 +1103,9 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics" || mech.fieldUpgrades[mech.fieldMode].name === "diamagnetic field"
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics" || mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism"
       },
-      requires: "standing wave harmonics<br>or diamagnetic field",
+      requires: "standing wave harmonics<br>or perfect diamagnetism",
       effect() {
         b.modBlockDmg += 0.6 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
       },

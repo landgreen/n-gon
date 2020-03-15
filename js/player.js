@@ -461,7 +461,7 @@ const mech = {
     dmg *= mech.fieldDamageResistance
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
-        dmg *= 0.9
+        dmg *= 0.87 // 1 - 0.13
       }
     }
     mech.health -= dmg;
@@ -792,7 +792,7 @@ const mech = {
       if (keys[32] || game.mouseDownRight) {
         if (mech.energy > 0.0007) {
           mech.energy -= 0.0007;
-          mech.throwCharge += 1 / mech.holdingTarget.mass * b.modThrowChargeRate
+          mech.throwCharge += 0.5 * b.modThrowChargeRate / mech.holdingTarget.mass
           //draw charge
           const x = mech.pos.x + 15 * Math.cos(mech.angle);
           const y = mech.pos.y + 15 * Math.sin(mech.angle);
@@ -910,9 +910,9 @@ const mech = {
     ctx.lineWidth = 2.5 - 1.5 * wave;
     ctx.lineCap = "butt"
     ctx.stroke();
-    let eye = 13;
-    const curve = 0.6 + 0.08 * wave
-    let aMag = (1 - curve) * Math.PI * mech.fieldArc
+    let eye = 20;
+    const curve = 0.5 + 0.06 * wave
+    let aMag = (1 - curve * 1.2) * Math.PI * mech.fieldArc
     let a = mech.angle + aMag
     let cp1x = mech.pos.x + curve * range * Math.cos(a)
     let cp1y = mech.pos.y + curve * range * Math.sin(a)

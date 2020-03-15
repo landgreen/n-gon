@@ -15,7 +15,7 @@ const level = {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
       // b.giveGuns("mine")
-      mech.setField("perfect diamagnetism")
+      // mech.setField("perfect diamagnetism")
       // b.giveMod("irradiated needles");
       // b.giveMod("reflective cavity");
 
@@ -72,18 +72,20 @@ const level = {
     if (game.difficulty < 1) game.difficulty = 0;
     game.healScale = 1 / (1 + game.difficulty * 0.09)
   },
-  levelAnnounce() {
+  difficultyText() {
     let mode = document.getElementById("difficulty-select").value
     if (mode === "0") {
-      mode = "(easy)"
+      return "easy"
     } else if (mode === "1") {
-      mode = "(normal)"
+      return "normal"
     } else if (mode === "2") {
-      mode = "(hard)"
+      return "hard"
     } else if (mode === "4") {
-      mode = "(why)"
+      return "why"
     }
-    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " " + mode;
+  },
+  levelAnnounce() {
+    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " (" + level.difficultyText() + ")";
   },
   //******************************************************************************************************************
   //******************************************************************************************************************

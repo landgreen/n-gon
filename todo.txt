@@ -1,6 +1,8 @@
 
 ************** TODO - n-gon **************
 
+gun or mod - drones that only last for 2 seconds
+
 field - the basic field emitter, but no energy loss and no knock back on blocks
   this field should make blocking a viable strategy
   gain energy on blocking?
@@ -69,6 +71,7 @@ lore - a robot (the player) gains self awareness
     final mod is "this is just a simulation"
       you get immortality and Infinity damage
       the next level is the final level
+  when you die with Quantum Immortality there is a chance of lore text
 
 atmosphere levels: change the pace, give the user a rest between combat
   low or no combat, but more graphics

@@ -19,7 +19,17 @@ const build = {
     let text = `
     <div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
-    </div>`;
+    </div>
+    <div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
+      level: ${level.levelsCleared} - ${level.levels[level.onLevel]} (${level.difficultyText()})
+      <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
+      <br>mouse: (${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)}) &nbsp; ${mech.cycle} cycles
+      <br>
+      <br>health: ${(mech.health*100).toFixed(0)}% &nbsp; energy: ${(mech.energy*100).toFixed(0)}% &nbsp; mass: ${player.mass.toFixed(1)}
+      <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
+    </div>
+    
+    `;
     // <div class="pause-grid-module" style="display: flex; justify-content: space-between;padding-bottom:20px;">
     // <span>${game.SVGleftMouse} fire gun</span>
     // <span>${game.SVGrightMouse} use field</span>
