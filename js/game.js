@@ -658,7 +658,21 @@ const game = {
   },
   checks() {
     if (mech.pos.y > game.fallHeight) { // if 4000px deep
-      mech.death();
+      if (game.difficultyMode > 2) {
+        mech.death();
+      } else {
+        Matter.Body.setVelocity(player, {
+          x: 0,
+          y: 0
+        });
+        Matter.Body.setPosition(player, {
+          x: level.enter.x + 50,
+          y: level.enter.y - 20
+        });
+        mech.energy = 0;
+        if (game.difficultyMode === 2) mech.damage(0.3);
+        if (game.difficultyMode === 1) mech.damage(0.1);
+      }
     }
 
     if (!(mech.cycle % 60)) { //once a second
@@ -680,18 +694,29 @@ const game = {
       }
 
       if (!(game.cycle % 420)) { //once every 7 seconds
-        fallCheck = function (who) {
+        fallCheck = function (who, save = false) {
           let i = who.length;
           while (i--) {
             if (who[i].position.y > game.fallHeight) {
-              Matter.World.remove(engine.world, who[i]);
-              who.splice(i, 1);
+              if (save && game.difficultyMode < 2) {
+                Matter.Body.setVelocity(who[i], {
+                  x: 0,
+                  y: 0
+                });
+                Matter.Body.setPosition(who[i], {
+                  x: level.exit.x + 30 * (Math.random() - 0.5),
+                  y: level.exit.y + 30 * (Math.random() - 0.5)
+                });
+              } else {
+                Matter.World.remove(engine.world, who[i]);
+                who.splice(i, 1);
+              }
             }
           }
         };
         fallCheck(mob);
         fallCheck(body);
-        fallCheck(powerUp);
+        fallCheck(powerUp, true);
       }
     }
   },

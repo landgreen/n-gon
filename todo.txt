@@ -1,5 +1,16 @@
+perfect diamagnetism balance and graphics
+unique energy colors for fields
+game info on pause screen
+falling off the map, on easy and normal difficulty
+  sets the player to the entrance
+  sets power ups to the exit
+
+
+
 
 ************** TODO - n-gon **************
+
+perfect diamagnetism should get larger as it blocks more, and then slowly fad back to the normal size
 
 gun or mod - drones that only last for 2 seconds
 

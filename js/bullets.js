@@ -65,6 +65,7 @@ const b = {
   isModIceCrystals: null,
   modThrowChargeRate: null,
   isModBlockStun: null,
+  isModStunField: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -1066,6 +1067,22 @@ const b = {
       }
     },
     {
+      name: "daze",
+      description: "blocking <strong>stuns</strong> mobs for 1 second<br>with the <strong>perfect diamagnetism</strong> field",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism"
+      },
+      requires: "perfect diamagnetism",
+      effect() {
+        b.isModStunField += 60;
+      },
+      remove() {
+        b.isModStunField = 0;
+      }
+    },
+    {
       name: "plasma jet",
       description: "increase <strong>plasma torch's</strong> range by <strong>33%</strong>",
       maxCount: 9,
@@ -1107,7 +1124,7 @@ const b = {
       },
       requires: "standing wave harmonics<br>or perfect diamagnetism",
       effect() {
-        b.modBlockDmg += 0.6 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+        b.modBlockDmg += 0.4 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
       },
       remove() {
         b.modBlockDmg = 0;
@@ -2238,7 +2255,7 @@ const b = {
     },
     {
       name: "fléchettes", //3
-      description: "fire a <strong>precise</strong> volley of <strong>high velocity</strong> needles<br>needles deliver <strong class='color-p'>chemical</strong> <strong class='color-d'>damage</strong> over 3 seconds",
+      description: "fire a <strong>precise</strong> volley of <strong>high velocity</strong> needles<br>that apply <strong class='color-p'>chemical</strong> <strong class='color-d'>damage</strong> over 3 seconds",
       ammo: 0,
       ammoPack: 23,
       defaultAmmoPack: 23,
@@ -2502,7 +2519,7 @@ const b = {
     },
     {
       name: "vacuum bomb", //8
-      description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br>click left mouse again to <strong>detonate</strong>",
+      description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br><strong>click</strong> left mouse again to <strong>detonate</strong>",
       ammo: 0,
       ammoPack: 2,
       have: false,
@@ -3032,7 +3049,7 @@ const b = {
     },
     {
       name: "laser", //14
-      description: "emit a beam of collimated coherent <strong>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
+      description: "emit a <strong>beam</strong> of collimated coherent <strong>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
       ammo: 0,
       ammoPack: Infinity,
       have: false,
