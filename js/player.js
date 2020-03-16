@@ -696,10 +696,10 @@ const mech = {
     mech.wakeCheck();
   },
   fieldMeterColor: "#0cf",
-  drawFieldMeter(range = 60) {
+  drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
     if (mech.energy < mech.fieldEnergyMax) {
       mech.energy += mech.fieldRegen;
-      ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+      ctx.fillStyle = bgColor;
       const xOff = mech.pos.x - mech.radius * mech.fieldEnergyMax
       const yOff = mech.pos.y - 50
       ctx.fillRect(xOff, yOff, range * mech.fieldEnergyMax, 10);
@@ -1171,7 +1171,7 @@ const mech = {
       isEasyToAim: false,
       effect: () => {
         mech.fieldShieldingScale = 0;
-        mech.fieldMeterColor = "#0af"
+        // mech.fieldMeterColor = "#0af"
         // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         // mech.calculateFieldThreshold();
         mech.hold = function () {
@@ -1186,19 +1186,12 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight && mech.energy > 0.05 && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             //draw field
             if (mech.holdingTarget) {
-              ctx.fillStyle = "rgba(120,190,255," + (0.06 + 0.03 * Math.random()) + ")";
-              ctx.strokeStyle = "rgba(120, 190, 255, " + (0.35 + 0.05 * Math.random()) + ")"
+              ctx.fillStyle = "rgba(110,170,200," + (0.06 + 0.03 * Math.random()) + ")";
+              ctx.strokeStyle = "rgba(110, 200, 235, " + (0.35 + 0.05 * Math.random()) + ")"
             } else {
-              ctx.fillStyle = "rgba(120,190,255," + (0.3 + 0.13 * Math.random() - 0.15 * wave) + ")";
-              ctx.strokeStyle = "rgba(120, 190, 255, " + (0.3 + 0.5 * Math.random()) + ")"
+              ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.13 * Math.random() - 0.15 * wave) + ")";
+              ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"
             }
-            // if (mech.holdingTarget) {
-            //   ctx.fillStyle = "rgba(110,175,200," + (0.06 + 0.03 * Math.random()) + ")";
-            //   ctx.strokeStyle = "rgba(115, 220, 255, " + (0.35 + 0.05 * Math.random()) + ")"
-            // } else {
-            //   ctx.fillStyle = "rgba(110,175,200," + (0.20 + 0.07 * Math.random() - 0.1 * wave) + ")";
-            //   ctx.strokeStyle = "rgba(115, 220, 255, " + (0.3 + 0.5 * Math.random()) + ")"
-            // }
             ctx.beginPath();
             ctx.arc(mech.pos.x, mech.pos.y, mech.fieldRange, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
             ctx.lineWidth = 2.5 - 1.5 * wave;
@@ -1458,7 +1451,7 @@ const mech = {
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
-          mech.drawFieldMeter()
+          mech.drawFieldMeter("rgba(0, 0, 0, 0.2)")
         }
       }
     },
@@ -1470,10 +1463,9 @@ const mech = {
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
-        // mech.fieldMeterColor = "#000"
+        mech.fieldMeterColor = "#000"
 
         mech.hold = function () {
-          mech.drawFieldMeter()
           mech.fieldDamageResistance = 1;
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1589,6 +1581,7 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
             this.fieldDrawRadius = 0
           }
+          mech.drawFieldMeter("rgba(0,0,0,0.2)")
         }
       }
     },
@@ -1758,7 +1751,26 @@ const mech = {
           } else {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
-          mech.drawFieldMeter()
+          // mech.drawFieldMeter()
+          if (mech.energy < mech.fieldEnergyMax) {
+            mech.energy += mech.fieldRegen;
+            const xOff = mech.pos.x - mech.radius * mech.fieldEnergyMax
+            const yOff = mech.pos.y - 50
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+            ctx.fillRect(xOff, yOff, 60 * mech.fieldEnergyMax, 10);
+
+            ctx.fillStyle = mech.fieldMeterColor;
+            ctx.fillRect(xOff, yOff, 60 * mech.energy, 10);
+
+            ctx.beginPath()
+            ctx.rect(xOff, yOff, 60 * mech.fieldEnergyMax, 10);
+            // ctx.fill();
+            ctx.strokeStyle = "rgb(0, 0, 0)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+
         }
       }
     },

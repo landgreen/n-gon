@@ -1067,8 +1067,8 @@ const b = {
       }
     },
     {
-      name: "daze",
-      description: "blocking <strong>stuns</strong> mobs for 1 second<br>with the <strong>perfect diamagnetism</strong> field",
+      name: "flux pinning",
+      description: "blocking <strong>stuns</strong> mobs for <strong>+1</strong> second<br>with the <strong>perfect diamagnetism</strong> field",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -1080,6 +1080,22 @@ const b = {
       },
       remove() {
         b.isModStunField = 0;
+      }
+    },
+    {
+      name: "bremsstrahlung radiation",
+      description: "<strong>blocking</strong> with your field does <strong class='color-d'>damage</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics" || mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism"
+      },
+      requires: "standing wave harmonics<br>or perfect diamagnetism",
+      effect() {
+        b.modBlockDmg += 0.4 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+      },
+      remove() {
+        b.modBlockDmg = 0;
       }
     },
     {
@@ -1112,22 +1128,6 @@ const b = {
       },
       remove() {
         b.isModHawking = 0;
-      }
-    },
-    {
-      name: "bremsstrahlung radiation",
-      description: "<strong>blocking</strong> with your field does <strong class='color-d'>damage</strong>",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics" || mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism"
-      },
-      requires: "standing wave harmonics<br>or perfect diamagnetism",
-      effect() {
-        b.modBlockDmg += 0.4 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
-      },
-      remove() {
-        b.modBlockDmg = 0;
       }
     },
     {

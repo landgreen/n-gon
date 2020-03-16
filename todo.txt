@@ -1,18 +1,14 @@
-perfect diamagnetism balance and graphics
-unique energy colors for fields
-game info on pause screen
-falling off the map, on easy and normal difficulty
-  sets the player to the entrance
-  sets power ups to the exit
-
-
 
 
 ************** TODO - n-gon **************
 
-perfect diamagnetism should get larger as it blocks more, and then slowly fad back to the normal size
+work on burn status effect
+  graphics don't look right
+  how is it different from the chemical dot
 
-gun or mod - drones that only last for 2 seconds
+perfect diamagnetism should get larger as it blocks more, and then slowly fade back to the normal size
+
+gun - bullets that acts like drones but only last for 2 seconds and do more damage
 
 field - the basic field emitter, but no energy loss and no knock back on blocks
   this field should make blocking a viable strategy
@@ -45,29 +41,18 @@ bug - getting stuck in crouch mode
       I don't think I was holding a block
       might have been standing on a block... not sure
 
-mobs - add in a function to the main loops that does injected code for each mob
-  each mob would get an object with a game.cycle for ending and a method to run each cycle until the end is met
-  this could be a DoT, graphics, slow, blind
-  stun - combine blind, slow
-    with increased gravity effects, but how
-  burn effect doesn't look right, too similar to poison
-    burn status could spread to player
-  mod - grenade explosions stun enemies
-  mod - vacuum bomb does DoT damage after exploding
-  mod - super balls become fire balls?
-  mod - laser mod has a chance to set things on fire
-  
 settings - auto aim at nearest mob
 settings - custom keys binding
 
 gun - buff vacuum bomb
-  its weak late game
+  it's weak late game
     can't spam it faster
     bad vs. shields
     doesn't scale up to huge groups
   buff collision damage?
   mod - double explosions?
   mod - doesn't suck player in?
+  mod - DoT damage after exploding
   
 mod - make bodies destroyable
   they drop ammo and heals
