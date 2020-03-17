@@ -15,7 +15,7 @@ const level = {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
       // b.giveGuns("mine")
-      // mech.setField("phase decoherence field")
+      // mech.setField("time dilation field")
       // b.giveMod("irradiated needles");
       // b.giveMod("reflective cavity");
 

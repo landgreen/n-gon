@@ -1102,6 +1102,7 @@ const mech = {
   },
   wakeCheck() {
     if (mech.isBodiesAsleep) {
+      console.log('in')
       mech.isBodiesAsleep = false;
 
       function wake(who) {
@@ -1284,7 +1285,7 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
           mech.drawFieldMeter()
-          if (mech.fieldMode !== 1) mech.wakeCheck(); //wake up if this is no longer the current field mode, like after a new power up
+          if (mech.fieldMode !== 2) mech.wakeCheck(); //wake up if this is no longer the current field mode, like after a new power up
         }
       }
     },
