@@ -2,6 +2,9 @@
 
 ************** TODO - n-gon **************
 
+desublimated ammo + mine reclaimation   not fun game play interaction
+  
+
 work on burn status effect
   graphics don't look right
   how is it different from the chemical dot

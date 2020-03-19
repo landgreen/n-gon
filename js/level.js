@@ -29,6 +29,7 @@ const level = {
       // level.warehouse();
       // level.highrise();
       // level.office();
+      level.levelAnnounce();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       // spawn.pickList = ["focuser", "focuser"]
@@ -85,7 +86,11 @@ const level = {
     }
   },
   levelAnnounce() {
-    document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " (" + level.difficultyText() + ")";
+    if (level.levelsCleared === 0) {
+      document.title = "n-gon: intro (" + level.difficultyText() + ")";
+    } else {
+      document.title = "n-gon: L" + (level.levelsCleared) + " " + level.levels[level.onLevel] + " (" + level.difficultyText() + ")";
+    }
   },
   //******************************************************************************************************************
   //******************************************************************************************************************

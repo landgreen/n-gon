@@ -1687,7 +1687,7 @@ const b = {
                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                 this.endCycle = 0 //end life if mob is near and visible
-                if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back from undetonated mines
+                if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back after detonation
               }
             }
           }
@@ -1725,7 +1725,7 @@ const b = {
             }
           }
         }
-        if (isAmmoBack) {
+        if (isAmmoBack) { //get ammo back from b.isModMineAmmoBack
           for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
             if (b.guns[i].name === "mine") {
               b.guns[i].ammo++
@@ -2629,7 +2629,7 @@ const b = {
       name: "mine", //9
       description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
       ammo: 0,
-      ammoPack: (game.difficultyMode > 3) ? 2 : 3,
+      ammoPack: 3,
       have: false,
       isStarterGun: false,
       isEasyToAim: true,
@@ -2695,7 +2695,7 @@ const b = {
       name: "drones", //11
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 10,
+      ammoPack: 11,
       have: false,
       isStarterGun: true,
       isEasyToAim: true,
@@ -2808,7 +2808,7 @@ const b = {
       name: "rail gun", //13
       description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
-      ammoPack: 2.84,
+      ammoPack: 4,
       have: false,
       isStarterGun: false,
       isEasyToAim: false,

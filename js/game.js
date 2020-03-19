@@ -579,6 +579,7 @@ const game = {
       }
       for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
         if (b.guns[i].name === "mine") {
+          if (b.modNoAmmo) count = Math.ceil(count / 2)
           b.guns[i].ammo += count
           game.updateGunHUD();
           break;
@@ -698,7 +699,7 @@ const game = {
           let i = who.length;
           while (i--) {
             if (who[i].position.y > game.fallHeight) {
-              if (save && game.difficultyMode < 2) {
+              if (save && game.difficultyMode < 3) {
                 Matter.Body.setVelocity(who[i], {
                   x: 0,
                   y: 0

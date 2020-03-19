@@ -841,7 +841,12 @@ const mech = {
 
         const charge = Math.min(mech.throwCharge / 5, 1)
         let speed = charge * Math.min(80, 64 / Math.pow(mech.holdingTarget.mass, 0.25));
-        if (Matter.Query.collides(mech.holdingTarget, map).length !== 0) speed = 0
+
+        if (Matter.Query.collides(mech.holdingTarget, map).length !== 0) {
+          speed *= 0.7 //drop speed by 30% if touching map
+          if (Matter.Query.ray(map, mech.holdingTarget.position, mech.pos).length !== 0) speed = 0 //drop to zero if the center of the block can't see the center of the player through the map
+          //|| Matter.Query.ray(body, mech.holdingTarget.position, mech.pos).length > 1
+        }
 
         mech.throwCharge = 0;
         Matter.Body.setVelocity(mech.holdingTarget, {
@@ -1102,7 +1107,6 @@ const mech = {
   },
   wakeCheck() {
     if (mech.isBodiesAsleep) {
-      console.log('in')
       mech.isBodiesAsleep = false;
 
       function wake(who) {
@@ -1285,7 +1289,6 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
           mech.drawFieldMeter()
-          if (mech.fieldMode !== 2) mech.wakeCheck(); //wake up if this is no longer the current field mode, like after a new power up
         }
       }
     },
