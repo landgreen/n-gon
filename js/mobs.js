@@ -154,7 +154,7 @@ const mobs = {
               x: who.position.x,
               y: who.position.y,
               radius: Math.log(2 * dmg + 1.1) * 40,
-              color: `rgba(255,${Math.floor(255*Math.random())},0,0.9)`,
+              color: `rgba(255,${Math.floor(200*Math.random())},0,0.9)`,
               time: game.drawTime
             });
           }
@@ -984,8 +984,7 @@ const mobs = {
           dmg /= Math.sqrt(this.mass)
           if (this.shield) dmg *= 0.04
           if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
-
-          // if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(1000, Math.min(3500, this.distanceToPlayer())) - 1000) * 0.01 //up to 50% dmg at max range of 3500
+          if (b.isModHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
           if (b.isModEnergyLoss) dmg *= 1.5;
           if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
           if (b.modEnergySiphon && dmg !== Infinity) mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon

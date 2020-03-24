@@ -689,9 +689,6 @@ const game = {
         if (b.isModEnergyLoss) {
           mech.energy = 0.05;
         }
-
-      } else { //haven't killed a mob in the last 5 seconds
-
       }
 
       if (!(game.cycle % 420)) { //once every 7 seconds

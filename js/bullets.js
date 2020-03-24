@@ -53,9 +53,9 @@ const b = {
   isModDeathAvoidOnCD: null,
   modWaveSpeedMap: null,
   modWaveSpeedBody: null,
-  modFieldEfficiency: null,
   isModSporeField: null,
   isModMissileField: null,
+  isModSwarmField: null,
   isModFlechetteMultiShot: null,
   isModMineAmmoBack: null,
   isModPlasmaRange: null,
@@ -66,6 +66,8 @@ const b = {
   modThrowChargeRate: null,
   isModBlockStun: null,
   isModStunField: null,
+  isModHarmDamage: null,
+  isModAlphaRadiation: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       game.playerDmgColor = "rgba(0,80,80,0.9)"
@@ -89,25 +91,6 @@ const b = {
       },
       remove() {
         b.modBulletSize = 1;
-      }
-    },
-    {
-      name: "fluoroantimonic acid",
-      description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return mech.health > 0.8 || build.isCustomSelection
-      },
-      requires: "health above 80%",
-      effect() {
-        b.isModAcidDmg = true;
-        b.modOnHealthChange();
-      },
-      remove() {
-        b.modAcidDmg = 0;
-        b.isModAcidDmg = false;
-        game.playerDmgColor = "rgba(0,0,0,0.7)"
       }
     },
     {
@@ -143,7 +126,26 @@ const b = {
       }
     },
     {
-      name: "quasistatic equilibrium",
+      name: "fluoroantimonic acid",
+      description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.health > 0.8 || build.isCustomSelection
+      },
+      requires: "health above 80%",
+      effect() {
+        b.isModAcidDmg = true;
+        b.modOnHealthChange();
+      },
+      remove() {
+        b.modAcidDmg = 0;
+        b.isModAcidDmg = false;
+        game.playerDmgColor = "rgba(0,0,0,0.7)"
+      }
+    },
+    {
+      name: "negative feedback",
       description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to <strong>50%</strong> increase when near death</em>",
       maxCount: 1,
       count: 0,
@@ -156,6 +158,22 @@ const b = {
       },
       remove() {
         b.isModLowHealthDmg = false;
+      }
+    },
+    {
+      name: "radiative equilibrium",
+      description: "after receiving any <strong>harm</strong><br>do <strong>2x</strong> <strong class='color-d'>damage</strong> for <strong>5 seconds</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModLowHealthDmg
+      },
+      requires: "quasistatic equilibrium",
+      effect() {
+        b.isModHarmDamage = true;
+      },
+      remove() {
+        b.isModHarmDamage = false;
       }
     },
     {
@@ -313,9 +331,9 @@ const b = {
       maxCount: 3,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam")
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam") || b.haveGunCheck("swarm")
       },
-      requires: "drones, spores, super balls,<br> foam, or wave beam",
+      requires: "drones, spores, super balls,<br> foam, wave beam, or swarm",
       effect() {
         b.isModBulletsLastLonger += 0.33
       },
@@ -1004,7 +1022,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField))
+        return b.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField || b.isModSwarmField))
       },
       requires: "drones",
       effect() {
@@ -1012,6 +1030,22 @@ const b = {
       },
       remove() {
         b.isModDroneCollide = true;
+      }
+    },
+    {
+      name: "alpha radiation",
+      description: "the <strong>swarm</strong> bots deliver a dose of<br><strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over 3 seconds",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("swarm") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && b.isModSwarmField)
+      },
+      requires: "swarm",
+      effect() {
+        b.isModAlphaRadiation = true
+      },
+      remove() {
+        b.isModAlphaRadiation = false;
       }
     },
     {
@@ -1057,18 +1091,18 @@ const b = {
       requires: "laser",
       effect() {
         b.modLaserReflections++;
-        b.modLaserDamage += 0.025; //base is 0.05
+        b.modLaserDamage += 0.035; //base is 0.06
         b.modLaserFieldDrain += 0.001 //base is 0.002
       },
       remove() {
         b.modLaserReflections = 2;
-        b.modLaserDamage = 0.06;
+        b.modLaserDamage = 0.07;
         b.modLaserFieldDrain = 0.002;
       }
     },
     {
       name: "flux pinning",
-      description: "blocking <strong>stuns</strong> mobs for <strong>+1</strong> second<br>with the <strong>perfect diamagnetism</strong> field",
+      description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>+1</strong> second",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -1080,22 +1114,6 @@ const b = {
       },
       remove() {
         b.isModStunField = 0;
-      }
-    },
-    {
-      name: "bremsstrahlung radiation",
-      description: "<strong>blocking</strong> with your field does <strong class='color-d'>damage</strong>",
-      maxCount: 9,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics" || mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism"
-      },
-      requires: "standing wave harmonics<br>or perfect diamagnetism",
-      effect() {
-        b.modBlockDmg += 0.4 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
-      },
-      remove() {
-        b.modBlockDmg = 0;
       }
     },
     {
@@ -1131,6 +1149,22 @@ const b = {
       }
     },
     {
+      name: "bremsstrahlung radiation",
+      description: "<strong>blocking</strong> with your field does <strong class='color-d'>damage</strong>",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+      },
+      requires: "standing wave harmonics",
+      effect() {
+        b.modBlockDmg += 0.5 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+      },
+      remove() {
+        b.modBlockDmg = 0;
+      }
+    },
+    {
       name: "frequency resonance",
       description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>30%</strong>",
       maxCount: 9,
@@ -1154,7 +1188,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModMissileField
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModMissileField || b.isModSwarmField)
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -1170,7 +1204,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !b.isModSporeField
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModSwarmField)
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -1178,6 +1212,22 @@ const b = {
       },
       remove() {
         b.isModMissileField = false;
+      }
+    },
+    {
+      name: "swarm manufacturing",
+      description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>swarm</strong> bots",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField)
+      },
+      requires: "nano-scale manufacturing",
+      effect() {
+        b.isModSwarmField = true;
+      },
+      remove() {
+        b.isModSwarmField = false;
       }
     },
     {
@@ -1802,6 +1852,75 @@ const b = {
       y: SPEED * Math.sin(ANGLE)
     });
     World.add(engine.world, bullet[bIndex]); //add bullet to world
+  },
+  swarm(speed = 0, spread = 2 * Math.PI) {
+    const me = bullet.length;
+    const THRUST = 0.004
+    const dir = mech.angle + spread * (Math.random() - 0.5);
+    const RADIUS = 17 * b.modBulletSize
+    bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 3, RADIUS, {
+      angle: dir - Math.PI,
+      inertia: Infinity,
+      friction: 0,
+      frictionAir: 0.10,
+      restitution: 0.2,
+      dmg: 0.3, //damage done in addition to the damage from momentum
+      lookFrequency: 10 + Math.floor(7 * Math.random()),
+      endCycle: game.cycle + 90 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
+      classType: "bullet",
+      collisionFilter: {
+        category: cat.bullet,
+        mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //self collide
+      },
+      minDmgSpeed: 0,
+      lockedOn: null,
+      isFollowMouse: true,
+      onDmg(who) {
+        this.endCycle = game.cycle
+        if (b.isModAlphaRadiation) mobs.statusPoison(who, 0.08, 180)
+      },
+      onEnd() {},
+      do() {
+        // this.force.y += this.mass * 0.0002;
+        //find mob targets
+        if (!(game.cycle % this.lookFrequency)) {
+          const scale = 0.9;
+          Matter.Body.scale(this, scale, scale);
+          this.lockedOn = null;
+          let closeDist = Infinity;
+          for (let i = 0, len = mob.length; i < len; ++i) {
+            if (
+              mob[i].dropPowerUp &&
+              Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+              Matter.Query.ray(body, this.position, mob[i].position).length === 0
+            ) {
+              const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
+              const DIST = Vector.magnitude(TARGET_VECTOR);
+              if (DIST < closeDist) {
+                closeDist = DIST;
+                this.lockedOn = mob[i]
+              }
+            }
+          }
+        }
+        if (this.lockedOn) { //accelerate towards mobs
+          this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+        } else {
+          this.force = Vector.mult(Vector.normalise(this.velocity), this.mass * THRUST)
+        }
+      }
+    })
+
+    World.add(engine.world, bullet[me]); //add bullet to world
+    // Matter.Body.setAngularVelocity(bullet[me], 2 * (0.5 - Math.random()))  //doesn't work due to high friction
+    Matter.Body.setVelocity(bullet[me], {
+      x: speed * Math.cos(dir),
+      y: speed * Math.sin(dir)
+    });
+    // Matter.Body.setVelocity(bullet[me], {
+    //   x: mech.Vx / 2 + speed * Math.cos(dir),
+    //   y: mech.Vy / 2 + speed * Math.sin(dir)
+    // });
   },
   drone(speed = 1) {
     const me = bullet.length;
@@ -2702,6 +2821,25 @@ const b = {
       fire() {
         b.drone(mech.crouch ? 45 : 1)
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 5) * b.modFireRate); // cool down
+      }
+    },
+    {
+      name: "swarm", //11
+      description: "rapidly deploy <strong>short-lived</strong> bots<br>that <strong>seek</strong> out nearby mobs",
+      ammo: 0,
+      ammoPack: 80,
+      have: false,
+      isStarterGun: true,
+      isEasyToAim: true,
+      fire() {
+        if (mech.crouch) {
+          b.swarm(20, 0.3)
+          mech.fireCDcycle = mech.cycle + Math.floor(10 * b.modFireRate); // cool down
+        } else {
+          b.swarm(2)
+          mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
+        }
+
       }
     },
     {

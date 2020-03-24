@@ -54,6 +54,7 @@ const mech = {
   },
   cycle: 0,
   lastKillCycle: 0,
+  lastHarmCycle: 0,
   width: 50,
   radius: 30,
   fillColor: "#fff", //changed by mod piezoelectric plating (damage immunity)
@@ -249,19 +250,59 @@ const mech = {
       }
 
       //horizontal move on ground
+
+
+
+      // function blink(dir) {
+      //   dir *= 6
+      //   mech.fieldCDcycle = mech.cycle + 15;
+      //   for (let i = 0; i < 100; i++) {
+      //     Matter.Body.setPosition(player, {
+      //       x: player.position.x + dir,
+      //       y: player.position.y
+      //     });
+      //     const bounds = {
+      //       min: {
+      //         x: player.bounds.min.x,
+      //         y: player.bounds.min.y
+      //       },
+      //       max: {
+      //         x: player.bounds.max.x,
+      //         y: player.bounds.max.y - 30
+      //       }
+      //     }
+
+      //     if (Matter.Query.region(map, bounds).length !== 0 || Matter.Query.region(body, bounds).length !== 0) {
+      //       Matter.Body.setPosition(player, {
+      //         x: player.position.x - dir,
+      //         y: player.position.y
+      //       });
+      //       break;
+      //     }
+      //   }
+      // }
+
       //apply a force to move
       if (keys[65] || keys[37]) { //left / a
+        // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
+        //   blink(-1)
+        // } else {
         if (player.velocity.x > -2) {
           player.force.x -= mech.Fx * 1.5
         } else {
           player.force.x -= mech.Fx
         }
+        // }
       } else if (keys[68] || keys[39]) { //right / d
+        // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
+        //   blink(1)
+        // } else {
         if (player.velocity.x < 2) {
           player.force.x += mech.Fx * 1.5
         } else {
           player.force.x += mech.Fx
         }
+        // }
       } else {
         const stoppingFriction = 0.92;
         Matter.Body.setVelocity(player, {
@@ -323,10 +364,6 @@ const mech = {
       }
 
       function randomizeMods() {
-        b.setupAllMods(); //remove all mods
-        //remove all bullets
-        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-        bullet = [];
         for (let i = 0; i < totalMods; i++) {
           //find what mods I don't have
           let options = [];
@@ -335,6 +372,7 @@ const mech = {
               b.mods[i].name !== "quantum immortality" &&
               b.mods[i].name !== "Born rule" &&
               b.mods[i].name !== "leveraged investment" &&
+              b.mods[i].name !== "reallocation" &&
               b.mods[i].allowed()
             ) options.push(i);
           }
@@ -354,7 +392,7 @@ const mech = {
       }
 
       function randomizeHealth() {
-        mech.health = 0.55 + Math.random()
+        mech.health = 0.6 + Math.random()
         if (mech.health > 1) mech.health = 1;
         mech.displayHealth();
       }
@@ -375,7 +413,7 @@ const mech = {
         //randomize ammo
         for (let i = 0, len = b.inventory.length; i < len; i++) {
           if (b.guns[b.inventory[i]].ammo !== Infinity) {
-            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(6 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.1)))
+            b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(5 * b.guns[b.inventory[i]].ammo * (Math.random() - 0.1)))
           }
         }
         game.makeGunHUD(); //update gun HUD
@@ -385,23 +423,29 @@ const mech = {
         ctx.fillStyle = "rgba(255,255,255,0)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
-      randomizeHealth()
-      randomizeField()
-      randomizeGuns()
-      randomizeMods()
+
+      function randomizeEverything() {
+        b.setupAllMods(); //remove all mods
+        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        bullet = []; //remove all bullets
+        randomizeHealth()
+        randomizeField()
+        randomizeGuns()
+        randomizeMods()
+      }
+
+      randomizeEverything()
+      const swapPeriod = 1000
       for (let i = 0, len = 7; i < len; i++) {
         setTimeout(function () {
-          randomizeHealth()
-          randomizeField()
-          randomizeGuns()
-          randomizeMods()
+          randomizeEverything()
           game.replaceTextLog = true;
-          game.makeTextLog(`probability amplitude will synchronize in ${len-i-1} seconds`, 1000);
+          game.makeTextLog(`probability amplitude will synchronize in ${len-i-1} seconds`, swapPeriod);
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.006})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
-        }, (i + 1) * 1000);
+        }, (i + 1) * swapPeriod);
       }
 
       setTimeout(function () {
@@ -410,7 +454,7 @@ const mech = {
         }
         game.replaceTextLog = true;
         game.makeTextLog("your quantum probability has stabilized", 1000);
-      }, 8000);
+      }, 8 * swapPeriod);
 
     } else if (mech.alive) { //normal death code here
       mech.alive = false;
@@ -458,6 +502,7 @@ const mech = {
   defaultFPSCycle: 0, //tracks when to return to normal fps
   collisionImmuneCycle: 0, //used in engine
   damage(dmg) {
+    mech.lastHarmCycle = mech.cycle
     dmg *= mech.fieldDamageResistance
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -1194,7 +1239,7 @@ const mech = {
               ctx.fillStyle = "rgba(110,170,200," + (0.06 + 0.03 * Math.random()) + ")";
               ctx.strokeStyle = "rgba(110, 200, 235, " + (0.35 + 0.05 * Math.random()) + ")"
             } else {
-              ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.13 * Math.random() - 0.15 * wave) + ")";
+              ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
               ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"
             }
             ctx.beginPath();
@@ -1635,18 +1680,18 @@ const mech = {
       isEasyToAim: true,
       effect: () => {
         mech.fieldRegen *= 2;
-        mech.fieldShieldingScale = b.modFieldEfficiency;
         mech.hold = function () {
           if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
-            mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
             if (b.isModSporeField) {
+              mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
               const len = Math.floor(6 + 3 * Math.random())
-              mech.energy -= len * 0.08;
+              mech.energy -= len * 0.07;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
             } else if (b.isModMissileField) {
-              mech.energy -= 0.55;
+              mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
+              mech.energy -= 0.5;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -1654,7 +1699,12 @@ const mech = {
                 mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
                 -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
                 1, b.modBabyMissiles)
+            } else if (b.isModSwarmField) {
+              // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
+              mech.energy -= 0.05;
+              b.swarm(1)
             } else {
+              mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
               mech.energy -= 0.33;
               b.drone(1)
             }

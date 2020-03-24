@@ -2,8 +2,7 @@
 
 ************** TODO - n-gon **************
 
-desublimated ammo + mine reclaimation   not fun game play interaction
-  
+mod - drop a mine after taking damage
 
 work on burn status effect
   graphics don't look right
@@ -27,8 +26,6 @@ mod - mines become a turret that fires nails
 dash - mod  when pressing left or right on the ground, teleport to the right until you find an obstruction
   do repeated horizontal zone queries until they hit map or block
   up to a max range of like 10 player widths
-
-bug - mech.fieldShieldingScale doesn't reset when switching fields
 
 mod - blocks stun mobs
 mod or field - turn blocks into spores or drones
