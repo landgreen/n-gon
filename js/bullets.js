@@ -2245,8 +2245,8 @@ const b = {
       name: "minigun", //0
       description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong>",
       ammo: 0,
-      ammoPack: 55,
-      defaultAmmoPack: 55,
+      ammoPack: 65,
+      defaultAmmoPack: 65,
       recordedAmmo: 0,
       have: false,
       isStarterGun: true,

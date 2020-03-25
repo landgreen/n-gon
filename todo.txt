@@ -1,6 +1,25 @@
+**New Patch**
+gun - swarm(although I'd like to think up a better name)
+mod - alpha radiation - swarm does DOT damage
+mod - nano-scale field makes swarm bots
+mod - radiation equilibrium - do extra damage after getting hit
+laserBoss has a locked rotation, and rotates backwards at high levels
+minigun - +20% ammo
+laser - +10 damage
 
 
 ************** TODO - n-gon **************
+
+power up - player controlled bot power up that actives on pick up
+  controls and camera follow the bot
+  bot can explore
+  bot can attack?
+    by crashing into things?
+    with laser or nails?
+  ends when field is activated?  or fire? or bot gets hit
+
+
+mod - frag grenades fire nails on explosion
 
 mod - drop a mine after taking damage
 
