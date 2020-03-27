@@ -469,7 +469,7 @@ const mech = {
     }
   },
   health: 0,
-  maxHealth: null, //set in game.reset()
+  maxHealth: 1, //set in game.reset()
   drawHealth() {
     if (mech.health < 1) {
       ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
@@ -549,6 +549,17 @@ const mech = {
         if (Math.random() < 0.75) b.drone() //spawn drone
       }
     }
+    if (b.isModMineOnDamage && dmg > 0.05 + 0.5 * Math.random()) {
+      b.mine({
+        x: mech.pos.x,
+        y: mech.pos.y - 80
+      }, {
+        x: 0,
+        y: 0
+      })
+    }
+
+
 
     // freeze game and display a full screen red color
     if (dmg > 0.05) {
@@ -696,7 +707,7 @@ const mech = {
     ctx.restore();
   },
   // *********************************************
-  // **************** holding ********************
+  // **************** fields *********************
   // *********************************************
   closest: {
     dist: 1000,
@@ -1683,15 +1694,15 @@ const mech = {
         mech.hold = function () {
           if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             if (b.isModSporeField) {
-              mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              const len = Math.floor(6 + 3 * Math.random())
-              mech.energy -= len * 0.07;
+              mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
+              const len = Math.floor(6 + 4 * Math.random())
+              mech.energy -= len * 0.06;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
             } else if (b.isModMissileField) {
-              mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.5;
+              mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
+              mech.energy -= 0.44;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -1699,13 +1710,13 @@ const mech = {
                 mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
                 -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
                 1, b.modBabyMissiles)
-            } else if (b.isModSwarmField) {
+            } else if (b.isModIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.05;
-              b.swarm(1)
+              mech.energy -= 0.055;
+              b.iceIX(1)
             } else {
-              mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.33;
+              mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
+              mech.energy -= 0.34;
               b.drone(1)
             }
 

@@ -71,7 +71,7 @@ const build = {
     document.getElementById("pause-grid-left").style.display = "none"
     document.getElementById("pause-grid-right").style.display = "none"
   },
-  isCustomSelection: false,
+  isCustomSelection: true,
   choosePowerUp(who, index, type) {
     if (type === "gun") {
       let isDeselect = false
@@ -189,6 +189,7 @@ const build = {
     });
   },
   reset() {
+    build.isCustomSelection = true;
     mech.setField(0)
 
     b.inventory = []; //removes guns and ammo  
@@ -201,7 +202,6 @@ const build = {
     game.makeGunHUD();
 
     b.setupAllMods();
-    build.isCustomSelection = true;
     build.populateGrid();
     document.getElementById("field-0").classList.add("build-field-selected");
     document.getElementById("build-grid").style.display = "grid"
@@ -209,6 +209,8 @@ const build = {
 
   startBuildRun() {
     build.isCustomSelection = false;
+    b.modOnHealthChange()
+
     spawn.setSpawnList(); //gives random mobs,  not starter mobs
     spawn.setSpawnList();
     if (b.inventory.length > 0) {
@@ -242,6 +244,7 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
 
   level.isBuildRun = true;
   game.startGame(); //starts game, but pauses it
+  build.isCustomSelection = true;
   game.paused = true;
   build.reset();
 });

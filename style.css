@@ -416,6 +416,11 @@ em {
   letter-spacing: 1px;
 }
 
+.color-s {
+  color: #04f;
+  letter-spacing: 1px;
+}
+
 .color-d {
   color: #f03;
   letter-spacing: 1px;

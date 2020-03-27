@@ -124,8 +124,8 @@ const mobs = {
             let dmg = b.dmgScale * tickDamage
             who.damage(dmg);
             game.drawList.push({ //add dmg to draw queue
-              x: who.position.x,
-              y: who.position.y,
+              x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
+              y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
               radius: Math.log(2 * dmg + 1.1) * 40,
               color: "rgba(0,80,80,0.9)",
               time: game.drawTime
@@ -983,7 +983,7 @@ const mobs = {
         if (!this.isShielded || isBypassShield) {
           dmg /= Math.sqrt(this.mass)
           if (this.shield) dmg *= 0.04
-          if (b.isModLowHealthDmg) dmg *= (3 / (2 + mech.health)) //up to 50% dmg at zero player health
+          if (b.isModLowHealthDmg) dmg *= (3 / (2 + Math.min(mech.health, 1))) //up to 50% dmg at zero player health  //if this changes all update display in modOnHealthChange()
           if (b.isModHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
           if (b.isModEnergyLoss) dmg *= 1.5;
           if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500

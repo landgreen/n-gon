@@ -1,23 +1,12 @@
-**New Patch**
-gun - swarm(although I'd like to think up a better name)
-mod - alpha radiation - swarm does DOT damage
-mod - nano-scale field makes swarm bots
-mod - radiation equilibrium - do extra damage after getting hit
-laserBoss has a locked rotation, and rotates backwards at high levels
-minigun - +20% ammo
-laser - +10 damage
+shotgun hits harder up close and weaker far away 
+swarm is now called ice IX and it freezes mobs
+mod - ablative mines
+acid and negative feedback now tell you when they are active
 
 
 ************** TODO - n-gon **************
 
-power up - player controlled bot power up that actives on pick up
-  controls and camera follow the bot
-  bot can explore
-  bot can attack?
-    by crashing into things?
-    with laser or nails?
-  ends when field is activated?  or fire? or bot gets hit
-
+MOB stabber - extends one vector like the shooter, but quickly in order to stab
 
 mod - frag grenades fire nails on explosion
 
@@ -45,6 +34,7 @@ mod - mines become a turret that fires nails
 dash - mod  when pressing left or right on the ground, teleport to the right until you find an obstruction
   do repeated horizontal zone queries until they hit map or block
   up to a max range of like 10 player widths
+  this didn't work as a field, but maybe as a gun?
 
 mod - blocks stun mobs
 mod or field - turn blocks into spores or drones
@@ -59,6 +49,7 @@ bug - getting stuck in crouch mode
     once right after selecting a mod with lots of blocks around
       I don't think I was holding a block
       might have been standing on a block... not sure
+  running mech.definePlayerMass()  fixes it
 
 settings - auto aim at nearest mob
 settings - custom keys binding
@@ -72,9 +63,6 @@ gun - buff vacuum bomb
   mod - double explosions?
   mod - doesn't suck player in?
   mod - DoT damage after exploding
-  
-mod - make bodies destroyable
-  they drop ammo and heals
 
 mod - energy recharges faster when not moving
 
@@ -102,7 +90,7 @@ atmosphere levels: change the pace, give the user a rest between combat
     in the final level you see your self at the starting level, with the wires
       you shoot your self to wake up?
 
-mob: targeting laser, then a high speed, no gravity bullet
+MOB sniper - targeting laser, then a high speed, no gravity bullet
 
 mod - status effects last 1 second longer
   wait until you have more status effects written

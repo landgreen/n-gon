@@ -177,6 +177,7 @@ const game = {
       }
     }
     document.getElementById("mods").innerHTML = text
+    b.modOnHealthChange()
   },
   replaceTextLog: true,
   // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
@@ -468,6 +469,7 @@ const game = {
     game.difficulty = 0;
     game.difficultyMode = Number(document.getElementById("difficulty-select").value)
     level.isBuildRun = false;
+    build.isCustomSelection = false;
     if (game.difficultyMode === 0) {
       game.isEasyMode = true;
       game.difficultyMode = 1

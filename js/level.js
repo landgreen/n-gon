@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("swarm")
+      b.giveGuns("shotgun")
       // mech.setField("time dilation field")
       // b.giveMod("quantum immortality");
       // b.giveMod("reflective cavity");

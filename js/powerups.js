@@ -241,7 +241,7 @@ const powerUps = {
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod");
       return;
     }
-    if (Math.random() < 0.002) {
+    if (Math.random() < 0.006) {
       powerUps.spawn(x, y, "field");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
       return;
@@ -251,21 +251,24 @@ const powerUps = {
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.85) {
+    } else if (Math.random() < 0.9) {
       powerUps.spawn(x, y, "mod")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.35) {
+    } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "gun")
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun")
-    } else if (Math.random() < 0.5) {
-      powerUps.spawn(x, y, "field");
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
-    } else if (mech.health < 0.7) {
+      // } else if (Math.random() < 0.5) {
+      //   powerUps.spawn(x, y, "field");
+      //   if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
+    } else if (mech.health < 0.65) {
+      powerUps.spawn(x, y, "heal");
+      powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       if (Math.random() < b.isModBayesian) {
+        powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
       }
@@ -274,11 +277,12 @@ const powerUps = {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
+      powerUps.spawn(x, y, "ammo");
       if (Math.random() < b.isModBayesian) {
         powerUps.spawn(x, y, "ammo");
         powerUps.spawn(x, y, "ammo");
+        powerUps.spawn(x, y, "ammo");
       }
-
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
