@@ -1902,10 +1902,10 @@ const b = {
       inertia: Infinity,
       friction: 0,
       frictionAir: 0.10,
-      restitution: 0.2,
-      dmg: 0.25, //damage done in addition to the damage from momentum
+      restitution: 0.3,
+      dmg: 0.3, //damage done in addition to the damage from momentum
       lookFrequency: 10 + Math.floor(7 * Math.random()),
-      endCycle: game.cycle + 90 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
+      endCycle: game.cycle + 120 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1917,14 +1917,14 @@ const b = {
       onDmg(who) {
         mobs.statusSlow(who, 30)
         this.endCycle = game.cycle
-        if (b.isModAlphaRadiation) mobs.statusPoison(who, 0.08, 180)
+        if (b.isModAlphaRadiation) mobs.statusPoison(who, 0.1, 180)
       },
       onEnd() {},
       do() {
         // this.force.y += this.mass * 0.0002;
         //find mob targets
         if (!(game.cycle % this.lookFrequency)) {
-          const scale = 1 - 0.1 / b.isModBulletsLastLonger //0.9 * b.isModBulletsLastLonger;
+          const scale = 1 - 0.09 / b.isModBulletsLastLonger //0.9 * b.isModBulletsLastLonger;
           Matter.Body.scale(this, scale, scale);
           this.lockedOn = null;
           let closeDist = Infinity;

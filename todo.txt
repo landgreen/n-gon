@@ -1,10 +1,7 @@
-shotgun hits harder up close and weaker far away 
-swarm is now called ice IX and it freezes mobs
-mod - ablative mines
-acid and negative feedback now tell you when they are active
-
 
 ************** TODO - n-gon **************
+
+add a way to run player submitted maps.
 
 MOB stabber - extends one vector like the shooter, but quickly in order to stab
 
@@ -42,14 +39,6 @@ mod or field - turn blocks into spores or drones
 mod - robot that attack nearby mobs, and delivers a stun status effect
   use laser bot code for the attack
   large and 5 sided?
-
-bug - getting stuck in crouch mode
-  press T to see it visually
-  happened twice to me so far
-    once right after selecting a mod with lots of blocks around
-      I don't think I was holding a block
-      might have been standing on a block... not sure
-  running mech.definePlayerMass()  fixes it
 
 settings - auto aim at nearest mob
 settings - custom keys binding

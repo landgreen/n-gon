@@ -104,6 +104,7 @@ const spawn = {
 
     me.do = function () {
       this.gravity();
+      this.checkStatus();
       if (this.seePlayer.recall) {
         this.seePlayerByDistAndLOS();
         this.attraction();
@@ -749,11 +750,13 @@ const spawn = {
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
-    me.rotateVelocity = 0.0035 * Math.sqrt(game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
+    me.rotateVelocity = Math.min(0.01, 0.0025 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
       // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))
-      Matter.Body.rotate(me, this.rotateVelocity)
+      // if (!mech.isBodiesAsleep) Matter.Body.rotate(me, this.rotateVelocity)
+      Matter.Body.setAngle(me, game.cycle * this.rotateVelocity)
+
       // this.torque -= this.inertia * 0.0000025 / (4 + this.health);
       Matter.Body.setVelocity(this, {
         x: 0,

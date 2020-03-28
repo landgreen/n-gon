@@ -1021,7 +1021,7 @@ const mech = {
       } else {
         mech.drawHold(who);
       }
-      mech.holdingTarget = null
+      // mech.holdingTarget = null
       //knock backs
       if (mech.fieldShieldingScale > 0) {
         const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
