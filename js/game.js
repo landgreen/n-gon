@@ -145,6 +145,18 @@ const game = {
       // document.getElementById(b.activeGun).style.fontSize = "30px";
       if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
     }
+
+    if (b.isModEntanglement && document.getElementById("mod-entanglement")) {
+      if (b.inventory[0] === b.activeGun) {
+        let lessDamage = 1
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+          lessDamage *= 0.87 // 1 - 0.13
+        }
+        document.getElementById("mod-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
+      } else {
+        document.getElementById("mod-entanglement").innerHTML = " 0%"
+      }
+    }
   },
   updateGunHUD() {
     for (let i = 0, len = b.inventory.length; i < len; ++i) {
@@ -685,12 +697,7 @@ const game = {
           mech.energy += mech.fieldEnergyMax * 0.07
           if (mech.energy > mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
         }
-        if (b.isModHealthRecovery) {
-          mech.addHealth(0.01)
-        }
-        if (b.isModEnergyLoss) {
-          mech.energy = 0.05;
-        }
+        if (b.isModHealthRecovery) mech.addHealth(0.01)
       }
 
       if (!(game.cycle % 420)) { //once every 7 seconds

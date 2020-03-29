@@ -69,6 +69,7 @@ const b = {
   isModStunField: null,
   isModHarmDamage: null,
   isModAlphaRadiation: null,
+  modEnergyRegen: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.7
@@ -274,7 +275,7 @@ const b = {
     },
     {
       name: "mass driver",
-      description: "<strong>objects</strong> do <strong>3x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge <strong>throws</strong> in <strong>3x</strong> less time",
+      description: "<strong>blocks</strong> do <strong>3x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge <strong>throws</strong> in <strong>3x</strong> less time",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -450,7 +451,7 @@ const b = {
     },
     {
       name: "acute stress response",
-      description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>no <strong class='color-f'>energy</strong> for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+      description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/2</strong> your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -568,8 +569,8 @@ const b = {
       }
     },
     {
-      name: "entanglement",
-      description: "<strong>13%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
+      name: "entanglement <span id = 'mod-entanglement'></span>",
+      description: "<strong>16%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -584,8 +585,26 @@ const b = {
       }
     },
     {
+      name: "ground state",
+      description: "reduce <strong>harm</strong> by <strong>67%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect: () => {
+        b.modEnergyRegen = 0;
+        mech.fieldRegen = b.modEnergyRegen;
+      },
+      remove() {
+        b.modEnergyRegen = 0.005;
+        mech.fieldRegen = b.modEnergyRegen;
+      }
+    },
+    {
       name: "piezoelectricity",
-      description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>10%</strong> less <strong>harm</strong> from mob collisions",
+      description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong>harm</strong> from mob collisions",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -602,7 +621,7 @@ const b = {
     },
     {
       name: "energy conservation",
-      description: "gain <strong class='color-f'>energy</strong> proportional to <strong class='color-d'>damage</strong> done",
+      description: "<strong>15%</strong> of <strong class='color-d'>damage</strong> done is recovered as <strong class='color-f'>energy</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -619,7 +638,7 @@ const b = {
     },
     {
       name: "entropy exchange",
-      description: "<strong class='color-h'>heal</strong> proportional to <strong class='color-d'>damage</strong> done",
+      description: "<strong class='color-h'>heal</strong> for <strong>1.5%</strong> of <strong class='color-d'>damage</strong> done",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -810,6 +829,10 @@ const b = {
       },
       requires: "more than 6 mods",
       effect: () => {
+        //remove bullets  //mostly to get rid of bots
+        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        bullet = [];
+
         let count = b.modCount
         if (b.isModNoAmmo) count - 6 //remove the 6 bonus mods when getting rid of leveraged investment
         for (let i = 0; i < count; i++) { // spawn new mods
@@ -822,8 +845,6 @@ const b = {
         //nothing to undo
       }
     },
-
-
     {
       name: "ice crystal nucleation",
       description: "your <strong>minigun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>bullets</strong> from water vapor",
@@ -1915,7 +1936,7 @@ const b = {
       lockedOn: null,
       isFollowMouse: true,
       onDmg(who) {
-        mobs.statusSlow(who, 30)
+        mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
         if (b.isModAlphaRadiation) mobs.statusPoison(who, 0.1, 180)
       },
@@ -2302,7 +2323,7 @@ const b = {
         if (b.isModIceCrystals && mech.energy > 0.01) {
           mech.energy -= mech.fieldRegen + 0.007
           bullet[me].onDmg = function (who) {
-            mobs.statusSlow(who, 60)
+            mobs.statusSlow(who, 30)
           };
           //ice muzzleFlash
           ctx.fillStyle = "rgb(0,100,255)";

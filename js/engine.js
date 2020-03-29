@@ -140,7 +140,7 @@ function collisionChecks(event) {
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
             if (b.isModPiezo) {
               mech.energy = mech.fieldEnergyMax;
-              dmg *= 0.9
+              dmg *= 0.85
             }
             mech.damage(dmg);
             if (mob[k].onHit) mob[k].onHit(k);

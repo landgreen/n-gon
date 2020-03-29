@@ -16,7 +16,7 @@ const level = {
       // level.difficultyIncrease(9)
       // b.giveGuns("ice IX")
       // mech.setField("time dilation field")
-      // b.giveMod("quantum immortality");
+      // b.giveMod("ground state");
       // b.giveMod("reflective cavity");
 
       level.intro(); //starting level
@@ -965,9 +965,9 @@ const level = {
     spawn.mapRect(5450, -775, 100, 875); //right building wall
     spawn.bodyRect(4850, -750, 300, 25, 0.8);
     spawn.bodyRect(3925, -1400, 100, 150, 0.8);
-    spawn.mapRect(3450, -1250, 1100, 50);
+    spawn.mapRect(3450, -1250, 1090, 50);
     // spawn.mapRect(3450, -1225, 50, 75);
-    spawn.mapRect(4500, -1225, 50, 390);
+    spawn.mapRect(4500, -1250, 50, 415);
     spawn.mapRect(3450, -725, 1500, 50);
     spawn.mapRect(5100, -725, 400, 50);
     spawn.mapRect(4500, -735, 50, 635);
