@@ -1,12 +1,9 @@
-new mod - ground state: reduce harm by 77% but you don't regen energy
-negative feedback, entanglement, fluoroantimonic acid now indicate effects with text
-entanglement 13% -> 16% damage reduction
-piezoelectricity 10% -> 15% harm reduction 
-acute stress response now does 33% damage and drains 50% energy once when a mob dies
-
 
 
 ************** TODO - n-gon **************
+
+mob Boss - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
+  what about a series of short time skips forward 10 cycles at a time
 
 add a way to run player submitted maps.
 

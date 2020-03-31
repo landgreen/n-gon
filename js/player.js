@@ -508,10 +508,10 @@ const mech = {
     if (b.isModDroneOnDamage) {
       const len = (dmg - 0.06 * Math.random()) * 40
       for (let i = 0; i < len; i++) {
-        if (Math.random() < 0.75) b.drone() //spawn drone
+        if (Math.random() < 0.5) b.drone() //spawn drone
       }
     }
-    if (b.isModMineOnDamage && dmg > 0.005 + 0.1 * Math.random()) {
+    if (b.isModMineOnDamage && dmg > 0.004 + 0.05 * Math.random()) {
       b.mine({
         x: mech.pos.x,
         y: mech.pos.y - 80
@@ -522,7 +522,7 @@ const mech = {
     }
 
     dmg *= mech.fieldDamageResistance
-    if (!b.modEnergyRegen) dmg *= 0.33 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
+    if (!b.modEnergyRegen) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.84 // 1 - 0.16
@@ -738,7 +738,7 @@ const mech = {
   },
   setHoldDefaults() {
     if (mech.energy < mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
-    mech.fieldRegen = b.modEnergyRegen;
+    mech.fieldRegen = b.modEnergyRegen; //0.001
     mech.fieldMeterColor = "#0cf"
     mech.fieldShieldingScale = 1;
     mech.fieldDamageResistance = 1;
@@ -1305,8 +1305,8 @@ const mech = {
             const DRAIN = 0.0023
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
-              if (mech.energy < 0) {
-                mech.fieldCDcycle = mech.cycle + 60;
+              if (mech.energy < DRAIN) {
+                mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
                 mech.wakeCheck();
               }
@@ -1370,7 +1370,7 @@ const mech = {
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
-                mech.fieldCDcycle = mech.cycle + 60;
+                mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
               }
               //calculate laser collision
@@ -1585,7 +1585,7 @@ const mech = {
                 zeroG(body, this.fieldDrawRadius);
               }
               if (mech.energy < 0) {
-                mech.fieldCDcycle = mech.cycle + 60;
+                mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
               }
               //add extra friction for horizontal motion
@@ -1765,7 +1765,7 @@ const mech = {
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
-                mech.fieldCDcycle = mech.cycle + 60;
+                mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
               }
               mech.isStealth = true //isStealth disables most uses of foundPlayer() 

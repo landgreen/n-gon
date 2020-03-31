@@ -56,6 +56,20 @@ const game = {
     ctx.restore();
     game.drawCursor();
   },
+  timeSkip(cycles = 60) {
+    for (let i = 0; i < cycles; i++) {
+      game.cycle++;
+      // mech.cycle++;
+      game.gravity();
+      Engine.update(engine, game.delta);
+      level.checkZones();
+      level.checkQuery();
+      mech.move();
+      mobs.loop();
+      mech.hold();
+      b.bulletActions();
+    }
+  },
   mouse: {
     x: canvas.width / 2,
     y: canvas.height / 2

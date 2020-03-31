@@ -585,24 +585,6 @@ const b = {
       }
     },
     {
-      name: "ground state",
-      description: "reduce <strong>harm</strong> by <strong>67%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect: () => {
-        b.modEnergyRegen = 0;
-        mech.fieldRegen = b.modEnergyRegen;
-      },
-      remove() {
-        b.modEnergyRegen = 0.005;
-        mech.fieldRegen = b.modEnergyRegen;
-      }
-    },
-    {
       name: "piezoelectricity",
       description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong>harm</strong> from mob collisions",
       maxCount: 1,
@@ -617,6 +599,24 @@ const b = {
       },
       remove() {
         b.isModPiezo = false;
+      }
+    },
+    {
+      name: "ground state",
+      description: "reduce <strong>harm</strong> by <strong>50%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.isModPiezo
+      },
+      requires: "piezoelectricity",
+      effect: () => {
+        b.modEnergyRegen = 0;
+        mech.fieldRegen = b.modEnergyRegen;
+      },
+      remove() {
+        b.modEnergyRegen = 0.001;
+        mech.fieldRegen = b.modEnergyRegen;
       }
     },
     {

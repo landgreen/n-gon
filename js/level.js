@@ -16,8 +16,9 @@ const level = {
       // level.difficultyIncrease(9)
       // b.giveGuns("ice IX")
       // mech.setField("time dilation field")
+      // mech.energy = 0.1;
       // b.giveMod("ground state");
-      // b.giveMod("reflective cavity");
+      // b.giveMod("photovoltaics");
 
       level.intro(); //starting level
       // level.testingMap();
