@@ -1,6 +1,9 @@
+mod - electromagnetic pulse - vacuum bomb does 9x damage to shields
+
 
 
 ************** TODO - n-gon **************
+cryonics : a mod that increases the freezing time of mobs.
 
 mob Boss - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
   what about a series of short time skips forward 10 cycles at a time
@@ -46,16 +49,6 @@ mod - robot that attack nearby mobs, and delivers a stun status effect
 
 settings - auto aim at nearest mob
 settings - custom keys binding
-
-gun - buff vacuum bomb
-  it's weak late game
-    can't spam it faster
-    bad vs. shields
-    doesn't scale up to huge groups
-  buff collision damage?
-  mod - double explosions?
-  mod - doesn't suck player in?
-  mod - DoT damage after exploding
 
 mod - energy recharges faster when not moving
 

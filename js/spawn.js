@@ -1670,7 +1670,7 @@ const spawn = {
         if (mech.pos.x > breakingPoint) {
           this.freeOfWires = true;
           this.force.x += -0.0006;
-          this.fill = "#222";
+          this.fill = "#111";
         }
         //move mob to player
         mech.calcLeg(0, 0);
@@ -1685,7 +1685,7 @@ const spawn = {
       ctx.quadraticCurveTo(wireX, 0, this.position.x, this.position.y);
       ctx.lineWidth = 5;
       ctx.lineCap = "butt";
-      ctx.strokeStyle = "#222";
+      ctx.strokeStyle = "#111";
       ctx.stroke();
       ctx.lineCap = "round";
     };
@@ -1719,7 +1719,7 @@ const spawn = {
         if (mech.pos.x > breakingPoint) {
           this.freeOfWires = true;
           this.force.x += -0.0005;
-          this.fill = "#333";
+          this.fill = "#222";
         }
         //move mob to player
         mech.calcLeg(Math.PI, -3);
@@ -1733,7 +1733,7 @@ const spawn = {
       ctx.moveTo(wireX, wireY);
       ctx.quadraticCurveTo(wireX, 0, this.position.x, this.position.y);
       ctx.lineWidth = 5;
-      ctx.strokeStyle = "#333";
+      ctx.strokeStyle = "#222";
       ctx.lineCap = "butt";
       ctx.stroke();
       ctx.lineCap = "round";

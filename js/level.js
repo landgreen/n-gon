@@ -14,7 +14,7 @@ const level = {
   start() {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
-      // b.giveGuns("ice IX")
+      // b.giveGuns("vacuum bomb")
       // mech.setField("time dilation field")
       // mech.energy = 0.1;
       // b.giveMod("ground state");
@@ -476,21 +476,30 @@ const level = {
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
 
-    document.body.style.backgroundColor = "#fff";
+    document.body.style.backgroundColor = "#eee";
     level.fillBG.push({
       x: 2600,
       y: -600,
       width: 400,
       height: 500,
-      color: "#edf9f9"
+      color: "#cee"
     });
 
+    level.fill.push({
+      x: -150,
+      y: -1000,
+      width: 2750,
+      height: 1000,
+      color: "rgba(0,20,40,0.1)"
+    });
+
+    const lineColor = "#ddd"
     level.fillBG.push({
       x: 1600,
       y: -500,
       width: 100,
       height: 100,
-      color: "#eee"
+      color: lineColor
     });
 
     level.fillBG.push({
@@ -498,7 +507,7 @@ const level = {
       y: -283,
       width: 12,
       height: 100,
-      color: "#eee"
+      color: lineColor
     });
 
     //faster way to draw a wire
@@ -509,7 +518,7 @@ const level = {
           y: y,
           width: width,
           height: height,
-          color: "#aaa"
+          color: lineColor
         });
       } else {
         level.fillBG.push({
@@ -517,11 +526,10 @@ const level = {
           y: y,
           width: width,
           height: height,
-          color: "#eee"
+          color: lineColor
         });
       }
     }
-
     for (let i = 0; i < 3; i++) {
       wallWire(100 - 10 * i, -1050 - 10 * i, 5, 800);
       wallWire(100 - 10 * i, -255 - 10 * i, -300, 5);
