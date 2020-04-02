@@ -56,7 +56,9 @@ const game = {
     ctx.restore();
     game.drawCursor();
   },
+  isTimeSkipping: false,
   timeSkip(cycles = 60) {
+    game.isTimeSkipping = true;
     for (let i = 0; i < cycles; i++) {
       game.cycle++;
       // mech.cycle++;
@@ -69,6 +71,7 @@ const game = {
       mech.hold();
       b.bulletActions();
     }
+    game.isTimeSkipping = false;
   },
   mouse: {
     x: canvas.width / 2,

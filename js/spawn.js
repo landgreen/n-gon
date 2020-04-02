@@ -636,6 +636,60 @@ const spawn = {
       this.checkStatus();
     }
   },
+  timeSkipBoss(x, y, radius = 80) {
+    mobs.spawn(x, y, 6, radius, '#000');
+    let me = mob[mob.length - 1];
+    // me.stroke = "transparent"; //used for drawSneaker
+    me.timeSkipLastCycle = 0
+    me.eventHorizon = 1600; //required for black hole
+    me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
+    me.accelMag = 0.0001 * game.accelScale;
+    // me.collisionFilter.mask = cat.player | cat.bullet
+    // me.frictionAir = 0.005;
+    // me.memory = 1600;
+    Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
+    me.onDeath = function () {
+      //applying forces to player doesn't seem to work inside this method, not sure why
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    };
+    me.do = function () {
+      //keep it slow, to stop issues from explosion knock backs
+      this.seePlayerByDistOrLOS();
+
+      if (this.seePlayer.recall) {
+        //accelerate towards the player
+        const forceMag = this.accelMag * this.mass;
+        const dx = this.seePlayer.position.x - this.position.x
+        const dy = this.seePlayer.position.y - this.position.y
+        const mag = Math.sqrt(dx * dx + dy * dy)
+        this.force.x += forceMag * dx / mag;
+        this.force.y += forceMag * dy / mag;
+
+        if (!game.isTimeSkipping) {
+          this.fill = `rgba(0,0,0,${0.1+0.1*Math.random()})`
+          const compress = 3
+          if (this.timeSkipLastCycle < game.cycle - compress &&
+            Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
+            this.timeSkipLastCycle = game.cycle
+            game.timeSkip(compress)
+
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+            ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+            ctx.fillStyle = this.fill;
+            ctx.fill();
+          }
+        }
+      }
+      this.checkStatus();
+    }
+  },
   beamer(x, y, radius = 15 + Math.ceil(Math.random() * 15)) {
     mobs.spawn(x, y, 4, radius, "rgb(255,0,190)");
     let me = mob[mob.length - 1];

@@ -95,6 +95,12 @@ const b = {
       }
     }
   },
+  resetModText() {
+    setTimeout(function () {
+      if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = "";
+      if (document.getElementById("mod-low-health-damage")) document.getElementById("mod-low-health-damage").innerHTML = "";
+    }, 10);
+  },
   mods: [{
       name: "depleted uranium rounds",
       description: `your <strong>bullets</strong> are <strong>+13%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,

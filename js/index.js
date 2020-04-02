@@ -187,6 +187,7 @@ const build = {
       document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
       localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     });
+    b.resetModText();
   },
   reset() {
     build.isCustomSelection = true;
@@ -235,6 +236,7 @@ const build = {
 }
 
 document.getElementById("build-button").addEventListener("click", () => { //setup build run
+  console.log('hi')
   document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
   el.style.display = "grid"

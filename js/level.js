@@ -20,8 +20,8 @@ const level = {
       // b.giveMod("ground state");
       // b.giveMod("photovoltaics");
 
-      level.intro(); //starting level
-      // level.testingMap();
+      // level.intro(); //starting level
+      level.testingMap();
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -96,288 +96,56 @@ const level = {
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
-  stronghold() { // player made level  by    Francois 👑   from discord
-    level.defaultZoom = 1400
 
-    game.zoomTransition(level.defaultZoom)
-    mech.setPosToSpawn(1900, -10); //normal spawn
-    level.enter.x = mech.spawnPos.x - 50;
-    level.enter.y = mech.spawnPos.y - 10;
-    level.exit.x = -350;
-    level.exit.y = -1250;
-    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
-    spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 20); //exit bump
-    document.body.style.backgroundColor = "#dbdcde";
-    spawn.debris(3800, -1480, 300, 12);
-    spawn.debris(3600, -1130, 200, 2);
-
-    level.fillBG.push({
-      x: -500,
-      y: -1220,
-      width: 550,
-      height: -480,
-      color: "#edf9f9"
-    });
-    level.fillBG.push({
-      x: 0,
-      y: -700,
-      width: 1050,
-      height: 700,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: -550,
-      y: -1170,
-      width: 550,
-      height: 1170,
-      color: "rgba(0,0,0,0.1)"
-    });
-
-    level.fillBG.push({
-      x: 1150,
-      y: -1700,
-      width: 250,
-      height: 1700,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 1050,
-      y: -1200,
-      width: 100,
-      height: 1200,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 1400,
-      y: -250,
-      width: 200,
-      height: -1500,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 1600,
-      y: -550,
-      width: 600,
-      height: -1150,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 2530,
-      y: -550,
-      width: 400,
-      height: -1450,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 3270,
-      y: -1700,
-      width: 80,
-      height: 600,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 3350,
-      y: -1350,
-      width: 700,
-      height: 230,
-      color: "rgba(0,0,0,0.1)"
-    });
-
-    level.fillBG.push({
-      x: 4050,
-      y: -1700,
-      width: 600,
-      height: 1290,
-      color: "rgba(0,0,0,0.1)"
-    });
-    level.fillBG.push({
-      x: 3650,
-      y: -110,
-      width: 1000,
-      height: 170,
-      color: "rgba(0,0,0,0.1)"
-    });
-
-
-    // __________________________________________________________________________________________________
-    // Spawn Box
-    spawn.mapRect(1600, -500, 50, 500); //Left Wall
-    spawn.mapRect(1600, -550, 1500, 50); //Roof
-    spawn.mapRect(2300, -500, 50, 300); //Right Wall
-
-    spawn.mapRect(-550, 0, 4300, 200); //ground
-    spawn.mapRect(3700, 55, 1300, 145); //2nd ground
-    spawn.mapRect(5000, 0, 50, 200); //Last small part of the ground
-    spawn.mapRect(3100, -1070, 50, 570); // vertical 2nd roof
-    spawn.mapRect(3100, -1120, 950, 50); // Horizontal 2nd Roof
-    spawn.mapRect(4050, -1750, 600, 50); // Roof after lift 
-    spawn.mapRect(4600, -1700, 50, 100); // Petit retour de toit, après ascenseur
-
-    //Spawn "Upstairs" 
-    spawn.mapRect(3650, -160, 400, 50); //Thin Walk
-    spawn.mapRect(4050, -410, 600, 300); //Large staircase block
-    spawn.mapRect(4600, -1120, 50, 710); //Left Wall Wall upstairs
-    spawn.mapRect(4550, -1170, 100, 50); //Bloque ascenseur
-    spawn.mapVertex(3700, 35, "0 0 450 0 300 -60 150 -60"); //first slope
-    spawn.mapVertex(4850, 35, "0 0 370 0 370 -65 150 -65"); //second slope
-    spawn.boost(4865, 0, 1800); // right boost
-    spawn.bodyRect(3950, -280, 170, 120); //Bloc Marche Pour Monter À Ascenseur
-    // spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
-    // spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
-    spawn.bodyRect(4050, -500, 275, 100, 1, spawn.propsSlide); //weight
-    spawn.bodyRect(4235, -500, 275, 100, 1, spawn.propsSlide); //weight
-    // spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
-    spawn.bodyRect(4025, -450, 550, 100, 1, spawn.propsHoist); //hoist
-    cons[cons.length] = Constraint.create({
-      pointA: {
-        x: 4325,
-        y: -1700,
-      },
-      bodyB: body[body.length - 1],
-      stiffness: 0.0001217,
-      length: 200
-    });
-
-    spawn.bodyRect(2799, -870, 310, 290); //Gros bloc angle toit
-    spawn.mapRect(4000, -1750, 50, 400); //Right Wall Cuve
-    spawn.mapRect(3400, -1400, 600, 50); // Bottom Cuve
-    spawn.mapRect(3350, -1750, 50, 400); // Left Wall Cuve
-    spawn.bodyRect(3400, -1470, 110, 70); //Moyen bloc dans la cuve
-    spawn.mapRect(3270, -1750, 80, 50); // Rebord gauche cuve
-
-    spawn.mapRect(2530, -2000, 400, 50); //First Plateforme
-    spawn.mapRect(1600, -1750, 600, 50); // Middle plateforme
-    spawn.mapRect(1150, -1750, 250, 50); //Derniere plateforme // Toit petite boite en [
-    spawn.bodyRect(1830, -1980, 190, 230); // Fat bloc plateforme middle 
-    spawn.bodyRect(1380, -1770, 250, 20) // Pont last plateforme
-
-    spawn.mapRect(1000, -1250, 400, 50); //Sol de la petite boite en [
-    spawn.mapRect(1100, -1750, 50, 380); //Mur gauche petite boite en [
-    spawn.bodyRect(1100, -1380, 48, 119); //Bloc-porte petite boite en [
-
-    spawn.mapRect(-100, -750, 1100, 50); //Sol last salle
-    spawn.mapRect(1000, -1200, 50, 500) // Mur droit last salle
-    spawn.mapRect(50, -1550, 1050, 50); // Toit last salle
-    spawn.bodyRect(1, -900, 48, 150); //Bloc porte last salle
-    spawn.mapRect(0, -1170, 50, 270); //Mur gauche en bas last salle
-    spawn.bodyRect(920, -900, 120, 120); //Gros bloc last salle
-
-    spawn.mapRect(0, -1700, 50, 320); // Mur droit salle exit / Mur gauche last salle
-    spawn.mapRect(-550, -1220, 600, 50); // Sol exit room
-    spawn.mapRect(-500, -1750, 550, 50); // Toit exit room
-    spawn.mapRect(-550, -1750, 50, 530); // Mur gauche exit room
-    spawn.bodyRect(-503, -1250, 30, 30); // Petit bloc exit room
-
-    spawn.mapRect(500, -700, 100, 590); //Bloc noir un dessous last salle
-    spawn.mapRect(1400, -250, 200, 250); //Black Block left from the spawn
-    spawn.boost(-370, 0, 800);
-
-    map[map.length] = Bodies.polygon(2325, -205, 0, 15); //circle above door
-    spawn.bodyRect(2325, -180, 15, 170, 1, spawn.propsDoor); // door
-    body[body.length - 1].isNotHoldable = true;
-    //makes door swing
-    consBB[consBB.length] = Constraint.create({
-      bodyA: body[body.length - 1],
-      pointA: {
-        x: 0,
-        y: -90
-      },
-      bodyB: map[map.length - 1],
-      stiffness: 1
-    });
-
-    spawn.bodyRect(650, 50, 70, 50);
-    spawn.bodyRect(300, 0, 100, 60);
-    spawn.bodyRect(400, 0, 100, 150);
-    spawn.bodyRect(2545, -50, 70, 50);
-    spawn.bodyRect(2550, 0, 100, 30);
-
-    spawn.randomSmallMob(1000, -400, 1);
-    spawn.randomSmallMob(2550, -560, 1);
-    spawn.randomSmallMob(3350, -900, 1);
-    spawn.randomSmallMob(3600, -1210, 1);
-    spawn.randomSmallMob(700, -1950, 0.2);
-    spawn.randomSmallMob(5050, -550);
-    spawn.randomMob(900, -160, 1);
-    spawn.randomMob(2360, -820, 0.8);
-    spawn.randomMob(2700, -2020, 0.8);
-    spawn.randomMob(3050, -1650, 0.8);
-    spawn.randomMob(3350, -600, 0.8);
-    spawn.randomMob(4400, -50, 1);
-    spawn.randomBoss(1500, -1900, 0.5);
-    spawn.randomBoss(2350, -850, 1);
-    spawn.randomBoss(100, -450, 0.9);
-    if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400, 1);
-  },
   testingMap() {
-    //start with all guns
     // level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
-    game.zoomScale = 1700 //1400 is normal
     spawn.setSpawnList();
-    mech.setPosToSpawn(-75, -60); //normal spawn
+    level.defaultZoom = 1500
+    game.zoomTransition(level.defaultZoom)
+    document.body.style.backgroundColor = "#ddd";
+    level.fill.push({
+      x: 6400,
+      y: -550,
+      width: 300,
+      height: 350,
+      color: "rgba(0,255,255,0.1)"
+    });
+
+    mech.setPosToSpawn(0, -750); //normal spawn
     level.enter.x = mech.spawnPos.x - 50;
     level.enter.y = mech.spawnPos.y + 20;
-
-    level.exit.x = 3500;
-    level.exit.y = -870;
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+    level.exit.x = 6500;
+    level.exit.y = -230;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
-    document.body.style.backgroundColor = "#dcdcde";
 
+    spawn.mapRect(-950, 0, 8200, 800); //ground
+    spawn.mapRect(-950, -1200, 800, 1400); //left wall
+    spawn.mapRect(-950, -1800, 8200, 800); //roof
+    spawn.mapRect(-250, -700, 1000, 900); // shelf
+    spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
+    powerUps.spawnStartingPowerUps(600, -800);
 
+    function blockDoor(x, y, blockSize = 58) {
+      spawn.mapRect(x, y - 290, 40, 60); // door lip
+      spawn.mapRect(x, y, 40, 50); // door lip
+      for (let i = 0; i < 4; ++i) {
+        spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
+      }
+    }
+    blockDoor(710, -710);
+    spawn.mapRect(2500, -1200, 200, 750); //right wall
+    blockDoor(2585, -210)
+    spawn.mapRect(2500, -200, 200, 300); //right wall
+    spawn.mapRect(4500, -1200, 200, 750); //right wall
+    blockDoor(4585, -210)
+    spawn.mapRect(4500, -200, 200, 300); //right wall
+    spawn.mapRect(6400, -1200, 400, 750); //right wall
+    spawn.mapRect(6400, -200, 400, 300); //right wall
+    spawn.mapRect(6700, -1800, 800, 2600); //right wall
+    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
+    spawn.timeSkipBoss(2900, -500)
 
-
-    // this.addZone(250, -1000, 500, 1500, "laser");
-    //spawn.debris(0, -900, 4500, 10); //15 debris per level
-    // setTimeout(function() {
-    //   document.body.style.backgroundColor = "#eee";
-    // }, 1);
-    // this.addQueryRegion(550, -25, 100, 50, "bounce", { Vx: 0, Vy: -25 });
-    // level.fillBG.push({ x: 550, y: -25, width: 100, height: 50, color: "#ff0" });
-
-    spawn.mapRect(-1200, 0, 2200, 300); //left ground
-    spawn.mapRect(3500, -860, 100, 50); //ground bump wall
-    spawn.mapVertex(1250, 0, "0 0 0 300 -500 600 -500 300");
-    spawn.mapRect(1500, -300, 2000, 300); //upper ground
-    spawn.mapVertex(3750, 0, "0 600 0 300 -500 0 -500 300");
-    spawn.mapRect(4000, 0, 1000, 300); //right lower ground
-    spawn.mapRect(2200, -600, 600, 50); //center platform
-    spawn.mapRect(1300, -850, 700, 50); //center platform
-    spawn.mapRect(3000, -850, 700, 50); //center platform
-    // spawn.mapRect(0, -2000, 3000, 50); //center platform
-    spawn.spawnBuilding(-200, -250, 275, 240, false, true, "left"); //far left; player spawns in side
-    // spawn.boost(350, 0, -1000);
-    // for (let i = 0; i < 10; i++) {
-    // powerUps.spawn(950, -425, "gun", false);
-    // powerUps.spawn(950, -425, "gun", false);
-    // }
-
-    // spawn.nodeBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
-    // spawn.lineBoss(-500, -600, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
-    // spawn.bodyRect(-135, -50, 50, 50);
-    // spawn.bodyRect(-140, -100, 50, 50);
-    // powerUps.spawn(420, -400, "gun", false);
-    // powerUps.spawn(420, -400, "field", false);
-    // powerUps.spawn(420, -400, "field", false);
-    // powerUps.spawn(420, -400, "field", false);
-    // powerUps.spawn(450, -400, "mod", false, 6);
-    // powerUps.spawn(450, -400, "mod", false);
-    // spawn.bodyRect(-45, -100, 40, 50);
-    // spawn.starter(800, -450, 150);
-    spawn.laserBoss(400, -750);
-
-    // spawn.randomLevelBoss(400, -750)
-
-    // spawn.laser(400, -550);
-    // spawn.starter(1200, -1050);
-    // spawn.nodeBoss(-600, -550, "starter");
-    // spawn.starter(800, -150);
-    // spawn.beamer(800, -150);
-    // spawn.grower(800, -250);
-    // spawn.blinker(800, -250, 40);
-    // spawn.groupBoss(900, -1070);
-    // for (let i = 0; i < 20; i++) {
-    //   spawn.randomBoss(-100, -1470);
-    // }
   },
   bosses() {
     level.defaultZoom = 1500
@@ -1895,6 +1663,219 @@ const level = {
         spawn.shooterBoss(2200, -650);
       }
     }
+  },
+  stronghold() { // player made level  by    Francois 👑   from discord
+    level.defaultZoom = 1400
+
+    game.zoomTransition(level.defaultZoom)
+    mech.setPosToSpawn(1900, -10); //normal spawn
+    level.enter.x = mech.spawnPos.x - 50;
+    level.enter.y = mech.spawnPos.y - 10;
+    level.exit.x = -350;
+    level.exit.y = -1250;
+    level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
+    spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 20); //exit bump
+    document.body.style.backgroundColor = "#dbdcde";
+    spawn.debris(3800, -1480, 300, 12);
+    spawn.debris(3600, -1130, 200, 2);
+
+    level.fillBG.push({
+      x: -500,
+      y: -1220,
+      width: 550,
+      height: -480,
+      color: "#edf9f9"
+    });
+    level.fillBG.push({
+      x: 0,
+      y: -700,
+      width: 1050,
+      height: 700,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: -550,
+      y: -1170,
+      width: 550,
+      height: 1170,
+      color: "rgba(0,0,0,0.1)"
+    });
+
+    level.fillBG.push({
+      x: 1150,
+      y: -1700,
+      width: 250,
+      height: 1700,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 1050,
+      y: -1200,
+      width: 100,
+      height: 1200,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 1400,
+      y: -250,
+      width: 200,
+      height: -1500,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 1600,
+      y: -550,
+      width: 600,
+      height: -1150,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 2530,
+      y: -550,
+      width: 400,
+      height: -1450,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 3270,
+      y: -1700,
+      width: 80,
+      height: 600,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 3350,
+      y: -1350,
+      width: 700,
+      height: 230,
+      color: "rgba(0,0,0,0.1)"
+    });
+
+    level.fillBG.push({
+      x: 4050,
+      y: -1700,
+      width: 600,
+      height: 1290,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
+      x: 3650,
+      y: -110,
+      width: 1000,
+      height: 170,
+      color: "rgba(0,0,0,0.1)"
+    });
+
+
+    // __________________________________________________________________________________________________
+    // Spawn Box
+    spawn.mapRect(1600, -500, 50, 500); //Left Wall
+    spawn.mapRect(1600, -550, 1500, 50); //Roof
+    spawn.mapRect(2300, -500, 50, 300); //Right Wall
+
+    spawn.mapRect(-550, 0, 4300, 200); //ground
+    spawn.mapRect(3700, 55, 1300, 145); //2nd ground
+    spawn.mapRect(5000, 0, 50, 200); //Last small part of the ground
+    spawn.mapRect(3100, -1070, 50, 570); // vertical 2nd roof
+    spawn.mapRect(3100, -1120, 950, 50); // Horizontal 2nd Roof
+    spawn.mapRect(4050, -1750, 600, 50); // Roof after lift 
+    spawn.mapRect(4600, -1700, 50, 100); // Petit retour de toit, après ascenseur
+
+    //Spawn "Upstairs" 
+    spawn.mapRect(3650, -160, 400, 50); //Thin Walk
+    spawn.mapRect(4050, -410, 600, 300); //Large staircase block
+    spawn.mapRect(4600, -1120, 50, 710); //Left Wall Wall upstairs
+    spawn.mapRect(4550, -1170, 100, 50); //Bloque ascenseur
+    spawn.mapVertex(3700, 35, "0 0 450 0 300 -60 150 -60"); //first slope
+    spawn.mapVertex(4850, 35, "0 0 370 0 370 -65 150 -65"); //second slope
+    spawn.boost(4865, 0, 1800); // right boost
+    spawn.bodyRect(3950, -280, 170, 120); //Bloc Marche Pour Monter À Ascenseur
+    // spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
+    // spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(4050, -500, 275, 100, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(4235, -500, 275, 100, 1, spawn.propsSlide); //weight
+    // spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
+    spawn.bodyRect(4025, -450, 550, 100, 1, spawn.propsHoist); //hoist
+    cons[cons.length] = Constraint.create({
+      pointA: {
+        x: 4325,
+        y: -1700,
+      },
+      bodyB: body[body.length - 1],
+      stiffness: 0.0001217,
+      length: 200
+    });
+
+    spawn.bodyRect(2799, -870, 310, 290); //Gros bloc angle toit
+    spawn.mapRect(4000, -1750, 50, 400); //Right Wall Cuve
+    spawn.mapRect(3400, -1400, 600, 50); // Bottom Cuve
+    spawn.mapRect(3350, -1750, 50, 400); // Left Wall Cuve
+    spawn.bodyRect(3400, -1470, 110, 70); //Moyen bloc dans la cuve
+    spawn.mapRect(3270, -1750, 80, 50); // Rebord gauche cuve
+
+    spawn.mapRect(2530, -2000, 400, 50); //First Plateforme
+    spawn.mapRect(1600, -1750, 600, 50); // Middle plateforme
+    spawn.mapRect(1150, -1750, 250, 50); //Derniere plateforme // Toit petite boite en [
+    spawn.bodyRect(1830, -1980, 190, 230); // Fat bloc plateforme middle 
+    spawn.bodyRect(1380, -1770, 250, 20) // Pont last plateforme
+
+    spawn.mapRect(1000, -1250, 400, 50); //Sol de la petite boite en [
+    spawn.mapRect(1100, -1750, 50, 380); //Mur gauche petite boite en [
+    spawn.bodyRect(1100, -1380, 48, 119); //Bloc-porte petite boite en [
+
+    spawn.mapRect(-100, -750, 1100, 50); //Sol last salle
+    spawn.mapRect(1000, -1200, 50, 500) // Mur droit last salle
+    spawn.mapRect(50, -1550, 1050, 50); // Toit last salle
+    spawn.bodyRect(1, -900, 48, 150); //Bloc porte last salle
+    spawn.mapRect(0, -1170, 50, 270); //Mur gauche en bas last salle
+    spawn.bodyRect(920, -900, 120, 120); //Gros bloc last salle
+
+    spawn.mapRect(0, -1700, 50, 320); // Mur droit salle exit / Mur gauche last salle
+    spawn.mapRect(-550, -1220, 600, 50); // Sol exit room
+    spawn.mapRect(-500, -1750, 550, 50); // Toit exit room
+    spawn.mapRect(-550, -1750, 50, 530); // Mur gauche exit room
+    spawn.bodyRect(-503, -1250, 30, 30); // Petit bloc exit room
+
+    spawn.mapRect(500, -700, 100, 590); //Bloc noir un dessous last salle
+    spawn.mapRect(1400, -250, 200, 250); //Black Block left from the spawn
+    spawn.boost(-370, 0, 800);
+
+    map[map.length] = Bodies.polygon(2325, -205, 0, 15); //circle above door
+    spawn.bodyRect(2325, -180, 15, 170, 1, spawn.propsDoor); // door
+    body[body.length - 1].isNotHoldable = true;
+    //makes door swing
+    consBB[consBB.length] = Constraint.create({
+      bodyA: body[body.length - 1],
+      pointA: {
+        x: 0,
+        y: -90
+      },
+      bodyB: map[map.length - 1],
+      stiffness: 1
+    });
+
+    spawn.bodyRect(650, 50, 70, 50);
+    spawn.bodyRect(300, 0, 100, 60);
+    spawn.bodyRect(400, 0, 100, 150);
+    spawn.bodyRect(2545, -50, 70, 50);
+    spawn.bodyRect(2550, 0, 100, 30);
+
+    spawn.randomSmallMob(1000, -400, 1);
+    spawn.randomSmallMob(2550, -560, 1);
+    spawn.randomSmallMob(3350, -900, 1);
+    spawn.randomSmallMob(3600, -1210, 1);
+    spawn.randomSmallMob(700, -1950, 0.2);
+    spawn.randomSmallMob(5050, -550);
+    spawn.randomMob(900, -160, 1);
+    spawn.randomMob(2360, -820, 0.8);
+    spawn.randomMob(2700, -2020, 0.8);
+    spawn.randomMob(3050, -1650, 0.8);
+    spawn.randomMob(3350, -600, 0.8);
+    spawn.randomMob(4400, -50, 1);
+    spawn.randomBoss(1500, -1900, 0.5);
+    spawn.randomBoss(2350, -850, 1);
+    spawn.randomBoss(100, -450, 0.9);
+    if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400, 1);
   },
   //*****************************************************************************************************************
   //*****************************************************************************************************************

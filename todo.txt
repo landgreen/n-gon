@@ -1,9 +1,10 @@
-mod - electromagnetic pulse - vacuum bomb does 9x damage to shields
-
+mod - electromagnetic pulse - vacuum bomb removes shields and does 20% extra damage
 
 
 ************** TODO - n-gon **************
-cryonics : a mod that increases the freezing time of mobs.
+mod - status effects last 1 second longer
+  cryonics : a mod that increases the freezing time of mobs.
+  wait until you have more status effects written
 
 mob Boss - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
   what about a series of short time skips forward 10 cycles at a time
@@ -30,6 +31,7 @@ field - the basic field emitter, but no energy loss and no knock back on blocks
   call it diamagnetic field and remove the diamagnetism mod?
 
 mod - nails do poison damage
+
 mod - increase laser bot range, and reduce energy drain
 
 mod - mines become a turret that fires nails
@@ -41,6 +43,7 @@ dash - mod  when pressing left or right on the ground, teleport to the right unt
   this didn't work as a field, but maybe as a gun?
 
 mod - blocks stun mobs
+
 mod or field - turn blocks into spores or drones
 
 mod - robot that attack nearby mobs, and delivers a stun status effect
@@ -78,24 +81,7 @@ atmosphere levels: change the pace, give the user a rest between combat
 
 MOB sniper - targeting laser, then a high speed, no gravity bullet
 
-mod - status effects last 1 second longer
-  wait until you have more status effects written
-
-mod - time dilation - Quantum Recovery
-  Expending all your energy while using the field will
-    cause the player to go back in time to 3 seconds before the field was activated
-      resets ammo?, health, position, velocity
-      need to track player info in game.checks() in an array
-        put the array in the time field object
-    cause the player to go back in time when the field was first activated (easier then going back to 3 seconds before)
-
 css transition for pause menu
-
-field that pushes everything back, and can destroy smaller blocks
-  converts blocks into ammo power ups
-
-mod: bot that fires minigun bullets
-  only fires when your mouse is held down
 
 mod: do extra damage based on your speed
   do more damage when not moving?
@@ -106,9 +92,6 @@ gun/field: portals
     or lasers
   alternate red and blue portals
   
-missiles don't explode reliably enough
-  they can bounce, which is cool, but they should still explode right after a bounce
-
 weekly random challenge where everyone playing each week gets the same random setup.
   The randomness would be determined by the date so it would sync everyone.
   power ups still drop, but the drops are determined by a preset list that changes each week.
