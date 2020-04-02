@@ -641,52 +641,68 @@ const spawn = {
     let me = mob[mob.length - 1];
     // me.stroke = "transparent"; //used for drawSneaker
     me.timeSkipLastCycle = 0
-    me.eventHorizon = 1600; //required for black hole
+    me.eventHorizon = 1300; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
-    me.accelMag = 0.0001 * game.accelScale;
+    me.accelMag = 0.00013 * game.accelScale;
     // me.collisionFilter.mask = cat.player | cat.bullet
     // me.frictionAir = 0.005;
     // me.memory = 1600;
-    Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.018); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
-      this.seePlayerByDistOrLOS();
+      this.seePlayerCheck();
+      this.attraction()
+      if (!game.isTimeSkipping) {
+        const compress = 3
+        if (this.timeSkipLastCycle < game.cycle - compress &&
+          Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
+          this.timeSkipLastCycle = game.cycle
+          game.timeSkip(compress)
 
-      if (this.seePlayer.recall) {
-        //accelerate towards the player
-        const forceMag = this.accelMag * this.mass;
-        const dx = this.seePlayer.position.x - this.position.x
-        const dy = this.seePlayer.position.y - this.position.y
-        const mag = Math.sqrt(dx * dx + dy * dy)
-        this.force.x += forceMag * dx / mag;
-        this.force.y += forceMag * dy / mag;
-
-        if (!game.isTimeSkipping) {
           this.fill = `rgba(0,0,0,${0.1+0.1*Math.random()})`
-          const compress = 3
-          if (this.timeSkipLastCycle < game.cycle - compress &&
-            Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
-            this.timeSkipLastCycle = game.cycle
-            game.timeSkip(compress)
+          this.stroke = "#000"
+          this.isShielded = false;
+          this.dropPowerUp = true;
+          ctx.beginPath();
+          ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+          ctx.fillStyle = `rgba(255,255,255,${mech.energy*0.5})`;
+          ctx.globalCompositeOperation = "destination-in"; //in or atop
+          ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
+          ctx.beginPath();
+          ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+          ctx.clip();
 
-            ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-            ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
-            ctx.fill();
-            ctx.strokeStyle = "#000";
-            ctx.stroke();
-          } else {
-            ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-            ctx.fillStyle = this.fill;
-            ctx.fill();
-          }
+          // ctx.beginPath();
+          // ctx.arc(this.position.x, this.position.y, 9999, 0, 2 * Math.PI);
+          // ctx.fillStyle = "#000";
+          // ctx.fill();
+          // ctx.strokeStyle = "#000";
+          // ctx.stroke();
+
+          // ctx.beginPath();
+          // ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+          // ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
+          // ctx.fill();
+          // ctx.strokeStyle = "#000";
+          // ctx.stroke();
+        } else {
+          this.isShielded = true;
+          this.dropPowerUp = false;
+          this.seePlayer.recall = false
+          this.fill = "transparent"
+          this.stroke = "transparent"
+          ctx.beginPath();
+          ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+          ctx.fillStyle = `rgba(0,0,0,${0.1*Math.random()})`;
+          ctx.fill();
         }
       }
+
       this.checkStatus();
     }
   },
@@ -1856,6 +1872,13 @@ const spawn = {
       height: height,
       color: "#f0f0f3"
     });
+  },
+  blockDoor(x, y, blockSize = 58) {
+    spawn.mapRect(x, y - 290, 40, 60); // door lip
+    spawn.mapRect(x, y, 40, 50); // door lip
+    for (let i = 0; i < 4; ++i) {
+      spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
+    }
   },
   debris(x, y, width, number = Math.floor(2 + Math.random() * 9)) {
     for (let i = 0; i < number; ++i) {

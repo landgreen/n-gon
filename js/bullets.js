@@ -150,7 +150,8 @@ const b = {
       }
     },
     {
-      name: "fluoroantimonic acid<span id='mod-acid'></span>",
+      name: "fluoroantimonic acid",
+      nameInfo: "<span id='mod-acid'></span>",
       description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
       maxCount: 1,
       count: 0,
@@ -169,7 +170,8 @@ const b = {
       }
     },
     {
-      name: "negative feedback<span id='mod-low-health-damage'></span>",
+      name: "negative feedback",
+      nameInfo: "<span id='mod-low-health-damage'></span>",
       description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to <strong>50%</strong> increase when near death</em>",
       maxCount: 1,
       count: 0,
@@ -576,7 +578,8 @@ const b = {
       }
     },
     {
-      name: "entanglement <span id = 'mod-entanglement'></span>",
+      name: "entanglement",
+      nameInfo: "<span id = 'mod-entanglement'></span>",
       description: "<strong>16%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
       maxCount: 1,
       count: 0,

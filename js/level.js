@@ -15,13 +15,14 @@ const level = {
     if (level.levelsCleared === 0) {
       // level.difficultyIncrease(9)
       // b.giveGuns("vacuum bomb")
-      // mech.setField("time dilation field")
+      // mech.setField("phase decoherence field")
       // mech.energy = 0.1;
-      // b.giveMod("ground state");
+      // b.giveMod("negative feedback");
       // b.giveMod("photovoltaics");
+      onLoadPowerUps();
 
-      // level.intro(); //starting level
-      level.testingMap();
+      level.intro(); //starting level
+      // level.testing();
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -75,8 +76,7 @@ const level = {
     if (game.difficulty < 1) game.difficulty = 0;
     game.healScale = 1 / (1 + game.difficulty * 0.09)
   },
-  difficultyText() {
-    let mode = document.getElementById("difficulty-select").value
+  difficultyText(mode = document.getElementById("difficulty-select").value) {
     if (mode === "0") {
       return "easy"
     } else if (mode === "1") {
@@ -97,7 +97,7 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
 
-  testingMap() {
+  testing() {
     // level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
     spawn.setSpawnList();
     level.defaultZoom = 1500
@@ -137,14 +137,15 @@ const level = {
     spawn.mapRect(2500, -1200, 200, 750); //right wall
     blockDoor(2585, -210)
     spawn.mapRect(2500, -200, 200, 300); //right wall
-    spawn.mapRect(4500, -1200, 200, 750); //right wall
-    blockDoor(4585, -210)
-    spawn.mapRect(4500, -200, 200, 300); //right wall
+    spawn.mapRect(4500, -1200, 200, 650); //right wall
+    blockDoor(4585, -310)
+    spawn.mapRect(4500, -300, 200, 400); //right wall
     spawn.mapRect(6400, -1200, 400, 750); //right wall
     spawn.mapRect(6400, -200, 400, 300); //right wall
     spawn.mapRect(6700, -1800, 800, 2600); //right wall
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
     spawn.timeSkipBoss(2900, -500)
+    spawn.randomMob(3200, -500)
 
   },
   bosses() {
@@ -193,23 +194,16 @@ const level = {
     spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
     powerUps.spawnStartingPowerUps(600, -800);
 
-    function blockDoor(x, y, blockSize = 58) {
-      spawn.mapRect(x, y - 290, 40, 60); // door lip
-      spawn.mapRect(x, y, 40, 50); // door lip
-      for (let i = 0; i < 4; ++i) {
-        spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
-      }
-    }
-    blockDoor(710, -710);
+    spawn.blockDoor(710, -710);
 
     spawn[spawn.pickList[0]](1500, -200, 150 + Math.random() * 30);
     spawn.mapRect(2500, -1200, 200, 750); //right wall
-    blockDoor(2585, -210)
+    spawn.blockDoor(2585, -210)
     spawn.mapRect(2500, -200, 200, 300); //right wall
 
     spawn.nodeBoss(3500, -200, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
     spawn.mapRect(4500, -1200, 200, 750); //right wall
-    blockDoor(4585, -210)
+    spawn.blockDoor(4585, -210)
     spawn.mapRect(4500, -200, 200, 300); //right wall
 
     spawn.lineBoss(5000, -200, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);

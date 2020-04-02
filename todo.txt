@@ -2,6 +2,9 @@ mod - electromagnetic pulse - vacuum bomb removes shields and does 20% extra dam
 
 
 ************** TODO - n-gon **************
+
+mod - spores with no target hang out about player
+
 mod - status effects last 1 second longer
   cryonics : a mod that increases the freezing time of mobs.
   wait until you have more status effects written

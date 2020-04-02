@@ -12,6 +12,38 @@ const cat = {
   mobShield: 0x10000000,
 }
 
+//example  https://landgreen.github.io/sidescroller/index.html?
+//          &gun1=minigun&gun2=laser
+//          &mod1=laser-bot&mod2=mass%20driver&mod3=overcharge&mod4=laser-bot&mod5=laser-bot&field=phase%20decoherence%20field&difficulty=2
+//add ? to end of url then for each power up add
+// &gun1=name&gun2=name
+// &mod1=laser-bot&mod2=mass%20driver&mod3=overcharge&mod4=laser-bot&mod5=laser-bot
+// &field=phase%20decoherence%20field
+// &difficulty=2
+//use %20 for spaces
+//difficulty is 0 easy, 1 normal, 2 hard, 4 why
+function onLoadPowerUps() {
+  function getUrlVars() {
+    let vars = {};
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, k, v) {
+      vars[k] = v;
+    });
+    return vars;
+  }
+  const set = getUrlVars()
+  for (const property in set) {
+    // console.log(`${property}: ${give[property]}`);
+    set[property] = set[property].replace(/%20/g, " ")
+    if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
+    if (property.substring(0, 3) === "mod") b.giveMod(set[property])
+    if (property === "field") mech.setField(set[property])
+    if (property === "difficulty") {
+      game.difficultyMode = Number(set[property])
+      document.getElementById("difficulty-select").value = Number(set[property])
+    }
+  }
+}
+
 //build build grid display
 const build = {
   pauseGrid() {
@@ -148,11 +180,16 @@ const build = {
         <text x="18" y="38">start</text>
       </g>
     </svg>
-    <svg class="SVG-button" onclick="build.reset()" width="70" height="35">
-      <g stroke='none' fill='#333' stroke-width="2" font-size="22px" font-family="Ariel, sans-serif">
-        <text x="10" y="24">reset</text>
+    <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
+      <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+        <text x="5" y="18">reset</text>
       </g>
     </svg>
+    <svg class="SVG-button" onclick="build.shareURL()" width="52" height="25">
+    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+      <text x="5" y="18">share</text>
+    </g>
+  </svg>
   </div>
   <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
     <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
@@ -207,7 +244,63 @@ const build = {
     document.getElementById("field-0").classList.add("build-field-selected");
     document.getElementById("build-grid").style.display = "grid"
   },
+  shareURL() {
+    // Create a fake textarea
+    const textAreaEle = document.createElement('textarea');
 
+    // Reset styles
+    textAreaEle.style.border = '0';
+    textAreaEle.style.padding = '0';
+    textAreaEle.style.margin = '0';
+
+    // Set the absolute position
+    // User won't see the element
+    textAreaEle.style.position = 'absolute';
+    textAreaEle.style.left = '-9999px';
+    textAreaEle.style.top = `0px`;
+
+    // Set the value
+    textAreaEle.value = build.generateURL();
+
+    // Append the textarea to body
+    document.body.appendChild(textAreaEle);
+
+    // Focus and select the text
+    textAreaEle.focus();
+    textAreaEle.select();
+
+    // Execute the "copy" command
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      // Unable to copy
+    } finally {
+      // Remove the textarea
+      document.body.removeChild(textAreaEle);
+    }
+    alert('n-gon build URL copied to clip board.\nPaste it into your browser address bar.')
+  },
+  generateURL() {
+    let url = "https://landgreen.github.io/sidescroller/index.html?"
+    let count = 0;
+    for (let i = 0; i < b.guns.length; i++) {
+      if (b.guns[i].have) {
+        url += `&gun${count}=${encodeURIComponent(b.guns[i].name.trim())}`
+        count++
+      }
+    }
+    count = 0;
+    for (let i = 0; i < b.mods.length; i++) {
+      for (let j = 0; j < b.mods[i].count; j++) {
+        url += `&mod${count}=${encodeURIComponent(b.mods[i].name.trim())}`
+        count++
+      }
+    }
+    url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
+    url += `&difficulty=${game.difficultyMode}`
+    console.log(url)
+    return url
+  },
   startBuildRun() {
     build.isCustomSelection = false;
     b.modOnHealthChange()
