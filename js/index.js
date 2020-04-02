@@ -311,7 +311,7 @@ const build = {
       // Remove the textarea
       document.body.removeChild(textAreaEle);
     }
-    alert('n-gon build URL copied to clip board.\nPaste it into your browser address bar.')
+    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
   },
   generateURL() {
     let url = "https://landgreen.github.io/sidescroller/index.html?"
