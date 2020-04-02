@@ -13,13 +13,13 @@ const level = {
   levelsCleared: 0,
   start() {
     if (level.levelsCleared === 0) {
+      if (build.isURLBuild) build.onLoadPowerUps();
       // level.difficultyIncrease(9)
       // b.giveGuns("vacuum bomb")
       // mech.setField("phase decoherence field")
       // mech.energy = 0.1;
       // b.giveMod("negative feedback");
       // b.giveMod("photovoltaics");
-      onLoadPowerUps();
 
       level.intro(); //starting level
       // level.testing();

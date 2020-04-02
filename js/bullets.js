@@ -746,7 +746,7 @@ const b = {
       }
     },
     {
-      name: "+1 cardinality",
+      name: "cardinality",
       description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
@@ -937,33 +937,33 @@ const b = {
       }
     },
     {
-      name: "fléchettes cartridges",
-      description: "<strong>fléchettes</strong> release <strong>three</strong> needles in each shot<br><strong>ammo</strong> cost are increases by <strong>3x</strong>",
+      name: "flechettes cartridges",
+      description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong>ammo</strong> cost are increases by <strong>3x</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("fléchettes")
+        return b.haveGunCheck("flechettes")
       },
-      requires: "fléchettes",
+      requires: "flechettes",
       effect() {
         b.isModFlechetteMultiShot = true;
         //cut current ammo by 1/3
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+          if (b.guns[i].name === "flechettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
         }
         //cut ammo packs by 1/3
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+          if (b.guns[i].name === "flechettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
         }
         game.updateGunHUD();
       },
       remove() {
         b.isModFlechetteMultiShot = false;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
+          if (b.guns[i].name === "flechettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
         }
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-          if (b.guns[i].name === "fléchettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+          if (b.guns[i].name === "flechettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
         }
         game.updateGunHUD();
       }
@@ -974,9 +974,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("fléchettes")
+        return b.haveGunCheck("flechettes")
       },
-      requires: "fléchettes",
+      requires: "flechettes",
       effect() {
         b.isModDotFlechette = true;
       },
@@ -2470,7 +2470,7 @@ const b = {
       }
     },
     {
-      name: "fléchettes", //3
+      name: "flechettes", //3
       description: "fire a <strong>precise</strong> volley of <strong>high velocity</strong> needles<br>that apply <strong class='color-p'>chemical</strong> <strong class='color-d'>damage</strong> over 3 seconds",
       ammo: 0,
       ammoPack: 23,

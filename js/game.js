@@ -527,6 +527,7 @@ const game = {
   splashReturn() {
     game.onTitlePage = true;
     // document.getElementById('splash').onclick = 'run(this)';
+    // build.isURLBuild = false;
     document.getElementById("splash").onclick = function () {
       game.startGame();
     };
