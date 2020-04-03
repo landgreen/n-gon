@@ -12,8 +12,8 @@ const level = {
   onLevel: 0,
   levelsCleared: 0,
   start() {
+    if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) {
-      if (build.isURLBuild) build.onLoadPowerUps();
       // level.difficultyIncrease(9)
       // b.giveGuns("vacuum bomb")
       // mech.setField("phase decoherence field")
@@ -32,13 +32,13 @@ const level = {
       // level.warehouse();
       // level.highrise();
       // level.office();
-      level.levelAnnounce();
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       // spawn.pickList = ["focuser", "focuser"]
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
-      level.levelAnnounce();
     }
+
+    level.levelAnnounce();
     game.noCameraScroll();
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
@@ -98,7 +98,8 @@ const level = {
   //******************************************************************************************************************
 
   testing() {
-    // level.difficultyIncrease(9) //level 7 on normal, level 4 on hard, level 1.2 on why?
+    level.difficultyIncrease(9);
+    spawn.setSpawnList();
     spawn.setSpawnList();
     level.defaultZoom = 1500
     game.zoomTransition(level.defaultZoom)
@@ -144,8 +145,11 @@ const level = {
     spawn.mapRect(6400, -200, 400, 300); //right wall
     spawn.mapRect(6700, -1800, 800, 2600); //right wall
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
+
+    // spawn.laserBoss(2900, -500)
+    // spawn.exploder(3200, -500)
     spawn.timeSkipBoss(2900, -500)
-    spawn.randomMob(3200, -500)
+    // spawn.randomMob(3200, -500)
 
   },
   bosses() {

@@ -694,6 +694,8 @@ const b = {
       },
       remove() {
         mech.maxHealth = 1;
+        b.modOnHealthChange();
+        mech.displayHealth();
       }
     },
     {

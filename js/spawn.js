@@ -644,7 +644,6 @@ const spawn = {
     me.eventHorizon = 1300; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
     me.accelMag = 0.00013 * game.accelScale;
-    // me.collisionFilter.mask = cat.player | cat.bullet
     // me.frictionAir = 0.005;
     // me.memory = 1600;
     Matter.Body.setDensity(me, 0.018); //extra dense //normal is 0.001 //makes effective life much larger
@@ -667,6 +666,8 @@ const spawn = {
           this.stroke = "#000"
           this.isShielded = false;
           this.dropPowerUp = true;
+          this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can't touch bullets
+
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
           ctx.fillStyle = `rgba(255,255,255,${mech.energy*0.5})`;
@@ -696,6 +697,7 @@ const spawn = {
           this.seePlayer.recall = false
           this.fill = "transparent"
           this.stroke = "transparent"
+          this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob; //can't touch bullets
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
           ctx.fillStyle = `rgba(0,0,0,${0.1*Math.random()})`;
@@ -904,32 +906,16 @@ const spawn = {
       vertexCollision(where, look, map);
       vertexCollision(where, look, body);
       if (!mech.isStealth) vertexCollision(where, look, [player]);
-      //hitting mob
-      if (best.who) {
-        // if (best.who.mob) {
-        //   best.who.damage(Infinity);
-        //   //draw damage
-        //   game.drawList.push({ //add dmg to draw queue
-        //     x: best.x,
-        //     y: best.y,
-        //     radius: 50,
-        //     color: game.playerDmgColor,
-        //     time: game.drawTime
-        //   });
-        // }
-        // hitting player
-        if (best.who === player && mech.collisionImmuneCycle < mech.cycle) {
-          mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
-          mech.damage(this.dmg);
-          //draw damage
-          game.drawList.push({ //add dmg to draw queue
-            x: best.x,
-            y: best.y,
-            radius: this.dmg * 1500,
-            color: "rgba(80,0,255,0.5)",
-            time: 20
-          });
-        }
+      if (best.who && best.who === player && mech.collisionImmuneCycle < mech.cycle) {
+        mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        mech.damage(this.dmg);
+        game.drawList.push({ //add dmg to draw queue
+          x: best.x,
+          y: best.y,
+          radius: this.dmg * 1500,
+          color: "rgba(80,0,255,0.5)",
+          time: 20
+        });
       }
       //draw beam
       if (best.dist2 === Infinity) best = look;
@@ -1077,30 +1063,35 @@ const spawn = {
   //   me.isStatic = true;
   //   me.memory = 360;
   //   me.seePlayerFreq = Math.round((40 + 30 * Math.random()) * game.lookFreqScale);
-  //   me.isBig = false;
-  //   me.scaleMag = Math.max(5 - me.mass, 1.75);
+  //   // me.isBig = false;
+  //   // me.scaleMag = Math.max(5 - me.mass, 1.75);
   //   me.onDeath = function () {
-  //     if (this.isBig) {
-  //       Matter.Body.scale(this, 1 / this.scaleMag, 1 / this.scaleMag);
-  //       this.isBig = false;
-  //     }
+  //     // if (this.isBig) {
+  //     //   Matter.Body.scale(this, 1 / this.scaleMag, 1 / this.scaleMag);
+  //     //   this.isBig = false;
+  //     // }
+  //   };
+  //   me.onHit = function () {
+  //     game.timeSkip(120)
   //   };
   //   me.do = function () {
   //     this.seePlayerCheck();
   //     this.blink();
   //     //strike by expanding
-  //     if (this.isBig) {
-  //       if (this.cd - this.delay + 15 < game.cycle) {
-  //         Matter.Body.scale(this, 1 / this.scaleMag, 1 / this.scaleMag);
-  //         this.isBig = false;
-  //       }
-  //     } else if (this.seePlayer.yes && this.cd < game.cycle) {
+  //     // if (this.isBig) {
+  //     //   if (this.cd - this.delay + 15 < game.cycle) {
+  //     //     Matter.Body.scale(this, 1 / this.scaleMag, 1 / this.scaleMag);
+  //     //     this.isBig = false;
+  //     //   }
+  //     // } else 
+  //     if (this.seePlayer.yes && this.cd < game.cycle) {
   //       const dist = Vector.sub(this.seePlayer.position, this.position);
   //       const distMag2 = Vector.magnitudeSquared(dist);
   //       if (distMag2 < 80000) {
   //         this.cd = game.cycle + this.delay;
-  //         Matter.Body.scale(this, this.scaleMag, this.scaleMag);
-  //         this.isBig = true;
+
+  //         // Matter.Body.scale(this, this.scaleMag, this.scaleMag);
+  //         // this.isBig = true;
   //       }
   //     }
   //   };
@@ -1169,7 +1160,7 @@ const spawn = {
       x: x,
       y: y
     };
-    me.fireFreq = 0.025;
+    me.fireFreq = 0.02;
     me.noseLength = 0;
     me.fireAngle = 0;
     me.accelMag = 0.005 * game.accelScale;
@@ -1179,7 +1170,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    Matter.Body.setDensity(me, 0.023 + 0.001 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.02 + 0.0008 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };

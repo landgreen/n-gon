@@ -1,7 +1,17 @@
-mod - electromagnetic pulse - vacuum bomb removes shields and does 20% extra damage
-
 
 ************** TODO - n-gon **************
+
+lore - a robot (the player) gains self awareness
+  each mod/gun/field is a new tech
+    all the technology leads to the singularity
+  each game run is actually the mech simulating a possible escape
+    this is why the graphics are so bad, its just a simulation
+    final mod is "this is just a simulation"
+      you get immortality and Infinity damage
+      the next level is the final level
+  when you die with Quantum Immortality there is a chance of lore text
+  make a global variable that goes up by one every time you play
+    show text at start, loading simulation #...
 
 mod - spores with no target hang out about player
 
@@ -57,16 +67,6 @@ settings - auto aim at nearest mob
 settings - custom keys binding
 
 mod - energy recharges faster when not moving
-
-lore - a robot (the player) gains self awareness
-  each mod/gun/field is a new tech
-    all the technology leads to the singularity
-  each game run is actually the mech simulating a possible escape
-    this is why the graphics are so bad, its just a simulation
-    final mod is "this is just a simulation"
-      you get immortality and Infinity damage
-      the next level is the final level
-  when you die with Quantum Immortality there is a chance of lore text
 
 atmosphere levels: change the pace, give the user a rest between combat
   low or no combat, but more graphics

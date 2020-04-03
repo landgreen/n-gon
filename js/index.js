@@ -29,29 +29,6 @@ function getUrlVars() {
   });
   return vars;
 }
-// ?
-// &gun0 = minigun & gun1 = shotgun & gun2 = super % 20 balls & gun3 = flechettes & gun4 = wave % 20 beam & gun5 = missiles & gun6 = flak & gun7 = grenades & gun8 = vacuum % 20 bomb &
-//   gun9 = mine & gun10 = spores & gun11 = drones & gun12 = ice % 20 IX & gun13 = foam & gun14 = rail % 20 gun & gun15 = laser & gun16 = pulse
-//   &
-//   mod0 = depleted % 20 uranium % 20 rounds & mod1 = kinetic % 20 bombardment & mod2 = fracture % 20 analysis & mod3 = fluoroantimonic % 20 acid &
-//   mod4 = negative % 20 feedback & mod5 = radiative % 20 equilibrium & mod6 = high % 20 explosives & mod7 = high % 20 explosives &
-//   mod8 = high % 20 explosives & mod9 = electric % 20 reactive % 20 armor & mod10 = thermal % 20 runaway & mod11 = auto - loading % 20 heuristics &
-//   mod12 = desublimated % 20 ammunition & mod13 = mass % 20 driver & mod14 = laser - bot & mod15 = nail - bot & mod16 = ablative % 20 drones &
-//   mod17 = ablative % 20 mines & mod18 = Lorentzian % 20 topology & mod19 = Lorentzian % 20 topology & mod20 = Lorentzian % 20 topology &
-//   mod21 = zoospore % 20 vector & mod22 = reaction % 20 inhibitor & mod23 = waste % 20 energy % 20 recovery & mod24 = scrap % 20 recycling &
-//   mod25 = acute % 20 stress % 20 response & mod26 = squirrel - cage % 20 rotor & mod27 = basidio - stomp & mod28 = Pauli % 20 exclusion &
-//   mod29 = annihilation & mod30 = quantum % 20 immortality & mod31 = weak % 20 anthropic % 20 principle & mod32 = entanglement & mod33 = piezoelectricity &
-//   mod34 = ground % 20 state & mod35 = energy % 20 conservation & mod36 = entropy % 20 exchange & mod37 = overcharge & mod38 = supersaturation &
-//   mod39 = recursive % 20 healing & mod40 = mass - energy % 20 equivalence & mod41 = Bayesian % 20 inference & mod42 = % 2 B1 % 20 cardinality &
-//   mod43 = catabolism & mod44 = leveraged % 20 investment & mod45 = ice % 20 crystal % 20n ucleation & mod46 = shotgun % 20 spin - statistics &
-//   mod47 = super % 20 duper & mod48 = super % 20 duper & mod49 = flechettes % 20 cartridges & mod50 = irradiated % 20n eedles & mod51 = wave % 20 phase % 20 velocity &
-//   mod52 = pocket % 20 universe & mod53 = self - replication & mod54 = optimized % 20 shell % 20 packing & mod55 = electromagnetic % 20 pulse &
-//   mod56 = mine % 20 reclamation & mod57 = tinsellated % 20 flagella & mod58 = redundant % 20 systems & mod59 = heavy % 20 water & mod60 = foam % 20 stabilization &
-//   mod61 = fragmenting % 20 projectiles & mod62 = specular % 20 reflection & mod63 = specular % 20 reflection & mod64 = specular % 20 reflection &
-//   mod65 = quantum % 20 dissipation & field = phase % 20 decoherence % 20 field & difficulty = 2
-
-
-
 window.addEventListener('load', (event) => {
   const set = getUrlVars()
   if (Object.keys(set).length !== 0) {
@@ -76,7 +53,21 @@ const build = {
           game.difficultyMode = Number(set[property])
           document.getElementById("difficulty-select").value = Number(set[property])
         }
+        if (property === "level") {
+          level.levelsCleared += Number(set[property]);
+          level.difficultyIncrease(Number(set[property]) * game.difficultyMode) //increase difficulty based on modes
+          spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+          level.onLevel++
+        }
       }
+
+      for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+      bullet = []; //remove any bullets that might have spawned from mods
+      if (b.inventory.length > 0) {
+        b.activeGun = b.inventory[0] //set first gun to active gun
+        game.makeGunHUD();
+      }
+      b.modOnHealthChange();
     }
   },
   pauseGrid() {
@@ -331,6 +322,7 @@ const build = {
     }
     url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
     url += `&difficulty=${game.difficultyMode}`
+    url += `&level=${Number(document.getElementById("starting-level").value)}`
     console.log(url)
     return url
   },
@@ -348,10 +340,9 @@ const build = {
     //remove any bullets that might have spawned from mods
     for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
     bullet = [];
-
-    const increase = Math.min(99, Number(document.getElementById("starting-level").value) * game.difficultyMode)
-    level.levelsCleared += increase;
-    level.difficultyIncrease(increase) //increase difficulty based on modes
+    const levelsCleared = Number(document.getElementById("starting-level").value) - 1
+    level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
+    level.levelsCleared += levelsCleared;
 
     document.body.style.cursor = "none";
     document.body.style.overflow = "hidden"
