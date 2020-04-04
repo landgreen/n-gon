@@ -126,6 +126,7 @@ const build = {
     document.body.style.overflow = "hidden"
     document.getElementById("pause-grid-left").style.display = "none"
     document.getElementById("pause-grid-right").style.display = "none"
+    window.scrollTo(0, 0);
   },
   isCustomSelection: true,
   choosePowerUp(who, index, type) {
@@ -337,10 +338,10 @@ const build = {
       game.makeGunHUD();
     }
 
-    //remove any bullets that might have spawned from mods
     for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-    bullet = [];
-    const levelsCleared = Number(document.getElementById("starting-level").value) - 1
+    bullet = []; //remove any bullets that might have spawned from mods
+
+    const levelsCleared = Number(document.getElementById("starting-level").value)
     level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
     level.levelsCleared += levelsCleared;
 

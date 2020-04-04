@@ -1,5 +1,12 @@
 
+phase decoherence field - updated graphics, can fire gun while active
+mod - fragmentation grenade fires nails
+
 ************** TODO - n-gon **************
+
+pulse and time dilation only ones left with no dedicated mod
+
+mod - renormalization: you can shoot bullets while in phase field 
 
 lore - a robot (the player) gains self awareness
   each mod/gun/field is a new tech
@@ -13,8 +20,6 @@ lore - a robot (the player) gains self awareness
   make a global variable that goes up by one every time you play
     show text at start, loading simulation #...
 
-mod - spores with no target hang out about player
-
 mod - status effects last 1 second longer
   cryonics : a mod that increases the freezing time of mobs.
   wait until you have more status effects written
@@ -25,10 +30,6 @@ mob Boss - time skipper: sends a pulse wave out that will cause time to jump for
 add a way to run player submitted maps.
 
 MOB stabber - extends one vector like the shooter, but quickly in order to stab
-
-mod - frag grenades fire nails on explosion
-
-mod - drop a mine after taking damage
 
 work on burn status effect
   graphics don't look right

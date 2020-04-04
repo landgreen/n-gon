@@ -1057,6 +1057,22 @@ const b = {
       }
     },
     {
+      name: "fragmentation grenade",
+      description: "<strong>grenades</strong> are loaded with <strong>+5</strong> nails<br>on detonation <strong>nails</strong> are ejected towards mobs",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("grenades")
+      },
+      requires: "grenades",
+      effect() {
+        b.modGrenadeFragments += 5
+      },
+      remove() {
+        b.modGrenadeFragments = 0
+      }
+    },
+    {
       name: "electromagnetic pulse",
       description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> destroys <strong>shields</strong><br>and does <strong>20%</strong> more <strong class='color-d'>damage</strong>",
       maxCount: 1,
@@ -1154,7 +1170,7 @@ const b = {
     },
     {
       name: "fragmenting projectiles",
-      description: "<strong>rail gun</strong> fragments into nails after hitting mobs at high speeds",
+      description: "<strong>rail gun</strong> fragments into nails<br> after hitting mobs at high speeds",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1170,7 +1186,7 @@ const b = {
     },
     {
       name: "specular reflection",
-      description: "the <strong>laser</strong> gains <strong>+1</strong> reflection<br><strong>+50%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+      description: "<strong>laser</strong> beams gain <strong>+1</strong> reflection<br><strong>+50%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -1889,7 +1905,7 @@ const b = {
       friction: 0,
       frictionAir: 0.025,
       thrust: b.isModFastSpores ? 0.0008 : 0.0004,
-      dmg: 2.2, //damage done in addition to the damage from momentum
+      dmg: 2.4, //damage done in addition to the damage from momentum
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1952,7 +1968,7 @@ const b = {
       friction: 0,
       frictionAir: 0.10,
       restitution: 0.3,
-      dmg: 0.3, //damage done in addition to the damage from momentum
+      dmg: 0.2, //damage done in addition to the damage from momentum
       lookFrequency: 10 + Math.floor(7 * Math.random()),
       endCycle: game.cycle + 120 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
@@ -2022,7 +2038,7 @@ const b = {
       friction: 0.05,
       frictionAir: 0.0005,
       restitution: 1,
-      dmg: 0.15, //damage done in addition to the damage from momentum
+      dmg: 0.17, //damage done in addition to the damage from momentum
       lookFrequency: 83 + Math.floor(41 * Math.random()),
       endCycle: game.cycle + Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
@@ -2418,7 +2434,7 @@ const b = {
       name: "super balls", //2
       description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 13,
+      ammoPack: 14,
       have: false,
       num: 5,
       isStarterGun: true,
@@ -2724,6 +2740,37 @@ const b = {
         bullet[me].explodeRad = 275;
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+          if (b.modGrenadeFragments) {
+            const targets = [] //target nearby mobs
+            for (let i = 0, len = mob.length; i < len; i++) {
+              if (mob[i].dropPowerUp) {
+                const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                if (dist < 1440000 && //1200*1200
+                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                  Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                  targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
+                }
+              }
+            }
+            for (let i = 0; i < b.modGrenadeFragments; i++) {
+              const speed = 53 + 10 * Math.random()
+              if (targets.length > 0) { // aim near a random target in array
+                const index = Math.floor(Math.random() * targets.length)
+                const SPREAD = 150 / targets.length
+                const WHERE = {
+                  x: targets[index].x + SPREAD * (Math.random() - 0.5),
+                  y: targets[index].y + SPREAD * (Math.random() - 0.5)
+                }
+                b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
+              } else { // aim in random direction
+                const ANGLE = 2 * Math.PI * Math.random()
+                b.nail(this.position, {
+                  x: speed * Math.cos(ANGLE),
+                  y: speed * Math.sin(ANGLE)
+                })
+              }
+            }
+          }
         }
         bullet[me].minDmgSpeed = 1;
         bullet[me].onDmg = function () {
