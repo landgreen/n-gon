@@ -96,6 +96,7 @@ const game = {
   fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
   fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
   isEasyToAimMode: true, //removes power ups that don't work well with a track pad
+  isCommunityMaps: false,
   cyclePaused: 0,
   fallHeight: 3000, //below this y position the player dies
   lastTimeStamp: 0, //tracks time stamps for measuring delta
@@ -597,9 +598,10 @@ const game = {
         }
         return array;
       }
-
+      if (game.isCommunityMaps) level.levels.push("stronghold");
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
+      console.log(level.levels)
     }
     game.reset();
     game.firstRun = false;

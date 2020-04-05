@@ -380,6 +380,9 @@ if (localSettings) {
   game.isEasyToAimMode = localSettings.isEasyToAimMode
   document.getElementById("track-pad-mode").checked = localSettings.isEasyToAimMode
 
+  game.isCommunityMaps = localSettings.isCommunityMaps
+  document.getElementById("community-maps").checked = localSettings.isCommunityMaps
+
   game.difficultyMode = localSettings.difficultyMode
   document.getElementById("difficulty-select").value = localSettings.difficultyMode
 
@@ -393,6 +396,7 @@ if (localSettings) {
   localSettings = {
     isBodyDamage: true,
     isEasyToAimMode: false,
+    isCommunityMaps: false,
     difficultyMode: '1',
     fpsCapDefault: 'max',
   };
@@ -400,6 +404,8 @@ if (localSettings) {
   document.getElementById("body-damage").checked = localSettings.isBodyDamage
   document.getElementById("track-pad-mode").checked = localSettings.isEasyToAimMode
   game.isEasyToAimMode = localSettings.isEasyToAimMode
+  document.getElementById("community-maps").checked = localSettings.isEasyToAimMode
+  game.isCommunityMaps = localSettings.isCommunityMaps
   document.getElementById("difficulty-select").value = localSettings.difficultyMode
   document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }
@@ -500,6 +506,12 @@ document.getElementById("body-damage").addEventListener("input", () => {
 document.getElementById("track-pad-mode").addEventListener("input", () => {
   game.isEasyToAimMode = document.getElementById("track-pad-mode").checked
   localSettings.isEasyToAimMode = game.isEasyToAimMode
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+document.getElementById("community-maps").addEventListener("input", () => {
+  game.isCommunityMaps = document.getElementById("community-maps").checked
+  localSettings.isCommunityMaps = game.isCommunityMaps
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 

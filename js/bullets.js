@@ -71,6 +71,8 @@ const b = {
   isModAlphaRadiation: null,
   modEnergyRegen: null,
   isModVacuumShield: null,
+  modRenormalization: null,
+  modGrenadeFragments: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.7
@@ -1332,6 +1334,22 @@ const b = {
       },
       remove() {
         b.isModIceField = false;
+      }
+    },
+    {
+      name: "renormalization",
+      description: "<strong>phase decoherence field</strong> has <strong>3x visibility</strong><br>and <strong>1/3</strong> <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
+      },
+      requires: "phase decoherence field",
+      effect() {
+        b.modRenormalization = 3;
+      },
+      remove() {
+        b.modRenormalization = 1;
       }
     },
     {

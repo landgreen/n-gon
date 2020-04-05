@@ -1,12 +1,8 @@
-
-phase decoherence field - updated graphics, can fire gun while active
-mod - fragmentation grenade fires nails
-
 ************** TODO - n-gon **************
 
 pulse and time dilation only ones left with no dedicated mod
 
-mod - renormalization: you can shoot bullets while in phase field 
+mod - renormalization: phase decoherence field has more range and less energy cost
 
 lore - a robot (the player) gains self awareness
   each mod/gun/field is a new tech
@@ -34,15 +30,6 @@ MOB stabber - extends one vector like the shooter, but quickly in order to stab
 work on burn status effect
   graphics don't look right
   how is it different from the chemical dot
-
-perfect diamagnetism should get larger as it blocks more, and then slowly fade back to the normal size
-
-gun - bullets that acts like drones but only last for 2 seconds and do more damage
-
-field - the basic field emitter, but no energy loss and no knock back on blocks
-  this field should make blocking a viable strategy
-  gain energy on blocking?
-  call it diamagnetic field and remove the diamagnetism mod?
 
 mod - nails do poison damage
 

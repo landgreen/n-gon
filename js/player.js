@@ -1751,17 +1751,16 @@ const mech = {
       isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
-        mech.fieldMeterColor = "#fff"
-        mech.fieldPhase = 0
+        mech.fieldMeterColor = "#fff";
+        mech.fieldPhase = 0;
 
         mech.hold = function () {
           function drawField(radius) {
-            radius *= 0.7 + 0.7 * mech.energy
-            const rotate = mech.cycle * 0.005
-            const amplitude = 0.06
-            mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.min(mech.energy, 1))
-            const off1 = 1 + amplitude * Math.sin(mech.fieldPhase) //+ 0.07 * Math.sin(mech.cycle * 0.05)
-            const off2 = 1 - amplitude * Math.sin(mech.fieldPhase) //+ 0.07 * Math.sin(mech.cycle * 0.05)
+            radius *= 0.6 + 0.7 * mech.energy * b.modRenormalization;
+            const rotate = mech.cycle * 0.005;
+            mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.min(mech.energy, 1));
+            const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
+            const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
             ctx.beginPath();
             ctx.ellipse(mech.pos.x, mech.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
             ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*mech.energy})`;
@@ -1770,7 +1769,7 @@ const mech = {
             ctx.globalCompositeOperation = "source-over";
             ctx.clip();
 
-            if (mech.fireCDcycle > mech.cycle) {
+            if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
               ctx.lineWidth = 5;
               ctx.strokeStyle = `rgba(0, 204, 255,1)`
               ctx.stroke()
@@ -1788,7 +1787,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
 
-            const DRAIN = (0.0005 + 0.0001 * player.speed) * (mech.fireCDcycle > mech.cycle ? 4 : 1) //game.mouseDown
+            const DRAIN = (0.0005 + 0.0001 * player.speed) * (mech.fireCDcycle > mech.cycle ? 10 / b.modRenormalization : 1) //game.mouseDown
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0.001) {
@@ -1842,7 +1841,7 @@ const mech = {
           } else {
             // this.fieldRange = 3000
             if (this.fieldRange < 2000 && mech.holdingTarget === null) {
-              this.fieldRange += 200
+              this.fieldRange += 20
               drawField(this.fieldRange)
             }
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
