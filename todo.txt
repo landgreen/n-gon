@@ -2,8 +2,6 @@
 
 pulse and time dilation only ones left with no dedicated mod
 
-mod - renormalization: phase decoherence field has more range and less energy cost
-
 lore - a robot (the player) gains self awareness
   each mod/gun/field is a new tech
     all the technology leads to the singularity
@@ -22,8 +20,6 @@ mod - status effects last 1 second longer
 
 mob Boss - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
   what about a series of short time skips forward 10 cycles at a time
-
-add a way to run player submitted maps.
 
 MOB stabber - extends one vector like the shooter, but quickly in order to stab
 
