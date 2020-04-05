@@ -926,7 +926,7 @@ const b = {
     },
     {
       name: "super ball",
-      description: "fire one <strong>large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>2</strong> second",
+      description: "fire one <strong>large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1338,7 +1338,7 @@ const b = {
     },
     {
       name: "renormalization",
-      description: "<strong>phase decoherence field</strong> has <strong>3x visibility</strong><br>and <strong>1/3</strong> <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+      description: "<strong>phase decoherence field</strong> has <strong>3x visibility</strong><br>and <strong>3x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1353,8 +1353,9 @@ const b = {
       }
     },
     {
-      name: "quantum dissipation",
-      description: "<strong>phase decoherence field</strong> uses <strong class='color-f'>energy</strong> to <br><strong class='color-d'>damage</strong> unshielded <strong>mobs</strong> that you <strong>overlap</strong>",
+      name: "superposition",
+      // description: "<strong>phase decoherence field</strong> applies a <strong>stun</strong><br> to unshielded <strong>mobs</strong> for <strong>2</strong> seconds",
+      description: "apply a <strong>4</strong> second <strong>stun</strong> to unshielded <strong>mobs</strong><br>that <strong>overlap</strong> with <strong>phase decoherence field</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1362,10 +1363,10 @@ const b = {
       },
       requires: "phase decoherence field",
       effect() {
-        b.isModPhaseFieldDamage = true;
+        b.superposition = true;
       },
       remove() {
-        b.isModPhaseFieldDamage = false;
+        b.superposition = false;
       }
     },
   ],
@@ -2478,7 +2479,7 @@ const b = {
             this.force.y += this.mass * 0.001;
           };
           bullet[me].onDmg = function (who) {
-            mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+            mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
           };
         } else {
           b.muzzleFlash(20);

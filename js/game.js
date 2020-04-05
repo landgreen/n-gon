@@ -601,7 +601,7 @@ const game = {
       if (game.isCommunityMaps) level.levels.push("stronghold");
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
-      console.log(level.levels)
+      // console.log(level.levels)
     }
     game.reset();
     game.firstRun = false;

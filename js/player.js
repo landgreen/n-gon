@@ -1787,7 +1787,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
 
-            const DRAIN = (0.0005 + 0.0001 * player.speed) * (mech.fireCDcycle > mech.cycle ? 10 / b.modRenormalization : 1) //game.mouseDown
+            const DRAIN = (0.0005 + 0.0001 * player.speed) * (mech.fireCDcycle > mech.cycle ? 9 / b.modRenormalization : 1) //game.mouseDown
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0.001) {
@@ -1805,14 +1805,15 @@ const mech = {
               if (inPlayer.length > 0) {
                 for (let i = 0; i < inPlayer.length; i++) {
                   if (inPlayer[i].shield) {
-                    mech.energy -= 0.005; //shields drain player energy
+                    mech.energy -= 0.01; //shields drain player energy
                     //draw outline of shield
                     ctx.fillStyle = `rgba(0, 204, 255,0.6)`
                     ctx.fill()
-                  } else if (b.isModPhaseFieldDamage && mech.energy > 0.006 && inPlayer[i].dropPowerUp && !inPlayer[i].isShielded) {
-                    inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
-                    mech.energy -= 0.002;
+                  } else if (b.superposition && inPlayer[i].dropPowerUp) {
+                    // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
+                    // mech.energy += 0.005;
 
+                    mobs.statusStun(inPlayer[i], 240)
                     //draw outline of mob in a few random locations to show blurriness
                     const vertices = inPlayer[i].vertices;
                     const off = 30
@@ -1825,11 +1826,8 @@ const mech = {
                         ctx.lineTo(xOff + vertices[j].x, yOff + vertices[j].y);
                       }
                       ctx.lineTo(xOff + vertices[0].x, yOff + vertices[0].y);
-                      ctx.fillStyle = "rgba(0,0,0,0.3)"
+                      ctx.fillStyle = "rgba(0,0,0,0.1)"
                       ctx.fill()
-                      // ctx.strokeStyle = "#000"
-                      // ctx.lineWidth = 1
-                      // ctx.stroke()
                     }
                     break;
                   }

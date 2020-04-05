@@ -1,5 +1,10 @@
 ************** TODO - n-gon **************
 
+boss mob - just a faster and larger version of a springer mob
+  could have a more frequent random walk
+  always shielded
+  consider combining with time skipper field?
+
 pulse and time dilation only ones left with no dedicated mod
 
 lore - a robot (the player) gains self awareness

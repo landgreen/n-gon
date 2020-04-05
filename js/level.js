@@ -147,8 +147,8 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     // spawn.laserBoss(2900, -500)
-    // spawn.exploder(3200, -500)
-    spawn.timeSkipBoss(2900, -500)
+    spawn.springer(3200, -500)
+    // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(3200, -500)
 
   },

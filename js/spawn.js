@@ -182,6 +182,7 @@ const spawn = {
     me.do = function () {
       if (!mech.isBodiesAsleep) {
         this.seePlayerByDistOrLOS();
+        this.checkStatus();
         this.attraction();
 
         if (this.seePlayer.recall && this.mass < this.cellMassMax) { //grow cell radius
@@ -205,7 +206,6 @@ const spawn = {
           }
         }
       }
-      this.checkStatus()
     };
     me.onDeath = function () {
       let count = 0 //count other cells
@@ -318,8 +318,8 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
-      this.attraction();
       this.checkStatus();
+      this.attraction();
     };
   },
   grower(x, y, radius = 15) {
@@ -329,9 +329,9 @@ const spawn = {
     me.accelMag = 0.00045 * game.accelScale;
     me.do = function () {
       this.seePlayerByLookingAt();
+      this.checkStatus();
       this.attraction();
       this.grow();
-      this.checkStatus();
     };
   },
   springer(x, y, radius = 20 + Math.ceil(Math.random() * 35)) {
@@ -381,6 +381,8 @@ const spawn = {
       this.gravity();
       this.searchSpring();
       this.checkStatus();
+      this.springAttack();
+      //not properly effected by stun, if looking at player while stun will still attack...
     };
   },
   hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
@@ -397,6 +399,7 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
+      this.checkStatus();
       this.hop();
       //randomly hob if not aware of player
       if (this.randomHopCD < game.cycle && this.speed < 1 && !this.seePlayer.recall) {
@@ -408,7 +411,6 @@ const spawn = {
         this.force.x += forceMag * Math.cos(angle);
         this.force.y += forceMag * Math.sin(angle) - 0.04 * this.mass; //antigravity
       }
-      this.checkStatus();
     };
   },
   spinner(x, y, radius = 30 + Math.ceil(Math.random() * 35)) {
@@ -430,6 +432,7 @@ const spawn = {
     spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
+      this.checkStatus();
       //accelerate towards the player after a delay
       if (this.seePlayer.recall) {
         if (this.cdBurst2 < game.cycle && this.angularSpeed < 0.01) {
@@ -463,7 +466,6 @@ const spawn = {
       } else {
         this.cdBurst2 = 0;
       }
-      this.checkStatus();
     };
   },
   sucker(x, y, radius = 30 + Math.ceil(Math.random() * 70)) {
@@ -486,6 +488,7 @@ const spawn = {
         });
       }
       this.seePlayerByDistOrLOS();
+      this.checkStatus();
       if (this.seePlayer.recall) {
         //eventHorizon waves in and out
         eventHorizon = this.eventHorizon * (0.93 + 0.17 * Math.sin(game.cycle * 0.011))
@@ -533,7 +536,6 @@ const spawn = {
           ctx.fill();
         }
       }
-      this.checkStatus();
     }
   },
   suckerBoss(x, y, radius = 25) {
@@ -575,6 +577,7 @@ const spawn = {
         });
       }
       this.seePlayerByDistOrLOS();
+      this.checkStatus();
       if (this.seePlayer.recall) {
         //accelerate towards the player
         const forceMag = this.accelMag * this.mass;
@@ -633,7 +636,6 @@ const spawn = {
         }
         this.curl(eventHorizon);
       }
-      this.checkStatus();
     }
   },
   timeSkipBoss(x, y, radius = 80) {
@@ -654,6 +656,7 @@ const spawn = {
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
       this.seePlayerCheck();
+      this.checkStatus();
       this.attraction()
       if (!game.isTimeSkipping) {
         const compress = 3
@@ -704,8 +707,6 @@ const spawn = {
           ctx.fill();
         }
       }
-
-      this.checkStatus();
     }
   },
   beamer(x, y, radius = 15 + Math.ceil(Math.random() * 15)) {
@@ -719,11 +720,11 @@ const spawn = {
     spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
+      this.checkStatus();
       this.attraction();
       this.repulsion();
       //laser beam
       this.laserBeam();
-      this.checkStatus();
     };
   },
   focuser(x, y, radius = 30 + Math.ceil(Math.random() * 10)) {
@@ -744,6 +745,7 @@ const spawn = {
     me.do = function () {
       if (!mech.isBodiesAsleep) {
         this.seePlayerByLookingAt();
+        this.checkStatus();
         const dist2 = this.distanceToPlayer2();
         //laser Tracking
         if (this.seePlayer.yes && dist2 < 4000000 && !mech.isStealth) {
@@ -787,7 +789,6 @@ const spawn = {
           this.laserPos = this.position;
         }
       };
-      this.checkStatus();
     }
   },
   laser(x, y, radius = 30) {
@@ -802,9 +803,9 @@ const spawn = {
     };
     me.do = function () {
       this.seePlayerByLookingAt();
+      this.checkStatus();
       this.attraction();
       this.laser();
-      this.checkStatus();
     };
   },
   laserBoss(x, y, radius = 30) {
@@ -937,11 +938,11 @@ const spawn = {
       this.cd = game.cycle + this.delay;
     };
     me.do = function () {
-      this.seePlayerCheck();
-      this.attraction();
       this.gravity();
-      this.strike();
+      this.seePlayerCheck();
       this.checkStatus();
+      this.attraction();
+      this.strike();
     };
   },
   sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {
@@ -958,9 +959,10 @@ const spawn = {
     me.showHealthBar = false;
     // me.memory = 420;
     me.do = function () {
-      this.seePlayerCheck();
-      this.attraction();
       this.gravity();
+      this.seePlayerCheck();
+      this.checkStatus();
+      this.attraction();
       //draw
       if (!mech.isBodiesAsleep) {
         if (this.seePlayer.yes) {
@@ -991,7 +993,6 @@ const spawn = {
         this.canTouchPlayer = false;
         this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
       }
-      this.checkStatus();
     };
   },
   ghoster(x, y, radius = 40 + Math.ceil(Math.random() * 100)) {
@@ -1018,6 +1019,7 @@ const spawn = {
         });
       }
       this.seePlayerCheckByDistance();
+      this.checkStatus();
       this.attraction();
       this.search();
       //draw
@@ -1049,7 +1051,6 @@ const spawn = {
         this.canTouchPlayer = false;
         this.collisionFilter.mask = cat.bullet; //can't touch player or walls
       }
-      this.checkStatus();
     };
   },
   // blinker(x, y, radius = 45 + Math.ceil(Math.random() * 70)) {
@@ -1122,10 +1123,12 @@ const spawn = {
     };
     me.do = function () {
       this.seePlayerCheckByDistance();
-      this.hoverOverPlayer();
-      this.bomb();
-      this.search();
       this.checkStatus();
+      if (this.seePlayer.recall) {
+        this.hoverOverPlayer();
+        this.bomb();
+        this.search();
+      }
     };
   },
   shooter(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
@@ -1146,8 +1149,8 @@ const spawn = {
     // spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
-      this.fire();
       this.checkStatus();
+      this.fire();
     };
   },
   shooterBoss(x, y, radius = 130) {
@@ -1176,12 +1179,12 @@ const spawn = {
     };
     me.do = function () {
       this.seePlayerByLookingAt();
+      this.checkStatus();
       this.fire();
       //gently return to starting location
       const sub = Vector.sub(this.homePosition, this.position)
       const dist = Vector.magnitude(sub)
       if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
-      this.checkStatus();
     };
   },
   bullet(x, y, radius = 6, sides = 0) {
@@ -1226,8 +1229,8 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
-      this.attraction();
       this.checkStatus();
+      this.attraction();
     };
   },
   spawns(x, y, radius = 15 + Math.ceil(Math.random() * 5)) {
@@ -1246,8 +1249,8 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
-      this.attraction();
       this.checkStatus();
+      this.attraction();
     };
   },
   exploder(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
@@ -1261,8 +1264,8 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
-      this.attraction();
       this.checkStatus();
+      this.attraction();
     };
   },
   snakeBoss(x, y, radius = 80) {
@@ -1279,9 +1282,9 @@ const spawn = {
     };
     me.do = function () {
       this.seePlayerCheck();
+      this.checkStatus();
       this.attraction();
       this.laserBeam();
-      this.checkStatus();
     };
 
     //snake tail
@@ -1322,8 +1325,8 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
-      this.attraction();
       this.checkStatus();
+      this.attraction();
     };
   },
   shield(target, x, y, chance = Math.min(0.02 + game.difficulty * 0.005, 0.2)) {

@@ -485,10 +485,10 @@ const mobs = {
         }
       },
       searchSpring() {
+        //draw the two dots on the end of the springs
         ctx.beginPath();
         ctx.arc(this.cons.pointA.x, this.cons.pointA.y, 6, 0, 2 * Math.PI);
         ctx.arc(this.cons2.pointA.x, this.cons2.pointA.y, 6, 0, 2 * Math.PI);
-        // ctx.arc(this.cons.bodyB.position.x, this.cons.bodyB.position.y,6,0,2*Math.PI);
         ctx.fillStyle = "#222";
         ctx.fill();
 
@@ -501,25 +501,28 @@ const mobs = {
             !mech.isStealth
           ) {
             this.foundPlayer();
-            if (!(game.cycle % (this.seePlayerFreq * 2))) {
-              this.springTarget.x = this.seePlayer.position.x;
-              this.springTarget.y = this.seePlayer.position.y;
-              this.cons.length = -200;
-              this.cons2.length = 100 + 1.5 * this.radius;
-            } else {
-              this.springTarget2.x = this.seePlayer.position.x;
-              this.springTarget2.y = this.seePlayer.position.y;
-              this.cons.length = 100 + 1.5 * this.radius;
-              this.cons2.length = -200;
-            }
           } else if (this.seePlayer.recall) {
             this.lostPlayer();
           }
         }
-        //if you don't recall player location rotate and draw to show where you are looking
-        if (!this.seePlayer.recall) {
+      },
+      springAttack() {
+        // set new values of the ends of the spring constraints
+        if (this.seePlayer.recall) {
+          if (!(game.cycle % (this.seePlayerFreq * 2))) {
+            this.springTarget.x = this.seePlayer.position.x;
+            this.springTarget.y = this.seePlayer.position.y;
+            this.cons.length = -200;
+            this.cons2.length = 100 + 1.5 * this.radius;
+          } else {
+            this.springTarget2.x = this.seePlayer.position.x;
+            this.springTarget2.y = this.seePlayer.position.y;
+            this.cons.length = 100 + 1.5 * this.radius;
+            this.cons2.length = -200;
+          }
+        } else {
           this.torque = this.lookTorque * this.inertia;
-          //draw
+          //draw looking around arcs
           const range = Math.PI * this.lookRange;
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.radius * 2.5, this.angle - range, this.angle + range);
@@ -567,8 +570,8 @@ const mobs = {
               }
             }
           };
-          const seeRange = 3000;
-          if (!(game.cycle % (this.seePlayerFreq * 10))) {
+          //move to a random location
+          if (!(game.cycle % (this.seePlayerFreq * 5))) {
             best = {
               x: null,
               y: null,
@@ -577,6 +580,7 @@ const mobs = {
               v1: null,
               v2: null
             };
+            const seeRange = 3000;
             const look = {
               x: this.position.x + seeRange * Math.cos(this.angle),
               y: this.position.y + seeRange * Math.sin(this.angle)
@@ -585,27 +589,6 @@ const mobs = {
             if (best.dist2 != Infinity) {
               this.springTarget.x = best.x;
               this.springTarget.y = best.y;
-              this.cons.length = 100 + 1.5 * this.radius;
-              this.cons2.length = 100 + 1.5 * this.radius;
-            }
-          }
-          if (!((game.cycle + this.seePlayerFreq * 5) % (this.seePlayerFreq * 10))) {
-            best = {
-              x: null,
-              y: null,
-              dist2: Infinity,
-              who: null,
-              v1: null,
-              v2: null
-            };
-            const look = {
-              x: this.position.x + seeRange * Math.cos(this.angle),
-              y: this.position.y + seeRange * Math.sin(this.angle)
-            };
-            vertexCollision(this.position, look, map);
-            if (best.dist2 != Infinity) {
-              this.springTarget2.x = best.x;
-              this.springTarget2.y = best.y;
               this.cons.length = 100 + 1.5 * this.radius;
               this.cons2.length = 100 + 1.5 * this.radius;
             }
@@ -805,6 +788,7 @@ const mobs = {
         if (this.seePlayer.recall && this.cd < game.cycle) {
           const dist = Vector.sub(this.seePlayer.position, this.position);
           const distMag = Vector.magnitude(dist);
+          console.log(this.seePlayer.recall)
           if (distMag < 400) {
             this.cd = game.cycle + this.delay;
             ctx.beginPath();

@@ -1,6 +1,6 @@
 "use strict";
 //collision groups
-//   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield
+//   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield | cat.phased
 const cat = {
   player: 0x1,
   map: 0x10,
@@ -10,6 +10,7 @@ const cat = {
   mob: 0x100000,
   mobBullet: 0x1000000,
   mobShield: 0x10000000,
+  phased: 0x100000000,
 }
 
 //example  https://landgreen.github.io/sidescroller/index.html?
