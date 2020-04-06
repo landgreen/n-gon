@@ -771,7 +771,7 @@ const level = {
     spawn.randomBoss(2225, -1325, 0.4);
     spawn.randomBoss(4900, -1200, 0);
     //spawn.randomBoss(4850, -1250,0.7);
-    if (game.difficulty > 4) spawn.randomLevelBoss(3200, -2050);
+    if (game.difficulty > 3) spawn.randomLevelBoss(3200, -2050);
   },
   aerie() {
     // game.setZoom(3000);

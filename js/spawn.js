@@ -80,7 +80,8 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss"]
+    // const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss"]
+    const options = ["timeSkipBoss"]
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -638,17 +639,21 @@ const spawn = {
       }
     }
   },
-  timeSkipBoss(x, y, radius = 60) {
+  timeSkipBoss(x, y, radius = 45) {
     mobs.spawn(x, y, 6, radius, '#000');
     let me = mob[mob.length - 1];
     // me.stroke = "transparent"; //used for drawSneaker
     me.timeSkipLastCycle = 0
     me.eventHorizon = 1500; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 2000) * (me.eventHorizon + 2000); //vision limit is event horizon + 2000
-    me.accelMag = 0.00022 * game.accelScale;
+    me.accelMag = 0.0002 * game.accelScale;
     // me.frictionAir = 0.005;
     // me.memory = 1600;
-    Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
+    // Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    spawn.shield(me, x, y, 1);
+
+
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -665,7 +670,7 @@ const spawn = {
       this.checkStatus();
       this.attraction()
       if (!game.isTimeSkipping) {
-        const compress = 2
+        const compress = 1
         if (this.timeSkipLastCycle < game.cycle - compress &&
           Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
           this.timeSkipLastCycle = game.cycle
