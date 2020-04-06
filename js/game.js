@@ -257,21 +257,6 @@ const game = {
     game.boldActiveGunHUD();
     // mech.drop();
   },
-  // tips = [
-  //   "You can throw blocks at dangerous speeds by holding the right mouse or spacebar.",
-  //   "You can use your field to block damage. (right mouse or spacebar)",
-  //   "Explosive weapons, like the grenade are good at clearing groups.",
-  //   "Larger and faster bullets do more damage.",
-  //   "You take more damage from colliding with larger baddies",
-  //   "Holding large blocks slows down the player.",
-  //   "holding blocks prevents the field energy from regenerating.",
-  //   `There are ${mech.fieldUpgrades.length-1} possible field upgrades.`,
-  //   `There are ${b.guns.length} different guns.`,
-  //   "You keep field upgrades after you die.",
-  //   "Unique level bosses always drop a field upgrade if you don't have one.",
-  //   "You jump higher if you hold down the jump button.",
-  //   "Crouching while firing makes bullets go faster, but slows the rate of fire.",
-  // ]
   keyPress() { //runs on key down event
     if (keys[189]) {
       // - key
@@ -393,16 +378,6 @@ const game = {
     game.zoomScale = zoomScale
     game.zoom = canvas.height / zoomScale; //sets starting zoom scale
   },
-  noCameraScroll() {
-    // makes the camera not scroll after changing locations
-    mech.pos.x = player.position.x;
-    mech.pos.y = playerBody.position.y - mech.yOff;
-    const scale = 0.8;
-    mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
-    mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
-    mech.transX += (mech.transSmoothX - mech.transX) * 1;
-    mech.transY += (mech.transSmoothY - mech.transY) * 1;
-  },
   zoomTransition(newZoomScale, step = 2) {
     if (game.isAutoZoom) {
       const isBigger = (newZoomScale - game.zoomScale > 0) ? true : false;
@@ -431,18 +406,6 @@ const game = {
       }
     }
   },
-  camera() {
-    ctx.save();
-    ctx.translate(canvas.width2, canvas.height2); //center
-    ctx.scale(game.zoom, game.zoom); //zoom in once centered
-    ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
-    //calculate in game mouse position by undoing the zoom and translations
-    game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom + canvas.width2 - mech.transX;
-    game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom + canvas.height2 - mech.transY;
-  },
-  restoreCamera() {
-    ctx.restore();
-  },
   zoomInFactor: 0,
   startZoomIn(time = 180) {
     game.zoom = 0;
@@ -458,6 +421,28 @@ const game = {
         game.setZoom();
       }
     }
+  },
+  noCameraScroll() {
+    // makes the camera not scroll after changing locations
+    mech.pos.x = player.position.x;
+    mech.pos.y = playerBody.position.y - mech.yOff;
+    const scale = 0.8;
+    mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
+    mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
+    mech.transX += (mech.transSmoothX - mech.transX) * 1;
+    mech.transY += (mech.transSmoothY - mech.transY) * 1;
+  },
+  camera() {
+    ctx.save();
+    ctx.translate(canvas.width2, canvas.height2); //center
+    ctx.scale(game.zoom, game.zoom); //zoom in once centered
+    ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
+    //calculate in game mouse position by undoing the zoom and translations
+    game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom + canvas.width2 - mech.transX;
+    game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom + canvas.height2 - mech.transY;
+  },
+  restoreCamera() {
+    ctx.restore();
   },
   wipe() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -711,6 +696,12 @@ const game = {
           x: level.enter.x + 50,
           y: level.enter.y - 20
         });
+        // Matter.Body.setPosition(player, {
+        //   x: player.position.x,
+        //   y: -7000
+        // });
+        // game.noCameraScroll()
+
         mech.energy = 0;
         if (game.difficultyMode === 2) mech.damage(0.3);
         if (game.difficultyMode === 1) mech.damage(0.1);

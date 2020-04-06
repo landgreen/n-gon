@@ -147,7 +147,7 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     // spawn.laserBoss(2900, -500)
-    spawn.springer(3200, -500)
+    spawn.beamer(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(3200, -500)
 
@@ -701,7 +701,7 @@ const level = {
 
     //spawn.mapRect(-700, 0, 6250, 100); //ground
     spawn.mapRect(3400, 0, 2150, 100); //ground
-    spawn.mapRect(-700, -2000, 2100, 50); //Top left ledge
+    spawn.mapRect(-700, -2000, 2110, 50); //Top left ledge
     spawn.bodyRect(1300, -2125, 50, 125, 0.8);
     spawn.bodyRect(1307, -2225, 50, 100, 0.8);
     spawn.mapRect(-700, -2350, 50, 400); //far left starting left wall
@@ -715,6 +715,7 @@ const level = {
     spawn.mapRect(1850, -2000, 650, 50);
     spawn.bodyRect(200, -2150, 200, 220, 0.8);
     spawn.mapRect(700, -2275, 600, 50);
+    spawn.mapRect(1000, -1350, 410, 50);
     spawn.bodyRect(1050, -2350, 30, 30, 0.8);
     // spawn.boost(1800, -1000, 1200);
     spawn.bodyRect(1625, -1100, 100, 75);
@@ -938,7 +939,7 @@ const level = {
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
     if (game.difficulty > 2) {
-      if (Math.random() < 0.3) { // tether ball
+      if (Math.random() < 0.1) { // tether ball
         spawn.tetherBoss(4250, 0)
         cons[cons.length] = Constraint.create({
           pointA: {

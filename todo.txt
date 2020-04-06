@@ -5,7 +5,24 @@ boss mob - just a faster and larger version of a springer mob
   always shielded
   consider combining with time skipper field?
 
-pulse and time dilation only ones left with no dedicated mod
+pulse and time dilation only upgrades left with no dedicated mod
+
+mob - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
+
+mob stabber - extends one vector like the shooter, but quickly in order to stab
+
+mob sniper - targeting laser, then a high speed, no gravity bullet
+
+mod - nails do poison damage
+
+mod - increase laser bot range, and reduce energy drain
+
+mod - mines become a turret that fires nails
+  it could float to the mouse location on fire
+
+mod - blocks stun mobs
+
+settings - custom keys binding
 
 lore - a robot (the player) gains self awareness
   each mod/gun/field is a new tech
@@ -16,46 +33,6 @@ lore - a robot (the player) gains self awareness
       you get immortality and Infinity damage
       the next level is the final level
   when you die with Quantum Immortality there is a chance of lore text
-  make a global variable that goes up by one every time you play
-    show text at start, loading simulation #...
-
-mod - status effects last 1 second longer
-  cryonics : a mod that increases the freezing time of mobs.
-  wait until you have more status effects written
-
-mob Boss - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
-  what about a series of short time skips forward 10 cycles at a time
-
-MOB stabber - extends one vector like the shooter, but quickly in order to stab
-
-work on burn status effect
-  graphics don't look right
-  how is it different from the chemical dot
-
-mod - nails do poison damage
-
-mod - increase laser bot range, and reduce energy drain
-
-mod - mines become a turret that fires nails
-  it could float to the mouse location on fire
-
-dash - mod  when pressing left or right on the ground, teleport to the right until you find an obstruction
-  do repeated horizontal zone queries until they hit map or block
-  up to a max range of like 10 player widths
-  this didn't work as a field, but maybe as a gun?
-
-mod - blocks stun mobs
-
-mod or field - turn blocks into spores or drones
-
-mod - robot that attack nearby mobs, and delivers a stun status effect
-  use laser bot code for the attack
-  large and 5 sided?
-
-settings - auto aim at nearest mob
-settings - custom keys binding
-
-mod - energy recharges faster when not moving
 
 atmosphere levels: change the pace, give the user a rest between combat
   low or no combat, but more graphics
@@ -71,11 +48,9 @@ atmosphere levels: change the pace, give the user a rest between combat
     in the final level you see your self at the starting level, with the wires
       you shoot your self to wake up?
 
-MOB sniper - targeting laser, then a high speed, no gravity bullet
-
 css transition for pause menu
 
-mod: do extra damage based on your speed
+mod - do extra damage based on your speed
   do more damage when not moving?
   take less damage when not moving?
 
@@ -88,15 +63,6 @@ weekly random challenge where everyone playing each week gets the same random se
   The randomness would be determined by the date so it would sync everyone.
   power ups still drop, but the drops are determined by a preset list that changes each week.
 
-mod: do something at the end of each level
-  heal to full
-    should still be effected by the heal reduction at higher difficulty
-  give ammo to current gun
-  give goals/quests for each level
-    how to track goals?
-    take no damage
-    don't shoot
-
 gun:  Spirit Bomb (singularity)
   use charge up like rail gun
   electricity graphics like plasma torch
@@ -105,7 +71,7 @@ gun:  Spirit Bomb (singularity)
   uses energy
   hold above the player's head
 
-Boss levels
+small Boss levels
   sensor that locks you in after you enter the boss room
   boss that eats other mobs and gains stats from them
     chance to spawn on any level (past level 5)
@@ -116,12 +82,6 @@ make power ups keep moving to player if the pickup field is turned off before th
   not sure how to do this without adding a constant check
 
 animate new level spawn by having the map aspects randomly fly into place
-
-new map with repeating endlessness
-  get ideas from Manifold Garden game
-  if falling, get teleported above the map
-    I tried it, but had trouble getting the camera to adjust to the teleportation
-    this can apply to blocks mobs, and power ups as well
     
 give mobs more animal-like behaviors
   like rain world

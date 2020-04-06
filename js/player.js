@@ -564,7 +564,7 @@ const mech = {
 
     // freeze game and display a full screen red color
     if (dmg > 0.05) {
-      if (dmg > 0.07 && mech.holdingMassScale > 0.2) mech.drop(); //drop block if holding
+      if (dmg > 0.15 * mech.holdingMassScale) mech.drop(); //drop block if holding
       game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
       game.fpsInterval = 1000 / game.fpsCap;
     } else {

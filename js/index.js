@@ -72,7 +72,6 @@ const build = {
     }
   },
   pauseGrid() {
-    // let text = `<div class="pause-grid-module" style="border:0px;background:none;"></div>`
     let text = `
     <div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
@@ -84,13 +83,8 @@ const build = {
       <br>
       <br>health: ${(mech.health*100).toFixed(0)}% &nbsp; energy: ${(mech.energy*100).toFixed(0)}% &nbsp; mass: ${player.mass.toFixed(1)}
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
-    </div>
-    
-    `;
-    // <div class="pause-grid-module" style="display: flex; justify-content: space-between;padding-bottom:20px;">
-    // <span>${game.SVGleftMouse} fire gun</span>
-    // <span>${game.SVGrightMouse} use field</span>
-    // </div>
+    </div>`;
+
     let countGuns = 0
     let countMods = 0
     for (let i = 0, len = b.guns.length; i < len; i++) {
@@ -212,10 +206,10 @@ const build = {
       </g>
     </svg>
     <svg class="SVG-button" onclick="build.shareURL()" width="52" height="25">
-    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-      <text x="5" y="18">share</text>
-    </g>
-  </svg>
+      <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+        <text x="5" y="18">share</text>
+      </g>
+    </svg>
   </div>
   <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
     <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>

@@ -80,7 +80,7 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss"]
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss"]
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -638,34 +638,40 @@ const spawn = {
       }
     }
   },
-  timeSkipBoss(x, y, radius = 80) {
+  timeSkipBoss(x, y, radius = 60) {
     mobs.spawn(x, y, 6, radius, '#000');
     let me = mob[mob.length - 1];
     // me.stroke = "transparent"; //used for drawSneaker
     me.timeSkipLastCycle = 0
-    me.eventHorizon = 1300; //required for black hole
-    me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
-    me.accelMag = 0.00013 * game.accelScale;
+    me.eventHorizon = 1500; //required for black hole
+    me.seeAtDistance2 = (me.eventHorizon + 2000) * (me.eventHorizon + 2000); //vision limit is event horizon + 2000
+    me.accelMag = 0.00022 * game.accelScale;
     // me.frictionAir = 0.005;
     // me.memory = 1600;
-    Matter.Body.setDensity(me, 0.018); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       //applying forces to player doesn't seem to work inside this method, not sure why
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
     me.do = function () {
       //keep it slow, to stop issues from explosion knock backs
+      if (this.speed > 2) {
+        Matter.Body.setVelocity(this, {
+          x: this.velocity.x * 0.99,
+          y: this.velocity.y * 0.99
+        });
+      }
       this.seePlayerCheck();
       this.checkStatus();
       this.attraction()
       if (!game.isTimeSkipping) {
-        const compress = 3
+        const compress = 2
         if (this.timeSkipLastCycle < game.cycle - compress &&
           Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
           this.timeSkipLastCycle = game.cycle
           game.timeSkip(compress)
 
-          this.fill = `rgba(0,0,0,${0.1+0.1*Math.random()})`
+          this.fill = `rgba(0,0,0,${0.1+0.4*Math.random()})`
           this.stroke = "#000"
           this.isShielded = false;
           this.dropPowerUp = true;
@@ -673,7 +679,7 @@ const spawn = {
 
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-          ctx.fillStyle = `rgba(255,255,255,${mech.energy*0.5})`;
+          ctx.fillStyle = "#fff";
           ctx.globalCompositeOperation = "destination-in"; //in or atop
           ctx.fill();
           ctx.globalCompositeOperation = "source-over";
@@ -703,7 +709,7 @@ const spawn = {
           this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob; //can't touch bullets
           ctx.beginPath();
           ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-          ctx.fillStyle = `rgba(0,0,0,${0.1*Math.random()})`;
+          ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
           ctx.fill();
         }
       }

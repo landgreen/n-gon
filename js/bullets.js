@@ -335,25 +335,6 @@ const b = {
       }
     },
     {
-      name: "ablative drones",
-      description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.isModDroneOnDamage = true;
-        for (let i = 0; i < 4; i++) {
-          b.drone() //spawn drone
-        }
-      },
-      remove() {
-        b.isModDroneOnDamage = false;
-      }
-    },
-    {
       name: "ablative mines",
       description: "rebuild your broken parts as a <strong>mine</strong><br>chance to occur after being <strong>harmed</strong>",
       maxCount: 1,
@@ -374,6 +355,25 @@ const b = {
       },
       remove() {
         b.isModMineOnDamage = false;
+      }
+    },
+    {
+      name: "ablative drones",
+      description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModDroneOnDamage = true;
+        for (let i = 0; i < 4; i++) {
+          b.drone() //spawn drone
+        }
+      },
+      remove() {
+        b.isModDroneOnDamage = false;
       }
     },
     {
@@ -591,6 +591,10 @@ const b = {
       requires: "",
       effect() {
         b.isModEntanglement = true
+        setTimeout(function () {
+          game.boldActiveGunHUD();
+        }, 10);
+
       },
       remove() {
         b.isModEntanglement = false;

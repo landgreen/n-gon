@@ -7,11 +7,6 @@ const mobs = {
     while (i--) {
       if (mob[i].alive) {
         mob[i].do();
-        // let j = mob[i].status.length;
-        // while (j--) {
-        //   mob[i].status[j].effect();
-        //   if (mob[i].status[j].endCycle > game.cycle) mob[i].status.splice(j, 0);
-        // }
       } else {
         mob[i].replace(i); //removing mob and replace with body, this is done here to avoid an array index bug with drawing I think
       }
@@ -49,6 +44,8 @@ const mobs = {
     }
   },
   statusSlow(who, cycles = 60) {
+    console.log('slow')
+
     if (!who.shield && !who.isShielded) {
       //remove other "slow" effects on this mob
       let i = who.status.length
@@ -788,7 +785,6 @@ const mobs = {
         if (this.seePlayer.recall && this.cd < game.cycle) {
           const dist = Vector.sub(this.seePlayer.position, this.position);
           const distMag = Vector.magnitude(dist);
-          console.log(this.seePlayer.recall)
           if (distMag < 400) {
             this.cd = game.cycle + this.delay;
             ctx.beginPath();
