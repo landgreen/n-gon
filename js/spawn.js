@@ -639,7 +639,7 @@ const spawn = {
       }
     }
   },
-  timeSkipBoss(x, y, radius = 60) {
+  timeSkipBoss(x, y, radius = 70) {
     mobs.spawn(x, y, 6, radius, '#000');
     let me = mob[mob.length - 1];
     // me.stroke = "transparent"; //used for drawSneaker
@@ -1108,7 +1108,7 @@ const spawn = {
   //     }
   //   };
   // },
-  bomberBoss(x, y, radius = 90 + Math.ceil(Math.random() * 20)) {
+  bomberBoss(x, y, radius = 85 + Math.ceil(Math.random() * 20)) {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
@@ -1118,7 +1118,7 @@ const spawn = {
     me.seeAtDistance2 = 1500000;
     me.fireFreq = Math.ceil(30 + 2000 / radius);
     me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
-    me.hoverElevation = 400 + (Math.random() - 0.5) * 200; //squared
+    me.hoverElevation = 460 + (Math.random() - 0.5) * 200; //squared
     me.hoverXOff = (Math.random() - 0.5) * 100;
     me.accelMag = Math.floor(10 * (Math.random() + 5)) * 0.00001 * game.accelScale;
     me.g = 0.0002; //required if using 'gravity'   // gravity called in hoverOverPlayer

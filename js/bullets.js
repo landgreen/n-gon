@@ -73,6 +73,8 @@ const b = {
   isModVacuumShield: null,
   modRenormalization: null,
   modGrenadeFragments: null,
+  isModEnergyDamage: null,
+  isModBotSpawner: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.7
@@ -117,6 +119,23 @@ const b = {
       },
       remove() {
         b.modBulletSize = 1;
+      }
+    },
+    {
+      name: "capacitor",
+      nameInfo: "<span id='mod-capacitor'></span>",
+      description: "increase <strong class='color-d'>damage</strong> based on stored <strong class='color-f'>energy</strong><br><strong>+1%</strong> <strong class='color-d'>damage</strong> for every <strong>5%</strong> <strong class='color-f'>energy</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect: () => {
+        b.isModEnergyDamage = true // used in mech.grabPowerUp
+      },
+      remove() {
+        b.isModEnergyDamage = false;
       }
     },
     {
@@ -335,6 +354,22 @@ const b = {
       }
     },
     {
+      name: "scrap bots",
+      description: "<strong>+16%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
+      maxCount: 6,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModBotSpawner += 0.16;
+      },
+      remove() {
+        b.isModBotSpawner = 0;
+      }
+    },
+    {
       name: "ablative mines",
       description: "rebuild your broken parts as a <strong>mine</strong><br>chance to occur after being <strong>harmed</strong>",
       maxCount: 1,
@@ -514,7 +549,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with mobs for <strong>+1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `unable to <strong>collide</strong> with mobs for <strong>+2</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -522,27 +557,11 @@ const b = {
       },
       requires: "",
       effect() {
-        b.modCollisionImmuneCycles += 60;
+        b.modCollisionImmuneCycles += 120;
         mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
       },
       remove() {
         b.modCollisionImmuneCycles = 30;
-      }
-    },
-    {
-      name: "annihilation",
-      description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.modCollisionImmuneCycles > 30
-      },
-      requires: "Pauli exclusion",
-      effect() {
-        b.isModAnnihilation = true
-      },
-      remove() {
-        b.isModAnnihilation = false;
       }
     },
     {
@@ -722,7 +741,7 @@ const b = {
     },
     {
       name: "mass-energy equivalence",
-      description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>50%</strong> above your max",
+      description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>twice</strong> your maximum",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1240,6 +1259,22 @@ const b = {
       },
       remove() {
         b.isModPlasmaRange = 1;
+      }
+    },
+    {
+      name: "annihilation",
+      description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+      },
+      requires: "negative mass field",
+      effect() {
+        b.isModAnnihilation = true
+      },
+      remove() {
+        b.isModAnnihilation = false;
       }
     },
     {
@@ -3150,12 +3185,21 @@ const b = {
           minDmgSpeed: 5,
           onDmg(who) {
             if (who.shield) {
+              for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
+                  const force = Matter.Vector.mult(this.velocity, 15 / mob[i].mass)
+                  Matter.Body.setVelocity(mob[i], {
+                    x: mob[i].velocity.x + force.x,
+                    y: mob[i].velocity.y + force.y
+                  });
+                  break
+                }
+              }
               Matter.Body.setVelocity(this, {
                 x: -0.1 * this.velocity.x,
                 y: -0.1 * this.velocity.y
               });
               Matter.Body.setDensity(this, 0.001);
-              // this.endCycle = 0;
             }
             if (b.isModRailNails && this.speed > 10) {
               const targets = [] //target nearby mobs
@@ -3187,9 +3231,9 @@ const b = {
                   })
                 }
               }
+              this.endCycle = 0 //triggers despawn
             }
-
-          }, //this.endCycle = 0  //triggers despawn
+          },
           onEnd() {}
         });
         mech.fireCDcycle = Infinity; // cool down
@@ -3200,7 +3244,7 @@ const b = {
           if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release
             //normal bullet behavior occurs after firing, overwrite this function
             this.do = function () {
-              this.force.y += this.mass * 0.00015 / this.charge; // low gravity that scales with charge
+              this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
             }
 
             mech.fireCDcycle = mech.cycle + 2; // set fire cool down

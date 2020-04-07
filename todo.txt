@@ -1,4 +1,10 @@
+mod - your damage scales with current energy
+mod - 10% chance after killing a mob to gain a bot
+      that follows you until you exit the map
+
 ************** TODO - n-gon **************
+
+mod - you can no longer see your current health
 
 boss mob - just a faster and larger version of a springer mob
   could have a more frequent random walk

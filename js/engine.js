@@ -144,7 +144,7 @@ function collisionChecks(event) {
             }
             mech.damage(dmg);
             if (mob[k].onHit) mob[k].onHit(k);
-            if (b.isModAnnihilation && mob[k].dropPowerUp && !mob[k].isShielded) {
+            if (b.isModAnnihilation) {
               mob[k].death();
               game.drawList.push({
                 //add dmg to draw queue

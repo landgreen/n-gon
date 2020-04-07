@@ -710,6 +710,10 @@ const game = {
 
     if (!(mech.cycle % 60)) { //once a second
 
+      if (b.isModEnergyDamage) {
+        document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
+      }
+
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
         if (b.isModEnergyRecovery) {
           mech.energy += mech.fieldEnergyMax * 0.07

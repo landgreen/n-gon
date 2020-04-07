@@ -915,8 +915,8 @@ const mech = {
         //player recoil //stronger in x-dir to prevent jump hacking
 
         Matter.Body.setVelocity(player, {
-          x: player.velocity.x - Math.cos(mech.angle) * speed / (mech.crouch ? 30 : 5) * Math.sqrt(mech.holdingTarget.mass),
-          y: player.velocity.y - Math.sin(mech.angle) * speed / 40 * Math.sqrt(mech.holdingTarget.mass)
+          x: player.velocity.x - Math.cos(mech.angle) * speed / (mech.crouch ? 30 : 10) * Math.sqrt(mech.holdingTarget.mass),
+          y: player.velocity.y - Math.sin(mech.angle) * speed / 30 * Math.sqrt(mech.holdingTarget.mass)
         });
         mech.definePlayerMass() //return to normal player mass
       }
@@ -978,7 +978,7 @@ const mech = {
           y: powerUp[i].velocity.y * 0.11
         });
         if (dist2 < 5000) { //use power up if it is close enough
-          if (b.isModMassEnergy) mech.energy = mech.fieldEnergyMax * 1.5;
+          if (b.isModMassEnergy) mech.energy = mech.fieldEnergyMax * 2;
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3

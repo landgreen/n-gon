@@ -44,8 +44,6 @@ const mobs = {
     }
   },
   statusSlow(who, cycles = 60) {
-    console.log('slow')
-
     if (!who.shield && !who.isShielded) {
       //remove other "slow" effects on this mob
       let i = who.status.length
@@ -966,6 +964,7 @@ const mobs = {
           if (b.isModLowHealthDmg) dmg *= (3 / (2 + Math.min(mech.health, 1))) //up to 50% dmg at zero player health  //if this changes all update display in modOnHealthChange()
           if (b.isModHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
           if (b.isModEnergyLoss) dmg *= 1.33;
+          if (b.isModEnergyDamage) dmg *= 1 + mech.energy / 5;
           if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
           if (b.modEnergySiphon && dmg !== Infinity) mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
           if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
@@ -998,6 +997,9 @@ const mobs = {
             for (let i = 0; i < len; i++) {
               b.spore(this) //spawn drone
             }
+          }
+          if (Math.random() < b.isModBotSpawner) {
+            (Math.random() < 0.5) ? b.nailBot(): b.laserBot()
           }
           if (b.isModExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
         }
