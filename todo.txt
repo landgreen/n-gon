@@ -1,8 +1,13 @@
 mod - your damage scales with current energy
 mod - 10% chance after killing a mob to gain a bot
       that follows you until you exit the map
+mod - move extra fast with less energy cost in time dilation
+mod - double helix fire two wave bullets, but they do 40% less damage
 
 ************** TODO - n-gon **************
+
+boss level for timeSkipBoss because of game instability for boss on normal levels
+  boss level needs to be very simple (maybe no other mobs, or no random mobs)
 
 mod - you can no longer see your current health
 

@@ -80,7 +80,7 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss"]
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss"] //, "timeSkipBoss"
     // const options = ["timeSkipBoss"]
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
@@ -644,7 +644,7 @@ const spawn = {
     let me = mob[mob.length - 1];
     // me.stroke = "transparent"; //used for drawSneaker
     me.timeSkipLastCycle = 0
-    me.eventHorizon = 2000; //required for black hole
+    me.eventHorizon = 1600; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 2000) * (me.eventHorizon + 2000); //vision limit is event horizon + 2000
     me.accelMag = 0.0004 * game.accelScale;
     // me.frictionAir = 0.005;

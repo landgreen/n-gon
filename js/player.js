@@ -723,6 +723,7 @@ const mech = {
   fieldEnergyMax: 1, //can be increased by a mod
   holdingTarget: null,
   fieldShieldingScale: 1,
+  timeSkipLastCycle: 0,
   // these values are set on reset by setHoldDefaults()
   fieldRange: 155,
   energy: 0,
@@ -1339,7 +1340,32 @@ const mech = {
                   cons[i].stiffness = 0;
                 }
               }
+
               game.cycle--; //pause all functions that depend on game cycle increasing
+              if (b.isModTimeSkip) {
+                game.isTimeSkipping = true;
+                mech.cycle++;
+                game.gravity();
+                Engine.update(engine, game.delta);
+                // level.checkZones();
+                // level.checkQuery();
+                mech.move();
+                game.checks();
+                // mobs.loop();
+                // mech.draw();
+                mech.walk_cycle += mech.flipLegs * mech.Vx;
+                // mech.hold();
+                mech.energy += 0.5 * DRAIN; //x1 to undo the energy drain from time speed up, x1.5 to cut energy drain in half
+                b.fire();
+                // b.bulletRemove();
+                b.bulletDo();
+                game.isTimeSkipping = false;
+              }
+              // game.cycle--; //pause all functions that depend on game cycle increasing
+              // if (b.isModTimeSkip && !game.isTimeSkipping) { //speed up the rate of time
+              //   game.timeSkip(1)
+              //   mech.energy += 1.5 * DRAIN; //x1 to undo the energy drain from time speed up, x1.5 to cut energy drain in half
+              // }
             }
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
             mech.wakeCheck();
