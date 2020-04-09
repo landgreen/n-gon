@@ -978,7 +978,7 @@ const mech = {
           x: powerUp[i].velocity.x * 0.11,
           y: powerUp[i].velocity.y * 0.11
         });
-        if (dist2 < 5000) { //use power up if it is close enough
+        if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
           if (b.isModMassEnergy) mech.energy = mech.fieldEnergyMax * 2;
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
@@ -1061,7 +1061,6 @@ const mech = {
     }
   },
   pushMobsFacing() { // find mobs in range and in direction looking
-
     for (let i = 0, len = mob.length; i < len; ++i) {
       if (
         Vector.magnitude(Vector.sub(mob[i].position, player.position)) - mob[i].radius < mech.fieldRange &&
@@ -1304,7 +1303,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp(180);
 
-            const DRAIN = 0.0023
+            const DRAIN = 0.0017
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < DRAIN) {
@@ -1472,7 +1471,7 @@ const mech = {
                   y: best.y
                 };
                 if (best.who.alive) {
-                  const dmg = 0.5 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                  const dmg = 0.55 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
                   best.who.damage(dmg);
                   best.who.locatePlayer();
 
@@ -1546,7 +1545,7 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>75%</strong> while field is active", //<br><strong>launch</strong> larger blocks at much higher speeds
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>80%</strong> while field is active", //<br><strong>launch</strong> larger blocks at much higher speeds
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {
@@ -1565,7 +1564,7 @@ const mech = {
             mech.lookForPickUp();
             const DRAIN = 0.00035
             if (mech.energy > DRAIN) {
-              mech.fieldDamageResistance = 0.25; // 1 - 0.75
+              mech.fieldDamageResistance = 0.2; // 1 - 0.8
               // mech.pushMobs360();
 
               //repulse mobs
@@ -1813,7 +1812,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
 
-            const DRAIN = (0.0005 + 0.0001 * player.speed) * (mech.fireCDcycle > mech.cycle ? 9 / b.modRenormalization : 1) //game.mouseDown
+            const DRAIN = (0.0004 + 0.00007 * player.speed) * (mech.fireCDcycle > mech.cycle ? 7 / b.modRenormalization : 1) //game.mouseDown
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0.001) {

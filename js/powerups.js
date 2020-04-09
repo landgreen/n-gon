@@ -25,7 +25,7 @@ const powerUps = {
     game.isChoosing = false; //stops p from un pausing on key down
     requestAnimationFrame(cycle);
   },
-  cancel(what) {
+  cancel() {
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("choose-background").style.display = "none"

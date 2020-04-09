@@ -76,6 +76,7 @@ const b = {
   isModEnergyDamage: null,
   isModBotSpawner: null,
   modWaveHelix: null,
+  isModSporeFollow: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.7
@@ -216,7 +217,7 @@ const b = {
       allowed() {
         return b.isModLowHealthDmg
       },
-      requires: "quasistatic equilibrium",
+      requires: "negative feedback",
       effect() {
         b.isModHarmDamage = true;
       },
@@ -1164,6 +1165,22 @@ const b = {
       }
     },
     {
+      name: "diplochory",
+      description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use the player for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
+      },
+      requires: "spores",
+      effect() {
+        b.isModSporeFollow = true
+      },
+      remove() {
+        b.isModSporeFollow = false
+      }
+    },
+    {
       name: "redundant systems",
       description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
       maxCount: 1,
@@ -2004,14 +2021,17 @@ const b = {
         category: cat.bullet,
         mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
       },
-      endCycle: game.cycle + Math.floor((660 + Math.floor(Math.random() * 240)) * b.isModBulletsLastLonger),
+      endCycle: game.cycle + Math.floor((660 + Math.floor(Math.random() * 360)) * b.isModBulletsLastLonger),
       minDmgSpeed: 0,
-      onDmg(who) {
-        // mobs.statusPoison(who, 0.5, 180) // (2.2) * 1.3 * 30/180  // 6 ticks (3 seconds)
+      playerOffPosition: { //used when following player to keep spores separate
+        x: 100 * (Math.random() - 0.5),
+        y: 100 * (Math.random() - 0.5)
+      },
+      onDmg() {
         this.endCycle = 0; //bullet ends cycle after doing damage 
       },
       onEnd() {},
-      lookFrequency: 97 + Math.floor(77 * Math.random()),
+      lookFrequency: 97 + Math.floor(93 * Math.random()),
       do() {
         //find mob targets
         if (!(game.cycle % this.lookFrequency)) {
@@ -2034,9 +2054,17 @@ const b = {
         }
         //accelerate towards mobs
         if (this.lockedOn && this.lockedOn.alive) {
-          this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * this.thrust)
-          // this.force.x -= THRUST * this.lockedOn.x
-          // this.force.y -= THRUST * this.lockedOn.y
+          this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+
+        } else if (b.isModSporeFollow && this.lockedOn !== undefined) { //move towards player
+          //checking for undefined means that the spores don't go after the player until it has looked and not found a target
+          const dx = this.position.x - mech.pos.x;
+          const dy = this.position.y - mech.pos.y;
+          if (dx * dx + dy * dy > 10000) {
+            this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+          }
+          // this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.thrust)
+
         } else {
           this.force.y += this.mass * 0.0001; //gravity
         }
@@ -2646,10 +2674,11 @@ const b = {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
         const dir = mech.angle
         const SPEED = 10
-        const wiggleMag = mech.crouch ? 5 : 12
+        const wiggleMag = mech.crouch ? 6 : 12
+        const size = 5 * b.modBulletSize * (b.modWaveHelix === 1 ? 1 : 0.7)
         for (let i = 0; i < b.modWaveHelix; i++) {
           const me = bullet.length;
-          bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, 5 * b.modBulletSize, {
+          bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, size, {
             angle: dir,
             cycle: -0.5,
             endCycle: game.cycle + Math.floor((b.isModWaveReflect ? 480 : 120) * b.isModBulletsLastLonger),
@@ -2681,7 +2710,7 @@ const b = {
                     for (let i = 0; i < q.length; i++) {
                       slowCheck = 0.3;
                       Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                      let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (b.modWaveHelix ? 0.6 : 1) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                      let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (b.modWaveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                       q[i].damage(dmg);
                       q[i].foundPlayer();
                       game.drawList.push({ //add dmg to draw queue
