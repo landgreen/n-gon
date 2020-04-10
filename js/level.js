@@ -13,10 +13,10 @@ const level = {
   levelsCleared: 0,
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
-    if (level.levelsCleared === 0) {
+    if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(9)
       // b.giveGuns("vacuum bomb")
-      // mech.setField("phase decoherence field")
+      // mech.setField("pilot wave")
       // mech.energy = 0.1;
       // b.giveMod("negative feedback");
       // b.giveMod("photovoltaics");
@@ -147,9 +147,9 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     // spawn.laserBoss(2900, -500)
-    spawn.beamer(1200, -500)
+    // spawn.sucker(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
-    // spawn.randomMob(3200, -500)
+    spawn.randomMob(1600, -500)
 
   },
   bosses() {
@@ -671,7 +671,7 @@ const level = {
     });
 
     level.fill.push({
-      x: 1760,
+      x: 1735,
       y: -1550,
       width: 1390,
       height: 550,
@@ -701,7 +701,7 @@ const level = {
 
     //spawn.mapRect(-700, 0, 6250, 100); //ground
     spawn.mapRect(3400, 0, 2150, 100); //ground
-    spawn.mapRect(-700, -2000, 2110, 50); //Top left ledge
+    spawn.mapRect(-700, -2000, 2125, 50); //Top left ledge
     spawn.bodyRect(1300, -2125, 50, 125, 0.8);
     spawn.bodyRect(1307, -2225, 50, 100, 0.8);
     spawn.mapRect(-700, -2350, 50, 400); //far left starting left wall
@@ -733,7 +733,7 @@ const level = {
     spawn.bodyRect(2710, -1250, 125, 125, 0.8);
     spawn.bodyRect(2705, -1350, 75, 100, 0.8);
     spawn.mapRect(3500, -1600, 350, 50);
-    spawn.mapRect(1750, -1600, 1410, 50);
+    spawn.mapRect(1725, -1600, 1435, 50);
     spawn.bodyRect(3100, -1015, 375, 15);
     spawn.bodyRect(3500, -850, 75, 125, 0.8);
     spawn.mapRect(3450, -1000, 50, 580); //left building wall

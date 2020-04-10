@@ -537,6 +537,14 @@ function cycle() {
     }
 
     game.loop();
+    if (isNaN(mech.health)) {
+      console.log(`mech.health = ${mech.health}`)
+      game.paused = true;
+      game.replaceTextLog = true;
+      build.pauseGrid()
+      document.body.style.cursor = "auto";
+      alert("health is NaN, please report this bug to the discord  \n https://discordapp.com/invite/2eC9pgJ")
+    }
     // for (let i = 0, len = loop.length; i < len; i++) {
     //   loop[i]()
     // }

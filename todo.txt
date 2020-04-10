@@ -1,11 +1,34 @@
 
 mod - spores follow player
+mod - nails do 66% extra damage over 6 seconds
+
 
 ************** TODO - n-gon **************
+
+field - pilot wave
+  while mouse is down blocks (and mobs?) are move with the mouse
+    players can do serious damage by flicking the mouse and firing blocks
+    on mouse down calculate relative position of block to mouse and maintain that as mouse moves
+      on mouse up give blocks the computed mouse velocity
+    use a gravity effect that pulls blocks in range towards the center of the mouse
+      maybe no force in the very center to prevent clumping
+  draw a ellipse around the mouse that wobbles like phase decoherence field, and changes color maybe like negative mass field
+
+make flurooantimonic acid mod a damage over time
+  rename to radiation damage?
+
+mod - radiation damage over time effects can spread to nearby mobs
+  do a check for nearby mobs on each tick
+
+try adding a subtile shift of color towards red, green or blue
+  block, map, background, text? color
+  could be random as each level loads
 
 player health becomes NaN
 occurred a few times at higher levels
   game.dmgScale, game.healScale not corrupted
+
+  didn't occur:   shotgun / laser  with all mods that have no requirements
 
 mod - killing a stunned mob gives something 
   ammo or heal power up?

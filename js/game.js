@@ -89,7 +89,6 @@ const game = {
     x: 0,
     y: 0
   },
-
   g: 0.001,
   onTitlePage: true,
   paused: false,

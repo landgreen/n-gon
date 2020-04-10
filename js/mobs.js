@@ -111,7 +111,7 @@ const mobs = {
       })
     }
   },
-  statusPoison(who, tickDamage, cycles = 180) {
+  statusDoT(who, tickDamage, cycles = 180) {
     if (!who.isShielded) {
       who.status.push({
         effect() {
@@ -126,40 +126,44 @@ const mobs = {
               time: game.drawTime
             });
           }
-        },
-        type: "poison",
-        endCycle: game.cycle + cycles,
-        startCycle: game.cycle
-      })
-    }
-  },
-  statusBurn(who, tickDamage, cycles = 90 + Math.floor(90 * Math.random())) {
-    if (!who.isShielded) {
-      //remove other "burn" effects on this mob
-      let i = who.status.length
-      while (i--) {
-        if (who.status[i].type === "burn") who.status.splice(i, 1);
-      }
-      who.status.push({
-        effect() {
-          if ((game.cycle - this.startCycle) % 15 === 0) {
-            let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
-            who.damage(dmg);
-            game.drawList.push({ //add dmg to draw queue
-              x: who.position.x,
-              y: who.position.y,
-              radius: Math.log(2 * dmg + 1.1) * 40,
-              color: `rgba(255,${Math.floor(200*Math.random())},0,0.9)`,
-              time: game.drawTime
-            });
+          if (true) {
+            //check for nearby mobs
+
           }
         },
-        type: "burn",
+        // type: "DoT",
         endCycle: game.cycle + cycles,
         startCycle: game.cycle
       })
     }
   },
+  // statusBurn(who, tickDamage, cycles = 90 + Math.floor(90 * Math.random())) {
+  //   if (!who.isShielded) {
+  //     //remove other "burn" effects on this mob
+  //     let i = who.status.length
+  //     while (i--) {
+  //       if (who.status[i].type === "burn") who.status.splice(i, 1);
+  //     }
+  //     who.status.push({
+  //       effect() {
+  //         if ((game.cycle - this.startCycle) % 15 === 0) {
+  //           let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
+  //           who.damage(dmg);
+  //           game.drawList.push({ //add dmg to draw queue
+  //             x: who.position.x,
+  //             y: who.position.y,
+  //             radius: Math.log(2 * dmg + 1.1) * 40,
+  //             color: `rgba(255,${Math.floor(200*Math.random())},0,0.9)`,
+  //             time: game.drawTime
+  //           });
+  //         }
+  //       },
+  //       type: "burn",
+  //       endCycle: game.cycle + cycles,
+  //       startCycle: game.cycle
+  //     })
+  //   }
+  // },
 
   //**********************************************************************************************
   //**********************************************************************************************

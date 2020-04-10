@@ -1722,15 +1722,15 @@ const mech = {
         mech.hold = function () {
           if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
             if (b.isModSporeField) {
-              mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
+              // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
               const len = Math.floor(6 + 4 * Math.random())
-              mech.energy -= len * 0.06;
+              mech.energy -= len * 0.074;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
             } else if (b.isModMissileField) {
-              mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.44;
+              // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
+              mech.energy -= 0.5;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -1740,11 +1740,11 @@ const mech = {
                 1, b.modBabyMissiles)
             } else if (b.isModIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.055;
+              mech.energy -= 0.061;
               b.iceIX(1)
             } else {
-              mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.34;
+              // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
+              mech.energy -= 0.33;
               b.drone(1)
             }
 
@@ -1891,5 +1891,63 @@ const mech = {
         }
       }
     },
+    // {
+    //   name: "pilot wave",
+    //   description: "push stuff",
+    //   isEasyToAim: false,
+    //   effect: () => {
+    //     game.replaceTextLog = true; //allow text over write
+    //     mech.lastMouseInGame = {
+    //       x: game.mouseInGame.x,
+    //       y: game.mouseInGame.y
+    //     }
+    //     mech.drop();
+    //     mech.fieldPhase = 0;
+    //     mech.hold = function () {
+    //       if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+    //         mech.grabPowerUp();
+    //         //disable if player is inside field
+
+    //         const radius = 100
+    //         if (mech.energy > 0.05) {
+    //           // && Vector.magnitude(Vector.sub(game.mouseInGame, player.position)) > radius * 1.5
+    //           //find mouse velocity
+    //           const diff = Vector.sub(game.mouseInGame, mech.lastMouseInGame)
+    //           const velocity = Vector.mult(Vector.normalise(diff), Math.min(Vector.magnitude(diff), 60)) //limit velocity
+    //           //find nearby blocks
+    //           for (let i = 0, len = body.length; i < len; ++i) {
+    //             if (Vector.magnitude(Vector.sub(body[i].position, game.mouseInGame)) < radius) {
+
+    //               // Matter.Query.collides(body, bodies)
+    //               Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
+    //               body[i].force.y -= body[i].mass * game.g; //antigravity
+    //               //maybe give blocks some weak attraction to mouse
+    //             }
+    //           }
+    //           ctx.beginPath();
+    //           const rotate = mech.cycle * 0.008;
+    //           mech.fieldPhase += 0.2 // - 0.5 * Math.sqrt(Math.min(mech.energy, 1));
+    //           const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
+    //           const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
+    //           ctx.beginPath();
+    //           ctx.ellipse(game.mouseInGame.x, game.mouseInGame.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
+    //           // ctx.arc(game.mouseInGame.x, game.mouseInGame.y, this.fieldRange, 0, 2 * Math.PI);
+    //           ctx.fillStyle = "#eef";
+    //           ctx.globalCompositeOperation = "difference";
+    //           ctx.fill();
+    //           ctx.strokeStyle = "#000";
+    //           ctx.lineWidth = 1;
+    //           ctx.stroke();
+    //           ctx.globalCompositeOperation = "source-over";
+    //         }
+    //       }
+    //       mech.lastMouseInGame = { //constantly log last mouse position so you can calc mouse velocity
+    //         x: game.mouseInGame.x,
+    //         y: game.mouseInGame.y
+    //       }
+    //       mech.drawFieldMeter()
+    //     }
+    //   }
+    // },
   ],
 };
