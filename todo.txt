@@ -3,6 +3,9 @@
 
 ************** TODO - n-gon **************
 
+add player Scent Trails for mod navigation
+  https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
+
 mod - energy replaces your health, 
 
 field - pilot wave

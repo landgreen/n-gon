@@ -1927,7 +1927,7 @@ const mech = {
     },
     {
       name: "pilot wave",
-      description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>energy <strong>drain</strong> is lower in your <strong>line of sight</strong>",
+      description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>energy <strong>drain</strong> is increased out of <strong>line of sight</strong>",
       isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write

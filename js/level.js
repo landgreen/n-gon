@@ -16,7 +16,7 @@ const level = {
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(9)
       // b.giveGuns("vacuum bomb")
-      mech.setField("pilot wave")
+      // mech.setField("pilot wave")
       // b.giveMod("energy");
       // b.giveMod("Born rule");
 
