@@ -458,6 +458,35 @@ document.body.addEventListener("mousedown", (e) => {
   }
 });
 
+document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting stuck when leaving the window
+  // console.log(e)
+  if (e.which === 1) {
+    game.mouseDown = true;
+  } else {
+    game.mouseDown = false;
+  }
+
+  if (e.which === 3) {
+    game.mouseDownRight = true;
+  } else {
+    game.mouseDownRight = false;
+  }
+});
+document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting stuck when leaving the window
+  // console.log(e)
+  if (e.which === 1) {
+    game.mouseDown = true;
+  } else {
+    game.mouseDown = false;
+  }
+
+  if (e.which === 3) {
+    game.mouseDownRight = true;
+  } else {
+    game.mouseDownRight = false;
+  }
+});
+
 //keyboard input
 const keys = [];
 document.body.addEventListener("keydown", (e) => {
@@ -537,14 +566,14 @@ function cycle() {
     }
 
     game.loop();
-    if (isNaN(mech.health)) {
-      console.log(`mech.health = ${mech.health}`)
-      game.paused = true;
-      game.replaceTextLog = true;
-      build.pauseGrid()
-      document.body.style.cursor = "auto";
-      alert("health is NaN, please report this bug to the discord  \n https://discordapp.com/invite/2eC9pgJ")
-    }
+    // if (isNaN(mech.health) || isNaN(mech.energy)) {
+    //   console.log(`mech.health = ${mech.health}`)
+    //   game.paused = true;
+    //   game.replaceTextLog = true;
+    //   build.pauseGrid()
+    //   document.body.style.cursor = "auto";
+    //   alert("health is NaN, please report this bug to the discord  \n https://discordapp.com/invite/2eC9pgJ")
+    // }
     // for (let i = 0, len = loop.length; i < len; i++) {
     //   loop[i]()
     // }

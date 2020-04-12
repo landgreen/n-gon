@@ -47,10 +47,14 @@ const powerUps = {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
     effect() {
-      let heal = 0
-      for (let i = 0; i < b.modRecursiveHealing; i++) heal += ((this.size / 40) ** 2)
-      if (heal > 0) game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
-      mech.addHealth(heal);
+      if (!b.isModEnergyHealth) {
+        let heal = 0
+        for (let i = 0; i < b.modRecursiveHealing; i++) heal += ((this.size / 40) ** 2)
+        if (heal > 0) {
+          game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
+          mech.addHealth(heal);
+        }
+      }
     }
   },
   ammo: {

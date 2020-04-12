@@ -78,6 +78,7 @@ const b = {
   modWaveHelix: null,
   isModSporeFollow: null,
   isModNailPoison: null,
+  isModEnergyHealth: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -558,14 +559,34 @@ const b = {
       }
     },
     {
+      name: "mass-energy equivalence",
+      description: "your <strong class='color-f'>energy</strong> replaces your <strong>health</strong><br>you can't <strong>die</strong> if your <strong class='color-f'>energy</strong> is above <strong>zero</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return !b.isModPiezo
+      },
+      requires: "not piezoelectricity",
+      effect: () => {
+        mech.health = 0
+        b.modOnHealthChange();
+        mech.displayHealth();
+        b.isModEnergyHealth = true;
+      },
+      remove() {
+        b.isModEnergyHealth = false;
+        mech.health = mech.energy;
+      }
+    },
+    {
       name: "piezoelectricity",
       description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong>harm</strong> from mob collisions",
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return !b.isModEnergyHealth
       },
-      requires: "",
+      requires: "not mass-energy equivalence",
       effect() {
         b.isModPiezo = true;
         mech.energy = mech.fieldEnergyMax;
@@ -678,7 +699,7 @@ const b = {
       }
     },
     {
-      name: "mass-energy equivalence",
+      name: "pair production",
       description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>twice</strong> your maximum",
       maxCount: 1,
       count: 0,
@@ -822,7 +843,7 @@ const b = {
     },
     {
       name: "depleted uranium rounds",
-      description: `your <strong>bullets</strong> are <strong>+13%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
+      description: `your <strong>bullets</strong> are <strong>+16%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
       maxCount: 9,
       allowed() {
@@ -830,7 +851,7 @@ const b = {
       },
       requires: "minigun, shotgun, super balls",
       effect() {
-        b.modBulletSize += 0.13
+        b.modBulletSize += 0.16
       },
       remove() {
         b.modBulletSize = 1;
@@ -2042,8 +2063,7 @@ const b = {
       },
       onEnd() {},
       do() {
-        //find mob targets
-        if (!(game.cycle % this.lookFrequency)) {
+        if (!(game.cycle % this.lookFrequency)) { //find mob targets
           this.closestTarget = null;
           this.lockedOn = null;
           let closeDist = Infinity;
@@ -2061,8 +2081,8 @@ const b = {
             }
           }
         }
-        //accelerate towards mobs
-        if (this.lockedOn && this.lockedOn.alive) {
+
+        if (this.lockedOn && this.lockedOn.alive) { //accelerate towards mobs
           this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
         } else if (b.isModSporeFollow && this.lockedOn !== undefined) { //move towards player
           //checking for undefined means that the spores don't go after the player until it has looked and not found a target
@@ -2097,7 +2117,7 @@ const b = {
       friction: 0,
       frictionAir: 0.10,
       restitution: 0.3,
-      dmg: 0.2, //damage done in addition to the damage from momentum
+      dmg: 0.18, //damage done in addition to the damage from momentum
       lookFrequency: 10 + Math.floor(7 * Math.random()),
       endCycle: game.cycle + 120 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",

@@ -1,9 +1,9 @@
 
-mod - spores follow player
-mod - nails do 66% extra damage over 6 seconds
 
 
 ************** TODO - n-gon **************
+
+mod - energy replaces your health, 
 
 field - pilot wave
   while mouse is down blocks (and mobs?) are move with the mouse

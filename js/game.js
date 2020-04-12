@@ -686,31 +686,30 @@ const game = {
     }
   },
   checks() {
-    if (mech.pos.y > game.fallHeight) { // if 4000px deep
-      if (game.difficultyMode > 2) {
-        mech.death();
-      } else {
-        Matter.Body.setVelocity(player, {
-          x: 0,
-          y: 0
-        });
-        Matter.Body.setPosition(player, {
-          x: level.enter.x + 50,
-          y: level.enter.y - 20
-        });
-        // Matter.Body.setPosition(player, {
-        //   x: player.position.x,
-        //   y: -7000
-        // });
-        // game.noCameraScroll()
-
-        mech.energy = 0;
-        if (game.difficultyMode === 2) mech.damage(0.3);
-        if (game.difficultyMode === 1) mech.damage(0.1);
-      }
-    }
-
     if (!(mech.cycle % 60)) { //once a second
+      if (mech.pos.y > game.fallHeight) { // if 4000px deep
+        if (game.difficultyMode > 2) {
+          mech.death();
+        } else {
+          Matter.Body.setVelocity(player, {
+            x: 0,
+            y: 0
+          });
+          Matter.Body.setPosition(player, {
+            x: level.enter.x + 50,
+            y: level.enter.y - 20
+          });
+          // Matter.Body.setPosition(player, {
+          //   x: player.position.x,
+          //   y: -7000
+          // });
+          // game.noCameraScroll()
+
+          if (game.difficultyMode === 2) mech.damage(0.3);
+          if (game.difficultyMode === 1) mech.damage(0.1);
+          mech.energy = 0;
+        }
+      }
 
       if (b.isModEnergyDamage) {
         document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`

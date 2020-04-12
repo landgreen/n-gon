@@ -566,7 +566,7 @@ const spawn = {
         }
         toMe(body, this.position, this.eventHorizon)
         toMe(mob, this.position, this.eventHorizon)
-        toMe(bullet, this.position, this.eventHorizon)
+        // toMe(bullet, this.position, this.eventHorizon)
       }
     };
     me.do = function () {
@@ -826,7 +826,6 @@ const spawn = {
       x: x,
       y: y
     }
-    me.dmg = 0.14 * game.dmgScale;
     me.frictionAir = 0.03;
     // me.torque -= me.inertia * 0.002
     Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
@@ -920,11 +919,12 @@ const spawn = {
       if (!mech.isStealth) vertexCollision(where, look, [player]);
       if (best.who && best.who === player && mech.collisionImmuneCycle < mech.cycle) {
         mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
-        mech.damage(this.dmg);
+        const dmg = 0.14 * game.dmgScale;
+        mech.damage(dmg);
         game.drawList.push({ //add dmg to draw queue
           x: best.x,
           y: best.y,
-          radius: this.dmg * 1500,
+          radius: dmg * 1500,
           color: "rgba(80,0,255,0.5)",
           time: 20
         });
