@@ -37,7 +37,6 @@ const b = {
   isModPiezo: null,
   isModDroneCollide: null,
   isModFastSpores: null,
-  isModStomp: null,
   modSuperBallNumber: null,
   modOneSuperBall: null,
   modLaserReflections: null,
@@ -79,6 +78,7 @@ const b = {
   isModSporeFollow: null,
   isModNailPoison: null,
   isModEnergyHealth: null,
+  isModPulseStun: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -144,13 +144,13 @@ const b = {
     },
     {
       name: "fracture analysis",
-      description: "<strong>5x</strong> physical <strong class='color-d'>damage</strong> to unaware mobs<br><em>unaware mobs don't have a health bar</em>",
+      description: "<strong>bullets</strong> do <strong>5x</strong> <strong class='color-d'>damage</strong> to <strong>unaware</strong> mobs<br><em>unaware mobs don't have a health bar</em>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.isModFarAwayDmg
+        return true
       },
-      requires: "kinetic bombardment",
+      requires: "",
       effect() {
         b.isModCrit = true;
       },
@@ -201,9 +201,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.isModLowHealthDmg
+        return true
       },
-      requires: "negative feedback",
+      requires: "",
       effect() {
         b.isModHarmDamage = true;
       },
@@ -261,7 +261,7 @@ const b = {
     },
     {
       name: "mass driver",
-      description: "<strong>blocks</strong> do <strong>3x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge <strong>throws</strong> in <strong>3x</strong> less time",
+      description: "<strong>blocks</strong> do <strong>2x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -269,7 +269,7 @@ const b = {
       },
       requires: "",
       effect() {
-        b.modThrowChargeRate = 3
+        b.modThrowChargeRate = 2
       },
       remove() {
         b.modThrowChargeRate = 1
@@ -403,6 +403,22 @@ const b = {
       }
     },
     {
+      name: "scrap recycling",
+      description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModHealthRecovery = true;
+      },
+      remove() {
+        b.isModHealthRecovery = false;
+      }
+    },
+    {
       name: "waste energy recovery",
       description: "regen <strong>7%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
       maxCount: 1,
@@ -419,30 +435,14 @@ const b = {
       }
     },
     {
-      name: "scrap recycling",
-      description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.isModEnergyRecovery
-      },
-      requires: "waste energy recovery",
-      effect() {
-        b.isModHealthRecovery = true;
-      },
-      remove() {
-        b.isModHealthRecovery = false;
-      }
-    },
-    {
       name: "acute stress response",
       description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/2</strong> your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.isModEnergyRecovery
+        return true
       },
-      requires: "waste energy recovery",
+      requires: "",
       effect() {
         b.isModEnergyLoss = true;
       },
@@ -468,22 +468,6 @@ const b = {
         b.modSquirrelFx = 1;
         mech.Fx = 0.016; //if this changes update the values in  definePlayerMass
         mech.jumpForce = 0.42; //was 0.38 at 0.0019 gravity
-      }
-    },
-    {
-      name: "basidio-stomp",
-      description: "hard <strong>landings</strong> disrupt <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> in the ground<br>immune to <strong>harm</strong> from <strong>falling</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.modSquirrelFx > 1
-      },
-      requires: "squirrel-cage rotor",
-      effect() {
-        b.isModStomp = true
-      },
-      remove() {
-        b.isModStomp = false;
       }
     },
     {
@@ -525,9 +509,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.isModImmortal
+        return true
       },
-      requires: "quantum immortality",
+      requires: "",
       effect() {
         b.isModDeathAvoid = true;
         b.isModDeathAvoidOnCD = false;
@@ -560,7 +544,7 @@ const b = {
     },
     {
       name: "mass-energy equivalence",
-      description: "your <strong class='color-f'>energy</strong> replaces your <strong>health</strong><br>you can't <strong>die</strong> if your <strong class='color-f'>energy</strong> is above <strong>zero</strong>",
+      description: "you can't <strong>die</strong> if your <strong class='color-f'>energy</strong> is above <strong>zero</strong><br>your <strong>health</strong> is permanently set to <strong>zero</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1175,7 +1159,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
+        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModSporeField
       },
       requires: "spores",
       effect() {
@@ -1191,7 +1175,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModStomp || b.isModSporeField
+        return b.haveGunCheck("spores") || b.modSporesOnDeath > 0 || b.isModSporeField
       },
       requires: "spores",
       effect() {
@@ -1299,6 +1283,22 @@ const b = {
         b.modLaserReflections = 2;
         b.modLaserDamage = 0.07;
         b.modLaserFieldDrain = 0.002;
+      }
+    },
+    {
+      name: "shock wave",
+      description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("pulse")
+      },
+      requires: "pulse",
+      effect() {
+        b.isModPulseStun = true;
+      },
+      remove() {
+        b.isModPulseStun = false;
       }
     },
     {
@@ -1568,14 +1568,21 @@ const b = {
           game.updateGunHUD();
         }
       } else {
-        if (b.isModAmmoFromHealth && mech.health > 0.05) {
-          mech.damage(Math.max(0.01, b.isModAmmoFromHealth * mech.health));
-          powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+        if (b.isModAmmoFromHealth) {
+          if (mech.health > 0.05) {
+            mech.damage(Math.max(0.01, b.isModAmmoFromHealth * mech.health));
+            powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+            if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+          } else {
+            game.replaceTextLog = true;
+            game.makeTextLog("not enough health for catabolism to produce ammo", 120);
+          }
+
+        } else {
+          game.replaceTextLog = true;
+          game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
         }
-        mech.fireCDcycle = mech.cycle + 30; //fire cooldown
-        game.replaceTextLog = true;
-        game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
+        mech.fireCDcycle = mech.cycle + 30; //fire cooldown        
       }
       if (mech.holdingTarget) {
         mech.drop();
@@ -2117,7 +2124,7 @@ const b = {
       friction: 0,
       frictionAir: 0.10,
       restitution: 0.3,
-      dmg: 0.18, //damage done in addition to the damage from momentum
+      dmg: 0.17, //damage done in addition to the damage from momentum
       lookFrequency: 10 + Math.floor(7 * Math.random()),
       endCycle: game.cycle + 120 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
@@ -3286,7 +3293,7 @@ const b = {
             if (who.shield) {
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
-                  const force = Matter.Vector.mult(this.velocity, 15 / mob[i].mass)
+                  const force = Matter.Vector.mult(this.velocity, 7 / mob[i].mass)
                   Matter.Body.setVelocity(mob[i], {
                     x: mob[i].velocity.x + force.x,
                     y: mob[i].velocity.y + force.y
@@ -3756,6 +3763,16 @@ const b = {
         mech.energy -= energy
         if (best.who) b.explosion(path[1], 1000 * energy, true)
         mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
+
+        if (b.isModPulseStun) {
+          const range = 100 + 2000 * energy
+          for (let i = 0, len = mob.length; i < len; ++i) {
+            if (mob[i].alive && !mob[i].isShielded) {
+              dist = Vector.magnitude(Vector.sub(path[1], mob[i].position)) - mob[i].radius;
+              if (dist < range) mobs.statusStun(mob[i], 30 + Math.floor(energy * 60))
+            }
+          }
+        }
 
         //draw laser beam
         ctx.beginPath();

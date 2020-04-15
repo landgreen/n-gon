@@ -3,25 +3,18 @@
 
 ************** TODO - n-gon **************
 
+an effect when canceling a power up
+  ammo? heals?
+  50% chance for a mod, 25% heal, 25% ammo
+
+liquid nitrogen cooling
+  Mobs freeze on contact with the player
+
+uranium reactor core
+  Mobs get irradiated on contact with the player
+
 add player Scent Trails for mod navigation
   https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
-
-mod - energy replaces your health, 
-
-field - pilot wave
-  while mouse is down blocks (and mobs?) are move with the mouse
-    players can do serious damage by flicking the mouse and firing blocks
-    on mouse down calculate relative position of block to mouse and maintain that as mouse moves
-      on mouse up give blocks the computed mouse velocity
-    use a gravity effect that pulls blocks in range towards the center of the mouse
-      maybe no force in the very center to prevent clumping
-  draw a ellipse around the mouse that wobbles like phase decoherence field, and changes color maybe like negative mass field
-
-make flurooantimonic acid mod a damage over time
-  rename to radiation damage?
-
-mod - radiation damage over time effects can spread to nearby mobs
-  do a check for nearby mobs on each tick
 
 try adding a subtile shift of color towards red, green or blue
   block, map, background, text? color

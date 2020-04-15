@@ -146,9 +146,9 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     // spawn.laserBoss(2900, -500)
-    // spawn.sucker(1200, -500)
+    spawn.striker(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
-    spawn.randomMob(1600, -500)
+    // spawn.randomMob(1600, -500)
 
   },
   bosses() {
@@ -492,12 +492,12 @@ const level = {
     spawn.mapRect(5200, -775, 100, 920);
     spawn.mapRect(5300, -1075, 350, 1220);
     spawn.boost(5825, 235, 1400);
-    level.fillBG.push({
+    level.fill.push({
       x: 5200,
       y: 125,
       width: 450,
       height: 200,
-      color: "rgba(0,20,40,0.2)"
+      color: "rgba(0,20,40,0.25)"
     });
 
     //structure bellow tall stairs
@@ -522,12 +522,12 @@ const level = {
     spawn.mapRect(4100, -3450, 100, 700); //left top shelf
     spawn.mapRect(4200, -3450, 100, 400); //left top shelf
     spawn.mapRect(4300, -3450, 100, 100); //left top shelf
-    level.fillBG.push({
+    level.fill.push({
       x: 4100,
       y: -3450,
       width: 500,
       height: 1750,
-      color: "#d0d4d6"
+      color: "rgba(0,20,40,0.1)"
     });
     level.fill.push({
       x: 4100,

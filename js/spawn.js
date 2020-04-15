@@ -942,7 +942,8 @@ const spawn = {
     me.g = 0.0002; //required if using 'gravity'
     me.frictionStatic = 0;
     me.friction = 0;
-    me.delay = 100;
+    me.delay = 120 * game.CDScale;
+    me.cd = Infinity;
     Matter.Body.rotate(me, Math.PI * 0.1);
     spawn.shield(me, x, y);
     me.onDamage = function () {
@@ -950,7 +951,20 @@ const spawn = {
     };
     me.do = function () {
       this.gravity();
-      this.seePlayerCheck();
+      if (!(game.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
+        if (
+          this.distanceToPlayer2() < this.seeAtDistance2 &&
+          Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
+          Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+          !mech.isStealth
+        ) {
+          this.foundPlayer();
+          if (this.cd === Infinity) this.cd = game.cycle + this.delay;
+        } else if (this.seePlayer.recall) {
+          this.lostPlayer();
+          this.cd = Infinity
+        }
+      }
       this.checkStatus();
       this.attraction();
       this.strike();
