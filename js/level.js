@@ -17,8 +17,7 @@ const level = {
       // level.difficultyIncrease(9)
       // b.giveGuns("vacuum bomb")
       // mech.setField("pilot wave")
-      // b.giveMod("energy");
-      // b.giveMod("Born rule");
+      // b.giveMod("nonlocality");
 
       level.intro(); //starting level
       // level.testing();
@@ -103,6 +102,10 @@ const level = {
     level.defaultZoom = 1500
     game.zoomTransition(level.defaultZoom)
     document.body.style.backgroundColor = "#ddd";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
+
     level.fill.push({
       x: 6400,
       y: -550,
@@ -164,6 +167,9 @@ const level = {
     // }
 
     document.body.style.backgroundColor = "#ddd";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     // level.fillBG.push({
     //   x: -150,
@@ -242,6 +248,10 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
 
     document.body.style.backgroundColor = "#eee";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
+
     level.fillBG.push({
       x: 2600,
       y: -600,
@@ -395,6 +405,9 @@ const level = {
     spawn.debris(3035, -3900, 1500, 3); //16 debris per level
 
     document.body.style.backgroundColor = "#dbdcde";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     //spawn start building
     spawn.mapRect(-300, -800, 50, 800);
@@ -575,6 +588,9 @@ const level = {
     level.defaultZoom = 1700
     game.zoomTransition(level.defaultZoom)
     document.body.style.backgroundColor = "#dcdcde";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     if (Math.random() < 0.75) {
       //normal direction start in top left
@@ -804,6 +820,9 @@ const level = {
     spawn.debris(3450, 0, 2000, 16); //16 debris per level
     spawn.debris(3500, -2350, 1500, 2); //16 debris per level
     document.body.style.backgroundColor = "#dcdcde";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     //foreground
     level.fill.push({
@@ -984,6 +1003,9 @@ const level = {
     powerUps.spawnStartingPowerUps(1475, -1175);
     spawn.debris(750, -2200, 3700, 16); //16 debris per level
     document.body.style.backgroundColor = "#dcdcde";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     //foreground
     level.fill.push({
@@ -1124,7 +1146,6 @@ const level = {
     level.defaultZoom = 1500
     game.zoomTransition(level.defaultZoom)
 
-    document.body.style.backgroundColor = "#dcdcde" //"#fafcff";
     mech.setPosToSpawn(0, -700); //normal spawn
     //mech.setPosToSpawn(-2000, -1700); // left ledge spawn
     level.enter.x = mech.spawnPos.x - 50;
@@ -1135,6 +1156,10 @@ const level = {
     level.exit.y = -2805;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     powerUps.spawnStartingPowerUps(-2550, -700);
+    document.body.style.backgroundColor = "#dcdcde" //"#fafcff";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     // spawn.laserZone(-550, -350, 10, 400, 0.3)
     // spawn.deathQuery(-550, -350, 50, 400)
@@ -1306,7 +1331,6 @@ const level = {
     level.defaultZoom = 1300
     game.zoomTransition(level.defaultZoom)
 
-    document.body.style.backgroundColor = "#dcdcde" //"#f2f5f3";
     mech.setPosToSpawn(25, -55); //normal spawn
     //mech.setPosToSpawn(-2000, -1700); // left ledge spawn
     level.enter.x = mech.spawnPos.x - 50;
@@ -1320,6 +1344,10 @@ const level = {
     spawn.debris(-3000, -800, 3280, 6); //16 debris per level
     spawn.debris(-1400, 410, 2300, 5); //16 debris per level
     powerUps.spawnStartingPowerUps(25, 500);
+    document.body.style.backgroundColor = "#dcdcde" //"#f2f5f3";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     //foreground
     // level.fill.push({ x: -3025, y: 50, width: 4125, height: 1350, color: "rgba(0,0,0,0.05)"});
@@ -1517,7 +1545,11 @@ const level = {
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
     document.body.style.backgroundColor = "#e0e5e0";
-    //foreground
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
+
+    // foreground
     level.fill.push({
       x: -550,
       y: -1700,
@@ -1673,9 +1705,12 @@ const level = {
     level.exit.y = -1250;
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 20); //exit bump
-    document.body.style.backgroundColor = "#dbdcde";
     spawn.debris(3800, -1480, 300, 12);
     spawn.debris(3600, -1130, 200, 2);
+    document.body.style.backgroundColor = "#dbdcde";
+    // game.draw.mapFill = "#444"
+    // game.draw.bodyFill = "rgba(140,140,140,0.85)"
+    // game.draw.bodyStroke = "#222"
 
     level.fillBG.push({
       x: -500,

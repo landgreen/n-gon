@@ -3,6 +3,8 @@
 
 ************** TODO - n-gon **************
 
+mod pilot wave - nonlocality: works out of LOS
+
 an effect when canceling a power up
   ammo? heals?
   50% chance for a mod, 25% heal, 25% ammo
@@ -13,18 +15,8 @@ liquid nitrogen cooling
 uranium reactor core
   Mobs get irradiated on contact with the player
 
-add player Scent Trails for mod navigation
+add player Scent Trails for mob navigation
   https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
-
-try adding a subtile shift of color towards red, green or blue
-  block, map, background, text? color
-  could be random as each level loads
-
-player health becomes NaN
-occurred a few times at higher levels
-  game.dmgScale, game.healScale not corrupted
-
-  didn't occur:   shotgun / laser  with all mods that have no requirements
 
 mod - killing a stunned mob gives something 
   ammo or heal power up?
@@ -42,15 +34,11 @@ boss mob - just a faster and larger version of a springer mob
   always shielded
   consider combining with time skipper field?
 
-pulse and time dilation only upgrades left with no dedicated mod
-
 mob - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
 
 mob stabber - extends one vector like the shooter, but quickly in order to stab
 
 mob sniper - targeting laser, then a high speed, no gravity bullet
-
-mod - nails do poison damage
 
 mod - increase laser bot range, and reduce energy drain
 

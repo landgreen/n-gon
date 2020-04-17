@@ -1225,9 +1225,15 @@ const mech = {
   hold() {},
   setField(index) {
     if (isNaN(index)) { //find index by name
+      let found = false
       for (let i = 0; i < mech.fieldUpgrades.length; i++) {
-        if (index === mech.fieldUpgrades[i].name) index = i
+        if (index === mech.fieldUpgrades[i].name) {
+          index = i;
+          found = true;
+          break;
+        }
       }
+      if (!found) return //if you can't find the field don't give a field to avoid game crash
     }
     mech.fieldMode = index;
     document.getElementById("field").innerHTML = mech.fieldUpgrades[index].name
@@ -1376,7 +1382,7 @@ const mech = {
               }
             } else if (b.isModMissileField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.5;
+              mech.energy -= 0.6;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -1927,7 +1933,7 @@ const mech = {
     },
     {
       name: "pilot wave",
-      description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>energy <strong>drain</strong> is increased out of <strong>line of sight</strong>",
+      description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
       isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
@@ -1944,16 +1950,22 @@ const mech = {
         mech.fieldRadius = 0;
         mech.drop();
         mech.hold = function () {
-          if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+          if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) {
+            const scale = 25
+            const bounds = {
+              min: {
+                x: mech.fieldPosition.x - scale,
+                y: mech.fieldPosition.y - scale
+              },
+              max: {
+                x: mech.fieldPosition.x + scale,
+                y: mech.fieldPosition.y + scale
+              }
+            }
+            const isInMap = Matter.Query.region(map, bounds).length
+            // const isInMap = Matter.Query.point(map, mech.fieldPosition).length
 
-
-            // if (Matter.Query.ray(map, game.mouseInGame, player.position).length === 0){
-
-            // } else {
-            //   mech.fieldOn = false;
-            // }
-
-            if (!mech.fieldOn) {
+            if (!mech.fieldOn) { // if field was off, and it starting up, teleport to new mouse location
               mech.fieldOn = true;
               mech.fieldPosition = { //smooth the mouse position
                 x: game.mouseInGame.x,
@@ -1963,62 +1975,58 @@ const mech = {
                 x: mech.fieldPosition.x,
                 y: mech.fieldPosition.y
               }
-            } else {
+            } else { //when field is on it smoothly moves towards the mouse
               mech.lastFieldPosition = { //used to find velocity of field changes
                 x: mech.fieldPosition.x,
                 y: mech.fieldPosition.y
               }
-              const smooth = 0.97
+              const smooth = isInMap ? 0.985 : 0.96;
               mech.fieldPosition = { //smooth the mouse position
                 x: mech.fieldPosition.x * smooth + game.mouseInGame.x * (1 - smooth),
                 y: mech.fieldPosition.y * smooth + game.mouseInGame.y * (1 - smooth),
               }
             }
-            // Matter.Query.ray(map, game.mouseInGame, player.position).length === 0
-            //make it so the field only works in line of sight
-            //  make the field not get stuck on map when there in no line of site
-            //    maybe track the last mouse position, and revert to smooting towards it when mouse leaves line of site
-            // if (Matter.Query.ray(map, mech.fieldPosition, player.position).length === 0)
-
-
-
             mech.grabPowerUp();
-            //disable if player is inside field
-
             if (mech.energy > 0.01) {
-              // && Vector.magnitude(Vector.sub(game.mouseInGame, player.position)) > radius * 1.5 //disable effect when near player
               //find mouse velocity
               const diff = Vector.sub(mech.fieldPosition, mech.lastFieldPosition)
               const speed = Vector.magnitude(diff)
-              const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 60)) //limit velocity
-              let radius = Math.max(50, 250 - 1.5 * speed) //change radius proportional to mouse speed  //run a smoothing function?
-              let isVisible = true
-              if (Matter.Query.ray(map, mech.fieldPosition, player.position).length !== 0) {
-                isVisible = false
-                radius *= 0.2
+              const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 45)) //limit velocity
+              let radius, radiusSmooth
+              if (Matter.Query.ray(map, mech.fieldPosition, player.position).length) { //is there something block the player's view of the field
+                radius = 0
+                radiusSmooth = Math.max(0, isInMap ? 0.96 - 0.02 * speed : 0.995); //0.99
+              } else {
+                radius = Math.max(50, 250 - 2 * speed)
+                radiusSmooth = 0.97
               }
-              smooth = 0.9
-              mech.fieldRadius = mech.fieldRadius * smooth + radius * (1 - smooth)
+              mech.fieldRadius = mech.fieldRadius * radiusSmooth + radius * (1 - radiusSmooth)
 
-              //find nearby blocks
               for (let i = 0, len = body.length; i < len; ++i) {
                 if (Vector.magnitude(Vector.sub(body[i].position, mech.fieldPosition)) < mech.fieldRadius) {
-                  // Matter.Query.collides(player, [body[i]]).length === 0) { //block is not touching player, for no flying
-                  // (Matter.Query.ray(map, game.mouseInGame, player.position).length === 0 ? 1 : 4)
-                  const DRAIN = speed * body[i].mass * 0.00002 * (isVisible ? 1 : 4)
+                  const DRAIN = speed * body[i].mass * 0.00002
                   if (mech.energy > DRAIN) {
                     mech.energy -= DRAIN;
                     Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
                     Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0.8)
                     body[i].force.y -= body[i].mass * game.g; //remove gravity effects
                   } else {
-                    mech.fieldOn = false
                     mech.fieldCDcycle = mech.cycle + 120;
+                    mech.fieldOn = false
                     mech.fieldRadius = 0
                     break
                   }
                 }
               }
+
+              if (b.isModPilotFreeze) {
+                for (let i = 0, len = mob.length; i < len; ++i) {
+                  if (Vector.magnitude(Vector.sub(mob[i].position, mech.fieldPosition)) < mech.fieldRadius) {
+                    mobs.statusSlow(mob[i], 120)
+                  }
+                }
+              }
+
               ctx.beginPath();
               const rotate = mech.cycle * 0.008;
               mech.fieldPhase += 0.2 // - 0.5 * Math.sqrt(Math.min(mech.energy, 1));
@@ -2026,21 +2034,18 @@ const mech = {
               const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
               ctx.beginPath();
               ctx.ellipse(mech.fieldPosition.x, mech.fieldPosition.y, 1.2 * mech.fieldRadius * off1, 1.2 * mech.fieldRadius * off2, rotate, 0, 2 * Math.PI);
-              // ctx.ellipse(game.mouseInGame.x, game.mouseInGame.y, radius * off1, radius * off2, -rotate, 0, 2 * Math.PI);
-              // ctx.arc(game.mouseInGame.x, game.mouseInGame.y, this.fieldRange, 0, 2 * Math.PI);
-              ctx.fillStyle = "#fff"; //"#eef";
               ctx.globalCompositeOperation = "exclusion"; //"exclusion" "difference";
+              ctx.fillStyle = "#fff"; //"#eef";
               ctx.fill();
               ctx.globalCompositeOperation = "source-over";
-
               ctx.beginPath();
               ctx.ellipse(mech.fieldPosition.x, mech.fieldPosition.y, 1.2 * mech.fieldRadius * off1, 1.2 * mech.fieldRadius * off2, rotate, 0, mech.energy * 2 * Math.PI);
               ctx.strokeStyle = "#000";
               ctx.lineWidth = 4;
               ctx.stroke();
             } else {
-              mech.fieldOn = false
               mech.fieldCDcycle = mech.cycle + 120;
+              mech.fieldOn = false
               mech.fieldRadius = 0
             }
           } else {
