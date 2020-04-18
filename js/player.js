@@ -1828,17 +1828,22 @@ const mech = {
             const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
             ctx.beginPath();
             ctx.ellipse(mech.pos.x, mech.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
-            ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*mech.energy})`;
-            ctx.globalCompositeOperation = "destination-in"; //in or atop
-            ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
-            ctx.clip();
-
             if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
               ctx.lineWidth = 5;
               ctx.strokeStyle = `rgba(0, 204, 255,1)`
               ctx.stroke()
             }
+            if (b.modRenormalization) {
+              for (let i = 0; i < bullet.length; i++) {
+                ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
+                ctx.arc(bullet[i].position.x, bullet[i].position.y, radius, 0, 2 * Math.PI);
+              }
+            }
+            ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*mech.energy})`;
+            ctx.globalCompositeOperation = "destination-in"; //in or atop
+            ctx.fill();
+            ctx.globalCompositeOperation = "source-over";
+            ctx.clip();
           }
 
           mech.isStealth = false //isStealth disables most uses of foundPlayer() 

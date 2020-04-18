@@ -815,7 +815,7 @@ const b = {
         bullet = [];
 
         let count = b.modCount
-        if (b.isModNoAmmo) count - 5 //remove the 5 bonus mods when getting rid of leveraged investment
+        if (b.isModNoAmmo) count -= 5 //remove the 5 bonus mods when getting rid of leveraged investment
         for (let i = 0; i < count; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
@@ -3325,11 +3325,13 @@ const b = {
             if (who.shield) {
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
-                  const force = Matter.Vector.mult(this.velocity, 7 / mob[i].mass)
-                  Matter.Body.setVelocity(mob[i], {
-                    x: mob[i].velocity.x + force.x,
-                    y: mob[i].velocity.y + force.y
-                  });
+
+                  Matter.Body.setVelocity(mob[i], Matter.Vector.mult(Matter.Vector.normalise(this.velocity), 10));
+
+                  // const force = Matter.Vector.mult(this.velocity, 4 / mob[i].mass)
+                  // const velocity = Matter.Vector.add(force, mob[i].velocity)
+                  // Matter.Body.setVelocity(mob[i], velocity);
+
                   break
                 }
               }

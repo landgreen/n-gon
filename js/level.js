@@ -15,12 +15,12 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(9)
-      // b.giveGuns("vacuum bomb")
+      b.giveGuns("rail gun")
       // mech.setField("pilot wave")
       // b.giveMod("nonlocality");
 
-      level.intro(); //starting level
-      // level.testing();
+      // level.intro(); //starting level
+      level.testing();
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -148,8 +148,9 @@ const level = {
     spawn.mapRect(6700, -1800, 800, 2600); //right wall
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-    // spawn.laserBoss(2900, -500)
-    spawn.striker(1200, -500)
+    // spawn.bomberBoss(2900, -500)
+    spawn.hopper(1200, -500)
+    spawn.hopper(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
 
