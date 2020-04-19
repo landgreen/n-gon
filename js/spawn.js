@@ -833,7 +833,7 @@ const spawn = {
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
-    me.rotateVelocity = Math.min(0.01, 0.0025 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
+    me.rotateVelocity = Math.min(0.0054, 0.0022 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
       // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))

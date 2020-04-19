@@ -225,7 +225,7 @@ const powerUps = {
     }
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
-    if (Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) || Math.random() < 0.035) { //spawn heal chance is higher at low health
+    if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !b.isModEnergyHealth) || Math.random() < 0.035) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
       if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "heal");
       return;
@@ -264,7 +264,7 @@ const powerUps = {
       // } else if (Math.random() < 0.5) {
       //   powerUps.spawn(x, y, "field");
       //   if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
-    } else if (mech.health < 0.65) {
+    } else if (mech.health < 0.65 && !b.isModEnergyHealth) {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");

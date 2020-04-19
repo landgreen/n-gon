@@ -1318,9 +1318,9 @@ const mech = {
         // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         // mech.calculateFieldThreshold();
         mech.hold = function () {
-          const wave = Math.sin(mech.cycle * 0.02);
-          mech.fieldRange = 165 + 10 * wave
-          mech.fieldArc = 0.3 + 0.03 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+          const wave = Math.sin(mech.cycle * 0.022);
+          mech.fieldRange = 165 + 12 * wave
+          mech.fieldArc = 0.3 + 0.035 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
           mech.calculateFieldThreshold();
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1517,7 +1517,6 @@ const mech = {
                   if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
                     mob[i].damage(b.dmgScale * 0.085);
                     mob[i].locatePlayer();
-
                     //draw electricity
                     const sub = Vector.sub(mob[i].position, mech.pos)
                     const unit = Vector.normalise(sub);
@@ -1535,7 +1534,6 @@ const mech = {
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "rgba(0,255,0,0.5)" //"#fff";
                     ctx.stroke();
-
                   }
                 }
               }
@@ -1821,22 +1819,23 @@ const mech = {
 
         mech.hold = function () {
           function drawField(radius) {
-            radius *= 0.6 + 0.7 * mech.energy * b.modRenormalization;
+            radius *= 0.7 + 0.6 * mech.energy;
             const rotate = mech.cycle * 0.005;
-            mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.min(mech.energy, 1));
+            mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(mech.energy, 1)));
             const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
             const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
             ctx.beginPath();
             ctx.ellipse(mech.pos.x, mech.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
-            if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
-              ctx.lineWidth = 5;
-              ctx.strokeStyle = `rgba(0, 204, 255,1)`
-              ctx.stroke()
-            }
             if (b.modRenormalization) {
               for (let i = 0; i < bullet.length; i++) {
                 ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
                 ctx.arc(bullet[i].position.x, bullet[i].position.y, radius, 0, 2 * Math.PI);
+              }
+            } else {
+              if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = `rgba(0, 204, 255,1)`
+                ctx.stroke()
               }
             }
             ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*mech.energy})`;
@@ -1857,7 +1856,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
 
-            const DRAIN = (0.0004 + 0.00007 * player.speed) * (mech.fireCDcycle > mech.cycle ? 7 / b.modRenormalization : 1) //game.mouseDown
+            const DRAIN = 0.0004 + 0.0002 * player.speed + ((!b.modRenormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.0017)
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0.001) {
@@ -1875,9 +1874,9 @@ const mech = {
               if (inPlayer.length > 0) {
                 for (let i = 0; i < inPlayer.length; i++) {
                   if (inPlayer[i].shield) {
-                    mech.energy -= 0.01; //shields drain player energy
+                    mech.energy -= 0.005; //shields drain player energy
                     //draw outline of shield
-                    ctx.fillStyle = `rgba(0, 204, 255,0.6)`
+                    ctx.fillStyle = `rgba(140,217,255,0.5)`
                     ctx.fill()
                   } else if (b.superposition && inPlayer[i].dropPowerUp) {
                     // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player

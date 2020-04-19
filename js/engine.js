@@ -144,7 +144,19 @@ function collisionChecks(event) {
             }
             mech.damage(dmg);
             if (mob[k].onHit) mob[k].onHit(k);
-            if (b.isModAnnihilation) {
+
+            //extra kick between player and mob              //this section would be better with forces but they don't work...
+            let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
+            Matter.Body.setVelocity(player, {
+              x: player.velocity.x + 8 * Math.cos(angle),
+              y: player.velocity.y + 8 * Math.sin(angle)
+            });
+            Matter.Body.setVelocity(mob[k], {
+              x: mob[k].velocity.x - 8 * Math.cos(angle),
+              y: mob[k].velocity.y - 8 * Math.sin(angle)
+            });
+
+            if (b.isModAnnihilation && !mob[k].shield && !mob[k].isShielded) {
               mob[k].death();
               game.drawList.push({
                 //add dmg to draw queue
@@ -165,16 +177,6 @@ function collisionChecks(event) {
               });
 
             }
-            //extra kick between player and mob              //this section would be better with forces but they don't work...
-            let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
-            Matter.Body.setVelocity(player, {
-              x: player.velocity.x + 8 * Math.cos(angle),
-              y: player.velocity.y + 8 * Math.sin(angle)
-            });
-            Matter.Body.setVelocity(mob[k], {
-              x: mob[k].velocity.x - 8 * Math.cos(angle),
-              y: mob[k].velocity.y - 8 * Math.sin(angle)
-            });
             return;
           }
           //mob + bullet collisions

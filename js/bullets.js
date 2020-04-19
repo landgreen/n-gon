@@ -409,9 +409,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return !b.isModEnergyHealth
       },
-      requires: "",
+      requires: "not mass-energy equivalence",
       effect() {
         b.isModHealthRecovery = true;
       },
@@ -556,10 +556,12 @@ const b = {
         mech.health = 0
         b.modOnHealthChange();
         mech.displayHealth();
+        document.getElementById("health-bg").style.display = "none"
         b.isModEnergyHealth = true;
       },
       remove() {
         b.isModEnergyHealth = false;
+        document.getElementById("health-bg").style.display = "inline"
         mech.health = mech.energy;
       }
     },
@@ -621,9 +623,9 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return true
+        return !b.isModEnergyHealth
       },
-      requires: "",
+      requires: "not mass-energy equivalence",
       effect() {
         b.modHealthDrain += 0.015;
       },
@@ -654,9 +656,9 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return true
+        return !b.isModEnergyHealth
       },
-      requires: "",
+      requires: "not mass-energy equivalence",
       effect() {
         mech.maxHealth += 0.50
         mech.addHealth(0.50)
@@ -673,9 +675,9 @@ const b = {
       maxCount: 9,
       count: 0,
       allowed() {
-        return mech.health < 0.7 || build.isCustomSelection
+        return (mech.health < 0.7 || build.isCustomSelection) && !b.isModEnergyHealth
       },
-      requires: "health below 70%",
+      requires: "not mass-energy equivalence",
       effect() {
         b.modRecursiveHealing += 1
       },
@@ -734,13 +736,13 @@ const b = {
     },
     {
       name: "catabolism",
-      description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong>health</strong>",
+      description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong class='color-h'>health</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return !b.isModEnergyHealth
       },
-      requires: "",
+      requires: "not mass-energy equivalence",
       effect: () => {
         b.isModAmmoFromHealth = 0.03;
       },
@@ -972,26 +974,8 @@ const b = {
       }
     },
     {
-      name: "wave phase velocity",
-      description: "the <strong>wave beam</strong> propagates faster in solids",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return b.haveGunCheck("wave beam")
-      },
-      requires: "wave beam",
-      effect() {
-        b.modWaveSpeedMap = 3
-        b.modWaveSpeedBody = 1.9
-      },
-      remove() {
-        b.modWaveSpeedMap = 0.08
-        b.modWaveSpeedBody = 0.25
-      }
-    },
-    {
-      name: "double helix",
-      description: "<strong>wave beam</strong> emits <strong>two</strong> out of phase particles<br>wave particles do <strong>40%</strong> less <strong class='color-d'>damage</strong>",
+      name: "wave packet",
+      description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>wave particles do <strong>40%</strong> less <strong class='color-d'>damage</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1005,14 +989,31 @@ const b = {
         b.modWaveHelix = 1
       }
     },
-
     {
-      name: "pocket universe",
-      description: "<strong>wave beam</strong> bullets last <strong>4</strong> times longer<br>bullets are <strong>confined</strong> to a <strong>region</strong> around player",
+      name: "phase velocity",
+      description: "the <strong>wave beam</strong> propagates faster in solids",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("wave beam")
+        return b.haveGunCheck("wave beam") && !b.isModWaveReflect
+      },
+      requires: "wave beam",
+      effect() {
+        b.modWaveSpeedMap = 3 //needs to be 3 for pocket universe require check
+        b.modWaveSpeedBody = 1.9
+      },
+      remove() {
+        b.modWaveSpeedMap = 0.08
+        b.modWaveSpeedBody = 0.25
+      }
+    },
+    {
+      name: "pocket universe",
+      description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>confined</strong> to a <strong>region</strong> around player",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("wave beam") && b.modWaveSpeedMap !== 3
       },
       requires: "wave beam",
       effect() {
@@ -1235,7 +1236,7 @@ const b = {
       }
     },
     {
-      name: "foam stabilization",
+      name: "quantum foam",
       description: "<strong>foam</strong> can stick to <strong>shields</strong>",
       maxCount: 1,
       count: 0,
@@ -1466,7 +1467,7 @@ const b = {
     },
     {
       name: "renormalization",
-      description: "<strong>phase decoherence field</strong> has <strong>3x visibility</strong><br>and <strong>3x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+      description: "<strong>phase decoherence field</strong> has increased <strong>visibility</strong><br>and <strong>3x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1474,10 +1475,10 @@ const b = {
       },
       requires: "phase decoherence field",
       effect() {
-        b.modRenormalization = 3;
+        b.modRenormalization = true;
       },
       remove() {
-        b.modRenormalization = 1;
+        b.modRenormalization = false;
       }
     },
     {
@@ -2540,7 +2541,7 @@ const b = {
     game.makeGunHUD();
   },
   guns: [{
-      name: "minigun", //0
+      name: "minigun",
       description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong>",
       ammo: 0,
       ammoPack: 65,
@@ -2577,7 +2578,7 @@ const b = {
       }
     },
     {
-      name: "shotgun", //1
+      name: "shotgun",
       description: "fire a <strong>burst</strong> of short range bullets<br><em>crouch to reduce recoil</em>",
       ammo: 0,
       ammoPack: 11,
@@ -2624,7 +2625,7 @@ const b = {
       }
     },
     {
-      name: "super balls", //2
+      name: "super balls",
       description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
       ammoPack: 14,
@@ -2681,7 +2682,7 @@ const b = {
       }
     },
     {
-      name: "flechettes", //3
+      name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
       ammoPack: 23,
@@ -2735,7 +2736,7 @@ const b = {
       }
     },
     {
-      name: "wave beam", //4
+      name: "wave beam",
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles <strong>slowly</strong> propagate through <strong>solids</strong>",
       ammo: 0,
       ammoPack: 110,
@@ -2746,14 +2747,20 @@ const b = {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
         const dir = mech.angle
         const SPEED = 10
-        const wiggleMag = mech.crouch ? 6 : 12
+        let wiggleMag
+        if (b.modWaveHelix === 2) {
+          wiggleMag = (mech.crouch ? 6 : 12) * (1 + Math.sin(mech.cycle * 0.1))
+        } else {
+          wiggleMag = mech.crouch ? 6 : 12
+        }
+        // const wiggleMag = b.modWaveHelix ? (mech.crouch ? 6 + 6 * Math.sin(mech.cycle * 0.1) : 13 + 13 * Math.sin(mech.cycle * 0.1)) : (mech.crouch ? 6 : 12)
         const size = 5 * (b.modWaveHelix === 1 ? 1 : 0.7)
         for (let i = 0; i < b.modWaveHelix; i++) {
           const me = bullet.length;
           bullet[me] = Bodies.polygon(mech.pos.x + 25 * Math.cos(dir), mech.pos.y + 25 * Math.sin(dir), 7, size, {
             angle: dir,
             cycle: -0.5,
-            endCycle: game.cycle + Math.floor((b.isModWaveReflect ? 480 : 120) * b.isModBulletsLastLonger),
+            endCycle: game.cycle + Math.floor((b.isModWaveReflect ? 600 : 120) * b.isModBulletsLastLonger),
             inertia: Infinity,
             frictionAir: 0,
             slow: 0,
@@ -2769,36 +2776,62 @@ const b = {
             onEnd() {},
             do() {
               if (!mech.isBodiesAsleep) {
-                let slowCheck = 1;
-                if (Matter.Query.point(map, this.position).length) { //check if inside map
-                  slowCheck = b.modWaveSpeedMap
-                } else { //check if inside a body
-                  let q = Matter.Query.point(body, this.position)
-                  if (q.length) {
-                    slowCheck = b.modWaveSpeedBody
-                    Matter.Body.setPosition(this, Vector.add(this.position, q[0].velocity)) //move with the medium
-                  } else { // check if inside a mob
-                    q = Matter.Query.point(mob, this.position)
-                    for (let i = 0; i < q.length; i++) {
-                      slowCheck = 0.3;
-                      Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                      let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (b.modWaveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
-                      q[i].damage(dmg);
-                      q[i].foundPlayer();
-                      game.drawList.push({ //add dmg to draw queue
-                        x: this.position.x,
-                        y: this.position.y,
-                        radius: Math.log(2 * dmg + 1.1) * 40,
-                        color: 'rgba(0,0,0,0.4)',
-                        time: game.drawTime
-                      });
+                if (b.isModWaveReflect) {
+                  // check if inside a mob
+                  q = Matter.Query.point(mob, this.position)
+                  for (let i = 0; i < q.length; i++) {
+                    let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (b.modWaveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                    q[i].damage(dmg);
+                    q[i].foundPlayer();
+                    game.drawList.push({ //add dmg to draw queue
+                      x: this.position.x,
+                      y: this.position.y,
+                      radius: Math.log(2 * dmg + 1.1) * 40,
+                      color: 'rgba(0,0,0,0.4)',
+                      time: game.drawTime
+                    });
+                  }
+                  Matter.Body.setPosition(this, Vector.add(this.position, player.velocity)) //bullets move with player
+                  const sub = Vector.sub(this.position, mech.pos)
+                  const range = 558 //93 * x
+                  if (Vector.magnitude(sub) > range) {
+                    // Matter.Body.setPosition(this, Vector.sub(this.position, Vector.mult(Vector.normalise(sub), 2 * range))) //teleport to opposite side
+                    Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1));
+                    // Matter.Body.setPosition(this, Vector.add(mech.pos, Vector.mult(Vector.normalise(sub), range)))
+                  }
+                } else {
+                  let slowCheck = 1
+                  if (Matter.Query.point(map, this.position).length) { //check if inside map
+                    slowCheck = b.modWaveSpeedMap
+                  } else { //check if inside a body
+                    let q = Matter.Query.point(body, this.position)
+                    if (q.length) {
+                      slowCheck = b.modWaveSpeedBody
+                      Matter.Body.setPosition(this, Vector.add(this.position, q[0].velocity)) //move with the medium
+                    } else { // check if inside a mob
+                      q = Matter.Query.point(mob, this.position)
+                      for (let i = 0; i < q.length; i++) {
+                        slowCheck = 0.3;
+                        Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
+                        let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (b.modWaveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                        q[i].damage(dmg);
+                        q[i].foundPlayer();
+                        game.drawList.push({ //add dmg to draw queue
+                          x: this.position.x,
+                          y: this.position.y,
+                          radius: Math.log(2 * dmg + 1.1) * 40,
+                          color: 'rgba(0,0,0,0.4)',
+                          time: game.drawTime
+                        });
+                      }
                     }
                   }
+                  if (slowCheck !== this.slow) { //toggle velocity based on inside and outside status change
+                    this.slow = slowCheck
+                    Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), SPEED * slowCheck));
+                  }
                 }
-                if (slowCheck !== this.slow) { //toggle velocity based on inside and outside status change
-                  this.slow = slowCheck
-                  Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), SPEED * slowCheck));
-                }
+
                 this.cycle++
                 const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.35) * ((i % 2) ? -1 : 1))
                 Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
@@ -2813,14 +2846,6 @@ const b = {
               //     }
               //   }
               // }
-
-              if (b.isModWaveReflect) {
-                Matter.Body.setPosition(this, Vector.add(this.position, player.velocity)) //bullets move with player
-                const sub = Vector.sub(this.position, mech.pos)
-                if (Vector.magnitude(sub) > 630) {
-                  Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(sub), -2 * 630))) //teleport to opposite side
-                }
-              }
 
               // if (b.isModWaveReflect) {
               //   Matter.Body.setPosition(this, Vector.add(this.position, player.velocity))  //bullets move with player
@@ -2917,7 +2942,7 @@ const b = {
       }
     },
     {
-      name: "grenades", //7
+      name: "grenades",
       description: "lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second",
       ammo: 0,
       ammoPack: 7,
@@ -2979,7 +3004,7 @@ const b = {
       }
     },
     {
-      name: "vacuum bomb", //8
+      name: "vacuum bomb",
       description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br><strong>click</strong> left mouse again to <strong>detonate</strong>",
       ammo: 0,
       ammoPack: 3,
@@ -3101,7 +3126,7 @@ const b = {
       }
     },
     {
-      name: "mine", //9
+      name: "mine",
       description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
       ammo: 0,
       ammoPack: 3,
@@ -3121,7 +3146,7 @@ const b = {
       }
     },
     {
-      name: "spores", //10
+      name: "spores",
       description: "fire a <strong>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
       ammo: 0,
       ammoPack: (game.difficultyMode > 3) ? 3 : 4,
@@ -3167,7 +3192,7 @@ const b = {
       }
     },
     {
-      name: "drones", //11
+      name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
       ammoPack: 12,
@@ -3180,7 +3205,7 @@ const b = {
       }
     },
     {
-      name: "ice IX", //11
+      name: "ice IX",
       description: "synthesize <strong>short-lived</strong> ice crystals<br>crystals <strong>seek</strong> out and <strong class='color-s'>freeze</strong> mobs",
       ammo: 0,
       ammoPack: 75,
@@ -3199,7 +3224,7 @@ const b = {
       }
     },
     {
-      name: "foam", //12
+      name: "foam",
       description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
       ammo: 0,
       ammoPack: 35,
@@ -3299,7 +3324,7 @@ const b = {
       }
     },
     {
-      name: "rail gun", //13
+      name: "rail gun",
       description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
       ammoPack: 4,
@@ -3553,7 +3578,7 @@ const b = {
       }
     },
     {
-      name: "laser", //14
+      name: "laser",
       description: "emit a <strong>beam</strong> of collimated coherent <strong>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
       ammo: 0,
       ammoPack: Infinity,
@@ -3712,7 +3737,7 @@ const b = {
       }
     },
     {
-      name: "pulse", //15
+      name: "pulse",
       description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
       ammo: 0,
       ammoPack: Infinity,
