@@ -782,23 +782,6 @@ const mobs = {
           }
         }
       },
-      strike() {
-        //teleport to player when close enough on CD
-        if (this.seePlayer.recall && this.cd < game.cycle) {
-          const dist = Vector.sub(this.seePlayer.position, this.position);
-          const distMag = Vector.magnitude(dist);
-          if (distMag < 400) {
-            this.cd = game.cycle + this.delay;
-            ctx.beginPath();
-            ctx.moveTo(this.position.x, this.position.y);
-            Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), distMag - 20 - radius));
-            ctx.lineTo(this.position.x, this.position.y);
-            ctx.lineWidth = radius * 2;
-            ctx.strokeStyle = this.fill; //"rgba(0,0,0,0.5)"; //'#000'
-            ctx.stroke();
-          }
-        }
-      },
       blink() {
         //teleport towards player as a way to move
         if (this.seePlayer.recall && !(game.cycle % this.blinkRate)) {

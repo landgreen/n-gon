@@ -2,23 +2,24 @@
 const spawn = {
   pickList: ["starter", "starter"],
   fullPickList: [
+    "shooter", "shooter", "shooter", "shooter", "shooter",
+    "hopper", "hopper", "hopper", "hopper",
     "chaser", "chaser", "chaser",
     "striker", "striker",
+    "laser", "laser",
+    "exploder", "exploder",
+    "spiker", "spiker",
     "spinner",
-    "hopper", "hopper", "hopper", "hopper",
     "grower",
     "springer",
-    "shooter", "shooter", "shooter", "shooter", "shooter",
     "beamer",
     "focuser",
-    "laser", "laser",
     "sucker",
-    "exploder", "exploder", "exploder",
     "spawner",
     "ghoster",
     "sneaker",
   ],
-  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter"],
+  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "spiker"],
   setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
     //each level has 2 mobs: one new mob and one from the last level
     spawn.pickList.splice(0, 1);
@@ -935,6 +936,76 @@ const spawn = {
       ctx.lineTo(best.x, best.y);
     }
   },
+  spiker(x, y, radius = 25 + Math.ceil(Math.random() * 15)) {
+    mobs.spawn(x, y, 10, radius, "rgb(220,50,205)");
+    let me = mob[mob.length - 1];
+    me.accelMag = 0.0005 * game.accelScale;
+    // me.g = 0.0002; //required if using 'gravity'
+    me.frictionStatic = 0;
+    me.friction = 0;
+    me.delay = 360 * game.CDScale;
+    me.cd = Infinity;
+    me.spikeVertex = 0;
+    me.spikeLength = 0;
+    me.isSpikeGrowing = false;
+    me.isSpikeReset = true;
+    Matter.Body.rotate(me, Math.PI * 0.1);
+    spawn.shield(me, x, y);
+    me.onDamage = function () {};
+    me.do = function () {
+      // this.gravity();
+      this.seePlayerByLookingAt();
+      this.checkStatus();
+      this.attraction();
+
+      const setNoseShape = () => {
+        const sub = Vector.sub(this.vertices[this.spikeVertex], this.position)
+        const spike = Vector.mult(Vector.normalise(sub), this.radius * this.spikeLength)
+        this.vertices[this.spikeVertex].x = this.position.x + spike.x
+        this.vertices[this.spikeVertex].y = this.position.y + spike.y
+      };
+
+
+      if (this.isSpikeReset) {
+        if (this.seePlayer.recall) {
+          const dist = Vector.sub(this.seePlayer.position, this.position);
+          const distMag = Vector.magnitude(dist);
+          if (distMag < this.radius * 7) {
+            //find nearest vertex
+            let nearestDistance = Infinity
+            for (let i = 0, len = this.vertices.length; i < len; i++) {
+              //find distance to player for each vertex
+              const dist = Vector.sub(this.seePlayer.position, this.vertices[i]);
+              const distMag = Vector.magnitude(dist);
+              //save the closest distance
+              if (distMag < nearestDistance) {
+                this.spikeVertex = i
+                nearestDistance = distMag
+              }
+            }
+            this.spikeLength = 1
+            this.isSpikeGrowing = true;
+            this.isSpikeReset = false;
+            Matter.Body.setAngularVelocity(this, 0)
+          }
+        }
+      } else {
+        if (this.isSpikeGrowing) {
+          this.spikeLength += 1
+          if (this.spikeLength > 9) {
+            this.isSpikeGrowing = false;
+          }
+        } else {
+          this.spikeLength -= 0.1
+          if (this.spikeLength < 1) {
+            this.spikeLength = 1
+            this.isSpikeReset = true
+          }
+        }
+        setNoseShape();
+      }
+    };
+  },
   striker(x, y, radius = 14 + Math.ceil(Math.random() * 25)) {
     mobs.spawn(x, y, 5, radius, "rgb(221,102,119)");
     let me = mob[mob.length - 1];
@@ -967,7 +1038,20 @@ const spawn = {
       }
       this.checkStatus();
       this.attraction();
-      this.strike();
+      if (this.seePlayer.recall && this.cd < game.cycle) {
+        const dist = Vector.sub(this.seePlayer.position, this.position);
+        const distMag = Vector.magnitude(dist);
+        if (distMag < 400) {
+          this.cd = game.cycle + this.delay;
+          ctx.beginPath();
+          ctx.moveTo(this.position.x, this.position.y);
+          Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), distMag - 20 - radius));
+          ctx.lineTo(this.position.x, this.position.y);
+          ctx.lineWidth = radius * 2;
+          ctx.strokeStyle = this.fill; //"rgba(0,0,0,0.5)"; //'#000'
+          ctx.stroke();
+        }
+      }
     };
   },
   sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {

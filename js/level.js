@@ -151,8 +151,10 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     // spawn.bomberBoss(2900, -500)
-    spawn.hopper(1200, -500)
-    spawn.hopper(1200, -500)
+    spawn.stabber(1200, -500)
+    spawn.chaser(1200, -500)
+    // spawn.nodeBoss(1200, -500, "spiker")
+    // spawn.hopper(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
 

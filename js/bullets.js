@@ -296,7 +296,7 @@ const b = {
     },
     {
       name: "scrap bots",
-      description: "<strong>+16%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
+      description: "<strong>+15%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
       maxCount: 6,
       count: 0,
       allowed() {
@@ -304,7 +304,7 @@ const b = {
       },
       requires: "",
       effect() {
-        b.isModBotSpawner += 0.16;
+        b.isModBotSpawner += 0.15;
       },
       remove() {
         b.isModBotSpawner = 0;
@@ -441,9 +441,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return !b.isModEnergyHealth
       },
-      requires: "",
+      requires: "mass-energy equivalence",
       effect() {
         b.isModEnergyLoss = true;
       },
@@ -549,9 +549,9 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return !b.isModPiezo
+        return !b.isModPiezo && !b.isModEnergyLoss
       },
-      requires: "not piezoelectricity",
+      requires: "not piezoelectricity<br>or acute stress response",
       effect: () => {
         mech.health = 0
         b.modOnHealthChange();
@@ -2148,7 +2148,7 @@ const b = {
       friction: 0,
       frictionAir: 0.10,
       restitution: 0.3,
-      dmg: 0.16, //damage done in addition to the damage from momentum
+      dmg: 0.15, //damage done in addition to the damage from momentum
       lookFrequency: 10 + Math.floor(7 * Math.random()),
       endCycle: game.cycle + 120 * b.isModBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
@@ -2797,7 +2797,7 @@ const b = {
                   if (Vector.magnitude(sub) > range) {
                     // Matter.Body.setPosition(this, Vector.sub(this.position, Vector.mult(Vector.normalise(sub), 2 * range))) //teleport to opposite side
                     Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1));
-                    // Matter.Body.setPosition(this, Vector.add(mech.pos, Vector.mult(Vector.normalise(sub), range)))
+                    Matter.Body.setPosition(this, Vector.add(mech.pos, Vector.mult(Vector.normalise(sub), range))) //reflect
                   }
                 } else {
                   let slowCheck = 1

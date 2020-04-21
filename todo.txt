@@ -3,6 +3,9 @@
 
 ************** TODO - n-gon **************
 
+bullets cost 5 life instead of ammo, but return 5 life when they hit a mob
+  replace life with energy or ammo?
+
 an effect when canceling a power up
   ammo? heals?
   50% chance for a mod, 25% heal, 25% ammo
