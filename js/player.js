@@ -216,7 +216,7 @@ const mech = {
           for (let i = 0; i < len; i++) {
             b.spore(player) //spawn drone
           }
-        } else if (game.isBodyDamage && player.velocity.y > 27 && momentum > 180 * b.modSquirrelFx) { //falling damage
+        } else if (player.velocity.y > 27 && momentum > 180 * b.modSquirrelFx) { //falling damage
           let dmg = Math.sqrt(momentum - 180) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
           mech.damage(dmg);
@@ -776,6 +776,7 @@ const mech = {
     mech.fieldRegen = b.modEnergyRegen; //0.001
     mech.fieldMeterColor = "#0cf"
     mech.fieldShieldingScale = 1;
+    game.isBodyDamage = true;
     mech.fieldDamageResistance = 1;
     mech.fieldRange = 155;
     mech.fieldFire = false;
@@ -1937,10 +1938,11 @@ const mech = {
     },
     {
       name: "pilot wave",
-      description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
+      description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br><strong>immune</strong> to <strong class='color-d'>damage</strong> from block <strong>collisions</strong>",
       isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
+        game.isBodyDamage = false;
         mech.fieldPhase = 0;
         mech.fieldPosition = {
           x: game.mouseInGame.x,
@@ -2008,7 +2010,7 @@ const mech = {
 
               for (let i = 0, len = body.length; i < len; ++i) {
                 if (Vector.magnitude(Vector.sub(body[i].position, mech.fieldPosition)) < mech.fieldRadius) {
-                  const DRAIN = speed * body[i].mass * 0.00002
+                  const DRAIN = speed * body[i].mass * 0.000022
                   if (mech.energy > DRAIN) {
                     mech.energy -= DRAIN;
                     Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity

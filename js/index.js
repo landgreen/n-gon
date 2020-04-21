@@ -369,8 +369,8 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
 let localSettings = JSON.parse(localStorage.getItem("localSettings"));
 // console.log(localSettings)
 if (localSettings) {
-  game.isBodyDamage = localSettings.isBodyDamage
-  document.getElementById("body-damage").checked = localSettings.isBodyDamage
+  // game.isBodyDamage = localSettings.isBodyDamage
+  // document.getElementById("body-damage").checked = localSettings.isBodyDamage
 
   game.isEasyToAimMode = localSettings.isEasyToAimMode
   document.getElementById("track-pad-mode").checked = localSettings.isEasyToAimMode
@@ -389,14 +389,14 @@ if (localSettings) {
   document.getElementById("fps-select").value = localSettings.fpsCapDefault
 } else {
   localSettings = {
-    isBodyDamage: true,
+    // isBodyDamage: true,
     isEasyToAimMode: false,
     isCommunityMaps: false,
     difficultyMode: '1',
     fpsCapDefault: 'max',
   };
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-  document.getElementById("body-damage").checked = localSettings.isBodyDamage
+  // document.getElementById("body-damage").checked = localSettings.isBodyDamage
   document.getElementById("track-pad-mode").checked = localSettings.isEasyToAimMode
   game.isEasyToAimMode = localSettings.isEasyToAimMode
   document.getElementById("community-maps").checked = localSettings.isEasyToAimMode
@@ -459,28 +459,32 @@ document.body.addEventListener("mousedown", (e) => {
 });
 
 document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting stuck when leaving the window
-  // console.log(e)
-  if (e.which === 1) {
+  // game.mouseDown = false;
+  // game.mouseDownRight = false;
+
+  if (e.button === 1) {
     game.mouseDown = true;
   } else {
     game.mouseDown = false;
   }
 
-  if (e.which === 3) {
+  if (e.button === 3) {
     game.mouseDownRight = true;
   } else {
     game.mouseDownRight = false;
   }
 });
 document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting stuck when leaving the window
+  // game.mouseDown = false;
+  // game.mouseDownRight = false;
   // console.log(e)
-  if (e.which === 1) {
+  if (e.button === 1) {
     game.mouseDown = true;
   } else {
     game.mouseDown = false;
   }
 
-  if (e.which === 3) {
+  if (e.button === 3) {
     game.mouseDownRight = true;
   } else {
     game.mouseDownRight = false;
@@ -521,11 +525,11 @@ document.getElementById("fps-select").addEventListener("input", () => {
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
-document.getElementById("body-damage").addEventListener("input", () => {
-  game.isBodyDamage = document.getElementById("body-damage").checked
-  localSettings.isBodyDamage = game.isBodyDamage
-  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-});
+// document.getElementById("body-damage").addEventListener("input", () => {
+//   game.isBodyDamage = document.getElementById("body-damage").checked
+//   localSettings.isBodyDamage = game.isBodyDamage
+//   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+// });
 
 document.getElementById("track-pad-mode").addEventListener("input", () => {
   game.isEasyToAimMode = document.getElementById("track-pad-mode").checked

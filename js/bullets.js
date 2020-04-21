@@ -296,7 +296,7 @@ const b = {
     },
     {
       name: "scrap bots",
-      description: "<strong>+15%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
+      description: "<strong>+13%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
       maxCount: 6,
       count: 0,
       allowed() {
@@ -304,7 +304,7 @@ const b = {
       },
       requires: "",
       effect() {
-        b.isModBotSpawner += 0.15;
+        b.isModBotSpawner += 0.13;
       },
       remove() {
         b.isModBotSpawner = 0;

@@ -95,19 +95,21 @@ function collisionChecks(event) {
       }
     }
 
-    function collidePlayer(obj, speedThreshold = 12, massThreshold = 2) {
+    function collidePlayer(obj) {
       //player dmg from hitting a body
-      if (
-        obj.classType === "body" &&
-        obj.speed > speedThreshold &&
-        obj.mass > massThreshold &&
-        (obj.velocity.y > 0 || player.velocity.y > 0)
-      ) {
-        const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
-        if (v > speedThreshold && mech.collisionImmuneCycle < mech.cycle) {
+      if (obj.classType === "body" && mech.collisionImmuneCycle < mech.cycle) {
+        const velocityThreshold = 13
+        if (player.position.y > obj.position.y) { //block is above the player look at total momentum difference
+          const velocityDiffMag = Vector.magnitude(Vector.sub(player.velocity, obj.velocity))
+          if (velocityDiffMag > velocityThreshold) hit(velocityDiffMag - velocityThreshold)
+        } else { //block is below player only look at horizontal momentum difference
+          const velocityDiffMagX = Math.abs(obj.velocity.x - player.velocity.x)
+          if (velocityDiffMagX > velocityThreshold) hit(velocityDiffMagX - velocityThreshold)
+        }
+
+        function hit(dmg) {
           mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
-          let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
-          dmg = Math.min(Math.max(dmg, 0.02), 0.15);
+          dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
           mech.damage(dmg);
           game.drawList.push({ //add dmg to draw queue
             x: pairs[i].activeContacts[0].vertex.x,
@@ -116,10 +118,30 @@ function collisionChecks(event) {
             color: game.mobDmgColor,
             time: game.drawTime
           });
-          return;
         }
       }
     }
+
+    // function collidePlayer(obj, speedThreshold = 12, massThreshold = 2) {
+    //   //player dmg from hitting a body
+    //   if (obj.classType === "body" && mech.collisionImmuneCycle < mech.cycle && obj.speed > speedThreshold && obj.mass > massThreshold) {
+    //     const v = Vector.magnitude(Vector.sub(player.velocity, obj.velocity));
+    //     if ((Math.abs(obj.velocity.x - player.velocity.x) > speedThreshold) || (player.position.y > obj.position.y && v > speedThreshold)) {
+    //       mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+    //       let dmg = Math.sqrt((v - speedThreshold + 0.1) * (obj.mass - massThreshold)) * 0.01;
+    //       dmg = Math.min(Math.max(dmg, 0.02), 0.15);
+    //       mech.damage(dmg);
+    //       game.drawList.push({ //add dmg to draw queue
+    //         x: pairs[i].activeContacts[0].vertex.x,
+    //         y: pairs[i].activeContacts[0].vertex.y,
+    //         radius: dmg * 500,
+    //         color: game.mobDmgColor,
+    //         time: game.drawTime
+    //       });
+    //       return;
+    //     }
+    //   }
+    // }
 
     //mob + (player,bullet,body) collisions
     for (let k = 0; k < mob.length; k++) {

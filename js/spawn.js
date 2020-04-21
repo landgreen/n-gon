@@ -8,7 +8,7 @@ const spawn = {
     "striker", "striker",
     "laser", "laser",
     "exploder", "exploder",
-    "spiker", "spiker",
+    "stabber", "stabber",
     "spinner",
     "grower",
     "springer",
@@ -19,7 +19,7 @@ const spawn = {
     "ghoster",
     "sneaker",
   ],
-  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "spiker"],
+  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "stabber"],
   setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
     //each level has 2 mobs: one new mob and one from the last level
     spawn.pickList.splice(0, 1);
@@ -936,15 +936,12 @@ const spawn = {
       ctx.lineTo(best.x, best.y);
     }
   },
-  spiker(x, y, radius = 25 + Math.ceil(Math.random() * 15)) {
-    mobs.spawn(x, y, 10, radius, "rgb(220,50,205)");
+  stabber(x, y, radius = 25 + Math.ceil(Math.random() * 15)) {
+    mobs.spawn(x, y, 4, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
     let me = mob[mob.length - 1];
-    me.accelMag = 0.0005 * game.accelScale;
+    me.accelMag = 0.0006 * game.accelScale;
     // me.g = 0.0002; //required if using 'gravity'
-    me.frictionStatic = 0;
-    me.friction = 0;
     me.delay = 360 * game.CDScale;
-    me.cd = Infinity;
     me.spikeVertex = 0;
     me.spikeLength = 0;
     me.isSpikeGrowing = false;
@@ -957,14 +954,6 @@ const spawn = {
       this.seePlayerByLookingAt();
       this.checkStatus();
       this.attraction();
-
-      const setNoseShape = () => {
-        const sub = Vector.sub(this.vertices[this.spikeVertex], this.position)
-        const spike = Vector.mult(Vector.normalise(sub), this.radius * this.spikeLength)
-        this.vertices[this.spikeVertex].x = this.position.x + spike.x
-        this.vertices[this.spikeVertex].y = this.position.y + spike.y
-      };
-
 
       if (this.isSpikeReset) {
         if (this.seePlayer.recall) {
@@ -1002,7 +991,9 @@ const spawn = {
             this.isSpikeReset = true
           }
         }
-        setNoseShape();
+        const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), this.radius * this.spikeLength)
+        this.vertices[this.spikeVertex].x = this.position.x + spike.x
+        this.vertices[this.spikeVertex].y = this.position.y + spike.y
       }
     };
   },

@@ -20,6 +20,8 @@ const level = {
       // b.giveMod("renormalization");
       // b.giveMod("pocket universe");
       // b.giveMod("wave packet");
+      // b.giveGuns("laser")
+      // mech.setField("pilot wave")
 
       level.intro(); //starting level
       // level.testing();
