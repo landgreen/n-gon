@@ -2,6 +2,38 @@
 
 
 ************** TODO - n-gon **************
+foam - check for touching map / blocks and slow foam down rather then bounce off walls
+quantum foam should just skip the shield
+
+red flashes when you take damage were replaced with the color of your energy bar
+  When you have mass energy equivalence
+
+mod - missiles: fire 3 small missiles
+  disables missile replication mod
+
+lore - a robot (the player) gains self awareness
+  each mod/gun/field is a new tech
+    all the technology leads to the singularity
+  each game run is actually the mech simulating a possible escape
+    this is why the graphics are so bad, its just a simulation
+    final mod is "this is just a simulation"
+      you get immortality and Infinity damage
+      the next level is the final level
+  when you die with Quantum Immortality there is a chance of lore text
+
+atmosphere levels: change the pace, give the user a rest between combat
+  low or no combat, but more graphics
+  explore lore
+    find power ups in "wrecked" mechs representing previous simulations
+      how you could leave something in one simulation that effects a different simulation
+        Maybe some strange quantum physics principle.
+    add text for player thoughts?
+  simple puzzles
+  cool looking stuff
+    large rotating fan that the player has to move through
+    nonaggressive mobs
+    in the final level you see your self at the starting level, with the wires
+      you shoot your self to wake up?
 
 bullets cost 5 life instead of ammo, but return 5 life when they hit a mob
   replace life with energy or ammo?
@@ -37,8 +69,6 @@ boss mob - just a faster and larger version of a springer mob
 
 mob - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
 
-mob stabber - extends one vector like the shooter, but quickly in order to stab
-
 mob sniper - targeting laser, then a high speed, no gravity bullet
 
 mod - increase laser bot range, and reduce energy drain
@@ -50,35 +80,9 @@ mod - blocks stun mobs
 
 settings - custom keys binding
 
-lore - a robot (the player) gains self awareness
-  each mod/gun/field is a new tech
-    all the technology leads to the singularity
-  each game run is actually the mech simulating a possible escape
-    this is why the graphics are so bad, its just a simulation
-    final mod is "this is just a simulation"
-      you get immortality and Infinity damage
-      the next level is the final level
-  when you die with Quantum Immortality there is a chance of lore text
-
-atmosphere levels: change the pace, give the user a rest between combat
-  low or no combat, but more graphics
-  explore lore
-    find power ups in "wrecked" mechs representing previous simulations
-      how you could leave something in one simulation that effects a different simulation
-        Maybe some strange quantum physics principle.
-    add text for player thoughts?
-  simple puzzles
-  cool looking stuff
-    large rotating fan that the player has to move through
-    nonaggressive mobs
-    in the final level you see your self at the starting level, with the wires
-      you shoot your self to wake up?
-
 css transition for pause menu
 
-mod - do extra damage based on your speed
-  do more damage when not moving?
-  take less damage when not moving?
+mod - do more damage when not moving?
 
 gun/field: portals
   use the code from mines to get them to stick to walls

@@ -80,6 +80,9 @@ const b = {
   isModEnergyHealth: null,
   isModPulseStun: null,
   isModPilotFreeze: null,
+  isModRest: null,
+  isModRPG: null,
+  isMod3Missiles: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -96,13 +99,13 @@ const b = {
         }, 10);
       }
     }
-    if (b.isModLowHealthDmg) {
-      if (!build.isCustomSelection) {
-        setTimeout(function () {
-          if (document.getElementById("mod-low-health-damage")) document.getElementById("mod-low-health-damage").innerHTML = " +" + (((3 / (2 + Math.min(mech.health, 1))) - 1) * 100).toFixed(0) + "%"
-        }, 10);
-      }
-    }
+    // if (b.isModLowHealthDmg) {
+    //   if (!build.isCustomSelection) {
+    //     setTimeout(function () {
+    //       if (document.getElementById("mod-low-health-damage")) document.getElementById("mod-low-health-damage").innerHTML = " +" + (((3 / (2 + Math.min(mech.health, 1))) - 1) * 100).toFixed(0) + "%"
+    //     }, 10);
+    //   }
+    // }
   },
   resetModText() {
     setTimeout(function () {
@@ -112,7 +115,7 @@ const b = {
   },
   mods: [{
       name: "capacitor",
-      nameInfo: "<span id='mod-capacitor'></span>",
+      // nameInfo: "<span id='mod-capacitor'></span>",
       description: "increase <strong class='color-d'>damage</strong> based on stored <strong class='color-f'>energy</strong><br><strong>+1%</strong> <strong class='color-d'>damage</strong> for every <strong>5%</strong> <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
@@ -125,6 +128,23 @@ const b = {
       },
       remove() {
         b.isModEnergyDamage = false;
+      }
+    },
+    {
+      name: "rest frame",
+      // nameInfo: "<span id='mod-rest'></span>",
+      description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong> when at rest",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect: () => {
+        b.isModRest = true // used in mech.grabPowerUp
+      },
+      remove() {
+        b.isModRest = false;
       }
     },
     {
@@ -181,7 +201,7 @@ const b = {
     },
     {
       name: "negative feedback",
-      nameInfo: "<span id='mod-low-health-damage'></span>",
+      // nameInfo: "<span id='mod-low-health-damage'></span>",
       description: "do extra <strong class='color-d'>damage</strong> at low health<br><em>up to <strong>50%</strong> increase when near death</em>",
       maxCount: 1,
       count: 0,
@@ -1057,7 +1077,7 @@ const b = {
     },
     {
       name: "self-replication",
-      description: "when <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they fire <strong>+1</strong> smaller <strong>missiles</strong>",
+      description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they launch <strong>+1</strong> smaller <strong>missile</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -1069,6 +1089,22 @@ const b = {
       },
       remove() {
         b.modBabyMissiles = 0;
+      }
+    },
+    {
+      name: "MIRV",
+      description: "launch <strong>3</strong> small <strong>missiles</strong> instead of 1<br><strong>2x</strong> increase in <strong>delay</strong> after firing",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("missiles")
+      },
+      requires: "missiles",
+      effect() {
+        b.isMod3Missiles = true;
+      },
+      remove() {
+        b.isMod3Missiles = false;
       }
     },
     {
@@ -1105,6 +1141,22 @@ const b = {
       },
       remove() {
         b.modGrenadeFragments = 0
+      }
+    },
+    {
+      name: "rocket-propelled grenade",
+      description: "<strong>grenades</strong> are rapidly <strong>accelerated</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("grenades")
+      },
+      requires: "grenades",
+      effect() {
+        b.isModRPG = true;
+      },
+      remove() {
+        b.isModRPG = false;
       }
     },
     {
@@ -1467,7 +1519,7 @@ const b = {
     },
     {
       name: "renormalization",
-      description: "<strong>phase decoherence field</strong> has increased <strong>visibility</strong><br>and <strong>3x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+      description: "<strong>phase decoherence</strong> has increased <strong>visibility</strong><br>and <strong>3x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1612,6 +1664,15 @@ const b = {
         mech.drop();
       }
     }
+  },
+  damageFromMods() {
+    let dmg = 1
+    if (b.isModLowHealthDmg) dmg *= (3 / (2 + Math.min(mech.health, 1))) //up to 50% dmg at zero player health  //if this changes all update display in modOnHealthChange()
+    if (b.isModHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
+    if (b.isModEnergyLoss) dmg *= 1.33;
+    if (b.isModRest && player.speed < 1) dmg *= 1.20;
+    if (b.isModEnergyDamage) dmg *= 1 + mech.energy / 5;
+    return dmg
   },
   bulletRemove() { //run in main loop
     //remove bullet if at end cycle for that bullet
@@ -1842,12 +1903,12 @@ const b = {
     bullet[me].onEnd = function () {
       b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
       for (let i = 0; i < spawn; i++) {
-        b.missile(this.position, 2 * Math.PI * Math.random(), 0, 0.65)
+        b.missile(this.position, 2 * Math.PI * Math.random(), 0, 0.7 * size)
       }
     }
     bullet[me].onDmg = function () {
       this.tryToLockOn();
-      // this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
+      this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
     };
     bullet[me].lockedOn = null;
     bullet[me].tryToLockOn = function () {
@@ -1874,7 +1935,7 @@ const b = {
       if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
         // console.log('hit')
         this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
-        this.lockedOn.damage(b.dmgScale * 5 * size); //does extra damage to target
+        this.lockedOn.damage(b.dmgScale * 4 * size); //does extra damage to target
       }
     };
     bullet[me].do = function () {
@@ -2875,7 +2936,7 @@ const b = {
     },
     {
       name: "missiles",
-      description: "fire missiles that <strong>accelerate</strong> towards <strong>mobs</strong><br><strong class='color-e'>explodes</strong> when near target",
+      description: "launch missiles that <strong>accelerate</strong> towards <strong>mobs</strong><br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
       ammoPack: 4,
       have: false,
@@ -2884,15 +2945,51 @@ const b = {
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 50 : 25); // cool down
-        b.missile({
-            x: mech.pos.x + 40 * Math.cos(mech.angle),
-            y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
-          },
-          mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
-          -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
-          1, b.modBabyMissiles)
-        bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
+        if (b.isMod3Missiles) {
+          if (mech.crouch) {
+            mech.fireCDcycle = mech.cycle + 80; // cool down
+            const direction = {
+              x: Math.cos(mech.angle),
+              y: Math.sin(mech.angle)
+            }
+            const push = Vector.mult(Vector.perp(direction), 0.0007)
+            for (let i = 0; i < 3; i++) {
+              //missile(where, dir, speed, size = 1, spawn = 0) {
+              b.missile({
+                x: mech.pos.x + 40 * direction.x,
+                y: mech.pos.y + 40 * direction.y
+              }, mech.angle + 0.06 * (1 - i), 0, 0.7, b.modBabyMissiles)
+              bullet[bullet.length - 1].force.x += push.x * (i - 1);
+              bullet[bullet.length - 1].force.y += push.y * (i - 1);
+            }
+          } else {
+            mech.fireCDcycle = mech.cycle + 60; // cool down
+            const direction = {
+              x: Math.cos(mech.angle),
+              y: Math.sin(mech.angle)
+            }
+            const push = Vector.mult(Vector.perp(direction), 0.0008)
+            for (let i = 0; i < 3; i++) {
+              //missile(where, dir, speed, size = 1, spawn = 0) {
+              b.missile({
+                x: mech.pos.x + 40 * direction.x,
+                y: mech.pos.y + 40 * direction.y
+              }, mech.angle, 0, 0.7, b.modBabyMissiles)
+              bullet[bullet.length - 1].force.x += push.x * (i - 1);
+              bullet[bullet.length - 1].force.y += push.y * (i - 1);
+            }
+          }
+        } else {
+          mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 50 : 30); // cool down
+          b.missile({
+              x: mech.pos.x + 40 * Math.cos(mech.angle),
+              y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
+            },
+            mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
+            -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
+            1, b.modBabyMissiles)
+          bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
+        }
       }
     },
     {
@@ -2953,11 +3050,7 @@ const b = {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir, true));
-        b.fireProps(mech.crouch ? 30 : 20, mech.crouch ? 43 : 32, dir, me); //cd , speed
         Matter.Body.setDensity(bullet[me], 0.0005);
-        bullet[me].totalCycles = 100;
-        bullet[me].endCycle = game.cycle + Math.floor(mech.crouch ? 120 : 80);
-        bullet[me].restitution = 0.2;
         bullet[me].explodeRad = 275;
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
@@ -2997,10 +3090,35 @@ const b = {
         bullet[me].onDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
         };
-        bullet[me].do = function () {
-          //extra gravity for harder arcs
-          this.force.y += this.mass * 0.0025;
-        };
+
+        if (b.isModRPG) {
+          b.fireProps(25, mech.crouch ? 60 : -15, dir, me); //cd , speed
+          bullet[me].endCycle = game.cycle + 70;
+          bullet[me].frictionAir = 0.07;
+          const MAG = 0.015
+          bullet[me].thrust = {
+            x: bullet[me].mass * MAG * Math.cos(dir),
+            y: bullet[me].mass * MAG * Math.sin(dir)
+          }
+          bullet[me].do = function () {
+            this.force.x += this.thrust.x;
+            this.force.y += this.thrust.y;
+            if (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) {
+              this.endCycle = 0; //explode if touching map or blocks
+            }
+          };
+        } else {
+          b.fireProps(mech.crouch ? 40 : 30, mech.crouch ? 43 : 32, dir, me); //cd , speed
+          bullet[me].endCycle = game.cycle + Math.floor(mech.crouch ? 120 : 80);
+          bullet[me].restitution = 0.2;
+          bullet[me].explodeRad = 275;
+          bullet[me].do = function () {
+            //extra gravity for harder arcs
+            this.force.y += this.mass * 0.0025;
+          };
+        }
+
+
       }
     },
     {
@@ -3195,7 +3313,7 @@ const b = {
       name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 12,
+      ammoPack: 13,
       have: false,
       isStarterGun: true,
       isEasyToAim: true,

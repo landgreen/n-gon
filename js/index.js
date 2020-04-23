@@ -83,7 +83,10 @@ const build = {
       <br>
       <br>health: ${(mech.health*100).toFixed(0)}% &nbsp; energy: ${(mech.energy*100).toFixed(0)}% &nbsp; mass: ${player.mass.toFixed(1)}
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
+      <br>global damage increase: ${((b.damageFromMods()-1)*100).toFixed(0)}%
+      <br>global harm reduction: ${((1-mech.harmReduction())*100).toFixed(0)}% 
     </div>`;
+
 
     let countGuns = 0
     let countMods = 0

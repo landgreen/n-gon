@@ -937,7 +937,7 @@ const spawn = {
     }
   },
   stabber(x, y, radius = 25 + Math.ceil(Math.random() * 15)) {
-    mobs.spawn(x, y, 4, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
+    mobs.spawn(x, y, 6, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
     let me = mob[mob.length - 1];
     me.accelMag = 0.0006 * game.accelScale;
     // me.g = 0.0002; //required if using 'gravity'
@@ -948,52 +948,62 @@ const spawn = {
     me.isSpikeReset = true;
     Matter.Body.rotate(me, Math.PI * 0.1);
     spawn.shield(me, x, y);
-    me.onDamage = function () {};
-    me.do = function () {
-      // this.gravity();
-      this.seePlayerByLookingAt();
-      this.checkStatus();
-      this.attraction();
-
-      if (this.isSpikeReset) {
-        if (this.seePlayer.recall) {
-          const dist = Vector.sub(this.seePlayer.position, this.position);
-          const distMag = Vector.magnitude(dist);
-          if (distMag < this.radius * 7) {
-            //find nearest vertex
-            let nearestDistance = Infinity
-            for (let i = 0, len = this.vertices.length; i < len; i++) {
-              //find distance to player for each vertex
-              const dist = Vector.sub(this.seePlayer.position, this.vertices[i]);
-              const distMag = Vector.magnitude(dist);
-              //save the closest distance
-              if (distMag < nearestDistance) {
-                this.spikeVertex = i
-                nearestDistance = distMag
-              }
-            }
-            this.spikeLength = 1
-            this.isSpikeGrowing = true;
-            this.isSpikeReset = false;
-            Matter.Body.setAngularVelocity(this, 0)
-          }
-        }
-      } else {
-        if (this.isSpikeGrowing) {
-          this.spikeLength += 1
-          if (this.spikeLength > 9) {
-            this.isSpikeGrowing = false;
-          }
-        } else {
-          this.spikeLength -= 0.1
-          if (this.spikeLength < 1) {
-            this.spikeLength = 1
-            this.isSpikeReset = true
-          }
-        }
+    // me.onDamage = function () {};
+    me.onDeath = function () {
+      if (this.spikeLength > 4) {
+        this.spikeLength = 4
         const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), this.radius * this.spikeLength)
         this.vertices[this.spikeVertex].x = this.position.x + spike.x
         this.vertices[this.spikeVertex].y = this.position.y + spike.y
+      }
+    };
+    me.do = function () {
+      if (!mech.isBodiesAsleep) {
+        // this.gravity();
+        this.seePlayerByLookingAt();
+        this.checkStatus();
+        this.attraction();
+
+        if (this.isSpikeReset) {
+          if (this.seePlayer.recall) {
+            const dist = Vector.sub(this.seePlayer.position, this.position);
+            const distMag = Vector.magnitude(dist);
+            if (distMag < this.radius * 7) {
+              //find nearest vertex
+              let nearestDistance = Infinity
+              for (let i = 0, len = this.vertices.length; i < len; i++) {
+                //find distance to player for each vertex
+                const dist = Vector.sub(this.seePlayer.position, this.vertices[i]);
+                const distMag = Vector.magnitude(dist);
+                //save the closest distance
+                if (distMag < nearestDistance) {
+                  this.spikeVertex = i
+                  nearestDistance = distMag
+                }
+              }
+              this.spikeLength = 1
+              this.isSpikeGrowing = true;
+              this.isSpikeReset = false;
+              Matter.Body.setAngularVelocity(this, 0)
+            }
+          }
+        } else {
+          if (this.isSpikeGrowing) {
+            this.spikeLength += 1
+            if (this.spikeLength > 9) {
+              this.isSpikeGrowing = false;
+            }
+          } else {
+            this.spikeLength -= 0.1
+            if (this.spikeLength < 1) {
+              this.spikeLength = 1
+              this.isSpikeReset = true
+            }
+          }
+          const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), this.radius * this.spikeLength)
+          this.vertices[this.spikeVertex].x = this.position.x + spike.x
+          this.vertices[this.spikeVertex].y = this.position.y + spike.y
+        }
       }
     };
   },

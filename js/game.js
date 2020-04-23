@@ -711,9 +711,16 @@ const game = {
         }
       }
 
-      if (b.isModEnergyDamage) {
-        document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
-      }
+      // if (b.isModEnergyDamage) {
+      //   document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
+      // }
+      // if (b.isModRest) {
+      //   if (player.speed < 1) {
+      //     document.getElementById("mod-rest").innerHTML = `(+20%)`
+      //   } else {
+      //     document.getElementById("mod-rest").innerHTML = `(+0%)`
+      //   }
+      // }
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
         if (b.isModEnergyRecovery) {

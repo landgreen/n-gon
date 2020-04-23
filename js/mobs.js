@@ -946,13 +946,13 @@ const mobs = {
       },
       damage(dmg, isBypassShield = false) {
         if (!this.isShielded || isBypassShield) {
+          dmg *= b.damageFromMods()
+          //mobs specific damage changes
           dmg /= Math.sqrt(this.mass)
           if (this.shield) dmg *= 0.04
-          if (b.isModLowHealthDmg) dmg *= (3 / (2 + Math.min(mech.health, 1))) //up to 50% dmg at zero player health  //if this changes all update display in modOnHealthChange()
-          if (b.isModHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
-          if (b.isModEnergyLoss) dmg *= 1.33;
-          if (b.isModEnergyDamage) dmg *= 1 + mech.energy / 5;
           if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
+
+          //energy and heal drain should be calculated after damage boosts
           if (b.modEnergySiphon && dmg !== Infinity) mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
           if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
           this.health -= dmg

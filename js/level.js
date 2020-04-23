@@ -15,12 +15,12 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(9)
-      // b.giveGuns("wave beam")
-      // mech.setField("phase decoherence field")
+      // b.giveGuns("missiles")
+      // mech.setField("time dilation field")
       // b.giveMod("renormalization");
       // b.giveMod("pocket universe");
-      // b.giveMod("wave packet");
-      // b.giveGuns("laser")
+      // b.giveGuns("grenades")
+      // b.giveMod("rocket-propelled grenade");
       // mech.setField("pilot wave")
 
       level.intro(); //starting level
@@ -154,7 +154,7 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     spawn.stabber(1200, -500)
-    spawn.chaser(1200, -500)
+    // spawn.chaser(1200, -500)
     // spawn.nodeBoss(1200, -500, "spiker")
     // spawn.hopper(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
@@ -264,7 +264,7 @@ const level = {
       y: -600,
       width: 400,
       height: 500,
-      color: "#cee"
+      color: "#dee"
     });
 
     level.fill.push({
@@ -272,7 +272,7 @@ const level = {
       y: -1000,
       width: 2750,
       height: 1000,
-      color: "rgba(0,20,40,0.1)"
+      color: "rgba(0,10,30,0.04)"
     });
 
     const lineColor = "#ddd"
@@ -606,6 +606,7 @@ const level = {
       level.exit.y = -300;
       spawn.mapRect(3600, -285, 100, 50); //ground bump wall
       //mobs that spawn in exit room
+      spawn.bodyRect(4850, -750, 300, 25, 0.6); //
       spawn.randomSmallMob(4100, -100);
       spawn.randomSmallMob(4600, -100);
       spawn.randomMob(3765, -450, 0.3);
@@ -629,7 +630,7 @@ const level = {
       level.exit.x = -550;
       level.exit.y = -2030;
       spawn.mapRect(-550, -2015, 100, 50); //ground bump wall
-      spawn.boost(4950, 0, 1600);
+      spawn.boost(4950, 0, 1100);
       level.fillBG.push({
         x: -650,
         y: -2300,
@@ -761,7 +762,6 @@ const level = {
     spawn.mapRect(3450, -1000, 50, 580); //left building wall
     spawn.bodyRect(3460, -420, 30, 144);
     spawn.mapRect(5450, -775, 100, 875); //right building wall
-    spawn.bodyRect(4850, -750, 300, 25, 0.8);
     spawn.bodyRect(3925, -1400, 100, 150, 0.8);
     spawn.mapRect(3450, -1250, 1090, 50);
     // spawn.mapRect(3450, -1225, 50, 75);

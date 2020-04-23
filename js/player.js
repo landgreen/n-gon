@@ -202,7 +202,7 @@ const mech = {
     } else {
       //sets a hard land where player stays in a crouch for a bit and can't jump
       //crouch is forced in keyMove() on ground section below
-      const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 20 down velocity, unless the player is holding something
+      const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
       if (momentum > 130) {
         mech.doCrouch();
         mech.yOff = mech.yOffWhen.jump;
@@ -503,6 +503,17 @@ const mech = {
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
   collisionImmuneCycle: 0, //used in engine
+  harmReduction() {
+    let dmg = 1
+    dmg *= mech.fieldDamageResistance
+    if (b.modEnergyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
+    if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
+      for (let i = 0, len = b.inventory.length; i < len; i++) {
+        dmg *= 0.84 // 1 - 0.16
+      }
+    }
+    return dmg
+  },
   damage(dmg) {
     mech.lastHarmCycle = mech.cycle
 
@@ -522,14 +533,8 @@ const mech = {
         y: 0
       })
     }
+    dmg *= mech.harmReduction()
 
-    dmg *= mech.fieldDamageResistance
-    if (b.modEnergyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
-    if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
-      for (let i = 0, len = b.inventory.length; i < len; i++) {
-        dmg *= 0.84 // 1 - 0.16
-      }
-    }
     if (b.isModEnergyHealth) {
       mech.energy -= dmg;
       if (mech.energy < 0 || isNaN(mech.energy)) {
@@ -1820,7 +1825,7 @@ const mech = {
 
         mech.hold = function () {
           function drawField(radius) {
-            radius *= 0.7 + 0.6 * mech.energy;
+            radius *= 0.8 + 0.7 * mech.energy;
             const rotate = mech.cycle * 0.005;
             mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(mech.energy, 1)));
             const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
@@ -1858,13 +1863,14 @@ const mech = {
             mech.lookForPickUp();
 
             const DRAIN = 0.0004 + 0.0002 * player.speed + ((!b.modRenormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.0017)
+            mech.energy -= DRAIN;
             if (mech.energy > DRAIN) {
-              mech.energy -= DRAIN;
-              if (mech.energy < 0.001) {
-                mech.fieldCDcycle = mech.cycle + 120;
-                mech.energy = 0;
-              }
-              this.fieldRange = this.fieldRange * 0.9 + 0.1 * 160
+              // if (mech.energy < 0.001) {
+              //   mech.fieldCDcycle = mech.cycle + 120;
+              //   mech.energy = 0;
+              //   mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+              // }
+              this.fieldRange = this.fieldRange * 0.87 + 0.13 * 160
               drawField(this.fieldRange)
 
               mech.isStealth = true //isStealth disables most uses of foundPlayer() 
@@ -1903,32 +1909,33 @@ const mech = {
                   }
                 }
               }
+            } else {
+              mech.fieldCDcycle = mech.cycle + 120;
+              mech.energy = 0;
+              mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+              drawField(this.fieldRange)
             }
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
             mech.pickUp();
           } else {
             // this.fieldRange = 3000
             if (this.fieldRange < 2000 && mech.holdingTarget === null) {
-              this.fieldRange += 20
+              this.fieldRange += 40
               drawField(this.fieldRange)
             }
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
-          // mech.drawFieldMeter()
+
           if (mech.energy < mech.fieldEnergyMax) {
             mech.energy += mech.fieldRegen;
             const xOff = mech.pos.x - mech.radius * mech.fieldEnergyMax
             const yOff = mech.pos.y - 50
-
             ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
             ctx.fillRect(xOff, yOff, 60 * mech.fieldEnergyMax, 10);
-
             ctx.fillStyle = mech.fieldMeterColor;
             ctx.fillRect(xOff, yOff, 60 * mech.energy, 10);
-
             ctx.beginPath()
             ctx.rect(xOff, yOff, 60 * mech.fieldEnergyMax, 10);
-            // ctx.fill();
             ctx.strokeStyle = "rgb(0, 0, 0)";
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -1992,7 +1999,31 @@ const mech = {
                 y: mech.fieldPosition.y * smooth + game.mouseInGame.y * (1 - smooth),
               }
             }
-            mech.grabPowerUp();
+
+            for (let i = 0, len = powerUp.length; i < len; ++i) {
+              const dxP = mech.fieldPosition.x - powerUp[i].position.x;
+              const dyP = mech.fieldPosition.y - powerUp[i].position.y;
+              const dist2 = dxP * dxP + dyP * dyP;
+              // float towards field  if looking at and in range  or  if very close to player
+              if (dist2 < mech.fieldRadius * mech.fieldRadius && (mech.lookingAt(powerUp[i]) || dist2 < 16000) && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
+                powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
+                powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+                //extra friction
+                Matter.Body.setVelocity(powerUp[i], {
+                  x: powerUp[i].velocity.x * 0.11,
+                  y: powerUp[i].velocity.y * 0.11
+                });
+                if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
+                  if (b.isModMassEnergy) mech.energy = mech.fieldEnergyMax * 2;
+                  powerUp[i].effect();
+                  Matter.World.remove(engine.world, powerUp[i]);
+                  powerUp.splice(i, 1);
+                  mech.fieldRadius += 50
+                  break; //because the array order is messed up after splice
+                }
+              }
+            }
+
             if (mech.energy > 0.01) {
               //find mouse velocity
               const diff = Vector.sub(mech.fieldPosition, mech.lastFieldPosition)
