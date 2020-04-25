@@ -15,10 +15,10 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(9)
-      // b.giveGuns("missiles")
+      b.giveGuns("foam")
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
-      // b.giveMod("pocket universe");
+      // b.giveMod("quantum tunneling");
       // b.giveGuns("grenades")
       // b.giveMod("rocket-propelled grenade");
       // mech.setField("pilot wave")
@@ -100,7 +100,7 @@ const level = {
   //******************************************************************************************************************
 
   testing() {
-    level.difficultyIncrease(9);
+    level.difficultyIncrease(19);
     spawn.setSpawnList();
     spawn.setSpawnList();
     level.defaultZoom = 1500
@@ -153,12 +153,16 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     // spawn.bomberBoss(2900, -500)
-    spawn.stabber(1200, -500)
-    // spawn.chaser(1200, -500)
+    spawn.suckerBoss(1200, -500)
+    // spawn.hopper(1200, -500)
+    // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
+
     // spawn.nodeBoss(1200, -500, "spiker")
     // spawn.hopper(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
+    spawn.boost()
+    spawn.boost(1500, 0, 1400);
 
   },
   bosses() {
@@ -254,28 +258,35 @@ const level = {
     level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
     spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
 
-    document.body.style.backgroundColor = "#eee";
+    document.body.style.backgroundColor = "#ddd";
     // game.draw.mapFill = "#444"
     // game.draw.bodyFill = "rgba(140,140,140,0.85)"
     // game.draw.bodyStroke = "#222"
 
+    level.fill.push({
+      x: 2600,
+      y: -600,
+      width: 400,
+      height: 500,
+      color: "rgba(0,255,255,0.05)"
+    });
     level.fillBG.push({
       x: 2600,
       y: -600,
       width: 400,
       height: 500,
-      color: "#dee"
+      color: "#fff"
     });
 
-    level.fill.push({
-      x: -150,
-      y: -1000,
-      width: 2750,
-      height: 1000,
-      color: "rgba(0,10,30,0.04)"
-    });
+    // level.fill.push({
+    //   x: -150,
+    //   y: -1000,
+    //   width: 2750,
+    //   height: 1000,
+    //   color: "rgba(0,10,30,0.04)"
+    // });
 
-    const lineColor = "#ddd"
+    const lineColor = "#ccc"
     level.fillBG.push({
       x: 1600,
       y: -500,
@@ -428,8 +439,7 @@ const level = {
     spawn.bodyRect(2000, 50, 60, 60);
     // spawn.bodyRect(1650, 50, 300, 200);
     spawn.bodyRect(3175, -155, 325, 325);
-    spawn.mapRect(1800, 175, 800, 100); //stops above body from moving to right
-
+    spawn.mapRect(1800, Math.floor(Math.random() * 200), 850, 300); //stops above body from moving to right
     //exit building
     // spawn.mapRect(-100, -410, 100, 30);
     spawn.mapRect(-300, -800, 500, 50);
@@ -509,7 +519,7 @@ const level = {
     });
 
     //far right structure
-    spawn.mapRect(5200, -775, 100, 920);
+    spawn.mapRect(5200, -725, 100, 870);
     spawn.mapRect(5300, -1075, 350, 1220);
     spawn.boost(5825, 235, 1400);
     level.fill.push({
@@ -528,8 +538,8 @@ const level = {
       height: 1500,
       color: "rgba(0,20,40,0.13)"
     });
-    spawn.mapRect(4000, -400, 325, 50);
-    spawn.mapRect(4725, -400, 325, 50);
+    spawn.mapRect(3950, -350, 375, 50);
+    spawn.mapRect(4725, -350, 375, 50);
     spawn.mapRect(4000, -1300, 1050, 100);
 
     //steep stairs

@@ -517,10 +517,9 @@ const spawn = {
 
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (mech.energy > 0.1) {
-            mech.energy -= 0.005
-          } else {
-            mech.damage(0.0002 * game.dmgScale);
+          mech.energy -= 0.004
+          if (mech.energy < 0.1) {
+            mech.damage(0.00015 * game.dmgScale);
           }
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (mech.onGround ? 1.8 : 1);
@@ -616,10 +615,9 @@ const spawn = {
         ctx.fill();
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-          if (mech.energy > 0.1) {
-            mech.energy -= 0.0075
-          } else {
-            mech.damage(0.0003 * game.dmgScale);
+          mech.energy -= 0.006
+          if (mech.energy < 0.1) {
+            mech.damage(0.0002 * game.dmgScale);
           }
           const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
           player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (mech.onGround ? 1.7 : 1);
@@ -936,7 +934,8 @@ const spawn = {
       ctx.lineTo(best.x, best.y);
     }
   },
-  stabber(x, y, radius = 25 + Math.ceil(Math.random() * 15)) {
+  stabber(x, y, radius = 25 + Math.ceil(Math.random() * 12)) {
+    if (radius > 80) radius = 65;
     mobs.spawn(x, y, 6, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
     let me = mob[mob.length - 1];
     me.accelMag = 0.0006 * game.accelScale;

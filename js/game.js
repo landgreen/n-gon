@@ -358,7 +358,7 @@ const game = {
         b.giveGuns("all", 1000)
       } else if (keys[72]) { // heal with H
         mech.addHealth(Infinity)
-        mech.energy = mech.fieldEnergyMax;
+        mech.energy = mech.maxEnergy;
       } else if (keys[89]) { //add mods with y
         b.giveMod()
       } else if (keys[82]) { // teleport to mouse with R
@@ -471,7 +471,7 @@ const game = {
     b.setupAllMods(); //sets mods to default values
     game.updateModHUD();
     mech.maxHealth = 1
-    mech.fieldEnergyMax = 1
+    mech.maxEnergy = 1
     game.paused = false;
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
@@ -724,8 +724,8 @@ const game = {
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
         if (b.isModEnergyRecovery) {
-          mech.energy += mech.fieldEnergyMax * 0.07
-          if (mech.energy > mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
+          mech.energy += mech.maxEnergy * 0.07
+          if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
         }
         if (b.isModHealthRecovery) mech.addHealth(0.01)
       }

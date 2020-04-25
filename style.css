@@ -268,6 +268,7 @@ summary {
   width: 100%;
   height: 100%;
   display: none;
+  /* background-color also set in mass-energy mod */
   background-color: #f67;
   opacity: 0;
   transition: opacity 1s;

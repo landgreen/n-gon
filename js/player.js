@@ -759,7 +759,7 @@ const mech = {
   fireCDcycle: 0,
   fieldCDcycle: 0,
   fieldMode: 0, //basic field mode before upgrades
-  fieldEnergyMax: 1, //can be increased by a mod
+  maxEnergy: 1, //can be increased by a mod
   holdingTarget: null,
   fieldShieldingScale: 1,
   timeSkipLastCycle: 0,
@@ -777,7 +777,7 @@ const mech = {
     mech.fieldThreshold = Math.cos(mech.fieldArc * Math.PI)
   },
   setHoldDefaults() {
-    if (mech.energy < mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
+    if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
     mech.fieldRegen = b.modEnergyRegen; //0.001
     mech.fieldMeterColor = "#0cf"
     mech.fieldShieldingScale = 1;
@@ -796,17 +796,18 @@ const mech = {
   },
   fieldMeterColor: "#0cf",
   drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
-    if (mech.energy < mech.fieldEnergyMax) {
+    if (mech.energy < mech.maxEnergy) {
       mech.energy += mech.fieldRegen;
       ctx.fillStyle = bgColor;
-      const xOff = mech.pos.x - mech.radius * mech.fieldEnergyMax
+      const xOff = mech.pos.x - mech.radius * mech.maxEnergy
       const yOff = mech.pos.y - 50
-      ctx.fillRect(xOff, yOff, range * mech.fieldEnergyMax, 10);
+      ctx.fillRect(xOff, yOff, range * mech.maxEnergy, 10);
       ctx.fillStyle = mech.fieldMeterColor;
       ctx.fillRect(xOff, yOff, range * mech.energy, 10);
     }
+    if (mech.energy < 0) mech.energy = 0
     // else {
-    //   mech.energy = mech.fieldEnergyMax
+    //   mech.energy = mech.maxEnergy
     // }
   },
   lookingAt(who) {
@@ -1019,7 +1020,7 @@ const mech = {
           y: powerUp[i].velocity.y * 0.11
         });
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-          if (b.isModMassEnergy) mech.energy = mech.fieldEnergyMax * 2;
+          if (b.isModMassEnergy) mech.energy = mech.maxEnergy * 2;
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
@@ -1038,7 +1039,7 @@ const mech = {
     if (mech.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
       mech.energy -= fieldBlockCost
       if (mech.energy < 0) mech.energy = 0;
-      if (mech.energy > mech.fieldEnergyMax) mech.energy = mech.fieldEnergyMax;
+      if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
       const unit = Vector.normalise(Vector.sub(player.position, who.position))
       if (b.modBlockDmg) {
@@ -1378,7 +1379,7 @@ const mech = {
       effect: () => {
         // mech.fieldRegen *= 2;
         mech.hold = function () {
-          if (mech.energy > mech.fieldEnergyMax - 0.02 && mech.fieldCDcycle < mech.cycle) {
+          if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle) {
             if (b.isModSporeField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
               const len = Math.floor(6 + 4 * Math.random())
@@ -1926,20 +1927,21 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
 
-          if (mech.energy < mech.fieldEnergyMax) {
+          if (mech.energy < mech.maxEnergy) {
             mech.energy += mech.fieldRegen;
-            const xOff = mech.pos.x - mech.radius * mech.fieldEnergyMax
+            const xOff = mech.pos.x - mech.radius * mech.maxEnergy
             const yOff = mech.pos.y - 50
             ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-            ctx.fillRect(xOff, yOff, 60 * mech.fieldEnergyMax, 10);
+            ctx.fillRect(xOff, yOff, 60 * mech.maxEnergy, 10);
             ctx.fillStyle = mech.fieldMeterColor;
             ctx.fillRect(xOff, yOff, 60 * mech.energy, 10);
             ctx.beginPath()
-            ctx.rect(xOff, yOff, 60 * mech.fieldEnergyMax, 10);
+            ctx.rect(xOff, yOff, 60 * mech.maxEnergy, 10);
             ctx.strokeStyle = "rgb(0, 0, 0)";
             ctx.lineWidth = 1;
             ctx.stroke();
           }
+          if (mech.energy < 0) mech.energy = 0
         }
       }
     },
@@ -2000,6 +2002,7 @@ const mech = {
               }
             }
 
+            //grab power ups into the field
             for (let i = 0, len = powerUp.length; i < len; ++i) {
               const dxP = mech.fieldPosition.x - powerUp[i].position.x;
               const dyP = mech.fieldPosition.y - powerUp[i].position.y;
@@ -2014,11 +2017,11 @@ const mech = {
                   y: powerUp[i].velocity.y * 0.11
                 });
                 if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-                  if (b.isModMassEnergy) mech.energy = mech.fieldEnergyMax * 2;
+                  if (b.isModMassEnergy) mech.energy = mech.maxEnergy * 2;
                   powerUp[i].effect();
                   Matter.World.remove(engine.world, powerUp[i]);
                   powerUp.splice(i, 1);
-                  mech.fieldRadius += 50
+                  // mech.fieldRadius += 50
                   break; //because the array order is messed up after splice
                 }
               }

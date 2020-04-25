@@ -78,7 +78,7 @@ const powerUps = {
           }
         }
         if (target.ammo === Infinity) {
-          mech.energy = mech.fieldEnergyMax;
+          if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
           if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
         } else {
           let ammo = Math.ceil((target.ammoPack * (1 + 0.1 * Math.random())));
@@ -89,7 +89,7 @@ const powerUps = {
         }
       } else {
         // target = b.guns[Math.floor(Math.random() * b.guns.length)];         //if you don't have any guns just add ammo to a random gun you don't have yet
-        mech.energy = mech.fieldEnergyMax;
+        if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
         if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       }
     }
@@ -110,17 +110,18 @@ const powerUps = {
       }
 
       let choice1 = pick(mech.fieldUpgrades)
-      let choice2 = pick(mech.fieldUpgrades, choice1)
+      let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.cancel("field")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
-        if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
         if (!b.isModBayesian) {
+          choice2 = pick(mech.fieldUpgrades, choice1)
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
           choice3 = pick(mech.fieldUpgrades, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice3].name}</div> ${mech.fieldUpgrades[choice3].description}</div>`
         }
-        if (b.isModFourOptions) {
+        if (b.isModExtraChoice) {
           let choice4 = pick(mech.fieldUpgrades, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice4].name}</div> ${mech.fieldUpgrades[choice4].description}</div>`
         }
@@ -154,17 +155,18 @@ const powerUps = {
       }
 
       let choice1 = pick()
-      let choice2 = pick(choice1)
+      let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.cancel("mod")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
-        if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
         if (!b.isModBayesian) {
+          choice2 = pick(choice1)
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
           choice3 = pick(choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice3].name}</div> ${b.mods[choice3].description}</div>`
         }
-        if (b.isModFourOptions) {
+        if (b.isModExtraChoice) {
           let choice4 = pick(choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice4].name}</div> ${b.mods[choice4].description}</div>`
         }
@@ -191,17 +193,18 @@ const powerUps = {
       }
 
       let choice1 = pick(b.guns)
-      let choice2 = pick(b.guns, choice1)
+      let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.cancel("gun")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
-        if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
         if (!b.isModBayesian) {
+          choice2 = pick(b.guns, choice1)
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
           choice3 = pick(b.guns, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice3})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice3].name}</div> ${b.guns[choice3].description}</div>`
         }
-        if (b.isModFourOptions) {
+        if (b.isModExtraChoice) {
           let choice4 = pick(b.guns, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice4})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice4].name}</div> ${b.guns[choice4].description}</div>`
         }

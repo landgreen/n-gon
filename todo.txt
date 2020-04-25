@@ -2,6 +2,12 @@
 
 
 ************** TODO - n-gon **************
+
+mod - annihilation might be unbalanced?
+
+boss mob - let it die multiple times and come back to life
+  on death event spawns a new version of self, but with a decrementing counter
+
 foam - check for touching map / blocks and slow foam down rather then bounce off walls
 quantum foam should just skip the shield
 

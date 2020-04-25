@@ -953,8 +953,14 @@ const mobs = {
           if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
 
           //energy and heal drain should be calculated after damage boosts
-          if (b.modEnergySiphon && dmg !== Infinity) mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
-          if (b.modHealthDrain && dmg !== Infinity) mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
+          if (b.modEnergySiphon && dmg !== Infinity) {
+            mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
+            if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy
+          }
+          if (b.modHealthDrain && dmg !== Infinity) {
+            mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
+            if (mech.health > mech.maxHealth) mech.health = mech.maxHealth
+          }
           this.health -= dmg
           //this.fill = this.color + this.health + ')';
           this.onDamage(dmg); //custom damage effects

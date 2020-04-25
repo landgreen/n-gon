@@ -29,7 +29,7 @@ const b = {
   isModFarAwayDmg: null,
   isModEntanglement: null,
   isModMassEnergy: null,
-  isModFourOptions: null,
+  isModExtraChoice: null,
   modLaserBotCount: null,
   modNailBotCount: null,
   modCollisionImmuneCycles: null,
@@ -48,7 +48,7 @@ const b = {
   isModEnergyRecovery: null,
   isModHealthRecovery: null,
   isModEnergyLoss: null,
-  isModFoamShieldHit: null,
+  isModFoamShieldSKip: null,
   isModDeathAvoid: null,
   isModDeathAvoidOnCD: null,
   modWaveSpeedMap: null,
@@ -577,11 +577,13 @@ const b = {
         b.modOnHealthChange();
         mech.displayHealth();
         document.getElementById("health-bg").style.display = "none"
+        document.getElementById("dmg").style.backgroundColor = "#0cf";
         b.isModEnergyHealth = true;
       },
       remove() {
         b.isModEnergyHealth = false;
         document.getElementById("health-bg").style.display = "inline"
+        document.getElementById("dmg").style.backgroundColor = "#f67";
         mech.health = mech.energy;
       }
     },
@@ -596,7 +598,7 @@ const b = {
       requires: "not mass-energy equivalence",
       effect() {
         b.isModPiezo = true;
-        mech.energy = mech.fieldEnergyMax;
+        mech.energy = mech.maxEnergy;
       },
       remove() {
         b.isModPiezo = false;
@@ -631,7 +633,7 @@ const b = {
       requires: "",
       effect() {
         b.modEnergySiphon += 0.15;
-        mech.energy = mech.fieldEnergyMax
+        mech.energy = mech.maxEnergy
       },
       remove() {
         b.modEnergySiphon = 0;
@@ -663,11 +665,11 @@ const b = {
       },
       requires: "",
       effect() {
-        mech.fieldEnergyMax += 0.5
+        mech.maxEnergy += 0.5
         mech.energy += 0.5
       },
       remove() {
-        mech.fieldEnergyMax = 1;
+        mech.maxEnergy = 1;
       }
     },
     {
@@ -716,7 +718,7 @@ const b = {
       requires: "",
       effect: () => {
         b.isModMassEnergy = true // used in mech.grabPowerUp
-        mech.energy = mech.fieldEnergyMax * 2
+        mech.energy = mech.maxEnergy * 2
       },
       remove() {
         b.isModMassEnergy = false;
@@ -724,7 +726,7 @@ const b = {
     },
     {
       name: "Bayesian inference",
-      description: "<strong>20%</strong> chance for double <strong>power ups</strong> to drop<br>one fewer <strong>choice</strong> when selecting <strong>power ups</strong>",
+      description: "<strong>33%</strong> chance for double <strong>power ups</strong> to drop<br>only <strong>one choice</strong> when selecting <strong>power ups</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -732,7 +734,7 @@ const b = {
       },
       requires: "",
       effect: () => {
-        b.isModBayesian = 0.20;
+        b.isModBayesian = 0.33;
       },
       remove() {
         b.isModBayesian = 0;
@@ -748,10 +750,10 @@ const b = {
       },
       requires: "",
       effect: () => {
-        b.isModFourOptions = true;
+        b.isModExtraChoice = true;
       },
       remove() {
-        b.isModFourOptions = false;
+        b.isModExtraChoice = false;
       }
     },
     {
@@ -1288,8 +1290,8 @@ const b = {
       }
     },
     {
-      name: "quantum foam",
-      description: "<strong>foam</strong> can stick to <strong>shields</strong>",
+      name: "quantum tunneling",
+      description: "<strong>foam</strong> bypasses <strong>shields</strong> to stick to mobs",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1297,10 +1299,10 @@ const b = {
       },
       requires: "foam",
       effect() {
-        b.isModFoamShieldHit = true;
+        b.isModFoamShieldSKip = true;
       },
       remove() {
-        b.isModFoamShieldHit = false;
+        b.isModFoamShieldSKip = false;
       }
     },
     {
@@ -1374,7 +1376,7 @@ const b = {
     {
       name: "timelike world line",
       description: "<strong>time dilation</strong> increases your time <strong>rate</strong> by <strong>2x</strong><br>while <strong class='color-f'>energy</strong> <strong>drain</strong> is decreased by <strong>2x</strong>",
-      maxCount: 9,
+      maxCount: 1,
       count: 0,
       allowed() {
         return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
@@ -2092,7 +2094,7 @@ const b = {
               }
             }
           }
-          for (let i = 0; i < 16; i++) {
+          for (let i = 0; i < 14; i++) {
             const speed = 53 + 10 * Math.random()
             if (targets.length > 0) { // aim near a random target in array
               const index = Math.floor(Math.random() * targets.length)
@@ -3092,7 +3094,7 @@ const b = {
         };
 
         if (b.isModRPG) {
-          b.fireProps(25, mech.crouch ? 60 : -15, dir, me); //cd , speed
+          b.fireProps(35, mech.crouch ? 60 : -15, dir, me); //cd , speed
           bullet[me].endCycle = game.cycle + 70;
           bullet[me].frictionAir = 0.07;
           const MAG = 0.015
@@ -3350,11 +3352,11 @@ const b = {
       isStarterGun: true,
       isEasyToAim: false,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 12 : 5) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 6) * b.modFireRate); // cool down
         const me = bullet.length;
         const dir = mech.angle + 0.2 * (Math.random() - 0.5)
         const RADIUS = (8 + 16 * Math.random())
-        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 25, RADIUS, {
+        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, RADIUS, {
           angle: dir,
           density: 0.00005, //  0.001 is normal density
           inertia: Infinity,
@@ -3365,7 +3367,7 @@ const b = {
           classType: "bullet",
           collisionFilter: {
             category: cat.bullet,
-            mask: cat.map | cat.body | cat.mob | cat.mobShield
+            mask: cat.mob | cat.mobShield //cat.map | cat.body | cat.mob | cat.mobShield
           },
           minDmgSpeed: 0,
           endCycle: Infinity,
@@ -3374,7 +3376,7 @@ const b = {
           target: null,
           targetVertex: null,
           onDmg(who) {
-            if (!this.target && who.alive && (who.dropPowerUp || b.isModFoamShieldHit) && (!who.isShielded || b.isModFoamShieldHit)) {
+            if (!this.target && who.alive && who.dropPowerUp && (!who.isShielded || b.isModFoamShieldSKip)) {
               this.target = who;
               this.collisionFilter.category = cat.body;
               this.collisionFilter.mask = null;
@@ -3399,7 +3401,23 @@ const b = {
             // ctx.fill()
 
             if (!mech.isBodiesAsleep) { //if time dilation isn't active
-              this.force.y += this.mass * 0.00006; //gravity
+
+              //check for touching map
+              if (Matter.Query.collides(this, map).length > 0) {
+                const slow = 0.94
+                Matter.Body.setVelocity(this, {
+                  x: this.velocity.x * slow,
+                  y: this.velocity.y * slow
+                });
+              } else if (Matter.Query.collides(this, body).length > 0) {
+                const slow = 0.97
+                Matter.Body.setVelocity(this, {
+                  x: this.velocity.x * slow,
+                  y: this.velocity.y * slow
+                });
+              } else {
+                this.force.y += this.mass * 0.00006; //gravity
+              }
 
               if (this.count < 17) {
                 this.count++
@@ -3409,7 +3427,7 @@ const b = {
                 this.radius *= SCALE;
               } else {
                 //shrink
-                const SCALE = 1 - 0.0035 / b.isModBulletsLastLonger
+                const SCALE = 1 - 0.0033 / b.isModBulletsLastLonger
                 Matter.Body.scale(this, SCALE, SCALE);
                 this.radius *= SCALE;
                 if (this.radius < 14) this.endCycle = 0;
@@ -3419,12 +3437,11 @@ const b = {
                 Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
                 Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.9))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
-                if (this.target.isShielded) {
-                  this.target.damage(b.dmgScale * 0.001);
+                if (b.isModFoamShieldSKip) {
+                  this.target.damage(b.dmgScale * 0.0025, true); //shield damage bypass
                 } else {
                   this.target.damage(b.dmgScale * 0.005);
                 }
-
               } else if (this.target !== null) { //look for a new target
                 this.target = null
                 this.collisionFilter.category = cat.bullet;
@@ -3434,7 +3451,8 @@ const b = {
           }
         });
         World.add(engine.world, bullet[me]); //add bullet to world
-        const SPEED = mech.crouch ? 22 : 12 - RADIUS * 0.25;
+        if (b.isModFoamShieldSKip) bullet[me].collisionFilter.mask = cat.mob // | cat.mobShield
+        const SPEED = (mech.crouch ? 17 : 12) - RADIUS * 0.25;
         Matter.Body.setVelocity(bullet[me], {
           x: SPEED * Math.cos(dir),
           y: SPEED * Math.sin(dir)
