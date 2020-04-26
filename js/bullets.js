@@ -1822,17 +1822,15 @@ const b = {
         mech.energy += Math.max(radius * 0.0003, 0.15)
       } else {
         mech.damage(radius * 0.0002); //normal player damage from explosions
+        mech.drop();
       }
-
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
       player.force.x += knock.x;
       player.force.y += knock.y;
-      mech.drop();
     } else if (dist < alertRange) {
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
       player.force.x += knock.x;
       player.force.y += knock.y;
-      mech.drop();
     }
 
     //body knock backs

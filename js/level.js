@@ -15,13 +15,14 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(9)
-      b.giveGuns("foam")
+      // b.giveGuns("foam")
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
       // b.giveMod("quantum tunneling");
       // b.giveGuns("grenades")
       // b.giveMod("rocket-propelled grenade");
       // mech.setField("pilot wave")
+      // mech.setField("perfect diamagnetism")
 
       level.intro(); //starting level
       // level.testing();

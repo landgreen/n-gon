@@ -1,7 +1,13 @@
 
 
-
+foam gun now slows down when touching walls
+mod - quantum foam now bypasses shields
+Bayesian now only give one mod choice on election, but 33% (from 20%) chance at double power ups
 ************** TODO - n-gon **************
+
+mod - blocking with perfect diamagnetism fires your gun
+  maybe doesn't trigger cooldown?
+  does use ammo
 
 mod - annihilation might be unbalanced?
 
