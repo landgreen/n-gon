@@ -14,18 +14,18 @@ const level = {
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
+      // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // b.giveGuns("foam")
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
       // b.giveMod("quantum tunneling");
-      // b.giveGuns("grenades")
-      // b.giveMod("rocket-propelled grenade");
+      // b.giveGuns("rail gun")
       // mech.setField("pilot wave")
       // mech.setField("perfect diamagnetism")
 
-      level.intro(); //starting level
-      // level.testing();
+      // level.intro(); //starting level
+      level.testing();
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -152,19 +152,18 @@ const level = {
     spawn.mapRect(6400, -200, 400, 300); //right wall
     spawn.mapRect(6700, -1800, 800, 2600); //right wall
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
+    spawn.boost(1500, 0, 900);
 
     // spawn.bomberBoss(2900, -500)
-    spawn.suckerBoss(1200, -500)
-    // spawn.hopper(1200, -500)
+    // spawn.suckerBoss(1200, -500)
+    // spawn.hopper(1200, -500, 70)
+    // spawn.hopper(1200, -500, 100)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "spiker")
-    // spawn.hopper(1200, -500)
+    spawn.spiderBoss(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
-    spawn.boost()
-    spawn.boost(1500, 0, 1400);
-
   },
   bosses() {
     level.defaultZoom = 1500
@@ -591,7 +590,9 @@ const level = {
     spawn.randomBoss(1600, -100, 0);
     spawn.randomBoss(5000, -3900, -0.3);
     if (game.difficulty > 3) {
-      if (Math.random() < 0.25) {
+      if (Math.random() < 0.1) {
+        spawn.randomLevelBoss(2800, -1400);
+      } else if (Math.random() < 0.25) {
         spawn.laserBoss(2900 + 300 * Math.random(), -2950 + 150 * Math.random());
       } else if (Math.random() < 0.33) {
         spawn.laserBoss(1800 + 250 * Math.random(), -2600 + 150 * Math.random());
@@ -975,7 +976,7 @@ const level = {
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
     if (game.difficulty > 2) {
-      if (Math.random() < 0.1) { // tether ball
+      if (Math.random() < 0.09) { // tether ball
         spawn.tetherBoss(4250, 0)
         cons[cons.length] = Constraint.create({
           pointA: {
@@ -986,6 +987,9 @@ const level = {
           stiffness: 0.00007
         });
         if (game.difficulty > 4) spawn.nodeBoss(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
+      }
+      if (Math.random() < 0.08) {
+        spawn.randomLevelBoss(4250, -250);
       } else {
         //floor below right tall tower
         spawn.bodyRect(3000, 50, 150, 250, 0.9);
@@ -1343,7 +1347,6 @@ const level = {
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
     if (game.difficulty > 4) spawn.randomLevelBoss(-3400, -2800);
-
   },
   warehouse() {
     level.defaultZoom = 1300
@@ -1522,7 +1525,13 @@ const level = {
     //spawn.randomMob(1120, -1200, 0.3);
     //spawn.randomSmallMob(2200, -1775);
 
-    if (game.difficulty > 2) spawn.snakeBoss(-1300 + Math.random() * 2000, -2200); //boss snake with head
+    if (game.difficulty > 3) {
+      if (Math.random() < 0.1) {
+        spawn.randomLevelBoss(-800, -1300)
+      } else {
+        spawn.snakeBoss(-1300 + Math.random() * 2000, -2200); //boss snake with head
+      }
+    }
   },
   office() {
     level.defaultZoom = 1400

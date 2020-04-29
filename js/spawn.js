@@ -81,7 +81,7 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss"] //, "timeSkipBoss"
+    const options = ["spiderBoss"] //, "timeSkipBoss"  //"shooterBoss", "cellBossCulture", "bomberBoss",
     // const options = ["timeSkipBoss"]
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
@@ -329,6 +329,7 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.big = false; //required for grow
     me.accelMag = 0.00045 * game.accelScale;
+    me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.player //can't touch other mobs
     me.do = function () {
       this.seePlayerByLookingAt();
       this.checkStatus();
@@ -384,7 +385,6 @@ const spawn = {
       this.searchSpring();
       this.checkStatus();
       this.springAttack();
-      //not properly effected by stun, if looking at player while stun will still attack...
     };
   },
   hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
@@ -636,6 +636,82 @@ const spawn = {
         }
         this.curl(eventHorizon);
       }
+    }
+  },
+  spiderBoss(x, y, radius = 50 + Math.ceil(Math.random() * 10)) {
+    let targets = [] //track who is in the node boss, for shields
+    mobs.spawn(x, y, 6, radius, "#b386e8");
+    let me = mob[mob.length - 1];
+    targets.push(me.id) //add to shield protection
+    me.friction = 0;
+    me.frictionAir = 0.0065;
+    me.lookTorque = 0.0000008; //controls spin while looking for player
+    me.g = 0.00025; //required if using 'gravity'
+    me.seePlayerFreq = Math.round((40 + 25 * Math.random()) * game.lookFreqScale);
+    const springStiffness = 0.00006;
+    const springDampening = 0.0006;
+
+    me.springTarget = {
+      x: me.position.x,
+      y: me.position.y
+    };
+    const len = cons.length;
+    cons[len] = Constraint.create({
+      pointA: me.springTarget,
+      bodyB: me,
+      stiffness: springStiffness,
+      damping: springDampening
+    });
+    cons[len].length = 100 + 1.5 * radius;
+    me.cons = cons[len];
+
+    me.springTarget2 = {
+      x: me.position.x,
+      y: me.position.y
+    };
+    const len2 = cons.length;
+    cons[len2] = Constraint.create({
+      pointA: me.springTarget2,
+      bodyB: me,
+      stiffness: springStiffness,
+      damping: springDampening
+    });
+    cons[len2].length = 100 + 1.5 * radius;
+    me.cons2 = cons[len2];
+    // Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
+    me.onDeath = function () {
+      this.removeCons();
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    };
+    me.do = function () {
+      this.gravity();
+      this.searchSpring();
+      this.checkStatus();
+      this.springAttack();
+    };
+
+    radius = 22 // radius of each node mob
+    const sideLength = 100 // distance between each node mob
+    const nodes = 6
+    const angle = 2 * Math.PI / nodes
+
+    spawn.allowShields = false; //don't want shields on individual boss mobs
+
+    for (let i = 0; i < nodes; ++i) {
+      spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
+      targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
+    }
+    //spawn shield for entire boss
+    spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
+    spawn.allowShields = true;
+
+    spawn.constrain2AdjacentMobs(nodes + 1, 0.05, true); //loop mobs together
+    for (let i = 0; i < nodes; ++i) { //attach to center mob
+      consBB[consBB.length] = Constraint.create({
+        bodyA: me,
+        bodyB: mob[mob.length - i - 1],
+        stiffness: 0.05
+      });
     }
   },
   timeSkipBoss(x, y, radius = 70) {
@@ -945,6 +1021,7 @@ const spawn = {
     me.spikeLength = 0;
     me.isSpikeGrowing = false;
     me.isSpikeReset = true;
+    me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.player //can't touch other mobs
     Matter.Body.rotate(me, Math.PI * 0.1);
     spawn.shield(me, x, y);
     // me.onDamage = function () {};
@@ -1013,7 +1090,7 @@ const spawn = {
     me.g = 0.0002; //required if using 'gravity'
     me.frictionStatic = 0;
     me.friction = 0;
-    me.delay = 120 * game.CDScale;
+    me.delay = 90 * game.CDScale;
     me.cd = Infinity;
     Matter.Body.rotate(me, Math.PI * 0.1);
     spawn.shield(me, x, y);

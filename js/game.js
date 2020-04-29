@@ -20,6 +20,7 @@ const game = {
     game.draw.cons();
     game.draw.testing();
     game.drawCircle();
+    game.constructCycle()
     ctx.restore();
     game.testingOutput();
     game.drawCursor();
@@ -322,8 +323,14 @@ const game = {
       if (game.testing) {
         game.testing = false;
         game.loop = game.normalLoop
+        if (game.isConstructionMode) {
+          document.getElementById("construct").style.display = 'none'
+        }
       } else {
         game.testing = true;
+        if (game.isConstructionMode) {
+          document.getElementById("construct").style.display = 'inline'
+        }
         game.loop = game.testingLoop
       }
     }
@@ -758,78 +765,32 @@ const game = {
     }
   },
   testingOutput() {
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#000";
-    let line = 500;
-    const x = canvas.width - 5;
-    ctx.fillText("T: exit testing mode", x, line);
-    line += 20;
-    ctx.fillText("Y: give all mods", x, line);
-    line += 20;
-    ctx.fillText("R: teleport to mouse", x, line);
-    line += 20;
-    ctx.fillText("F: cycle field", x, line);
-    line += 20;
-    ctx.fillText("G: give all guns", x, line);
-    line += 20;
-    ctx.fillText("H: heal", x, line);
-    line += 20;
-    ctx.fillText("U: next level", x, line);
-    line += 20;
-    ctx.fillText("1-7: spawn things", x, line);
-    line += 30;
-
-    // ctx.fillText("cycle: " + game.cycle, x, line);
-    // line += 20;
-    // ctx.fillText("player cycle: " + mech.cycle, x, line);
-    // line += 20;
-    // ctx.fillText("x: " + player.position.x.toFixed(0), x, line);
-    // line += 20;
-    // ctx.fillText("y: " + player.position.y.toFixed(0), x, line);
-    // line += 20;
-    // ctx.fillText("Vx: " + mech.Vx.toFixed(2), x, line);
-    // line += 20;
-    // ctx.fillText("Vy: " + mech.Vy.toFixed(2), x, line);
-    // line += 20;
-    // ctx.fillText("Fx: " + player.force.x.toFixed(3), x, line);
-    // line += 20;
-    // ctx.fillText("Fy: " + player.force.y.toFixed(3), x, line);
-    // line += 20;
-    // ctx.fillText("yOff: " + mech.yOff.toFixed(1), x, line);
-    // line += 20;
-    // ctx.fillText("mass: " + player.mass.toFixed(1), x, line);
-    // line += 20;
-    // ctx.fillText("onGround: " + mech.onGround, x, line);
-    // line += 20;
-    // ctx.fillText("crouch: " + mech.crouch, x, line);
-    // line += 20;
-    // ctx.fillText("isHeadClear: " + mech.isHeadClear, x, line);
-    // line += 20;
-    // ctx.fillText("frictionAir: " + player.frictionAir.toFixed(3), x, line);
-    // line += 20;
-    // ctx.fillText("stepSize: " + mech.stepSize.toFixed(2), x, line);
-    // line += 20;
-    // ctx.fillText("zoom: " + game.zoom.toFixed(4), x, line);
-    // line += 20;
+    if (!game.isConstructionMode) {
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#000";
+      let line = 500;
+      const x = canvas.width - 5;
+      ctx.fillText("T: exit testing mode", x, line);
+      line += 20;
+      ctx.fillText("Y: give all mods", x, line);
+      line += 20;
+      ctx.fillText("R: teleport to mouse", x, line);
+      line += 20;
+      ctx.fillText("F: cycle field", x, line);
+      line += 20;
+      ctx.fillText("G: give all guns", x, line);
+      line += 20;
+      ctx.fillText("H: heal", x, line);
+      line += 20;
+      ctx.fillText("U: next level", x, line);
+      line += 20;
+      ctx.fillText("1-7: spawn things", x, line);
+    }
     ctx.textAlign = "center";
     ctx.fillText(`(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`, game.mouse.x, game.mouse.y - 20);
   },
   draw: {
     powerUp() {
-      // draw power up
-      // ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
-      // for (let i = 0, len = powerUp.length; i < len; ++i) {
-      //   let vertices = powerUp[i].vertices;
-      //   ctx.beginPath();
-      //   ctx.moveTo(vertices[0].x, vertices[0].y);
-      //   for (let j = 1; j < vertices.length; j += 1) {
-      //     ctx.lineTo(vertices[j].x, vertices[j].y);
-      //   }
-      //   ctx.lineTo(vertices[0].x, vertices[0].y);
-      //   ctx.fillStyle = powerUp[i].color;
-      //   ctx.fill();
-      // }
-      // ctx.globalAlpha = 1;
       ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
       for (let i = 0, len = powerUp.length; i < len; ++i) {
         ctx.beginPath();
@@ -872,133 +833,6 @@ const game = {
       ctx.fillStyle = game.draw.mapFill;
       ctx.fill(game.draw.mapPath);
     },
-    // seeEdges() {
-    //   const eye = {
-    //     x: mech.pos.x + 20 * Math.cos(mech.angle),
-    //     y: mech.pos.y + 20 * Math.sin(mech.angle)
-    //   };
-    //   //find all vertex nodes in range and in LOS
-    //   findNodes = function (domain, center) {
-    //     let nodes = [];
-    //     for (let i = 0; i < domain.length; ++i) {
-    //       let vertices = domain[i].vertices;
-
-    //       for (let j = 0, len = vertices.length; j < len; j++) {
-    //         //calculate distance to player
-    //         const dx = vertices[j].x - center.x;
-    //         const dy = vertices[j].y - center.y;
-    //         if (dx * dx + dy * dy < 800 * 800 && Matter.Query.ray(domain, center, vertices[j]).length === 0) {
-    //           nodes.push(vertices[j]);
-    //         }
-    //       }
-    //     }
-    //     return nodes;
-    //   };
-    //   let nodes = findNodes(map, eye);
-    //   //sort node list by angle to player
-    //   nodes.sort(function (a, b) {
-    //     //sub artan2 from player loc
-    //     const dx = a.x - eye.x;
-    //     const dy = a.y - eye.y;
-    //     return Math.atan2(dy, dx) - Math.atan2(dy, dx);
-    //   });
-    //   //draw nodes
-    //   ctx.lineWidth = 2;
-    //   ctx.strokeStyle = "#000";
-    //   ctx.beginPath();
-    //   for (let i = 0; i < nodes.length; ++i) {
-    //     ctx.lineTo(nodes[i].x, nodes[i].y);
-    //   }
-    //   ctx.stroke();
-    // },
-    // see() {
-    //   const vertexCollision = function (
-    //     v1,
-    //     v1End,
-    //     domain,
-    //     best = {
-    //       x: null,
-    //       y: null,
-    //       dist2: Infinity,
-    //       who: null,
-    //       v1: null,
-    //       v2: null
-    //     }
-    //   ) {
-    //     for (let i = 0; i < domain.length; ++i) {
-    //       let vertices = domain[i].vertices;
-    //       const len = vertices.length - 1;
-    //       for (let j = 0; j < len; j++) {
-    //         results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-    //         if (results.onLine1 && results.onLine2) {
-    //           const dx = v1.x - results.x;
-    //           const dy = v1.y - results.y;
-    //           const dist2 = dx * dx + dy * dy;
-    //           if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-    //             best = {
-    //               x: results.x,
-    //               y: results.y,
-    //               dist2: dist2,
-    //               who: domain[i],
-    //               v1: vertices[j],
-    //               v2: vertices[j + 1]
-    //             };
-    //           }
-    //         }
-    //       }
-    //       results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-    //       if (results.onLine1 && results.onLine2) {
-    //         const dx = v1.x - results.x;
-    //         const dy = v1.y - results.y;
-    //         const dist2 = dx * dx + dy * dy;
-    //         if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-    //           best = {
-    //             x: results.x,
-    //             y: results.y,
-    //             dist2: dist2,
-    //             who: domain[i],
-    //             v1: vertices[0],
-    //             v2: vertices[len]
-    //           };
-    //         }
-    //       }
-    //     }
-    //     return best;
-    //   };
-    //   const range = 3000;
-    //   ctx.beginPath();
-    //   for (let i = 0; i < Math.PI * 2; i += Math.PI / 2 / 100) {
-    //     const cosAngle = Math.cos(mech.angle + i);
-    //     const sinAngle = Math.sin(mech.angle + i);
-
-    //     const start = {
-    //       x: mech.pos.x + 20 * cosAngle,
-    //       y: mech.pos.y + 20 * sinAngle
-    //     };
-    //     const end = {
-    //       x: mech.pos.x + range * cosAngle,
-    //       y: mech.pos.y + range * sinAngle
-    //     };
-    //     let result = vertexCollision(start, end, map);
-    //     result = vertexCollision(start, end, body, result);
-    //     result = vertexCollision(start, end, mob, result);
-
-    //     if (result.dist2 < range * range) {
-    //       // ctx.arc(result.x, result.y, 2, 0, 2 * Math.PI);
-    //       ctx.lineTo(result.x, result.y);
-    //     } else {
-    //       // ctx.arc(end.x, end.y, 2, 0, 2 * Math.PI);
-    //       ctx.lineTo(end.x, end.y);
-    //     }
-    //   }
-    //   // ctx.lineWidth = 1;
-    //   // ctx.strokeStyle = "#000";
-    //   // ctx.stroke();
-    //   ctx.fillStyle = "rgba(0,0,0,0.3)";
-    //   ctx.fillStyle = "#fff";
-    //   ctx.fill();
-    //   ctx.clip();
-    // },
     body() {
       ctx.beginPath();
       for (let i = 0, len = body.length; i < len; ++i) {
@@ -1146,38 +980,144 @@ const game = {
     // if line1 and line2 are segments, they intersect if both of the above are true
     return result;
   },
-  //was used in level design
-  buildingUp(e) {
-    if (game.mouseDown) {
-      game.getCoords.pos2.x = Math.round(game.mouseInGame.x / 25) * 25;
-      game.getCoords.pos2.y = Math.round(game.mouseInGame.y / 25) * 25;
-      let out;
+  copyToClipBoard(value) {
+    // Create a fake textarea
+    const textAreaEle = document.createElement('textarea');
 
-      //body rect mode
-      out = `spawn.mapRect(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2.y -
-        game.getCoords.pos1.y});`;
+    // Reset styles
+    textAreaEle.style.border = '0';
+    textAreaEle.style.padding = '0';
+    textAreaEle.style.margin = '0';
 
-      //mob spawn
-      //out = `spawn.randomMob(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, 0.3);`
+    // Set the absolute position
+    // User won't see the element
+    textAreaEle.style.position = 'absolute';
+    textAreaEle.style.left = '-9999px';
+    textAreaEle.style.top = `0px`;
 
-      //draw foreground
-      //out = `level.fill.push({ x: ${game.getCoords.pos1.x}, y: ${game.getCoords.pos1.y}, width: ${game.getCoords.pos2.x-game.getCoords.pos1.x}, height: ${game.getCoords.pos2.y-game.getCoords.pos1.y}, color: "rgba(0,0,0,0.1)"});`;
+    // Set the value
+    textAreaEle.value = value
 
-      //draw background fill
-      //out = `level.fillBG.push({ x: ${game.getCoords.pos1.x}, y: ${game.getCoords.pos1.y}, width: ${game.getCoords.pos2.x-game.getCoords.pos1.x}, height: ${game.getCoords.pos2.y-game.getCoords.pos1.y}, color: "#ccc"});`;
+    // Append the textarea to body
+    document.body.appendChild(textAreaEle);
 
-      //svg mode
-      //out = 'rect x="'+game.getCoords.pos1.x+'" y="'+ game.getCoords.pos1.y+'" width="'+(game.getCoords.pos2.x-game.getCoords.pos1.x)+'" height="'+(game.getCoords.pos2.y-game.getCoords.pos1.y)+'"';
+    // Focus and select the text
+    textAreaEle.focus();
+    textAreaEle.select();
 
-      console.log(out);
-      // document.getElementById("copy-this").innerHTML = out
-      //
-      // window.getSelection().removeAllRanges();
-      // var range = document.createRange();
-      // range.selectNode(document.getElementById('copy-this'));
-      // window.getSelection().addRange(range);
-      // document.execCommand('copy')
-      // window.getSelection().removeAllRanges();
+    // Execute the "copy" command
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      // Unable to copy
+    } finally {
+      // Remove the textarea
+      document.body.removeChild(textAreaEle);
     }
+  },
+  constructMouseDownPosition: {
+    x: 0,
+    y: 0
+  },
+  constructMapString: [],
+  constructCycle() {
+    if (game.isConstructionMode && game.constructMouseDownPosition) {
+      function round(num, round = 25) {
+        return Math.ceil(num / round) * round;
+      }
+      const x = round(game.constructMouseDownPosition.x)
+      const y = round(game.constructMouseDownPosition.y)
+      const dx = round(game.mouseInGame.x) - x
+      const dy = round(game.mouseInGame.y) - y
+
+      ctx.strokeStyle = "#000"
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, dx, dy);
+    }
+  },
+  outputMapString() {
+    let out = "" //combine set of map strings to one string
+    let outHTML = ""
+    for (let i = 0, len = game.constructMapString.length; i < len; i++) {
+      out += game.constructMapString[i];
+      outHTML += "<div>" + game.constructMapString[i] + "</div>"
+    }
+    game.copyToClipBoard(out)
+    document.getElementById("construct").innerHTML = outHTML
+  },
+  enableConstructMode() {
+    game.isConstructionMode = true;
+    game.isAutoZoom = false;
+
+    document.body.addEventListener("mouseup", (e) => {
+      if (game.testing && game.constructMouseDownPosition && game.mouseInGame.x > game.constructMouseDownPosition.x && game.mouseInGame.y > game.constructMouseDownPosition.y) { //make sure that the width and height are positive
+        function round(num, round = 25) {
+          return Math.ceil(num / round) * round;
+        }
+        //clean up positions
+        const x = round(game.constructMouseDownPosition.x)
+        const y = round(game.constructMouseDownPosition.y)
+        const dx = round(game.mouseInGame.x) - x
+        const dy = round(game.mouseInGame.y) - y
+
+        console.log(e.which)
+        if (e.which === 1) { //add map
+          game.constructMapString.push(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`) //store command as a string in the next element of an array
+          game.outputMapString();
+
+          //see map in world
+          spawn.mapRect(x, y, dx, dy);
+          len = map.length - 1
+          map[len].collisionFilter.category = cat.map;
+          map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+          Matter.Body.setStatic(map[len], true); //make static
+          World.add(engine.world, map[len]); //add to world
+
+          game.draw.setPaths() //update map graphics
+        } else if (e.which === 3) { //add body
+          game.constructMapString.push(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`) //store command as a string in the next element of an array
+          game.outputMapString();
+
+          //see map in world
+          spawn.bodyRect(x, y, dx, dy);
+          len = body.length - 1
+          body[len].collisionFilter.category = cat.body;
+          body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+          World.add(engine.world, body[len]); //add to world
+        }
+
+      }
+      game.constructMouseDownPosition.x = undefined
+      game.constructMouseDownPosition.y = undefined
+    });
+    game.constructMouseDownPosition.x = undefined
+    game.constructMouseDownPosition.y = undefined
+    document.body.addEventListener("mousedown", () => {
+      if (game.testing) {
+        game.constructMouseDownPosition.x = game.mouseInGame.x
+        game.constructMouseDownPosition.y = game.mouseInGame.y
+      }
+    });
+
+    document.body.addEventListener("keydown", (e) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
+      if (game.testing && e.keyCode === 90 && game.constructMapString.length) {
+        if (game.constructMapString[game.constructMapString.length - 1][6] === 'm') { //remove map
+          game.constructMapString.pop();
+          game.outputMapString();
+          //remove from current level
+          const index = map.length - 1
+          Matter.World.remove(engine.world, map[index]);
+          map.splice(index, 1);
+          game.draw.setPaths() //update map graphics  
+        } else if (game.constructMapString[game.constructMapString.length - 1][6] === 'b') { //remove body
+          game.constructMapString.pop();
+          game.outputMapString();
+          //remove from current level
+          const index = body.length - 1
+          Matter.World.remove(engine.world, body[index]);
+          body.splice(index, 1);
+        }
+      }
+    });
   }
 };

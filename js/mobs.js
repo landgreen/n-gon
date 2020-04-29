@@ -992,11 +992,11 @@ const mobs = {
             }
           }
           if (Math.random() < b.isModBotSpawner) {
-            (Math.random() < 0.5) ? b.nailBot(): b.laserBot()
+            (Math.random() < 0.5) ? b.nailBot(this.position): b.laserBot(this.position)
+            if (mech.energy > 0.33) mech.energy -= 0.33
           }
           if (b.isModExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
         }
-
       },
       removeConsBB() {
         for (let i = 0, len = consBB.length; i < len; ++i) {
@@ -1040,20 +1040,31 @@ const mobs = {
       },
       //replace dead mob with a regular body
       replace(i) {
-        //large mobs or too many bodies go intangible and fall until removed from game to help performance
-        if (this.leaveBody && this.mass < 10 && body.length < 50) {
+        //if there are too many bodies don't turn into blocks to help performance
+        if (this.leaveBody && body.length < 60 && this.mass < 100) {
           const len = body.length;
           body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, this.vertices);
           Matter.Body.setVelocity(body[len], this.velocity);
           Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
           body[len].collisionFilter.category = cat.body;
           body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-
           // if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
           //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
           // }
           body[len].classType = "body";
           World.add(engine.world, body[len]); //add to world
+
+          //large mobs shrink so they don't block paths
+          if (body[len].mass > 10) {
+            const shrink = function (that, massLimit) {
+              if (that.mass > massLimit) {
+                const scale = 0.95;
+                Matter.Body.scale(that, scale, scale);
+                setTimeout(shrink, 20, that, massLimit);
+              }
+            };
+            shrink(body[len], 9 + 5 * Math.random())
+          }
         }
         Matter.World.remove(engine.world, this);
         mob.splice(i, 1);

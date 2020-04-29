@@ -1,9 +1,23 @@
 
 
-foam gun now slows down when touching walls
-mod - quantum foam now bypasses shields
-Bayesian now only give one mod choice on election, but 33% (from 20%) chance at double power ups
+large mods shrink on death instead of disappearing
+new boss mob:  spiderBoss
+mod - Bayesian interference -> determinism 
+   spawn 4 mods and 2 heals, future power ups are limited to one choice
+mod - Leveraged investments -> Bayesian interference
+   33% chance for double power ups to drop, remove all future ammo power ups
+
+(serious progress on my level construction tools, but it's not ready yet)
+
 ************** TODO - n-gon **************
+
+construct
+  display outline of map to be draw while mouse is down
+  toggle between maps and bodies
+  ?highlight map/body mouse is over and be able to remove it?
+  display current output text in a box
+    live update it
+
 
 mod - blocking with perfect diamagnetism fires your gun
   maybe doesn't trigger cooldown?

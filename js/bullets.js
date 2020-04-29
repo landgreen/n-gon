@@ -24,7 +24,7 @@ const b = {
   modRecursiveHealing: null,
   modSquirrelFx: null,
   isModCrit: null,
-  isModBayesian: null,
+  modBayesian: null,
   isModLowHealthDmg: null,
   isModFarAwayDmg: null,
   isModEntanglement: null,
@@ -42,7 +42,6 @@ const b = {
   modLaserReflections: null,
   modLaserDamage: null,
   modLaserFieldDrain: null,
-  isModNoAmmo: null,
   isModAmmoFromHealth: null,
   modMobDieAtHealth: null,
   isModEnergyRecovery: null,
@@ -83,6 +82,7 @@ const b = {
   isModRest: null,
   isModRPG: null,
   isMod3Missiles: null,
+  isModDeterminism: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -116,7 +116,7 @@ const b = {
   mods: [{
       name: "capacitor",
       // nameInfo: "<span id='mod-capacitor'></span>",
-      description: "increase <strong class='color-d'>damage</strong> based on stored <strong class='color-f'>energy</strong><br><strong>+1%</strong> <strong class='color-d'>damage</strong> for every <strong>5%</strong> <strong class='color-f'>energy</strong>",
+      description: "increase <strong class='color-d'>damage</strong> based on stored <strong class='color-f'>energy</strong><br><strong>+1%</strong> <strong class='color-d'>damage</strong> for every <strong>5.5%</strong> <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -316,7 +316,7 @@ const b = {
     },
     {
       name: "scrap bots",
-      description: "<strong>+13%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
+      description: "<strong>+12%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot will follow you until you <strong>exit</strong> the map",
       maxCount: 6,
       count: 0,
       allowed() {
@@ -324,7 +324,7 @@ const b = {
       },
       requires: "",
       effect() {
-        b.isModBotSpawner += 0.13;
+        b.isModBotSpawner += 0.12;
       },
       remove() {
         b.isModBotSpawner = 0;
@@ -726,7 +726,7 @@ const b = {
     },
     {
       name: "Bayesian inference",
-      description: "<strong>33%</strong> chance for double <strong>power ups</strong> to drop<br>only <strong>one choice</strong> when selecting <strong>power ups</strong>",
+      description: "<strong>33%</strong> chance for double <strong>power ups</strong> to drop<br><strong>remove</strong> all future <strong>ammo</strong> power ups",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -734,10 +734,10 @@ const b = {
       },
       requires: "",
       effect: () => {
-        b.isModBayesian = 0.33;
+        b.modBayesian = 0.33;
       },
       remove() {
-        b.isModBayesian = 0;
+        b.modBayesian = 0;
       }
     },
     {
@@ -773,8 +773,8 @@ const b = {
       }
     },
     {
-      name: "leveraged investment",
-      description: "<strong>remove</strong> all future <strong>ammo</strong> power ups<br>spawn <strong>5</strong> <strong class='color-m'>mods</strong> and <strong>3</strong> <strong class='color-h'>healing</strong> power ups",
+      name: "determinism",
+      description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong> and 2 <strong class='color-h'>heal</strong> power ups<br>future <strong>power ups</strong> are limited to <strong>one choice</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -782,23 +782,23 @@ const b = {
       },
       requires: "",
       effect: () => {
-        b.isModNoAmmo = true;
-        for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
+        b.isModDeterminism = true;
+        for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+          if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
-        for (let i = 0; i < 3; i++) { // spawn new mods
+        for (let i = 0; i < 2; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
-          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+          if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
         }
       },
       remove() {
-        b.isModNoAmmo = false;
+        b.isModDeterminism = false;
       }
     },
     {
       name: "reallocation",
-      description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods can lose all stacks</em>",
+      description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods lose all stacks</em>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -817,7 +817,7 @@ const b = {
 
         for (let i = 0; i < 2; i++) {
           powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-          if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+          if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
         }
       },
       remove() {
@@ -839,7 +839,7 @@ const b = {
         bullet = [];
 
         let count = b.modCount
-        if (b.isModNoAmmo) count -= 5 //remove the 5 bonus mods when getting rid of leveraged investment
+        if (b.isModDeterminism) count -= 4 //remove the 5 bonus mods when getting rid of determinism
         for (let i = 0; i < count; i++) { // spawn new mods
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
@@ -1291,7 +1291,7 @@ const b = {
     },
     {
       name: "quantum tunneling",
-      description: "<strong>foam</strong> bypasses <strong>shields</strong> to stick to mobs",
+      description: "<strong>foam</strong> bypasses <strong>shields</strong> and sticks to mobs",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1650,7 +1650,7 @@ const b = {
           if (mech.health > 0.05) {
             mech.damage(Math.max(0.01, b.isModAmmoFromHealth * mech.health));
             powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-            if (Math.random() < b.isModBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+            if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
           } else {
             game.replaceTextLog = true;
             game.makeTextLog("not enough health for catabolism to produce ammo", 120);
@@ -1673,7 +1673,7 @@ const b = {
     if (b.isModHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
     if (b.isModEnergyLoss) dmg *= 1.33;
     if (b.isModRest && player.speed < 1) dmg *= 1.20;
-    if (b.isModEnergyDamage) dmg *= 1 + mech.energy / 5;
+    if (b.isModEnergyDamage) dmg *= 1 + mech.energy / 5.5;
     return dmg
   },
   bulletRemove() { //run in main loop
@@ -2385,11 +2385,11 @@ const b = {
     };
     bullet[me].do = function () {};
   },
-  nailBot(speed = 1) {
+  nailBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (10 + 5 * Math.random())
-    bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 4, RADIUS, {
+    bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -2439,16 +2439,12 @@ const b = {
       }
     })
     World.add(engine.world, bullet[me]); //add bullet to world
-    Matter.Body.setVelocity(bullet[me], {
-      x: speed * Math.cos(dir),
-      y: speed * Math.sin(dir)
-    });
   },
-  laserBot(speed = 1) {
+  laserBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (14 + 6 * Math.random())
-    bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 3, RADIUS, {
+    bullet[me] = Bodies.polygon(position.x, position.y, 3, RADIUS, {
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -2558,10 +2554,6 @@ const b = {
       }
     })
     World.add(engine.world, bullet[me]); //add bullet to world
-    Matter.Body.setVelocity(bullet[me], {
-      x: speed * Math.cos(dir),
-      y: speed * Math.sin(dir)
-    });
   },
   giveGuns(gun = "random", ammoPacks = 6) {
     if (gun === "random") {
@@ -3435,7 +3427,7 @@ const b = {
                 Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
                 Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.9))
                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
-                if (b.isModFoamShieldSKip) {
+                if (b.isModFoamShieldSKip && this.target.isShielded) {
                   this.target.damage(b.dmgScale * 0.0025, true); //shield damage bypass
                 } else {
                   this.target.damage(b.dmgScale * 0.005);

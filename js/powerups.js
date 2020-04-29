@@ -81,7 +81,7 @@ const powerUps = {
           if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
           if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
         } else {
-          let ammo = Math.ceil((target.ammoPack * (1 + 0.1 * Math.random())));
+          let ammo = Math.ceil((target.ammoPack * (0.8 + 0.25 * Math.random())));
           // if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
           target.ammo += ammo;
           game.updateGunHUD();
@@ -115,7 +115,7 @@ const powerUps = {
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.cancel("field")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
-        if (!b.isModBayesian) {
+        if (!b.isModDeterminism) {
           choice2 = pick(mech.fieldUpgrades, choice1)
           if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
           choice3 = pick(mech.fieldUpgrades, choice1, choice2)
@@ -160,7 +160,7 @@ const powerUps = {
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.cancel("mod")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
-        if (!b.isModBayesian) {
+        if (!b.isModDeterminism) {
           choice2 = pick(choice1)
           if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
           choice3 = pick(choice1, choice2)
@@ -198,7 +198,7 @@ const powerUps = {
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.cancel("gun")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
-        if (!b.isModBayesian) {
+        if (!b.isModDeterminism) {
           choice2 = pick(b.guns, choice1)
           if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
           choice3 = pick(b.guns, choice1, choice2)
@@ -230,43 +230,43 @@ const powerUps = {
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
     if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !b.isModEnergyHealth) || Math.random() < 0.035) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "heal");
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "heal");
       return;
     }
-    if (Math.random() < 0.15 && b.inventory.length > 0 && !b.isModNoAmmo) {
+    if (Math.random() < 0.15 && b.inventory.length > 0 && !b.modBayesian) {
       powerUps.spawn(x, y, "ammo");
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "ammo");
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "ammo");
       return;
     }
     if (Math.random() < 0.002 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
       powerUps.spawn(x, y, "gun");
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun");
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "gun");
       return;
     }
     if (Math.random() < 0.0027 * (15 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod");
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "mod");
       return;
     }
     if (Math.random() < 0.006) {
       powerUps.spawn(x, y, "field");
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field");
       return;
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field")
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.9) {
       powerUps.spawn(x, y, "mod")
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "mod")
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "gun")
-      if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "gun")
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "gun")
       // } else if (Math.random() < 0.5) {
       //   powerUps.spawn(x, y, "field");
-      //   if (Math.random() < b.isModBayesian) powerUps.spawn(x, y, "field");
+      //   if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field");
     } else if (mech.health < 0.65 && !b.isModEnergyHealth) {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
@@ -274,18 +274,18 @@ const powerUps = {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
-      if (Math.random() < b.isModBayesian) {
+      if (Math.random() < b.modBayesian) {
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
       }
-    } else if (!b.isModNoAmmo) {
+    } else if (!b.modBayesian) {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
-      if (Math.random() < b.isModBayesian) {
+      if (Math.random() < b.modBayesian) {
         powerUps.spawn(x, y, "ammo");
         powerUps.spawn(x, y, "ammo");
         powerUps.spawn(x, y, "ammo");
@@ -296,18 +296,24 @@ const powerUps = {
     if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
     } else {
-      if (!b.isModNoAmmo) powerUps.spawn(x, y, "ammo", false);
+      if (!b.modBayesian) powerUps.spawn(x, y, "ammo", false);
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-    if (b.inventory.length === 0) {
-      powerUps.spawn(x, y, "gun", false);
-    } else if (b.modCount === 0) {
-      powerUps.spawn(x, y, "mod", false); //starting gun
-    } else if (b.inventory.length < 2) {
-      powerUps.spawn(x, y, "gun", false);
+    if (level.levelsCleared < 5) {
+      if (b.inventory.length === 0) {
+        powerUps.spawn(x, y, "gun", false);
+      } else if (b.modCount === 0) {
+        powerUps.spawn(x, y, "mod", false); //starting gun
+      } else if (b.inventory.length < 2) {
+        powerUps.spawn(x, y, "gun", false);
+      } else {
+        powerUps.spawnRandomPowerUp(x, y);
+        powerUps.spawnRandomPowerUp(x, y);
+        powerUps.spawnRandomPowerUp(x, y);
+        powerUps.spawnRandomPowerUp(x, y);
+      }
     } else {
-      powerUps.spawnRandomPowerUp(x, y);
       powerUps.spawnRandomPowerUp(x, y);
       powerUps.spawnRandomPowerUp(x, y);
       powerUps.spawnRandomPowerUp(x, y);

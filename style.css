@@ -95,6 +95,25 @@ summary {
   /* transition: display 0.5s; */
 }
 
+#construct {
+  display: none;
+  position: absolute;
+  bottom: 0%;
+  right: 0%;
+  z-index: 1;
+  width: 300px;
+  height: 320px;
+  background-color: #fff;
+  color: #000;
+  font-size: 0.9em;
+  user-select: text;
+  white-space: pre;
+  padding: 3px;
+  overflow: scroll;
+  /* border-radius: 0px; */
+  border: 2px #333 solid;
+}
+
 #choose-grid {
   position: absolute;
   top: 50%;

@@ -371,7 +371,7 @@ const mech = {
             if (b.mods[i].count < b.mods[i].maxCount &&
               b.mods[i].name !== "quantum immortality" &&
               b.mods[i].name !== "Born rule" &&
-              b.mods[i].name !== "leveraged investment" &&
+              b.mods[i].name !== "determinism" &&
               b.mods[i].name !== "reallocation" &&
               b.mods[i].allowed()
             ) options.push(i);
@@ -603,7 +603,7 @@ const mech = {
 
     // freeze game and display a full screen red color
     if (dmg > 0.05) {
-      if (dmg > 0.15 * mech.holdingMassScale) mech.drop(); //drop block if holding
+      if (dmg > 0.20 * mech.holdingMassScale) mech.drop(); //drop block if holding
       game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
       game.fpsInterval = 1000 / game.fpsCap;
     } else {
@@ -714,6 +714,13 @@ const mech = {
     mech.knee.x = (l / d) * (mech.foot.x - mech.hip.x) - (h / d) * (mech.foot.y - mech.hip.y) + mech.hip.x + offset;
     mech.knee.y = (l / d) * (mech.foot.y - mech.hip.y) + (h / d) * (mech.foot.x - mech.hip.x) + mech.hip.y;
   },
+  // collisionImmune: false,
+  // beginCollisionImmune() {
+
+  // },
+  // endCollisionImmune() {
+
+  // },
   draw() {
     // mech.fillColor = (mech.collisionImmuneCycle < mech.cycle) ? "#fff" : "rgba(255,255,255,0.1)" //"#cff"
     ctx.fillStyle = mech.fillColor;
@@ -721,6 +728,12 @@ const mech = {
 
     //draw body
     ctx.save();
+    // if (mech.collisionImmuneCycle < mech.cycle) {
+    //   ctx.globalAlpha = 1
+    //   if (mech.collisionImmune) mech.collisionImmune = false;
+    // } else {
+    //   ctx.globalAlpha = 0.7
+    // }
     ctx.globalAlpha = (mech.collisionImmuneCycle < mech.cycle) ? 1 : 0.7
     ctx.translate(mech.pos.x, mech.pos.y);
     mech.calcLeg(Math.PI, -3);
