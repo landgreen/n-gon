@@ -19,13 +19,14 @@ const level = {
       // b.giveGuns("foam")
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
-      // b.giveMod("quantum tunneling");
-      // b.giveGuns("rail gun")
+      // b.giveMod("impact shear");
+      // b.giveMod("nail bot");
+      // b.giveGuns("mine")
       // mech.setField("pilot wave")
       // mech.setField("perfect diamagnetism")
 
-      // level.intro(); //starting level
-      level.testing();
+      level.intro(); //starting level
+      // level.testing();
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -157,11 +158,11 @@ const level = {
     // spawn.bomberBoss(2900, -500)
     // spawn.suckerBoss(1200, -500)
     // spawn.hopper(1200, -500, 70)
-    // spawn.hopper(1200, -500, 100)
+    spawn.spinner(1200, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "spiker")
-    spawn.spiderBoss(1200, -500)
+    // spawn.spiderBoss(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
   },
@@ -987,8 +988,7 @@ const level = {
           stiffness: 0.00007
         });
         if (game.difficulty > 4) spawn.nodeBoss(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
-      }
-      if (Math.random() < 0.08) {
+      } else if (Math.random() < 0.08) {
         spawn.randomLevelBoss(4250, -250);
       } else {
         //floor below right tall tower
@@ -1721,7 +1721,7 @@ const level = {
       }
     }
   },
-  stronghold() { // player made level  by    Francois 👑   from discord
+  stronghold() { // player made level  by    Francois 👑 from discord
     level.defaultZoom = 1400
 
     game.zoomTransition(level.defaultZoom)
@@ -1769,6 +1769,13 @@ const level = {
       color: "rgba(0,0,0,0.1)"
     });
     level.fillBG.push({
+      x: 1100,
+      y: -1700,
+      width: 50,
+      height: 450,
+      color: "rgba(0,0,0,0.1)"
+    });
+    level.fillBG.push({
       x: 1050,
       y: -1200,
       width: 100,
@@ -1792,7 +1799,7 @@ const level = {
     level.fillBG.push({
       x: 2530,
       y: -550,
-      width: 400,
+      width: 430,
       height: -1450,
       color: "rgba(0,0,0,0.1)"
     });
@@ -1873,15 +1880,15 @@ const level = {
     spawn.bodyRect(3400, -1470, 110, 70); //Moyen bloc dans la cuve
     spawn.mapRect(3270, -1750, 80, 50); // Rebord gauche cuve
 
-    spawn.mapRect(2530, -2000, 400, 50); //First Plateforme
+    spawn.mapRect(2530, -2000, 430, 50); //First Plateforme
     spawn.mapRect(1600, -1750, 600, 50); // Middle plateforme
-    spawn.mapRect(1150, -1750, 250, 50); //Derniere plateforme // Toit petite boite en [
+    spawn.mapRect(1100, -1750, 300, 50); //Derniere plateforme // Toit petite boite en [
     spawn.bodyRect(1830, -1980, 190, 230); // Fat bloc plateforme middle 
     spawn.bodyRect(1380, -1770, 250, 20) // Pont last plateforme
 
     spawn.mapRect(1000, -1250, 400, 50); //Sol de la petite boite en [
-    spawn.mapRect(1100, -1750, 50, 380); //Mur gauche petite boite en [
-    spawn.bodyRect(1100, -1380, 48, 119); //Bloc-porte petite boite en [
+    spawn.mapRect(1100, -1550, 50, 190); //Mur gauche petite boite en [
+    spawn.bodyRect(1100, -1380, 48, 109); //Bloc-porte petite boite en [
 
     spawn.mapRect(-100, -750, 1100, 50); //Sol last salle
     spawn.mapRect(1000, -1200, 50, 500) // Mur droit last salle
@@ -1897,7 +1904,9 @@ const level = {
     spawn.bodyRect(-503, -1250, 30, 30); // Petit bloc exit room
 
     spawn.mapRect(500, -700, 100, 590); //Bloc noir un dessous last salle
-    spawn.mapRect(1400, -250, 200, 250); //Black Block left from the spawn
+    spawn.mapRect(1350, -250, 250, 250); //Black Block left from the spawn
+    spawn.boost(1470, -250, 1080);
+
     spawn.boost(-370, 0, 800);
 
     map[map.length] = Bodies.polygon(2325, -205, 0, 15); //circle above door
@@ -1920,12 +1929,19 @@ const level = {
     spawn.bodyRect(2545, -50, 70, 50);
     spawn.bodyRect(2550, 0, 100, 30);
 
+    spawn.randomSmallMob(200, -1300, 0.5);
+    spawn.randomSmallMob(300, -1300, 0.9);
+    spawn.randomSmallMob(470, -650, 1);
     spawn.randomSmallMob(1000, -400, 1);
     spawn.randomSmallMob(2550, -560, 1);
     spawn.randomSmallMob(3350, -900, 1);
     spawn.randomSmallMob(3600, -1210, 1);
     spawn.randomSmallMob(700, -1950, 0.2);
     spawn.randomSmallMob(5050, -550);
+    spawn.randomMob(-250, -250, 0.8);
+    spawn.randomMob(-300, -600, 0.6);
+    spawn.randomMob(350, -900, 0.5);
+    spawn.randomMob(770, -950, 0.8)
     spawn.randomMob(900, -160, 1);
     spawn.randomMob(2360, -820, 0.8);
     spawn.randomMob(2700, -2020, 0.8);
@@ -1935,6 +1951,7 @@ const level = {
     spawn.randomBoss(1500, -1900, 0.5);
     spawn.randomBoss(2350, -850, 1);
     spawn.randomBoss(100, -450, 0.9);
+
     if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400, 1);
   },
   //*****************************************************************************************************************

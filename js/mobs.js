@@ -996,6 +996,7 @@ const mobs = {
             if (mech.energy > 0.33) mech.energy -= 0.33
           }
           if (b.isModExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
+          if (b.modNailsDeathMob) b.targetedNail(this.position, b.modNailsDeathMob)
         }
       },
       removeConsBB() {

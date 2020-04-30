@@ -83,6 +83,8 @@ const b = {
   isModRPG: null,
   isMod3Missiles: null,
   isModDeterminism: null,
+  isModHarmReduce: null,
+  modNailsDeathMob: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -405,6 +407,22 @@ const b = {
       },
       remove() {
         b.isModExplodeMob = false;
+      }
+    },
+    {
+      name: "impact shear",
+      description: "mobs release <strong>+2</strong> <strong>nails</strong> when they <strong>die</strong><br>nails target nearby mobs",
+      maxCount: 9,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect: () => {
+        b.modNailsDeathMob += 2
+      },
+      remove() {
+        b.modNailsDeathMob = 0;
       }
     },
     {
@@ -1406,6 +1424,22 @@ const b = {
       }
     },
     {
+      name: "degenerate matter",
+      description: "<strong>2x</strong> <strong class='color-f'>energy</strong> drain for <strong>negative mass field</strong><br>increase <strong>harm</strong> reduction to <strong>90%</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+      },
+      requires: "negative mass field",
+      effect() {
+        b.isModHarmReduce = true
+      },
+      remove() {
+        b.isModHarmReduce = false;
+      }
+    },
+    {
       name: "annihilation",
       description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong>",
       maxCount: 1,
@@ -2081,35 +2115,7 @@ const b = {
       },
       onEnd() {
         if (this.isArmed) {
-          const targets = [] //target nearby mobs
-          for (let i = 0, len = mob.length; i < len; i++) {
-            if (mob[i].dropPowerUp) {
-              const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-              if (dist < 1440000 && //1200*1200
-                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
-              }
-            }
-          }
-          for (let i = 0; i < 14; i++) {
-            const speed = 53 + 10 * Math.random()
-            if (targets.length > 0) { // aim near a random target in array
-              const index = Math.floor(Math.random() * targets.length)
-              const SPREAD = 150 / targets.length
-              const WHERE = {
-                x: targets[index].x + SPREAD * (Math.random() - 0.5),
-                y: targets[index].y + SPREAD * (Math.random() - 0.5)
-              }
-              b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
-            } else { // aim in random direction
-              const ANGLE = 2 * Math.PI * Math.random()
-              b.nail(this.position, {
-                x: speed * Math.cos(ANGLE),
-                y: speed * Math.sin(ANGLE)
-              })
-            }
-          }
+          b.targetedNail(this.position, 14)
         }
         if (isAmmoBack) { //get ammo back from b.isModMineAmmoBack
           for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
@@ -2370,6 +2376,36 @@ const b = {
       x: speed * Math.cos(dir),
       y: speed * Math.sin(dir)
     });
+  },
+  targetedNail(position, num = 1, speed = 50 + 10 * Math.random(), range = 1200) {
+    const targets = [] //target nearby mobs
+    for (let i = 0, len = mob.length; i < len; i++) {
+      if (mob[i].dropPowerUp) {
+        const dist = Vector.magnitude(Vector.sub(position, mob[i].position));
+        if (dist < range &&
+          Matter.Query.ray(map, position, mob[i].position).length === 0 &&
+          Matter.Query.ray(body, position, mob[i].position).length === 0) {
+          targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
+        }
+      }
+    }
+    for (let i = 0; i < num; i++) {
+      if (targets.length > 0) { // aim near a random target in array
+        const index = Math.floor(Math.random() * targets.length)
+        const SPREAD = 150 / targets.length
+        const WHERE = {
+          x: targets[index].x + SPREAD * (Math.random() - 0.5),
+          y: targets[index].y + SPREAD * (Math.random() - 0.5)
+        }
+        b.nail(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed), 1.1)
+      } else { // aim in random direction
+        const ANGLE = 2 * Math.PI * Math.random()
+        b.nail(position, {
+          x: speed * Math.cos(ANGLE),
+          y: speed * Math.sin(ANGLE)
+        })
+      }
+    }
   },
   nail(pos, velocity, dmg = 0) {
     const me = bullet.length;
@@ -2939,7 +2975,7 @@ const b = {
       fire() {
         if (b.isMod3Missiles) {
           if (mech.crouch) {
-            mech.fireCDcycle = mech.cycle + 80; // cool down
+            mech.fireCDcycle = mech.cycle + 80 * b.modFireRate; // cool down
             const direction = {
               x: Math.cos(mech.angle),
               y: Math.sin(mech.angle)
@@ -2955,7 +2991,7 @@ const b = {
               bullet[bullet.length - 1].force.y += push.y * (i - 1);
             }
           } else {
-            mech.fireCDcycle = mech.cycle + 60; // cool down
+            mech.fireCDcycle = mech.cycle + 60 * b.modFireRate; // cool down
             const direction = {
               x: Math.cos(mech.angle),
               y: Math.sin(mech.angle)
@@ -2972,7 +3008,7 @@ const b = {
             }
           }
         } else {
-          mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 50 : 30); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 50 : 30) * b.modFireRate; // cool down
           b.missile({
               x: mech.pos.x + 40 * Math.cos(mech.angle),
               y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -3046,37 +3082,7 @@ const b = {
         bullet[me].explodeRad = 275;
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-          if (b.modGrenadeFragments) {
-            const targets = [] //target nearby mobs
-            for (let i = 0, len = mob.length; i < len; i++) {
-              if (mob[i].dropPowerUp) {
-                const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                if (dist < 1440000 && //1200*1200
-                  Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                  Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                  targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
-                }
-              }
-            }
-            for (let i = 0; i < b.modGrenadeFragments; i++) {
-              const speed = 53 + 10 * Math.random()
-              if (targets.length > 0) { // aim near a random target in array
-                const index = Math.floor(Math.random() * targets.length)
-                const SPREAD = 150 / targets.length
-                const WHERE = {
-                  x: targets[index].x + SPREAD * (Math.random() - 0.5),
-                  y: targets[index].y + SPREAD * (Math.random() - 0.5)
-                }
-                b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
-              } else { // aim in random direction
-                const ANGLE = 2 * Math.PI * Math.random()
-                b.nail(this.position, {
-                  x: speed * Math.cos(ANGLE),
-                  y: speed * Math.sin(ANGLE)
-                })
-              }
-            }
-          }
+          if (b.modGrenadeFragments) b.targetedNail(this.position, b.modGrenadeFragments)
         }
         bullet[me].minDmgSpeed = 1;
         bullet[me].onDmg = function () {
@@ -3305,7 +3311,7 @@ const b = {
       name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 13,
+      ammoPack: 14,
       have: false,
       isStarterGun: true,
       isEasyToAim: true,
@@ -3476,13 +3482,7 @@ const b = {
             if (who.shield) {
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
-
                   Matter.Body.setVelocity(mob[i], Matter.Vector.mult(Matter.Vector.normalise(this.velocity), 10));
-
-                  // const force = Matter.Vector.mult(this.velocity, 4 / mob[i].mass)
-                  // const velocity = Matter.Vector.add(force, mob[i].velocity)
-                  // Matter.Body.setVelocity(mob[i], velocity);
-
                   break
                 }
               }
@@ -3493,35 +3493,7 @@ const b = {
               Matter.Body.setDensity(this, 0.001);
             }
             if (b.isModRailNails && this.speed > 10) {
-              const targets = [] //target nearby mobs
-              for (let i = 0, len = mob.length; i < len; i++) {
-                if (mob[i].dropPowerUp) {
-                  const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                  if (dist < 1000000 && //1000*1000
-                    Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                    Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                    targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))) //predict where the mob will be in a few cycles
-                  }
-                }
-              }
-              for (let i = 0; i < this.speed - 10; i++) {
-                const speed = 50 + 10 * Math.random()
-                if (targets.length > 0) { // aim near a random target in array
-                  const index = Math.floor(Math.random() * targets.length)
-                  const SPREAD = 150 / targets.length
-                  const WHERE = {
-                    x: targets[index].x + SPREAD * (Math.random() - 0.5),
-                    y: targets[index].y + SPREAD * (Math.random() - 0.5)
-                  }
-                  b.nail(this.position, Vector.mult(Vector.normalise(Vector.sub(WHERE, this.position)), speed), 1.1)
-                } else { // aim in random direction
-                  const ANGLE = 2 * Math.PI * Math.random()
-                  b.nail(this.position, {
-                    x: speed * Math.cos(ANGLE),
-                    y: speed * Math.sin(ANGLE)
-                  })
-                }
-              }
+              b.targetedNail(this.position, Math.min(40, this.speed) - 10)
               this.endCycle = 0 //triggers despawn
             }
           },

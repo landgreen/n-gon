@@ -1461,9 +1461,16 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.00035
+            let DRAIN = 0.00105;
             if (mech.energy > DRAIN) {
-              mech.fieldDamageResistance = 0.2; // 1 - 0.8
+              if (b.isModHarmReduce) {
+                mech.fieldDamageResistance = 0.1; // 1 - 0.9
+                DRAIN = 0.0007 //2x energy drain
+              } else {
+                mech.fieldDamageResistance = 0.2; // 1 - 0.8
+                DRAIN = 0.00035
+              }
+
               // mech.pushMobs360();
 
               //repulse mobs

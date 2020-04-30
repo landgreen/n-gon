@@ -67,6 +67,8 @@ const game = {
       mech.cycle++;
       game.gravity();
       Engine.update(engine, game.delta);
+      mech.keyMove();
+
       level.checkZones();
       level.checkQuery();
       mech.move();

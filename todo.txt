@@ -1,15 +1,23 @@
 
-
-large mods shrink on death instead of disappearing
-new boss mob:  spiderBoss
-mod - Bayesian interference -> determinism 
-   spawn 4 mods and 2 heals, future power ups are limited to one choice
-mod - Leveraged investments -> Bayesian interference
-   33% chance for double power ups to drop, remove all future ammo power ups
-
-(serious progress on my level construction tools, but it's not ready yet)
+mod - negative mass field: 80%->90% harm reduction while active, but 2x energy drain
+mod - mobs fire nails when they die  (by Francois 👑 from discord)
 
 ************** TODO - n-gon **************
+
+possible names for mods
+  Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
+
+have a mob apply a positive status effect on other mobs,
+  heal?
+  make it yellow
+  damage bonus, but how?
+  possible balance issues
+
+mobs that fire grenades
+mobs that fire bullets
+  bullets that chase the player a bit (blue color)
+  short lived bullets that fire in every direction
+    or fire in a spiral over time
 
 construct
   display outline of map to be draw while mouse is down
@@ -17,25 +25,6 @@ construct
   ?highlight map/body mouse is over and be able to remove it?
   display current output text in a box
     live update it
-
-
-mod - blocking with perfect diamagnetism fires your gun
-  maybe doesn't trigger cooldown?
-  does use ammo
-
-mod - annihilation might be unbalanced?
-
-boss mob - let it die multiple times and come back to life
-  on death event spawns a new version of self, but with a decrementing counter
-
-foam - check for touching map / blocks and slow foam down rather then bounce off walls
-quantum foam should just skip the shield
-
-red flashes when you take damage were replaced with the color of your energy bar
-  When you have mass energy equivalence
-
-mod - missiles: fire 3 small missiles
-  disables missile replication mod
 
 lore - a robot (the player) gains self awareness
   each mod/gun/field is a new tech
@@ -57,9 +46,12 @@ atmosphere levels: change the pace, give the user a rest between combat
   simple puzzles
   cool looking stuff
     large rotating fan that the player has to move through
-    nonaggressive mobs
     in the final level you see your self at the starting level, with the wires
       you shoot your self to wake up?
+  nonaggressive mobs
+
+boss mob - let it die multiple times and come back to life
+  on death event spawns a new version of self, but with a decrementing counter
 
 bullets cost 5 life instead of ammo, but return 5 life when they hit a mob
   replace life with energy or ammo?

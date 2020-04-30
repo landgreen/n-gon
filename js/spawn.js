@@ -81,8 +81,7 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
-    const options = ["spiderBoss"] //, "timeSkipBoss"  //"shooterBoss", "cellBossCulture", "bomberBoss",
-    // const options = ["timeSkipBoss"]
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss"] // , "timeSkipBoss"
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -420,55 +419,49 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.fill = "#28b";
     me.rememberFill = me.fill;
-    me.cdBurst1 = 0; //must add for burstAttraction
-    me.cdBurst2 = 0; //must add for burstAttraction
-    me.delay = 0;
+    me.cd = 0;
     me.burstDir = {
       x: 0,
       y: 0
     };
-    me.accelMag = 0.16 * game.accelScale;
     me.frictionAir = 0.022;
     me.lookTorque = 0.0000014;
     me.restitution = 0;
     spawn.shield(me, x, y);
-    me.do = function () {
+    me.look = function () {
       this.seePlayerByLookingAt();
       this.checkStatus();
-      //accelerate towards the player after a delay
-      if (this.seePlayer.recall) {
-        if (this.cdBurst2 < game.cycle && this.angularSpeed < 0.01) {
-          this.cdBurst2 = Infinity;
-          this.cdBurst1 = game.cycle + 40;
-          this.burstDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-        } else if (this.cdBurst1 < game.cycle) {
-          this.cdBurst2 = game.cycle + this.delay;
-          this.cdBurst1 = Infinity;
-          this.force = Vector.mult(this.burstDir, this.mass * 0.25);
-          this.fill = this.rememberFill;
-        } else if (this.cdBurst1 != Infinity) {
-          this.torque += 0.000035 * this.inertia;
-          this.fill = randomColor({
-            hue: "blue"
-          });
-          //draw attack vector
-          const mag = this.radius * 2.5 + 50;
-          ctx.strokeStyle = "rgba(0,0,0,0.2)";
-          ctx.lineWidth = 3;
-          ctx.setLineDash([10, 20]); //30
-          const dir = Vector.add(this.position, Vector.mult(this.burstDir, mag));
-          ctx.beginPath();
-          ctx.moveTo(this.position.x, this.position.y);
-          ctx.lineTo(dir.x, dir.y);
-          ctx.stroke();
-          ctx.setLineDash([]);
-        } else {
-          this.fill = this.rememberFill;
-        }
-      } else {
-        this.cdBurst2 = 0;
+      if (this.seePlayer.recall && this.cd < game.cycle) {
+        this.burstDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+        this.cd = game.cycle + 40;
+        this.do = this.spin
       }
-    };
+    }
+    me.do = me.look
+    me.spin = function () {
+      this.checkStatus();
+      this.torque += 0.000035 * this.inertia;
+      this.fill = randomColor({
+        hue: "blue"
+      });
+      //draw attack vector
+      const mag = this.radius * 2.5 + 50;
+      ctx.strokeStyle = "rgba(0,0,0,0.2)";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([10, 20]); //30
+      const dir = Vector.add(this.position, Vector.mult(this.burstDir, mag));
+      ctx.beginPath();
+      ctx.moveTo(this.position.x, this.position.y);
+      ctx.lineTo(dir.x, dir.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (this.cd < game.cycle) {
+        this.fill = this.rememberFill;
+        this.cd = game.cycle + 180 * game.CDScale
+        this.do = this.look
+        this.force = Vector.mult(this.burstDir, this.mass * 0.25);
+      }
+    }
   },
   sucker(x, y, radius = 30 + Math.ceil(Math.random() * 70)) {
     radius = 9 + radius / 8; //extra small
@@ -714,18 +707,18 @@ const spawn = {
       });
     }
   },
-  timeSkipBoss(x, y, radius = 70) {
+  timeSkipBoss(x, y, radius = 55) {
     mobs.spawn(x, y, 6, radius, '#000');
     let me = mob[mob.length - 1];
     // me.stroke = "transparent"; //used for drawSneaker
     me.timeSkipLastCycle = 0
-    me.eventHorizon = 1600; //required for black hole
+    me.eventHorizon = 1800; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 2000) * (me.eventHorizon + 2000); //vision limit is event horizon + 2000
     me.accelMag = 0.0004 * game.accelScale;
     // me.frictionAir = 0.005;
     // me.memory = 1600;
     // Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
-    Matter.Body.setDensity(me, 0.0025 + 0.0007 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y, 1);
 
 
