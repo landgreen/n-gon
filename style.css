@@ -101,17 +101,17 @@ summary {
   bottom: 0%;
   right: 0%;
   z-index: 1;
-  width: 300px;
-  height: 320px;
+  width: 250px;
+  height: 200px;
   background-color: #fff;
   color: #000;
   font-size: 0.9em;
-  user-select: text;
+  /* user-select: text; */
   white-space: pre;
   padding: 3px;
-  overflow: scroll;
+  /* overflow: scroll; */
   /* border-radius: 0px; */
-  border: 2px #333 solid;
+  border: 1px #333 solid;
 }
 
 #choose-grid {

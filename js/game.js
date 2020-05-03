@@ -1029,15 +1029,16 @@ const game = {
       }
       const x = round(game.constructMouseDownPosition.x)
       const y = round(game.constructMouseDownPosition.y)
-      const dx = round(game.mouseInGame.x) - x
-      const dy = round(game.mouseInGame.y) - y
+      const dx = Math.max(25, round(game.mouseInGame.x) - x)
+      const dy = Math.max(25, round(game.mouseInGame.y) - y)
 
       ctx.strokeStyle = "#000"
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, dx, dy);
     }
   },
-  outputMapString() {
+  outputMapString(string) {
+    if (string) game.constructMapString.push(string) //store command as a string in the next element of an array
     let out = "" //combine set of map strings to one string
     let outHTML = ""
     for (let i = 0, len = game.constructMapString.length; i < len; i++) {
@@ -1052,49 +1053,50 @@ const game = {
     game.isAutoZoom = false;
 
     document.body.addEventListener("mouseup", (e) => {
-      if (game.testing && game.constructMouseDownPosition && game.mouseInGame.x > game.constructMouseDownPosition.x && game.mouseInGame.y > game.constructMouseDownPosition.y) { //make sure that the width and height are positive
+      if (game.testing && game.constructMouseDownPosition) {
         function round(num, round = 25) {
           return Math.ceil(num / round) * round;
         }
         //clean up positions
         const x = round(game.constructMouseDownPosition.x)
         const y = round(game.constructMouseDownPosition.y)
-        const dx = round(game.mouseInGame.x) - x
-        const dy = round(game.mouseInGame.y) - y
+        const dx = Math.max(25, round(game.mouseInGame.x) - x)
+        const dy = Math.max(25, round(game.mouseInGame.y) - y)
 
-        console.log(e.which)
-        if (e.which === 1) { //add map
-          game.constructMapString.push(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`) //store command as a string in the next element of an array
-          game.outputMapString();
+        if (e.which === 2) {
+          game.outputMapString(`spawn.randomMob(${x}, ${y},0.5);`);
+        } else if (game.mouseInGame.x > game.constructMouseDownPosition.x && game.mouseInGame.y > game.constructMouseDownPosition.y) { //make sure that the width and height are positive
+          if (e.which === 1) { //add map
+            game.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`);
 
-          //see map in world
-          spawn.mapRect(x, y, dx, dy);
-          len = map.length - 1
-          map[len].collisionFilter.category = cat.map;
-          map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
-          Matter.Body.setStatic(map[len], true); //make static
-          World.add(engine.world, map[len]); //add to world
+            //see map in world
+            spawn.mapRect(x, y, dx, dy);
+            len = map.length - 1
+            map[len].collisionFilter.category = cat.map;
+            map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+            Matter.Body.setStatic(map[len], true); //make static
+            World.add(engine.world, map[len]); //add to world
 
-          game.draw.setPaths() //update map graphics
-        } else if (e.which === 3) { //add body
-          game.constructMapString.push(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`) //store command as a string in the next element of an array
-          game.outputMapString();
+            game.draw.setPaths() //update map graphics
+          } else if (e.which === 3) { //add body
+            game.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
 
-          //see map in world
-          spawn.bodyRect(x, y, dx, dy);
-          len = body.length - 1
-          body[len].collisionFilter.category = cat.body;
-          body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-          World.add(engine.world, body[len]); //add to world
+            //see map in world
+            spawn.bodyRect(x, y, dx, dy);
+            len = body.length - 1
+            body[len].collisionFilter.category = cat.body;
+            body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+            World.add(engine.world, body[len]); //add to world
+            body[len].classType = "body"
+          }
         }
-
       }
       game.constructMouseDownPosition.x = undefined
       game.constructMouseDownPosition.y = undefined
     });
     game.constructMouseDownPosition.x = undefined
     game.constructMouseDownPosition.y = undefined
-    document.body.addEventListener("mousedown", () => {
+    document.body.addEventListener("mousedown", (e) => {
       if (game.testing) {
         game.constructMouseDownPosition.x = game.mouseInGame.x
         game.constructMouseDownPosition.y = game.mouseInGame.y
@@ -1103,22 +1105,18 @@ const game = {
 
     document.body.addEventListener("keydown", (e) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
       if (game.testing && e.keyCode === 90 && game.constructMapString.length) {
-        if (game.constructMapString[game.constructMapString.length - 1][6] === 'm') { //remove map
-          game.constructMapString.pop();
-          game.outputMapString();
-          //remove from current level
+        if (game.constructMapString[game.constructMapString.length - 1][6] === 'm') { //remove map from current level
           const index = map.length - 1
           Matter.World.remove(engine.world, map[index]);
           map.splice(index, 1);
           game.draw.setPaths() //update map graphics  
-        } else if (game.constructMapString[game.constructMapString.length - 1][6] === 'b') { //remove body
-          game.constructMapString.pop();
-          game.outputMapString();
-          //remove from current level
+        } else if (game.constructMapString[game.constructMapString.length - 1][6] === 'b') { //remove body from current level
           const index = body.length - 1
           Matter.World.remove(engine.world, body[index]);
           body.splice(index, 1);
         }
+        game.constructMapString.pop();
+        game.outputMapString();
       }
     });
   }

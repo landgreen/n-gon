@@ -14,13 +14,13 @@ const level = {
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
-      game.enableConstructMode() //used to build maps in testing mode
+      // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // b.giveGuns("foam")
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
       // b.giveMod("impact shear");
-      b.giveMod("clock gating");
+      // b.giveMod("clock gating");
       // b.giveGuns("mine")
       // mech.setField("pilot wave")
       // mech.setField("perfect diamagnetism")

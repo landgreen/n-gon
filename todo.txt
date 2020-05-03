@@ -1,9 +1,6 @@
-cardinality now gives 2 selection choices
-+20% laser damage
-Mod: When damaged, time slows down
 ************** TODO - n-gon **************
 
-let people know about n-gon
+n-gon outreach ideas
   blips - errant signal on youtube
   reddit - r/IndieGaming
   hacker news - show hacker news post
