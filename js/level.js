@@ -14,13 +14,13 @@ const level = {
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
-      // game.enableConstructMode() //used to build maps in testing mode
+      game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // b.giveGuns("foam")
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
       // b.giveMod("impact shear");
-      // b.giveMod("nail bot");
+      b.giveMod("clock gating");
       // b.giveGuns("mine")
       // mech.setField("pilot wave")
       // mech.setField("perfect diamagnetism")
@@ -102,7 +102,7 @@ const level = {
   //******************************************************************************************************************
 
   testing() {
-    level.difficultyIncrease(19);
+    // level.difficultyIncrease(19);
     spawn.setSpawnList();
     spawn.setSpawnList();
     level.defaultZoom = 1500
@@ -157,8 +157,8 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     // spawn.suckerBoss(1200, -500)
-    // spawn.hopper(1200, -500, 70)
-    spawn.spinner(1200, -500)
+    spawn.hopper(1200, -500)
+    spawn.laser(1200, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "spiker")

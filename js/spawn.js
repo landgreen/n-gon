@@ -906,7 +906,16 @@ const spawn = {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
       // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))
       // if (!mech.isBodiesAsleep) Matter.Body.rotate(me, this.rotateVelocity)
-      Matter.Body.setAngle(me, game.cycle * this.rotateVelocity)
+
+      //check if slowed
+      let slowed = false
+      for (let i = 0; i < this.status.length; i++) {
+        if (this.status[i].type === "slow") {
+          slowed = true
+          break
+        }
+      }
+      if (!slowed) Matter.Body.setAngle(me, game.cycle * this.rotateVelocity)
 
       // this.torque -= this.inertia * 0.0000025 / (4 + this.health);
       Matter.Body.setVelocity(this, {

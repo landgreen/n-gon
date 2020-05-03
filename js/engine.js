@@ -55,20 +55,20 @@ function playerOffGroundCheck(event) {
   }
 }
 
-function playerHeadCheck(event) {
-  //runs on collisions events
-  if (mech.crouch) {
-    mech.isHeadClear = true;
-    const pairs = event.pairs;
-    for (let i = 0, j = pairs.length; i != j; ++i) {
-      if (pairs[i].bodyA === headSensor) {
-        mech.isHeadClear = false;
-      } else if (pairs[i].bodyB === headSensor) {
-        mech.isHeadClear = false;
-      }
-    }
-  }
-}
+// function playerHeadCheck(event) {
+//   //runs on collisions events
+//   if (mech.crouch) {
+//     mech.isHeadClear = true;
+//     const pairs = event.pairs;
+//     for (let i = 0, j = pairs.length; i != j; ++i) {
+//       if (pairs[i].bodyA === headSensor) {
+//         mech.isHeadClear = false;
+//       } else if (pairs[i].bodyB === headSensor) {
+//         mech.isHeadClear = false;
+//       }
+//     }
+//   }
+// }
 
 function collisionChecks(event) {
   const pairs = event.pairs;
@@ -249,12 +249,12 @@ function collisionChecks(event) {
 //determine if player is on the ground
 Events.on(engine, "collisionStart", function (event) {
   playerOnGroundCheck(event);
-  playerHeadCheck(event);
+  // playerHeadCheck(event);
   collisionChecks(event);
 });
 Events.on(engine, "collisionActive", function (event) {
   playerOnGroundCheck(event);
-  playerHeadCheck(event);
+  // playerHeadCheck(event);
 });
 Events.on(engine, "collisionEnd", function (event) {
   playerOffGroundCheck(event);

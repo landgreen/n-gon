@@ -1,8 +1,22 @@
-
-mod - negative mass field: 80%->90% harm reduction while active, but 2x energy drain
-mod - mobs fire nails when they die  (by Francois 👑 from discord)
-
+cardinality now gives 2 selection choices
++20% laser damage
+Mod: When damaged, time slows down
 ************** TODO - n-gon **************
+
+let people know about n-gon
+  blips - errant signal on youtube
+  reddit - r/IndieGaming
+  hacker news - show hacker news post
+
+frozen mobs take +33% damage
+
+a lasting AoE damage gun
+  reuse sporangium code
+  maybe mod for vacuum bomb where it does aoe damage before it explodes
+
+bot that punches nearby mobs
+  bot could have a regeneration phase, and a punching phase
+    indicate phase by the size, shape of bot
 
 possible names for mods
   Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
@@ -26,15 +40,9 @@ construct
   display current output text in a box
     live update it
 
-lore - a robot (the player) gains self awareness
-  each mod/gun/field is a new tech
-    all the technology leads to the singularity
-  each game run is actually the mech simulating a possible escape
-    this is why the graphics are so bad, its just a simulation
-    final mod is "this is just a simulation"
-      you get immortality and Infinity damage
-      the next level is the final level
-  when you die with Quantum Immortality there is a chance of lore text
+boss levels - small levels just a boss, and maybe a few mobs
+  boss level for timeSkipBoss because of game instability for boss on normal levels
+    this might not fix issues
 
 atmosphere levels: change the pace, give the user a rest between combat
   low or no combat, but more graphics
@@ -49,6 +57,16 @@ atmosphere levels: change the pace, give the user a rest between combat
     in the final level you see your self at the starting level, with the wires
       you shoot your self to wake up?
   nonaggressive mobs
+
+lore - a robot (the player) gains self awareness
+  each mod/gun/field is a new tech
+    all the technology leads to the singularity
+  each game run is actually the mech simulating a possible escape
+    this is why the graphics are so bad, its just a simulation
+    final mod is "this is just a simulation"
+      you get immortality and Infinity damage
+      the next level is the final level
+  when you die with Quantum Immortality there is a chance of lore text
 
 boss mob - let it die multiple times and come back to life
   on death event spawns a new version of self, but with a decrementing counter
@@ -75,17 +93,7 @@ mod - killing a stunned mob gives something
 mod - scale squirrel cage rotor with current energy
   is variable speed going to be hard to deal with?
 
-boss level for timeSkipBoss because of game instability for boss on normal levels
-  boss level needs to be very simple (maybe no other mobs, or no random mobs)
-
 mod - you can no longer see your current health
-
-boss mob - just a faster and larger version of a springer mob
-  could have a more frequent random walk
-  always shielded
-  consider combining with time skipper field?
-
-mob - time skipper: sends a pulse wave out that will cause time to jump forward 1 second.
 
 mob sniper - targeting laser, then a high speed, no gravity bullet
 
@@ -99,8 +107,6 @@ mod - blocks stun mobs
 settings - custom keys binding
 
 css transition for pause menu
-
-mod - do more damage when not moving?
 
 gun/field: portals
   use the code from mines to get them to stick to walls
@@ -118,11 +124,6 @@ gun:  Spirit Bomb (singularity)
     sucked in stuff increase size
   uses energy
   hold above the player's head
-
-small Boss levels
-  sensor that locks you in after you enter the boss room
-  boss that eats other mobs and gains stats from them
-    chance to spawn on any level (past level 5)
 
 add a key that player picks up and needs to set on the exit door to open it
 

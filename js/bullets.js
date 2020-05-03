@@ -85,6 +85,7 @@ const b = {
   isModDeterminism: null,
   isModHarmReduce: null,
   modNailsDeathMob: null,
+  isModSlowFPS: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -232,6 +233,22 @@ const b = {
       },
       remove() {
         b.isModHarmDamage = false;
+      }
+    },
+    {
+      name: "acute stress response",
+      description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/2</strong> your <strong class='color-f'>energy</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return !b.isModEnergyHealth
+      },
+      requires: "mass-energy equivalence",
+      effect() {
+        b.isModEnergyLoss = true;
+      },
+      remove() {
+        b.isModEnergyLoss = false;
       }
     },
     {
@@ -474,22 +491,6 @@ const b = {
       }
     },
     {
-      name: "acute stress response",
-      description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/2</strong> your <strong class='color-f'>energy</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return !b.isModEnergyHealth
-      },
-      requires: "mass-energy equivalence",
-      effect() {
-        b.isModEnergyLoss = true;
-      },
-      remove() {
-        b.isModEnergyLoss = false;
-      }
-    },
-    {
       name: "squirrel-cage rotor",
       description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
       maxCount: 9,
@@ -524,6 +525,22 @@ const b = {
       },
       remove() {
         b.modCollisionImmuneCycles = 30;
+      }
+    },
+    {
+      name: "clock gating",
+      description: `reduce all <strong>harm</strong> by <strong>15%</strong><br><strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong>harm</strong>`,
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return game.fpsCapDefault > 45
+      },
+      requires: "FPS above 45",
+      effect() {
+        b.isModSlowFPS = true;
+      },
+      remove() {
+        b.isModSlowFPS = true;
       }
     },
     {
@@ -642,7 +659,7 @@ const b = {
     },
     {
       name: "energy conservation",
-      description: "<strong>15%</strong> of <strong class='color-d'>damage</strong> done is recovered as <strong class='color-f'>energy</strong>",
+      description: "<strong>+15%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -659,7 +676,7 @@ const b = {
     },
     {
       name: "entropy exchange",
-      description: "<strong class='color-h'>heal</strong> for <strong>1.5%</strong> of <strong class='color-d'>damage</strong> done",
+      description: "<strong class='color-h'>heal</strong> for <strong>+1.5%</strong> of <strong class='color-d'>damage</strong> done",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -711,7 +728,7 @@ const b = {
     },
     {
       name: "recursive healing",
-      description: "<strong class='color-h'>healing</strong> <strong>power ups</strong> trigger a <strong>2nd</strong> time",
+      description: "<strong class='color-h'>healing</strong> <strong>power ups</strong> trigger <strong>+1</strong> more time",
       maxCount: 9,
       count: 0,
       allowed() {
@@ -759,22 +776,6 @@ const b = {
       }
     },
     {
-      name: "cardinality",
-      description: "one extra <strong>choice</strong> when selecting <strong>power ups</strong>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect: () => {
-        b.isModExtraChoice = true;
-      },
-      remove() {
-        b.isModExtraChoice = false;
-      }
-    },
-    {
       name: "catabolism",
       description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong class='color-h'>health</strong>",
       maxCount: 1,
@@ -791,14 +792,30 @@ const b = {
       }
     },
     {
+      name: "cardinality",
+      description: "<strong>2</strong> extra <strong>choices</strong> when selecting <strong>power ups</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return !b.isModDeterminism
+      },
+      requires: "not determinism",
+      effect: () => {
+        b.isModExtraChoice = true;
+      },
+      remove() {
+        b.isModExtraChoice = false;
+      }
+    },
+    {
       name: "determinism",
       description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong> and 2 <strong class='color-h'>heal</strong> power ups<br>future <strong>power ups</strong> are limited to <strong>one choice</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return true
+        return !b.isModExtraChoice
       },
-      requires: "",
+      requires: "not cardinality",
       effect: () => {
         b.isModDeterminism = true;
         for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
@@ -1217,7 +1234,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modNailBotCount || b.haveGunCheck("mine") || b.modGrenadeFragments || b.isModRailNails || b.isModBotSpawner
+        return b.modNailBotCount || b.haveGunCheck("mine") || b.modGrenadeFragments || b.isModRailNails || b.isModBotSpawner || b.modNailsDeathMob
       },
       requires: "nails",
       effect() {
@@ -1350,12 +1367,12 @@ const b = {
       requires: "laser",
       effect() {
         b.modLaserReflections++;
-        b.modLaserDamage += 0.035; //base is 0.06
+        b.modLaserDamage += 0.045; //base is 0.08
         b.modLaserFieldDrain += 0.001 //base is 0.002
       },
       remove() {
         b.modLaserReflections = 2;
-        b.modLaserDamage = 0.07;
+        b.modLaserDamage = 0.09;
         b.modLaserFieldDrain = 0.002;
       }
     },
@@ -2782,7 +2799,7 @@ const b = {
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
-        const CD = (mech.crouch) ? 45 : 25
+        const CD = (mech.crouch) ? 50 : 30
         if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
         this.lastFireCycle = mech.cycle
         if (this.count > ((mech.crouch) ? 6 : 1)) {
@@ -2790,7 +2807,7 @@ const b = {
           mech.fireCDcycle = mech.cycle + Math.floor(CD * b.modFireRate); // cool down
         } else {
           this.count++
-          mech.fireCDcycle = mech.cycle + Math.floor(2 * b.modFireRate); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(3 * b.modFireRate); // cool down
         }
 
         function makeFlechette(angle = mech.angle) {

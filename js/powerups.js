@@ -47,7 +47,7 @@ const powerUps = {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
     effect() {
-      if (!b.isModEnergyHealth) {
+      if (!b.isModEnergyHealth && mech.alive) {
         let heal = 0
         for (let i = 0; i < b.modRecursiveHealing; i++) heal += ((this.size / 40) ** 2)
         if (heal > 0) {
@@ -101,10 +101,10 @@ const powerUps = {
       return 45;
     },
     effect() {
-      function pick(who, skip1 = -1, skip2 = -1, skip3 = -1) {
+      function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 1; i < who.length; i++) {
-          if (i !== mech.fieldMode && (!game.isEasyToAimMode || mech.fieldUpgrades[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
+          if (i !== mech.fieldMode && (!game.isEasyToAimMode || mech.fieldUpgrades[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
         }
         if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
       }
@@ -124,6 +124,8 @@ const powerUps = {
         if (b.isModExtraChoice) {
           let choice4 = pick(mech.fieldUpgrades, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice4].name}</div> ${mech.fieldUpgrades[choice4].description}</div>`
+          let choice5 = pick(mech.fieldUpgrades, choice1, choice2, choice3, choice4)
+          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice5})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice5].name}</div> ${mech.fieldUpgrades[choice5].description}</div>`
         }
         // text += `<div style = 'color:#fff'>${game.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
         document.getElementById("choose-grid").innerHTML = text
@@ -140,14 +142,10 @@ const powerUps = {
       return 42;
     },
     effect() {
-      function pick(skip1 = -1, skip2 = -1, skip3 = -1) {
+      function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 0; i < b.mods.length; i++) {
-          if (
-            b.mods[i].count < b.mods[i].maxCount &&
-            i !== skip1 && i !== skip2 && i !== skip3 &&
-            b.mods[i].allowed()
-          ) {
+          if (b.mods[i].count < b.mods[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && b.mods[i].allowed()) {
             options.push(i);
           }
         }
@@ -169,6 +167,8 @@ const powerUps = {
         if (b.isModExtraChoice) {
           let choice4 = pick(choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice4].name}</div> ${b.mods[choice4].description}</div>`
+          let choice5 = pick(choice1, choice2, choice3, choice4)
+          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice5].name}</div> ${b.mods[choice5].description}</div>`
         }
         document.getElementById("choose-grid").innerHTML = text
         powerUps.showDraft();
@@ -184,10 +184,10 @@ const powerUps = {
       return 35;
     },
     effect() {
-      function pick(who, skip1 = -1, skip2 = -1, skip3 = -1) {
+      function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 0; i < who.length; i++) {
-          if (!who[i].have && (!game.isEasyToAimMode || b.guns[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3) options.push(i);
+          if (!who[i].have && (!game.isEasyToAimMode || b.guns[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
         }
         if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
       }
@@ -207,6 +207,8 @@ const powerUps = {
         if (b.isModExtraChoice) {
           let choice4 = pick(b.guns, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice4})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice4].name}</div> ${b.guns[choice4].description}</div>`
+          let choice5 = pick(b.guns, choice1, choice2, choice3, choice4)
+          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice5})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice5].name}</div> ${b.guns[choice5].description}</div>`
         }
         document.getElementById("choose-grid").innerHTML = text
         powerUps.showDraft();

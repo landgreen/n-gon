@@ -76,7 +76,7 @@ const mech = {
   standingOn: undefined,
   numTouching: 0,
   crouch: false,
-  isHeadClear: true,
+  // isHeadClear: true,
   spawnPos: {
     x: 0,
     y: 0
@@ -179,11 +179,18 @@ const mech = {
     }
   },
   hardLandCD: 0,
+  checkHeadClear() {
+    if (Matter.Query.collides(headSensor, map).length > 0) {
+      return false
+    } else {
+      return true
+    }
+  },
   enterAir() {
     //triggered in engine.js on collision
     mech.onGround = false;
     mech.hardLandCD = 0 // disable hard landing
-    if (mech.isHeadClear) {
+    if (mech.checkHeadClear()) {
       if (mech.crouch) {
         mech.undoCrouch();
       }
@@ -194,7 +201,7 @@ const mech = {
   enterLand() {
     mech.onGround = true;
     if (mech.crouch) {
-      if (mech.isHeadClear) {
+      if (mech.checkHeadClear()) {
         mech.undoCrouch();
       } else {
         mech.yOffGoal = mech.yOffWhen.crouch;
@@ -230,7 +237,7 @@ const mech = {
   keyMove() {
     if (mech.onGround) { //on ground **********************
       if (mech.crouch) {
-        if (!(keys[83] || keys[40]) && mech.isHeadClear && mech.hardLandCD < mech.cycle) mech.undoCrouch();
+        if (!(keys[83] || keys[40]) && mech.checkHeadClear() && mech.hardLandCD < mech.cycle) mech.undoCrouch();
       } else if (keys[83] || keys[40] || mech.hardLandCD > mech.cycle) {
         mech.doCrouch(); //on ground && not crouched and pressing s or down
       } else if ((keys[87] || keys[38]) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
@@ -506,6 +513,7 @@ const mech = {
   harmReduction() {
     let dmg = 1
     dmg *= mech.fieldDamageResistance
+    dmg *= b.isModSlowFPS ? 0.85 : 1
     if (b.modEnergyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
     if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -586,8 +594,6 @@ const mech = {
             // game.makeTextLog("death avoided", 360);
             b.isModDeathAvoidOnCD = false;
           }, 3000);
-
-          return;
         } else {
           mech.health = 0;
           mech.death();
@@ -596,21 +602,12 @@ const mech = {
       }
     }
 
+    if (dmg > 0.2 * mech.holdingMassScale) mech.drop(); //drop block if holding
+
     b.modOnHealthChange();
     mech.displayHealth();
     document.getElementById("dmg").style.transition = "opacity 0s";
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
-
-    // freeze game and display a full screen red color
-    if (dmg > 0.05) {
-      if (dmg > 0.20 * mech.holdingMassScale) mech.drop(); //drop block if holding
-      game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
-      game.fpsInterval = 1000 / game.fpsCap;
-    } else {
-      game.fpsCap = game.fpsCapDefault
-      game.fpsInterval = 1000 / game.fpsCap;
-    }
-    mech.defaultFPSCycle = mech.cycle
 
     const normalFPS = function () {
       if (mech.defaultFPSCycle < mech.cycle) { //back to default values
@@ -622,33 +619,23 @@ const mech = {
         requestAnimationFrame(normalFPS);
       }
     };
-    requestAnimationFrame(normalFPS);
 
-    // // freeze game and display a full screen red color
-    // if (dmg > 0.05) {
-    //   if (dmg > 0.07) {
-    //     mech.drop(); //drop block if holding
-    //   }
-
-    //   game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
-    //   game.fpsInterval = 1000 / game.fpsCap;
-    // } else {
-    //   game.fpsCap = game.fpsCapDefault
-    //   game.fpsInterval = 1000 / game.fpsCap;
-    // }
-    // mech.defaultFPSCycle = mech.cycle
-
-    // const normalFPS = function () {
-    //   if (mech.defaultFPSCycle < mech.cycle) { //back to default values
-    //     game.fpsCap = game.fpsCapDefault
-    //     game.fpsInterval = 1000 / game.fpsCap;
-    //     document.getElementById("dmg").style.transition = "opacity 1s";
-    //     document.getElementById("dmg").style.opacity = "0";
-    //   } else {
-    //     requestAnimationFrame(normalFPS);
-    //   }
-    // };
-    // requestAnimationFrame(normalFPS);
+    if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(normalFPS);
+    if (b.isModSlowFPS) { // slow game 
+      game.fpsCap = 30 //new fps
+      game.fpsInterval = 1000 / game.fpsCap;
+      mech.defaultFPSCycle = mech.cycle + 30 //how long to wait to return to normal fps
+      if (dmg > 0.1) mech.defaultFPSCycle += 30
+    } else {
+      if (dmg > 0.05) { // freeze game for high damage hits
+        game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
+        game.fpsInterval = 1000 / game.fpsCap;
+      } else {
+        game.fpsCap = game.fpsCapDefault
+        game.fpsInterval = 1000 / game.fpsCap;
+      }
+      mech.defaultFPSCycle = mech.cycle
+    }
   },
   hitMob(i, dmg) {
     //prevents damage happening too quick
