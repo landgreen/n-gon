@@ -307,7 +307,7 @@ const spawn = {
   //   };
   // },
   chaser(x, y, radius = 35 + Math.ceil(Math.random() * 40)) {
-    mobs.spawn(x, y, 8, radius, "#2c9790");
+    mobs.spawn(x, y, 8, radius, "rgb(255,150,100)"); //"#2c9790"
     let me = mob[mob.length - 1];
     // Matter.Body.setDensity(me, 0.0007); //extra dense //normal is 0.001 //makes effective life much lower
     me.friction = 0;
@@ -390,27 +390,36 @@ const spawn = {
     mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
     let me = mob[mob.length - 1];
     me.accelMag = 0.04;
-    me.g = 0.0015; //required if using 'gravity'
-    me.frictionAir = 0.018;
+    me.g = 0.0017; //required if using 'gravity'
+    me.frictionAir = 0.01;
     me.restitution = 0;
-    me.delay = 110;
-    me.randomHopFrequency = 50 + Math.floor(Math.random() * 1000);
+    me.delay = 120 * game.CDScale;
+    me.randomHopFrequency = 200 + Math.floor(Math.random() * 150);
     me.randomHopCD = game.cycle + me.randomHopFrequency;
     spawn.shield(me, x, y);
     me.do = function () {
       this.gravity();
       this.seePlayerCheck();
       this.checkStatus();
-      this.hop();
-      //randomly hob if not aware of player
-      if (this.randomHopCD < game.cycle && this.speed < 1 && !this.seePlayer.recall) {
-        this.randomHopCD = game.cycle + this.randomHopFrequency;
-        //slowly change randomHopFrequency after each hop
-        this.randomHopFrequency = Math.max(100, this.randomHopFrequency + (0.5 - Math.random()) * 200);
-        const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass * (0.1 + Math.random() * 0.3);
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
-        this.force.x += forceMag * Math.cos(angle);
-        this.force.y += forceMag * Math.sin(angle) - 0.04 * this.mass; //antigravity
+      if (this.seePlayer.recall) {
+        if (this.cd < game.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+          this.cd = game.cycle + this.delay;
+          const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
+          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+          this.force.x += forceMag * Math.cos(angle);
+          this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.07 + 0.02) * this.mass; //antigravity
+        }
+      } else {
+        //randomly hob if not aware of player
+        if (this.randomHopCD < game.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+          this.randomHopCD = game.cycle + this.randomHopFrequency;
+          //slowly change randomHopFrequency after each hop
+          this.randomHopFrequency = Math.max(100, this.randomHopFrequency + (0.5 - Math.random()) * 200);
+          const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass * (0.1 + Math.random() * 0.3);
+          const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+          this.force.x += forceMag * Math.cos(angle);
+          this.force.y += forceMag * Math.sin(angle) - 0.05 * this.mass; //antigravity
+        }
       }
     };
   },
@@ -631,7 +640,7 @@ const spawn = {
       }
     }
   },
-  spiderBoss(x, y, radius = 50 + Math.ceil(Math.random() * 10)) {
+  spiderBoss(x, y, radius = 60 + Math.ceil(Math.random() * 10)) {
     let targets = [] //track who is in the node boss, for shields
     mobs.spawn(x, y, 6, radius, "#b386e8");
     let me = mob[mob.length - 1];
@@ -640,8 +649,8 @@ const spawn = {
     me.frictionAir = 0.0065;
     me.lookTorque = 0.0000008; //controls spin while looking for player
     me.g = 0.00025; //required if using 'gravity'
-    me.seePlayerFreq = Math.round((40 + 25 * Math.random()) * game.lookFreqScale);
-    const springStiffness = 0.00006;
+    me.seePlayerFreq = Math.round((30 + 20 * Math.random()) * game.lookFreqScale);
+    const springStiffness = 0.000065;
     const springDampening = 0.0006;
 
     me.springTarget = {
@@ -691,7 +700,11 @@ const spawn = {
     spawn.allowShields = false; //don't want shields on individual boss mobs
 
     for (let i = 0; i < nodes; ++i) {
-      spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
+      spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
+      // const who = mob[mob.length - 1]
+      // who.frictionAir = 0.06
+      // who.accelMag = 0.005 * game.accelScale
+
       targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
     }
     //spawn shield for entire boss
@@ -1012,7 +1025,7 @@ const spawn = {
       ctx.lineTo(best.x, best.y);
     }
   },
-  stabber(x, y, radius = 25 + Math.ceil(Math.random() * 12)) {
+  stabber(x, y, radius = 25 + Math.ceil(Math.random() * 12), spikeMax = 9) {
     if (radius > 80) radius = 65;
     mobs.spawn(x, y, 6, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
     let me = mob[mob.length - 1];
@@ -1068,11 +1081,15 @@ const spawn = {
         } else {
           if (this.isSpikeGrowing) {
             this.spikeLength += 1
-            if (this.spikeLength > 9) {
+            if (this.spikeLength > spikeMax) {
               this.isSpikeGrowing = false;
             }
           } else {
-            this.spikeLength -= 0.1
+
+            //reduce rotation
+            Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.8)
+
+            this.spikeLength -= 0.2
             if (this.spikeLength < 1) {
               this.spikeLength = 1
               this.isSpikeReset = true
@@ -1441,7 +1458,7 @@ const spawn = {
       this.attraction();
     };
   },
-  exploder(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
+  exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
     mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
     let me = mob[mob.length - 1];
     me.onHit = function () {

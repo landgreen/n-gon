@@ -1,10 +1,5 @@
 ************** TODO - n-gon **************
 
-n-gon outreach ideas
-  blips - errant signal on youtube
-  reddit - r/IndieGaming
-  hacker news - show hacker news post
-
 frozen mobs take +33% damage
 
 a lasting AoE damage gun
@@ -64,6 +59,10 @@ lore - a robot (the player) gains self awareness
       you get immortality and Infinity damage
       the next level is the final level
   when you die with Quantum Immortality there is a chance of lore text
+
+scrap drops that can be used to buy things in a shop
+  scrap could be yellow
+  shop could appear every 4 levels
 
 boss mob - let it die multiple times and come back to life
   on death event spawns a new version of self, but with a decrementing counter
@@ -156,3 +155,8 @@ game mechanics
     water
     low friction ground
     bouncy ground
+
+n-gon outreach ideas
+  blips - errant signal on youtube
+  reddit - r/IndieGaming
+  hacker news - show hacker news post

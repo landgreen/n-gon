@@ -699,16 +699,6 @@ const mobs = {
           this.force.y -= 2 * forceMag * Math.sin(angle); // - 0.0007 * this.mass; //antigravity
         }
       },
-      hop() {
-        //accelerate towards the player after a delay
-        if (this.cd < game.cycle && this.seePlayer.recall && this.speed < 1) {
-          this.cd = game.cycle + this.delay;
-          const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
-          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-          this.force.x += forceMag * Math.cos(angle);
-          this.force.y += forceMag * Math.sin(angle) - 0.04 * this.mass; //antigravity
-        }
-      },
       hoverOverPlayer() {
         if (this.seePlayer.recall) {
           // vertical positioning

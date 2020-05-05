@@ -624,8 +624,8 @@ const mech = {
     if (b.isModSlowFPS) { // slow game 
       game.fpsCap = 30 //new fps
       game.fpsInterval = 1000 / game.fpsCap;
-      mech.defaultFPSCycle = mech.cycle + 30 //how long to wait to return to normal fps
-      if (dmg > 0.1) mech.defaultFPSCycle += 30
+      //how long to wait to return to normal fps
+      mech.defaultFPSCycle = mech.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
     } else {
       if (dmg > 0.05) { // freeze game for high damage hits
         game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
