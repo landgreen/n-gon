@@ -160,6 +160,7 @@ const spawn = {
     me.isCell = true;
     me.accelMag = 0.00015 * game.accelScale;
     me.memory = 40;
+    me.isVerticesChange = true
     me.frictionAir = 0.012
     me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
     me.seeAtDistance2 = 1400000;
@@ -173,12 +174,14 @@ const spawn = {
       Matter.Body.scale(this, 0.4, 0.4);
       this.radius = Math.sqrt(this.mass * k / Math.PI)
       spawn.cellBoss(this.position.x, this.position.y, this.radius);
+      mob[mob.length - 1].health = this.health
     }
     me.onHit = function () { //run this function on hitting player
+      this.health = 1;
       this.split();
     };
     me.onDamage = function (dmg) {
-      if (Math.random() < 0.17 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
+      if (Math.random() < 0.33 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
     }
     me.do = function () {
       if (!mech.isBodiesAsleep) {
@@ -326,9 +329,13 @@ const spawn = {
   grower(x, y, radius = 15) {
     mobs.spawn(x, y, 7, radius, "hsl(144, 15%, 50%)");
     let me = mob[mob.length - 1];
+    me.isVerticesChange = true
     me.big = false; //required for grow
     me.accelMag = 0.00045 * game.accelScale;
     me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.player //can't touch other mobs
+    // me.onDeath = function () { //helps collisions functions work better after vertex have been changed
+    //   this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
+    // }
     me.do = function () {
       this.seePlayerByLookingAt();
       this.checkStatus();
@@ -907,6 +914,7 @@ const spawn = {
       x: x,
       y: y
     }
+    me.count = 0;
     me.frictionAir = 0.03;
     // me.torque -= me.inertia * 0.002
     Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
@@ -928,7 +936,10 @@ const spawn = {
           break
         }
       }
-      if (!slowed) Matter.Body.setAngle(me, game.cycle * this.rotateVelocity)
+      if (!slowed) {
+        this.count++
+        Matter.Body.setAngle(me, this.count * this.rotateVelocity)
+      }
 
       // this.torque -= this.inertia * 0.0000025 / (4 + this.health);
       Matter.Body.setVelocity(this, {
@@ -1029,6 +1040,7 @@ const spawn = {
     if (radius > 80) radius = 65;
     mobs.spawn(x, y, 6, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
     let me = mob[mob.length - 1];
+    me.isVerticesChange = true
     me.accelMag = 0.0006 * game.accelScale;
     // me.g = 0.0002; //required if using 'gravity'
     me.delay = 360 * game.CDScale;
@@ -1046,6 +1058,7 @@ const spawn = {
         const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), this.radius * this.spikeLength)
         this.vertices[this.spikeVertex].x = this.position.x + spike.x
         this.vertices[this.spikeVertex].y = this.position.y + spike.y
+        this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
       }
     };
     me.do = function () {
@@ -1339,7 +1352,10 @@ const spawn = {
   shooter(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
     mobs.spawn(x, y, 3, radius, "rgb(255,100,150)");
     let me = mob[mob.length - 1];
-    me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+    me.vertices = Matter.Vertices.clockwiseSort(Matter.Vertices.rotate(me.vertices, Math.PI, me.position)); //make the pointy side of triangle the front
+    me.isVerticesChange = true
+    // Matter.Body.rotate(me, Math.PI)
+
     me.memory = 120;
     me.fireFreq = 0.007 + Math.random() * 0.005;
     me.noseLength = 0;
@@ -1351,6 +1367,9 @@ const spawn = {
       x: 0,
       y: 0
     };
+    me.onDeath = function () { //helps collisions functions work better after vertex have been changed
+      this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
+    }
     // spawn.shield(me, x, y);
     me.do = function () {
       this.seePlayerByLookingAt();
@@ -1359,10 +1378,10 @@ const spawn = {
     };
   },
   shooterBoss(x, y, radius = 130) {
-    //boss spawns on skyscraper level
     mobs.spawn(x, y, 3, radius, "rgb(255,70,180)");
     let me = mob[mob.length - 1];
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+    me.isVerticesChange = true
     me.memory = 240;
     me.homePosition = {
       x: x,
@@ -1381,7 +1400,9 @@ const spawn = {
     Matter.Body.setDensity(me, 0.02 + 0.0008 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+      // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
     };
+
     me.do = function () {
       this.seePlayerByLookingAt();
       this.checkStatus();

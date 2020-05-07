@@ -263,12 +263,12 @@ const game = {
     // mech.drop();
   },
   keyPress() { //runs on key down event
-    if (keys[189]) {
+    if (keys[189] || keys[79]) {
       // - key
       game.isAutoZoom = false;
       game.zoomScale /= 0.9;
       game.setZoom();
-    } else if (keys[187]) {
+    } else if (keys[187] || keys[73]) {
       // = key
       game.isAutoZoom = false;
       game.zoomScale *= 0.9;

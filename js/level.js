@@ -21,7 +21,7 @@ const level = {
       // b.giveMod("renormalization");
       // b.giveMod("impact shear");
       // b.giveMod("clock gating");
-      b.giveGuns("neutron bomb")
+      // b.giveGuns("neutron bomb")
       // mech.setField("pilot wave")
       // mech.setField("perfect diamagnetism")
 
@@ -102,7 +102,7 @@ const level = {
   //******************************************************************************************************************
 
   testing() {
-    level.difficultyIncrease(9);
+    level.difficultyIncrease(14); //hard mode level 7
     spawn.setSpawnList();
     spawn.setSpawnList();
     level.defaultZoom = 1500
@@ -157,8 +157,10 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     // spawn.shooterBoss(1200, -500)
-    // spawn.spawns(1200, -500)
-    spawn.hopper(1600, -500)
+    // spawn.spinner(1200, -500)
+    // spawn.grower(1600, -500)
+    spawn.cellBossCulture(1600, -500)
+    // spawn.shooter(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "spiker")

@@ -86,6 +86,7 @@ const b = {
   isModHarmReduce: null,
   modNailsDeathMob: null,
   isModSlowFPS: null,
+  isModNeutronStun: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -237,7 +238,7 @@ const b = {
     },
     {
       name: "acute stress response",
-      description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/2</strong> your <strong class='color-f'>energy</strong>",
+      description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/3</strong> your <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -886,6 +887,22 @@ const b = {
       }
     },
     {
+      name: "Lorentzian topology",
+      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam") || b.haveGunCheck("ice IX") || b.haveGunCheck("neutron bomb")
+      },
+      requires: "drones, spores, super balls, foam<br>wave beam, ice IX, neutron bomb",
+      effect() {
+        b.isModBulletsLastLonger += 0.33
+      },
+      remove() {
+        b.isModBulletsLastLonger = 1;
+      }
+    },
+    {
       name: "depleted uranium rounds",
       description: `your <strong>bullets</strong> are <strong>+16%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
       count: 0,
@@ -1213,6 +1230,22 @@ const b = {
       }
     },
     {
+      name: "inertial confinement",
+      description: "<strong>neutron bomb's</strong> initial detonation <br><strong>stuns</strong> nearby mobs for <strong>+1</strong> seconds",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("neutron bomb")
+      },
+      requires: "neutron bomb",
+      effect() {
+        b.isModNeutronStun += 60;
+      },
+      remove() {
+        b.isModNeutronStun = 0;
+      }
+    },
+    {
       name: "mine reclamation",
       description: "retrieve <strong>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
       maxCount: 1,
@@ -1274,22 +1307,6 @@ const b = {
       },
       remove() {
         b.isModSporeFollow = false
-      }
-    },
-    {
-      name: "Lorentzian topology",
-      description: "your <strong>bullets</strong> last <strong>+33% longer</strong>",
-      maxCount: 3,
-      count: 0,
-      allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || b.haveGunCheck("spores") || b.haveGunCheck("drones") || b.haveGunCheck("super balls") || b.haveGunCheck("foam") || b.haveGunCheck("wave beam") || b.haveGunCheck("ice IX")
-      },
-      requires: "drones, spores, super balls,<br> foam, wave beam, or ice IX",
-      effect() {
-        b.isModBulletsLastLonger += 0.33
-      },
-      remove() {
-        b.isModBulletsLastLonger = 1;
       }
     },
     {
@@ -3260,109 +3277,213 @@ const b = {
     },
     {
       name: "neutron bomb",
-      description: "fire a <strong>bomb</strong> that emits <strong class='color-p'>neutron radiation</strong><br><strong>detonation</strong> occurs after any </strong>collision</strong>",
+      description: "toss a chunk of <strong class='color-p'>Cf-252</strong> that emits <strong class='color-p'>neutrons</strong><br><strong class='color-d'>damages</strong> and drains <strong class='color-f'>energy</strong> in area of effect",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 6,
       have: false,
       isStarterGun: false,
       isEasyToAim: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
-        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 6, b.fireAttributes(dir, false));
-        b.fireProps(mech.crouch ? 30 : 20, mech.crouch ? 28 : 14, dir, me); //cd , speed
+        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 4, b.fireAttributes(dir, false));
+        b.fireProps(mech.crouch ? 30 : 15, mech.crouch ? 28 : 18, dir, me); //cd , speed
         Matter.Body.setDensity(bullet[me], 0.000001);
         bullet[me].endCycle = Infinity;
         bullet[me].frictionAir = 0;
-        bullet[me].friction = 0.5;
+        bullet[me].friction = 1;
+        bullet[me].frictionStatic = 1;
         bullet[me].restitution = 0;
         bullet[me].minDmgSpeed = 0;
         bullet[me].damageRadius = 100;
-        bullet[me].maxDamageRadius = 600
+        bullet[me].maxDamageRadius = 450 + 150 * Math.random()
+        bullet[me].stuckTo = null;
+        bullet[me].stuckToRelativePosition = null;
         bullet[me].onDmg = function () {};
-
+        bullet[me].stuck = function () {};
         bullet[me].do = function () {
-          this.force.y += this.mass * 0.001;
-          if (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length || Matter.Query.collides(this, mob).length) {
-            //have the bullet stick to mobs and blocks?
-            //stun mobs in range
-            // for (let i = 0, len = mob.length; i < len; i++) {
-            //   const dx = this.position.x - mob[i].position.x;
-            //   const dy = this.position.y - mob[i].position.y;
-            //   if (dx * dx + dy * dy < this.maxDamageRadius * this.maxDamageRadius) {
-            //     mobs.statusStun(mob[i], 60)
-            //   }
-            // }
-
-            //push away blocks when firing
-            for (let i = 0, len = body.length; i < len; ++i) {
-              const SUB = Vector.sub(body[i].position, this.position)
-              const DISTANCE = Vector.magnitude(SUB)
-              if (DISTANCE < this.maxDamageRadius) {
-                const FORCE = Vector.mult(Vector.normalise(SUB), 0.01 * body[i].mass)
-                body[i].force.x += FORCE.x;
-                body[i].force.y += FORCE.y - body[i].mass * (game.g * 2); //kick up a bit to give them some arc
-              }
-            }
-            //stun mobs, but don't push away
-            for (let i = 0, len = mob.length; i < len; ++i) {
-              if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.maxDamageRadius) {
-                mobs.statusStun(mob[i], 60)
-              }
-            }
-
-            //use a constraint?
-            Matter.Sleeping.set(this, true) //freeze in place
-            this.collisionFilter.mask = 0;
-            Matter.Body.setVelocity(this, {
+          function onCollide(that) {
+            that.collisionFilter.mask = 0; //non collide with everything
+            Matter.Body.setVelocity(that, {
               x: 0,
               y: 0
             });
-            const SCALE = 0.01
-            Matter.Body.scale(this, SCALE, SCALE);
-            this.do = this.radiationMode;
+            // that.frictionAir = 1;
+            that.do = that.radiationMode;
+
+            if (b.isModNeutronStun) {
+              //push blocks
+              const dist = that.maxDamageRadius * 0.9
+              for (let i = 0, len = body.length; i < len; ++i) {
+                const SUB = Vector.sub(body[i].position, that.position)
+                const DISTANCE = Vector.magnitude(SUB)
+                if (DISTANCE < dist) {
+                  const FORCE = Vector.mult(Vector.normalise(SUB), 0.04 * body[i].mass)
+                  body[i].force.x += FORCE.x;
+                  body[i].force.y += FORCE.y - body[i].mass * game.g * 5; //kick up a bit to give them some arc
+                }
+              }
+              //stun mobs
+              for (let i = 0, len = mob.length; i < len; ++i) {
+                if (Vector.magnitude(Vector.sub(mob[i].position, that.position)) < dist) {
+                  mobs.statusStun(mob[i], b.isModNeutronStun)
+                }
+              }
+            }
           }
+
+
+          const mobCollisions = Matter.Query.collides(this, mob)
+          if (mobCollisions.length) {
+            onCollide(this)
+            this.stuckTo = mobCollisions[0].bodyA
+
+            if (this.stuckTo.isVerticesChange) {
+              this.stuckToRelativePosition = {
+                x: 0,
+                y: 0
+              }
+            } else {
+              //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+              this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+            }
+            this.stuck = function () {
+              if (this.stuckTo && this.stuckTo.alive) {
+                const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
+                Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
+                Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+              } else {
+                this.collisionFilter.mask = cat.map; //non collide with everything but map
+                this.stuck = function () {
+                  this.force.y += this.mass * 0.001;
+                }
+              }
+            }
+          } else {
+            const bodyCollisions = Matter.Query.collides(this, body)
+            if (bodyCollisions.length) {
+              onCollide(this)
+              this.stuckTo = bodyCollisions[0].bodyA
+              //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+              this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+              this.stuck = function () {
+                if (this.stuckTo) {
+                  const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
+                  Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
+                  // Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+                }
+              }
+            } else {
+              if (Matter.Query.collides(this, map).length) {
+                onCollide(this)
+
+                // this.stuck = function () {
+                // Matter.Body.setVelocity(this, {
+                //   x: 0,
+                //   y: 0
+                // });
+                // }
+              } else { //if colliding with nothing just fall
+                this.force.y += this.mass * 0.001;
+              }
+            }
+          }
+
+
+
+          // if (Matter.Query.collides(this, map).length || bodyCollisions.length || mobCollisions.length) {
+          //   if (mobCollisions.length) {
+          //     this.isStuck = true;
+          //     this.stuckTo = mobCollisions[0].bodyA
+          //     this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), this.stuckTo.angle)
+          //   } else if (bodyCollisions.length) {
+          //     this.isStuck = true;
+          //     this.stuckTo = bodyCollisions[0].bodyA
+          //     this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), this.stuckTo.angle)
+          //   }
+
+          //   if (b.isModNeutronStun) {
+          //     //push blocks
+          //     const dist = this.maxDamageRadius * 0.9
+          //     for (let i = 0, len = body.length; i < len; ++i) {
+          //       const SUB = Vector.sub(body[i].position, this.position)
+          //       const DISTANCE = Vector.magnitude(SUB)
+          //       if (DISTANCE < dist) {
+          //         const FORCE = Vector.mult(Vector.normalise(SUB), 0.04 * body[i].mass)
+          //         body[i].force.x += FORCE.x;
+          //         body[i].force.y += FORCE.y - body[i].mass * game.g * 5; //kick up a bit to give them some arc
+          //       }
+          //     }
+          //     //stun mobs
+          //     for (let i = 0, len = mob.length; i < len; ++i) {
+          //       if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < dist) {
+          //         mobs.statusStun(mob[i], b.isModNeutronStun)
+          //       }
+          //     }
+          //   }
+
+          //   this.collisionFilter.mask = cat.map; //non collide with everything
+          //   Matter.Body.setVelocity(this, {
+          //     x: 0,
+          //     y: 0
+          //   });
+          //   // this.frictionAir = 1;
+          //   this.do = this.radiationMode;
+          // } else {
+          //   this.force.y += this.mass * 0.001;
+          // }
         };
         bullet[me].radiationMode = function () {
-          // if (this.endCycle - 360 < game.cycle) {
-          //   this.damageRadius = this.damageRadius * 0.992
-          // } else {
-          //   this.damageRadius = this.damageRadius * 0.98 + 0.02 * this.maxDamageRadius
-          //   this.damageRadius = Math.max(0, this.damageRadius + 2 * (Math.random() - 0.5))
+          this.stuck(); //runs different code based on what the bullet is stuck to
+          // if (this.isStuck) {
+          //   if (this.stuckTo.alive || this.stuckTo.classType === "body") {
+          //     const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle)
+          //     Matter.Body.setPosition(this, Vector.add(rotate, this.stuckTo.position))
+          //     // Matter.Body.setPosition(this, Vector.add(this.stuckToRelativePosition, this.stuckTo.position))
+          //     Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+          //   } else {
+          //     this.isStuck = false;
+          //     // this.force.y += this.mass * 0.5;
+          //   }
           // }
+
           if (!mech.isBodiesAsleep) {
-            this.damageRadius = this.damageRadius * 0.9 + 0.1 * this.maxDamageRadius //smooth radius towards max
-            this.maxDamageRadius = this.maxDamageRadius * 0.999 - 0.7 //slowly shrink max radius
+            this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
+            this.maxDamageRadius -= 0.8 / b.isModBulletsLastLonger //+ 0.5 * Math.sin(game.cycle * 0.1) //slowly shrink max radius
           }
           if (this.damageRadius < 15) {
             this.endCycle = 0;
           } else {
             //aoe damage to player
             if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-              const DRAIN = 0.003
+              const DRAIN = 0.0015
               if (mech.energy > DRAIN) {
                 mech.energy -= DRAIN
               } else {
                 mech.energy = 0;
-                mech.damage(0.001)
+                mech.damage(0.00015)
               }
             }
             //aoe damage to mobs
             for (let i = 0, len = mob.length; i < len; i++) {
               if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
                 if (mob[i].shield) {
-                  mob[i].damage(5 * b.dmgScale * 0.02);
+                  mob[i].damage(5 * b.dmgScale * 0.025);
                 } else {
-                  mob[i].damage(b.dmgScale * 0.02);
+                  mob[i].damage(b.dmgScale * 0.025);
                 }
-
                 mob[i].locatePlayer();
               }
             }
+
+            //draw it differently for the initial detonation to make the stun seem logical.
+            //make draw some electricity?
+
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
             ctx.globalCompositeOperation = "lighter"
-            ctx.fillStyle = `rgba(0,100,120,${0.3+0.05*Math.random()})`;
+            // ctx.fillStyle = `hsla(189,60%,50%,${0.35+0.06*Math.random()})`;
+            ctx.fillStyle = `rgba(20,130,160,${0.35+0.06*Math.random()})`;
             ctx.fill();
             ctx.globalCompositeOperation = "source-over"
           }

@@ -1871,8 +1871,8 @@ const mech = {
             mech.lookForPickUp();
 
             const DRAIN = 0.0004 + 0.0002 * player.speed + ((!b.modRenormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.0017)
-            mech.energy -= DRAIN;
             if (mech.energy > DRAIN) {
+              mech.energy -= DRAIN;
               // if (mech.energy < 0.001) {
               //   mech.fieldCDcycle = mech.cycle + 120;
               //   mech.energy = 0;
