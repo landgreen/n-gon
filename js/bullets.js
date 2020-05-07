@@ -1230,6 +1230,22 @@ const b = {
       }
     },
     {
+      name: "water shielding",
+      description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("neutron bomb")
+      },
+      requires: "neutron bomb",
+      effect() {
+        b.isModNeutronImmune = true
+      },
+      remove() {
+        b.isModNeutronImmune = false
+      }
+    },
+    {
       name: "inertial confinement",
       description: "<strong>neutron bomb's</strong> initial detonation <br><strong>stuns</strong> nearby mobs for <strong>+1</strong> seconds",
       maxCount: 3,
@@ -3279,7 +3295,7 @@ const b = {
       name: "neutron bomb",
       description: "toss a chunk of <strong class='color-p'>Cf-252</strong> that emits <strong class='color-p'>neutrons</strong><br><strong class='color-d'>damages</strong> and drains <strong class='color-f'>energy</strong> in area of effect",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 7,
       have: false,
       isStarterGun: false,
       isEasyToAim: true,
@@ -3296,7 +3312,7 @@ const b = {
         bullet[me].restitution = 0;
         bullet[me].minDmgSpeed = 0;
         bullet[me].damageRadius = 100;
-        bullet[me].maxDamageRadius = 450 + 150 * Math.random()
+        bullet[me].maxDamageRadius = (450 + 150 * Math.random()) * (b.isModNeutronImmune ? 1.2 : 1)
         bullet[me].stuckTo = null;
         bullet[me].stuckToRelativePosition = null;
         bullet[me].onDmg = function () {};
@@ -3389,63 +3405,9 @@ const b = {
             }
           }
 
-
-
-          // if (Matter.Query.collides(this, map).length || bodyCollisions.length || mobCollisions.length) {
-          //   if (mobCollisions.length) {
-          //     this.isStuck = true;
-          //     this.stuckTo = mobCollisions[0].bodyA
-          //     this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), this.stuckTo.angle)
-          //   } else if (bodyCollisions.length) {
-          //     this.isStuck = true;
-          //     this.stuckTo = bodyCollisions[0].bodyA
-          //     this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), this.stuckTo.angle)
-          //   }
-
-          //   if (b.isModNeutronStun) {
-          //     //push blocks
-          //     const dist = this.maxDamageRadius * 0.9
-          //     for (let i = 0, len = body.length; i < len; ++i) {
-          //       const SUB = Vector.sub(body[i].position, this.position)
-          //       const DISTANCE = Vector.magnitude(SUB)
-          //       if (DISTANCE < dist) {
-          //         const FORCE = Vector.mult(Vector.normalise(SUB), 0.04 * body[i].mass)
-          //         body[i].force.x += FORCE.x;
-          //         body[i].force.y += FORCE.y - body[i].mass * game.g * 5; //kick up a bit to give them some arc
-          //       }
-          //     }
-          //     //stun mobs
-          //     for (let i = 0, len = mob.length; i < len; ++i) {
-          //       if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < dist) {
-          //         mobs.statusStun(mob[i], b.isModNeutronStun)
-          //       }
-          //     }
-          //   }
-
-          //   this.collisionFilter.mask = cat.map; //non collide with everything
-          //   Matter.Body.setVelocity(this, {
-          //     x: 0,
-          //     y: 0
-          //   });
-          //   // this.frictionAir = 1;
-          //   this.do = this.radiationMode;
-          // } else {
-          //   this.force.y += this.mass * 0.001;
-          // }
         };
         bullet[me].radiationMode = function () {
           this.stuck(); //runs different code based on what the bullet is stuck to
-          // if (this.isStuck) {
-          //   if (this.stuckTo.alive || this.stuckTo.classType === "body") {
-          //     const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle)
-          //     Matter.Body.setPosition(this, Vector.add(rotate, this.stuckTo.position))
-          //     // Matter.Body.setPosition(this, Vector.add(this.stuckToRelativePosition, this.stuckTo.position))
-          //     Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
-          //   } else {
-          //     this.isStuck = false;
-          //     // this.force.y += this.mass * 0.5;
-          //   }
-          // }
 
           if (!mech.isBodiesAsleep) {
             this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
@@ -3455,7 +3417,8 @@ const b = {
             this.endCycle = 0;
           } else {
             //aoe damage to player
-            if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
+
+            if (!b.isModNeutronImmune && Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
               const DRAIN = 0.0015
               if (mech.energy > DRAIN) {
                 mech.energy -= DRAIN
@@ -3475,15 +3438,10 @@ const b = {
                 mob[i].locatePlayer();
               }
             }
-
-            //draw it differently for the initial detonation to make the stun seem logical.
-            //make draw some electricity?
-
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
             ctx.globalCompositeOperation = "lighter"
-            // ctx.fillStyle = `hsla(189,60%,50%,${0.35+0.06*Math.random()})`;
-            ctx.fillStyle = `rgba(20,130,160,${0.35+0.06*Math.random()})`;
+            ctx.fillStyle = `rgba(25,139,170,${0.3+0.06*Math.random()})`;
             ctx.fill();
             ctx.globalCompositeOperation = "source-over"
           }

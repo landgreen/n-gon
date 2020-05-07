@@ -1,13 +1,7 @@
-acute stress mod removes 1/3 (was 1/2) of your energy
-zoom works with i and o now
-cell boss has double the chance to spilt on damage.
-After it splits, each daughter cell has the mother's reduced health
-
-new gun neutron bomb, persistent AoE damage
-  (might still have issues sticking to objects properly)
-new mob neutron bomb stuns mobs
-
 ************** TODO - n-gon **************
+
+mod - neutron bomb, water shielding, player takess no damage or energy drain
+  also increase range?
 
 extend neutron mob sticking code to foam gun and mines?
 

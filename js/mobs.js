@@ -972,7 +972,7 @@ const mobs = {
         this.removeConsBB();
         this.alive = false; //triggers mob removal in mob[i].replace(i)
         if (this.dropPowerUp) {
-          if (b.isModEnergyLoss) mech.energy /= 3;
+          if (b.isModEnergyLoss) mech.energy *= 0.66;
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
           mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in game.checks()
           if (Math.random() < b.modSporesOnDeath) {
