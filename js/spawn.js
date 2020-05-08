@@ -925,20 +925,20 @@ const spawn = {
     me.rotateVelocity = Math.min(0.0054, 0.0022 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
-      // Matter.Body.rotate(this, -0.003 / (0.3 + this.health))
-      // if (!mech.isBodiesAsleep) Matter.Body.rotate(me, this.rotateVelocity)
 
-      //check if slowed
-      let slowed = false
-      for (let i = 0; i < this.status.length; i++) {
-        if (this.status[i].type === "slow") {
-          slowed = true
-          break
+      if (!mech.isBodiesAsleep) {
+        //check if slowed
+        let slowed = false
+        for (let i = 0; i < this.status.length; i++) {
+          if (this.status[i].type === "slow") {
+            slowed = true
+            break
+          }
         }
-      }
-      if (!slowed) {
-        this.count++
-        Matter.Body.setAngle(me, this.count * this.rotateVelocity)
+        if (!slowed) {
+          this.count++
+          Matter.Body.setAngle(me, this.count * this.rotateVelocity)
+        }
       }
 
       // this.torque -= this.inertia * 0.0000025 / (4 + this.health);
@@ -1058,7 +1058,7 @@ const spawn = {
         const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), this.radius * this.spikeLength)
         this.vertices[this.spikeVertex].x = this.position.x + spike.x
         this.vertices[this.spikeVertex].y = this.position.y + spike.y
-        this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
+        // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
       }
     };
     me.do = function () {
@@ -1368,7 +1368,7 @@ const spawn = {
       y: 0
     };
     me.onDeath = function () { //helps collisions functions work better after vertex have been changed
-      this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
+      // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
     }
     // spawn.shield(me, x, y);
     me.do = function () {

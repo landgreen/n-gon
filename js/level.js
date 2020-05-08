@@ -22,8 +22,9 @@ const level = {
       // b.giveMod("impact shear");
       // b.giveMod("clock gating");
       // b.giveGuns("neutron bomb")
+      // b.giveGuns("spores")
       // mech.setField("pilot wave")
-      // mech.setField("perfect diamagnetism")
+      // mech.setField("phase decoherence field")
 
       level.intro(); //starting level
       // level.testing();
@@ -158,8 +159,8 @@ const level = {
     // spawn.bomberBoss(2900, -500)
     // spawn.shooterBoss(1200, -500)
     // spawn.spinner(1200, -500)
-    // spawn.grower(1600, -500)
-    spawn.cellBossCulture(1600, -500)
+    spawn.stabber(1600, -500)
+    // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 

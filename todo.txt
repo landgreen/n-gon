@@ -1,15 +1,9 @@
+sporangium gun now sticks to things, takes longer to germinate, ammo and fire rate are increased.
+plasma field does 50% more damage, pushes 20% harder, but has 20% less range
+
 ************** TODO - n-gon **************
 
-mod - neutron bomb, water shielding, player takess no damage or energy drain
-  also increase range?
-
-extend neutron mob sticking code to foam gun and mines?
-
-phase field is kinda annoying
-  large vision range,
-  faster animation (instant?)
-  shrink vision range slowly over time, not with energy
-    also shrink when firing or moving?
+mod - if energy goes zero after shield block, knock back and stun nearby mobs
 
 mod - frozen mobs take +33% damage
 

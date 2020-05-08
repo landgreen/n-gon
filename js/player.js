@@ -1588,15 +1588,15 @@ const mech = {
               }
               //calculate laser collision
               let best;
-              let range = b.isModPlasmaRange * (175 + (mech.crouch ? 450 : 350) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
-              const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
+              let range = b.isModPlasmaRange * (140 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
+              // const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
               const path = [{
-                  x: mech.pos.x + 20 * Math.cos(dir),
-                  y: mech.pos.y + 20 * Math.sin(dir)
+                  x: mech.pos.x + 20 * Math.cos(mech.angle),
+                  y: mech.pos.y + 20 * Math.sin(mech.angle)
                 },
                 {
-                  x: mech.pos.x + range * Math.cos(dir),
-                  y: mech.pos.y + range * Math.sin(dir)
+                  x: mech.pos.x + range * Math.cos(mech.angle),
+                  y: mech.pos.y + range * Math.sin(mech.angle)
                 }
               ];
               const vertexCollision = function (v1, v1End, domain) {
@@ -1658,12 +1658,12 @@ const mech = {
                   y: best.y
                 };
                 if (best.who.alive) {
-                  const dmg = 0.55 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                  const dmg = 0.8 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
                   best.who.damage(dmg);
                   best.who.locatePlayer();
 
                   //push mobs away
-                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.sqrt(best.who.mass))
+                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.02 * Math.sqrt(best.who.mass))
                   Matter.Body.applyForce(best.who, path[1], force)
                   // const angle = Math.atan2(player.position.y - best.who.position.y, player.position.x - best.who.position.x);
                   // const mass = Math.min(Math.sqrt(best.who.mass), 6);
@@ -1832,8 +1832,15 @@ const mech = {
         mech.fieldPhase = 0;
 
         mech.hold = function () {
+          function expandField() {
+            if (this.fieldRange < 2000) {
+              this.fieldRange += 100
+              drawField(this.fieldRange)
+            }
+          }
+
           function drawField(radius) {
-            radius *= 0.8 + 0.7 * mech.energy;
+            radius *= 0.9 + 1 * mech.energy;
             const rotate = mech.cycle * 0.005;
             mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(mech.energy, 1)));
             const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
@@ -1862,7 +1869,10 @@ const mech = {
           mech.isStealth = false //isStealth disables most uses of foundPlayer() 
           player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
           if (mech.isHolding) {
-            this.fieldRange = 2000;
+            if (this.fieldRange < 2000) {
+              this.fieldRange += 100
+              drawField(this.fieldRange)
+            }
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
@@ -1870,7 +1880,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
 
-            const DRAIN = 0.0004 + 0.0002 * player.speed + ((!b.modRenormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.0017)
+            const DRAIN = 0.0003 + 0.00015 * player.speed + ((!b.modRenormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.001)
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               // if (mech.energy < 0.001) {
@@ -1878,7 +1888,7 @@ const mech = {
               //   mech.energy = 0;
               //   mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
               // }
-              this.fieldRange = this.fieldRange * 0.87 + 0.13 * 160
+              this.fieldRange = this.fieldRange * 0.8 + 0.2 * 160
               drawField(this.fieldRange)
 
               mech.isStealth = true //isStealth disables most uses of foundPlayer() 
@@ -1925,10 +1935,14 @@ const mech = {
             }
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
             mech.pickUp();
+            if (this.fieldRange < 2000) {
+              this.fieldRange += 100
+              drawField(this.fieldRange)
+            }
           } else {
             // this.fieldRange = 3000
             if (this.fieldRange < 2000 && mech.holdingTarget === null) {
-              this.fieldRange += 40
+              this.fieldRange += 100
               drawField(this.fieldRange)
             }
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
