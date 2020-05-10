@@ -1300,7 +1300,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.modNailBotCount || b.haveGunCheck("mine") || b.modGrenadeFragments || b.isModRailNails || b.isModBotSpawner || b.modNailsDeathMob
+        return b.modNailBotCount > 1 || b.haveGunCheck("mine") || b.modGrenadeFragments > 5 || b.isModRailNails || b.modNailsDeathMob > 2
       },
       requires: "nails",
       effect() {
@@ -1375,12 +1375,12 @@ const b = {
       }
     },
     {
-      name: "diffusiophoresis",
-      description: "<strong>foam's</strong> radius increases by <strong>3x</strong><br>after the mob it's stuck to <strong>dies</strong>",
+      name: "necrophoresis",
+      description: "<strong>foam</strong> splits into 3 <strong>copies</strong><br>when the mob it is stuck to <strong>dies</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
-        return b.haveGunCheck("foam")
+        return b.haveGunCheck("foam") || b.modFoamBotCount > 1
       },
       requires: "foam",
       effect() {
@@ -2525,6 +2525,7 @@ const b = {
             const SCALE = 1.06
             Matter.Body.scale(this, SCALE, SCALE);
             this.radius *= SCALE;
+            console.log(this.radius)
           } else {
             //shrink
             const SCALE = 1 - 0.005 / b.isModBulletsLastLonger
@@ -2555,10 +2556,13 @@ const b = {
             this.target = null
             this.collisionFilter.category = cat.bullet;
             this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-            if (b.isModFoamGrowOnDeath && this.radius < 30) {
-              const SCALE = 3
-              Matter.Body.scale(this, SCALE, SCALE);
-              this.radius *= SCALE;
+            if (b.isModFoamGrowOnDeath) {
+              // const SCALE = (this.radius < 30) ? 2 : 1 //Math.min(5, Math.max(1, 20 / (this.radius * this.radius)))
+              // Matter.Body.scale(this, SCALE, SCALE);
+              // this.radius *= SCALE;
+              const radius = Math.min(this.radius / 2, 10)
+              b.foam(this.position, Matter.Vector.rotate(this.velocity, Math.PI * 2 / 3), radius)
+              b.foam(this.position, Matter.Vector.rotate(this.velocity, Math.PI * 1 / 3), radius)
             }
 
           }
@@ -2679,9 +2683,9 @@ const b = {
       restitution: 0.6 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
-      lookFrequency: 27 + Math.floor(11 * Math.random()),
+      lookFrequency: 47 + Math.floor(17 * Math.random()),
       cd: 0,
-      delay: 110,
+      delay: 100,
       acceleration: 0.005 * (1 + 0.5 * Math.random()),
       range: 70 * (1 + 0.3 * Math.random()),
       endCycle: Infinity,

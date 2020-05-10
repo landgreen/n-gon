@@ -18,7 +18,7 @@ const level = {
       // level.difficultyIncrease(9)
       // b.giveGuns("foam")
       // mech.setField("time dilation field")
-      // b.giveMod("renormalization");
+      // b.giveMod("necrophoresis");
       // b.giveMod("impact shear");
       // b.giveMod("foam-bot");
       // b.giveGuns("neutron bomb")
