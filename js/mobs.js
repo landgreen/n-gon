@@ -44,7 +44,7 @@ const mobs = {
     }
   },
   statusSlow(who, cycles = 60) {
-    if (!who.shield && !who.isShielded) {
+    if (!who.shield && !who.isShielded && !mech.isBodiesAsleep) {
       //remove other "slow" effects on this mob
       let i = who.status.length
       while (i--) {
@@ -75,7 +75,7 @@ const mobs = {
     }
   },
   statusStun(who, cycles = 180) {
-    if (!who.shield && !who.isShielded) {
+    if (!who.shield && !who.isShielded && !mech.isBodiesAsleep) {
       Matter.Body.setVelocity(who, {
         x: who.velocity.x * 0.5,
         y: who.velocity.y * 0.5
@@ -112,7 +112,7 @@ const mobs = {
     }
   },
   statusDoT(who, tickDamage, cycles = 180) {
-    if (!who.isShielded) {
+    if (!who.isShielded && !mech.isBodiesAsleep) {
       who.status.push({
         effect() {
           if ((game.cycle - this.startCycle) % 30 === 0) {
@@ -982,8 +982,14 @@ const mobs = {
             }
           }
           if (Math.random() < b.isModBotSpawner) {
-            (Math.random() < 0.5) ? b.nailBot(this.position): b.laserBot(this.position)
-            if (mech.energy > 0.33) mech.energy -= 0.33
+            if (Math.random() < 0.33) {
+              b.nailBot(this.position)
+            } else if (Math.random() < 0.5) {
+              b.laserBot(this.position)
+            } else {
+              b.foamBot(this.position)
+            }
+            // if (mech.energy > 0.33) mech.energy -= 0.33
           }
           if (b.isModExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
           if (b.modNailsDeathMob) b.targetedNail(this.position, b.modNailsDeathMob)

@@ -1,15 +1,12 @@
-sporangium gun now sticks to things, takes longer to germinate, ammo and fire rate are increased.
-plasma field does 50% more damage, pushes 20% harder, but has 20% less range
+foam bullets are faster, smaller, shrink slower, stick to mobs better
+foam can now stick to shielded mobs, but shrinks faster
+mod: foam-bots
 
 ************** TODO - n-gon **************
 
-mod - if energy goes zero after shield block, knock back and stun nearby mobs
+sticking bullets don't always gain the correct speed from mobs after they die
 
 mod - frozen mobs take +33% damage
-
-bot that punches nearby mobs
-  bot could have a regeneration phase, and a punching phase
-    indicate phase by the size, shape of bot
 
 mod heal to full at the end of each level
   heal mods no longer drop?

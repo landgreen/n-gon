@@ -20,9 +20,9 @@ const level = {
       // mech.setField("time dilation field")
       // b.giveMod("renormalization");
       // b.giveMod("impact shear");
-      // b.giveMod("clock gating");
+      // b.giveMod("foam-bot");
       // b.giveGuns("neutron bomb")
-      // b.giveGuns("spores")
+      // b.giveGuns("foam")
       // mech.setField("pilot wave")
       // mech.setField("phase decoherence field")
 
@@ -53,6 +53,9 @@ const level = {
     }
     for (let i = 0; i < b.modNailBotCount; i++) {
       b.nailBot()
+    }
+    for (let i = 0; i < b.modFoamBotCount; i++) {
+      b.foamBot()
     }
   },
   isBuildRun: false,
@@ -158,8 +161,8 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     // spawn.shooterBoss(1200, -500)
-    // spawn.spinner(1200, -500)
-    spawn.stabber(1600, -500)
+    spawn.spinner(1200, -500, 40)
+    // spawn.stabber(1600, -500)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);

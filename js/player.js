@@ -1036,12 +1036,15 @@ const mech = {
   pushMass(who) {
     const speed = Vector.magnitude(Vector.sub(who.velocity, player.velocity))
     const fieldBlockCost = (0.03 + Math.sqrt(who.mass) * speed * 0.003) * mech.fieldShieldingScale;
+    const unit = Vector.normalise(Vector.sub(player.position, who.position))
+
     if (mech.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
       mech.energy -= fieldBlockCost
-      if (mech.energy < 0) mech.energy = 0;
+      if (mech.energy < 0) {
+        mech.energy = 0;
+      }
       if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
-      const unit = Vector.normalise(Vector.sub(player.position, who.position))
       if (b.modBlockDmg) {
         who.damage(b.modBlockDmg)
         //draw electricity
@@ -1293,9 +1296,9 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
           if (mech.energy > 0.1 && mech.fieldCDcycle < mech.cycle) {
-            const fieldRange1 = (0.55 + 0.35 * Math.sin(mech.cycle / 23)) * mech.fieldRange
-            const fieldRange2 = (0.5 + 0.4 * Math.sin(mech.cycle / 37)) * mech.fieldRange
-            const fieldRange3 = (0.45 + 0.45 * Math.sin(mech.cycle / 47)) * mech.fieldRange
+            const fieldRange1 = (0.6 + 0.35 * Math.sin(mech.cycle / 23)) * mech.fieldRange
+            const fieldRange2 = (0.55 + 0.4 * Math.sin(mech.cycle / 37)) * mech.fieldRange
+            const fieldRange3 = (0.5 + 0.45 * Math.sin(mech.cycle / 47)) * mech.fieldRange
             const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
             ctx.fillStyle = "rgba(110,170,200," + (0.04 + mech.energy * (0.12 + 0.13 * Math.random())) + ")";
             ctx.beginPath();
