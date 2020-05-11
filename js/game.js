@@ -338,7 +338,9 @@ const game = {
     }
     //in testing mode
     if (game.testing) {
-      if (keys[49]) { // give power ups with 1
+      if (keys[192]) { // `
+        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
+      } else if (keys[49]) { // give power ups with 1
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
       } else if (keys[50]) { // 2
         powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");

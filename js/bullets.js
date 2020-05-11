@@ -2707,8 +2707,8 @@ const b = {
             if (dist < 1000000 && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
               this.cd = game.cycle + this.delay;
               target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))
-              const radius = 6 + 6 * Math.random()
-              const SPEED = 27 - radius * 0.4; //(mech.crouch ? 32 : 20) - radius * 0.7;
+              const radius = 6 + 7 * Math.random()
+              const SPEED = 29 - radius * 0.5; //(mech.crouch ? 32 : 20) - radius * 0.7;
               const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
               b.foam(this.position, velocity, radius)
               break;

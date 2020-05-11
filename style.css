@@ -487,6 +487,8 @@ em {
   margin-bottom: -5px;
 }
 
+
+
 .field {
   background: #0cf;
 }
@@ -506,6 +508,22 @@ em {
 
 .heal {
   background: #0d9;
+}
+
+.reroll {
+
+  /* #f84  #f99*/
+  background: #f7b;
+}
+
+.dice {
+  font-size: 45px;
+  vertical-align: -5px;
+  float: right;
+  /* position: absolute;
+  top: 15px;
+  right: 15px; */
+  /* text-align: right; */
 }
 
 .box {

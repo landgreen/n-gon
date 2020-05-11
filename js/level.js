@@ -138,6 +138,7 @@ const level = {
     spawn.mapRect(-250, -700, 1000, 900); // shelf
     spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
     powerUps.spawnStartingPowerUps(600, -800);
+    powerUps.spawn(550, -800, "reroll", false); //starting gun
 
     function blockDoor(x, y, blockSize = 58) {
       spawn.mapRect(x, y - 290, 40, 60); // door lip

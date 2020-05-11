@@ -4,6 +4,10 @@ mod: foam-bots
 
 ************** TODO - n-gon **************
 
+power up  reroll
+  color yellow?
+
+
 sticking bullets don't always gain the correct speed from mobs after they die
 
 mod - frozen mobs take +33% damage

@@ -18,14 +18,9 @@ const powerUps = {
       // game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[index].name}</strong><br><br> ${b.mods[index].description}`, 500);
       // game.replaceTextLog = false;
     }
-    document.body.style.cursor = "none";
-    document.getElementById("choose-grid").style.display = "none"
-    document.getElementById("choose-background").style.display = "none"
-    game.paused = false;
-    game.isChoosing = false; //stops p from un pausing on key down
-    requestAnimationFrame(cycle);
+    powerUps.endDraft();
   },
-  cancel() {
+  endDraft() {
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("choose-background").style.display = "none"
@@ -39,6 +34,60 @@ const powerUps = {
     document.body.style.cursor = "auto";
     game.paused = true;
     game.isChoosing = true; //stops p from un pausing on key down
+  },
+  reroll: {
+    rerolls: 0,
+    name: "reroll",
+    color: "#f7b",
+    size() {
+      return 20;
+    },
+    effect() {
+      powerUps.reroll.rerolls++
+      game.makeTextLog("<div class='circle reroll'></div> &nbsp; <span style='font-size:115%;'> <strong>+1 reroll</strong></span>", 300)
+    },
+    diceText() {
+      const r = powerUps.reroll.rerolls
+      const fullDice = Math.floor(r / 6)
+      const lastDice = r % 6
+      let out = ''
+      for (let i = 0; i < fullDice; i++) {
+        out += '⚅'
+      }
+      if (lastDice === 1) {
+        out += '⚀'
+      } else if (lastDice === 2) {
+        out += '⚁'
+      } else if (lastDice === 3) {
+        out += '⚂'
+      } else if (lastDice === 4) {
+        out += '⚃'
+      } else if (lastDice === 5) {
+        out += '⚄'
+      }
+      return out
+    },
+    // diceText() {
+    //   if (powerUps.reroll.rerolls === 1) {
+    //     return '⚀'
+    //   } else if (powerUps.reroll.rerolls === 2) {
+    //     return '⚁'
+    //   } else if (powerUps.reroll.rerolls === 3) {
+    //     return '⚂'
+    //   } else if (powerUps.reroll.rerolls === 4) {
+    //     return '⚃'
+    //   } else if (powerUps.reroll.rerolls === 5) {
+    //     return '⚄'
+    //   } else if (powerUps.reroll.rerolls === 6) {
+    //     return '⚅'
+    //   } else if (powerUps.reroll.rerolls > 6) {
+    //     return '⚅+'
+    //   }
+    // },
+    use(type) {
+      powerUps.reroll.rerolls--;
+      powerUps[type].effect();
+    },
   },
   heal: {
     name: "heal",
@@ -113,7 +162,7 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.cancel("field")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
+        let text = `<div class='cancel' onclick='powerUps.endDraft("field")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
         if (!b.isModDeterminism) {
           choice2 = pick(mech.fieldUpgrades, choice1)
@@ -127,6 +176,8 @@ const powerUps = {
           let choice5 = pick(mech.fieldUpgrades, choice1, choice2, choice3, choice4)
           if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice5})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice5].name}</div> ${mech.fieldUpgrades[choice5].description}</div>`
         }
+        if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('field')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
+
         // text += `<div style = 'color:#fff'>${game.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
         document.getElementById("choose-grid").innerHTML = text
         powerUps.showDraft();
@@ -156,7 +207,7 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.cancel("mod")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
+        let text = `<div class='cancel' onclick='powerUps.endDraft("mod")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
         if (!b.isModDeterminism) {
           choice2 = pick(choice1)
@@ -170,6 +221,8 @@ const powerUps = {
           let choice5 = pick(choice1, choice2, choice3, choice4)
           if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice5].name}</div> ${b.mods[choice5].description}</div>`
         }
+        if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('mod')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
+
         document.getElementById("choose-grid").innerHTML = text
         powerUps.showDraft();
       } else {
@@ -196,7 +249,7 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.cancel("gun")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
+        let text = `<div class='cancel' onclick='powerUps.endDraft("gun")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
         if (!b.isModDeterminism) {
           choice2 = pick(b.guns, choice1)
@@ -208,8 +261,12 @@ const powerUps = {
           let choice4 = pick(b.guns, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice4})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice4].name}</div> ${b.guns[choice4].description}</div>`
           let choice5 = pick(b.guns, choice1, choice2, choice3, choice4)
-          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice5})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice5].name}</div> ${b.guns[choice5].description}</div>`
+          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice5})">
+          <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice5].name}</div> ${b.guns[choice5].description}</div>`
         }
+
+        if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('gun')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
+
         document.getElementById("choose-grid").innerHTML = text
         powerUps.showDraft();
       } else {
@@ -255,6 +312,11 @@ const powerUps = {
       if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field");
       return;
     }
+    if (Math.random() < 0.01) {
+      powerUps.spawn(x, y, "reroll");
+      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "reroll");
+      return;
+    }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (mech.fieldMode === 0) {
@@ -287,18 +349,15 @@ const powerUps = {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
-      if (Math.random() < b.modBayesian) {
-        powerUps.spawn(x, y, "ammo");
-        powerUps.spawn(x, y, "ammo");
-        powerUps.spawn(x, y, "ammo");
-      }
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
-    if (Math.random() < 0.5) {
+    if (Math.random() < 0.02) {
+      powerUps.spawn(x, y, "reroll");
+    } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
-    } else {
-      if (!b.modBayesian) powerUps.spawn(x, y, "ammo", false);
+    } else if (!b.modBayesian) {
+      powerUps.spawn(x, y, "ammo", false);
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
