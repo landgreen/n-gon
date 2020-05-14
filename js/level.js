@@ -16,11 +16,8 @@ const level = {
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
-      // b.giveGuns("foam")
       // mech.setField("time dilation field")
-      // b.giveMod("necrophoresis");
-      // b.giveMod("impact shear");
-      // b.giveMod("foam-bot");
+      // b.giveMod("many worlds");
       // b.giveGuns("neutron bomb")
       // b.giveGuns("foam")
       // mech.setField("pilot wave")
@@ -162,10 +159,11 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     // spawn.shooterBoss(1200, -500)
-    spawn.spinner(1200, -500, 40)
+    // spawn.starter(2500, -40, 40)
     // spawn.stabber(1600, -500)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
+    spawn.focuser(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "spiker")

@@ -363,6 +363,7 @@ const mech = {
     if (b.isModImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
       spawn.setSpawnList(); //new mob types
       game.clearNow = true; //triggers a map reset
+      powerUps.reroll.rerolls = Math.floor(Math.random() * Math.random() * 8)
 
       //count mods
       let totalMods = 0;
@@ -380,6 +381,7 @@ const mech = {
               b.mods[i].name !== "Born rule" &&
               b.mods[i].name !== "determinism" &&
               b.mods[i].name !== "reallocation" &&
+              b.mods[i].name !== "many worlds" &&
               b.mods[i].allowed()
             ) options.push(i);
           }
@@ -1045,7 +1047,7 @@ const mech = {
       }
       if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
-      if (b.modBlockDmg) {
+      if (b.modBlockDmg && mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics") {
         who.damage(b.modBlockDmg)
         //draw electricity
         const step = 40
@@ -1087,7 +1089,7 @@ const mech = {
           });
         }
       } else {
-        if (b.isModStunField) mobs.statusStun(who, b.isModStunField)
+        if (b.isModStunField && mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism") mobs.statusStun(who, b.isModStunField)
         // mobs.statusSlow(who, b.isModStunField)
         const massRoot = Math.sqrt(Math.max(0.15, who.mass)); // masses above 12 can start to overcome the push back
         Matter.Body.setVelocity(who, {
@@ -1434,7 +1436,7 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>80%</strong> while field is active", //<br><strong>launch</strong> larger blocks at much higher speeds
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>80%</strong> while field is active",
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {
@@ -1569,10 +1571,11 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br><em>effective at close range</em>",
+      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br>reduce <strong>harm</strong> by <strong>33%</strong>",
       isEasyToAim: false,
       effect: () => {
         mech.fieldMeterColor = "#f0f"
+        mech.fieldDamageResistance = 0.67; //reduce harm by 33%
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1582,7 +1585,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.00065
+            const DRAIN = 0.0006
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
@@ -1666,8 +1669,12 @@ const mech = {
                   best.who.locatePlayer();
 
                   //push mobs away
-                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.02 * Math.sqrt(best.who.mass))
+                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
                   Matter.Body.applyForce(best.who, path[1], force)
+                  Matter.Body.setVelocity(best.who, { //friction
+                    x: best.who.velocity.x * 0.6,
+                    y: best.who.velocity.y * 0.6
+                  });
                   // const angle = Math.atan2(player.position.y - best.who.position.y, player.position.x - best.who.position.x);
                   // const mass = Math.min(Math.sqrt(best.who.mass), 6);
                   // Matter.Body.setVelocity(best.who, {
@@ -1685,7 +1692,7 @@ const mech = {
                   });
                 } else if (!best.who.isStatic) {
                   //push blocks away
-                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.006 * Math.sqrt(Math.sqrt(best.who.mass)))
+                  const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.007 * Math.sqrt(Math.sqrt(best.who.mass)))
                   Matter.Body.applyForce(best.who, path[1], force)
                 }
               }

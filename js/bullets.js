@@ -87,6 +87,7 @@ const b = {
   modNailsDeathMob: null,
   isModSlowFPS: null,
   isModNeutronStun: null,
+  manyWorlds: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -762,7 +763,7 @@ const b = {
     },
     {
       name: "pair production",
-      description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>twice</strong> your maximum",
+      description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>twice</strong> your max <strong class='color-f'>energy</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -850,31 +851,23 @@ const b = {
       }
     },
     {
-      name: "reallocation",
-      description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods lose all stacks</em>",
+      name: "many worlds",
+      description: "spawn a <strong class='color-r'>reroll</strong> after choosing a power up",
       maxCount: 1,
       count: 0,
       allowed() {
-        return (b.modCount > 0) && !build.isCustomSelection
+        return true
       },
-      requires: "at least 1 mod",
+      requires: "",
       effect: () => {
-        const have = [] //find which mods you have
-        for (let i = 0; i < b.mods.length; i++) {
-          if (b.mods[i].count > 0) have.push(i)
-        }
-        const choose = have[Math.floor(Math.random() * have.length)]
-        b.mods[choose].remove(); // remove a random mod form the list of mods you have
-        b.mods[choose].count = 0;
-        game.updateModHUD();
-
-        for (let i = 0; i < 2; i++) {
-          powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-          if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-        }
+        b.manyWorlds = true;
+        // for (let i = 0; i < 9; i++) {
+        //   powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+        //   if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+        // }
       },
       remove() {
-        //nothing to remove
+        b.manyWorlds = false;
       }
     },
     {
@@ -901,6 +894,34 @@ const b = {
       },
       remove() {
         //nothing to undo
+      }
+    },
+    {
+      name: "reallocation",
+      description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods lose all stacks</em>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return (b.modCount > 0) && !build.isCustomSelection
+      },
+      requires: "at least 1 mod",
+      effect: () => {
+        const have = [] //find which mods you have
+        for (let i = 0; i < b.mods.length; i++) {
+          if (b.mods[i].count > 0) have.push(i)
+        }
+        const choose = have[Math.floor(Math.random() * have.length)]
+        b.mods[choose].remove(); // remove a random mod form the list of mods you have
+        b.mods[choose].count = 0;
+        game.updateModHUD();
+
+        for (let i = 0; i < 2; i++) {
+          powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+          if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+        }
+      },
+      remove() {
+        //nothing to remove
       }
     },
     {
@@ -1973,6 +1994,7 @@ const b = {
         dist = Vector.magnitude(sub) - mob[i].radius;
         if (dist < radius) {
           if (mob[i].shield) dmg *= 3 //balancing explosion dmg to shields
+          if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
           mob[i].damage(dmg * damageScale);
           mob[i].locatePlayer();
           knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 50);
@@ -2353,7 +2375,7 @@ const b = {
       friction: 0.05,
       frictionAir: 0.0005,
       restitution: 1,
-      dmg: 0.17, //damage done in addition to the damage from momentum
+      dmg: 0.23, //damage done in addition to the damage from momentum
       lookFrequency: 107 + Math.floor(47 * Math.random()),
       endCycle: game.cycle + Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
@@ -2365,7 +2387,14 @@ const b = {
       lockedOn: null,
       isFollowMouse: true,
       deathCycles: 110 + RADIUS * 5,
-      onDmg() {
+      onDmg(who) {
+        //move away from target after hitting
+        const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20)
+        Matter.Body.setVelocity(this, {
+          x: unit.x,
+          y: unit.y
+        });
+
         this.lockedOn = null
         if (this.endCycle > game.cycle + this.deathCycles && b.isModDroneCollide) {
           this.endCycle -= 60
@@ -3119,7 +3148,7 @@ const b = {
                   // check if inside a mob
                   q = Matter.Query.point(mob, this.position)
                   for (let i = 0; i < q.length; i++) {
-                    let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (b.modWaveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                    let dmg = b.dmgScale * 0.40 / Math.sqrt(q[i].mass) * (b.modWaveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                     q[i].damage(dmg);
                     q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue
@@ -3631,11 +3660,10 @@ const b = {
               //aoe damage to mobs
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                  if (mob[i].shield) {
-                    mob[i].damage(5 * b.dmgScale * 0.023);
-                  } else {
-                    mob[i].damage(b.dmgScale * 0.023);
-                  }
+                  let dmg = b.dmgScale * 0.023
+                  if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
+                  if (mob[i].shield) dmg *= 5 //x5 to make up for the /5 that shields normally take
+                  mob[i].damage(dmg);
                   mob[i].locatePlayer();
                 }
               }
@@ -3859,6 +3887,7 @@ const b = {
           //frictionAir: 0.01,			//restitution: 0,
           // angle: 0,
           // friction: 0.5,
+          restitution: 0,
           frictionAir: 0,
           dmg: 0, //damage done in addition to the damage from momentum
           classType: "bullet",

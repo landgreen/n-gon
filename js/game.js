@@ -56,6 +56,7 @@ const game = {
     b.bulletDraw();
     b.bulletDo();
     game.drawCircle();
+    game.clip();
     ctx.restore();
     game.drawCursor();
   },
@@ -132,6 +133,9 @@ const game = {
   //   };
   //   requestAnimationFrame(normalFPS);
   // },
+  clip() {
+
+  },
   drawCursor() {
     const size = 10;
     ctx.beginPath();
@@ -481,6 +485,7 @@ const game = {
 
     b.setupAllMods(); //sets mods to default values
     game.updateModHUD();
+    powerUps.reroll.rerolls = 0;
     mech.maxHealth = 1
     mech.maxEnergy = 1
     game.paused = false;

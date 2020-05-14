@@ -1,19 +1,20 @@
-foam bullets are faster, smaller, shrink slower, stick to mobs better
-foam can now stick to shielded mobs, but shrinks faster
-mod: foam-bots
+mod - many worlds: spawn a reroll after choosing (or canceling) a power up
+new mob type - launcher:  similar to the shooter, but fires bullets that chase you
+plasma torch - reduces harm to player by 1/3 and has more reliable stopping power against charging mobs
+explosions and neutron bomb do 50% less damage through walls
+drone bullets bounce off mobs more predictably
 
 ************** TODO - n-gon **************
 
-power up  reroll
-  color yellow?
+what about a neutron bomb mod, that cause the bomb to activate right after you fire and slowly move forward with no gravity
 
+Drop a reroll when the player exits the selection screen without picking one of the choices
+
+redblobgames.com/articles/visibility
+  https://github.com/Silverwolf90/2d-visibility/tree/master/src
+  could apply to explosions, neutron bomb, player LOS
 
 sticking bullets don't always gain the correct speed from mobs after they die
-
-mod - frozen mobs take +33% damage
-
-mod heal to full at the end of each level
-  heal mods no longer drop?
 
 possible names for mods
   Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
@@ -23,19 +24,6 @@ have a mob apply a positive status effect on other mobs,
   make it yellow
   damage bonus, but how?
   possible balance issues
-
-mobs that fire grenades
-mobs that fire bullets
-  bullets that chase the player a bit (blue color)
-  short lived bullets that fire in every direction
-    or fire in a spiral over time
-
-construct
-  display outline of map to be draw while mouse is down
-  toggle between maps and bodies
-  ?highlight map/body mouse is over and be able to remove it?
-  display current output text in a box
-    live update it
 
 boss levels - small levels just a boss, and maybe a few mobs
   boss level for timeSkipBoss because of game instability for boss on normal levels
@@ -65,10 +53,6 @@ lore - a robot (the player) gains self awareness
       the next level is the final level
   when you die with Quantum Immortality there is a chance of lore text
 
-scrap drops that can be used to buy things in a shop
-  scrap could be yellow
-  shop could appear every 4 levels
-
 mob - stuns, or slows player 
 
 boss mob - let it die multiple times and come back to life
@@ -90,15 +74,10 @@ uranium reactor core
 add player Scent Trails for mob navigation
   https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
 
-mod - killing a stunned mob gives something 
-  ammo or heal power up?
-
 mod - scale squirrel cage rotor with current energy
   is variable speed going to be hard to deal with?
 
 mod - you can no longer see your current health
-
-mob sniper - targeting laser, then a high speed, no gravity bullet
 
 mod - increase laser bot range, and reduce energy drain
 

@@ -2,13 +2,14 @@
 const spawn = {
   pickList: ["starter", "starter"],
   fullPickList: [
-    "shooter", "shooter", "shooter", "shooter", "shooter",
+    "shooter", "shooter", "shooter", "shooter",
     "hopper", "hopper", "hopper", "hopper",
     "chaser", "chaser", "chaser",
     "striker", "striker",
     "laser", "laser",
     "exploder", "exploder",
     "stabber", "stabber",
+    "launcher", "launcher",
     "spinner",
     "grower",
     "springer",
@@ -19,7 +20,7 @@ const spawn = {
     "ghoster",
     "sneaker",
   ],
-  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "stabber"],
+  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber"],
   setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
     //each level has 2 mobs: one new mob and one from the last level
     spawn.pickList.splice(0, 1);
@@ -845,30 +846,30 @@ const spawn = {
       if (!mech.isBodiesAsleep) {
         this.seePlayerByLookingAt();
         this.checkStatus();
+        this.attraction();
         const dist2 = this.distanceToPlayer2();
         //laser Tracking
-        if (this.seePlayer.yes && dist2 < 4000000 && !mech.isStealth) {
-          this.attraction();
+        if (this.seePlayer.yes && dist2 < 4000000) {
           const rangeWidth = 2000; //this is sqrt of 4000000 from above if()
           //targeting laser will slowly move from the mob to the player's position
           this.laserPos = Vector.add(this.laserPos, Vector.mult(Vector.sub(player.position, this.laserPos), 0.1));
           let targetDist = Vector.magnitude(Vector.sub(this.laserPos, mech.pos));
-          const r = 10;
+          const r = 12;
           ctx.beginPath();
           ctx.moveTo(this.position.x, this.position.y);
-          if (targetDist < r + 15) {
+          if (targetDist < r + 16) {
             targetDist = r + 10;
             //charge at player
-            const forceMag = this.accelMag * 40 * this.mass;
+            const forceMag = this.accelMag * 30 * this.mass;
             const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
             this.force.x += forceMag * Math.cos(angle);
             this.force.y += forceMag * Math.sin(angle);
           } else {
             //high friction if can't lock onto player
-            Matter.Body.setVelocity(this, {
-              x: this.velocity.x * 0.96,
-              y: this.velocity.y * 0.96
-            });
+            // Matter.Body.setVelocity(this, {
+            //   x: this.velocity.x * 0.98,
+            //   y: this.velocity.y * 0.98
+            // });
           }
           if (dist2 > 80000) {
             const laserWidth = 0.002;
@@ -1433,6 +1434,58 @@ const spawn = {
     me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
     me.do = function () {
       this.gravity();
+      this.timeLimit();
+    };
+  },
+  launcher(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
+    mobs.spawn(x, y, 3, radius, "rgb(150,150,255)");
+    let me = mob[mob.length - 1];
+    me.vertices = Matter.Vertices.clockwiseSort(Matter.Vertices.rotate(me.vertices, Math.PI, me.position)); //make the pointy side of triangle the front
+    me.isVerticesChange = true
+    // Matter.Body.rotate(me, Math.PI)
+
+    me.memory = 120;
+    me.fireFreq = 0.006 + Math.random() * 0.003;
+    me.noseLength = 0;
+    me.fireAngle = 0;
+    me.accelMag = 0.0005 * game.accelScale;
+    me.frictionAir = 0.05;
+    me.lookTorque = 0.0000028 * (Math.random() > 0.5 ? -1 : 1);
+    me.fireDir = {
+      x: 0,
+      y: 0
+    };
+    me.onDeath = function () { //helps collisions functions work better after vertex have been changed
+      // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
+    }
+    // spawn.shield(me, x, y);
+    me.do = function () {
+      this.seePlayerByLookingAt();
+      this.checkStatus();
+      this.launch();
+    };
+  },
+  seeker(x, y, radius = 6, sides = 0) {
+    //bullets
+    mobs.spawn(x, y, sides, radius, "rgb(0,0,255)");
+    let me = mob[mob.length - 1];
+    me.stroke = "transparent";
+    me.onHit = function () {
+      this.explode(this.mass * 10);
+    };
+    Matter.Body.setDensity(me, 0.00005); //normal is 0.001
+    me.timeLeft = 420;
+    me.accelMag = 0.0004 * game.accelScale;
+    me.frictionAir = 0.035;
+    me.restitution = 0.5;
+    me.leaveBody = false;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
+    me.collisionFilter.category = cat.mobBullet;
+    me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
+    me.do = function () {
+      this.seePlayerCheck();
+      this.attraction();
       this.timeLimit();
     };
   },

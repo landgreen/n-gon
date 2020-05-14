@@ -87,8 +87,6 @@ const build = {
       <br>global damage increase: ${((b.damageFromMods()-1)*100).toFixed(0)}%
       <br>global harm reduction: ${((1-mech.harmReduction())*100).toFixed(0)}% 
     </div>`;
-
-
     let countGuns = 0
     let countMods = 0
     for (let i = 0, len = b.guns.length; i < len; i++) {
@@ -269,10 +267,6 @@ const build = {
     document.getElementById("build-grid").style.display = "grid"
   },
   shareURL() {
-    game.copyToClipBoard(build.generateURL())
-    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
-  },
-  generateURL() {
     let url = "https://landgreen.github.io/sidescroller/index.html?"
     let count = 0;
     for (let i = 0; i < b.guns.length; i++) {
@@ -292,7 +286,8 @@ const build = {
     url += `&difficulty=${game.difficultyMode}`
     url += `&level=${Number(document.getElementById("starting-level").value)}`
     console.log(url)
-    return url
+    game.copyToClipBoard(url)
+    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
   },
   startBuildRun() {
     build.isCustomSelection = false;

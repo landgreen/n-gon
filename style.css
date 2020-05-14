@@ -466,6 +466,11 @@ em {
   letter-spacing: 1px;
 }
 
+.color-r {
+  color: #f7b;
+  letter-spacing: 1px;
+}
+
 .faded {
   opacity: 0.7;
   font-size: 90%;
@@ -511,7 +516,6 @@ em {
 }
 
 .reroll {
-
   /* #f84  #f99*/
   background: #f7b;
 }

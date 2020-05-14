@@ -21,6 +21,10 @@ const powerUps = {
     powerUps.endDraft();
   },
   endDraft() {
+    if (b.manyWorlds) {
+      powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+      if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+    }
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
     document.getElementById("choose-background").style.display = "none"
@@ -162,7 +166,7 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.endDraft("field")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
+        let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
         if (!b.isModDeterminism) {
           choice2 = pick(mech.fieldUpgrades, choice1)
@@ -207,7 +211,7 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.endDraft("mod")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
+        let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
         if (!b.isModDeterminism) {
           choice2 = pick(choice1)
@@ -249,7 +253,7 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.endDraft("gun")'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
+        let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
         if (!b.isModDeterminism) {
           choice2 = pick(b.guns, choice1)
@@ -312,7 +316,7 @@ const powerUps = {
       if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field");
       return;
     }
-    if (Math.random() < 0.01) {
+    if (Math.random() < 0.005) {
       powerUps.spawn(x, y, "reroll");
       if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "reroll");
       return;
@@ -352,7 +356,7 @@ const powerUps = {
     }
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
-    if (Math.random() < 0.02) {
+    if (Math.random() < 0.05) {
       powerUps.spawn(x, y, "reroll");
     } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
