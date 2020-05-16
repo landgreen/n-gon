@@ -215,9 +215,6 @@ const mech = {
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
 
-        // if (b.isModStompPauli) {
-        //   mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
-        // }
         if (b.isModStomp) {
           const len = Math.min(25, (momentum - 120) * 0.1)
           for (let i = 0; i < len; i++) {
@@ -363,7 +360,7 @@ const mech = {
     if (b.isModImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
       spawn.setSpawnList(); //new mob types
       game.clearNow = true; //triggers a map reset
-      powerUps.reroll.rerolls = Math.floor(Math.random() * Math.random() * 8)
+      powerUps.reroll.rerolls = Math.floor(Math.random() * Math.random() * 12)
 
       //count mods
       let totalMods = 0;
@@ -511,7 +508,7 @@ const mech = {
     }
   },
   defaultFPSCycle: 0, //tracks when to return to normal fps
-  collisionImmuneCycle: 0, //used in engine
+  immuneCycle: 0, //used in engine
   harmReduction() {
     let dmg = 1
     dmg *= mech.fieldDamageResistance
@@ -548,24 +545,23 @@ const mech = {
     if (b.isModEnergyHealth) {
       mech.energy -= dmg;
       if (mech.energy < 0 || isNaN(mech.energy)) {
-        if (b.isModDeathAvoid && !b.isModDeathAvoidOnCD) { //&& Math.random() < 0.5
-          b.isModDeathAvoidOnCD = true;
-          mech.energy += dmg //undo the damage
-          if (mech.energy < 0.05) mech.energy = 0.05
-          mech.collisionImmuneCycle = mech.cycle + 30 //disable this.collisionImmuneCycle bonus seconds
+        if (b.isModDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
+          powerUps.reroll.changeRerolls(-1)
+
+          mech.energy = mech.maxEnergy * 0.5
+          // if (mech.energy < 0.05) mech.energy = 0.05
+          mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
+          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 300)
 
           game.wipe = function () { //set wipe to have trails
-            ctx.fillStyle = "rgba(255,255,255,0.02)";
+            ctx.fillStyle = "rgba(255,255,255,0.03)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
           setTimeout(function () {
             game.wipe = function () { //set wipe to normal
               ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
-            // game.replaceTextLog = true;
-            // game.makeTextLog("death avoided", 360);
-            b.isModDeathAvoidOnCD = false;
-          }, 3000);
+          }, 2000);
 
           return;
         } else {
@@ -578,24 +574,22 @@ const mech = {
     } else {
       mech.health -= dmg;
       if (mech.health < 0 || isNaN(mech.health)) {
-        if (b.isModDeathAvoid && !b.isModDeathAvoidOnCD) { //&& Math.random() < 0.5
-          b.isModDeathAvoidOnCD = true;
-          mech.health += dmg //undo the damage
-          if (mech.health < 0.05) mech.health = 0.05
-          mech.collisionImmuneCycle = mech.cycle + 30 //disable this.collisionImmuneCycle bonus seconds
+        if (b.isModDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
+          powerUps.reroll.changeRerolls(-1)
+          mech.health = mech.maxHealth * 0.5
+          // if (mech.health < 0.05) mech.health = 0.05
+          mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
+          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 300)
 
           game.wipe = function () { //set wipe to have trails
-            ctx.fillStyle = "rgba(255,255,255,0.02)";
+            ctx.fillStyle = "rgba(255,255,255,0.03)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
           setTimeout(function () {
             game.wipe = function () { //set wipe to normal
               ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
-            // game.replaceTextLog = true;
-            // game.makeTextLog("death avoided", 360);
-            b.isModDeathAvoidOnCD = false;
-          }, 3000);
+          }, 2000);
         } else {
           mech.health = 0;
           mech.death();
@@ -711,19 +705,12 @@ const mech = {
 
   // },
   draw() {
-    // mech.fillColor = (mech.collisionImmuneCycle < mech.cycle) ? "#fff" : "rgba(255,255,255,0.1)" //"#cff"
     ctx.fillStyle = mech.fillColor;
     mech.walk_cycle += mech.flipLegs * mech.Vx;
 
     //draw body
     ctx.save();
-    // if (mech.collisionImmuneCycle < mech.cycle) {
-    //   ctx.globalAlpha = 1
-    //   if (mech.collisionImmune) mech.collisionImmune = false;
-    // } else {
-    //   ctx.globalAlpha = 0.7
-    // }
-    ctx.globalAlpha = (mech.collisionImmuneCycle < mech.cycle) ? 1 : 0.7
+    ctx.globalAlpha = (mech.immuneCycle < mech.cycle) ? 1 : 0.7
     ctx.translate(mech.pos.x, mech.pos.y);
     mech.calcLeg(Math.PI, -3);
     mech.drawLeg("#4a4a4a");
@@ -1672,8 +1659,8 @@ const mech = {
                   const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
                   Matter.Body.applyForce(best.who, path[1], force)
                   Matter.Body.setVelocity(best.who, { //friction
-                    x: best.who.velocity.x * 0.6,
-                    y: best.who.velocity.y * 0.6
+                    x: best.who.velocity.x * 0.7,
+                    y: best.who.velocity.y * 0.7
                   });
                   // const angle = Math.atan2(player.position.y - best.who.position.y, player.position.x - best.who.position.x);
                   // const mass = Math.min(Math.sqrt(best.who.mass), 6);

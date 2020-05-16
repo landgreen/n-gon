@@ -17,9 +17,9 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.setField("time dilation field")
-      // b.giveMod("many worlds");
-      // b.giveGuns("neutron bomb")
-      // b.giveGuns("foam")
+      // b.giveMod("brushless motor");
+      // b.giveGuns("drones")
+      // b.giveGuns("mine")
       // mech.setField("pilot wave")
       // mech.setField("phase decoherence field")
 
@@ -135,7 +135,7 @@ const level = {
     spawn.mapRect(-250, -700, 1000, 900); // shelf
     spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
     powerUps.spawnStartingPowerUps(600, -800);
-    powerUps.spawn(550, -800, "reroll", false); //starting gun
+    powerUps.spawn(550, -800, "reroll", false);
 
     function blockDoor(x, y, blockSize = 58) {
       spawn.mapRect(x, y - 290, 40, 60); // door lip

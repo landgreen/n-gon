@@ -21,7 +21,7 @@ const powerUps = {
     powerUps.endDraft();
   },
   endDraft() {
-    if (b.manyWorlds) {
+    if (b.manyWorlds && Math.random() < 0.66) {
       powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
       if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
     }
@@ -47,8 +47,15 @@ const powerUps = {
       return 20;
     },
     effect() {
-      powerUps.reroll.rerolls++
+      powerUps.reroll.changeRerolls(1)
       game.makeTextLog("<div class='circle reroll'></div> &nbsp; <span style='font-size:115%;'> <strong>+1 reroll</strong></span>", 300)
+    },
+    changeRerolls(amount) {
+      powerUps.reroll.rerolls += amount
+      if (powerUps.reroll.rerolls < 0) powerUps.reroll.rerolls = 0
+      if (b.isModDeathAvoid && document.getElementById("mod-anthropic")) {
+        document.getElementById("mod-anthropic").innerHTML = `(${powerUps.reroll.rerolls})`
+      }
     },
     diceText() {
       const r = powerUps.reroll.rerolls
@@ -71,25 +78,8 @@ const powerUps = {
       }
       return out
     },
-    // diceText() {
-    //   if (powerUps.reroll.rerolls === 1) {
-    //     return '⚀'
-    //   } else if (powerUps.reroll.rerolls === 2) {
-    //     return '⚁'
-    //   } else if (powerUps.reroll.rerolls === 3) {
-    //     return '⚂'
-    //   } else if (powerUps.reroll.rerolls === 4) {
-    //     return '⚃'
-    //   } else if (powerUps.reroll.rerolls === 5) {
-    //     return '⚄'
-    //   } else if (powerUps.reroll.rerolls === 6) {
-    //     return '⚅'
-    //   } else if (powerUps.reroll.rerolls > 6) {
-    //     return '⚅+'
-    //   }
-    // },
     use(type) {
-      powerUps.reroll.rerolls--;
+      powerUps.reroll.changeRerolls(-1)
       powerUps[type].effect();
     },
   },
@@ -153,13 +143,30 @@ const powerUps = {
     size() {
       return 45;
     },
+    choiceLog: [], //records all previous choice options
     effect() {
       function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 1; i < who.length; i++) {
           if (i !== mech.fieldMode && (!game.isEasyToAimMode || mech.fieldUpgrades[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
         }
-        if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
+        //remove repeats from last selection
+        const totalChoices = b.isModDeterminism ? 1 : 3 + b.isModExtraChoice * 2
+        if (powerUps.field.choiceLog.length > totalChoices || powerUps.field.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+          for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+            if (options.length > totalChoices) {
+              for (let j = 0, len = options.length; j < len; j++) {
+                if (powerUps.field.choiceLog[powerUps.field.choiceLog.length - 1 - i] === options[j]) {
+                  options.splice(j, 1) //remove previous choice from option pool
+                  break
+                }
+              }
+            }
+          }
+        }
+        if (options.length > 0) {
+          return options[Math.floor(Math.random() * options.length)]
+        }
       }
 
       let choice1 = pick(mech.fieldUpgrades)
@@ -179,7 +186,13 @@ const powerUps = {
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice4].name}</div> ${mech.fieldUpgrades[choice4].description}</div>`
           let choice5 = pick(mech.fieldUpgrades, choice1, choice2, choice3, choice4)
           if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice5})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice5].name}</div> ${mech.fieldUpgrades[choice5].description}</div>`
+          powerUps.field.choiceLog.push(choice4)
+          powerUps.field.choiceLog.push(choice5)
         }
+        powerUps.field.choiceLog.push(choice1)
+        powerUps.field.choiceLog.push(choice2)
+        powerUps.field.choiceLog.push(choice3)
+
         if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('field')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
 
         // text += `<div style = 'color:#fff'>${game.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
@@ -196,6 +209,7 @@ const powerUps = {
     size() {
       return 42;
     },
+    choiceLog: [], //records all previous choice options
     effect() {
       function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
@@ -204,7 +218,23 @@ const powerUps = {
             options.push(i);
           }
         }
-        if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
+        //remove repeats from last selection
+        const totalChoices = b.isModDeterminism ? 1 : 3 + b.isModExtraChoice * 2
+        if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+          for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+            if (options.length > totalChoices) {
+              for (let j = 0, len = options.length; j < len; j++) {
+                if (powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i] === options[j]) {
+                  options.splice(j, 1) //remove previous choice from option pool
+                  break
+                }
+              }
+            }
+          }
+        }
+        if (options.length > 0) {
+          return options[Math.floor(Math.random() * options.length)]
+        }
       }
 
       let choice1 = pick()
@@ -224,7 +254,12 @@ const powerUps = {
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice4].name}</div> ${b.mods[choice4].description}</div>`
           let choice5 = pick(choice1, choice2, choice3, choice4)
           if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice5].name}</div> ${b.mods[choice5].description}</div>`
+          powerUps.mod.choiceLog.push(choice4)
+          powerUps.mod.choiceLog.push(choice5)
         }
+        powerUps.mod.choiceLog.push(choice1)
+        powerUps.mod.choiceLog.push(choice2)
+        powerUps.mod.choiceLog.push(choice3)
         if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('mod')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
 
         document.getElementById("choose-grid").innerHTML = text
@@ -240,13 +275,33 @@ const powerUps = {
     size() {
       return 35;
     },
+    choiceLog: [], //records all previous choice options
     effect() {
       function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 0; i < who.length; i++) {
-          if (!who[i].have && (!game.isEasyToAimMode || b.guns[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
+          if (!who[i].have && (!game.isEasyToAimMode || b.guns[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) {
+            options.push(i);
+          }
         }
-        if (options.length > 0) return options[Math.floor(Math.random() * options.length)]
+
+        //remove repeats from last selection
+        const totalChoices = b.isModDeterminism ? 1 : 3 + b.isModExtraChoice * 2
+        if (powerUps.gun.choiceLog.length > totalChoices || powerUps.gun.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+          for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+            if (options.length > totalChoices) {
+              for (let j = 0, len = options.length; j < len; j++) {
+                if (powerUps.gun.choiceLog[powerUps.gun.choiceLog.length - 1 - i] === options[j]) {
+                  options.splice(j, 1) //remove previous choice from option pool
+                  break
+                }
+              }
+            }
+          }
+        }
+        if (options.length > 0) {
+          return options[Math.floor(Math.random() * options.length)]
+        }
       }
 
       let choice1 = pick(b.guns)
@@ -267,9 +322,16 @@ const powerUps = {
           let choice5 = pick(b.guns, choice1, choice2, choice3, choice4)
           if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice5})">
           <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice5].name}</div> ${b.guns[choice5].description}</div>`
+          powerUps.gun.choiceLog.push(choice4)
+          powerUps.gun.choiceLog.push(choice5)
         }
-
+        powerUps.gun.choiceLog.push(choice1)
+        powerUps.gun.choiceLog.push(choice2)
+        powerUps.gun.choiceLog.push(choice3)
         if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('gun')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
+
+        // console.log(powerUps.gun.choiceLog)
+        // console.log(choice1, choice2, choice3)
 
         document.getElementById("choose-grid").innerHTML = text
         powerUps.showDraft();

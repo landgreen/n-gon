@@ -1,20 +1,24 @@
-mod - many worlds: spawn a reroll after choosing (or canceling) a power up
-new mob type - launcher:  similar to the shooter, but fires bullets that chase you
-plasma torch - reduces harm to player by 1/3 and has more reliable stopping power against charging mobs
-explosions and neutron bomb do 50% less damage through walls
-drone bullets bounce off mobs more predictably
+anthropic principle - now consumes 1 rerolls, and heals player to 50% health instead of letting them die
+many worlds - 66% chance for rerolls
+quantum immortality - also gives 3 rerolls
+mod drones - Brushless Motor: drones move faster
+mod drones - redundant systems: removed
+choices in power up selection should no longer repeat the previous choices when possible
 
 ************** TODO - n-gon **************
 
-what about a neutron bomb mod, that cause the bomb to activate right after you fire and slowly move forward with no gravity
+bug - mines spawn extra mines when fired at thin map wall while jumping
 
-Drop a reroll when the player exits the selection screen without picking one of the choices
+mod - negative mass field move faster
+  less friction, more like flying?
+
+what about a neutron bomb mod, that causes the bomb to activate right after you fire and slowly move forward with no gravity
 
 redblobgames.com/articles/visibility
   https://github.com/Silverwolf90/2d-visibility/tree/master/src
   could apply to explosions, neutron bomb, player LOS
 
-sticking bullets don't always gain the correct speed from mobs after they die
+bug - sticking bullets don't always gain the correct speed from mobs after they die
 
 possible names for mods
   Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.

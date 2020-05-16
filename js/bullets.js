@@ -36,7 +36,7 @@ const b = {
   modCollisionImmuneCycles: null,
   modBlockDmg: null,
   isModPiezo: null,
-  isModDroneCollide: null,
+  isModFastDrones: null,
   isModFastSpores: null,
   modSuperBallNumber: null,
   modOneSuperBall: null,
@@ -49,7 +49,6 @@ const b = {
   isModHealthRecovery: null,
   isModEnergyLoss: null,
   isModDeathAvoid: null,
-  isModDeathAvoidOnCD: null,
   modWaveSpeedMap: null,
   modWaveSpeedBody: null,
   isModSporeField: null,
@@ -531,7 +530,7 @@ const b = {
     },
     {
       name: "Pauli exclusion",
-      description: `unable to <strong>collide</strong> with mobs for <strong>+2</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
+      description: `<strong>immune</strong> to <strong>harm</strong> for <strong>+1</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
       maxCount: 9,
       count: 0,
       allowed() {
@@ -539,8 +538,8 @@ const b = {
       },
       requires: "",
       effect() {
-        b.modCollisionImmuneCycles += 120;
-        mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        b.modCollisionImmuneCycles += 60;
+        mech.immuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
       },
       remove() {
         b.modCollisionImmuneCycles = 30;
@@ -560,40 +559,6 @@ const b = {
       },
       remove() {
         b.isModSlowFPS = false;
-      }
-    },
-    {
-      name: "quantum immortality",
-      description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br><em>guns, ammo, field, and mods are randomized</em>",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.isModImmortal = true;
-      },
-      remove() {
-        b.isModImmortal = false;
-      }
-    },
-    {
-      name: "anthropic principle",
-      description: "<strong>fatal harm</strong> can't happen<br><strong>saves</strong> you up to once every <strong>3</strong> seconds",
-      maxCount: 1,
-      count: 0,
-      allowed() {
-        return true
-      },
-      requires: "",
-      effect() {
-        b.isModDeathAvoid = true;
-        b.isModDeathAvoidOnCD = false;
-      },
-      remove() {
-        b.isModDeathAvoid = false;
-        b.isModDeathAvoidOnCD = false;
       }
     },
     {
@@ -780,7 +745,7 @@ const b = {
     },
     {
       name: "Bayesian inference",
-      description: "<strong>33%</strong> chance for double <strong>power ups</strong> to drop<br><strong>remove</strong> all future <strong>ammo</strong> power ups",
+      description: "<strong>37%</strong> chance for double <strong>power ups</strong> to drop<br><strong>remove</strong> all future <strong>ammo</strong> power ups",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -788,7 +753,7 @@ const b = {
       },
       requires: "",
       effect: () => {
-        b.modBayesian = 0.33;
+        b.modBayesian = 0.37;
       },
       remove() {
         b.modBayesian = 0;
@@ -828,7 +793,7 @@ const b = {
     },
     {
       name: "determinism",
-      description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong> and 2 <strong class='color-h'>heal</strong> power ups<br>future <strong>power ups</strong> are limited to <strong>one choice</strong>",
+      description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong> and 2 <strong class='color-h'>heal</strong> power ups<br>future <strong>power ups</strong> are limited to <strong>one choice</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -837,7 +802,7 @@ const b = {
       requires: "not cardinality",
       effect: () => {
         b.isModDeterminism = true;
-        for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
+        for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
           if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
         }
@@ -852,7 +817,7 @@ const b = {
     },
     {
       name: "many worlds",
-      description: "spawn a <strong class='color-r'>reroll</strong> after choosing a power up",
+      description: "after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong><br><strong>66%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -868,6 +833,45 @@ const b = {
       },
       remove() {
         b.manyWorlds = false;
+      }
+    },
+    {
+      name: "anthropic principle",
+      nameInfo: "<span id = 'mod-anthropic'></span>",
+      description: "<strong class='color-h'>heal</strong> to <strong>50%</strong> health instead of <strong>dying</strong><br>consumes <strong>1</strong> <strong class='color-r'>reroll</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return powerUps.reroll.rerolls > 0 || build.isCustomSelection
+      },
+      requires: "at least 1 reroll",
+      effect() {
+        b.isModDeathAvoid = true;
+        setTimeout(function () {
+          powerUps.reroll.changeRerolls(0)
+        }, 1000);
+      },
+      remove() {
+        b.isModDeathAvoid = false;
+      }
+    },
+    {
+      name: "quantum immortality",
+      description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>3</strong> <strong class='color-r'>rerolls</strong>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return true
+      },
+      requires: "",
+      effect() {
+        b.isModImmortal = true;
+        powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+        powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+        powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+      },
+      remove() {
+        b.isModImmortal = false;
       }
     },
     {
@@ -991,7 +995,7 @@ const b = {
     },
     {
       name: "shotgun spin-statistics",
-      description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to collisions for <strong>1 second</strong>",
+      description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to <strong>harm</strong> for <strong>1 second</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1364,8 +1368,8 @@ const b = {
       }
     },
     {
-      name: "redundant systems",
-      description: "<strong>drone</strong> collisions no longer reduce their <strong>lifespan</strong>",
+      name: "brushless motor",
+      description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -1373,10 +1377,10 @@ const b = {
       },
       requires: "drones",
       effect() {
-        b.isModDroneCollide = true
+        b.isModFastDrones = true
       },
       remove() {
-        b.isModDroneCollide = true;
+        b.isModFastDrones = false
       }
     },
     {
@@ -2133,7 +2137,7 @@ const b = {
         let collide = Matter.Query.collides(this, map) //check if collides with map
         if (collide.length > 0) {
           for (let i = 0; i < collide.length; i++) {
-            if (collide[i].bodyA.collisionFilter.category === cat.map || collide[i].bodyB.collisionFilter.category === cat.map) {
+            if (collide[i].bodyA.collisionFilter.category === cat.map) { // || collide[i].bodyB.collisionFilter.category === cat.map) {
               const angle = Matter.Vector.angle(collide[i].normal, {
                 x: 1,
                 y: 0
@@ -2141,7 +2145,7 @@ const b = {
               Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
               //move until touching map again after rotation
               for (let j = 0; j < 10; j++) {
-                if (Matter.Query.collides(this, map).length > 0) {
+                if (Matter.Query.collides(this, map).length > 0) { //touching map
                   if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
                     Matter.Body.setStatic(this, true) //don't set to static if not touching map
                   } else {
@@ -2156,7 +2160,8 @@ const b = {
                   //sometimes the mine can't attach to map and it just needs to be reset
                   const that = this
                   setTimeout(function () {
-                    if (Matter.Query.collides(that, map).length === 0) {
+                    if (Matter.Query.collides(that, map).length === 0 || Matter.Query.point(map, that.position).length > 0) {
+                      console.log(that)
                       that.endCycle = 0 // if not touching map explode
                       that.isArmed = false
                       b.mine(that.position, that.velocity, that.angle)
@@ -2366,17 +2371,18 @@ const b = {
   },
   drone(speed = 1) {
     const me = bullet.length;
-    const THRUST = 0.0015
-    const dir = mech.angle + 0.2 * (Math.random() - 0.5);
+    const THRUST = b.isModFastDrones ? 0.0025 : 0.0015
+    const FRICTION = b.isModFastDrones ? 0.008 : 0.0005
+    const dir = mech.angle + 0.4 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random())
     bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 8, RADIUS, {
       angle: dir,
       inertia: Infinity,
       friction: 0.05,
-      frictionAir: 0.0005,
+      frictionAir: FRICTION,
       restitution: 1,
       dmg: 0.23, //damage done in addition to the damage from momentum
-      lookFrequency: 107 + Math.floor(47 * Math.random()),
+      lookFrequency: 100 + Math.floor(23 * Math.random()),
       endCycle: game.cycle + Math.floor((1200 + 420 * Math.random()) * b.isModBulletsLastLonger),
       classType: "bullet",
       collisionFilter: {
@@ -2396,7 +2402,7 @@ const b = {
         });
 
         this.lockedOn = null
-        if (this.endCycle > game.cycle + this.deathCycles && b.isModDroneCollide) {
+        if (this.endCycle > game.cycle + this.deathCycles) {
           this.endCycle -= 60
           if (game.cycle + this.deathCycles > this.endCycle) this.endCycle = game.cycle + this.deathCycles
         }
@@ -2966,7 +2972,7 @@ const b = {
         }
         player.force.x -= knock * Math.cos(mech.angle)
         player.force.y -= knock * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
-        if (b.isModShotgunImmune) mech.collisionImmuneCycle = mech.cycle + 60; //player is immune to collision damage for 30 cycles
+        if (b.isModShotgunImmune) mech.immuneCycle = mech.cycle + 60; //player is immune to collision damage for 30 cycles
         b.muzzleFlash(35);
         const side = 19 * b.modBulletSize
         for (let i = 0; i < 15; i++) {
@@ -3687,11 +3693,15 @@ const b = {
       isStarterGun: false,
       isEasyToAim: true,
       fire() {
-        const speed = mech.crouch ? 36 : 22
-        b.mine({
+        const pos = {
           x: mech.pos.x + 30 * Math.cos(mech.angle),
           y: mech.pos.y + 30 * Math.sin(mech.angle)
-        }, {
+        }
+        let speed = mech.crouch ? 36 : 22
+        if (Matter.Query.point(map, pos).length > 0) { //don't fire if mine will spawn inside map
+          speed = -2
+        }
+        b.mine(pos, {
           x: speed * Math.cos(mech.angle),
           y: speed * Math.sin(mech.angle)
         }, 0, b.isModMineAmmoBack)
@@ -3820,13 +3830,13 @@ const b = {
       name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 14,
+      ammoPack: 15,
       have: false,
       isStarterGun: true,
       isEasyToAim: true,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 5) * b.modFireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 5) * b.modFireRate); // cool down
       }
     },
     {

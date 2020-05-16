@@ -1019,8 +1019,8 @@ const spawn = {
       vertexCollision(where, look, map);
       vertexCollision(where, look, body);
       if (!mech.isStealth) vertexCollision(where, look, [player]);
-      if (best.who && best.who === player && mech.collisionImmuneCycle < mech.cycle) {
-        mech.collisionImmuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+      if (best.who && best.who === player && mech.immuneCycle < mech.cycle) {
+        mech.immuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
         const dmg = 0.14 * game.dmgScale;
         mech.damage(dmg);
         game.drawList.push({ //add dmg to draw queue
@@ -1445,7 +1445,7 @@ const spawn = {
     // Matter.Body.rotate(me, Math.PI)
 
     me.memory = 120;
-    me.fireFreq = 0.006 + Math.random() * 0.003;
+    me.fireFreq = 0.007 + Math.random() * 0.003;
     me.noseLength = 0;
     me.fireAngle = 0;
     me.accelMag = 0.0005 * game.accelScale;
