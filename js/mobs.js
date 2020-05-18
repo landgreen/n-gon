@@ -1089,7 +1089,7 @@ const mobs = {
           const len = body.length;
           const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
           body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
-          Matter.Body.setVelocity(body[len], this.velocity);
+          Matter.Body.setVelocity(body[len], Vector.mult(this.velocity, 0.5));
           Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
           body[len].collisionFilter.category = cat.body;
           body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;

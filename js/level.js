@@ -60,27 +60,52 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.17; //damage done by mobs increases each level
+      game.dmgScale += 0.205; //damage done by mobs increases each level
       b.dmgScale *= 0.91; //damage done by player decreases each level
-      game.accelScale *= 1.02 //mob acceleration increases each level
-      game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
-      game.CDScale *= 0.97 //mob CD time decreases each level
+      game.accelScale *= 1.024 //mob acceleration increases each level
+      game.lookFreqScale *= 0.976 //mob cycles between looks decreases each level
+      game.CDScale *= 0.964 //mob CD time decreases each level
     }
     game.healScale = 1 / (1 + game.difficulty * 0.09) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.17; //damage done by mobs increases each level
+      game.dmgScale -= 0.205; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.91; //damage done by player decreases each level
-      game.accelScale /= 1.02 //mob acceleration increases each level
-      game.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
-      game.CDScale /= 0.97 //mob CD time decreases each level
+      game.accelScale /= 1.024 //mob acceleration increases each level
+      game.lookFreqScale /= 0.976 //mob cycles between looks decreases each level
+      game.CDScale /= 0.964 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 0;
     game.healScale = 1 / (1 + game.difficulty * 0.09)
   },
+  // difficultyIncrease(num = 1) {
+  //   // if (level.isBuildRun) num++
+  //   for (let i = 0; i < num; i++) {
+  //     game.difficulty++
+  //     game.dmgScale += 0.17; //damage done by mobs increases each level
+  //     b.dmgScale *= 0.91; //damage done by player decreases each level
+  //     game.accelScale *= 1.02 //mob acceleration increases each level
+  //     game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
+  //     game.CDScale *= 0.97 //mob CD time decreases each level
+  //   }
+  //   game.healScale = 1 / (1 + game.difficulty * 0.09) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
+  // },
+  // difficultyDecrease(num = 1) { //used in easy mode for game.reset()
+  //   for (let i = 0; i < num; i++) {
+  //     game.difficulty--
+  //     game.dmgScale -= 0.17; //damage done by mobs increases each level
+  //     if (game.dmgScale < 0.1) game.dmgScale = 0.1;
+  //     b.dmgScale /= 0.91; //damage done by player decreases each level
+  //     game.accelScale /= 1.02 //mob acceleration increases each level
+  //     game.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
+  //     game.CDScale /= 0.97 //mob CD time decreases each level
+  //   }
+  //   if (game.difficulty < 1) game.difficulty = 0;
+  //   game.healScale = 1 / (1 + game.difficulty * 0.09)
+  // },
   difficultyText(mode = document.getElementById("difficulty-select").value) {
     if (mode === "0") {
       return "easy"

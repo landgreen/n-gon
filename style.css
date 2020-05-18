@@ -250,11 +250,11 @@ summary {
 }
 
 .build-mod-selected {
-  background-color: hsl(247, 100%, 84%);
+  background-color: hsl(253, 100%, 84%);
 }
 
 .build-mod-selected:hover {
-  background-color: hsl(247, 100%, 81%);
+  background-color: hsl(253, 100%, 81%);
 }
 
 .build-grid-disabled {
@@ -462,7 +462,7 @@ em {
 }
 
 .color-m {
-  color: hsl(246, 57%, 52%);
+  color: hsl(253, 57%, 52%);
   letter-spacing: 1px;
 }
 
@@ -500,7 +500,7 @@ em {
 
 .mod {
   /* background: rgb(116, 102, 238); */
-  background: hsl(246, 80%, 67%);
+  background: hsl(253, 80%, 67%);
 }
 
 .grey {

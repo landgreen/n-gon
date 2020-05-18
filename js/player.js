@@ -378,7 +378,7 @@ const mech = {
               b.mods[i].name !== "Born rule" &&
               b.mods[i].name !== "determinism" &&
               b.mods[i].name !== "reallocation" &&
-              b.mods[i].name !== "many worlds" &&
+              b.mods[i].name !== "many-worlds" &&
               b.mods[i].allowed()
             ) options.push(i);
           }
@@ -551,7 +551,7 @@ const mech = {
           mech.energy = mech.maxEnergy * 0.5
           // if (mech.energy < 0.05) mech.energy = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
-          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 300)
+          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
 
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -579,7 +579,7 @@ const mech = {
           mech.health = mech.maxHealth * 0.5
           // if (mech.health < 0.05) mech.health = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
-          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 300)
+          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
 
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -1829,12 +1829,12 @@ const mech = {
         mech.fieldPhase = 0;
 
         mech.hold = function () {
-          function expandField() {
-            if (this.fieldRange < 2000) {
-              this.fieldRange += 100
-              drawField(this.fieldRange)
-            }
-          }
+          // function expandField() {
+          //   if (this.fieldRange < 2000) {
+          //     this.fieldRange += 100
+          //     drawField(this.fieldRange)
+          //   }
+          // }
 
           function drawField(radius) {
             radius *= 0.9 + 1 * mech.energy;

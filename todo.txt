@@ -1,11 +1,15 @@
-anthropic principle - now consumes 1 rerolls, and heals player to 50% health instead of letting them die
-many worlds - 66% chance for rerolls
-quantum immortality - also gives 3 rerolls
-mod drones - Brushless Motor: drones move faster
-mod drones - redundant systems: removed
-choices in power up selection should no longer repeat the previous choices when possible
+mod - many worlds: 100% chance on choosing a power up to spawn a reroll if you have no rerolls
+mod - microstates: +7% damage for every 10 active bullets
+  (requires mod: Lorentzian topology)
+mod - laser diode: laser, pulse, and laser-bots use 37% less energy
+25% increase in difficulty scaling  (level 10 should now have the difficulty of level 12)
+  effects: player damage, mod damage, mob acceleration, mob reaction time, mob cooldown time
 
 ************** TODO - n-gon **************
+
+rays can have width,  how to use this?
+  Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
+  wide lasers?
 
 bug - mines spawn extra mines when fired at thin map wall while jumping
 

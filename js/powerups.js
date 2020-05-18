@@ -21,7 +21,7 @@ const powerUps = {
     powerUps.endDraft();
   },
   endDraft() {
-    if (b.manyWorlds && Math.random() < 0.66) {
+    if (b.manyWorlds && powerUps.reroll.rerolls < 1) {
       powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
       if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
     }

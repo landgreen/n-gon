@@ -87,6 +87,8 @@ const b = {
   isModSlowFPS: null,
   isModNeutronStun: null,
   manyWorlds: null,
+  isModDamageFromBulletCount: null,
+  isModLaserDiode: null,
   modOnHealthChange() { //used with acid mod
     if (b.isModAcidDmg && mech.health > 0.8) {
       b.modAcidDmg = 0.5
@@ -816,8 +818,8 @@ const b = {
       }
     },
     {
-      name: "many worlds",
-      description: "after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong><br><strong>66%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
+      name: "many-worlds",
+      description: "if you have <strong>zero</strong> <strong class='color-r'>rerolls</strong>, spawn a <strong class='color-r'>reroll</strong><br>after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong>",
       maxCount: 1,
       count: 0,
       allowed() {
@@ -826,10 +828,6 @@ const b = {
       requires: "",
       effect: () => {
         b.manyWorlds = true;
-        // for (let i = 0; i < 9; i++) {
-        //   powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-        //   if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-        // }
       },
       remove() {
         b.manyWorlds = false;
@@ -942,6 +940,22 @@ const b = {
       },
       remove() {
         b.isModBulletsLastLonger = 1;
+      }
+    },
+    {
+      name: "microstates",
+      description: "<strong>+7%</strong> <strong class='color-d'>damage</strong> for every <strong>10</strong> active <strong>bullets</strong>",
+      maxCount: 3,
+      count: 0,
+      allowed() {
+        return b.isModBulletsLastLonger > 1
+      },
+      requires: "Lorentzian topology",
+      effect() {
+        b.isModDamageFromBulletCount = true
+      },
+      remove() {
+        b.isModDamageFromBulletCount = false
       }
     },
     {
@@ -1433,6 +1447,22 @@ const b = {
       }
     },
     {
+      name: "laser diodes",
+      description: "<strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser gun, pulse gun, and laser-bot</em>",
+      maxCount: 1,
+      count: 0,
+      allowed() {
+        return b.haveGunCheck("pulse") || b.haveGunCheck("laser") || b.modLaserBotCount > 1
+      },
+      requires: "laser",
+      effect() {
+        b.isModLaserDiode = 0.63; //100%-37%
+      },
+      remove() {
+        b.isModLaserDiode = 1;
+      }
+    },
+    {
       name: "specular reflection",
       description: "<strong>laser</strong> beams gain <strong>+1</strong> reflection<br><strong>+50%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
       maxCount: 9,
@@ -1604,7 +1634,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModMissileField || b.isModIceField)
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModMissileField || b.isModIceField || b.isModFastDrones)
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -1620,7 +1650,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModIceField)
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModIceField || b.isModFastDrones)
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -1636,7 +1666,7 @@ const b = {
       maxCount: 1,
       count: 0,
       allowed() {
-        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField)
+        return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(b.isModSporeField || b.isModMissileField || b.isModFastDrones)
       },
       requires: "nano-scale manufacturing",
       effect() {
@@ -1801,6 +1831,7 @@ const b = {
     if (b.isModEnergyLoss) dmg *= 1.33;
     if (b.isModRest && player.speed < 1) dmg *= 1.20;
     if (b.isModEnergyDamage) dmg *= 1 + mech.energy / 5.5;
+    if (b.isModDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
     return dmg
   },
   bulletRemove() { //run in main loop
@@ -2834,7 +2865,7 @@ const b = {
 
         //hit target with laser
         if (this.lockedOn && this.lockedOn.alive && mech.energy > 0.15) {
-          mech.energy -= 0.0014
+          mech.energy -= 0.0014 * b.isModLaserDiode
           //make sure you can still see vertex
           const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
           if (DIST - this.lockedOn.radius < this.range + 150 &&
@@ -4117,7 +4148,7 @@ const b = {
         if (mech.energy < b.modLaserFieldDrain) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
-          mech.energy -= mech.fieldRegen + b.modLaserFieldDrain
+          mech.energy -= mech.fieldRegen + b.modLaserFieldDrain * b.isModLaserDiode
           let best = {
             x: null,
             y: null,
@@ -4345,7 +4376,7 @@ const b = {
 
         //use energy to explode
         const energy = 0.3 * Math.min(mech.energy, 1.75)
-        mech.energy -= energy
+        mech.energy -= energy * b.isModLaserDiode
         if (best.who) b.explosion(path[1], 1000 * energy, true)
         mech.fireCDcycle = mech.cycle + Math.floor(60 * b.modFireRate); // cool down
 

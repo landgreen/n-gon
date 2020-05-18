@@ -49,6 +49,7 @@ const game = {
     mobs.healthBar();
     mech.draw();
     mech.hold();
+    // v.draw(); //working on visibility work in progress
     level.drawFills();
     game.draw.drawMapPath();
     b.fire();
@@ -515,7 +516,8 @@ const game = {
       game.difficultyMode = 1
       level.difficultyDecrease(6); //if this stops being -6  change in build.calculateCustomDifficulty()
     }
-    if (game.difficultyMode === 4) level.difficultyIncrease(6)
+    if (game.difficultyMode === 2) level.difficultyIncrease(1)
+    if (game.difficultyMode === 4) level.difficultyIncrease(4)
 
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
@@ -703,6 +705,9 @@ const game = {
   },
   checks() {
     if (!(mech.cycle % 60)) { //once a second
+      console.log(bullet.length * 0.005)
+
+
       if (mech.pos.y > game.fallHeight) { // if 4000px deep
         if (game.difficultyMode > 2) {
           mech.death();
