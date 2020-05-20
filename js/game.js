@@ -180,7 +180,7 @@ const game = {
       if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
     }
 
-    if (b.isModEntanglement && document.getElementById("mod-entanglement")) {
+    if (mod.isEntanglement && document.getElementById("mod-entanglement")) {
       if (b.inventory[0] === b.activeGun) {
         let lessDamage = 1
         for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -215,16 +215,16 @@ const game = {
   },
   updateModHUD() {
     let text = ""
-    for (let i = 0, len = b.mods.length; i < len; i++) { //add mods
-      if (b.mods[i].count > 0) {
+    for (let i = 0, len = mod.mods.length; i < len; i++) { //add mods
+      if (mod.mods[i].count > 0) {
         if (text) text += "<br>" //add a new line, but not on the first line
-        text += b.mods[i].name
-        if (b.mods[i].nameInfo) text += b.mods[i].nameInfo
-        if (b.mods[i].count > 1) text += ` (${b.mods[i].count}x)`
+        text += mod.mods[i].name
+        if (mod.mods[i].nameInfo) text += mod.mods[i].nameInfo
+        if (mod.mods[i].count > 1) text += ` (${mod.mods[i].count}x)`
       }
     }
     document.getElementById("mods").innerHTML = text
-    b.modOnHealthChange()
+    mod.onHealthChange()
   },
   replaceTextLog: true,
   // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
@@ -261,7 +261,7 @@ const game = {
     }
   },
   switchGun() {
-    if (b.modNoAmmo) b.modNoAmmo = 1 //this prevents hacking the mod by switching guns
+    if (mod.noAmmo) mod.noAmmo = 1 //this prevents hacking the mod by switching guns
     b.activeGun = b.inventory[b.inventoryGun];
     game.updateGunHUD();
     game.boldActiveGunHUD();
@@ -376,7 +376,7 @@ const game = {
         mech.addHealth(Infinity)
         mech.energy = mech.maxEnergy;
       } else if (keys[89]) { //add mods with y
-        b.giveMod()
+        mod.giveMod()
       } else if (keys[82]) { // teleport to mouse with R
         Matter.Body.setPosition(player, game.mouseInGame);
         Matter.Body.setVelocity(player, {
@@ -484,11 +484,12 @@ const game = {
     }
     b.activeGun = null;
 
-    b.setupAllMods(); //sets mods to default values
+    mod.setupAllMods(); //sets mods to default values
     game.updateModHUD();
     powerUps.reroll.rerolls = 0;
     mech.maxHealth = 1
     mech.maxEnergy = 1
+    mech.energy = 1
     game.paused = false;
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
@@ -516,8 +517,7 @@ const game = {
       game.difficultyMode = 1
       level.difficultyDecrease(6); //if this stops being -6  change in build.calculateCustomDifficulty()
     }
-    if (game.difficultyMode === 2) level.difficultyIncrease(1)
-    if (game.difficultyMode === 4) level.difficultyIncrease(4)
+    if (game.difficultyMode === 4) level.difficultyIncrease(2)
 
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
@@ -585,7 +585,7 @@ const game = {
 
     if (game.firstRun) {
       mech.spawn(); //spawns the player
-      b.setupAllMods(); //doesn't run on reset so that gun mods carry over to new runs
+      mod.setupAllMods(); //doesn't run on reset so that gun mods carry over to new runs
 
       function shuffle(array) {
         var currentIndex = array.length,
@@ -606,7 +606,6 @@ const game = {
       if (game.isCommunityMaps) level.levels.push("stronghold");
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
-      // console.log(level.levels)
     }
     game.reset();
     game.firstRun = false;
@@ -618,14 +617,14 @@ const game = {
   },
   clearNow: false,
   clearMap() {
-    if (b.isModMineAmmoBack) {
+    if (mod.isMineAmmoBack) {
       let count = 0;
       for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
         if (bullet[i].bulletType === "mine") count++
       }
       for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
         if (b.guns[i].name === "mine") {
-          if (b.modNoAmmo) count = Math.ceil(count / 2)
+          if (mod.noAmmo) count = Math.ceil(count / 2)
           b.guns[i].ammo += count
           game.updateGunHUD();
           break;
@@ -705,9 +704,6 @@ const game = {
   },
   checks() {
     if (!(mech.cycle % 60)) { //once a second
-      console.log(bullet.length * 0.005)
-
-
       if (mech.pos.y > game.fallHeight) { // if 4000px deep
         if (game.difficultyMode > 2) {
           mech.death();
@@ -732,10 +728,10 @@ const game = {
         }
       }
 
-      // if (b.isModEnergyDamage) {
+      // if (mod.isEnergyDamage) {
       //   document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
       // }
-      // if (b.isModRest) {
+      // if (mod.isRest) {
       //   if (player.speed < 1) {
       //     document.getElementById("mod-rest").innerHTML = `(+20%)`
       //   } else {
@@ -744,11 +740,11 @@ const game = {
       // }
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
-        if (b.isModEnergyRecovery) {
+        if (mod.isEnergyRecovery) {
           mech.energy += mech.maxEnergy * 0.07
           if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
         }
-        if (b.isModHealthRecovery) mech.addHealth(0.01)
+        if (mod.isHealthRecovery) mech.addHealth(0.01)
       }
 
       if (!(game.cycle % 420)) { //once every 7 seconds

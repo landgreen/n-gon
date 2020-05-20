@@ -1,11 +1,40 @@
-mod - many worlds: 100% chance on choosing a power up to spawn a reroll if you have no rerolls
-mod - microstates: +7% damage for every 10 active bullets
-  (requires mod: Lorentzian topology)
-mod - laser diode: laser, pulse, and laser-bots use 37% less energy
-25% increase in difficulty scaling  (level 10 should now have the difficulty of level 12)
-  effects: player damage, mod damage, mob acceleration, mob reaction time, mob cooldown time
+
 
 ************** TODO - n-gon **************
+
+impact shear buff to 3 nails?
+
+make a lower tier of basic mods
+  33% chance for basic mod on each selection
+    make an odds variable that starts at 0% and gains 33% for each normal mod, resets to 0% after get a basic mod
+    don't track these mods for avoiding no repeats
+  make ball different color to indicate quality
+    basic: grey? smaller size?
+    also make gun/field specific mods have a different icon for top tier
+  don't include basic mods in custom mod?
+  basic mods can show on guns or fields?
+  ideas
+    +5% damage
+    +8% haste
+    +5% damage reduction
+    +25% max health
+    +25% max energy
+    spawn 2 ammo   //or 3?
+    spawn 2 heal
+    spawn 2 reroll  //or 1?
+
+improve movement fluidity, through mods, or default improvements
+  let legs jump on mobs, but player will still take damage
+  like: ori and the blind forest, celeste
+    many of the movement abilities in these games require levels to be built around the ability
+  general feeling of responsiveness and control
+  coyote time: can still jump a few cycles after leaving ground
+  mod: double jump
+  mod: air dash
+  mod: wall jump
+    wall grab?
+  maybe remove falling damage and block damage?
+
 
 rays can have width,  how to use this?
   Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])

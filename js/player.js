@@ -106,7 +106,7 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  jumpForce: 0.38, //0.38 //this is reset in b.setupAllMods()
+  jumpForce: 0.38, //0.38 //this is reset in mod.setupAllMods()
   gravity: 0.0024, //0.0019  //game.g is 0.001
   friction: {
     ground: 0.01,
@@ -215,12 +215,12 @@ const mech = {
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
 
-        if (b.isModStomp) {
+        if (mod.isStomp) {
           const len = Math.min(25, (momentum - 120) * 0.1)
           for (let i = 0; i < len; i++) {
             b.spore(player) //spawn drone
           }
-        } else if (player.velocity.y > 27 && momentum > 180 * b.modSquirrelFx) { //falling damage
+        } else if (player.velocity.y > 27 && momentum > 180 * mod.squirrelFx) { //falling damage
           let dmg = Math.sqrt(momentum - 180) * 0.01
           dmg = Math.min(Math.max(dmg, 0.02), 0.20);
           mech.damage(dmg);
@@ -357,36 +357,36 @@ const mech = {
   },
   alive: false,
   death() {
-    if (b.isModImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
+    if (mod.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
       spawn.setSpawnList(); //new mob types
       game.clearNow = true; //triggers a map reset
       powerUps.reroll.rerolls = Math.floor(Math.random() * Math.random() * 12)
 
       //count mods
       let totalMods = 0;
-      for (let i = 0; i < b.mods.length; i++) {
-        totalMods += b.mods[i].count
+      for (let i = 0; i < mod.mods.length; i++) {
+        totalMods += mod.mods[i].count
       }
 
       function randomizeMods() {
         for (let i = 0; i < totalMods; i++) {
           //find what mods I don't have
           let options = [];
-          for (let i = 0, len = b.mods.length; i < len; i++) {
-            if (b.mods[i].count < b.mods[i].maxCount &&
-              b.mods[i].name !== "quantum immortality" &&
-              b.mods[i].name !== "Born rule" &&
-              b.mods[i].name !== "determinism" &&
-              b.mods[i].name !== "reallocation" &&
-              b.mods[i].name !== "many-worlds" &&
-              b.mods[i].allowed()
+          for (let i = 0, len = mod.mods.length; i < len; i++) {
+            if (mod.mods[i].count < mod.mods[i].maxCount &&
+              mod.mods[i].name !== "quantum immortality" &&
+              mod.mods[i].name !== "Born rule" &&
+              mod.mods[i].name !== "determinism" &&
+              mod.mods[i].name !== "reallocation" &&
+              mod.mods[i].name !== "many-worlds" &&
+              mod.mods[i].allowed()
             ) options.push(i);
           }
           //add a new mod
           if (options.length > 0) {
             const choose = Math.floor(Math.random() * options.length)
             let newMod = options[choose]
-            b.giveMod(newMod)
+            mod.giveMod(newMod)
             options.splice(choose, 1);
           }
         }
@@ -431,7 +431,7 @@ const mech = {
       }
 
       function randomizeEverything() {
-        b.setupAllMods(); //remove all mods
+        mod.setupAllMods(); //remove all mods
         for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
         bullet = []; //remove all bullets
         randomizeHealth()
@@ -500,10 +500,10 @@ const mech = {
     }
   },
   addHealth(heal) {
-    if (!b.isModEnergyHealth) {
+    if (!mod.isEnergyHealth) {
       mech.health += heal * game.healScale;
       if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
-      b.modOnHealthChange();
+      mod.onHealthChange();
       mech.displayHealth();
     }
   },
@@ -512,9 +512,9 @@ const mech = {
   harmReduction() {
     let dmg = 1
     dmg *= mech.fieldDamageResistance
-    dmg *= b.isModSlowFPS ? 0.85 : 1
-    if (b.modEnergyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
-    if (b.isModEntanglement && b.inventory[0] === b.activeGun) {
+    dmg *= mod.isSlowFPS ? 0.85 : 1
+    if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
+    if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.84 // 1 - 0.16
       }
@@ -525,13 +525,13 @@ const mech = {
     mech.lastHarmCycle = mech.cycle
 
     //chance to build a drone on damage  from mod
-    if (b.isModDroneOnDamage) {
+    if (mod.isDroneOnDamage) {
       const len = (dmg - 0.06 * Math.random()) * 40
       for (let i = 0; i < len; i++) {
         if (Math.random() < 0.5) b.drone() //spawn drone
       }
     }
-    if (b.isModMineOnDamage && dmg > 0.004 + 0.05 * Math.random()) {
+    if (mod.isMineOnDamage && dmg > 0.004 + 0.05 * Math.random()) {
       b.mine({
         x: mech.pos.x,
         y: mech.pos.y - 80
@@ -542,10 +542,10 @@ const mech = {
     }
     dmg *= mech.harmReduction()
 
-    if (b.isModEnergyHealth) {
+    if (mod.isEnergyHealth) {
       mech.energy -= dmg;
       if (mech.energy < 0 || isNaN(mech.energy)) {
-        if (b.isModDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
+        if (mod.isDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
 
           mech.energy = mech.maxEnergy * 0.5
@@ -574,7 +574,7 @@ const mech = {
     } else {
       mech.health -= dmg;
       if (mech.health < 0 || isNaN(mech.health)) {
-        if (b.isModDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
+        if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
           mech.health = mech.maxHealth * 0.5
           // if (mech.health < 0.05) mech.health = 0.05
@@ -600,7 +600,7 @@ const mech = {
 
     if (dmg > 0.2 * mech.holdingMassScale) mech.drop(); //drop block if holding
 
-    b.modOnHealthChange();
+    mod.onHealthChange();
     mech.displayHealth();
     document.getElementById("dmg").style.transition = "opacity 0s";
     document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
@@ -617,7 +617,7 @@ const mech = {
     };
 
     if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(normalFPS);
-    if (b.isModSlowFPS) { // slow game 
+    if (mod.isSlowFPS) { // slow game 
       game.fpsCap = 30 //new fps
       game.fpsInterval = 1000 / game.fpsCap;
       //how long to wait to return to normal fps
@@ -767,7 +767,7 @@ const mech = {
   },
   setHoldDefaults() {
     if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
-    mech.fieldRegen = b.modEnergyRegen; //0.001
+    mech.fieldRegen = mod.energyRegen; //0.001
     mech.fieldMeterColor = "#0cf"
     mech.fieldShieldingScale = 1;
     game.isBodyDamage = true;
@@ -830,7 +830,7 @@ const mech = {
   definePlayerMass(mass = mech.defaultMass) {
     Matter.Body.setMass(player, mass);
     //reduce air and ground move forces
-    mech.Fx = 0.08 / mass * b.modSquirrelFx //base player mass is 5
+    mech.Fx = 0.08 / mass * mod.squirrelFx //base player mass is 5
     mech.FxAir = 0.4 / mass / mass //base player mass is 5
     //make player stand a bit lower when holding heavy masses
     mech.yOffWhen.stand = Math.max(mech.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
@@ -883,8 +883,8 @@ const mech = {
     if (mech.holdingTarget) {
       if (keys[32] || game.mouseDownRight) {
         if (mech.energy > 0.001) {
-          mech.energy -= 0.001 / b.modThrowChargeRate;
-          mech.throwCharge += 0.5 * b.modThrowChargeRate / mech.holdingTarget.mass
+          mech.energy -= 0.001 / mod.throwChargeRate;
+          mech.throwCharge += 0.5 * mod.throwChargeRate / mech.holdingTarget.mass
           //draw charge
           const x = mech.pos.x + 15 * Math.cos(mech.angle);
           const y = mech.pos.y + 15 * Math.sin(mech.angle);
@@ -1009,7 +1009,7 @@ const mech = {
           y: powerUp[i].velocity.y * 0.11
         });
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-          if (b.isModMassEnergy) mech.energy = mech.maxEnergy * 2;
+          if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 2;
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
@@ -1034,12 +1034,12 @@ const mech = {
       }
       if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
-      if (b.modBlockDmg && mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics") {
-        who.damage(b.modBlockDmg)
+      if (mod.blockDmg && mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics") {
+        who.damage(mod.blockDmg)
         //draw electricity
         const step = 40
         ctx.beginPath();
-        for (let i = 0, len = 2 * b.modBlockDmg; i < len; i++) {
+        for (let i = 0, len = 2 * mod.blockDmg; i < len; i++) {
           let x = mech.pos.x - 20 * unit.x;
           let y = mech.pos.y - 20 * unit.y;
           ctx.moveTo(x, y);
@@ -1076,8 +1076,8 @@ const mech = {
           });
         }
       } else {
-        if (b.isModStunField && mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism") mobs.statusStun(who, b.isModStunField)
-        // mobs.statusSlow(who, b.isModStunField)
+        if (mod.isStunField && mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism") mobs.statusStun(who, mod.isStunField)
+        // mobs.statusSlow(who, mod.isStunField)
         const massRoot = Math.sqrt(Math.max(0.15, who.mass)); // masses above 12 can start to overcome the push back
         Matter.Body.setVelocity(who, {
           x: player.velocity.x - (20 * unit.x) / massRoot,
@@ -1241,7 +1241,7 @@ const mech = {
   },
   fieldUpgrades: [{
       name: "field emitter",
-      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-d'>damage</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
+      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong>harm</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
       isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
@@ -1372,14 +1372,14 @@ const mech = {
         // mech.fieldRegen *= 2;
         mech.hold = function () {
           if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle) {
-            if (b.isModSporeField) {
+            if (mod.isSporeField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
               const len = Math.floor(6 + 4 * Math.random())
               mech.energy -= len * 0.074;
               for (let i = 0; i < len; i++) {
                 b.spore(player)
               }
-            } else if (b.isModMissileField) {
+            } else if (mod.isMissileField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
               mech.energy -= 0.6;
               b.missile({
@@ -1387,9 +1387,9 @@ const mech = {
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
                 },
                 mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
-                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.modFireRate,
-                1, b.modBabyMissiles)
-            } else if (b.isModIceField) {
+                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * mod.fireRate,
+                1, mod.babyMissiles)
+            } else if (mod.isIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
               mech.energy -= 0.061;
               b.iceIX(1)
@@ -1442,7 +1442,7 @@ const mech = {
             mech.lookForPickUp();
             let DRAIN = 0.00105;
             if (mech.energy > DRAIN) {
-              if (b.isModHarmReduce) {
+              if (mod.isHarmReduce) {
                 mech.fieldDamageResistance = 0.1; // 1 - 0.9
                 DRAIN = 0.0007 //2x energy drain
               } else {
@@ -1518,7 +1518,7 @@ const mech = {
               ctx.fillStyle = "#f5f5ff";
               ctx.globalCompositeOperation = "difference";
               ctx.fill();
-              if (b.isModHawking) {
+              if (mod.isHawking) {
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
                     mob[i].damage(b.dmgScale * 0.085);
@@ -1572,7 +1572,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.0006
+            const DRAIN = 0.001
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
@@ -1581,7 +1581,7 @@ const mech = {
               }
               //calculate laser collision
               let best;
-              let range = b.isModPlasmaRange * (140 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
+              let range = mod.isPlasmaRange * (140 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
               // const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
               const path = [{
                   x: mech.pos.x + 20 * Math.cos(mech.angle),
@@ -1783,7 +1783,7 @@ const mech = {
               }
 
               game.cycle--; //pause all functions that depend on game cycle increasing
-              if (b.isModTimeSkip) {
+              if (mod.isTimeSkip) {
                 game.isTimeSkipping = true;
                 mech.cycle++;
                 game.gravity();
@@ -1803,7 +1803,7 @@ const mech = {
                 game.isTimeSkipping = false;
               }
               // game.cycle--; //pause all functions that depend on game cycle increasing
-              // if (b.isModTimeSkip && !game.isTimeSkipping) { //speed up the rate of time
+              // if (mod.isTimeSkip && !game.isTimeSkipping) { //speed up the rate of time
               //   game.timeSkip(1)
               //   mech.energy += 1.5 * DRAIN; //x1 to undo the energy drain from time speed up, x1.5 to cut energy drain in half
               // }
@@ -1844,7 +1844,7 @@ const mech = {
             const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
             ctx.beginPath();
             ctx.ellipse(mech.pos.x, mech.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
-            if (b.modRenormalization) {
+            if (mod.renormalization) {
               for (let i = 0; i < bullet.length; i++) {
                 ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
                 ctx.arc(bullet[i].position.x, bullet[i].position.y, radius, 0, 2 * Math.PI);
@@ -1877,7 +1877,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp();
 
-            const DRAIN = 0.0003 + 0.00015 * player.speed + ((!b.modRenormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.001)
+            const DRAIN = 0.0003 + 0.00015 * player.speed + ((!mod.renormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.001)
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               // if (mech.energy < 0.001) {
@@ -1900,7 +1900,7 @@ const mech = {
                     //draw outline of shield
                     ctx.fillStyle = `rgba(140,217,255,0.5)`
                     ctx.fill()
-                  } else if (b.superposition && inPlayer[i].dropPowerUp) {
+                  } else if (mod.superposition && inPlayer[i].dropPowerUp) {
                     // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
                     // mech.energy += 0.005;
 
@@ -2035,7 +2035,7 @@ const mech = {
                   y: powerUp[i].velocity.y * 0.11
                 });
                 if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-                  if (b.isModMassEnergy) mech.energy = mech.maxEnergy * 2;
+                  if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 2;
                   powerUp[i].effect();
                   Matter.World.remove(engine.world, powerUp[i]);
                   powerUp.splice(i, 1);
@@ -2077,7 +2077,7 @@ const mech = {
                 }
               }
 
-              if (b.isModPilotFreeze) {
+              if (mod.isPilotFreeze) {
                 for (let i = 0, len = mob.length; i < len; ++i) {
                   if (Vector.magnitude(Vector.sub(mob[i].position, mech.fieldPosition)) < mech.fieldRadius) {
                     mobs.statusSlow(mob[i], 120)

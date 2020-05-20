@@ -17,7 +17,7 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.setField("time dilation field")
-      // b.giveMod("brushless motor");
+      // mod.giveMod("brushless motor");
       // b.giveGuns("drones")
       // b.giveGuns("mine")
       // mech.setField("pilot wave")
@@ -45,13 +45,13 @@ const level = {
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
-    for (let i = 0; i < b.modLaserBotCount; i++) {
+    for (let i = 0; i < mod.laserBotCount; i++) {
       b.laserBot()
     }
-    for (let i = 0; i < b.modNailBotCount; i++) {
+    for (let i = 0; i < mod.nailBotCount; i++) {
       b.nailBot()
     }
-    for (let i = 0; i < b.modFoamBotCount; i++) {
+    for (let i = 0; i < mod.foamBotCount; i++) {
       b.foamBot()
     }
   },
@@ -188,7 +188,7 @@ const level = {
     // spawn.stabber(1600, -500)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
-    spawn.focuser(1600, -500)
+    spawn.striker(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "spiker")

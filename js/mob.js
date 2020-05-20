@@ -227,7 +227,7 @@ const mobs = {
       gravity() {
         this.force.y += this.mass * this.g;
       },
-      seePlayerFreq: Math.round((30 + 30 * Math.random()) * game.lookFreqScale), //how often NPC checks to see where player is, lower numbers have better vision
+      seePlayerFreq: Math.floor((30 + 30 * Math.random()) * game.lookFreqScale), //how often NPC checks to see where player is, lower numbers have better vision
       foundPlayer() {
         this.locatePlayer();
         if (!this.seePlayer.yes) {
@@ -983,25 +983,25 @@ const mobs = {
       },
       damage(dmg, isBypassShield = false) {
         if (!this.isShielded || isBypassShield) {
-          dmg *= b.damageFromMods()
+          dmg *= mod.damageFromMods()
           //mobs specific damage changes
           dmg /= Math.sqrt(this.mass)
           if (this.shield) dmg *= 0.04
-          if (b.isModFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
+          if (mod.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
 
           //energy and heal drain should be calculated after damage boosts
-          if (b.modEnergySiphon && dmg !== Infinity) {
-            mech.energy += Math.min(this.health, dmg) * b.modEnergySiphon
+          if (mod.energySiphon && dmg !== Infinity) {
+            mech.energy += Math.min(this.health, dmg) * mod.energySiphon
             if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy
           }
-          if (b.modHealthDrain && dmg !== Infinity) {
-            mech.addHealth(Math.min(this.health, dmg) * b.modHealthDrain)
+          if (mod.healthDrain && dmg !== Infinity) {
+            mech.addHealth(Math.min(this.health, dmg) * mod.healthDrain)
             if (mech.health > mech.maxHealth) mech.health = mech.maxHealth
           }
           this.health -= dmg
           //this.fill = this.color + this.health + ')';
           this.onDamage(dmg); //custom damage effects
-          if (this.health < b.modMobDieAtHealth && this.alive) this.death();
+          if (this.health < mod.mobDieAtHealth && this.alive) this.death();
         }
       },
       onDamage() {
@@ -1019,16 +1019,16 @@ const mobs = {
         this.removeConsBB();
         this.alive = false; //triggers mob removal in mob[i].replace(i)
         if (this.dropPowerUp) {
-          if (b.isModEnergyLoss) mech.energy *= 0.66;
+          if (mod.isEnergyLoss) mech.energy *= 0.66;
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y, this.mass, radius);
           mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in game.checks()
-          if (Math.random() < b.modSporesOnDeath) {
+          if (Math.random() < mod.sporesOnDeath) {
             const len = Math.min(30, Math.floor(4 + this.mass * Math.random()))
             for (let i = 0; i < len; i++) {
               b.spore(this) //spawn drone
             }
           }
-          if (Math.random() < b.isModBotSpawner) {
+          if (Math.random() < mod.isBotSpawner) {
             if (Math.random() < 0.33) {
               b.nailBot(this.position)
             } else if (Math.random() < 0.5) {
@@ -1038,8 +1038,8 @@ const mobs = {
             }
             // if (mech.energy > 0.33) mech.energy -= 0.33
           }
-          if (b.isModExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
-          if (b.modNailsDeathMob) b.targetedNail(this.position, b.modNailsDeathMob)
+          if (mod.isExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
+          if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob)
         }
       },
       removeConsBB() {

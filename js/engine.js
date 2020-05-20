@@ -108,7 +108,7 @@ function collisionChecks(event) {
         }
 
         function hit(dmg) {
-          mech.immuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+          mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
           dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
           mech.damage(dmg);
           game.drawList.push({ //add dmg to draw queue
@@ -136,10 +136,10 @@ function collisionChecks(event) {
         function collideMob(obj) {
           //player + mob collision
           if (mech.immuneCycle < mech.cycle && (obj === playerBody || obj === playerHead)) {
-            mech.immuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+            mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             mob[k].foundPlayer();
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-            if (b.isModPiezo) {
+            if (mod.isPiezo) {
               mech.energy = mech.maxEnergy;
               dmg *= 0.85
             }
@@ -157,7 +157,7 @@ function collisionChecks(event) {
               y: mob[k].velocity.y - 8 * Math.sin(angle)
             });
 
-            if (b.isModAnnihilation && !mob[k].shield && !mob[k].isShielded) {
+            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded) {
               mob[k].death();
               game.drawList.push({
                 //add dmg to draw queue
@@ -183,10 +183,10 @@ function collisionChecks(event) {
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)));
-            let dmg = b.dmgScale * (obj.dmg + b.modAcidDmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+            let dmg = b.dmgScale * (obj.dmg + mod.acidDmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
             // console.log(obj.dmg, 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
             // console.log(obj.dmg / (0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity))))
-            if (b.isModCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
+            if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn
@@ -203,8 +203,8 @@ function collisionChecks(event) {
           if (obj.classType === "body" && obj.speed > 6) {
             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 9) {
-              let dmg = b.dmgScale * (v * obj.mass * 0.07) * b.modThrowChargeRate;
-              if (b.isModCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
+              let dmg = b.dmgScale * (v * obj.mass * 0.07) * mod.throwChargeRate;
+              if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
               if (mob[k].isShielded) dmg *= 0.5
               mob[k].damage(dmg, true);
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();

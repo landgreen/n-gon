@@ -48,7 +48,7 @@ const build = {
         // console.log(`${property}: ${give[property]}`);
         set[property] = set[property].replace(/%20/g, " ")
         if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
-        if (property.substring(0, 3) === "mod") b.giveMod(set[property])
+        if (property.substring(0, 3) === "mod") mod.giveMod(set[property])
         if (property === "field") mech.setField(set[property])
         if (property === "difficulty") {
           game.difficultyMode = Number(set[property])
@@ -68,7 +68,7 @@ const build = {
         b.activeGun = b.inventory[0] //set first gun to active gun
         game.makeGunHUD();
       }
-      b.modOnHealthChange();
+      mod.onHealthChange();
     }
   },
   pauseGrid() {
@@ -84,7 +84,7 @@ const build = {
       <br>health: ${(mech.health*100).toFixed(0)}% &nbsp; energy: ${(mech.energy*100).toFixed(0)}% &nbsp;
       <br>mass: ${player.mass.toFixed(1)} &nbsp; rerolls: ${powerUps.reroll.rerolls}
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
-      <br>global damage increase: ${((b.damageFromMods()-1)*100).toFixed(0)}%
+      <br>global damage increase: ${((mod.damageFromMods()-1)*100).toFixed(0)}%
       <br>global harm reduction: ${((1-mech.harmReduction())*100).toFixed(0)}% 
     </div>`;
     let countGuns = 0
@@ -101,12 +101,12 @@ const build = {
 
     text = "";
     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
-    for (let i = 0, len = b.mods.length; i < len; i++) {
-      if (b.mods[i].count > 0) {
-        if (b.mods[i].count === 1) {
-          text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+    for (let i = 0, len = mod.mods.length; i < len; i++) {
+      if (mod.mods[i].count > 0) {
+        if (mod.mods[i].count === 1) {
+          text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
         } else {
-          text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name} (${b.mods[i].count}x)</div> ${b.mods[i].description}</div>`
+          text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
         }
         countMods++
       }
@@ -154,25 +154,25 @@ const build = {
         who.classList.add("build-field-selected");
       }
     } else if (type === "mod") { //remove mod if you have too many
-      if (b.mods[index].count < b.mods[index].maxCount) {
+      if (mod.mods[index].count < mod.mods[index].maxCount) {
         if (!who.classList.contains("build-mod-selected")) who.classList.add("build-mod-selected");
-        b.giveMod(index)
-        // if (b.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name} (${b.mods[index].count}x)</div> ${b.mods[index].description}`
+        mod.giveMod(index)
+        // if (mod.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[index].name} (${mod.mods[index].count}x)</div> ${mod.mods[index].description}`
       } else {
-        b.removeMod(index);
-        // who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[index].name}</div> ${b.mods[index].description}`
+        mod.removeMod(index);
+        // who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[index].name}</div> ${mod.mods[index].description}`
         who.classList.remove("build-mod-selected");
       }
     }
     //update mod text //disable not allowed mods
-    for (let i = 0, len = b.mods.length; i < len; i++) {
+    for (let i = 0, len = mod.mods.length; i < len; i++) {
       const modID = document.getElementById("mod-" + i)
 
-      if (b.mods[i].allowed()) {
-        if (b.mods[i].count > 1) {
-          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name} (${b.mods[i].count}x)</div>${b.mods[i].description}</div>`
+      if (mod.mods[i].allowed()) {
+        if (mod.mods[i].count > 1) {
+          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
         } else {
-          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div>${b.mods[i].description}</div>`
+          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
         }
 
         if (modID.classList.contains("build-grid-disabled")) {
@@ -180,13 +180,13 @@ const build = {
           modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
         }
       } else {
-        modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${b.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${b.mods[i].requires}</span></div>`
+        modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
         if (!modID.classList.contains("build-grid-disabled")) {
           modID.classList.add("build-grid-disabled");
           modID.onclick = null
         }
-        if (b.mods[i].count > 0) {
-          b.removeMod(i)
+        if (mod.mods[i].count > 0) {
+          mod.removeMod(i)
         }
         if (modID.classList.contains("build-mod-selected")) {
           modID.classList.remove("build-mod-selected");
@@ -229,13 +229,13 @@ const build = {
     for (let i = 0, len = b.guns.length; i < len; i++) {
       text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
     }
-    for (let i = 0, len = b.mods.length; i < len; i++) {
-      if (!b.mods[i].allowed()) { // || b.mods[i].name === "+1 cardinality") { //|| b.mods[i].name === "leveraged investment"
-        text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${b.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${b.mods[i].requires}</span></div>`
-      } else if (b.mods[i].count > 1) {
-        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name} (${b.mods[i].count}x)</div> ${b.mods[i].description}</div>`
+    for (let i = 0, len = mod.mods.length; i < len; i++) {
+      if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
+        text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+      } else if (mod.mods[i].count > 1) {
+        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
       } else {
-        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[i].name}</div> ${b.mods[i].description}</div>`
+        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
       }
     }
     document.getElementById("build-grid").innerHTML = text
@@ -246,7 +246,7 @@ const build = {
       document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
       localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     });
-    b.resetModText();
+    mod.resetModText();
   },
   reset() {
     build.isCustomSelection = true;
@@ -261,7 +261,7 @@ const build = {
     b.activeGun = null;
     game.makeGunHUD();
 
-    b.setupAllMods();
+    mod.setupAllMods();
     build.populateGrid();
     document.getElementById("field-0").classList.add("build-field-selected");
     document.getElementById("build-grid").style.display = "grid"
@@ -276,9 +276,9 @@ const build = {
       }
     }
     count = 0;
-    for (let i = 0; i < b.mods.length; i++) {
-      for (let j = 0; j < b.mods[i].count; j++) {
-        url += `&mod${count}=${encodeURIComponent(b.mods[i].name.trim())}`
+    for (let i = 0; i < mod.mods.length; i++) {
+      for (let j = 0; j < mod.mods[i].count; j++) {
+        url += `&mod${count}=${encodeURIComponent(mod.mods[i].name.trim())}`
         count++
       }
     }
@@ -291,7 +291,7 @@ const build = {
   },
   startBuildRun() {
     build.isCustomSelection = false;
-    b.modOnHealthChange()
+    mod.onHealthChange()
 
     spawn.setSpawnList(); //gives random mobs,  not starter mobs
     spawn.setSpawnList();

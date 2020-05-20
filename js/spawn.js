@@ -1020,7 +1020,7 @@ const spawn = {
       vertexCollision(where, look, body);
       if (!mech.isStealth) vertexCollision(where, look, [player]);
       if (best.who && best.who === player && mech.immuneCycle < mech.cycle) {
-        mech.immuneCycle = mech.cycle + b.modCollisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
         const dmg = 0.14 * game.dmgScale;
         mech.damage(dmg);
         game.drawList.push({ //add dmg to draw queue
@@ -1140,7 +1140,7 @@ const spawn = {
           !mech.isStealth
         ) {
           this.foundPlayer();
-          if (this.cd === Infinity) this.cd = game.cycle + this.delay;
+          if (this.cd === Infinity) this.cd = game.cycle + this.delay * 0.7;
         } else if (this.seePlayer.recall) {
           this.lostPlayer();
           this.cd = Infinity
@@ -1445,11 +1445,11 @@ const spawn = {
     // Matter.Body.rotate(me, Math.PI)
 
     me.memory = 120;
-    me.fireFreq = 0.007 + Math.random() * 0.003;
+    me.fireFreq = 0.0065 + Math.random() * 0.003;
     me.noseLength = 0;
     me.fireAngle = 0;
-    me.accelMag = 0.0005 * game.accelScale;
-    me.frictionAir = 0.05;
+    me.accelMag = 0.0006 * game.accelScale;
+    me.frictionAir = 0.04;
     me.lookTorque = 0.0000028 * (Math.random() > 0.5 ? -1 : 1);
     me.fireDir = {
       x: 0,
@@ -1476,7 +1476,7 @@ const spawn = {
     Matter.Body.setDensity(me, 0.00005); //normal is 0.001
     me.timeLeft = 420;
     me.accelMag = 0.0004 * game.accelScale;
-    me.frictionAir = 0.035;
+    me.frictionAir = 0.033;
     me.restitution = 0.5;
     me.leaveBody = false;
     me.dropPowerUp = false;

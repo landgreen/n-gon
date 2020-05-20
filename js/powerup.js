@@ -13,17 +13,17 @@ const powerUps = {
       // game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
       // game.replaceTextLog = false;
     } else if (type === "mod") {
-      b.giveMod(index)
+      mod.giveMod(index)
       // game.replaceTextLog = true;
-      // game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${b.mods[index].name}</strong><br><br> ${b.mods[index].description}`, 500);
+      // game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${mod.mods[index].name}</strong><br><br> ${mod.mods[index].description}`, 500);
       // game.replaceTextLog = false;
     }
     powerUps.endDraft();
   },
   endDraft() {
-    if (b.manyWorlds && powerUps.reroll.rerolls < 1) {
+    if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
       powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-      if (Math.random() < b.modBayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+      if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
     }
     document.body.style.cursor = "none";
     document.getElementById("choose-grid").style.display = "none"
@@ -53,7 +53,7 @@ const powerUps = {
     changeRerolls(amount) {
       powerUps.reroll.rerolls += amount
       if (powerUps.reroll.rerolls < 0) powerUps.reroll.rerolls = 0
-      if (b.isModDeathAvoid && document.getElementById("mod-anthropic")) {
+      if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
         document.getElementById("mod-anthropic").innerHTML = `(${powerUps.reroll.rerolls})`
       }
     },
@@ -90,9 +90,9 @@ const powerUps = {
       return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
     },
     effect() {
-      if (!b.isModEnergyHealth && mech.alive) {
+      if (!mod.isEnergyHealth && mech.alive) {
         let heal = 0
-        for (let i = 0; i < b.modRecursiveHealing; i++) heal += ((this.size / 40) ** 2)
+        for (let i = 0; i < mod.recursiveHealing; i++) heal += ((this.size / 40) ** 2)
         if (heal > 0) {
           game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
           mech.addHealth(heal);
@@ -151,7 +151,7 @@ const powerUps = {
           if (i !== mech.fieldMode && (!game.isEasyToAimMode || mech.fieldUpgrades[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
         }
         //remove repeats from last selection
-        const totalChoices = b.isModDeterminism ? 1 : 3 + b.isModExtraChoice * 2
+        const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
         if (powerUps.field.choiceLog.length > totalChoices || powerUps.field.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
           for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
             if (options.length > totalChoices) {
@@ -175,13 +175,13 @@ const powerUps = {
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
-        if (!b.isModDeterminism) {
+        if (!mod.isDeterminism) {
           choice2 = pick(mech.fieldUpgrades, choice1)
           if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
           choice3 = pick(mech.fieldUpgrades, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice3].name}</div> ${mech.fieldUpgrades[choice3].description}</div>`
         }
-        if (b.isModExtraChoice) {
+        if (mod.isExtraChoice) {
           let choice4 = pick(mech.fieldUpgrades, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice4].name}</div> ${mech.fieldUpgrades[choice4].description}</div>`
           let choice5 = pick(mech.fieldUpgrades, choice1, choice2, choice3, choice4)
@@ -213,13 +213,13 @@ const powerUps = {
     effect() {
       function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
-        for (let i = 0; i < b.mods.length; i++) {
-          if (b.mods[i].count < b.mods[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && b.mods[i].allowed()) {
+        for (let i = 0; i < mod.mods.length; i++) {
+          if (mod.mods[i].count < mod.mods[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && mod.mods[i].allowed()) {
             options.push(i);
           }
         }
         //remove repeats from last selection
-        const totalChoices = b.isModDeterminism ? 1 : 3 + b.isModExtraChoice * 2
+        const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
         if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
           for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
             if (options.length > totalChoices) {
@@ -242,18 +242,18 @@ const powerUps = {
       let choice3 = -1
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
-        text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice1].name}</div> ${b.mods[choice1].description}</div>`
-        if (!b.isModDeterminism) {
+        text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice1].name}</div> ${mod.mods[choice1].description}</div>`
+        if (!mod.isDeterminism) {
           choice2 = pick(choice1)
-          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice2].name}</div> ${b.mods[choice2].description}</div>`
+          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice2].name}</div> ${mod.mods[choice2].description}</div>`
           choice3 = pick(choice1, choice2)
-          if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice3].name}</div> ${b.mods[choice3].description}</div>`
+          if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice3].name}</div> ${mod.mods[choice3].description}</div>`
         }
-        if (b.isModExtraChoice) {
+        if (mod.isExtraChoice) {
           let choice4 = pick(choice1, choice2, choice3)
-          if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice4].name}</div> ${b.mods[choice4].description}</div>`
+          if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice4].name}</div> ${mod.mods[choice4].description}</div>`
           let choice5 = pick(choice1, choice2, choice3, choice4)
-          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${b.mods[choice5].name}</div> ${b.mods[choice5].description}</div>`
+          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice5].name}</div> ${mod.mods[choice5].description}</div>`
           powerUps.mod.choiceLog.push(choice4)
           powerUps.mod.choiceLog.push(choice5)
         }
@@ -286,7 +286,7 @@ const powerUps = {
         }
 
         //remove repeats from last selection
-        const totalChoices = b.isModDeterminism ? 1 : 3 + b.isModExtraChoice * 2
+        const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
         if (powerUps.gun.choiceLog.length > totalChoices || powerUps.gun.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
           for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
             if (options.length > totalChoices) {
@@ -310,13 +310,13 @@ const powerUps = {
       if (choice1 > -1) {
         let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
-        if (!b.isModDeterminism) {
+        if (!mod.isDeterminism) {
           choice2 = pick(b.guns, choice1)
           if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
           choice3 = pick(b.guns, choice1, choice2)
           if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice3})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice3].name}</div> ${b.guns[choice3].description}</div>`
         }
-        if (b.isModExtraChoice) {
+        if (mod.isExtraChoice) {
           let choice4 = pick(b.guns, choice1, choice2, choice3)
           if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice4})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice4].name}</div> ${b.guns[choice4].description}</div>`
           let choice5 = pick(b.guns, choice1, choice2, choice3, choice4)
@@ -353,63 +353,63 @@ const powerUps = {
     }
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies 
-    if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !b.isModEnergyHealth) || Math.random() < 0.035) { //spawn heal chance is higher at low health
+    if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !mod.isEnergyHealth) || Math.random() < 0.035) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "heal");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "heal");
       return;
     }
-    if (Math.random() < 0.15 && b.inventory.length > 0 && !b.modBayesian) {
+    if (Math.random() < 0.15 && b.inventory.length > 0 && !mod.bayesian) {
       powerUps.spawn(x, y, "ammo");
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "ammo");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "ammo");
       return;
     }
     if (Math.random() < 0.002 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
       powerUps.spawn(x, y, "gun");
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "gun");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0027 * (15 - b.modCount)) { //a new mod has a low chance for each not acquired mod up to 15
+    if (Math.random() < 0.0027 * (15 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "mod");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod");
       return;
     }
     if (Math.random() < 0.006) {
       powerUps.spawn(x, y, "field");
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field");
       return;
     }
     if (Math.random() < 0.005) {
       powerUps.spawn(x, y, "reroll");
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "reroll");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "reroll");
       return;
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (mech.fieldMode === 0) {
       powerUps.spawn(x, y, "field")
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field")
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field")
     } else if (Math.random() < 0.9) {
       powerUps.spawn(x, y, "mod")
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "mod")
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod")
     } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "gun")
-      if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "gun")
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun")
       // } else if (Math.random() < 0.5) {
       //   powerUps.spawn(x, y, "field");
-      //   if (Math.random() < b.modBayesian) powerUps.spawn(x, y, "field");
-    } else if (mech.health < 0.65 && !b.isModEnergyHealth) {
+      //   if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field");
+    } else if (mech.health < 0.65 && !mod.isEnergyHealth) {
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
       powerUps.spawn(x, y, "heal");
-      if (Math.random() < b.modBayesian) {
+      if (Math.random() < mod.bayesian) {
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
       }
-    } else if (!b.modBayesian) {
+    } else if (!mod.bayesian) {
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
       powerUps.spawn(x, y, "ammo");
@@ -422,7 +422,7 @@ const powerUps = {
       powerUps.spawn(x, y, "reroll");
     } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
-    } else if (!b.modBayesian) {
+    } else if (!mod.bayesian) {
       powerUps.spawn(x, y, "ammo", false);
     }
   },
@@ -430,7 +430,7 @@ const powerUps = {
     if (level.levelsCleared < 5) {
       if (b.inventory.length === 0) {
         powerUps.spawn(x, y, "gun", false);
-      } else if (b.modCount === 0) {
+      } else if (mod.totalCount === 0) {
         powerUps.spawn(x, y, "mod", false); //starting gun
       } else if (b.inventory.length < 2) {
         powerUps.spawn(x, y, "gun", false);
