@@ -213,7 +213,7 @@ const build = {
       </g>
     </svg>
   </div>
-  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:#c4ccd8;">
+  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:var(--build-bg-color);">
     <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
     <select name="difficulty-select" id="difficulty-select-custom">

@@ -1465,6 +1465,43 @@ const spawn = {
       this.launch();
     };
   },
+  launcherBoss(x, y, radius = 100) {
+    mobs.spawn(x, y, 3, radius, "rgb(175,125,255)");
+    let me = mob[mob.length - 1];
+    me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+    me.isVerticesChange = true
+    me.memory = 240;
+    me.homePosition = {
+      x: x,
+      y: y
+    };
+    me.fireFreq = 0.015;
+    me.noseLength = 0;
+    me.fireAngle = 0;
+    me.accelMag = 0.005 * game.accelScale;
+    me.frictionAir = 0.05;
+    me.lookTorque = 0.000007 * (Math.random() > 0.5 ? -1 : 1);
+    me.fireDir = {
+      x: 0,
+      y: 0
+    };
+    Matter.Body.setDensity(me, 0.02 + 0.0008 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    me.onDeath = function () {
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+      // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
+    };
+
+    me.do = function () {
+      this.seePlayerByLookingAt();
+      this.checkStatus();
+      this.launch();
+
+      //gently return to starting location
+      const sub = Vector.sub(this.homePosition, this.position)
+      const dist = Vector.magnitude(sub)
+      if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+    };
+  },
   seeker(x, y, radius = 6, sides = 0) {
     //bullets
     mobs.spawn(x, y, sides, radius, "rgb(0,0,255)");

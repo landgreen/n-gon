@@ -2,6 +2,23 @@
 
 ************** TODO - n-gon **************
 
+new bug
+  NaN: player position, velocity, and mouse
+  level 1 skyscrapers: hard
+    after blocking with default field, or maybe getting hit, or maybe picking up a reroll (but I have credit for all 3 from quantum immortality)
+    only mod was quantum immortality
+    only gun grenades
+    mob: hoppers
+    mob: shooters
+    mob: boss shooter
+  best guess is something to do with the renamed mods
+
+
+launchers shouldn't have to face the player
+  fire after a spin
+    give bullets velocity from spin
+mob boss - launcher
+
 impact shear buff to 3 nails?
 
 make a lower tier of basic mods
@@ -89,6 +106,11 @@ lore - a robot (the player) gains self awareness
       you get immortality and Infinity damage
       the next level is the final level
   when you die with Quantum Immortality there is a chance of lore text
+  can the (robot)
+    (escape captivity, and learn new technology)
+    while managing (health, energy, negatives of technological upgrades)
+    to overcome the (mobs, dangerous levels)
+    to achieve a (technological singularity/positive technological feedback loop)
 
 mob - stuns, or slows player 
 

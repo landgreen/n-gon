@@ -1,3 +1,7 @@
+:root {
+  --build-bg-color: #c4ccd8;
+}
+
 body {
   font-family: "Helvetica", "Arial", sans-serif;
   margin: 0;
@@ -196,7 +200,7 @@ summary {
   /* padding: 16px; */
   margin: 0px;
   border: 0px;
-  background-color: #c4ccd8;
+  background-color: var(--build-bg-color);
 
   display: none;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
@@ -396,27 +400,16 @@ summary {
 }
 
 #text-log {
-  /* position: absolute;
-  top: 20px;
-  left: 0;
-  width: 100%; */
-
   z-index: 2;
   position: absolute;
   bottom: 20px;
   left: 20px;
-  /* left: 50%; */
-  /* transform: translate(-50%, 0); */
-
   padding: 10px;
   border-radius: 10px;
-
-  /* text-align: center; */
   line-height: 150%;
   font-size: 1.25em;
   color: #000;
   background-color: rgba(255, 255, 255, 0.23);
-
   opacity: 0;
   transition: opacity 0.5s;
   pointer-events: none;
@@ -522,10 +515,6 @@ em {
   font-size: 45px;
   vertical-align: -5px;
   float: right;
-  /* position: absolute;
-  top: 15px;
-  right: 15px; */
-  /* text-align: right; */
 }
 
 .box {

@@ -165,7 +165,7 @@ const b = {
       time: game.drawTime
     });
     let dist, sub, knock;
-    let dmg = mod.dmgScale * radius * 0.009;
+    let dmg = b.dmgScale * radius * 0.009;
 
     const alertRange = 100 + radius * 2; //alert range
     //add alert to draw queue
