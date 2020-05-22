@@ -183,15 +183,15 @@ const level = {
     spawn.boost(1500, 0, 900);
 
     // spawn.bomberBoss(2900, -500)
-    // spawn.launcherBoss(1200, -500)
-    spawn.launcher(1600, -400)
-    // spawn.stabber(1600, -500)
+    spawn.launcherBoss(1200, -500)
+    // spawn.launcher(1600, -400)
+    // spawn.spawner(1600, -500)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
     // spawn.striker(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
-    // spawn.nodeBoss(1200, -500, "spiker")
+    // spawn.nodeBoss(1200, -500, "launcher")
     // spawn.spiderBoss(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)

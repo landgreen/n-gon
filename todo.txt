@@ -1,27 +1,16 @@
 
+mob: launchers now have a new fire mechanic
+mob: launcher boss
+huge rework of code organization, this might produce some new bugs around mods
 
 ************** TODO - n-gon **************
-
-new bug
-  NaN: player position, velocity, and mouse
-  level 1 skyscrapers: hard
-    after blocking with default field, or maybe getting hit, or maybe picking up a reroll (but I have credit for all 3 from quantum immortality)
-    only mod was quantum immortality
-    only gun grenades
-    mob: hoppers
-    mob: shooters
-    mob: boss shooter
-  best guess is something to do with the renamed mods
-
 
 launchers shouldn't have to face the player
   fire after a spin
     give bullets velocity from spin
 mob boss - launcher
 
-impact shear buff to 3 nails?
-
-make a lower tier of basic mods
+lower tier of basic mods
   33% chance for basic mod on each selection
     make an odds variable that starts at 0% and gains 33% for each normal mod, resets to 0% after get a basic mod
     don't track these mods for avoiding no repeats
@@ -40,7 +29,7 @@ make a lower tier of basic mods
     spawn 2 heal
     spawn 2 reroll  //or 1?
 
-improve movement fluidity, through mods, or default improvements
+movement fluidity
   let legs jump on mobs, but player will still take damage
   like: ori and the blind forest, celeste
     many of the movement abilities in these games require levels to be built around the ability
@@ -56,6 +45,9 @@ improve movement fluidity, through mods, or default improvements
 rays can have width,  how to use this?
   Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
   wide lasers?
+
+new type of mob vision that uses ray query with thickness
+  maybe use for bosses
 
 bug - mines spawn extra mines when fired at thin map wall while jumping
 
@@ -83,7 +75,8 @@ boss levels - small levels just a boss, and maybe a few mobs
   boss level for timeSkipBoss because of game instability for boss on normal levels
     this might not fix issues
 
-atmosphere levels: change the pace, give the user a rest between combat
+atmosphere levels
+  change the pace, give the user a rest between combat
   low or no combat, but more graphics
   explore lore
     find power ups in "wrecked" mechs representing previous simulations

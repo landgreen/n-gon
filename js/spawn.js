@@ -81,8 +81,8 @@ const spawn = {
     }
   },
   randomLevelBoss(x, y) {
-    // suckerBoss, laserBoss, tetherBoss, snakeBoss   all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss"] // , "timeSkipBoss"
+    // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss"] // , "timeSkipBoss"
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -1437,69 +1437,97 @@ const spawn = {
       this.timeLimit();
     };
   },
-  launcher(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
+  launcher(x, y, radius = 30 + Math.ceil(Math.random() * 40)) {
     mobs.spawn(x, y, 3, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
-    me.vertices = Matter.Vertices.clockwiseSort(Matter.Vertices.rotate(me.vertices, Math.PI, me.position)); //make the pointy side of triangle the front
-    me.isVerticesChange = true
-    // Matter.Body.rotate(me, Math.PI)
-
-    me.memory = 120;
-    me.fireFreq = 0.0065 + Math.random() * 0.003;
-    me.noseLength = 0;
-    me.fireAngle = 0;
-    me.accelMag = 0.0006 * game.accelScale;
-    me.frictionAir = 0.04;
-    me.lookTorque = 0.0000028 * (Math.random() > 0.5 ? -1 : 1);
-    me.fireDir = {
-      x: 0,
-      y: 0
-    };
-    me.onDeath = function () { //helps collisions functions work better after vertex have been changed
-      // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
-    }
-    // spawn.shield(me, x, y);
+    me.accelMag = 0.00002 * game.accelScale;
+    me.frictionStatic = 0;
+    me.friction = 0;
+    // me.memory = 200;
+    me.delay = 770 * game.CDScale;
+    me.cd = Infinity;
+    spawn.shield(me, x, y);
+    me.onDamage = function () {};
     me.do = function () {
-      this.seePlayerByLookingAt();
+      if (!(game.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
+        if (
+          this.distanceToPlayer2() < this.seeAtDistance2 &&
+          Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
+          Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+          !mech.isStealth
+        ) {
+          this.foundPlayer();
+          if (this.cd === Infinity) this.cd = game.cycle + this.delay * 0.3;
+        } else if (this.seePlayer.recall) {
+          this.lostPlayer();
+          this.cd = Infinity
+        }
+      }
       this.checkStatus();
-      this.launch();
+      this.attraction();
+      if (this.seePlayer.recall && this.cd < game.cycle) {
+        this.cd = game.cycle + this.delay;
+        // this.torque += 0.0002 * this.inertia;
+        Matter.Body.setAngularVelocity(this, 0.14)
+        //fire a bullet from each vertex
+        for (let i = 0, len = this.vertices.length; i < len; i++) {
+          spawn.seeker(this.vertices[i].x, this.vertices[i].y, 5)
+          //give the bullet a rotational velocity as if they were attached to a vertex
+          const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -8)
+          Matter.Body.setVelocity(mob[mob.length - 1], {
+            x: this.velocity.x + velocity.x,
+            y: this.velocity.y + velocity.y
+          });
+        }
+      }
     };
   },
-  launcherBoss(x, y, radius = 100) {
-    mobs.spawn(x, y, 3, radius, "rgb(175,125,255)");
+  launcherBoss(x, y, radius = 75 + Math.ceil(Math.random() * 20)) {
+    mobs.spawn(x, y, 7, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
-    me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
-    me.isVerticesChange = true
-    me.memory = 240;
-    me.homePosition = {
-      x: x,
-      y: y
-    };
-    me.fireFreq = 0.015;
-    me.noseLength = 0;
-    me.fireAngle = 0;
-    me.accelMag = 0.005 * game.accelScale;
-    me.frictionAir = 0.05;
-    me.lookTorque = 0.000007 * (Math.random() > 0.5 ? -1 : 1);
-    me.fireDir = {
-      x: 0,
-      y: 0
-    };
-    Matter.Body.setDensity(me, 0.02 + 0.0008 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    me.accelMag = 0.000065 * game.accelScale;
+    me.memory = 720;
+    me.delay = 420 * game.CDScale;
+    me.cd = Infinity;
+    spawn.shield(me, x, y, 1);
+    me.onDamage = function () {};
+    Matter.Body.setDensity(me, 0.002 + 0.0002 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
     };
-
     me.do = function () {
-      this.seePlayerByLookingAt();
+      if (!(game.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
+        if (
+          this.distanceToPlayer2() < this.seeAtDistance2 &&
+          Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
+          Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
+          !mech.isStealth
+        ) {
+          this.foundPlayer();
+          if (this.cd === Infinity) this.cd = game.cycle + this.delay * 0.2;
+        } else if (this.seePlayer.recall) {
+          this.lostPlayer();
+          this.cd = Infinity
+        }
+      }
       this.checkStatus();
-      this.launch();
-
-      //gently return to starting location
-      const sub = Vector.sub(this.homePosition, this.position)
-      const dist = Vector.magnitude(sub)
-      if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+      this.attraction();
+      if (this.seePlayer.recall && this.cd < game.cycle) {
+        this.cd = game.cycle + this.delay;
+        // this.torque += 0.0002 * this.inertia;
+        Matter.Body.setAngularVelocity(this, 0.11)
+        //fire a bullet from each vertex
+        for (let i = 0, len = this.vertices.length; i < len; i++) {
+          spawn.seeker(this.vertices[i].x, this.vertices[i].y, 7)
+          //give the bullet a rotational velocity as if they were attached to a vertex
+          const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -10)
+          Matter.Body.setVelocity(mob[mob.length - 1], {
+            x: this.velocity.x + velocity.x,
+            y: this.velocity.y + velocity.y
+          });
+        }
+      }
     };
   },
   seeker(x, y, radius = 6, sides = 0) {
@@ -1511,9 +1539,9 @@ const spawn = {
       this.explode(this.mass * 10);
     };
     Matter.Body.setDensity(me, 0.00005); //normal is 0.001
-    me.timeLeft = 420;
-    me.accelMag = 0.0004 * game.accelScale;
-    me.frictionAir = 0.033;
+    me.timeLeft = 380 * (0.8 + 0.4 * Math.random());
+    me.accelMag = 0.00012 * (0.8 + 0.4 * Math.random()) * game.accelScale;
+    me.frictionAir = 0.01 * (0.8 + 0.4 * Math.random());
     me.restitution = 0.5;
     me.leaveBody = false;
     me.dropPowerUp = false;
@@ -1521,7 +1549,11 @@ const spawn = {
     me.collisionFilter.category = cat.mobBullet;
     me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
     me.do = function () {
-      this.seePlayerCheck();
+      // this.seePlayer.yes = false;
+      this.seePlayer.recall = true;
+      this.seePlayer.position.x = player.position.x;
+      this.seePlayer.position.y = player.position.y;
+
       this.attraction();
       this.timeLimit();
     };
