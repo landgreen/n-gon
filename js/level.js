@@ -184,7 +184,7 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     spawn.launcherBoss(1200, -500)
-    // spawn.launcher(1600, -400)
+    spawn.launcher(1600, -400)
     // spawn.spawner(1600, -500)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)

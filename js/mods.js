@@ -44,6 +44,25 @@ const mod = {
             game.updateModHUD();
         }
     },
+    giveBasicMod(index = 'random') {
+        // if (isNaN(index)) { //find index by name
+        //     let found = false;
+        //     for (let i = 0; i < mod.mods.length; i++) {
+        //         if (index === mod.mods[i].name) {
+        //             index = i;
+        //             found = true;
+        //             break;
+        //         }
+        //     }
+        //     if (!found) return //if name not found don't give any mod
+        // }
+
+        mod.basicMods[index].effect(); //give specific mod
+        mod.mods[index].count++
+        mod.totalCount++ //used in power up randomization
+        game.updateModHUD();
+
+    },
     haveGunCheck(name) {
         for (i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].name === name) return true
@@ -90,6 +109,7 @@ const mod = {
             if (document.getElementById("mod-low-health-damage")) document.getElementById("mod-low-health-damage").innerHTML = "";
         }, 10);
     },
+
     mods: [{
             name: "capacitor",
             // nameInfo: "<span id='mod-capacitor'></span>",
@@ -154,26 +174,6 @@ const mod = {
             },
             remove() {
                 mod.isCrit = false;
-            }
-        },
-        {
-            name: "fluoroantimonic acid",
-            nameInfo: "<span id='mod-acid'></span>",
-            description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.health > 0.8 || build.isCustomSelection
-            },
-            requires: "health above 80%",
-            effect() {
-                mod.isAcidDmg = true;
-                mod.onHealthChange();
-            },
-            remove() {
-                mod.acidDmg = 0;
-                mod.isAcidDmg = false;
-                game.playerDmgColor = "rgba(0,0,0,0.7)"
             }
         },
         {
@@ -927,6 +927,27 @@ const mod = {
             },
             remove() {
                 mod.isDamageFromBulletCount = false
+            }
+        },
+        {
+            name: "fluoroantimonic acid",
+            nameInfo: "<span id='mod-acid'></span>",
+            description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mech.health > 0.8 || build.isCustomSelection) &&
+                    (mod.haveGunCheck("mine") || mod.haveGunCheck("minigun") || mod.haveGunCheck("shotgun") || mod.haveGunCheck("super balls") || mod.haveGunCheck("spores") || mod.haveGunCheck("drones") || mod.haveGunCheck("ice IX"))
+            },
+            requires: "health above 80%",
+            effect() {
+                mod.isAcidDmg = true;
+                mod.onHealthChange();
+            },
+            remove() {
+                mod.acidDmg = 0;
+                mod.isAcidDmg = false;
+                game.playerDmgColor = "rgba(0,0,0,0.7)"
             }
         },
         {

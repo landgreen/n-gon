@@ -211,6 +211,8 @@ const powerUps = {
     },
     choiceLog: [], //records all previous choice options
     effect() {
+
+
       function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 0; i < mod.mods.length; i++) {
@@ -232,28 +234,30 @@ const powerUps = {
             }
           }
         }
-        if (options.length > 0) {
-          return options[Math.floor(Math.random() * options.length)]
-        }
-      }
 
+        if (options.length > 0) {
+          const choose = options[Math.floor(Math.random() * options.length)]
+          text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choose].name}</div> ${mod.mods[choose].description}</div>`
+          return choose
+        }
+
+      }
+      let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
       let choice1 = pick()
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
-        text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice1})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice1].name}</div> ${mod.mods[choice1].description}</div>`
         if (!mod.isDeterminism) {
           choice2 = pick(choice1)
-          if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice2].name}</div> ${mod.mods[choice2].description}</div>`
+          // if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice2].name}</div> ${mod.mods[choice2].description}</div>`
           choice3 = pick(choice1, choice2)
-          if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice3].name}</div> ${mod.mods[choice3].description}</div>`
+          // if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice3].name}</div> ${mod.mods[choice3].description}</div>`
         }
         if (mod.isExtraChoice) {
           let choice4 = pick(choice1, choice2, choice3)
-          if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice4].name}</div> ${mod.mods[choice4].description}</div>`
+          // if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice4].name}</div> ${mod.mods[choice4].description}</div>`
           let choice5 = pick(choice1, choice2, choice3, choice4)
-          if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice5].name}</div> ${mod.mods[choice5].description}</div>`
+          // if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice5].name}</div> ${mod.mods[choice5].description}</div>`
           powerUps.mod.choiceLog.push(choice4)
           powerUps.mod.choiceLog.push(choice5)
         }

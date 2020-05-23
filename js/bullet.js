@@ -798,7 +798,6 @@ const b = {
             const SCALE = 1.06
             Matter.Body.scale(this, SCALE, SCALE);
             this.radius *= SCALE;
-            console.log(this.radius)
           } else {
             //shrink
             const SCALE = 1 - 0.005 / mod.isBulletsLastLonger
@@ -1164,28 +1163,20 @@ const b = {
       isEasyToAim: false,
       fire() {
         const me = bullet.length;
-        const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.03 : 0.1);
-        bullet[me] = Bodies.rectangle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 8 : 4, mech.crouch ? 52 : 38, dir, me); //cd , speed
+        const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
+        bullet[me] = Bodies.rectangle(mech.pos.x + 23 * Math.cos(mech.angle), mech.pos.y + 23 * Math.sin(mech.angle), 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
+        b.fireProps(mech.crouch ? 7 : 4, mech.crouch ? 40 : 34, dir, me); //cd , speed
         bullet[me].endCycle = game.cycle + 70;
-        bullet[me].dmg = 0.07;
-        bullet[me].frictionAir = mech.crouch ? 0.007 : 0.01;
+        bullet[me].dmg = 0.25;
+        bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
         if (mod.isIceCrystals && mech.energy > 0.01) {
-          mech.energy -= mech.fieldRegen + 0.007
+          mech.energy -= mech.fieldRegen + 0.005
           bullet[me].onDmg = function (who) {
             mobs.statusSlow(who, 30)
           };
-          //ice muzzleFlash
-          ctx.fillStyle = "rgb(0,100,255)";
-
-          ctx.beginPath();
-          ctx.arc(mech.pos.x + 35 * Math.cos(mech.angle), mech.pos.y + 35 * Math.sin(mech.angle), 15, 0, 2 * Math.PI);
-          ctx.fill();
-        } else {
-          b.muzzleFlash(15);
         }
         bullet[me].do = function () {
-          this.force.y += this.mass * 0.0005;
+          this.force.y += this.mass * 0.0003;
         };
       }
     },
@@ -1425,7 +1416,7 @@ const b = {
                       for (let i = 0; i < q.length; i++) {
                         slowCheck = 0.3;
                         Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                        let dmg = b.dmgScale * 0.43 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                        let dmg = b.dmgScale * 0.37 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                         q[i].damage(dmg);
                         q[i].foundPlayer();
                         game.drawList.push({ //add dmg to draw queue
@@ -1443,7 +1434,6 @@ const b = {
                     Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), SPEED * slowCheck));
                   }
                 }
-
                 this.cycle++
                 const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.35) * ((i % 2) ? -1 : 1))
                 Matter.Body.setPosition(this, Vector.add(this.position, wiggle))

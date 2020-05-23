@@ -1440,38 +1440,22 @@ const spawn = {
   launcher(x, y, radius = 30 + Math.ceil(Math.random() * 40)) {
     mobs.spawn(x, y, 3, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.00002 * game.accelScale;
+    me.accelMag = 0.00004 * game.accelScale;
+    me.fireFreq = Math.floor(420 + 90 * Math.random() * game.CDScale)
     me.frictionStatic = 0;
     me.friction = 0;
-    // me.memory = 200;
-    me.delay = 770 * game.CDScale;
-    me.cd = Infinity;
+    me.frictionAir = 0.02;
     spawn.shield(me, x, y);
     me.onDamage = function () {};
     me.do = function () {
-      if (!(game.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
-        if (
-          this.distanceToPlayer2() < this.seeAtDistance2 &&
-          Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-          Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-          !mech.isStealth
-        ) {
-          this.foundPlayer();
-          if (this.cd === Infinity) this.cd = game.cycle + this.delay * 0.3;
-        } else if (this.seePlayer.recall) {
-          this.lostPlayer();
-          this.cd = Infinity
-        }
-      }
+      this.seePlayerCheck();
       this.checkStatus();
       this.attraction();
-      if (this.seePlayer.recall && this.cd < game.cycle) {
-        this.cd = game.cycle + this.delay;
-        // this.torque += 0.0002 * this.inertia;
+      if (this.seePlayer.recall && !(game.cycle % this.fireFreq)) {
         Matter.Body.setAngularVelocity(this, 0.14)
         //fire a bullet from each vertex
         for (let i = 0, len = this.vertices.length; i < len; i++) {
-          spawn.seeker(this.vertices[i].x, this.vertices[i].y, 5)
+          spawn.seeker(this.vertices[i].x, this.vertices[i].y, 6)
           //give the bullet a rotational velocity as if they were attached to a vertex
           const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -8)
           Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -1482,40 +1466,29 @@ const spawn = {
       }
     };
   },
-  launcherBoss(x, y, radius = 75 + Math.ceil(Math.random() * 20)) {
-    mobs.spawn(x, y, 7, radius, "rgb(150,150,255)");
+  launcherBoss(x, y, radius = 90) {
+    mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
-    me.accelMag = 0.000065 * game.accelScale;
-    me.memory = 720;
-    me.delay = 420 * game.CDScale;
-    me.cd = Infinity;
+    me.accelMag = 0.00008 * game.accelScale;
+    me.fireFreq = Math.floor(330 * game.CDScale)
+    me.frictionStatic = 0;
+    me.friction = 0;
+    me.frictionAir = 0.02;
+    me.memory = 420 * game.CDScale;
+    me.repulsionRange = 1200000; //squared
     spawn.shield(me, x, y, 1);
-    me.onDamage = function () {};
-    Matter.Body.setDensity(me, 0.002 + 0.0002 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.004 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
     };
+    me.onDamage = function () {};
     me.do = function () {
-      if (!(game.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
-        if (
-          this.distanceToPlayer2() < this.seeAtDistance2 &&
-          Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-          Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-          !mech.isStealth
-        ) {
-          this.foundPlayer();
-          if (this.cd === Infinity) this.cd = game.cycle + this.delay * 0.2;
-        } else if (this.seePlayer.recall) {
-          this.lostPlayer();
-          this.cd = Infinity
-        }
-      }
+      this.seePlayerCheck();
       this.checkStatus();
       this.attraction();
-      if (this.seePlayer.recall && this.cd < game.cycle) {
-        this.cd = game.cycle + this.delay;
-        // this.torque += 0.0002 * this.inertia;
+      this.repulsion();
+      if (this.seePlayer.recall && !(game.cycle % this.fireFreq)) {
         Matter.Body.setAngularVelocity(this, 0.11)
         //fire a bullet from each vertex
         for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -1530,17 +1503,17 @@ const spawn = {
       }
     };
   },
-  seeker(x, y, radius = 6, sides = 0) {
+  seeker(x, y, radius = 5, sides = 0) {
     //bullets
-    mobs.spawn(x, y, sides, radius, "rgb(0,0,255)");
+    mobs.spawn(x, y, sides, radius, "rgb(100,100,255)");
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
       this.explode(this.mass * 10);
     };
     Matter.Body.setDensity(me, 0.00005); //normal is 0.001
-    me.timeLeft = 380 * (0.8 + 0.4 * Math.random());
-    me.accelMag = 0.00012 * (0.8 + 0.4 * Math.random()) * game.accelScale;
+    me.timeLeft = 420 * (0.8 + 0.4 * Math.random());
+    me.accelMag = 0.00015 * (0.8 + 0.4 * Math.random()) * game.accelScale;
     me.frictionAir = 0.01 * (0.8 + 0.4 * Math.random());
     me.restitution = 0.5;
     me.leaveBody = false;

@@ -187,7 +187,7 @@ const mobs = {
       index: i,
       health: 1,
       showHealthBar: true,
-      accelMag: 0.001,
+      accelMag: 0.001 * game.accelScale,
       cd: 0, //game cycle when cooldown will be over
       delay: 60, //static: time between cooldowns
       fill: color,

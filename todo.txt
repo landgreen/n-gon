@@ -1,33 +1,5 @@
 
-mob: launchers now have a new fire mechanic
-mob: launcher boss
-huge rework of code organization, this might produce some new bugs around mods
-
 ************** TODO - n-gon **************
-
-launchers shouldn't have to face the player
-  fire after a spin
-    give bullets velocity from spin
-mob boss - launcher
-
-lower tier of basic mods
-  33% chance for basic mod on each selection
-    make an odds variable that starts at 0% and gains 33% for each normal mod, resets to 0% after get a basic mod
-    don't track these mods for avoiding no repeats
-  make ball different color to indicate quality
-    basic: grey? smaller size?
-    also make gun/field specific mods have a different icon for top tier
-  don't include basic mods in custom mod?
-  basic mods can show on guns or fields?
-  ideas
-    +5% damage
-    +8% haste
-    +5% damage reduction
-    +25% max health
-    +25% max energy
-    spawn 2 ammo   //or 3?
-    spawn 2 heal
-    spawn 2 reroll  //or 1?
 
 movement fluidity
   let legs jump on mobs, but player will still take damage
@@ -40,7 +12,6 @@ movement fluidity
   mod: wall jump
     wall grab?
   maybe remove falling damage and block damage?
-
 
 rays can have width,  how to use this?
   Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
