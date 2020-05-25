@@ -136,6 +136,24 @@ function collisionChecks(event) {
         function collideMob(obj) {
           //player + mob collision
           if (mech.immuneCycle < mech.cycle && (obj === playerBody || obj === playerHead)) {
+            // const a = Object.values(event.pairs[0].contacts)
+            // contains = Matter.Bounds.contains({
+            //   max: {
+            //     x: player.position.x + 60,
+            //     y: player.position.y + 120
+            //   },
+            //   min: {
+            //     x: player.position.x - 60,
+            //     y: player.position.y + 40
+            //   }
+            // }, {
+            //   x: a[0].vertex.x,
+            //   y: a[0].vertex.y
+            // })
+            // // Matter.Query.point([jumpSensor], point)
+            // console.log(contains)
+            // if (!contains) {
+
             mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             mob[k].foundPlayer();
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
@@ -179,6 +197,7 @@ function collisionChecks(event) {
 
             }
             return;
+            // }
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {

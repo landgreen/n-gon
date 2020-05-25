@@ -1,5 +1,10 @@
+new mod: doubles current bots
 
 ************** TODO - n-gon **************
+
+shielded mobs don't knock back the same as unshielded mobs
+
+buff harmonic field to cover legs
 
 movement fluidity
   let legs jump on mobs, but player will still take damage

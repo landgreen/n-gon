@@ -2,25 +2,26 @@
 const spawn = {
   pickList: ["starter", "starter"],
   fullPickList: [
-    "shooter", "shooter", "shooter", "shooter",
-    "hopper", "hopper", "hopper", "hopper",
-    "chaser", "chaser", "chaser",
-    "striker", "striker",
-    "laser", "laser",
-    "exploder", "exploder",
-    "stabber", "stabber",
-    "launcher", "launcher",
-    "spinner",
-    "grower",
-    "springer",
-    "beamer",
-    "focuser",
-    "sucker",
-    "spawner",
-    "ghoster",
-    "sneaker",
+    // "hopper", "hopper", "hopper", "hopper",
+    // "shooter", "shooter", "shooter",
+    // "chaser", "chaser",
+    // "striker", "striker",
+    // "laser", "laser",
+    // "exploder", "exploder",
+    // "stabber", "stabber",
+    // "launcher", "launcher",
+    "sniper",
+    // "spinner",
+    // "grower",
+    // "springer",
+    // "beamer",
+    // "focuser",
+    // "sucker",
+    // "spawner",
+    // "ghoster",
+    // "sneaker",
   ],
-  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber"],
+  allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper"],
   setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
     //each level has 2 mobs: one new mob and one from the last level
     spawn.pickList.splice(0, 1);
@@ -1353,7 +1354,8 @@ const spawn = {
   shooter(x, y, radius = 25 + Math.ceil(Math.random() * 50)) {
     mobs.spawn(x, y, 3, radius, "rgb(255,100,150)");
     let me = mob[mob.length - 1];
-    me.vertices = Matter.Vertices.clockwiseSort(Matter.Vertices.rotate(me.vertices, Math.PI, me.position)); //make the pointy side of triangle the front
+    // me.vertices = Matter.Vertices.clockwiseSort(Matter.Vertices.rotate(me.vertices, Math.PI, me.position)); //make the pointy side of triangle the front
+    me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     me.isVerticesChange = true
     // Matter.Body.rotate(me, Math.PI)
 
@@ -1435,6 +1437,146 @@ const spawn = {
     me.do = function () {
       this.gravity();
       this.timeLimit();
+    };
+  },
+  sniper(x, y, radius = 35 + Math.ceil(Math.random() * 30)) {
+    mobs.spawn(x, y, 3, radius, "transparent"); //"rgb(25,0,50)")
+    let me = mob[mob.length - 1];
+    me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+    me.isVerticesChange = true
+    // Matter.Body.rotate(me, Math.PI)
+    me.stroke = "transparent"; //used for drawSneaker
+    me.alpha = 1; //used in drawSneaker
+    me.showHealthBar = false;
+
+    me.canTouchPlayer = false; //used in drawSneaker
+    me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+
+    me.memory = 60 //140;
+    me.fireFreq = 0.006 + Math.random() * 0.002;
+    me.noseLength = 0;
+    me.fireAngle = 0;
+    me.accelMag = 0.0005 * game.accelScale;
+    me.frictionAir = 0.05;
+    me.torque = 0.0001 * me.inertia;
+    me.fireDir = {
+      x: 0,
+      y: 0
+    };
+    me.onDeath = function () { //helps collisions functions work better after vertex have been changed
+      // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
+    }
+    // spawn.shield(me, x, y);
+    me.do = function () {
+      // this.seePlayerByLookingAt();
+      this.seePlayerCheck();
+      this.checkStatus();
+
+      if (!mech.isBodiesAsleep) {
+        const setNoseShape = () => {
+          const mag = this.radius + this.radius * this.noseLength;
+          this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
+          this.vertices[1].y = this.position.y + Math.sin(this.angle) * mag;
+        };
+        //throw a mob/bullet at player
+        if (this.seePlayer.recall) {
+          //set direction to turn to fire
+          if (!(game.cycle % this.seePlayerFreq)) {
+            this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+            // this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 1600; //gives the bullet an arc
+          }
+          //rotate towards fireAngle
+          const angle = this.angle + Math.PI / 2;
+          c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+          const threshold = 0.2;
+          if (c > threshold) {
+            this.torque += 0.000004 * this.inertia;
+          } else if (c < -threshold) {
+            this.torque -= 0.000004 * this.inertia;
+          } else if (this.noseLength > 1.5) {
+            //fire
+            spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 5 + Math.ceil(this.radius / 15), 4);
+            const v = 20 * game.accelScale;
+            Matter.Body.setVelocity(mob[mob.length - 1], {
+              x: this.velocity.x + this.fireDir.x * v + Math.random(),
+              y: this.velocity.y + this.fireDir.y * v + Math.random()
+            });
+            this.noseLength = 0;
+            // recoil
+            this.force.x -= 0.005 * this.fireDir.x * this.mass;
+            this.force.y -= 0.005 * this.fireDir.y * this.mass;
+          } else {
+            this.torque += 0.000001 * this.inertia; //
+          }
+          if (this.noseLength < 1.5) this.noseLength += this.fireFreq;
+          setNoseShape();
+        } else if (this.noseLength > 0.1) {
+          this.noseLength -= this.fireFreq / 2;
+          setNoseShape();
+        }
+        // else if (this.noseLength < -0.1) {
+        //   this.noseLength += this.fireFreq / 4;
+        //   setNoseShape();
+        // }
+
+        if (this.seePlayer.recall) {
+          if (this.alpha < 1) this.alpha += 0.01;
+        } else {
+          if (this.alpha > 0) this.alpha -= 0.03;
+        }
+      }
+      //draw
+      if (this.alpha > 0) {
+        if (this.alpha > 0.95) {
+          this.healthBar();
+          if (!this.canTouchPlayer) {
+            this.canTouchPlayer = true;
+            this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
+          }
+        }
+        //draw body
+        ctx.beginPath();
+        const vertices = this.vertices;
+        ctx.moveTo(vertices[0].x, vertices[0].y);
+        for (let j = 1, len = vertices.length; j < len; ++j) {
+          ctx.lineTo(vertices[j].x, vertices[j].y);
+        }
+        ctx.lineTo(vertices[0].x, vertices[0].y);
+        ctx.fillStyle = `rgba(25,0,50,${this.alpha * this.alpha})`;
+        ctx.fill();
+      } else if (this.canTouchPlayer) {
+        this.canTouchPlayer = false;
+        this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+      }
+
+    };
+  },
+  sniperBullet(x, y, radius = 6, sides = 4) {
+    //bullets
+    mobs.spawn(x, y, sides, radius, "rgb(190,0,255)");
+    let me = mob[mob.length - 1];
+    me.stroke = "transparent";
+    me.onHit = function () {
+      this.explode(this.mass * 10);
+    };
+    Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+    me.timeLeft = 240;
+    me.g = 0.001; //required if using 'gravity'
+    me.frictionAir = 0;
+    me.restitution = 0;
+    me.leaveBody = false;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
+    me.collisionFilter.category = cat.mobBullet;
+    me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
+    me.do = function () {
+      // this.gravity();
+      this.timeLimit();
+      if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0) {
+        // this.timeLeft = 0
+        this.dropPowerUp = false;
+        this.death(); //death with no power up
+      }
     };
   },
   launcher(x, y, radius = 30 + Math.ceil(Math.random() * 40)) {

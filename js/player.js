@@ -372,11 +372,8 @@ const mech = {
           let options = [];
           for (let i = 0, len = mod.mods.length; i < len; i++) {
             if (mod.mods[i].count < mod.mods[i].maxCount &&
+              !mod.mods[i].isNonRefundable &&
               mod.mods[i].name !== "quantum immortality" &&
-              mod.mods[i].name !== "Born rule" &&
-              mod.mods[i].name !== "determinism" &&
-              mod.mods[i].name !== "reallocation" &&
-              mod.mods[i].name !== "many-worlds" &&
               mod.mods[i].allowed()
             ) options.push(i);
           }

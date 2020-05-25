@@ -2077,7 +2077,7 @@ const b = {
       isEasyToAim: true,
       fire() {
         if (mech.crouch) {
-          b.iceIX(20, 0.3)
+          b.iceIX(10, 0.3)
           mech.fireCDcycle = mech.cycle + Math.floor(10 * mod.fireRate); // cool down
         } else {
           b.iceIX(2)
@@ -2160,13 +2160,23 @@ const b = {
         bullet[me].endCycle = Infinity
         bullet[me].charge = 0;
         bullet[me].do = function () {
-          if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release
-            //normal bullet behavior occurs after firing, overwrite this function
-            this.do = function () {
-              this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
+          if ((!game.mouseDown && this.charge > 0.6) || mech.energy < 0.005) { //fire on mouse release
+            if (mech.energy < 0.005) {
+              this.charge = 0.1;
+              mech.fireCDcycle = mech.cycle + 120; // cool down if out of energy
+              //normal bullet behavior occurs after firing, overwrite this function
+              this.do = function () {
+                this.force.y += this.mass * 0.001; //normal gravity
+              }
+            } else {
+              mech.fireCDcycle = mech.cycle + 2; // set fire cool down
+              //normal bullet behavior occurs after firing, overwrite this function
+              this.do = function () {
+                this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
+              }
             }
 
-            mech.fireCDcycle = mech.cycle + 2; // set fire cool down
+
             Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
             this.endCycle = game.cycle + 140
             this.collisionFilter.category = cat.bullet

@@ -330,7 +330,7 @@ const mod = {
             maxCount: 6,
             count: 0,
             allowed() {
-                return mod.foamBotCount > 0 || mod.nailBotCount > 0 || mod.laserBotCount > 0
+                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount > 0
             },
             requires: "a bot",
             effect() {
@@ -339,6 +339,38 @@ const mod = {
             remove() {
                 mod.isBotSpawner = 0;
             }
+        },
+        {
+            name: "self-replication",
+            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove all your <strong>ammo</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount > 1
+            },
+            requires: "2 or more bots",
+            effect() {
+                //remove ammo
+                for (let i = 0, len = b.guns.length; i < len; ++i) {
+                    if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
+                }
+
+                //double bots
+                for (let i = 0; i < mod.nailBotCount; i++) {
+                    b.nailBot();
+                }
+                mod.nailBotCount *= 2
+                for (let i = 0; i < mod.laserBotCount; i++) {
+                    b.laserBot();
+                }
+                mod.laserBotCount *= 2
+                for (let i = 0; i < mod.foamBotCount; i++) {
+                    b.foamBot();
+                }
+                mod.foamBotCount *= 2
+            },
+            remove() {}
         },
         {
             name: "ablative mines",
@@ -769,6 +801,7 @@ const mod = {
             description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong>power ups</strong> are limited to <strong>one choice</strong>",
             maxCount: 1,
             count: 0,
+            // isNonRefundable: true,
             allowed() {
                 return !mod.isExtraChoice
             },
@@ -786,7 +819,7 @@ const mod = {
         },
         {
             name: "many-worlds",
-            description: "if you have <strong>zero</strong> <strong class='color-r'>rerolls</strong>, spawn a <strong class='color-r'>reroll</strong><br>after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong>",
+            description: "after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -844,6 +877,7 @@ const mod = {
             description: "<strong>remove</strong> all current <strong class='color-m'>mods</strong><br>spawn new <strong class='color-m'>mods</strong> to replace them",
             maxCount: 1,
             count: 0,
+            isNonRefundable: true,
             allowed() {
                 return (mod.totalCount > 6) && !build.isCustomSelection
             },
@@ -853,23 +887,22 @@ const mod = {
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = [];
 
-                let count = mod.totalCount
-                if (mod.isDeterminism) count -= 4 //remove the 5 bonus mods when getting rid of determinism
-                for (let i = 0; i < count; i++) { // spawn new mods
+                let count = mod.totalCount + 1
+                if (mod.isDeterminism) count -= 5 //remove the 5 bonus mods when getting rid of determinism
+                mod.setupAllMods(); // remove all mods
+                for (let i = 0; i < count; i++) { // spawn new mods power ups
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
-                mod.setupAllMods(); // remove all mods
                 //have state is checked in mech.death()
             },
-            remove() {
-                //nothing to undo
-            }
+            remove() {}
         },
         {
             name: "reallocation",
             description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods lose all stacks</em>",
             maxCount: 1,
             count: 0,
+            isNonRefundable: true,
             allowed() {
                 return (mod.totalCount > 0) && !build.isCustomSelection
             },
@@ -889,9 +922,7 @@ const mod = {
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
             },
-            remove() {
-                //nothing to remove
-            }
+            remove() {}
         },
         //************************************************** 
         //************************************************** gun
@@ -1178,7 +1209,7 @@ const mod = {
             }
         },
         {
-            name: "self-replication",
+            name: "recursion",
             description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they launch <strong>+1</strong> smaller <strong>missile</strong>",
             maxCount: 9,
             count: 0,
@@ -1674,7 +1705,7 @@ const mod = {
         },
         {
             name: "renormalization",
-            description: "<strong>phase decoherence</strong> has increased <strong>visibility</strong><br>and <strong>5x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+            description: "<strong>phase decoherence</strong> adds <strong>visibility</strong> to bullets<br><strong>5x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1691,7 +1722,7 @@ const mod = {
         {
             name: "superposition",
             // description: "<strong>phase decoherence field</strong> applies a <strong>stun</strong><br> to unshielded <strong>mobs</strong> for <strong>2</strong> seconds",
-            description: "apply a <strong>4</strong> second <strong>stun</strong> to unshielded <strong>mobs</strong><br>that <strong>overlap</strong> with <strong>phase decoherence field</strong>",
+            description: "while <strong>phase decoherence field</strong> is active<br>mobs that <strong>overlap</strong> with the player are <strong>stunned</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
