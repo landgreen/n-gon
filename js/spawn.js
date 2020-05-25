@@ -2,24 +2,24 @@
 const spawn = {
   pickList: ["starter", "starter"],
   fullPickList: [
-    // "hopper", "hopper", "hopper", "hopper",
-    // "shooter", "shooter", "shooter",
-    // "chaser", "chaser",
-    // "striker", "striker",
-    // "laser", "laser",
-    // "exploder", "exploder",
-    // "stabber", "stabber",
-    // "launcher", "launcher",
+    "hopper", "hopper", "hopper", "hopper",
+    "shooter", "shooter", "shooter",
+    "chaser", "chaser",
+    "striker", "striker",
+    "laser", "laser",
+    "exploder", "exploder",
+    "stabber", "stabber",
+    "launcher", "launcher",
     "sniper",
-    // "spinner",
-    // "grower",
-    // "springer",
-    // "beamer",
-    // "focuser",
-    // "sucker",
-    // "spawner",
-    // "ghoster",
-    // "sneaker",
+    "spinner",
+    "grower",
+    "springer",
+    "beamer",
+    "focuser",
+    "sucker",
+    "spawner",
+    "ghoster",
+    "sneaker",
   ],
   allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper"],
   setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
@@ -83,7 +83,7 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss"] // , "timeSkipBoss"
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"] // , "timeSkipBoss"
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -892,6 +892,148 @@ const spawn = {
       };
     }
   },
+  laserTargetingBoss(x, y, radius = 70) {
+    const color = "#05f"
+    mobs.spawn(x, y, 3, radius, color);
+    let me = mob[mob.length - 1];
+    me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+    Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+    me.accelMag = 0.0006 * game.accelScale;
+    me.seePlayerFreq = Math.floor(25 * game.lookFreqScale);
+    me.memory = 600;
+    me.restitution = 1;
+    me.frictionAir = 0.06;
+    me.frictionStatic = 0;
+    me.friction = 0;
+
+    me.lookTorque = 0.000005 * (Math.random() > 0.5 ? -1 : 1);
+
+    me.fireDir = {
+      x: 0,
+      y: 0
+    }
+    Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+    spawn.shield(me, x, y, 1);
+    me.onHit = function () {
+      //run this function on hitting player
+      // this.explode();
+    };
+    // spawn.shield(me, x, y, 1);  //not working, not sure why
+    me.onDeath = function () {
+      powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    };
+    me.do = function () {
+      this.seePlayerByLookingAt();
+      this.checkStatus();
+      this.attraction();
+
+      if (this.seePlayer.recall) {
+        //set direction to turn to fire
+        if (!(game.cycle % this.seePlayerFreq)) {
+          this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+          // this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 1600; //gives the bullet an arc
+        }
+
+        //rotate towards fireAngle
+        const angle = this.angle + Math.PI / 2;
+        c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+        const threshold = 0.04;
+        if (c > threshold) {
+          this.torque += 0.000004 * this.inertia;
+        } else if (c < -threshold) {
+          this.torque -= 0.000004 * this.inertia;
+        }
+        // if (Math.abs(c) < 0.3) {
+        //   const mag = 0.05
+        //   this.force.x += mag * Math.cos(this.angle)
+        //   this.force.y += mag * Math.sin(this.angle)
+        // }
+
+        const vertexCollision = function (v1, v1End, domain) {
+          for (let i = 0; i < domain.length; ++i) {
+            let vertices = domain[i].vertices;
+            const len = vertices.length - 1;
+            for (let j = 0; j < len; j++) {
+              results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+              if (results.onLine1 && results.onLine2) {
+                const dx = v1.x - results.x;
+                const dy = v1.y - results.y;
+                const dist2 = dx * dx + dy * dy;
+                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                  best = {
+                    x: results.x,
+                    y: results.y,
+                    dist2: dist2,
+                    who: domain[i],
+                    v1: vertices[j],
+                    v2: vertices[j + 1]
+                  };
+                }
+              }
+            }
+            results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+            if (results.onLine1 && results.onLine2) {
+              const dx = v1.x - results.x;
+              const dy = v1.y - results.y;
+              const dist2 = dx * dx + dy * dy;
+              if (dist2 < best.dist2) {
+                best = {
+                  x: results.x,
+                  y: results.y,
+                  dist2: dist2,
+                  who: domain[i],
+                  v1: vertices[0],
+                  v2: vertices[len]
+                };
+              }
+            }
+          }
+        };
+
+        const seeRange = 8000;
+        best = {
+          x: null,
+          y: null,
+          dist2: Infinity,
+          who: null,
+          v1: null,
+          v2: null
+        };
+        const look = {
+          x: this.position.x + seeRange * Math.cos(this.angle),
+          y: this.position.y + seeRange * Math.sin(this.angle)
+        };
+        vertexCollision(this.position, look, map);
+        vertexCollision(this.position, look, body);
+        if (!mech.isStealth) vertexCollision(this.position, look, [player]);
+        // hitting player
+        if (best.who === player) {
+          if (mech.immuneCycle < mech.cycle) {
+            const dmg = 0.0005 * game.dmgScale;
+            mech.damage(dmg);
+            //draw damage
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(best.x, best.y, dmg * 10000, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
+        //draw beam
+        if (best.dist2 === Infinity) {
+          best = look;
+        }
+        ctx.beginPath();
+        ctx.moveTo(this.vertices[1].x, this.vertices[1].y);
+        ctx.lineTo(best.x, best.y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
+        ctx.stroke();
+        ctx.setLineDash([0, 0]);
+
+      }
+    };
+  },
   laser(x, y, radius = 30) {
     mobs.spawn(x, y, 3, radius, "#f00");
     let me = mob[mob.length - 1];
@@ -1364,6 +1506,8 @@ const spawn = {
     me.noseLength = 0;
     me.fireAngle = 0;
     me.accelMag = 0.0005 * game.accelScale;
+    me.frictionStatic = 0;
+    me.friction = 0;
     me.frictionAir = 0.05;
     me.lookTorque = 0.0000025 * (Math.random() > 0.5 ? -1 : 1);
     me.fireDir = {
@@ -1439,6 +1583,7 @@ const spawn = {
       this.timeLimit();
     };
   },
+
   sniper(x, y, radius = 35 + Math.ceil(Math.random() * 30)) {
     mobs.spawn(x, y, 3, radius, "transparent"); //"rgb(25,0,50)")
     let me = mob[mob.length - 1];
@@ -1448,7 +1593,8 @@ const spawn = {
     me.stroke = "transparent"; //used for drawSneaker
     me.alpha = 1; //used in drawSneaker
     me.showHealthBar = false;
-
+    me.frictionStatic = 0;
+    me.friction = 0;
     me.canTouchPlayer = false; //used in drawSneaker
     me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
 
@@ -1572,8 +1718,8 @@ const spawn = {
     me.do = function () {
       // this.gravity();
       this.timeLimit();
-      if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0) {
-        // this.timeLeft = 0
+
+      if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 3) {
         this.dropPowerUp = false;
         this.death(); //death with no power up
       }

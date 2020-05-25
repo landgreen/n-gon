@@ -23,8 +23,8 @@ const level = {
       // mech.setField("pilot wave")
       // mech.setField("phase decoherence field")
 
-      // level.intro(); //starting level
-      level.testing();
+      level.intro(); //starting level
+      // level.testing();
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -184,9 +184,9 @@ const level = {
 
     // spawn.bomberBoss(2900, -500)
     // spawn.launcherBoss(1200, -500)
-    // spawn.sniper(1600, -400)
+    spawn.laserTargetingBoss(1600, -400)
     // spawn.sneaker(1600, -500)
-    spawn.sniper(1700, -120)
+    // spawn.sniper(1700, -120)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
     // spawn.striker(1600, -500)

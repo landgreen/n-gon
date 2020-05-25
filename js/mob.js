@@ -467,7 +467,7 @@ const mobs = {
               //draw damage
               ctx.fillStyle = "#f00";
               ctx.beginPath();
-              ctx.arc(best.x, best.y, dmg * 2000, 0, 2 * Math.PI);
+              ctx.arc(best.x, best.y, dmg * 10000, 0, 2 * Math.PI);
               ctx.fill();
             }
           }

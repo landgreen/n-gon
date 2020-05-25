@@ -947,7 +947,7 @@ const mod = {
         {
             name: "microstates",
             description: "<strong>+7%</strong> <strong class='color-d'>damage</strong> for every <strong>10</strong> active <strong>bullets</strong>",
-            maxCount: 3,
+            maxCount: 1,
             count: 0,
             allowed() {
                 return mod.isBulletsLastLonger > 1
@@ -1044,6 +1044,22 @@ const mod = {
             },
             remove() {
                 mod.isShotgunImmune = false;
+            }
+        },
+        {
+            name: "nailshot",
+            description: "the <strong>shotgun</strong> fires <strong>nails</strong><br><em>effective at a distance</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("shotgun")
+            },
+            requires: "shotgun",
+            effect() {
+                mod.isNailShot = true;
+            },
+            remove() {
+                mod.isNailShot = false;
             }
         },
         {
@@ -1362,7 +1378,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount > 1 || mod.haveGunCheck("mine") || mod.grenadeFragments > 5 || mod.isRailNails || mod.nailsDeathMob > 2
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob > 1 || mod.haveGunCheck("mine") || mod.isRailNails || mod.isNailShot
             },
             requires: "nails",
             effect() {
@@ -1838,4 +1854,5 @@ const mod = {
     manyWorlds: null,
     isDamageFromBulletCount: null,
     isLaserDiode: null,
+    isNailShot: null
 }

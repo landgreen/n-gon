@@ -389,37 +389,53 @@ const powerUps = {
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
-    if (mech.fieldMode === 0) {
-      powerUps.spawn(x, y, "field")
-      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field")
-    } else if (Math.random() < 0.9) {
-      powerUps.spawn(x, y, "mod")
-      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod")
-    } else if (Math.random() < 0.5) {
-      powerUps.spawn(x, y, "gun")
-      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun")
-      // } else if (Math.random() < 0.5) {
-      //   powerUps.spawn(x, y, "field");
-      //   if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field");
-    } else if (mech.health < 0.65 && !mod.isEnergyHealth) {
-      powerUps.spawn(x, y, "heal");
-      powerUps.spawn(x, y, "heal");
-      powerUps.spawn(x, y, "heal");
-      powerUps.spawn(x, y, "heal");
-      powerUps.spawn(x, y, "heal");
-      powerUps.spawn(x, y, "heal");
-      if (Math.random() < mod.bayesian) {
+    if (game.difficultyMode > 1 || Math.random() < 0.66) { //easy and normal  have only a 66% chance for a power up
+      spawnPowerUps()
+      if (game.difficultyMode > 2 && Math.random() < 0.33) spawnPowerUps() //why? has a 33% chance for an extra power up
+    } else {
+      if (mech.health < 0.65 && !mod.isEnergyHealth) {
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
-        powerUps.spawn(x, y, "heal");
+        if (Math.random() < mod.bayesian) {
+          powerUps.spawn(x, y, "heal");
+          powerUps.spawn(x, y, "heal");
+        }
+      } else if (!mod.bayesian) {
+        powerUps.spawn(x, y, "ammo");
+        powerUps.spawn(x, y, "ammo");
       }
-    } else if (!mod.bayesian) {
-      powerUps.spawn(x, y, "ammo");
-      powerUps.spawn(x, y, "ammo");
-      powerUps.spawn(x, y, "ammo");
-      powerUps.spawn(x, y, "ammo");
-      powerUps.spawn(x, y, "ammo");
     }
+
+    function spawnPowerUps() {
+      if (mech.fieldMode === 0) {
+        powerUps.spawn(x, y, "field")
+        if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field")
+      } else if (Math.random() < 0.9) {
+        powerUps.spawn(x, y, "mod")
+        if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod")
+      } else if (Math.random() < 0.5) {
+        powerUps.spawn(x, y, "gun")
+        if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun")
+      } else if (mech.health < 0.65 && !mod.isEnergyHealth) {
+        powerUps.spawn(x, y, "heal");
+        powerUps.spawn(x, y, "heal");
+        powerUps.spawn(x, y, "heal");
+        powerUps.spawn(x, y, "heal");
+        if (Math.random() < mod.bayesian) {
+          powerUps.spawn(x, y, "heal");
+          powerUps.spawn(x, y, "heal");
+          powerUps.spawn(x, y, "heal");
+          powerUps.spawn(x, y, "heal");
+        }
+      } else if (!mod.bayesian) {
+        powerUps.spawn(x, y, "ammo");
+        powerUps.spawn(x, y, "ammo");
+        powerUps.spawn(x, y, "ammo");
+        powerUps.spawn(x, y, "ammo");
+      }
+    }
+
+
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
     if (Math.random() < 0.05) {
