@@ -87,40 +87,40 @@ function collisionChecks(event) {
 
 
     //body + player collision
-    if (game.isBodyDamage) {
-      if (pairs[i].bodyA === playerBody || pairs[i].bodyA === playerHead) {
-        collidePlayer(pairs[i].bodyB)
-      } else if (pairs[i].bodyB === playerBody || pairs[i].bodyB === playerHead) {
-        collidePlayer(pairs[i].bodyA)
-      }
-    }
+    // if (game.isBodyDamage) {
+    //   if (pairs[i].bodyA === playerBody || pairs[i].bodyA === playerHead) {
+    //     collidePlayer(pairs[i].bodyB)
+    //   } else if (pairs[i].bodyB === playerBody || pairs[i].bodyB === playerHead) {
+    //     collidePlayer(pairs[i].bodyA)
+    //   }
+    // }
 
-    function collidePlayer(obj) {
-      //player dmg from hitting a body
-      if (obj.classType === "body" && obj.speed > 10 && mech.immuneCycle < mech.cycle) {
-        const velocityThreshold = 30 //keep this lines up with player.enterLand numbers  (130/5 = 26)
-        if (player.position.y > obj.position.y) { //block is above the player look at total momentum difference
-          const velocityDiffMag = Vector.magnitude(Vector.sub(player.velocity, obj.velocity))
-          if (velocityDiffMag > velocityThreshold) hit(velocityDiffMag - velocityThreshold)
-        } else { //block is below player only look at horizontal momentum difference
-          const velocityDiffMagX = Math.abs(obj.velocity.x - player.velocity.x)
-          if (velocityDiffMagX > velocityThreshold) hit(velocityDiffMagX - velocityThreshold)
-        }
+    // function collidePlayer(obj) {
+    //   //player dmg from hitting a body
+    //   if (obj.classType === "body" && obj.speed > 10 && mech.immuneCycle < mech.cycle) {
+    //     const velocityThreshold = 30 //keep this lines up with player.enterLand numbers  (130/5 = 26)
+    //     if (player.position.y > obj.position.y) { //block is above the player look at total momentum difference
+    //       const velocityDiffMag = Vector.magnitude(Vector.sub(player.velocity, obj.velocity))
+    //       if (velocityDiffMag > velocityThreshold) hit(velocityDiffMag - velocityThreshold)
+    //     } else { //block is below player only look at horizontal momentum difference
+    //       const velocityDiffMagX = Math.abs(obj.velocity.x - player.velocity.x)
+    //       if (velocityDiffMagX > velocityThreshold) hit(velocityDiffMagX - velocityThreshold)
+    //     }
 
-        function hit(dmg) {
-          mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
-          dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
-          mech.damage(dmg);
-          game.drawList.push({ //add dmg to draw queue
-            x: pairs[i].activeContacts[0].vertex.x,
-            y: pairs[i].activeContacts[0].vertex.y,
-            radius: dmg * 500,
-            color: game.mobDmgColor,
-            time: game.drawTime
-          });
-        }
-      }
-    }
+    //     function hit(dmg) {
+    //       mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+    //       dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
+    //       mech.damage(dmg);
+    //       game.drawList.push({ //add dmg to draw queue
+    //         x: pairs[i].activeContacts[0].vertex.x,
+    //         y: pairs[i].activeContacts[0].vertex.y,
+    //         radius: dmg * 500,
+    //         color: game.mobDmgColor,
+    //         time: game.drawTime
+    //       });
+    //     }
+    //   }
+    // }
 
     //mob + (player,bullet,body) collisions
     for (let k = 0; k < mob.length; k++) {

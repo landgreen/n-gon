@@ -241,8 +241,8 @@ const b = {
           knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 50);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
-          radius *= 0.93 //reduced range for each additional explosion target
-          damageScale *= 0.8 //reduced damage for each additional explosion target
+          radius *= 0.95 //reduced range for each additional explosion target
+          damageScale *= 0.85 //reduced damage for each additional explosion target
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
           knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 80);
@@ -618,9 +618,9 @@ const b = {
       friction: 0.05,
       frictionAir: FRICTION,
       restitution: 1,
-      dmg: 0.23, //damage done in addition to the damage from momentum
+      dmg: 0.28, //damage done in addition to the damage from momentum
       lookFrequency: 100 + Math.floor(23 * Math.random()),
-      endCycle: game.cycle + Math.floor((1200 + 420 * Math.random()) * mod.isBulletsLastLonger),
+      endCycle: game.cycle + Math.floor((1100 + 420 * Math.random()) * mod.isBulletsLastLonger),
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1192,16 +1192,18 @@ const b = {
         let knock, spread
         if (mech.crouch) {
           mech.fireCDcycle = mech.cycle + Math.floor(55 * mod.fireRate); // cool down
+          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(55 * mod.fireRate); //player is immune to collision damage for 30 cycles
           spread = 0.75
           knock = 0.01 * mod.bulletSize * mod.bulletSize
         } else {
           mech.fireCDcycle = mech.cycle + Math.floor(45 * mod.fireRate); // cool down
+          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(45 * mod.fireRate); //player is immune to collision damage for 30 cycles
           spread = 1.3
           knock = 0.08 * mod.bulletSize * mod.bulletSize
         }
         player.force.x -= knock * Math.cos(mech.angle)
         player.force.y -= knock * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
-        if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + 60; //player is immune to collision damage for 30 cycles
+
         b.muzzleFlash(35);
         if (mod.isNailShot) {
           for (let i = 0; i < 15; i++) {
@@ -2074,7 +2076,7 @@ const b = {
       name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 15,
+      ammoPack: 14,
       have: false,
       isStarterGun: true,
       isEasyToAim: true,

@@ -69,7 +69,7 @@ const mech = {
   mass: 5,
   FxNotHolding: 0.015,
   Fx: 0.015, //run Force on ground //
-  FxAir: 0.016, //run Force in Air
+  FxAir: 0.016, // 0.4/5/5  run Force in Air
   yOff: 70,
   yOffGoal: 70,
   onGround: false, //checks if on ground or in air
@@ -112,6 +112,7 @@ const mech = {
     ground: 0.01,
     air: 0.0025
   },
+  airSpeedLimit: 125, // 125/mass/mass = 5
   angle: 0,
   walk_cycle: 0,
   stepSize: 0,
@@ -208,152 +209,101 @@ const mech = {
       }
     } else {
       //sets a hard land where player stays in a crouch for a bit and can't jump
-      //crouch is forced in keyMove() on ground section below
+      //crouch is forced in groundControl below
       const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
       if (momentum > 130) {
         mech.doCrouch();
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
 
-        if (mod.isStomp) {
-          const len = Math.min(25, (momentum - 120) * 0.1)
-          for (let i = 0; i < len; i++) {
-            b.spore(player) //spawn drone
-          }
-        } else if (player.velocity.y > 27 && momentum > 180 * mod.squirrelFx) { //falling damage
-          let dmg = Math.sqrt(momentum - 180) * 0.01
-          dmg = Math.min(Math.max(dmg, 0.02), 0.20);
-          mech.damage(dmg);
-        }
+        // if (mod.isStomp) {
+        //   const len = Math.min(25, (momentum - 120) * 0.1)
+        //   for (let i = 0; i < len; i++) {
+        //     b.spore(player) //spawn drone
+        //   }
+        // } else if (player.velocity.y > 27 && momentum > 180 * mod.squirrelFx) { //falling damage
+        //   let dmg = Math.sqrt(momentum - 180) * 0.01
+        //   dmg = Math.min(Math.max(dmg, 0.02), 0.20);
+        //   mech.damage(dmg);
+        // }
       } else {
         mech.yOffGoal = mech.yOffWhen.stand;
       }
     }
   },
   buttonCD_jump: 0, //cool down for player buttons
-  keyMove() {
-    if (mech.onGround) { //on ground **********************
-      if (mech.crouch) {
-        if (!(keys[83] || keys[40]) && mech.checkHeadClear() && mech.hardLandCD < mech.cycle) mech.undoCrouch();
-      } else if (keys[83] || keys[40] || mech.hardLandCD > mech.cycle) {
-        mech.doCrouch(); //on ground && not crouched and pressing s or down
-      } else if ((keys[87] || keys[38]) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
-        mech.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
+  groundControl() {
+    if (mech.crouch) {
+      if (!(keys[83] || keys[40]) && mech.checkHeadClear() && mech.hardLandCD < mech.cycle) mech.undoCrouch();
+    } else if (keys[83] || keys[40] || mech.hardLandCD > mech.cycle) {
+      mech.doCrouch(); //on ground && not crouched and pressing s or down
+    } else if ((keys[87] || keys[38]) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
+      mech.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
 
-        //apply a fraction of the jump force to the body the player is jumping off of
-        Matter.Body.applyForce(mech.standingOn, mech.pos, {
-          x: 0,
-          y: mech.jumpForce * 0.12 * Math.min(mech.standingOn.mass, 5)
-        });
+      //apply a fraction of the jump force to the body the player is jumping off of
+      Matter.Body.applyForce(mech.standingOn, mech.pos, {
+        x: 0,
+        y: mech.jumpForce * 0.12 * Math.min(mech.standingOn.mass, 5)
+      });
 
-        player.force.y = -mech.jumpForce; //player jump force
-        Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
-          x: player.velocity.x,
-          y: 0
-        });
-      }
-
-      //horizontal move on ground
-
-
-
-      // function blink(dir) {
-      //   dir *= 6
-      //   mech.fieldCDcycle = mech.cycle + 15;
-      //   for (let i = 0; i < 100; i++) {
-      //     Matter.Body.setPosition(player, {
-      //       x: player.position.x + dir,
-      //       y: player.position.y
-      //     });
-      //     const bounds = {
-      //       min: {
-      //         x: player.bounds.min.x,
-      //         y: player.bounds.min.y
-      //       },
-      //       max: {
-      //         x: player.bounds.max.x,
-      //         y: player.bounds.max.y - 30
-      //       }
-      //     }
-
-      //     if (Matter.Query.region(map, bounds).length !== 0 || Matter.Query.region(body, bounds).length !== 0) {
-      //       Matter.Body.setPosition(player, {
-      //         x: player.position.x - dir,
-      //         y: player.position.y
-      //       });
-      //       break;
-      //     }
-      //   }
-      // }
-
-      //apply a force to move
-      if (keys[65] || keys[37]) { //left / a
-        // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
-        //   blink(-1)
-        // } else {
-        if (player.velocity.x > -2) {
-          player.force.x -= mech.Fx * 1.5
-        } else {
-          player.force.x -= mech.Fx
-        }
-        // }
-      } else if (keys[68] || keys[39]) { //right / d
-        // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
-        //   blink(1)
-        // } else {
-        if (player.velocity.x < 2) {
-          player.force.x += mech.Fx * 1.5
-        } else {
-          player.force.x += mech.Fx
-        }
-        // }
-      } else {
-        const stoppingFriction = 0.92;
-        Matter.Body.setVelocity(player, {
-          x: player.velocity.x * stoppingFriction,
-          y: player.velocity.y * stoppingFriction
-        });
-      }
-      //come to a stop if fast or if no move key is pressed
-      if (player.speed > 4) {
-        const stoppingFriction = (mech.crouch) ? 0.65 : 0.89; // this controls speed when crouched
-        Matter.Body.setVelocity(player, {
-          x: player.velocity.x * stoppingFriction,
-          y: player.velocity.y * stoppingFriction
-        });
-      }
-    } else { // in air **********************************
-      //check for short jumps
-      if (
-        mech.buttonCD_jump + 60 > mech.cycle && //just pressed jump
-        !(keys[87] || keys[38]) && //but not pressing jump key
-        mech.Vy < 0 //moving up
-      ) {
-        Matter.Body.setVelocity(player, {
-          //reduce player y-velocity every cycle
-          x: player.velocity.x,
-          y: player.velocity.y * 0.94
-        });
-      }
-      const limit = 125 / player.mass / player.mass
-      if (keys[65] || keys[37]) {
-        if (player.velocity.x > -limit) player.force.x -= mech.FxAir; // move player   left / a
-      } else if (keys[68] || keys[39]) {
-        if (player.velocity.x < limit) player.force.x += mech.FxAir; //move player  right / d
-      }
-      // if ((keys[83] || keys[40])) { //ground stomp when pressing down
-      //   player.force.y += 0.1;
-      //   if (player.velocity.y > 50) {
-      //     Matter.Body.setVelocity(player, {
-      //       x: 0,
-      //       y: 50
-      //     });
-      //   }
-      // }
+      player.force.y = -mech.jumpForce; //player jump force
+      Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
+        x: player.velocity.x,
+        y: 0
+      });
     }
 
-    //smoothly move leg height towards height goal
-    mech.yOff = mech.yOff * 0.85 + mech.yOffGoal * 0.15;
+    if (keys[65] || keys[37]) { //left / a
+      // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
+      //   blink(-1)
+      // } else {
+      if (player.velocity.x > -2) {
+        player.force.x -= mech.Fx * 1.5
+      } else {
+        player.force.x -= mech.Fx
+      }
+      // }
+    } else if (keys[68] || keys[39]) { //right / d
+      // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
+      //   blink(1)
+      // } else {
+      if (player.velocity.x < 2) {
+        player.force.x += mech.Fx * 1.5
+      } else {
+        player.force.x += mech.Fx
+      }
+      // }
+    } else {
+      const stoppingFriction = 0.92;
+      Matter.Body.setVelocity(player, {
+        x: player.velocity.x * stoppingFriction,
+        y: player.velocity.y * stoppingFriction
+      });
+    }
+    //come to a stop if fast or if no move key is pressed
+    if (player.speed > 4) {
+      const stoppingFriction = (mech.crouch) ? 0.65 : 0.89; // this controls speed when crouched
+      Matter.Body.setVelocity(player, {
+        x: player.velocity.x * stoppingFriction,
+        y: player.velocity.y * stoppingFriction
+      });
+    }
+  },
+  airControl() {
+    //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
+    if (mech.buttonCD_jump + 60 > mech.cycle && !(keys[87] || keys[38]) && mech.Vy < 0) {
+      Matter.Body.setVelocity(player, {
+        //reduce player y-velocity every cycle
+        x: player.velocity.x,
+        y: player.velocity.y * 0.94
+      });
+    }
+
+    if (keys[65] || keys[37]) {
+      if (player.velocity.x > -mech.airSpeedLimit / player.mass / player.mass) player.force.x -= mech.FxAir; // move player   left / a
+    } else if (keys[68] || keys[39]) {
+      if (player.velocity.x < mech.airSpeedLimit / player.mass / player.mass) player.force.x += mech.FxAir; //move player  right / d
+    }
   },
   alive: false,
   death() {
@@ -374,6 +324,7 @@ const mech = {
             if (mod.mods[i].count < mod.mods[i].maxCount &&
               !mod.mods[i].isNonRefundable &&
               mod.mods[i].name !== "quantum immortality" &&
+              mod.mods[i].name !== "determinism" &&
               mod.mods[i].allowed()
             ) options.push(i);
           }
@@ -507,7 +458,7 @@ const mech = {
   immuneCycle: 0, //used in engine
   harmReduction() {
     let dmg = 1
-    dmg *= mech.fieldDamageResistance
+    dmg *= mech.fieldHarmReduction
     dmg *= mod.isSlowFPS ? 0.85 : 1
     if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
     if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
@@ -539,7 +490,7 @@ const mech = {
     dmg *= mech.harmReduction()
 
     if (mod.isEnergyHealth) {
-      mech.energy -= dmg;
+      mech.energy -= dmg * 1.25; //energy takes an extra 25% damage for balancing purposes
       if (mech.energy < 0 || isNaN(mech.energy)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
@@ -730,6 +681,7 @@ const mech = {
     // ctx.fillStyle = '#9cf' //'#0cf';
     // ctx.fill()
     ctx.restore();
+    mech.yOff = mech.yOff * 0.85 + mech.yOffGoal * 0.15; //smoothly move leg height towards height goal
   },
   // *********************************************
   // **************** fields *********************
@@ -754,7 +706,7 @@ const mech = {
   fieldRegen: 0,
   fieldMode: 0,
   fieldFire: false,
-  fieldDamageResistance: 1,
+  fieldHarmReduction: 1,
   holdingMassScale: 0,
   fieldArc: 0,
   fieldThreshold: 0,
@@ -766,14 +718,18 @@ const mech = {
     mech.fieldRegen = mod.energyRegen; //0.001
     mech.fieldMeterColor = "#0cf"
     mech.fieldShieldingScale = 1;
+    mech.fieldBlockCD = 10;
     game.isBodyDamage = true;
-    mech.fieldDamageResistance = 1;
+    mech.fieldHarmReduction = 1;
     mech.fieldRange = 155;
     mech.fieldFire = false;
     mech.fieldCDcycle = 0;
     mech.isStealth = false;
     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
+    mech.airSpeedLimit = 125
+    mech.drop();
     mech.holdingMassScale = 0.5;
+
     mech.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.isBodiesAsleep = true;
@@ -1059,7 +1015,7 @@ const mech = {
           x: player.velocity.x - (15 * unit.x) / massRoot,
           y: player.velocity.y - (15 * unit.y) / massRoot
         });
-        mech.fieldCDcycle = mech.cycle + 10;
+        mech.fieldCDcycle = mech.cycle + mech.fieldBlockCD;
         if (mech.crouch) {
           Matter.Body.setVelocity(player, {
             x: player.velocity.x + 0.4 * unit.x * massRoot,
@@ -1267,6 +1223,7 @@ const mech = {
       description: "three oscillating <strong>shields</strong> are permanently active<br><strong class='color-f'>energy</strong> regenerates while field is active",
       isEasyToAim: true,
       effect: () => {
+        mech.fieldBlockCD = 0;
         mech.hold = function () {
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1281,9 +1238,9 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
           if (mech.energy > 0.1 && mech.fieldCDcycle < mech.cycle) {
-            const fieldRange1 = (0.6 + 0.35 * Math.sin(mech.cycle / 23)) * mech.fieldRange
-            const fieldRange2 = (0.55 + 0.4 * Math.sin(mech.cycle / 37)) * mech.fieldRange
-            const fieldRange3 = (0.5 + 0.45 * Math.sin(mech.cycle / 47)) * mech.fieldRange
+            const fieldRange1 = (0.7 + 0.3 * Math.sin(mech.cycle / 23)) * mech.fieldRange
+            const fieldRange2 = (0.6 + 0.4 * Math.sin(mech.cycle / 37)) * mech.fieldRange
+            const fieldRange3 = (0.55 + 0.45 * Math.sin(mech.cycle / 47)) * mech.fieldRange
             const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
             ctx.fillStyle = "rgba(110,170,200," + (0.04 + mech.energy * (0.12 + 0.13 * Math.random())) + ")";
             ctx.beginPath();
@@ -1419,16 +1376,21 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>80%</strong> while field is active",
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>60%</strong>",
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
         mech.fieldMeterColor = "#000"
-
+        if (mod.isHarmReduce) {
+          mech.fieldHarmReduction = 0.2;
+        } else {
+          mech.fieldHarmReduction = 0.4;
+        }
         mech.hold = function () {
-          mech.fieldDamageResistance = 1;
+          mech.airSpeedLimit = 125 //5 * player.mass * player.mass
+          mech.FxAir = 0.016
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
@@ -1436,16 +1398,10 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
             mech.grabPowerUp();
             mech.lookForPickUp();
-            let DRAIN = 0.00105;
+            const DRAIN = 0.00035
             if (mech.energy > DRAIN) {
-              if (mod.isHarmReduce) {
-                mech.fieldDamageResistance = 0.1; // 1 - 0.9
-                DRAIN = 0.0007 //2x energy drain
-              } else {
-                mech.fieldDamageResistance = 0.2; // 1 - 0.8
-                DRAIN = 0.00035
-              }
-
+              mech.airSpeedLimit = 400 // 7* player.mass * player.mass
+              mech.FxAir = 0.005
               // mech.pushMobs360();
 
               //repulse mobs
@@ -1499,12 +1455,12 @@ const mech = {
               if (keys[65] || keys[68] || keys[37] || keys[39]) {
                 Matter.Body.setVelocity(player, {
                   x: player.velocity.x * 0.99,
-                  y: player.velocity.y * 0.97
+                  y: player.velocity.y * 0.98
                 });
               } else { //slow rise and fall
                 Matter.Body.setVelocity(player, {
-                  x: player.velocity.x,
-                  y: player.velocity.y * 0.97
+                  x: player.velocity.x * 0.99,
+                  y: player.velocity.y * 0.98
                 });
               }
 
@@ -1554,11 +1510,11 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br>reduce <strong>harm</strong> by <strong>33%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br>reduce <strong>harm</strong> by <strong>20%</strong>",
       isEasyToAim: false,
       effect: () => {
         mech.fieldMeterColor = "#f0f"
-        mech.fieldDamageResistance = 0.67; //reduce harm by 33%
+        mech.fieldHarmReduction = 0.80;
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1568,7 +1524,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.001
+            const DRAIN = 0.0013
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
@@ -2065,7 +2021,7 @@ const mech = {
 
                 for (let i = 0, len = body.length; i < len; ++i) {
                   if (Vector.magnitude(Vector.sub(body[i].position, mech.fieldPosition)) < mech.fieldRadius) {
-                    const DRAIN = speed * body[i].mass * 0.000022
+                    const DRAIN = speed * body[i].mass * 0.000018
                     if (mech.energy > DRAIN) {
                       mech.energy -= DRAIN;
                       Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity

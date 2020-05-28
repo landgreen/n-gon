@@ -83,7 +83,8 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"] // , "timeSkipBoss"
+    // "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss",
+    const options = ["laserTargetingBoss"] // , "timeSkipBoss"
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************

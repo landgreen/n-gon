@@ -7,7 +7,11 @@ const game = {
     Engine.update(engine, game.delta);
     game.wipe();
     game.textLog();
-    mech.keyMove();
+    if (mech.onGround) {
+      mech.groundControl()
+    } else {
+      mech.airControl()
+    }
     level.checkZones();
     level.checkQuery();
     mech.move();
@@ -30,7 +34,11 @@ const game = {
     Engine.update(engine, game.delta);
     game.wipe();
     game.textLog();
-    mech.keyMove();
+    if (mech.onGround) {
+      mech.groundControl()
+    } else {
+      mech.airControl()
+    }
     level.checkZones();
     level.checkQuery();
     mech.move();
@@ -69,7 +77,11 @@ const game = {
       mech.cycle++;
       game.gravity();
       Engine.update(engine, game.delta);
-      mech.keyMove();
+      if (mech.onGround) {
+        mech.groundControl()
+      } else {
+        mech.airControl()
+      }
 
       level.checkZones();
       level.checkQuery();
@@ -741,7 +753,7 @@ const game = {
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
         if (mod.isEnergyRecovery) {
-          mech.energy += mech.maxEnergy * 0.07
+          mech.energy += mech.maxEnergy * 0.06
           if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
         }
         if (mod.isHealthRecovery) mech.addHealth(0.01)

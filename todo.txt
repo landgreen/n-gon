@@ -1,24 +1,24 @@
-mod: doubles current bots
-mod: shotgun fires nails 
-difficulty mode why? now has 33% chance for a second boss power up
-difficulty mode normal and easy now have a 33% lower chance for a boss power up
-mob: sniper
-mob boss: Laser Targeting  (might need balancing)
+harmonic field now has no cooldown after blocking
+negative mass field accelerates slower, but with a higher top speed
+negative mass field harm reduction is now 60% and always on
+mod degenerate matter increases the damage reduction from 60% to 80%
 
+falling damage and damage from blocks have been removed
+(I'm trying it out, let me know if you want it back)
 
 ************** TODO - n-gon **************
 
-maybe increase chance of boss power ups on why difficulty
-  hard as well?
+add air control check box
+  set mech.airSpeedLimit to 0? to disable
 
-mod - shotgun: fire nails instead of bullets
-  gain range?
+on damage mines mod needs a nerf
+  spawns 2 mines every time... (from on dmg effects)
+
+give rail gun projectile a trail
+  only draw above speed 5
+  track previous positions?
 
 shielded mobs don't knock back the same as unshielded mobs
-
-buff harmonic field
-  cover legs?
-  no flicker after blocking?
 
 movement fluidity
   let legs jump on mobs, but player will still take damage
@@ -40,9 +40,6 @@ new type of mob vision that uses ray query with thickness
   maybe use for bosses
 
 bug - mines spawn extra mines when fired at thin map wall while jumping
-
-mod - negative mass field move faster
-  less friction, more like flying?
 
 what about a neutron bomb mod, that causes the bomb to activate right after you fire and slowly move forward with no gravity
 

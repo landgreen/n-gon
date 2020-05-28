@@ -391,7 +391,7 @@ const powerUps = {
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     if (game.difficultyMode > 1 || Math.random() < 0.66) { //easy and normal  have only a 66% chance for a power up
       spawnPowerUps()
-      if (game.difficultyMode > 2 && Math.random() < 0.33) spawnPowerUps() //why? has a 33% chance for an extra power up
+      if (game.difficultyMode > 2 && level.levelsCleared % 2 == 0) spawnPowerUps() //why? has an extra power up on even numbered levels
     } else {
       if (mech.health < 0.65 && !mod.isEnergyHealth) {
         powerUps.spawn(x, y, "heal");
@@ -416,7 +416,7 @@ const powerUps = {
       } else if (Math.random() < 0.5) {
         powerUps.spawn(x, y, "gun")
         if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun")
-      } else if (mech.health < 0.65 && !mod.isEnergyHealth) {
+      } else if (mech.health < 0.65 && !mod.isEnergyHealth || mod.bayesian) {
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
         powerUps.spawn(x, y, "heal");
@@ -427,7 +427,7 @@ const powerUps = {
           powerUps.spawn(x, y, "heal");
           powerUps.spawn(x, y, "heal");
         }
-      } else if (!mod.bayesian) {
+      } else {
         powerUps.spawn(x, y, "ammo");
         powerUps.spawn(x, y, "ammo");
         powerUps.spawn(x, y, "ammo");

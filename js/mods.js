@@ -342,18 +342,20 @@ const mod = {
         },
         {
             name: "self-replication",
-            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove all your <strong>ammo</strong>",
+            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>80%</strong> of your <strong>ammo</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount > 1
+                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount > 2
             },
-            requires: "2 or more bots",
+            requires: "3 or more bots",
             effect() {
                 //remove ammo
                 for (let i = 0, len = b.guns.length; i < len; ++i) {
-                    if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
+                    if (b.guns[i].ammo != Infinity) {
+                        b.guns[i].ammo = Math.floor(b.guns[i].ammo * 0.2);
+                    }
                 }
 
                 //double bots
@@ -499,7 +501,7 @@ const mod = {
         },
         {
             name: "waste energy recovery",
-            description: "regen <strong>7%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+            description: "regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -648,7 +650,7 @@ const mod = {
         },
         {
             name: "energy conservation",
-            description: "<strong>+15%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
+            description: "<strong>+13%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -656,8 +658,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.energySiphon += 0.15;
-                mech.energy = mech.maxEnergy
+                mod.energySiphon += 0.13;
             },
             remove() {
                 mod.energySiphon = 0;
@@ -1032,7 +1033,7 @@ const mod = {
         },
         {
             name: "shotgun spin-statistics",
-            description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to <strong>harm</strong> for <strong>1 second</strong>",
+            description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to <strong>harm</strong> while on cooldown",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1591,7 +1592,7 @@ const mod = {
         },
         {
             name: "degenerate matter",
-            description: "<strong>2x</strong> <strong class='color-f'>energy</strong> drain for <strong>negative mass field</strong><br>increase <strong>harm</strong> reduction to <strong>90%</strong>",
+            description: "<strong>negative mass field</strong><br><strong>harm</strong> reduction is increased to <strong>80%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1600,9 +1601,11 @@ const mod = {
             requires: "negative mass field",
             effect() {
                 mod.isHarmReduce = true
+                mech.fieldHarmReduction = 0.2;
             },
             remove() {
                 mod.isHarmReduce = false;
+                if (mech.fieldUpgrades[mech.fieldMode].name === "negative mass field") mech.setField("negative mass field") //reset harm reduction
             }
         },
         {
@@ -1655,7 +1658,7 @@ const mod = {
         },
         {
             name: "frequency resonance",
-            description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>30%</strong>",
+            description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>40%</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1663,8 +1666,8 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mech.fieldRange += 175 * 0.2
-                mech.fieldShieldingScale *= 0.7
+                mech.fieldRange += 175 * 0.21
+                mech.fieldShieldingScale *= 0.6
             },
             remove() {
                 mech.fieldRange = 175;
