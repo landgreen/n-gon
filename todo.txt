@@ -1,10 +1,7 @@
-above level 20 boss power ups only drop on even levels
-removed mod ablative mines  (was buggy, and too similar to ablative drones)
-flechettes get stuck in walls
-flechettes do no damage to mobs on hit
-flechettes do more damage over time, and have more ammo
-mod - flechettes pierce mobs
-mod - mutualism: each spore does 2x damage but they borrow 1% life from player
+
+mod - electrostatic shots:  33 increased damage and 33% increased delay after firing
+mod - time-like world line now also gives 33% reduced delay after firing (even when the field isn't active)
+mod auto-loading heuristics now gives 20% reduced delay after firing (up from 15%)
 
 ************** TODO - n-gon **************
 

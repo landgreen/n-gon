@@ -76,12 +76,16 @@ const b = {
     }
   },
   fireProps(cd, speed, dir, me) {
-    mech.fireCDcycle = mech.cycle + Math.floor(cd * mod.fireRate); // cool down
+    mech.fireCDcycle = mech.cycle + Math.floor(cd * b.fireCD); // cool down
     Matter.Body.setVelocity(bullet[me], {
       x: mech.Vx / 2 + speed * Math.cos(dir),
       y: mech.Vy / 2 + speed * Math.sin(dir)
     });
     World.add(engine.world, bullet[me]); //add bullet to world
+  },
+  fireCD: 1,
+  setFireCD() {
+    b.fireCD = mod.fireRate * mod.slowFire * (mod.isTimeSkip ? 0.66 : 1)
   },
   fireAttributes(dir, rotate = true) {
     if (rotate) {
@@ -1216,13 +1220,13 @@ const b = {
       fire() {
         let knock, spread
         if (mech.crouch) {
-          mech.fireCDcycle = mech.cycle + Math.floor(55 * mod.fireRate); // cool down
-          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(55 * mod.fireRate); //player is immune to collision damage for 30 cycles
+          mech.fireCDcycle = mech.cycle + Math.floor(55 * b.fireCD); // cool down
+          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(55 * b.fireCD); //player is immune to collision damage for 30 cycles
           spread = 0.75
           knock = 0.01 * mod.bulletSize * mod.bulletSize
         } else {
-          mech.fireCDcycle = mech.cycle + Math.floor(45 * mod.fireRate); // cool down
-          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(45 * mod.fireRate); //player is immune to collision damage for 30 cycles
+          mech.fireCDcycle = mech.cycle + Math.floor(45 * b.fireCD); // cool down
+          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(45 * b.fireCD); //player is immune to collision damage for 30 cycles
           spread = 1.3
           knock = 0.08 * mod.bulletSize * mod.bulletSize
         }
@@ -1281,7 +1285,7 @@ const b = {
       isEasyToAim: true,
       fire() {
         const SPEED = mech.crouch ? 40 : 30
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 28 : 20) * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 28 : 20) * b.fireCD); // cool down
         if (mod.oneSuperBall) {
           let dir = mech.angle
           const me = bullet.length;
@@ -1415,7 +1419,7 @@ const b = {
         this.lastFireCycle = mech.cycle
         if (this.count > ((mech.crouch) ? 7 : 1)) {
           this.count = 0
-          mech.fireCDcycle = mech.cycle + Math.floor(CD * mod.fireRate); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
 
           const who = bullet[bullet.length - 1]
           Matter.Body.setDensity(who, 0.00001);
@@ -1442,7 +1446,7 @@ const b = {
 
         } else {
           this.count++
-          mech.fireCDcycle = mech.cycle + Math.floor(3 * mod.fireRate); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
         }
 
 
@@ -1457,7 +1461,7 @@ const b = {
       isStarterGun: true,
       isEasyToAim: false,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor(3 * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
         const dir = mech.angle
         const SPEED = 10
         let wiggleMag
@@ -1598,7 +1602,7 @@ const b = {
       fire() {
         if (mod.is3Missiles) {
           if (mech.crouch) {
-            mech.fireCDcycle = mech.cycle + 60 * mod.fireRate; // cool down
+            mech.fireCDcycle = mech.cycle + 60 * b.fireCD; // cool down
             const direction = {
               x: Math.cos(mech.angle),
               y: Math.sin(mech.angle)
@@ -1614,7 +1618,7 @@ const b = {
               bullet[bullet.length - 1].force.y += push.y * (i - 1);
             }
           } else {
-            mech.fireCDcycle = mech.cycle + 45 * mod.fireRate; // cool down
+            mech.fireCDcycle = mech.cycle + 45 * b.fireCD; // cool down
             const direction = {
               x: Math.cos(mech.angle),
               y: Math.sin(mech.angle)
@@ -1631,13 +1635,13 @@ const b = {
             }
           }
         } else {
-          mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 45 : 30) * mod.fireRate; // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 45 : 30) * b.fireCD; // cool down
           b.missile({
               x: mech.pos.x + 40 * Math.cos(mech.angle),
               y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
             },
             mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
-            -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * mod.fireRate,
+            -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.fireCD,
             1, mod.babyMissiles)
           bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
         }
@@ -1653,7 +1657,7 @@ const b = {
       isStarterGun: true,
       isEasyToAim: false,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * b.fireCD); // cool down
         b.muzzleFlash(30);
         const SPEED = mech.crouch ? 29 : 25
         const END = Math.floor(mech.crouch ? 30 : 18);
@@ -2043,7 +2047,7 @@ const b = {
           x: speed * Math.cos(mech.angle),
           y: speed * Math.sin(mech.angle)
         }, 0, mod.isMineAmmoBack)
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 70 : 45) * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 70 : 45) * b.fireCD); // cool down
       }
     },
     {
@@ -2173,7 +2177,7 @@ const b = {
       isEasyToAim: true,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 5) * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 5) * b.fireCD); // cool down
       }
     },
     {
@@ -2187,10 +2191,10 @@ const b = {
       fire() {
         if (mech.crouch) {
           b.iceIX(10, 0.3)
-          mech.fireCDcycle = mech.cycle + Math.floor(10 * mod.fireRate); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(10 * b.fireCD); // cool down
         } else {
           b.iceIX(2)
-          mech.fireCDcycle = mech.cycle + Math.floor(3 * mod.fireRate); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
         }
 
       }
@@ -2204,7 +2208,7 @@ const b = {
       isStarterGun: true,
       isEasyToAim: false,
       fire() {
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
         const radius = mech.crouch ? 10 + 7 * Math.random() : 4 + 6 * Math.random() //(4 + (mech.crouch ? 15 : 6) * Math.random())
         const dir = mech.angle + 0.2 * (Math.random() - 0.5)
         const position = {
@@ -2333,7 +2337,7 @@ const b = {
             mech.fireCDcycle = Infinity //can't fire until mouse is released
             const lastCharge = this.charge
             let chargeRate = (mech.crouch) ? 0.975 : 0.987
-            chargeRate *= Math.pow(mod.fireRate, 0.04)
+            chargeRate *= Math.pow(b.fireCD, 0.04)
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
             mech.energy -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
 
@@ -2694,7 +2698,7 @@ const b = {
         const energy = 0.3 * Math.min(mech.energy, 1.75)
         mech.energy -= energy * mod.isLaserDiode
         if (best.who) b.explosion(path[1], 1000 * energy, true)
-        mech.fireCDcycle = mech.cycle + Math.floor(60 * mod.fireRate); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor(60 * b.fireCD); // cool down
 
         if (mod.isPulseStun) {
           const range = 100 + 2000 * energy

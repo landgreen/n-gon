@@ -497,6 +497,7 @@ const game = {
     b.activeGun = null;
 
     mod.setupAllMods(); //sets mods to default values
+    b.setFireCD();
     game.updateModHUD();
     powerUps.reroll.rerolls = 0;
     mech.maxHealth = 1

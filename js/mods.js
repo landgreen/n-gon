@@ -77,7 +77,7 @@ const mod = {
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
-        return dmg
+        return dmg * mod.slowFire
     },
     onHealthChange() { //used with acid mod
         if (mod.isAcidDmg && mech.health > 0.8) {
@@ -227,7 +227,7 @@ const mod = {
         },
         {
             name: "auto-loading heuristics",
-            description: "your <strong>delay</strong> after firing is <strong>+15% shorter</strong>",
+            description: "<strong>+20%</strong> decreased <strong>delay</strong> after firing",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -235,10 +235,29 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.fireRate *= 0.85
+                mod.fireRate *= 0.8
+                b.setFireCD();
             },
             remove() {
                 mod.fireRate = 1;
+                b.setFireCD();
+            }
+        },
+        {
+            name: "electrostatic shots",
+            description: "<strong>33%</strong> increased <strong class='color-d'>damage</strong><br><strong>33%</strong> increased <strong>delay</strong> after firing",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            effect() {
+                mod.slowFire = 1.33
+                b.setFireCD();
+            },
+            remove() {
+                mod.slowFire = 1;
+                b.setFireCD();
             }
         },
         {
@@ -1592,7 +1611,7 @@ const mod = {
         },
         {
             name: "timelike world line",
-            description: "<strong>time dilation</strong> increases your time <strong>rate</strong> by <strong>2x</strong><br>while <strong class='color-f'>energy</strong> <strong>drain</strong> is decreased by <strong>2x</strong>",
+            description: "<strong>time dilation</strong> increases your time <strong>rate</strong> by <strong>2x</strong><br><strong>33%</strong> decreased <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1601,9 +1620,11 @@ const mod = {
             requires: "time dilation field",
             effect() {
                 mod.isTimeSkip = true;
+                b.setFireCD();
             },
             remove() {
                 mod.isTimeSkip = false;
+                b.setFireCD();
             }
         },
         {
@@ -1889,5 +1910,6 @@ const mod = {
     manyWorlds: null,
     isDamageFromBulletCount: null,
     isLaserDiode: null,
-    isNailShot: null
+    isNailShot: null,
+    slowFire: null
 }

@@ -1340,7 +1340,7 @@ const mech = {
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
                 },
                 mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
-                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * mod.fireRate,
+                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.fireCD,
                 1, mod.babyMissiles)
             } else if (mod.isIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
@@ -1747,7 +1747,7 @@ const mech = {
                 // mech.draw();
                 mech.walk_cycle += mech.flipLegs * mech.Vx;
                 // mech.hold();
-                mech.energy += 0.5 * DRAIN; //x1 to undo the energy drain from time speed up, x1.5 to cut energy drain in half
+                mech.energy += DRAIN; // 1 to undo the energy drain from time speed up, 0.5 to cut energy drain in half
                 b.fire();
                 // b.bulletRemove();
                 b.bulletDo();
