@@ -208,6 +208,7 @@ function collisionChecks(event) {
             if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
             mob[k].damage(dmg);
+            // console.log(dmg)
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn
             game.drawList.push({ //add dmg to draw queue
               x: pairs[i].activeContacts[0].vertex.x,

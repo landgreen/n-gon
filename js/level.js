@@ -17,9 +17,9 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.setField("time dilation field")
-      // mod.giveMod("brushless motor");
+      // mod.giveMod("mutualism");
       // b.giveGuns("drones")
-      // b.giveGuns("mine")
+      // b.giveGuns("spores")
       // mech.setField("pilot wave")
       // mech.setField("phase decoherence field")
 
@@ -60,10 +60,10 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.205; //damage done by mobs increases each level
+      game.dmgScale += 0.21; //damage done by mobs increases each level
       b.dmgScale *= 0.91; //damage done by player decreases each level
-      game.accelScale *= 1.024 //mob acceleration increases each level
-      game.lookFreqScale *= 0.976 //mob cycles between looks decreases each level
+      game.accelScale *= 1.027 //mob acceleration increases each level
+      game.lookFreqScale *= 0.974 //mob cycles between looks decreases each level
       game.CDScale *= 0.964 //mob CD time decreases each level
     }
     game.healScale = 1 / (1 + game.difficulty * 0.09) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
@@ -71,11 +71,11 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.205; //damage done by mobs increases each level
+      game.dmgScale -= 0.21; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.91; //damage done by player decreases each level
-      game.accelScale /= 1.024 //mob acceleration increases each level
-      game.lookFreqScale /= 0.976 //mob cycles between looks decreases each level
+      game.accelScale /= 1.027 //mob acceleration increases each level
+      game.lookFreqScale /= 0.974 //mob cycles between looks decreases each level
       game.CDScale /= 0.964 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 0;
@@ -187,6 +187,8 @@ const level = {
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
     spawn.sniper(1700, -120)
+    // spawn.sniper(1600, -120)
+    // spawn.sniper(1800, -120)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
     // spawn.striker(1600, -500)

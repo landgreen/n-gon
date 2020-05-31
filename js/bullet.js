@@ -475,7 +475,7 @@ const b = {
       friction: 0,
       frictionAir: 0.025,
       thrust: mod.isFastSpores ? 0.001 : 0.0004,
-      dmg: 2.8, //damage done in addition to the damage from momentum
+      dmg: mod.isMutualism ? 5.6 : 2.8, //2x bonus damage from mod.isMutualism
       lookFrequency: 97 + Math.floor(117 * Math.random()),
       classType: "bullet",
       collisionFilter: {
@@ -491,7 +491,18 @@ const b = {
       onDmg() {
         this.endCycle = 0; //bullet ends cycle after doing damage 
       },
-      onEnd() {},
+      onEnd() {
+        if (mod.isMutualism && this.isMutualismActive) {
+          if (mod.isEnergyHealth) {
+            mech.energy += 0.01;
+          } else {
+            mech.health += 0.01
+            if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+            mod.onHealthChange();
+            mech.displayHealth();
+          }
+        }
+      },
       do() {
         if (!(game.cycle % this.lookFrequency)) { //find mob targets
           this.closestTarget = null;
@@ -535,6 +546,20 @@ const b = {
       y: SPEED * Math.sin(ANGLE)
     });
     World.add(engine.world, bullet[bIndex]); //add bullet to world
+
+    if (mod.isMutualism) {
+      if (mod.isEnergyHealth) {
+        if (mech.energy > 0.02) {
+          mech.energy -= 0.01; //energy takes an extra 25% damage for balancing purposes
+          bullet[bIndex].isMutualismActive = true
+        }
+      } else if (mech.health > 0.02) {
+        mech.health -= 0.01
+        mod.onHealthChange();
+        mech.displayHealth();
+        bullet[bIndex].isMutualismActive = true
+      }
+    }
   },
   iceIX(speed = 0, spread = 2 * Math.PI) {
     const me = bullet.length;
@@ -1306,42 +1331,72 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 23,
-      defaultAmmoPack: 23,
+      ammoPack: 30,
+      defaultAmmoPack: 30,
       have: false,
       isStarterGun: true,
       isEasyToAim: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
-        const CD = (mech.crouch) ? 50 : 30
-        if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
-        this.lastFireCycle = mech.cycle
-        if (this.count > ((mech.crouch) ? 6 : 1)) {
-          this.count = 0
-          mech.fireCDcycle = mech.cycle + Math.floor(CD * mod.fireRate); // cool down
-        } else {
-          this.count++
-          mech.fireCDcycle = mech.cycle + Math.floor(3 * mod.fireRate); // cool down
-        }
-
         function makeFlechette(angle = mech.angle) {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45, 1.4, b.fireAttributes(angle));
-          // Matter.Body.setDensity(bullet[me], 0.0001); //0.001 is normal
+          bullet[me].collisionFilter.mask = cat.body; //cat.mobShield | //cat.map | cat.body |
+          Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
           bullet[me].endCycle = game.cycle + 180;
           bullet[me].dmg = 0;
-          bullet[me].onDmg = function (who) {
-            if (mod.isDotFlechette) {
-              mobs.statusDoT(who, 0.33, 360) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
-            } else {
-              mobs.statusDoT(who, 0.33, 180) // (2.3) / 6 ticks (3 seconds)
+          bullet[me].immuneList = []
+          bullet[me].do = function () {
+            const whom = Matter.Query.collides(this, mob)
+            if (whom.length && this.speed > 20) { //if touching a mob 
+              who = whom[0].bodyA
+              if (who) {
+
+                function hit(that) {
+                  who.foundPlayer();
+                  if (mod.isDotFlechette) {
+                    mobs.statusDoT(who, 0.5, 360)
+                  } else {
+                    mobs.statusDoT(who, 0.5, 180)
+                  }
+                  game.drawList.push({ //add dmg to draw queue
+                    x: that.position.x,
+                    y: that.position.y,
+                    radius: 40,
+                    color: "rgba(0,80,80,0.3)",
+                    time: game.drawTime
+                  });
+                }
+
+                if (mod.pierce) {
+                  let immune = false
+                  for (let i = 0; i < this.immuneList.length; i++) {
+                    if (this.immuneList[i] === who.id) immune = true
+                  }
+                  if (!immune) {
+                    this.immuneList.push(who.id)
+                    hit(this)
+                  }
+                } else {
+                  this.endCycle = 0;
+                  hit(this)
+                }
+              }
+            } else if (Matter.Query.collides(this, map).length) { //stick in walls
+              this.collisionFilter.mask = 0;
+              Matter.Body.setAngularVelocity(this, 0)
+              Matter.Body.setVelocity(this, {
+                x: 0,
+                y: 0
+              });
+              this.do = function () {}
+            } else if (this.speed < 30) {
+              this.force.y += this.mass * 0.0007; //no gravity until it slows down to improve aiming
             }
           };
 
-          bullet[me].do = function () {
-            if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
-          };
+
           const SPEED = 50
           Matter.Body.setVelocity(bullet[me], {
             x: mech.Vx / 2 + SPEED * Math.cos(angle),
@@ -1351,9 +1406,46 @@ const b = {
         }
         makeFlechette()
         if (mod.isFlechetteMultiShot) {
-          makeFlechette(mech.angle + 0.01 + 0.01 * Math.random())
-          makeFlechette(mech.angle - 0.01 - 0.01 * Math.random())
+          makeFlechette(mech.angle + 0.02 + 0.005 * Math.random())
+          makeFlechette(mech.angle - 0.02 - 0.005 * Math.random())
         }
+
+        const CD = (mech.crouch) ? 60 : 30
+        if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
+        this.lastFireCycle = mech.cycle
+        if (this.count > ((mech.crouch) ? 7 : 1)) {
+          this.count = 0
+          mech.fireCDcycle = mech.cycle + Math.floor(CD * mod.fireRate); // cool down
+
+          const who = bullet[bullet.length - 1]
+          Matter.Body.setDensity(who, 0.00001);
+          // who.onDmg = function (who) {
+          //   if (mod.isDotFlechette) {
+          //     mobs.statusDoT(who, 0.33, 360) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+          //     mobs.statusSlow(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+          //   } else {
+          //     mobs.statusDoT(who, 0.33, 180) // (2.3) / 6 ticks (3 seconds)
+          //     mobs.statusSlow(who, 60) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+          //   }
+          //   this.endCycle = 0;
+          // };
+
+          // who.onEnd = function () {
+          //   b.explosion(this.position, 220); //makes bullet do explosive damage at end
+          // }
+          // who.do = function () {
+          //   if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
+          //   if (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) {
+          //     this.endCycle = 0; //explode if touching map or blocks
+          //   }
+          // }
+
+        } else {
+          this.count++
+          mech.fireCDcycle = mech.cycle + Math.floor(3 * mod.fireRate); // cool down
+        }
+
+
       }
     },
     {
@@ -1956,7 +2048,7 @@ const b = {
     },
     {
       name: "spores",
-      description: "fire a <strong>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+      description: "fire a <strong>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
       ammo: 0,
       ammoPack: 5,
       have: false,
@@ -2069,7 +2161,6 @@ const b = {
             b.spore(this)
           }
         }
-
       }
     },
     {

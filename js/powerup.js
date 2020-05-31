@@ -389,20 +389,22 @@ const powerUps = {
     }
   },
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
-    if (game.difficultyMode > 1 || Math.random() < 0.66) { //easy and normal  have only a 66% chance for a power up
-      spawnPowerUps()
-      if (game.difficultyMode > 2 && level.levelsCleared % 2 == 0) spawnPowerUps() //why? has an extra power up on even numbered levels
-    } else {
-      if (mech.health < 0.65 && !mod.isEnergyHealth) {
-        powerUps.spawn(x, y, "heal");
-        powerUps.spawn(x, y, "heal");
-        if (Math.random() < mod.bayesian) {
+    if (level.levelsCleared < 20 || level.levelsCleared % 2 == 0) { //drop only on even levels above level 20
+      if (game.difficultyMode > 1 || Math.random() < 0.66) { //easy and normal  have only a 66% chance for a power up
+        spawnPowerUps()
+        if (game.difficultyMode > 2 && level.levelsCleared % 2 == 0) spawnPowerUps() //why? has an extra power up on even numbered levels
+      } else {
+        if (mech.health < 0.65 && !mod.isEnergyHealth) {
           powerUps.spawn(x, y, "heal");
           powerUps.spawn(x, y, "heal");
+          if (Math.random() < mod.bayesian) {
+            powerUps.spawn(x, y, "heal");
+            powerUps.spawn(x, y, "heal");
+          }
+        } else if (!mod.bayesian) {
+          powerUps.spawn(x, y, "ammo");
+          powerUps.spawn(x, y, "ammo");
         }
-      } else if (!mod.bayesian) {
-        powerUps.spawn(x, y, "ammo");
-        powerUps.spawn(x, y, "ammo");
       }
     }
 

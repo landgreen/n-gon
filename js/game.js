@@ -644,6 +644,21 @@ const game = {
       }
     }
 
+    if (mod.isMutualism) {
+      for (let i = 0; i < bullet.length; i++) {
+        if (bullet[i].isMutualismActive) {
+          if (mod.isEnergyHealth) {
+            mech.energy += 0.01;
+          } else {
+            mech.health += 0.01
+            if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+            mod.onHealthChange();
+            mech.displayHealth();
+          }
+        }
+      }
+    }
+
     //if player is holding something this remembers it before it gets deleted
     let holdTarget;
     if (mech.holdingTarget) {

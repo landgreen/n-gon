@@ -83,8 +83,7 @@ const spawn = {
   },
   randomLevelBoss(x, y) {
     // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
-    // "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss",
-    const options = ["laserTargetingBoss"] // , "timeSkipBoss"
+    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"] // , "timeSkipBoss"
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -893,17 +892,17 @@ const spawn = {
       };
     }
   },
-  laserTargetingBoss(x, y, radius = 70) {
+  laserTargetingBoss(x, y, radius = 65) {
     const color = "#05f"
     mobs.spawn(x, y, 3, radius, color);
     let me = mob[mob.length - 1];
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-    me.accelMag = 0.0006 * game.accelScale;
+    me.accelMag = 0.0005 * game.accelScale;
     me.seePlayerFreq = Math.floor(25 * game.lookFreqScale);
     me.memory = 600;
     me.restitution = 1;
-    me.frictionAir = 0.06;
+    me.frictionAir = 0.05;
     me.frictionStatic = 0;
     me.friction = 0;
 
@@ -913,7 +912,7 @@ const spawn = {
       x: 0,
       y: 0
     }
-    Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.025); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y, 1);
     me.onHit = function () {
       //run this function on hitting player

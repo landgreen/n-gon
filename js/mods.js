@@ -374,29 +374,29 @@ const mod = {
             },
             remove() {}
         },
-        {
-            name: "ablative mines",
-            description: "rebuild your broken parts as a <strong>mine</strong><br>chance to occur after being <strong>harmed</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.isMineOnDamage = true;
-                b.mine({
-                    x: mech.pos.x,
-                    y: mech.pos.y - 80
-                }, {
-                    x: 0,
-                    y: 0
-                })
-            },
-            remove() {
-                mod.isMineOnDamage = false;
-            }
-        },
+        // {
+        //     name: "ablative mines",
+        //     description: "rebuild your broken parts as a <strong>mine</strong><br>chance to occur after being <strong>harmed</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+        //         mod.isMineOnDamage = true;
+        //         b.mine({
+        //             x: mech.pos.x,
+        //             y: mech.pos.y - 80
+        //         }, {
+        //             x: 0,
+        //             y: 0
+        //         })
+        //     },
+        //     remove() {
+        //         mod.isMineOnDamage = false;
+        //     }
+        // },
         {
             name: "ablative drones",
             description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
@@ -767,7 +767,7 @@ const mod = {
         },
         {
             name: "catabolism",
-            description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong class='color-h'>health</strong>",
+            description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>3%</strong> of current remaining <strong>health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1144,6 +1144,22 @@ const mod = {
             }
         },
         {
+            name: "piercing needles",
+            description: "<strong>needles</strong> penetrate <strong>mobs</strong><br>potentially hitting <strong>multiple</strong> targets",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("flechettes")
+            },
+            requires: "flechettes",
+            effect() {
+                mod.pierce = true;
+            },
+            remove() {
+                mod.pierce = false;
+            }
+        },
+        {
             name: "wave packet",
             description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>wave particles do <strong>40%</strong> less <strong class='color-d'>damage</strong>",
             maxCount: 1,
@@ -1419,6 +1435,22 @@ const mod = {
             },
             remove() {
                 mod.isSporeFollow = false
+            }
+        },
+        {
+            name: "mutualism",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>2x</strong> <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>1%</strong> <strong>health</strong> until they <strong>die</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
+            },
+            requires: "spores",
+            effect() {
+                mod.isMutualism = true
+            },
+            remove() {
+                mod.isMutualism = false
             }
         },
         {
@@ -1785,7 +1817,7 @@ const mod = {
     isImmuneExplosion: null,
     isExplodeMob: null,
     isDroneOnDamage: null,
-    isMineOnDamage: null,
+    // isMineOnDamage: null,
     acidDmg: null,
     isAcidDmg: null,
     isAnnihilation: null,

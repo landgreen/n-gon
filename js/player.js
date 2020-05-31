@@ -478,15 +478,15 @@ const mech = {
         if (Math.random() < 0.5) b.drone() //spawn drone
       }
     }
-    if (mod.isMineOnDamage && dmg > 0.004 + 0.05 * Math.random()) {
-      b.mine({
-        x: mech.pos.x,
-        y: mech.pos.y - 80
-      }, {
-        x: 0,
-        y: 0
-      })
-    }
+    // if (mod.isMineOnDamage && dmg > 0.004 + 0.05 * Math.random()) {
+    //   b.mine({
+    //     x: mech.pos.x,
+    //     y: mech.pos.y - 80
+    //   }, {
+    //     x: 0,
+    //     y: 0
+    //   })
+    // }
     dmg *= mech.harmReduction()
 
     if (mod.isEnergyHealth) {
@@ -543,14 +543,13 @@ const mech = {
           return;
         }
       }
+      mod.onHealthChange();
+      mech.displayHealth();
+      document.getElementById("dmg").style.transition = "opacity 0s";
+      document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
     }
 
     if (dmg > 0.2 * mech.holdingMassScale) mech.drop(); //drop block if holding
-
-    mod.onHealthChange();
-    mech.displayHealth();
-    document.getElementById("dmg").style.transition = "opacity 0s";
-    document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
 
     const normalFPS = function () {
       if (mech.defaultFPSCycle < mech.cycle) { //back to default values
@@ -698,10 +697,10 @@ const mech = {
   fieldMode: 0, //basic field mode before upgrades
   maxEnergy: 1, //can be increased by a mod
   holdingTarget: null,
-  fieldShieldingScale: 1,
   timeSkipLastCycle: 0,
   // these values are set on reset by setHoldDefaults()
   fieldRange: 155,
+  fieldShieldingScale: 1,
   energy: 0,
   fieldRegen: 0,
   fieldMode: 0,
@@ -1220,9 +1219,10 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are permanently active<br><strong class='color-f'>energy</strong> regenerates while field is active",
+      description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong>harm</strong> by <strong>33%</strong>",
       isEasyToAim: true,
       effect: () => {
+        mech.fieldHarmReduction = 0.67;
         mech.fieldBlockCD = 0;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1510,11 +1510,10 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit <strong class='color-d'>damaging</strong> plasma<br>reduce <strong>harm</strong> by <strong>20%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to emit short range plasma<br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
       isEasyToAim: false,
       effect: () => {
         mech.fieldMeterColor = "#f0f"
-        mech.fieldHarmReduction = 0.80;
 
         mech.hold = function () {
           if (mech.isHolding) {

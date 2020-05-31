@@ -1,18 +1,20 @@
-harmonic field now has no cooldown after blocking
-negative mass field accelerates slower, but with a higher top speed
-negative mass field harm reduction is now 60% and always on
-mod degenerate matter increases the damage reduction from 60% to 80%
-
-falling damage and damage from blocks have been removed
-(I'm trying it out, let me know if you want it back)
+above level 20 boss power ups only drop on even levels
+removed mod ablative mines  (was buggy, and too similar to ablative drones)
+flechettes get stuck in walls
+flechettes do no damage to mobs on hit
+flechettes do more damage over time, and have more ammo
+mod - flechettes pierce mobs
+mod - mutualism: each spore does 2x damage but they borrow 1% life from player
 
 ************** TODO - n-gon **************
 
+shrink font on small screens (so you can see 5 options on power ups)
+
+graphic idea:  bezier curve that moves smoothly from mob to mob
+  loops around player
+
 add air control check box
   set mech.airSpeedLimit to 0? to disable
-
-on damage mines mod needs a nerf
-  spawns 2 mines every time... (from on dmg effects)
 
 give rail gun projectile a trail
   only draw above speed 5
@@ -31,13 +33,6 @@ movement fluidity
   mod: wall jump
     wall grab?
   maybe remove falling damage and block damage?
-
-rays can have width,  how to use this?
-  Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
-  wide lasers?
-
-new type of mob vision that uses ray query with thickness
-  maybe use for bosses
 
 bug - mines spawn extra mines when fired at thin map wall while jumping
 
