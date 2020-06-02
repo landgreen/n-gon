@@ -17,7 +17,10 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.setField("time dilation field")
-      // mod.giveMod("mutualism");
+      // mod.giveMod("timelike world line");
+      // mod.giveMod("Lorentz transformation");
+
+
       // b.giveGuns("drones")
       // b.giveGuns("spores")
       // mech.setField("pilot wave")

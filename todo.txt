@@ -1,7 +1,12 @@
 
-mod - electrostatic shots:  33 increased damage and 33% increased delay after firing
-mod - time-like world line now also gives 33% reduced delay after firing (even when the field isn't active)
-mod auto-loading heuristics now gives 20% reduced delay after firing (up from 15%)
+new mod - heal: gives heals 
+new mod - ammo: gives ammo
+mod mass-energy equivalence no longer benefits from harm reduction effects,
+but it also takes 25% less damage than before
+
+mod - timelike world line gives 2x faster speed and harm immunity when time dilation is active
+mod - Lorentz transformation improves move jump and fire speed even when time dilation isn't active
+      (the same as 1 rank of squirrel cage rotor and auto-loading heuristics)
 
 ************** TODO - n-gon **************
 

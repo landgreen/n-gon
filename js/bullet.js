@@ -85,7 +85,7 @@ const b = {
   },
   fireCD: 1,
   setFireCD() {
-    b.fireCD = mod.fireRate * mod.slowFire * (mod.isTimeSkip ? 0.66 : 1)
+    b.fireCD = mod.fireRate * mod.slowFire / mod.fastTime
   },
   fireAttributes(dir, rotate = true) {
     if (rotate) {
@@ -1278,7 +1278,7 @@ const b = {
       name: "super balls",
       description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 14,
+      ammoPack: 15,
       have: false,
       num: 5,
       isStarterGun: true,
@@ -1335,8 +1335,8 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 30,
-      defaultAmmoPack: 30,
+      ammoPack: 36,
+      defaultAmmoPack: 36,
       have: false,
       isStarterGun: true,
       isEasyToAim: false,
@@ -1355,24 +1355,7 @@ const b = {
             const whom = Matter.Query.collides(this, mob)
             if (whom.length && this.speed > 20) { //if touching a mob 
               who = whom[0].bodyA
-              if (who) {
-
-                function hit(that) {
-                  who.foundPlayer();
-                  if (mod.isDotFlechette) {
-                    mobs.statusDoT(who, 0.5, 360)
-                  } else {
-                    mobs.statusDoT(who, 0.5, 180)
-                  }
-                  game.drawList.push({ //add dmg to draw queue
-                    x: that.position.x,
-                    y: that.position.y,
-                    radius: 40,
-                    color: "rgba(0,80,80,0.3)",
-                    time: game.drawTime
-                  });
-                }
-
+              if (who && who.mob) {
                 if (mod.pierce) {
                   let immune = false
                   for (let i = 0; i < this.immuneList.length; i++) {
@@ -1380,11 +1363,35 @@ const b = {
                   }
                   if (!immune) {
                     this.immuneList.push(who.id)
-                    hit(this)
+                    who.foundPlayer();
+                    if (mod.isDotFlechette) {
+                      mobs.statusDoT(who, 0.5, 360)
+                    } else {
+                      mobs.statusDoT(who, 0.5, 180)
+                    }
+                    game.drawList.push({ //add dmg to draw queue
+                      x: this.position.x,
+                      y: this.position.y,
+                      radius: 40,
+                      color: "rgba(0,80,80,0.3)",
+                      time: game.drawTime
+                    });
                   }
                 } else {
                   this.endCycle = 0;
-                  hit(this)
+                  who.foundPlayer();
+                  if (mod.isDotFlechette) {
+                    mobs.statusDoT(who, 0.5, 360)
+                  } else {
+                    mobs.statusDoT(who, 0.5, 180)
+                  }
+                  game.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: 40,
+                    color: "rgba(0,80,80,0.3)",
+                    time: game.drawTime
+                  });
                 }
               }
             } else if (Matter.Query.collides(this, map).length) { //stick in walls
@@ -2184,7 +2191,7 @@ const b = {
       name: "ice IX",
       description: "synthesize <strong>short-lived</strong> ice crystals<br>crystals <strong>seek</strong> out and <strong class='color-s'>freeze</strong> mobs",
       ammo: 0,
-      ammoPack: 75,
+      ammoPack: 73,
       have: false,
       isStarterGun: true,
       isEasyToAim: true,

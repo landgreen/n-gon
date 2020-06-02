@@ -111,6 +111,42 @@ const mod = {
     },
 
     mods: [{
+            name: "heal",
+            description: "spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
+            maxCount: 9,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 6; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+                }
+            },
+            remove() {}
+        },
+        {
+            name: "ammo",
+            description: "spawn <strong>6 ammo</strong> power ups",
+            maxCount: 9,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 6; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                }
+            },
+            remove() {}
+        },
+        {
             name: "capacitor",
             // nameInfo: "<span id='mod-capacitor'></span>",
             description: "increase <strong class='color-d'>damage</strong> based on stored <strong class='color-f'>energy</strong><br><strong>+1%</strong> <strong class='color-d'>damage</strong> for every <strong>5.5%</strong> <strong class='color-f'>energy</strong>",
@@ -217,7 +253,7 @@ const mod = {
             allowed() {
                 return !mod.isEnergyHealth
             },
-            requires: "mass-energy equivalence",
+            requires: "not mass-energy equivalence",
             effect() {
                 mod.isEnergyLoss = true;
             },
@@ -536,7 +572,7 @@ const mod = {
         },
         {
             name: "squirrel-cage rotor",
-            description: "<strong>jump</strong> higher and <strong>move</strong> faster<br>reduced <strong>harm</strong> from <strong>falling</strong> ",
+            description: "<strong>jump</strong> higher and <strong>move</strong> faster",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -545,13 +581,13 @@ const mod = {
             requires: "",
             effect() { // good with melee builds, content skipping builds
                 mod.squirrelFx += 0.2;
-                mech.Fx = 0.016 * mod.squirrelFx;
-                mech.jumpForce += 0.038;
+                mod.squirrelJump += 0.09;
+                mech.setMovement()
             },
             remove() {
                 mod.squirrelFx = 1;
-                mech.Fx = 0.016; //if this changes update the values in  definePlayerMass
-                mech.jumpForce = 0.42; //was 0.38 at 0.0019 gravity
+                mod.squirrelJump = 1;
+                mech.setMovement()
             }
         },
         {
@@ -594,9 +630,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return !mod.isEnergyHealth
             },
-            requires: "",
+            requires: "not mass-energy equivalence",
             effect() {
                 mod.isEntanglement = true
                 setTimeout(function () {
@@ -610,7 +646,8 @@ const mod = {
         },
         {
             name: "mass-energy equivalence",
-            description: "you can't <strong>die</strong> if your <strong class='color-f'>energy</strong> is above <strong>zero</strong><br>your <strong>health</strong> is permanently set to <strong>zero</strong>",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong>health</strong><br><strong>harm reduction</strong> effects provide <strong>no</strong> benefit",
+            // description: "you can't <strong>die</strong> if your <strong class='color-f'>energy</strong> is above <strong>zero</strong><br>your <strong>health</strong> is permanently set to <strong>zero</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -770,7 +807,7 @@ const mod = {
         },
         {
             name: "Bayesian inference",
-            description: "<strong>37%</strong> chance for double <strong>power ups</strong> to drop<br><strong>ammo</strong> will no longer <strong>spawn</strong>",
+            description: "<strong>37%</strong> chance for double <strong>power ups</strong> to drop<br><strong>ammo</strong> will no longer <strong>spawn</strong> from mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1611,7 +1648,7 @@ const mod = {
         },
         {
             name: "timelike world line",
-            description: "<strong>time dilation</strong> increases your time <strong>rate</strong> by <strong>2x</strong><br><strong>33%</strong> decreased <strong>delay</strong> after firing",
+            description: "<strong>time dilation</strong> increases your time <strong>rate</strong> by <strong>2x</strong><br> and makes you <strong>immune</strong> to <strong>harm</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1624,6 +1661,28 @@ const mod = {
             },
             remove() {
                 mod.isTimeSkip = false;
+                b.setFireCD();
+            }
+        },
+        {
+            name: "Lorentz transformation",
+            description: "<strong>time dilation field</strong> has an effect while inactive<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
+            },
+            requires: "time dilation field",
+            effect() {
+                mod.fastTime = 1.33;
+                mod.fastTimeJump = 1.09;
+                mech.setMovement();
+                b.setFireCD();
+            },
+            remove() {
+                mod.fastTime = 1;
+                mod.fastTimeJump = 1;
+                mech.setMovement();
                 b.setFireCD();
             }
         },
@@ -1911,5 +1970,8 @@ const mod = {
     isDamageFromBulletCount: null,
     isLaserDiode: null,
     isNailShot: null,
-    slowFire: null
+    slowFire: null,
+    fastTime: null,
+    squirrelJump: null,
+    fastTimeJump: null,
 }

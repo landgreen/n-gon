@@ -768,10 +768,7 @@ const game = {
       // }
 
       if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
-        if (mod.isEnergyRecovery) {
-          mech.energy += mech.maxEnergy * 0.06
-          if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
-        }
+        if (mod.isEnergyRecovery && mech.energy < mech.maxEnergy) mech.energy += mech.maxEnergy * 0.06
         if (mod.isHealthRecovery) mech.addHealth(0.01)
       }
 

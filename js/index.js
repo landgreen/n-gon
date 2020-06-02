@@ -284,7 +284,7 @@ const build = {
     }
     url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
     url += `&difficulty=${game.difficultyMode}`
-    url += `&level=${Number(document.getElementById("starting-level").value)}`
+    url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
     console.log(url)
     game.copyToClipBoard(url)
     alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
@@ -303,7 +303,7 @@ const build = {
     for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
     bullet = []; //remove any bullets that might have spawned from mods
 
-    const levelsCleared = Number(document.getElementById("starting-level").value)
+    const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value))
     level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
     level.levelsCleared += levelsCleared;
 

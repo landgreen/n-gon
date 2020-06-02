@@ -68,7 +68,12 @@ const mech = {
   defaultMass: 5,
   mass: 5,
   FxNotHolding: 0.015,
-  Fx: 0.015, //run Force on ground //
+  Fx: 0.016, //run Force on ground //
+  jumpForce: 0.42,
+  setMovement() {
+    mech.Fx = 0.016 * mod.squirrelFx * mod.fastTime;
+    mech.jumpForce = 0.42 * mod.squirrelJump * mod.fastTimeJump;
+  },
   FxAir: 0.016, // 0.4/5/5  run Force in Air
   yOff: 70,
   yOffGoal: 70,
@@ -106,7 +111,6 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  jumpForce: 0.38, //0.38 //this is reset in mod.setupAllMods()
   gravity: 0.0024, //0.0019  //game.g is 0.001
   friction: {
     ground: 0.01,
@@ -487,10 +491,10 @@ const mech = {
     //     y: 0
     //   })
     // }
-    dmg *= mech.harmReduction()
+
 
     if (mod.isEnergyHealth) {
-      mech.energy -= dmg * 1.25; //energy takes an extra 25% damage for balancing purposes
+      mech.energy -= dmg;
       if (mech.energy < 0 || isNaN(mech.energy)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
@@ -519,6 +523,7 @@ const mech = {
         }
       }
     } else {
+      dmg *= mech.harmReduction()
       mech.health -= dmg;
       if (mech.health < 0 || isNaN(mech.health)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
@@ -1735,6 +1740,7 @@ const mech = {
 
               game.cycle--; //pause all functions that depend on game cycle increasing
               if (mod.isTimeSkip) {
+                mech.immuneCycle = mech.cycle + 10;
                 game.isTimeSkipping = true;
                 mech.cycle++;
                 game.gravity();
@@ -1747,7 +1753,7 @@ const mech = {
                 // mech.draw();
                 mech.walk_cycle += mech.flipLegs * mech.Vx;
                 // mech.hold();
-                mech.energy += DRAIN; // 1 to undo the energy drain from time speed up, 0.5 to cut energy drain in half
+                // mech.energy += DRAIN; // 1 to undo the energy drain from time speed up, 0.5 to cut energy drain in half
                 b.fire();
                 // b.bulletRemove();
                 b.bulletDo();
