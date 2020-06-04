@@ -1,12 +1,6 @@
 
-new mod - heal: gives heals 
-new mod - ammo: gives ammo
-mod mass-energy equivalence no longer benefits from harm reduction effects,
-but it also takes 25% less damage than before
-
-mod - timelike world line gives 2x faster speed and harm immunity when time dilation is active
-mod - Lorentz transformation improves move jump and fire speed even when time dilation isn't active
-      (the same as 1 rank of squirrel cage rotor and auto-loading heuristics)
+mod flechettes do all DoT damage in 1/2 a second
+minigun increases fire speed as you hold the fire button
 
 ************** TODO - n-gon **************
 
@@ -14,9 +8,6 @@ shrink font on small screens (so you can see 5 options on power ups)
 
 graphic idea:  bezier curve that moves smoothly from mob to mob
   loops around player
-
-add air control check box
-  set mech.airSpeedLimit to 0? to disable
 
 give rail gun projectile a trail
   only draw above speed 5

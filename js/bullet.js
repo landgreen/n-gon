@@ -1184,49 +1184,61 @@ const b = {
       name: "minigun",
       description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong>",
       ammo: 0,
-      ammoPack: 65,
-      defaultAmmoPack: 65,
+      ammoPack: 75,
+      defaultAmmoPack: 75,
       recordedAmmo: 0,
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
+      nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
+      startingHoldCycle: 0,
       fire() {
         const me = bullet.length;
         const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
         bullet[me] = Bodies.rectangle(mech.pos.x + 23 * Math.cos(mech.angle), mech.pos.y + 23 * Math.sin(mech.angle), 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
-        b.fireProps(mech.crouch ? 7 : 4, mech.crouch ? 40 : 34, dir, me); //cd , speed
+
+
+        //fire delay decreases as you hold fire, down to 3 from 15
+        if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
+        const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+        this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
+        b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
+        // b.fireProps(mech.crouch ? 7 : 4, mech.crouch ? 40 : 34, dir, me); //cd , speed
+
         bullet[me].endCycle = game.cycle + 70;
         bullet[me].dmg = 0.25;
         bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
-        if (mod.isIceCrystals && mech.energy > 0.01) {
-          mech.energy -= mech.fieldRegen + 0.005
+        if (mod.isIceCrystals) {
           bullet[me].onDmg = function (who) {
             mobs.statusSlow(who, 30)
           };
+          mech.energy -= mech.fieldRegen + 0.007
+          if (mech.energy < 0.02) {
+            mech.fireCDcycle = mech.cycle + 60; // cool down
+          }
         }
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0003;
         };
+
       }
     },
     {
       name: "shotgun",
       description: "fire a <strong>burst</strong> of short range bullets<br><em>crouch to reduce recoil</em>",
       ammo: 0,
-      ammoPack: 11,
+      ammoPack: 9,
       have: false,
-      isStarterGun: true,
       isEasyToAim: true,
       fire() {
         let knock, spread
         if (mech.crouch) {
           mech.fireCDcycle = mech.cycle + Math.floor(55 * b.fireCD); // cool down
-          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(55 * b.fireCD); //player is immune to collision damage for 30 cycles
+          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(58 * b.fireCD); //player is immune to collision damage for 30 cycles
           spread = 0.75
           knock = 0.01 * mod.bulletSize * mod.bulletSize
         } else {
           mech.fireCDcycle = mech.cycle + Math.floor(45 * b.fireCD); // cool down
-          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(45 * b.fireCD); //player is immune to collision damage for 30 cycles
+          if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(47 * b.fireCD); //player is immune to collision damage for 30 cycles
           spread = 1.3
           knock = 0.08 * mod.bulletSize * mod.bulletSize
         }
@@ -1235,7 +1247,7 @@ const b = {
 
         b.muzzleFlash(35);
         if (mod.isNailShot) {
-          for (let i = 0; i < 15; i++) {
+          for (let i = 0; i < 14; i++) {
             const dir = mech.angle + (Math.random() - 0.5) * spread * 0.2
             const pos = {
               x: mech.pos.x + 35 * Math.cos(mech.angle) + 15 * (Math.random() - 0.5),
@@ -1281,7 +1293,6 @@ const b = {
       ammoPack: 15,
       have: false,
       num: 5,
-      isStarterGun: true,
       isEasyToAim: true,
       fire() {
         const SPEED = mech.crouch ? 40 : 30
@@ -1335,10 +1346,9 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 36,
-      defaultAmmoPack: 36,
+      ammoPack: 42,
+      defaultAmmoPack: 42,
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -1364,11 +1374,13 @@ const b = {
                   if (!immune) {
                     this.immuneList.push(who.id)
                     who.foundPlayer();
-                    if (mod.isDotFlechette) {
-                      mobs.statusDoT(who, 0.5, 360)
+
+                    if (mod.isFastDot) {
+                      mobs.statusDoT(who, 3.6, 30)
                     } else {
-                      mobs.statusDoT(who, 0.5, 180)
+                      mobs.statusDoT(who, 0.6, mod.isSlowDot ? 360 : 180)
                     }
+
                     game.drawList.push({ //add dmg to draw queue
                       x: this.position.x,
                       y: this.position.y,
@@ -1380,10 +1392,10 @@ const b = {
                 } else {
                   this.endCycle = 0;
                   who.foundPlayer();
-                  if (mod.isDotFlechette) {
-                    mobs.statusDoT(who, 0.5, 360)
+                  if (mod.isFastDot) {
+                    mobs.statusDoT(who, 3.78, 30)
                   } else {
-                    mobs.statusDoT(who, 0.5, 180)
+                    mobs.statusDoT(who, 0.63, mod.isSlowDot ? 360 : 180)
                   }
                   game.drawList.push({ //add dmg to draw queue
                     x: this.position.x,
@@ -1421,42 +1433,18 @@ const b = {
           makeFlechette(mech.angle - 0.02 - 0.005 * Math.random())
         }
 
-        const CD = (mech.crouch) ? 60 : 30
+        const CD = (mech.crouch) ? 68 : 35
         if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
         this.lastFireCycle = mech.cycle
         if (this.count > ((mech.crouch) ? 7 : 1)) {
           this.count = 0
           mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
-
           const who = bullet[bullet.length - 1]
           Matter.Body.setDensity(who, 0.00001);
-          // who.onDmg = function (who) {
-          //   if (mod.isDotFlechette) {
-          //     mobs.statusDoT(who, 0.33, 360) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
-          //     mobs.statusSlow(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
-          //   } else {
-          //     mobs.statusDoT(who, 0.33, 180) // (2.3) / 6 ticks (3 seconds)
-          //     mobs.statusSlow(who, 60) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
-          //   }
-          //   this.endCycle = 0;
-          // };
-
-          // who.onEnd = function () {
-          //   b.explosion(this.position, 220); //makes bullet do explosive damage at end
-          // }
-          // who.do = function () {
-          //   if (this.speed < 10) this.force.y += this.mass * 0.0003; //no gravity until it slows don to improve aiming
-          //   if (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) {
-          //     this.endCycle = 0; //explode if touching map or blocks
-          //   }
-          // }
-
         } else {
           this.count++
-          mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(2 * b.fireCD); // cool down
         }
-
-
       }
     },
     {
@@ -1465,7 +1453,6 @@ const b = {
       ammo: 0,
       ammoPack: 110,
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
@@ -1602,7 +1589,6 @@ const b = {
       ammo: 0,
       ammoPack: 4,
       have: false,
-      isStarterGun: false,
       isEasyToAim: true,
       fireCycle: 0,
       ammoLoaded: 0,
@@ -1661,7 +1647,6 @@ const b = {
       ammoPack: 6,
       defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * b.fireCD); // cool down
@@ -1706,7 +1691,6 @@ const b = {
       ammo: 0,
       ammoPack: 7,
       have: false,
-      isStarterGun: false,
       isEasyToAim: false,
       fire() {
         const me = bullet.length;
@@ -1759,7 +1743,6 @@ const b = {
       ammo: 0,
       ammoPack: 3,
       have: false,
-      isStarterGun: false,
       isEasyToAim: false,
       fire() {
         const me = bullet.length;
@@ -1881,7 +1864,6 @@ const b = {
       ammo: 0,
       ammoPack: 7,
       have: false,
-      isStarterGun: false,
       isEasyToAim: true,
       fire() {
         const me = bullet.length;
@@ -2039,7 +2021,6 @@ const b = {
       ammo: 0,
       ammoPack: 3,
       have: false,
-      isStarterGun: false,
       isEasyToAim: true,
       fire() {
         const pos = {
@@ -2063,7 +2044,6 @@ const b = {
       ammo: 0,
       ammoPack: 5,
       have: false,
-      isStarterGun: false,
       isEasyToAim: true,
       fire() {
         const me = bullet.length;
@@ -2180,7 +2160,6 @@ const b = {
       ammo: 0,
       ammoPack: 14,
       have: false,
-      isStarterGun: true,
       isEasyToAim: true,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
@@ -2193,7 +2172,6 @@ const b = {
       ammo: 0,
       ammoPack: 73,
       have: false,
-      isStarterGun: true,
       isEasyToAim: true,
       fire() {
         if (mech.crouch) {
@@ -2212,7 +2190,6 @@ const b = {
       ammo: 0,
       ammoPack: 50,
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
@@ -2236,7 +2213,6 @@ const b = {
       ammo: 0,
       ammoPack: 4,
       have: false,
-      isStarterGun: false,
       isEasyToAim: false,
       fire() {
         const me = bullet.length;
@@ -2467,7 +2443,6 @@ const b = {
       ammo: 0,
       ammoPack: Infinity,
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
       fire() {
         const reflectivity = 1 - 1 / (mod.laserReflections * 1.5)
@@ -2626,7 +2601,6 @@ const b = {
       ammo: 0,
       ammoPack: Infinity,
       have: false,
-      isStarterGun: true,
       isEasyToAim: false,
       fire() {
         //calculate laser collision
@@ -2823,7 +2797,7 @@ const b = {
     //   ammo: 0,
     //   ammoPack: 5,
     //   have: false,
-    //   isStarterGun: true,
+    //   
     //   fire() {
     //     b.muzzleFlash(45);
     //     // mobs.alert(800);

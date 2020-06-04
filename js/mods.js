@@ -473,7 +473,7 @@ const mod = {
         },
         {
             name: "zoospore vector",
-            description: "mobs discharge <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> on <strong>death</strong><br><strong>+11%</strong> chance",
+            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>+11%</strong> chance",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -540,7 +540,7 @@ const mod = {
         },
         {
             name: "scrap recycling",
-            description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+            description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -556,7 +556,7 @@ const mod = {
         },
         {
             name: "waste energy recovery",
-            description: "regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after a mob <strong>dies</strong>",
+            description: "regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1184,19 +1184,35 @@ const mod = {
             }
         },
         {
-            name: "irradiated needles",
+            name: "6s half-life",
             description: "<strong>needles</strong> are exposed to <strong class='color-p'>plutonium-238</strong><br><strong>2x</strong> <strong class='color-d'>damage</strong> spread over <strong>6</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes")
+                return mod.haveGunCheck("flechettes") && !mod.isFastDot
             },
             requires: "flechettes",
             effect() {
-                mod.isDotFlechette = true;
+                mod.isSlowDot = true;
             },
             remove() {
-                mod.isDotFlechette = false;
+                mod.isSlowDot = false;
+            }
+        },
+        {
+            name: "1/2s half-life",
+            description: "<strong>needles</strong> are exposed to <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("flechettes") && !mod.isSlowDot
+            },
+            requires: "flechettes",
+            effect() {
+                mod.isFastDot = true;
+            },
+            remove() {
+                mod.isFastDot = false;
             }
         },
         {
@@ -1974,4 +1990,5 @@ const mod = {
     fastTime: null,
     squirrelJump: null,
     fastTimeJump: null,
+    isFastDot: null,
 }
