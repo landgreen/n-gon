@@ -17,12 +17,12 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.setField("time dilation field")
-      // mod.giveMod("timelike world line");
-      // mod.giveMod("Lorentz transformation");
+      // mod.giveMod("logistics");
+      // mod.giveMod("negative temperature");
 
-      b.giveGuns("minigun")
+      // b.giveGuns("flechettes")
       // b.giveGuns("spores")
-      // mech.setField("pilot wave")
+      // mech.setField("negative mass field")
       // mech.setField("phase decoherence field")
 
       level.intro(); //starting level
@@ -55,6 +55,11 @@ const level = {
     }
     for (let i = 0; i < mod.foamBotCount; i++) {
       b.foamBot()
+    }
+    if (mod.isArmorFromPowerUps) {
+      // for (let i = 0; i < powerUps.totalPowerUps; i++) {}
+      mech.maxHealth += 0.03 * powerUps.totalPowerUps
+      game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
   },
   isBuildRun: false,
@@ -188,7 +193,7 @@ const level = {
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
-    spawn.sniper(1700, -120)
+    spawn.sniper(1700, -120, 50)
     // spawn.sniper(1600, -120)
     // spawn.sniper(1800, -120)
     // spawn.cellBossCulture(1600, -500)

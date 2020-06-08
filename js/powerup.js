@@ -1,6 +1,7 @@
 let powerUp = [];
 
 const powerUps = {
+  totalPowerUps: 0, //used for mods that count power ups at the end of a level
   choose(type, index) {
     if (type === "gun") {
       b.giveGuns(index)
@@ -110,16 +111,21 @@ const powerUps = {
       //only get ammo for guns player has
       let target;
       if (b.inventory.length > 0) {
-        //add ammo to a gun in inventory
-        target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
-        //try 3 more times to give ammo to a gun with ammo, not Infinity
-        if (target.ammo === Infinity) {
-          target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+        if (mod.isAmmoForGun) {
+          target = b.guns[b.activeGun];
+        } else {
+          //find a gun in your inventory
+          target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
+          //try 3 more times to give ammo to a gun with ammo, not Infinity
           if (target.ammo === Infinity) {
             target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-            if (target.ammo === Infinity) target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+            if (target.ammo === Infinity) {
+              target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+              if (target.ammo === Infinity) target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+            }
           }
         }
+        //give ammo
         if (target.ammo === Infinity) {
           if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
           if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);

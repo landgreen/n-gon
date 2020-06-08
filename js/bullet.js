@@ -22,15 +22,14 @@ const b = {
         }
       } else {
         if (mod.isAmmoFromHealth) {
-          if (mech.health > 0.05) {
-            mech.damage(Math.max(0.01, mod.isAmmoFromHealth * mech.health));
+          if (mech.health > 2 * mod.isAmmoFromHealth * mech.maxHealth) {
+            mech.damage(mod.isAmmoFromHealth * mech.maxHealth);
             powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
             if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
           } else {
             game.replaceTextLog = true;
             game.makeTextLog("not enough health for catabolism to produce ammo", 120);
           }
-
         } else {
           game.replaceTextLog = true;
           game.makeTextLog("<div style='font-size:140%;'>NO AMMO</div> <p style='font-size:90%;'><strong>Q</strong>, <strong>E</strong>, and <strong>mouse wheel</strong> change weapons</p>", 200);
@@ -496,15 +495,11 @@ const b = {
         this.endCycle = 0; //bullet ends cycle after doing damage 
       },
       onEnd() {
-        if (mod.isMutualism && this.isMutualismActive) {
-          if (mod.isEnergyHealth) {
-            mech.energy += 0.01;
-          } else {
-            mech.health += 0.01
-            if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
-            mod.onHealthChange();
-            mech.displayHealth();
-          }
+        if (mod.isMutualism && this.isMutualismActive && !mod.isEnergyHealth) {
+          mech.health += 0.01
+          if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+          mod.onHealthChange();
+          mech.displayHealth();
         }
       },
       do() {
@@ -551,18 +546,11 @@ const b = {
     });
     World.add(engine.world, bullet[bIndex]); //add bullet to world
 
-    if (mod.isMutualism) {
-      if (mod.isEnergyHealth) {
-        if (mech.energy > 0.02) {
-          mech.energy -= 0.01; //energy takes an extra 25% damage for balancing purposes
-          bullet[bIndex].isMutualismActive = true
-        }
-      } else if (mech.health > 0.02) {
-        mech.health -= 0.01
-        mod.onHealthChange();
-        mech.displayHealth();
-        bullet[bIndex].isMutualismActive = true
-      }
+    if (mod.isMutualism && mech.health > 0.02) {
+      mech.health -= 0.01
+      mod.onHealthChange();
+      mech.displayHealth();
+      bullet[bIndex].isMutualismActive = true
     }
   },
   iceIX(speed = 0, spread = 2 * Math.PI) {
@@ -772,7 +760,12 @@ const b = {
       onDmg(who) {
         if (!this.target && who.alive) {
           this.target = who;
-          if (Matter.Query.collides(this, [who]).length > 0) {
+          if (who.radius < 20) {
+            this.targetRelativePosition = {
+              x: 0,
+              y: 0
+            } //find relative position vector for zero mob rotation
+          } else if (Matter.Query.collides(this, [who]).length > 0) {
             const normal = Matter.Query.collides(this, [who])[0].normal
             this.targetRelativePosition = Vector.rotate(Vector.sub(Vector.sub(this.position, who.position), Vector.mult(normal, -this.radius)), -who.angle) //find relative position vector for zero mob rotation
           } else {
@@ -843,6 +836,8 @@ const b = {
               Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.target.velocity), this.target.position))
             }
             Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.9))
+            Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
+
             // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
             if (this.target.isShielded) {
               this.target.damage(b.dmgScale * 0.005, true); //shield damage bypass
@@ -1092,8 +1087,8 @@ const b = {
           //randomize position relative to player
           if (Math.random() < 0.15) {
             this.offPlayer = {
-              x: 100 * (Math.random() - 0.5),
-              y: 90 * (Math.random() - 0.5),
+              x: 120 * (Math.random() - 0.5),
+              y: 120 * (Math.random() - 0.5) - 20,
             }
           }
         }
@@ -1182,7 +1177,7 @@ const b = {
   },
   guns: [{
       name: "minigun",
-      description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong>",
+      description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong><br>fire <strong>delay</strong> decreases as you shoot",
       ammo: 0,
       ammoPack: 75,
       defaultAmmoPack: 75,
@@ -1211,7 +1206,7 @@ const b = {
           bullet[me].onDmg = function (who) {
             mobs.statusSlow(who, 30)
           };
-          mech.energy -= mech.fieldRegen + 0.007
+          mech.energy -= mech.fieldRegen + 0.0075
           if (mech.energy < 0.02) {
             mech.fireCDcycle = mech.cycle + 60; // cool down
           }
@@ -1219,7 +1214,6 @@ const b = {
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0003;
         };
-
       }
     },
     {
@@ -1353,7 +1347,7 @@ const b = {
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
-        function makeFlechette(angle = mech.angle) {
+        function makeFlechette(angle = mech.angle + 0.02 * (Math.random() - 0.5)) {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45, 1.4, b.fireAttributes(angle));
           bullet[me].collisionFilter.mask = cat.body; //cat.mobShield | //cat.map | cat.body |
@@ -1914,7 +1908,6 @@ const b = {
             }
           }
 
-
           const mobCollisions = Matter.Query.collides(this, mob)
           if (mobCollisions.length) {
             onCollide(this)
@@ -2320,7 +2313,7 @@ const b = {
             mech.fireCDcycle = Infinity //can't fire until mouse is released
             const lastCharge = this.charge
             let chargeRate = (mech.crouch) ? 0.975 : 0.987
-            chargeRate *= Math.pow(b.fireCD, 0.04)
+            chargeRate *= Math.pow(b.fireCD, 0.03)
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
             mech.energy -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
 
@@ -2679,7 +2672,7 @@ const b = {
         const energy = 0.3 * Math.min(mech.energy, 1.75)
         mech.energy -= energy * mod.isLaserDiode
         if (best.who) b.explosion(path[1], 1000 * energy, true)
-        mech.fireCDcycle = mech.cycle + Math.floor(60 * b.fireCD); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
 
         if (mod.isPulseStun) {
           const range = 100 + 2000 * energy

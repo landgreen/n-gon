@@ -554,7 +554,7 @@ const mech = {
       document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
     }
 
-    if (dmg > 0.2 * mech.holdingMassScale) mech.drop(); //drop block if holding
+    if (dmg > 0.06 / mech.holdingMassScale) mech.drop(); //drop block if holding
 
     const normalFPS = function () {
       if (mech.defaultFPSCycle < mech.cycle) { //back to default values
@@ -1468,6 +1468,20 @@ const mech = {
                   y: player.velocity.y * 0.98
                 });
               }
+              if (mod.isFreezeMobs) {
+                const ICE_DRAIN = 0.00015
+                for (let i = 0, len = mob.length; i < len; i++) {
+                  if (mob[i].distanceToPlayer() + mob[i].radius < this.fieldDrawRadius && !mob[i].shield && !mob[i].isShielded) {
+                    if (mech.energy > ICE_DRAIN) {
+                      this.fieldDrawRadius -= 2;
+                      mech.energy -= ICE_DRAIN;
+                      mobs.statusSlow(mob[i], 45)
+                    } else {
+                      break;
+                    }
+                  }
+                }
+              }
 
               //draw zero-G range
               ctx.beginPath();
@@ -1475,31 +1489,6 @@ const mech = {
               ctx.fillStyle = "#f5f5ff";
               ctx.globalCompositeOperation = "difference";
               ctx.fill();
-              if (mod.isHawking) {
-                for (let i = 0, len = mob.length; i < len; i++) {
-                  if (mob[i].distanceToPlayer2() < this.fieldDrawRadius * this.fieldDrawRadius && Matter.Query.ray(map, mech.pos, mob[i].position).length === 0 && Matter.Query.ray(body, mech.pos, mob[i].position).length === 0) {
-                    mob[i].damage(b.dmgScale * 0.085);
-                    mob[i].locatePlayer();
-                    //draw electricity
-                    const sub = Vector.sub(mob[i].position, mech.pos)
-                    const unit = Vector.normalise(sub);
-                    const steps = 6
-                    const step = Vector.magnitude(sub) / steps;
-                    ctx.beginPath();
-                    let x = mech.pos.x + 30 * unit.x;
-                    let y = mech.pos.y + 30 * unit.y;
-                    ctx.moveTo(x, y);
-                    for (let i = 0; i < steps; i++) {
-                      x += step * (unit.x + 0.7 * (Math.random() - 0.5))
-                      y += step * (unit.y + 0.7 * (Math.random() - 0.5))
-                      ctx.lineTo(x, y);
-                    }
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "rgba(0,255,0,0.5)" //"#fff";
-                    ctx.stroke();
-                  }
-                }
-              }
               ctx.globalCompositeOperation = "source-over";
             }
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released

@@ -175,7 +175,9 @@ function collisionChecks(event) {
               y: mob[k].velocity.y - 8 * Math.sin(angle)
             });
 
-            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded) {
+            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.2) {
+              mech.energy -= 0.2
+              mech.immuneCycle = 0; //player doesn't go immune to collision damage
               mob[k].death();
               game.drawList.push({
                 //add dmg to draw queue
@@ -207,6 +209,7 @@ function collisionChecks(event) {
             // console.log(obj.dmg / (0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity))))
             if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
+            console.log(dmg)
             mob[k].damage(dmg);
             // console.log(dmg)
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn

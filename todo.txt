@@ -1,8 +1,24 @@
 
-mod flechettes do all DoT damage in 1/2 a second
-minigun increases fire speed as you hold the fire button
+added mods to spawn a gun, a field, and rerolls
+added mod that gives max health for leftover power ups
+   this mod has some interesting interactions with other mods
+mod annihilation now uses 20% of base energy and doesn't trigger damage immunity
+mod Hawking radiation removed
+mod negative temperature: freezed mobs in range of negative mass field, but drain energy
+mod: logistics
+  ammo power ups are added to your current gun
+  spawn 4 ammo immediately
 
 ************** TODO - n-gon **************
+
+very high speed projectile that checks for collisions in future positions to avoid tunneling
+
+make a visual indication of max health
+
+mod: give a gun auto aiming
+  minigun?
+
+ice status effect lasts twice as long
 
 shrink font on small screens (so you can see 5 options on power ups)
 

@@ -900,7 +900,7 @@ const spawn = {
     Matter.Body.rotate(me, Math.random() * Math.PI * 2);
     me.accelMag = 0.0005 * game.accelScale;
     me.seePlayerFreq = Math.floor(25 * game.lookFreqScale);
-    me.memory = 600;
+    me.memory = 420;
     me.restitution = 1;
     me.frictionAir = 0.05;
     me.frictionStatic = 0;
@@ -1009,7 +1009,7 @@ const spawn = {
         // hitting player
         if (best.who === player) {
           if (mech.immuneCycle < mech.cycle) {
-            const dmg = 0.0005 * game.dmgScale;
+            const dmg = 0.002 * game.dmgScale;
             mech.damage(dmg);
             //draw damage
             ctx.fillStyle = color;
@@ -1801,7 +1801,7 @@ const spawn = {
     };
     Matter.Body.setDensity(me, 0.00005); //normal is 0.001
     me.timeLeft = 420 * (0.8 + 0.4 * Math.random());
-    me.accelMag = 0.00015 * (0.8 + 0.4 * Math.random()) * game.accelScale;
+    me.accelMag = 0.00017 * (0.8 + 0.4 * Math.random()) * game.accelScale;
     me.frictionAir = 0.01 * (0.8 + 0.4 * Math.random());
     me.restitution = 0.5;
     me.leaveBody = false;
