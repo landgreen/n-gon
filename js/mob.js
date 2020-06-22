@@ -45,6 +45,9 @@ const mobs = {
   },
   statusSlow(who, cycles = 60) {
     if (!who.shield && !who.isShielded && !mech.isBodiesAsleep) {
+      if (who.isBoss) {
+        cycles = Math.floor(cycles * 0.25)
+      }
       //remove other "slow" effects on this mob
       let i = who.status.length
       while (i--) {
@@ -993,7 +996,7 @@ const mobs = {
           if (Math.random() < mod.sporesOnDeath) {
             const len = Math.min(30, Math.floor(4 + this.mass * Math.random()))
             for (let i = 0; i < len; i++) {
-              b.spore(this) //spawn drone
+              b.spore(this.position)
             }
           }
           if (Math.random() < mod.isBotSpawner) {

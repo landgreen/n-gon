@@ -219,17 +219,6 @@ const mech = {
         mech.doCrouch();
         mech.yOff = mech.yOffWhen.jump;
         mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
-
-        // if (mod.isStomp) {
-        //   const len = Math.min(25, (momentum - 120) * 0.1)
-        //   for (let i = 0; i < len; i++) {
-        //     b.spore(player) //spawn drone
-        //   }
-        // } else if (player.velocity.y > 27 && momentum > 180 * mod.squirrelFx) { //falling damage
-        //   let dmg = Math.sqrt(momentum - 180) * 0.01
-        //   dmg = Math.min(Math.max(dmg, 0.02), 0.20);
-        //   mech.damage(dmg);
-        // }
       } else {
         mech.yOffGoal = mech.yOffWhen.stand;
       }
@@ -316,8 +305,11 @@ const mech = {
       //count mods
       let totalMods = 0;
       for (let i = 0; i < mod.mods.length; i++) {
-        totalMods += mod.mods[i].count
+        if (!mod.mods[i].isNonRefundable) totalMods += mod.mods[i].count
       }
+      if (mod.isDeterminism) totalMods -= 3 //remove the bonus mods 
+      if (mod.isSuperDeterminism) totalMods -= 2 //remove the bonus mods 
+
       const totalGuns = b.inventory.length //count guns
 
       function randomizeMods() {
@@ -328,7 +320,6 @@ const mech = {
             if (mod.mods[i].count < mod.mods[i].maxCount &&
               !mod.mods[i].isNonRefundable &&
               mod.mods[i].name !== "quantum immortality" &&
-              mod.mods[i].name !== "determinism" &&
               mod.mods[i].allowed()
             ) options.push(i);
           }
@@ -1335,7 +1326,7 @@ const mech = {
               const len = Math.floor(6 + 4 * Math.random())
               mech.energy -= len * 0.074;
               for (let i = 0; i < len; i++) {
-                b.spore(player)
+                b.spore(mech.pos)
               }
             } else if (mod.isMissileField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
@@ -1506,9 +1497,8 @@ const mech = {
       name: "plasma torch",
       description: "use <strong class='color-f'>energy</strong> to emit short range plasma<br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
       isEasyToAim: false,
-      effect: () => {
+      effect() {
         mech.fieldMeterColor = "#f0f"
-
         mech.hold = function () {
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1607,13 +1597,6 @@ const mech = {
                     x: best.who.velocity.x * 0.7,
                     y: best.who.velocity.y * 0.7
                   });
-                  // const angle = Math.atan2(player.position.y - best.who.position.y, player.position.x - best.who.position.x);
-                  // const mass = Math.min(Math.sqrt(best.who.mass), 6);
-                  // Matter.Body.setVelocity(best.who, {
-                  //   x: best.who.velocity.x * 0.85 - 3 * Math.cos(angle) / mass,
-                  //   y: best.who.velocity.y * 0.85 - 3 * Math.sin(angle) / mass
-                  // });
-
                   //draw mob damage circle
                   game.drawList.push({
                     x: path[1].x,
@@ -1648,7 +1631,6 @@ const mech = {
               ctx.beginPath();
               ctx.moveTo(x, y);
               const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 10
-
               for (let i = 0; i < 8; i++) {
                 x += step * (Dx + 1.5 * (Math.random() - 0.5))
                 y += step * (Dy + 1.5 * (Math.random() - 0.5))
@@ -1656,12 +1638,6 @@ const mech = {
               }
               ctx.lineWidth = 2 * Math.random();
               ctx.stroke();
-              //draw shield around player
-              // ctx.beginPath();
-              // ctx.arc(mech.pos.x, mech.pos.y, mech.fieldRange * 0.75, 0, 2 * Math.PI);
-              // ctx.fillStyle = "rgba(255,0,255,0.05)"
-              // ctx.fill();
-              // mech.pushBody360(100); //disabled because doesn't work at short range
             }
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
             mech.pickUp();
@@ -1669,6 +1645,7 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
           mech.drawFieldMeter("rgba(0, 0, 0, 0.2)")
+
         }
       }
     },

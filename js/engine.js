@@ -205,13 +205,9 @@ function collisionChecks(event) {
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)));
             let dmg = b.dmgScale * (obj.dmg + mod.acidDmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            // console.log(obj.dmg, 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            // console.log(obj.dmg / (0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity))))
             if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
-            console.log(dmg)
             mob[k].damage(dmg);
-            // console.log(dmg)
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn
             game.drawList.push({ //add dmg to draw queue
               x: pairs[i].activeContacts[0].vertex.x,

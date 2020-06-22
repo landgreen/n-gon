@@ -475,35 +475,35 @@ const powerUps = {
     }
   },
   spawn(x, y, target, moving = true, mode = null) {
-    // if (!level.isBuildRun || target === "heal" || target === "ammo") {
-    let index = powerUp.length;
-    target = powerUps[target];
-    size = target.size();
-    powerUp[index] = Matter.Bodies.polygon(x, y, 0, size, {
-      density: 0.001,
-      frictionAir: 0.01,
-      restitution: 0.8,
-      inertia: Infinity, //prevents rotation
-      collisionFilter: {
-        group: 0,
-        category: cat.powerUp,
-        mask: cat.map | cat.powerUp
-      },
-      color: target.color,
-      effect: target.effect,
-      name: target.name,
-      size: size
-    });
-    if (mode) {
-      powerUp[index].mode = mode
-    }
-    if (moving) {
-      Matter.Body.setVelocity(powerUp[index], {
-        x: (Math.random() - 0.5) * 15,
-        y: Math.random() * -9 - 3
+    if (!(mod.isSuperDeterminism && (target === 'gun' || target === 'field' || target === 'reroll'))) {
+      let index = powerUp.length;
+      target = powerUps[target];
+      size = target.size();
+      powerUp[index] = Matter.Bodies.polygon(x, y, 0, size, {
+        density: 0.001,
+        frictionAir: 0.01,
+        restitution: 0.8,
+        inertia: Infinity, //prevents rotation
+        collisionFilter: {
+          group: 0,
+          category: cat.powerUp,
+          mask: cat.map | cat.powerUp
+        },
+        color: target.color,
+        effect: target.effect,
+        name: target.name,
+        size: size
       });
+      if (mode) {
+        powerUp[index].mode = mode
+      }
+      if (moving) {
+        Matter.Body.setVelocity(powerUp[index], {
+          x: (Math.random() - 0.5) * 15,
+          y: Math.random() * -9 - 3
+        });
+      }
+      World.add(engine.world, powerUp[index]); //add to world
     }
-    World.add(engine.world, powerUp[index]); //add to world
-    // }
   },
 };

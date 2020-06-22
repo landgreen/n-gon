@@ -467,17 +467,18 @@ const b = {
     Matter.Body.setVelocity(bullet[bIndex], velocity);
     World.add(engine.world, bullet[bIndex]); //add bullet to world
   },
-  spore(who) { //used with the mod upgrade in mob.death()
+  spore(where, isFreeze = mod.isSporeFreeze) { //used with the mod upgrade in mob.death()
     const bIndex = bullet.length;
     const side = 4;
-    bullet[bIndex] = Bodies.polygon(who.position.x, who.position.y, 5, side, {
+    bullet[bIndex] = Bodies.polygon(where.x, where.y, 5, side, {
       // density: 0.0015,			//frictionAir: 0.01,
       inertia: Infinity,
+      isFreeze: isFreeze,
       restitution: 0.5,
       angle: Math.random() * 2 * Math.PI,
       friction: 0,
       frictionAir: 0.025,
-      thrust: mod.isFastSpores ? 0.001 : 0.0004,
+      thrust: (mod.isFastSpores ? 0.001 : 0.0004) * (1 + 0.3 * (Math.random() - 0.5)),
       dmg: mod.isMutualism ? 5.6 : 2.8, //2x bonus damage from mod.isMutualism
       lookFrequency: 97 + Math.floor(117 * Math.random()),
       classType: "bullet",
@@ -491,8 +492,9 @@ const b = {
         x: 100 * (Math.random() - 0.5),
         y: 100 * (Math.random() - 0.5)
       },
-      onDmg() {
+      onDmg(who) {
         this.endCycle = 0; //bullet ends cycle after doing damage 
+        if (this.isFreeze) mobs.statusSlow(who, 60)
       },
       onEnd() {
         if (mod.isMutualism && this.isMutualismActive && !mod.isEnergyHealth) {
@@ -503,39 +505,70 @@ const b = {
         }
       },
       do() {
-        if (!(game.cycle % this.lookFrequency)) { //find mob targets
-          this.closestTarget = null;
-          this.lockedOn = null;
-          let closeDist = Infinity;
-          for (let i = 0, len = mob.length; i < len; ++i) {
-            if (mob[i].dropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
-              // Matter.Query.ray(body, this.position, mob[i].position).length === 0
-              const targetVector = Vector.sub(this.position, mob[i].position)
-              const dist = Vector.magnitude(targetVector);
-              if (dist < closeDist) {
-                this.closestTarget = mob[i].position;
-                closeDist = dist;
-                this.lockedOn = mob[i] //Vector.normalise(targetVector);
-                if (0.3 > Math.random()) break //doesn't always target the closest mob
+        if (this.lockedOn && this.lockedOn.alive) {
+          this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+        } else {
+          if (!(game.cycle % this.lookFrequency)) { //find mob targets
+            this.closestTarget = null;
+            this.lockedOn = null;
+            let closeDist = Infinity;
+            for (let i = 0, len = mob.length; i < len; ++i) {
+              if (mob[i].dropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                const targetVector = Vector.sub(this.position, mob[i].position)
+                const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
+                if (dist < closeDist) {
+                  this.closestTarget = mob[i].position;
+                  closeDist = dist;
+                  this.lockedOn = mob[i]
+                  if (0.3 > Math.random()) break //doesn't always target the closest mob
+                }
               }
             }
           }
-        }
-
-        if (this.lockedOn && this.lockedOn.alive) { //accelerate towards mobs
-          this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
-        } else if (mod.isSporeFollow && this.lockedOn !== undefined) { //move towards player
-          //checking for undefined means that the spores don't go after the player until it has looked and not found a target
-          const dx = this.position.x - mech.pos.x;
-          const dy = this.position.y - mech.pos.y;
-          if (dx * dx + dy * dy > 10000) {
-            this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+          if (mod.isSporeFollow && this.lockedOn === null) { //move towards player
+            //checking for null means that the spores don't go after the player until it has looked and not found a target
+            const dx = this.position.x - mech.pos.x;
+            const dy = this.position.y - mech.pos.y;
+            if (dx * dx + dy * dy > 10000) {
+              this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+            }
+          } else {
+            this.force.y += this.mass * 0.0001; //gravity
           }
-          // this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.thrust)
 
-        } else {
-          this.force.y += this.mass * 0.0001; //gravity
         }
+
+        // if (!this.lockedOn && !(game.cycle % this.lookFrequency)) { //find mob targets
+        //   this.closestTarget = null;
+        //   this.lockedOn = null;
+        //   let closeDist = Infinity;
+        //   for (let i = 0, len = mob.length; i < len; ++i) {
+        //     if (mob[i].dropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+        //       // Matter.Query.ray(body, this.position, mob[i].position).length === 0
+        //       const targetVector = Vector.sub(this.position, mob[i].position)
+        //       const dist = Vector.magnitude(targetVector);
+        //       if (dist < closeDist) {
+        //         this.closestTarget = mob[i].position;
+        //         closeDist = dist;
+        //         this.lockedOn = mob[i] //Vector.normalise(targetVector);
+        //         if (0.3 > Math.random()) break //doesn't always target the closest mob
+        //       }
+        //     }
+        //   }
+        // }
+        // if (this.lockedOn && this.lockedOn.alive) { //accelerate towards mobs
+        //   this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+        // } else if (mod.isSporeFollow && this.lockedOn !== undefined) { //move towards player
+        //   //checking for undefined means that the spores don't go after the player until it has looked and not found a target
+        //   const dx = this.position.x - mech.pos.x;
+        //   const dy = this.position.y - mech.pos.y;
+        //   if (dx * dx + dy * dy > 10000) {
+        //     this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+        //   }
+        //   // this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.thrust)
+        // } else {
+        //   this.force.y += this.mass * 0.0001; //gravity
+        // }
       },
     });
     const SPEED = 4 + 8 * Math.random();
@@ -578,7 +611,7 @@ const b = {
       onDmg(who) {
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
-        if (mod.isAlphaRadiation) mobs.statusDoT(who, 0.1, 180)
+        if (mod.isHeavyWater) mobs.statusDoT(who, 0.1, 180)
       },
       onEnd() {},
       do() {
@@ -1226,18 +1259,27 @@ const b = {
       fire() {
         let knock, spread
         if (mech.crouch) {
+          spread = 0.75
           mech.fireCDcycle = mech.cycle + Math.floor(55 * b.fireCD); // cool down
           if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(58 * b.fireCD); //player is immune to collision damage for 30 cycles
-          spread = 0.75
-          knock = 0.01 * mod.bulletSize * mod.bulletSize
+          knock = 0.01
         } else {
           mech.fireCDcycle = mech.cycle + Math.floor(45 * b.fireCD); // cool down
           if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(47 * b.fireCD); //player is immune to collision damage for 30 cycles
           spread = 1.3
-          knock = 0.08 * mod.bulletSize * mod.bulletSize
+          knock = 0.08
         }
-        player.force.x -= knock * Math.cos(mech.angle)
-        player.force.y -= knock * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
+
+        if (mod.isShotgunRecoil) {
+          mech.fireCDcycle -= 15
+          player.force.x -= 2 * knock * Math.cos(mech.angle)
+          player.force.y -= 2 * knock * Math.sin(mech.angle) //reduce knock back in vertical direction to stop super jumps
+        } else {
+          player.force.x -= knock * Math.cos(mech.angle)
+          player.force.y -= knock * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
+        }
+
+
 
         b.muzzleFlash(35);
         if (mod.isNailShot) {
@@ -2142,7 +2184,7 @@ const b = {
         bullet[me].onEnd = function () {
           const NUM = 10
           for (let i = 0; i < NUM; i++) {
-            b.spore(this)
+            b.spore(this.position)
           }
         }
       }
@@ -2669,10 +2711,20 @@ const b = {
         }
 
         //use energy to explode
-        const energy = 0.3 * Math.min(mech.energy, 1.75)
-        mech.energy -= energy * mod.isLaserDiode
-        if (best.who) b.explosion(path[1], 1000 * energy, true)
-        mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
+        let energy;
+        if (mod.isRapidPulse) {
+          energy = 0.02 + 0.06 * Math.min(mech.energy, 1.75)
+          if (mech.energy < energy) return
+          mech.energy -= energy * mod.isLaserDiode
+          if (best.who) b.explosion(path[1], 2000 * energy, true)
+          mech.fireCDcycle = mech.cycle + Math.floor(15 * b.fireCD); // cool down
+        } else {
+          energy = 0.3 * Math.min(mech.energy, 1.75)
+          mech.energy -= energy * mod.isLaserDiode
+          if (best.who) b.explosion(path[1], 1000 * energy, true)
+          mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
+        }
+
 
         if (mod.isPulseStun) {
           const range = 100 + 2000 * energy

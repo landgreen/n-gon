@@ -16,17 +16,13 @@ const level = {
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
-      // mech.setField("time dilation field")
-      // mod.giveMod("logistics");
-      // mod.giveMod("negative temperature");
 
-      // b.giveGuns("flechettes")
+      mod.giveMod("automatic shotgun");
       // b.giveGuns("spores")
-      // mech.setField("negative mass field")
-      // mech.setField("phase decoherence field")
+      // mech.setField("plasma torch")
 
       level.intro(); //starting level
-      // level.testing();
+      // level.testing(); 
       // level.stronghold()
       // level.bosses();
       // level.satellite();
@@ -58,8 +54,8 @@ const level = {
     }
     if (mod.isArmorFromPowerUps) {
       // for (let i = 0; i < powerUps.totalPowerUps; i++) {}
-      mech.maxHealth += 0.03 * powerUps.totalPowerUps
-      game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
+      mech.maxHealth += 0.04 * powerUps.totalPowerUps
+      if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.04 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
   },
   isBuildRun: false,
@@ -135,7 +131,7 @@ const level = {
   //******************************************************************************************************************
 
   testing() {
-    level.difficultyIncrease(14); //hard mode level 7
+    // level.difficultyIncrease(14); //hard mode level 7
     spawn.setSpawnList();
     spawn.setSpawnList();
     level.defaultZoom = 1500
@@ -193,9 +189,10 @@ const level = {
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
-    spawn.sniper(1700, -120, 50)
-    // spawn.sniper(1600, -120)
-    // spawn.sniper(1800, -120)
+    // spawn.sniper(1700, -120, 50)
+    spawn.sniper(1400, -120)
+    spawn.sniper(1800, -120)
+    spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
     // spawn.shooter(1600, -500)
     // spawn.striker(1600, -500)

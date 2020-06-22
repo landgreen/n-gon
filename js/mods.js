@@ -245,14 +245,14 @@ const mod = {
         },
         {
             name: "electrostatic shots",
-            description: "<strong>33%</strong> increased <strong class='color-d'>damage</strong><br><strong>33%</strong> increased <strong>delay</strong> after firing",
+            description: "<strong>25%</strong> increased <strong class='color-d'>damage</strong><br><strong>25%</strong> increased <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
                 return true
             },
             effect() {
-                mod.slowFire = 1.33
+                mod.slowFire = 1.25
                 b.setFireCD();
             },
             remove() {
@@ -431,7 +431,7 @@ const mod = {
             effect() {
                 mod.sporesOnDeath += 0.11;
                 for (let i = 0; i < 10; i++) {
-                    b.spore(player)
+                    b.spore(mech.pos)
                 }
             },
             remove() {
@@ -552,7 +552,7 @@ const mod = {
                 mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             },
             remove() {
-                mod.collisionImmuneCycles = 30;
+                mod.collisionImmuneCycles = 15;
             }
         },
         {
@@ -721,6 +721,38 @@ const mod = {
             }
         },
         {
+            name: "negentropy",
+            description: "when below  <strong>25%</strong> of <strong>maximum health</strong><br> <strong class='color-h'>heal</strong> <strong>1%</strong> of <strong>maximum health</strong> per second",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mech.maxHealth > 1
+            },
+            requires: "increased max health",
+            effect() {
+                mod.isHealLowHealth = true;
+            },
+            remove() {
+                mod.isHealLowHealth = false;
+            }
+        },
+        {
+            name: "crystallized armor",
+            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>4%</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect() {
+                mod.isArmorFromPowerUps = true;
+            },
+            remove() {
+                mod.isArmorFromPowerUps = false;
+            }
+        },
+        {
             name: "recursive healing",
             description: "<strong class='color-h'>healing</strong> <strong>power ups</strong> trigger <strong>+1</strong> more time",
             maxCount: 9,
@@ -734,22 +766,6 @@ const mod = {
             },
             remove() {
                 mod.recursiveHealing = 1;
-            }
-        },
-        {
-            name: "crystallized armor",
-            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>3%</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isEnergyHealth
-            },
-            requires: "not mass-energy equivalence",
-            effect() {
-                mod.isArmorFromPowerUps = true;
-            },
-            remove() {
-                mod.isArmorFromPowerUps = false;
             }
         },
         {
@@ -787,13 +803,13 @@ const mod = {
         },
         {
             name: "logistics",
-            description: "<strong>ammo</strong> power ups <strong>add</strong> to your current <strong>gun</strong><br>spawn <strong>4 ammo</strong>",
+            description: "<strong>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>4 ammo</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return b.inventory.length > 1
             },
-            requires: "",
+            requires: "at least 2 guns",
             effect() {
                 mod.isAmmoForGun = true;
                 for (let i = 0; i < 4; i++) {
@@ -858,6 +874,7 @@ const mod = {
             description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong>power ups</strong> are limited to <strong>one choice</strong>",
             maxCount: 1,
             count: 0,
+            isNonRefundable: true,
             allowed() {
                 return !mod.isExtraChoice
             },
@@ -874,14 +891,35 @@ const mod = {
             }
         },
         {
+            name: "superdeterminism",
+            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong>guns</strong>, and <strong>fields</strong> will no longer <strong>spawn</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return mod.isDeterminism && !mod.manyWorlds
+            },
+            requires: "determinism",
+            effect: () => {
+                mod.isSuperDeterminism = true;
+                for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                }
+            },
+            remove() {
+                mod.isSuperDeterminism = false;
+            }
+        },
+        {
             name: "many-worlds",
             description: "after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return !mod.isSuperDeterminism
             },
-            requires: "",
+            requires: "not superdeterminism",
             effect: () => {
                 mod.manyWorlds = true;
             },
@@ -947,7 +985,9 @@ const mod = {
                 for (let i = 0, len = mod.mods.length; i < len; i++) { // spawn new mods power ups
                     if (!mod.mods[i].isNonRefundable) count += mod.mods[i].count
                 }
-                if (mod.isDeterminism) count -= 5 //remove the 5 bonus mods when getting rid of determinism
+                if (mod.isDeterminism) count -= 3 //remove the bonus mods 
+                if (mod.isSuperDeterminism) count -= 2 //remove the bonus mods 
+
                 mod.setupAllMods(); // remove all mods
                 for (let i = 0; i < count; i++) { // spawn new mods power ups
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
@@ -963,7 +1003,7 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return (mod.totalCount > 0) && !build.isCustomSelection
+                return (mod.totalCount > 0) && !build.isCustomSelection && !mod.isSuperDeterminism
             },
             requires: "at least 1 mod",
             effect: () => {
@@ -1122,6 +1162,22 @@ const mod = {
             }
         },
         {
+            name: "automatic shotgun",
+            description: "the <strong>shotgun</strong> fires <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("shotgun")
+            },
+            requires: "shotgun",
+            effect() {
+                mod.isShotgunRecoil = true;
+            },
+            remove() {
+                mod.isShotgunRecoil = false;
+            }
+        },
+        {
             name: "super duper",
             description: "fire <strong>+2</strong> additional <strong>super balls</strong>",
             maxCount: 9,
@@ -1187,7 +1243,7 @@ const mod = {
         },
         {
             name: "6s half-life",
-            description: "<strong>needles</strong> are exposed to <strong class='color-p'>plutonium-238</strong><br><strong>2x</strong> <strong class='color-d'>damage</strong> spread over <strong>6</strong> seconds",
+            description: "<strong>flechette</strong> needles made of <strong class='color-p'>plutonium-238</strong><br><strong>2x</strong> <strong class='color-d'>damage</strong> spread over <strong>6</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1203,7 +1259,7 @@ const mod = {
         },
         {
             name: "1/2s half-life",
-            description: "<strong>needles</strong> are exposed to <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
+            description: "<strong>flechette</strong> needles made of <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1259,7 +1315,7 @@ const mod = {
             },
             requires: "wave beam",
             effect() {
-                mod.waveSpeedMap = 3 //needs to be 3 for pocket universe require check
+                mod.waveSpeedMap = 3 //needs to be 3 to stop bound state require check
                 mod.waveSpeedBody = 1.9
             },
             remove() {
@@ -1268,8 +1324,8 @@ const mod = {
             }
         },
         {
-            name: "pocket universe",
-            description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>confined</strong> to a <strong>region</strong> around player",
+            name: "bound state",
+            description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>bound</strong> to a <strong>region</strong> around player",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1385,7 +1441,7 @@ const mod = {
         },
         {
             name: "rocket-propelled grenade",
-            description: "<strong>grenades</strong> are rapidly <strong>accelerated</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
+            description: "<strong>grenades</strong> rapidly <strong>accelerate</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1528,6 +1584,23 @@ const mod = {
             }
         },
         {
+            name: "cryodesiccation",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1</strong> second",
+            // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
+            },
+            requires: "spores",
+            effect() {
+                mod.isSporeFreeze = true
+            },
+            remove() {
+                mod.isSporeFreeze = false
+            }
+        },
+        {
             name: "brushless motor",
             description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
             maxCount: 1,
@@ -1545,7 +1618,7 @@ const mod = {
         },
         {
             name: "heavy water",
-            description: "<strong>ice IX</strong> is synthesized with unstable isotopes<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over 3 seconds",
+            description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over 3 seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1553,15 +1626,15 @@ const mod = {
             },
             requires: "ice IX",
             effect() {
-                mod.isAlphaRadiation = true
+                mod.isHeavyWater = true
             },
             remove() {
-                mod.isAlphaRadiation = false;
+                mod.isHeavyWater = false;
             }
         },
         {
             name: "necrophoresis",
-            description: "<strong>foam</strong> splits into 3 <strong>copies</strong><br>when the mob it is stuck to <strong>dies</strong>",
+            description: "<strong>foam</strong> splits into 3 <strong>copies</strong><br>when the mob it's stuck to <strong>dies</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1644,6 +1717,38 @@ const mod = {
                 mod.isPulseStun = false;
             }
         },
+        // {
+        //     name: "aim",
+        //     description: "<strong>pulse</strong> <strong class='color-e'>explosions</strong> aim",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mod.haveGunCheck("pulse")
+        //     },
+        //     requires: "pulse",
+        //     effect() {
+        //         mod.isPulseAim = true;
+        //     },
+        //     remove() {
+        //         mod.isPulseAim = false;
+        //     }
+        // },
+        // {
+        //     name: "fast ignition",
+        //     description: "<strong>pulse</strong> <strong class='color-e'>explosions</strong> more <strong>efficient</strong><br><strong>delay</strong> after firing is <strong>shorter</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mod.haveGunCheck("pulse")
+        //     },
+        //     requires: "pulse",
+        //     effect() {
+        //         mod.isRapidPulse = true;
+        //     },
+        //     remove() {
+        //         mod.isRapidPulse = false;
+        //     }
+        // },
         //************************************************** 
         //************************************************** field
         //************************************************** mods
@@ -1772,7 +1877,7 @@ const mod = {
         },
         {
             name: "bremsstrahlung radiation",
-            description: "<strong>blocking</strong> with your field does <strong class='color-d'>damage</strong>",
+            description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1945,9 +2050,9 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return true
+                return !mod.isSuperDeterminism
             },
-            requires: "",
+            requires: "not superdeterminism",
             effect() {
                 for (let i = 0; i < 6; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
@@ -1963,9 +2068,9 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return true
+                return !mod.isSuperDeterminism
             },
-            requires: "",
+            requires: "not superdeterminism",
             effect() {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
@@ -1979,9 +2084,9 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return true
+                return !mod.isSuperDeterminism
             },
-            requires: "",
+            requires: "not superdeterminism",
             effect() {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "field");
                 if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "field");
@@ -2050,7 +2155,7 @@ const mod = {
     isBlockStun: null,
     isStunField: null,
     isHarmDamage: null,
-    isAlphaRadiation: null,
+    isHeavyWater: null,
     energyRegen: null,
     isVacuumShield: null,
     renormalization: null,
@@ -2067,6 +2172,7 @@ const mod = {
     isRPG: null,
     is3Missiles: null,
     isDeterminism: null,
+    isSuperDeterminism: null,
     isHarmReduce: null,
     nailsDeathMob: null,
     isSlowFPS: null,
@@ -2081,5 +2187,10 @@ const mod = {
     fastTimeJump: null,
     isFastDot: null,
     isArmorFromPowerUps: null,
-    isAmmoForGun: null
+    isAmmoForGun: null,
+    isRapidPulse: null,
+    // isPulseAim: null,
+    isSporeFreeze: null,
+    isShotgunRecoil: null,
+    isHealLowHealth: null
 }

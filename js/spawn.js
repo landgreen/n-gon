@@ -159,6 +159,7 @@ const spawn = {
   cellBoss(x, y, radius = 20) {
     mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,150,155,0.7)");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.isCell = true;
     me.accelMag = 0.00015 * game.accelScale;
     me.memory = 40;
@@ -214,11 +215,12 @@ const spawn = {
       }
     };
     me.onDeath = function () {
+      this.isCell = false;
       let count = 0 //count other cells
       for (let i = 0, len = mob.length; i < len; i++) {
         if (mob[i].isCell) count++
       }
-      if (count === 1) { //only drop a power up if this is the last cell
+      if (count < 1) { //only drop a power up if this is the last cell
         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       } else {
         this.leaveBody = false;
@@ -553,6 +555,7 @@ const spawn = {
   suckerBoss(x, y, radius = 25) {
     mobs.spawn(x, y, 12, radius, "#000");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.stroke = "transparent"; //used for drawSneaker
     me.eventHorizon = 1100; //required for black hole
     me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
@@ -653,6 +656,7 @@ const spawn = {
     let targets = [] //track who is in the node boss, for shields
     mobs.spawn(x, y, 6, radius, "#b386e8");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     targets.push(me.id) //add to shield protection
     me.friction = 0;
     me.frictionAir = 0.0065;
@@ -732,6 +736,7 @@ const spawn = {
   timeSkipBoss(x, y, radius = 55) {
     mobs.spawn(x, y, 6, radius, '#000');
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     // me.stroke = "transparent"; //used for drawSneaker
     me.timeSkipLastCycle = 0
     me.eventHorizon = 1800; //required for black hole
@@ -896,6 +901,7 @@ const spawn = {
     const color = "#05f"
     mobs.spawn(x, y, 3, radius, color);
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     Matter.Body.rotate(me, Math.random() * Math.PI * 2);
     me.accelMag = 0.0005 * game.accelScale;
@@ -1054,6 +1060,7 @@ const spawn = {
   laserBoss(x, y, radius = 30) {
     mobs.spawn(x, y, 3, radius, "#f00");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.startingPosition = {
       x: x,
       y: y
@@ -1463,6 +1470,7 @@ const spawn = {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     Matter.Body.setDensity(me, 0.0015 + 0.0004 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
     me.stroke = "rgba(255,0,200)"; //used for drawGhost
@@ -1527,6 +1535,7 @@ const spawn = {
   shooterBoss(x, y, radius = 130) {
     mobs.spawn(x, y, 3, radius, "rgb(255,70,180)");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     me.isVerticesChange = true
     me.memory = 240;
@@ -1739,7 +1748,7 @@ const spawn = {
       this.seePlayerCheck();
       this.checkStatus();
       this.attraction();
-      if (this.seePlayer.recall && !(game.cycle % this.fireFreq)) {
+      if (this.seePlayer.recall && !(game.cycle % this.fireFreq) && !mech.isBodiesAsleep) {
         Matter.Body.setAngularVelocity(this, 0.14)
         //fire a bullet from each vertex
         for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -1757,6 +1766,7 @@ const spawn = {
   launcherBoss(x, y, radius = 90) {
     mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.accelMag = 0.00008 * game.accelScale;
     me.fireFreq = Math.floor(330 * game.CDScale)
     me.frictionStatic = 0;
@@ -1776,7 +1786,7 @@ const spawn = {
       this.checkStatus();
       this.attraction();
       this.repulsion();
-      if (this.seePlayer.recall && !(game.cycle % this.fireFreq)) {
+      if (this.seePlayer.recall && !(game.cycle % this.fireFreq) && !mech.isBodiesAsleep) {
         Matter.Body.setAngularVelocity(this, 0.11)
         //fire a bullet from each vertex
         for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -1881,6 +1891,7 @@ const spawn = {
     //snake boss with a laser head
     mobs.spawn(x, y, 8, radius, "rgb(255,50,130)");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.accelMag = 0.0012 * game.accelScale;
     me.memory = 200;
     me.laserRange = 500;
@@ -1922,6 +1933,7 @@ const spawn = {
     // often has a ring of mobs around it
     mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");
     let me = mob[mob.length - 1];
+    me.isBoss = true;
     me.g = 0.0001; //required if using 'gravity'
     me.accelMag = 0.002 * game.accelScale;
     me.memory = 20;

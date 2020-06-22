@@ -771,6 +771,12 @@ const game = {
         if (mod.isHealthRecovery) mech.addHealth(0.01)
       }
 
+      if (mod.isHealLowHealth) {
+        if (mech.health < mech.maxHealth * 0.25) {
+          mech.addHealth(0.01 * mech.maxHealth)
+        }
+      }
+
       if (!(game.cycle % 420)) { //once every 7 seconds
         fallCheck = function (who, save = false) {
           let i = who.length;
