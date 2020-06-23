@@ -1992,7 +1992,7 @@ const mech = {
 
                 for (let i = 0, len = body.length; i < len; ++i) {
                   if (Vector.magnitude(Vector.sub(body[i].position, mech.fieldPosition)) < mech.fieldRadius) {
-                    const DRAIN = speed * body[i].mass * 0.000018
+                    const DRAIN = speed * body[i].mass * 0.000015
                     if (mech.energy > DRAIN) {
                       mech.energy -= DRAIN;
                       Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity

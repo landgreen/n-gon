@@ -378,7 +378,7 @@ const b = {
         if (collide.length > 0) {
           for (let i = 0; i < collide.length; i++) {
             if (collide[i].bodyA.collisionFilter.category === cat.map) { // || collide[i].bodyB.collisionFilter.category === cat.map) {
-              const angle = Matter.Vector.angle(collide[i].normal, {
+              const angle = Vector.angle(collide[i].normal, {
                 x: 1,
                 y: 0
               })
@@ -726,14 +726,14 @@ const b = {
               let closeDist = Infinity;
               for (let i = 0, len = powerUp.length; i < len; ++i) {
                 if (
-                  ((powerUp[i].name !== "field" && powerUp[i].name !== "heal") || (powerUp[i].name === "heal" && mech.health < 0.8)) &&
+                  ((powerUp[i].name !== "field" && powerUp[i].name !== "heal") || (powerUp[i].name === "heal" && mech.health < 0.9)) &&
                   Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
                   Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
                 ) {
                   const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
                   const DIST = Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
-                    if (DIST < 50) { //eat the power up if close enough
+                    if (DIST < 60) { //eat the power up if close enough
                       powerUp[i].effect();
                       Matter.World.remove(engine.world, powerUp[i]);
                       powerUp.splice(i, 1);
@@ -875,7 +875,7 @@ const b = {
             if (this.target.isShielded) {
               this.target.damage(b.dmgScale * 0.005, true); //shield damage bypass
               //shrink if mob is shielded
-              const SCALE = 1 - 0.025 / mod.isBulletsLastLonger
+              const SCALE = 1 - 0.016 / mod.isBulletsLastLonger
               Matter.Body.scale(this, SCALE, SCALE);
               this.radius *= SCALE;
             } else {
@@ -886,14 +886,28 @@ const b = {
             this.collisionFilter.category = cat.bullet;
             this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
             if (mod.isFoamGrowOnDeath) {
-              // const SCALE = (this.radius < 30) ? 2 : 1 //Math.min(5, Math.max(1, 20 / (this.radius * this.radius)))
-              // Matter.Body.scale(this, SCALE, SCALE);
-              // this.radius *= SCALE;
-              const radius = Math.min(this.radius / 2, 10)
-              b.foam(this.position, Matter.Vector.rotate(this.velocity, Math.PI * 2 / 3), radius)
-              b.foam(this.position, Matter.Vector.rotate(this.velocity, Math.PI * 1 / 3), radius)
+              let targets = []
+              for (let i = 0, len = mob.length; i < len; i++) {
+                const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                if (dist < 1000000) {
+                  targets.push(mob[i])
+                }
+              }
+              const radius = Math.min(this.radius * 0.5, 10)
+              for (let i = 0; i < 2; i++) {
+                if (targets.length - i > 0) {
+                  const index = Math.floor(Math.random() * targets.length)
+                  const speed = 10 + 10 * Math.random()
+                  const velocity = Vector.mult(Vector.normalise(Vector.sub(targets[index].position, this.position)), speed)
+                  b.foam(this.position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
+                } else {
+                  b.foam(this.position, Vector.rotate({
+                    x: 15 + 10 * Math.random(),
+                    y: 0
+                  }, 2 * Math.PI * Math.random()), radius)
+                }
+              }
             }
-
           }
         }
       }
@@ -1392,7 +1406,7 @@ const b = {
         function makeFlechette(angle = mech.angle + 0.02 * (Math.random() - 0.5)) {
           const me = bullet.length;
           bullet[me] = Bodies.rectangle(mech.pos.x + 40 * Math.cos(mech.angle), mech.pos.y + 40 * Math.sin(mech.angle), 45, 1.4, b.fireAttributes(angle));
-          bullet[me].collisionFilter.mask = cat.body; //cat.mobShield | //cat.map | cat.body |
+          bullet[me].collisionFilter.mask = mod.pierce ? 0 : cat.body; //cat.mobShield | //cat.map | cat.body |
           Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
           bullet[me].endCycle = game.cycle + 180;
           bullet[me].dmg = 0;
@@ -2269,7 +2283,7 @@ const b = {
             if (who.shield) {
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
-                  Matter.Body.setVelocity(mob[i], Matter.Vector.mult(Matter.Vector.normalise(this.velocity), 10));
+                  Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(this.velocity), 10));
                   break
                 }
               }

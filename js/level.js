@@ -16,10 +16,10 @@ const level = {
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
-
-      mod.giveMod("automatic shotgun");
-      // b.giveGuns("spores")
-      // mech.setField("plasma torch")
+      // mech.isStealth = true;
+      // mod.giveMod("necrophoresis");
+      // b.giveGuns("foam")
+      // mech.setField("time dilation field")
 
       level.intro(); //starting level
       // level.testing(); 

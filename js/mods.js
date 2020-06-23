@@ -786,6 +786,22 @@ const mod = {
             }
         },
         {
+            name: "bubble fusion",
+            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>3</strong> <strong class='color-h'>heals</strong>, <strong>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.isShieldAmmo = true;
+            },
+            remove() {
+                mod.isShieldAmmo = false;
+            }
+        },
+        {
             name: "Bayesian inference",
             description: "<strong>40%</strong> chance for double <strong>power ups</strong> to drop<br><strong>ammo</strong> will no longer <strong>spawn</strong> from mobs",
             maxCount: 1,
@@ -1275,7 +1291,7 @@ const mod = {
         },
         {
             name: "piercing needles",
-            description: "<strong>needles</strong> penetrate <strong>mobs</strong><br>potentially hitting <strong>multiple</strong> targets",
+            description: "<strong>needles</strong> penetrate <strong>mobs</strong> and <strong>blocks</strong><br>potentially hitting <strong>multiple</strong> targets",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1634,7 +1650,7 @@ const mod = {
         },
         {
             name: "necrophoresis",
-            description: "<strong>foam</strong> splits into 3 <strong>copies</strong><br>when the mob it's stuck to <strong>dies</strong>",
+            description: "if the mob <strong>foam</strong> is stuck to <strong>dies</strong><br><strong>foam</strong> grows and splits into 3 <strong>copies</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
