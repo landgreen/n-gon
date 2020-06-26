@@ -369,7 +369,7 @@ const b = {
       stillCount: 0,
       isArmed: false,
       endCycle: Infinity,
-      lookFrequency: 41 + Math.floor(23 * Math.random()),
+      lookFrequency: 0,
       range: 700,
       onDmg() {},
       do() {
@@ -423,26 +423,33 @@ const b = {
         if (this.stillCount > 25) this.arm();
       },
       arm() {
-        this.isArmed = true
-        game.drawList.push({
-          //add dmg to draw queue
-          x: this.position.x,
-          y: this.position.y,
-          radius: 10,
-          color: "#f00",
-          time: 4
-        });
-
+        this.lookFrequency = game.cycle + 60
         this.do = function () { //overwrite the do method for this bullet
           this.force.y += this.mass * 0.002; //extra gravity
-          if (!(game.cycle % this.lookFrequency)) { //find mob targets
-            for (let i = 0, len = mob.length; i < len; ++i) {
-              if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
-                mob[i].dropPowerUp &&
-                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                this.endCycle = 0 //end life if mob is near and visible
-                if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back after detonation
+
+          if (game.cycle > this.lookFrequency) {
+            this.isArmed = true
+            this.lookFrequency = 50 + Math.floor(27 * Math.random())
+            game.drawList.push({
+              //add dmg to draw queue
+              x: this.position.x,
+              y: this.position.y,
+              radius: 10,
+              color: "#f00",
+              time: 4
+            });
+            this.do = function () { //overwrite the do method for this bullet
+              this.force.y += this.mass * 0.002; //extra gravity
+              if (!(game.cycle % this.lookFrequency)) { //find mob targets
+                for (let i = 0, len = mob.length; i < len; ++i) {
+                  if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
+                    mob[i].dropPowerUp &&
+                    Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                    Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                    this.endCycle = 0 //end life if mob is near and visible
+                    if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back after detonation
+                  }
+                }
               }
             }
           }
@@ -726,7 +733,7 @@ const b = {
               let closeDist = Infinity;
               for (let i = 0, len = powerUp.length; i < len; ++i) {
                 if (
-                  ((powerUp[i].name !== "field" && powerUp[i].name !== "heal") || (powerUp[i].name === "heal" && mech.health < 0.9)) &&
+                  ((powerUp[i].name !== "field" && powerUp[i].name !== "heal") || (powerUp[i].name === "heal" && mech.health < 0.9 * mech.maxHealth)) &&
                   Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
                   Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
                 ) {
@@ -2714,32 +2721,40 @@ const b = {
           v1: null,
           v2: null
         };
-        vertexCollision(path[0], path[1], mob);
-        vertexCollision(path[0], path[1], map);
-        vertexCollision(path[0], path[1], body);
-        if (best.dist2 != Infinity) { //if hitting something
-          path[path.length - 1] = {
-            x: best.x,
-            y: best.y
-          };
+        if (mod.isPulseAim) { //find mobs in line of sight
+          for (let i = 0, len = mob.length; i < len; i++) {
+            if (Vector.magnitude(Vector.sub(path[0], mob[i].position)) < 2200 &&
+              Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
+              Matter.Query.ray(body, path[0], mob[i].position).length === 0) {
+              best.who = mob[i]
+              path[path.length - 1] = mob[i].position
+              break
+            }
+          }
         }
-
-        //use energy to explode
-        let energy;
-        if (mod.isRapidPulse) {
-          energy = 0.02 + 0.06 * Math.min(mech.energy, 1.75)
-          if (mech.energy < energy) return
+        if (!best.who) {
+          vertexCollision(path[0], path[1], mob);
+          vertexCollision(path[0], path[1], map);
+          vertexCollision(path[0], path[1], body);
+          if (best.dist2 != Infinity) { //if hitting something
+            path[path.length - 1] = {
+              x: best.x,
+              y: best.y
+            };
+          }
+        }
+        let energy
+        if (mod.isPulseAim) {
+          energy = 0.25 * Math.min(mech.energy, 1.75)
           mech.energy -= energy * mod.isLaserDiode
-          if (best.who) b.explosion(path[1], 2000 * energy, true)
-          mech.fireCDcycle = mech.cycle + Math.floor(15 * b.fireCD); // cool down
+          if (best.who) b.explosion(path[1], 1000 * energy, true)
+          mech.fireCDcycle = mech.cycle + Math.floor(25 * b.fireCD); // cool down
         } else {
           energy = 0.3 * Math.min(mech.energy, 1.75)
           mech.energy -= energy * mod.isLaserDiode
           if (best.who) b.explosion(path[1], 1000 * energy, true)
           mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
         }
-
-
         if (mod.isPulseStun) {
           const range = 100 + 2000 * energy
           for (let i = 0, len = mob.length; i < len; ++i) {

@@ -388,7 +388,7 @@ const powerUps = {
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field");
       return;
     }
-    if (Math.random() < 0.005) {
+    if (Math.random() < 0.01) {
       powerUps.spawn(x, y, "reroll");
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "reroll");
       return;

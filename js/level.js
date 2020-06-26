@@ -17,9 +17,10 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.isStealth = true;
-      // mod.giveMod("necrophoresis");
-      // b.giveGuns("foam")
-      // mech.setField("time dilation field")
+      // mod.giveMod("logistics");
+      // mod.giveMod("supply chain");
+      // b.giveGuns("pulse")
+      // mech.setField("phase decoherence field")
 
       level.intro(); //starting level
       // level.testing(); 

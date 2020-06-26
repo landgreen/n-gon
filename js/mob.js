@@ -188,7 +188,7 @@ const mobs = {
       onHit: undefined,
       alive: true,
       index: i,
-      health: 1,
+      health: mod.mobSpawnWithHealth,
       showHealthBar: true,
       accelMag: 0.001 * game.accelScale,
       cd: 0, //game cycle when cooldown will be over
@@ -972,7 +972,7 @@ const mobs = {
           this.health -= dmg
           //this.fill = this.color + this.health + ')';
           this.onDamage(dmg); //custom damage effects
-          if (this.health < mod.mobDieAtHealth && this.alive) this.death();
+          if (this.health < 0.05 && this.alive) this.death();
         }
       },
       onDamage() {

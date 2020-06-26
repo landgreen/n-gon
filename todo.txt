@@ -1,26 +1,19 @@
 
-damage immunity after a collisions is reduced from 1/2s to 1/4s
-freezing status effects only last 1/4 as long on boss mobs
-mod - shotgun 66% increased fire rate and recoil
-mod - slowly heal when below 25% health
-mod - superdeterminism spawn 4 mods, but rerolls, fields, and guns no longer spawn
-foam mod, necrophoresis now aims the foam bullets, which makes it more effective at groups
-flechettes mod, piercing needles now goes through blocks as well as mobs
-mod - spawn 3 ammo, rerolls, or heals after destroying a shield
-
+rerolls drop 60% more often
+mines delay a 1/2 second longer before they arm
+mod: supply chain - doubles your current ammo, requires mod:logistics
+mod: neocognitron - pulse auto aiming
 ************** TODO - n-gon **************
-physics question: why don't the bound states of fields spread out.  What is making them bound.
 
-mobs killed by _____ always drops ammo
-  issues getting the code to work
-
-rework reaction inhibitor to spawn mobs with 12% less life, rather then killing them at 12%
-
-levels: make a function in the main game loop that runs level specific code
-  reset the level function as each new level loads
+phase field still isn't fun
+  rework renormalization mod as well
+  does phase field need the stealth flag?
 
 mod: use the stealth flag from the phase decoherence field
   maybe trigger it along with the damage immunity CD
+
+levels: make a function in the main game loop that runs level specific code
+  reset the level function as each new level loads
 
 mod: efficient shielding (requires standing wave harmonics field)
   lowers force applied when blocking mobs (instead of flinging them away, you push them like with plasma torch), but uses less energy to block mobs

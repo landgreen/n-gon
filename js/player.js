@@ -1760,7 +1760,7 @@ const mech = {
           // }
 
           function drawField(radius) {
-            radius *= 0.9 + 1 * mech.energy;
+            radius *= 0.9 + 1.5 * mech.energy * mech.energy;
             const rotate = mech.cycle * 0.005;
             mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(mech.energy, 1)));
             const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
@@ -1801,9 +1801,10 @@ const mech = {
             mech.lookForPickUp();
 
             if (mech.fieldCDcycle < mech.cycle) {
+              // game.draw.bodyFill = "transparent"
+              // game.draw.bodyStroke = "transparent"
 
-
-              const DRAIN = 0.0003 + 0.00015 * player.speed + ((!mod.renormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.001)
+              const DRAIN = 0.0002 + 0.0001 * player.speed + ((!mod.renormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.001)
               if (mech.energy > DRAIN) {
                 mech.energy -= DRAIN;
                 // if (mech.energy < 0.001) {
