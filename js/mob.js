@@ -1000,7 +1000,9 @@ const mobs = {
             }
           }
           if (Math.random() < mod.isBotSpawner) {
-            if (Math.random() < 0.25) {
+            if (Math.random() < 0.2) { //very low chance of plasma bot
+              b.plasmaBot(this.position)
+            } else if (Math.random() < 0.25) {
               b.nailBot(this.position)
             } else if (Math.random() < 0.33) {
               b.laserBot(this.position)

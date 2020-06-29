@@ -1,9 +1,4 @@
 
-mod - boomBot: explodes on mobs in close range
-mod - plasma-bot:  bot that fires your plasma torch
-(limit 1 bot) (requires plasma torch)
-(you can get 2 plasma-bots with bot replication)
-(you can switch to a new field after getting plasma-bot)
 
 ************** TODO - n-gon **************
 

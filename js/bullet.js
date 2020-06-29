@@ -1079,7 +1079,7 @@ const b = {
   plasmaBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
-    const RADIUS = 18
+    const RADIUS = 20
     bullet[me] = Bodies.polygon(position.x, position.y, 5, RADIUS, {
       angle: dir,
       friction: 0,
@@ -1088,9 +1088,9 @@ const b = {
       restitution: 1,
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
-      lookFrequency: 15,
+      lookFrequency: 25,
       cd: 0,
-      acceleration: 0.0085,
+      acceleration: 0.009,
       endCycle: Infinity,
       classType: "bullet",
       collisionFilter: {
@@ -1104,7 +1104,7 @@ const b = {
       onEnd() {},
       do() {
         const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
-        if (distanceToPlayer > 100) { //if far away move towards player
+        if (distanceToPlayer > 150) { //if far away move towards player
           this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
         }
         Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
@@ -1126,7 +1126,7 @@ const b = {
 
         //fire plasma at target
 
-        const DRAIN = 0.0014
+        const DRAIN = 0.0017
         if (this.lockedOn && this.lockedOn.alive && mech.energy > DRAIN && mech.fieldCDcycle < mech.cycle) {
           mech.energy -= DRAIN;
           if (mech.energy < 0) {
@@ -1247,16 +1247,14 @@ const b = {
             ctx.stroke();
 
             //draw electricity
-            const Dx = Math.cos(mech.angle);
-            const Dy = Math.sin(mech.angle);
-            let x = this.position.x + 20 * Dx;
-            let y = this.position.y + 20 * Dy;
+            let x = this.position.x + 20 * unit.x;
+            let y = this.position.y + 20 * unit.y;
             ctx.beginPath();
             ctx.moveTo(x, y);
             const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 5
             for (let i = 0; i < 4; i++) {
-              x += step * (Dx + 1.5 * (Math.random() - 0.5))
-              y += step * (Dy + 1.5 * (Math.random() - 0.5))
+              x += step * (unit.x + 1.5 * (Math.random() - 0.5))
+              y += step * (unit.y + 1.5 * (Math.random() - 0.5))
               ctx.lineTo(x, y);
             }
             ctx.lineWidth = 2 * Math.random();
