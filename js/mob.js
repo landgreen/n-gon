@@ -1000,12 +1000,14 @@ const mobs = {
             }
           }
           if (Math.random() < mod.isBotSpawner) {
-            if (Math.random() < 0.33) {
+            if (Math.random() < 0.25) {
               b.nailBot(this.position)
-            } else if (Math.random() < 0.5) {
+            } else if (Math.random() < 0.33) {
               b.laserBot(this.position)
-            } else {
+            } else if (Math.random() < 0.5) {
               b.foamBot(this.position)
+            } else {
+              b.boomBot(this.position)
             }
             // if (mech.energy > 0.33) mech.energy -= 0.33
           }

@@ -156,7 +156,7 @@ const b = {
       }
     }
   },
-  explosion(where, radius, isBurn = false) {
+  explosion(where, radius) {
     radius *= mod.explosionRadius
     // typically explode is used for some bullets with .onEnd
     //add dmg to draw queue
@@ -969,7 +969,7 @@ const b = {
   nailBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
-    const RADIUS = (10 + 5 * Math.random())
+    const RADIUS = (12 + 4 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
       angle: dir,
       friction: 0,
@@ -1071,6 +1071,273 @@ const b = {
           this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
         } else { //close to player
           Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+        }
+      }
+    })
+    World.add(engine.world, bullet[me]); //add bullet to world
+  },
+  plasmaBot(position = mech.pos) {
+    const me = bullet.length;
+    const dir = mech.angle;
+    const RADIUS = 18
+    bullet[me] = Bodies.polygon(position.x, position.y, 5, RADIUS, {
+      angle: dir,
+      friction: 0,
+      frictionStatic: 0,
+      frictionAir: 0.05,
+      restitution: 1,
+      dmg: 0, // 0.14   //damage done in addition to the damage from momentum
+      minDmgSpeed: 2,
+      lookFrequency: 15,
+      cd: 0,
+      acceleration: 0.0085,
+      endCycle: Infinity,
+      classType: "bullet",
+      collisionFilter: {
+        category: cat.bullet,
+        mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+      },
+      lockedOn: null,
+      onDmg() {
+        this.lockedOn = null
+      },
+      onEnd() {},
+      do() {
+        const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
+        if (distanceToPlayer > 100) { //if far away move towards player
+          this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
+        }
+        Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+
+        //find closest
+        if (!(game.cycle % this.lookFrequency)) {
+          this.lockedOn = null;
+          let closeDist = mod.isPlasmaRange * 1000;
+          for (let i = 0, len = mob.length; i < len; ++i) {
+            const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
+            if (DIST < closeDist && mob[i].dropPowerUp &&
+              Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+              Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+              closeDist = DIST;
+              this.lockedOn = mob[i]
+            }
+          }
+        }
+
+        //fire plasma at target
+
+        const DRAIN = 0.0014
+        if (this.lockedOn && this.lockedOn.alive && mech.energy > DRAIN && mech.fieldCDcycle < mech.cycle) {
+          mech.energy -= DRAIN;
+          if (mech.energy < 0) {
+            mech.fieldCDcycle = mech.cycle + 120;
+            mech.energy = 0;
+          }
+
+          const sub = Vector.sub(this.lockedOn.position, this.position)
+          const DIST = Vector.magnitude(sub);
+          const unit = Vector.normalise(sub)
+          if (DIST < mod.isPlasmaRange * 600) {
+            //calculate laser collision
+            let best;
+            let range = mod.isPlasmaRange * (140 + 300 * Math.sqrt(Math.random()))
+            const path = [{
+                x: this.position.x,
+                y: this.position.y
+              },
+              {
+                x: this.position.x + range * unit.x,
+                y: this.position.y + range * unit.y
+              }
+            ];
+            const vertexCollision = function (v1, v1End, domain) {
+              for (let i = 0; i < domain.length; ++i) {
+                let vertices = domain[i].vertices;
+                const len = vertices.length - 1;
+                for (let j = 0; j < len; j++) {
+                  results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                  if (results.onLine1 && results.onLine2) {
+                    const dx = v1.x - results.x;
+                    const dy = v1.y - results.y;
+                    const dist2 = dx * dx + dy * dy;
+                    if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                      best = {
+                        x: results.x,
+                        y: results.y,
+                        dist2: dist2,
+                        who: domain[i],
+                        v1: vertices[j],
+                        v2: vertices[j + 1]
+                      };
+                    }
+                  }
+                }
+                results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                if (results.onLine1 && results.onLine2) {
+                  const dx = v1.x - results.x;
+                  const dy = v1.y - results.y;
+                  const dist2 = dx * dx + dy * dy;
+                  if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                    best = {
+                      x: results.x,
+                      y: results.y,
+                      dist2: dist2,
+                      who: domain[i],
+                      v1: vertices[0],
+                      v2: vertices[len]
+                    };
+                  }
+                }
+              }
+            };
+
+            //check for collisions
+            best = {
+              x: null,
+              y: null,
+              dist2: Infinity,
+              who: null,
+              v1: null,
+              v2: null
+            };
+            vertexCollision(path[0], path[1], mob);
+            vertexCollision(path[0], path[1], map);
+            vertexCollision(path[0], path[1], body);
+            if (best.dist2 != Infinity) { //if hitting something
+              path[path.length - 1] = {
+                x: best.x,
+                y: best.y
+              };
+              if (best.who.alive) {
+                const dmg = 0.8 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                best.who.damage(dmg);
+                best.who.locatePlayer();
+
+                //push mobs away
+                const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
+                Matter.Body.applyForce(best.who, path[1], force)
+                Matter.Body.setVelocity(best.who, { //friction
+                  x: best.who.velocity.x * 0.7,
+                  y: best.who.velocity.y * 0.7
+                });
+                //draw mob damage circle
+                game.drawList.push({
+                  x: path[1].x,
+                  y: path[1].y,
+                  radius: Math.sqrt(dmg) * 50,
+                  color: "rgba(255,0,255,0.2)",
+                  time: game.drawTime * 4
+                });
+              } else if (!best.who.isStatic) {
+                //push blocks away
+                const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.007 * Math.sqrt(Math.sqrt(best.who.mass)))
+                Matter.Body.applyForce(best.who, path[1], force)
+              }
+            }
+
+            //draw blowtorch laser beam
+            ctx.strokeStyle = "rgba(255,0,255,0.1)"
+            ctx.lineWidth = 14
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            ctx.lineTo(path[1].x, path[1].y);
+            ctx.stroke();
+            ctx.strokeStyle = "#f0f";
+            ctx.lineWidth = 2
+            ctx.stroke();
+
+            //draw electricity
+            const Dx = Math.cos(mech.angle);
+            const Dy = Math.sin(mech.angle);
+            let x = this.position.x + 20 * Dx;
+            let y = this.position.y + 20 * Dy;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 5
+            for (let i = 0; i < 4; i++) {
+              x += step * (Dx + 1.5 * (Math.random() - 0.5))
+              y += step * (Dy + 1.5 * (Math.random() - 0.5))
+              ctx.lineTo(x, y);
+            }
+            ctx.lineWidth = 2 * Math.random();
+            ctx.stroke();
+          }
+        }
+      }
+    })
+    World.add(engine.world, bullet[me]); //add bullet to world
+  },
+  boomBot(position = mech.pos) {
+    const me = bullet.length;
+    const dir = mech.angle;
+    const RADIUS = (7 + 2 * Math.random())
+    bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
+      angle: dir,
+      friction: 0,
+      frictionStatic: 0,
+      frictionAir: 0.05,
+      restitution: 1,
+      dmg: 0,
+      minDmgSpeed: 0,
+      lookFrequency: 35 + Math.floor(7 * Math.random()),
+      acceleration: 0.005 * (1 + 0.5 * Math.random()),
+      range: 500 * (1 + 0.1 * Math.random()),
+      endCycle: Infinity,
+      classType: "bullet",
+      collisionFilter: {
+        category: cat.bullet,
+        mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+      },
+      lockedOn: null,
+      explode: 0,
+      onDmg() {
+        if (this.lockedOn) {
+          const explosionRadius = Math.min(170, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
+          if (explosionRadius > 60) {
+            this.explode = explosionRadius
+            // 
+            //push away from player, because normal explosion knock doesn't do much
+            // const sub = Vector.sub(this.lockedOn.position, mech.pos)
+            // mag = Math.min(35, 20 / Math.sqrt(this.lockedOn.mass))
+            // Matter.Body.setVelocity(this.lockedOn, Vector.mult(Vector.normalise(sub), mag))
+          }
+          this.lockedOn = null //lose target so bot returns to player
+        }
+      },
+      onEnd() {},
+      do() {
+        if (this.explode) {
+          b.explosion(this.position, this.explode); //makes bullet do explosive damage at end
+          this.explode = 0;
+        }
+        const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, mech.pos))
+        if (distanceToPlayer > 100) { //if far away move towards player
+          this.force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, this.position)), this.mass * this.acceleration)
+        } else if (distanceToPlayer < 250) { //close to player
+          Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+          //find targets
+          if (!(game.cycle % this.lookFrequency) && !mech.isStealth) {
+            this.lockedOn = null;
+            let closeDist = this.range;
+            for (let i = 0, len = mob.length; i < len; ++i) {
+              const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
+              if (DIST < closeDist && mob[i].dropPowerUp &&
+                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                closeDist = DIST;
+                this.lockedOn = mob[i]
+              }
+            }
+          }
+        }
+        //punch target
+        if (this.lockedOn && this.lockedOn.alive) {
+          const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
+          if (DIST - this.lockedOn.radius < this.range &&
+            Matter.Query.ray(map, this.position, this.lockedOn.position).length === 0) {
+            //move towards the target
+            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.012 * this.mass))
+          }
         }
       }
     })
@@ -2212,7 +2479,7 @@ const b = {
     },
     {
       name: "drones",
-      description: "deploy drones that <strong>crash</strong> into mobs<br>collisions reduce their <strong>lifespan</strong> by 1 second",
+      description: "deploy drones that <strong>crash</strong> into mobs<br>crashes reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
       ammoPack: 14,
       have: false,
@@ -2660,7 +2927,7 @@ const b = {
       isEasyToAim: false,
       fire() {
         //calculate laser collision
-        let best;
+        let best, energy, explosionRange;
         let range = 3000
         const path = [{
             x: mech.pos.x + 20 * Math.cos(mech.angle),
@@ -2722,15 +2989,22 @@ const b = {
           v2: null
         };
         if (mod.isPulseAim) { //find mobs in line of sight
+          let dist = 2200
+          energy = 0.25 * Math.min(mech.energy, 1.75)
+          explosionRange = 1000 * energy
           for (let i = 0, len = mob.length; i < len; i++) {
-            if (Vector.magnitude(Vector.sub(path[0], mob[i].position)) < 2200 &&
+            const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
+            if (explosionRange < newDist &&
+              newDist < dist &&
               Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
               Matter.Query.ray(body, path[0], mob[i].position).length === 0) {
+              dist = newDist
               best.who = mob[i]
               path[path.length - 1] = mob[i].position
-              break
             }
           }
+
+
         }
         if (!best.who) {
           vertexCollision(path[0], path[1], mob);
@@ -2743,16 +3017,16 @@ const b = {
             };
           }
         }
-        let energy
+
         if (mod.isPulseAim) {
-          energy = 0.25 * Math.min(mech.energy, 1.75)
           mech.energy -= energy * mod.isLaserDiode
-          if (best.who) b.explosion(path[1], 1000 * energy, true)
+          if (best.who) b.explosion(path[1], explosionRange, true)
           mech.fireCDcycle = mech.cycle + Math.floor(25 * b.fireCD); // cool down
         } else {
           energy = 0.3 * Math.min(mech.energy, 1.75)
           mech.energy -= energy * mod.isLaserDiode
-          if (best.who) b.explosion(path[1], 1000 * energy, true)
+          explosionRange = 1000 * energy
+          if (best.who) b.explosion(path[1], explosionRange, true)
           mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
         }
         if (mod.isPulseStun) {

@@ -2,33 +2,6 @@
 //*********************************************************************
 const game = {
   loop() {}, //main game loop, gets se tto normal or testing loop
-  testingLoop() {
-    game.gravity();
-    Engine.update(engine, game.delta);
-    game.wipe();
-    game.textLog();
-    if (mech.onGround) {
-      mech.groundControl()
-    } else {
-      mech.airControl()
-    }
-    level.checkZones();
-    level.checkQuery();
-    mech.move();
-    mech.look();
-    game.checks();
-    ctx.save();
-    game.camera();
-    mech.draw();
-    game.draw.wireFrame();
-    game.draw.cons();
-    game.draw.testing();
-    game.drawCircle();
-    game.constructCycle()
-    ctx.restore();
-    game.testingOutput();
-    game.drawCursor();
-  },
   normalLoop() {
     game.gravity();
     Engine.update(engine, game.delta);
@@ -39,7 +12,8 @@ const game = {
     } else {
       mech.airControl()
     }
-    level.checkZones();
+    // level.checkZones();
+    level.custom();
     level.checkQuery();
     mech.move();
     mech.look();
@@ -65,8 +39,36 @@ const game = {
     b.bulletDraw();
     b.bulletDo();
     game.drawCircle();
-    game.clip();
+    // game.clip();
     ctx.restore();
+    game.drawCursor();
+  },
+  testingLoop() {
+    game.gravity();
+    Engine.update(engine, game.delta);
+    game.wipe();
+    game.textLog();
+    if (mech.onGround) {
+      mech.groundControl()
+    } else {
+      mech.airControl()
+    }
+    // level.checkZones();
+    level.custom();
+    level.checkQuery();
+    mech.move();
+    mech.look();
+    game.checks();
+    ctx.save();
+    game.camera();
+    mech.draw();
+    game.draw.wireFrame();
+    game.draw.cons();
+    game.draw.testing();
+    game.drawCircle();
+    game.constructCycle()
+    ctx.restore();
+    game.testingOutput();
     game.drawCursor();
   },
   isTimeSkipping: false,
@@ -146,9 +148,9 @@ const game = {
   //   };
   //   requestAnimationFrame(normalFPS);
   // },
-  clip() {
+  // clip() {
 
-  },
+  // },
   drawCursor() {
     const size = 10;
     ctx.beginPath();
@@ -397,7 +399,7 @@ const game = {
         });
         // game.noCameraScroll()
       } else if (keys[85]) { // next level with U
-        level.zoneActions.nextLevel();
+        level.nextLevel();
       }
     }
   },
@@ -659,11 +661,9 @@ const game = {
 
     powerUps.totalPowerUps = powerUp.length
 
-    //if player is holding something this remembers it before it gets deleted
-    let holdTarget;
-    if (mech.holdingTarget) {
-      holdTarget = mech.holdingTarget;
-    }
+    let holdTarget; //if player is holding something this remembers it before it gets deleted
+    if (mech.holdingTarget) holdTarget = mech.holdingTarget;
+
     mech.fireCDcycle = 0
     mech.drop();
     level.fill = [];
@@ -697,7 +697,11 @@ const game = {
         frictionAir: holdTarget.frictionAir,
         frictionStatic: holdTarget.frictionStatic
       });
+      Matter.Body.setPosition(body[len], mech.pos);
+      mech.isHolding = true
       mech.holdingTarget = body[len];
+      mech.holdingTarget.collisionFilter.category = 0;
+      mech.holdingTarget.collisionFilter.mask = 0;
     }
   },
   getCoords: {
@@ -811,20 +815,20 @@ const game = {
       let line = 500;
       const x = canvas.width - 5;
       ctx.fillText("T: exit testing mode", x, line);
-      line += 20;
-      ctx.fillText("Y: give all mods", x, line);
-      line += 20;
-      ctx.fillText("R: teleport to mouse", x, line);
-      line += 20;
-      ctx.fillText("F: cycle field", x, line);
-      line += 20;
-      ctx.fillText("G: give all guns", x, line);
-      line += 20;
-      ctx.fillText("H: heal", x, line);
-      line += 20;
-      ctx.fillText("U: next level", x, line);
-      line += 20;
-      ctx.fillText("1-7: spawn things", x, line);
+      // line += 20;
+      // ctx.fillText("Y: give all mods", x, line);
+      // line += 20;
+      // ctx.fillText("R: teleport to mouse", x, line);
+      // line += 20;
+      // ctx.fillText("F: cycle field", x, line);
+      // line += 20;
+      // ctx.fillText("G: give all guns", x, line);
+      // line += 20;
+      // ctx.fillText("H: heal", x, line);
+      // line += 20;
+      // ctx.fillText("U: next level", x, line);
+      // line += 20;
+      // ctx.fillText("1-7: spawn things", x, line);
     }
     ctx.textAlign = "center";
     ctx.fillText(`(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`, game.mouse.x, game.mouse.y - 20);
@@ -924,13 +928,6 @@ const game = {
       ctx.stroke();
     },
     testing() {
-      //zones
-      ctx.beginPath();
-      for (let i = 0, len = level.zones.length; i < len; ++i) {
-        ctx.rect(level.zones[i].x1, level.zones[i].y1 + 70, level.zones[i].x2 - level.zones[i].x1, level.zones[i].y2 - level.zones[i].y1);
-      }
-      ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
-      ctx.fill();
       //query zones
       ctx.beginPath();
       for (let i = 0, len = level.queryList.length; i < len; ++i) {

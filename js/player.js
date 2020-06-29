@@ -94,20 +94,6 @@ const mech = {
     x: 0,
     y: 0
   },
-  setPosToSpawn(xPos, yPos) {
-    this.spawnPos.x = this.pos.x = xPos;
-    this.spawnPos.y = this.pos.y = yPos;
-    this.transX = this.transSmoothX = canvas.width2 - this.pos.x;
-    this.transY = this.transSmoothY = canvas.height2 - this.pos.y;
-    this.Vx = this.spawnVel.x;
-    this.Vy = this.spawnVel.y;
-    player.force.x = 0;
-    player.force.y = 0;
-    Matter.Body.setPosition(player, this.spawnPos);
-    Matter.Body.setVelocity(player, this.spawnVel);
-    // mech.transX = -player.position.x
-    // mech.transY = player.position.y
-  },
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
@@ -1507,7 +1493,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.0013
+            const DRAIN = 0.0014
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {

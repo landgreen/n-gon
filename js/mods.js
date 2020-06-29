@@ -277,23 +277,6 @@ const mod = {
             }
         },
         {
-            name: "laser-bot",
-            description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.laserBotCount++;
-                b.laserBot();
-            },
-            remove() {
-                mod.laserBotCount = 0;
-            }
-        },
-        {
             name: "nail-bot",
             description: "a bot fires <strong>nails</strong> at targets in line of sight",
             maxCount: 9,
@@ -328,12 +311,63 @@ const mod = {
             }
         },
         {
+            name: "boom-bot",
+            description: "a bot <strong>defends</strong> the space around you<br>ignites an <strong class='color-e'>explosion</strong> after hitting a mob",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.boomBotCount++;
+                b.boomBot();
+            },
+            remove() {
+                mod.boomBotCount = 0;
+            }
+        },
+        {
+            name: "laser-bot",
+            description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.laserBotCount++;
+                b.laserBot();
+            },
+            remove() {
+                mod.laserBotCount = 0;
+            }
+        },
+        {
+            name: "plasma-bot",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit short range <strong>plasma</strong><br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+            },
+            requires: "plasma torch",
+            effect() {
+                mod.plasmaBotCount++;
+                b.plasmaBot();
+            },
+            remove() {
+                mod.plasmaBotCount = 0;
+            }
+        },
+        {
             name: "scrap bots",
             description: "<strong>12%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
             maxCount: 6,
             count: 0,
             allowed() {
-                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount > 0
+                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount > 0
             },
             requires: "a bot",
             effect() {
@@ -345,19 +379,19 @@ const mod = {
         },
         {
             name: "bot replication",
-            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>80%</strong> of your <strong>ammo</strong>",
+            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>90%</strong> of your <strong>ammo</strong>",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
             allowed() {
-                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount > 2
+                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount > 1
             },
-            requires: "3 or more bots",
+            requires: "2 or more bots",
             effect() {
                 //remove ammo
                 for (let i = 0, len = b.guns.length; i < len; ++i) {
                     if (b.guns[i].ammo != Infinity) {
-                        b.guns[i].ammo = Math.floor(b.guns[i].ammo * 0.2);
+                        b.guns[i].ammo = Math.floor(b.guns[i].ammo * 0.1);
                     }
                 }
 
@@ -374,6 +408,14 @@ const mod = {
                     b.foamBot();
                 }
                 mod.foamBotCount *= 2
+                for (let i = 0; i < mod.boomBotCount; i++) {
+                    b.boomBot();
+                }
+                mod.boomBotCount *= 2
+                for (let i = 0; i < mod.plasmaBotCount; i++) {
+                    b.plasmaBot();
+                }
+                mod.plasmaBotCount *= 2
             },
             remove() {}
         },
@@ -545,7 +587,7 @@ const mod = {
         },
         {
             name: "Pauli exclusion",
-            description: `<strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> seconds<br>activates after being <strong>harmed</strong> from a collision`,
+            description: `<strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1400,7 +1442,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField;
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.isExplodeMob
             },
             requires: "an explosive gun",
             effect: () => {
@@ -2163,6 +2205,8 @@ const mod = {
     laserBotCount: null,
     nailBotCount: null,
     foamBotCount: null,
+    boomBotCount: null,
+    plasmaBotCount: null,
     collisionImmuneCycles: null,
     blockDmg: null,
     isPiezo: null,

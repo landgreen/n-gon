@@ -1,9 +1,20 @@
 
-rerolls drop 60% more often
-mines delay a 1/2 second longer before they arm
-mod: supply chain - doubles your current ammo, requires mod:logistics
-mod: neocognitron - pulse auto aiming
+mod - boomBot: explodes on mobs in close range
+mod - plasma-bot:  bot that fires your plasma torch
+(limit 1 bot) (requires plasma torch)
+(you can get 2 plasma-bots with bot replication)
+(you can switch to a new field after getting plasma-bot)
+
 ************** TODO - n-gon **************
+
+mob that flashes the player (makes the graphics not update for a couple seconds)
+
+held blocks aren't moving to the next level
+  only issue is setting held block to not collide
+
+mod do 50% more damage in close, but 50% less at a distance
+  code it like mod.isFarAwayDmg
+    have these mods disable each other
 
 phase field still isn't fun
   rework renormalization mod as well
@@ -12,9 +23,6 @@ phase field still isn't fun
 mod: use the stealth flag from the phase decoherence field
   maybe trigger it along with the damage immunity CD
 
-levels: make a function in the main game loop that runs level specific code
-  reset the level function as each new level loads
-
 mod: efficient shielding (requires standing wave harmonics field)
   lowers force applied when blocking mobs (instead of flinging them away, you push them like with plasma torch), but uses less energy to block mobs
   and making it so liquid nitrogen and uranium reactor core have that effect in a radius around the player instead of on contact
@@ -22,9 +30,6 @@ mod: efficient shielding (requires standing wave harmonics field)
 
 mod harmonic shield: slow everything in range around shield (temporal shield)
   set max speed?
-
-need a mod that effects ice status
-  mod: ice status effect lasts twice as long
 
 mod: bot very slowly follows you and gives you a bonus when it's in range
   it moves through walls
