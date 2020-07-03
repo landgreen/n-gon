@@ -44,46 +44,63 @@ const mobs = {
     }
   },
   statusSlow(who, cycles = 60) {
-    if (!who.shield && !who.isShielded && !mech.isBodiesAsleep) {
-      if (who.isBoss) {
-        cycles = Math.floor(cycles * 0.25)
+    applySlow(who)
+    //look for mobs near the target
+    if (mod.isAoESlow) {
+      const range = (220 + 150 * Math.random()) ** 2
+      for (let i = 0, len = mob.length; i < len; i++) {
+        if (Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range) applySlow(mob[i])
       }
-      //remove other "slow" effects on this mob
-      let i = who.status.length
-      while (i--) {
-        if (who.status[i].type === "slow") who.status.splice(i, 1);
+      game.drawList.push({
+        x: who.position.x,
+        y: who.position.y,
+        radius: Math.sqrt(range),
+        color: "rgba(0,100,255,0.05)",
+        time: 3
+      });
+    }
+
+
+    function applySlow(target) {
+      if (!target.shield && !target.isShielded && !mech.isBodiesAsleep) {
+        if (target.isBoss) cycles = Math.floor(cycles * 0.25)
+
+        let i = target.status.length
+        while (i--) {
+          if (target.status[i].type === "slow") target.status.splice(i, 1); //remove other "slow" effects on this mob
+        }
+        target.status.push({
+          effect() {
+            Matter.Body.setVelocity(target, {
+              x: 0,
+              y: 0
+            });
+            Matter.Body.setAngularVelocity(target, 0);
+            ctx.beginPath();
+            ctx.moveTo(target.vertices[0].x, target.vertices[0].y);
+            for (let j = 1, len = target.vertices.length; j < len; ++j) {
+              ctx.lineTo(target.vertices[j].x, target.vertices[j].y);
+            }
+            ctx.lineTo(target.vertices[0].x, target.vertices[0].y);
+            ctx.strokeStyle = "rgba(0,100,255,0.8)";
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.fillStyle = target.fill
+            ctx.fill();
+          },
+          type: "slow",
+          endCycle: game.cycle + cycles,
+        })
       }
-      who.status.push({
-        effect() {
-          Matter.Body.setVelocity(who, {
-            x: 0,
-            y: 0
-          });
-          Matter.Body.setAngularVelocity(who, 0);
-          ctx.beginPath();
-          ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
-          for (let j = 1, len = who.vertices.length; j < len; ++j) {
-            ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
-          }
-          ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
-          ctx.strokeStyle = "rgba(0,100,255,0.8)";
-          ctx.lineWidth = 15;
-          ctx.stroke();
-          ctx.fillStyle = who.fill
-          ctx.fill();
-        },
-        type: "slow",
-        endCycle: game.cycle + cycles,
-      })
     }
   },
   statusStun(who, cycles = 180) {
     if (!who.shield && !who.isShielded && !mech.isBodiesAsleep) {
       Matter.Body.setVelocity(who, {
-        x: who.velocity.x * 0.5,
-        y: who.velocity.y * 0.5
+        x: who.velocity.x * 0.8,
+        y: who.velocity.y * 0.8
       });
-      Matter.Body.setAngularVelocity(who, who.angularVelocity * 0.5);
+      Matter.Body.setAngularVelocity(who, who.angularVelocity * 0.8);
       //remove other "stun" effects on this mob
       let i = who.status.length
       while (i--) {
@@ -97,7 +114,7 @@ const mobs = {
             x: who.position.x + 100 * (Math.random() - 0.5),
             y: who.position.y + 100 * (Math.random() - 0.5)
           }
-          if (who.velocity.y < 2) who.force.y += who.mass * 0.0005 //extra gravity
+          if (who.velocity.y < 2) who.force.y += who.mass * 0.0004 //extra gravity
           ctx.beginPath();
           ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
           for (let j = 1, len = who.vertices.length; j < len; ++j) {
@@ -831,7 +848,7 @@ const mobs = {
           Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && //see player
           Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0
         ) {
-          spawn.bullet(this.position.x, this.position.y + this.radius * 0.5, 10 + Math.ceil(this.radius / 15), 5);
+          spawn.bomb(this.position.x, this.position.y + this.radius * 0.5, 10 + Math.ceil(this.radius / 15), 5);
           //add spin and speed
           Matter.Body.setAngularVelocity(mob[mob.length - 1], (Math.random() - 0.5) * 0.5);
           Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -1000,7 +1017,7 @@ const mobs = {
             }
           }
           if (Math.random() < mod.isBotSpawner) {
-            if (Math.random() < 0.2) { //very low chance of plasma bot
+            if (Math.random() < 0.1) { //very low chance of plasma bot
               b.plasmaBot(this.position)
             } else if (Math.random() < 0.25) {
               b.nailBot(this.position)

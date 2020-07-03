@@ -1466,20 +1466,20 @@ const spawn = {
   //     }
   //   };
   // },
-  bomberBoss(x, y, radius = 85 + Math.ceil(Math.random() * 20)) {
+  bomberBoss(x, y, radius = 80 + Math.floor(Math.random() * 15)) {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
     me.isBoss = true;
-    Matter.Body.setDensity(me, 0.0015 + 0.0004 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.0014 + 0.0003 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
     me.stroke = "rgba(255,0,200)"; //used for drawGhost
     me.seeAtDistance2 = 1500000;
-    me.fireFreq = Math.ceil(30 + 2000 / radius);
+    me.fireFreq = Math.ceil(60 + 3000 / radius);
     me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     me.hoverElevation = 460 + (Math.random() - 0.5) * 200; //squared
     me.hoverXOff = (Math.random() - 0.5) * 100;
-    me.accelMag = Math.floor(10 * (Math.random() + 5)) * 0.00001 * game.accelScale;
+    me.accelMag = Math.floor(10 * (Math.random() + 4.5)) * 0.00001 * game.accelScale;
     me.g = 0.0002; //required if using 'gravity'   // gravity called in hoverOverPlayer
     me.frictionStatic = 0;
     me.friction = 0;
@@ -1578,10 +1578,62 @@ const spawn = {
       this.explode(this.mass * 10);
     };
     Matter.Body.setDensity(me, 0.0001); //normal is 0.001
-    me.timeLeft = 240;
+    me.timeLeft = 200;
     me.g = 0.001; //required if using 'gravity'
     me.frictionAir = 0;
     me.restitution = 0.8;
+    me.leaveBody = false;
+    me.dropPowerUp = false;
+    me.showHealthBar = false;
+    me.collisionFilter.category = cat.mobBullet;
+    me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
+    me.do = function () {
+      this.gravity();
+      this.timeLimit();
+    };
+  },
+  bomb(x, y, radius = 6, sides = 5) {
+    mobs.spawn(x, y, sides, radius, "rgb(255,0,0)");
+    let me = mob[mob.length - 1];
+    me.stroke = "transparent";
+    me.onHit = function () {
+      this.explode(this.mass * 10);
+    };
+    me.onDeath = function () {
+      if (game.difficulty > 10) {
+        spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
+        spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
+        spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
+        const mag = 8
+        const v1 = Vector.rotate({
+          x: 1,
+          y: 1
+        }, 2 * Math.PI * Math.random())
+        const v2 = Vector.rotate({
+          x: 1,
+          y: 1
+        }, 2 * Math.PI * Math.random())
+        const v3 = Vector.normalise(Vector.add(v1, v2)) //last vector is opposite the sum of the other two to look a bit like momentum is conserved
+
+        Matter.Body.setVelocity(mob[mob.length - 1], {
+          x: mag * v1.x,
+          y: mag * v1.y
+        });
+        Matter.Body.setVelocity(mob[mob.length - 2], {
+          x: mag * v2.x,
+          y: mag * v2.y
+        });
+        Matter.Body.setVelocity(mob[mob.length - 3], {
+          x: -mag * v3.x,
+          y: -mag * v3.y
+        });
+      }
+    }
+    Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+    me.timeLeft = 95 + Math.floor(Math.random() * 15);
+    me.g = 0.001; //required if using 'gravity'
+    me.frictionAir = 0;
+    me.restitution = 1;
     me.leaveBody = false;
     me.dropPowerUp = false;
     me.showHealthBar = false;

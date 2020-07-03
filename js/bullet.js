@@ -1079,7 +1079,7 @@ const b = {
   plasmaBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
-    const RADIUS = 20
+    const RADIUS = 21
     bullet[me] = Bodies.polygon(position.x, position.y, 5, RADIUS, {
       angle: dir,
       friction: 0,
@@ -1115,7 +1115,7 @@ const b = {
           let closeDist = mod.isPlasmaRange * 1000;
           for (let i = 0, len = mob.length; i < len; ++i) {
             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
-            if (DIST < closeDist && mob[i].dropPowerUp &&
+            if (DIST < closeDist &&
               Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
               Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
               closeDist = DIST;

@@ -1,13 +1,29 @@
 
+negentropy - heals player to 50% max health at the end of a level
+crystallized armor - give 5% (was 4%) max health for a power up
+mod - superfluidity: AoE freeze effect
+bomberBoss's bombs split into 3 bombs on later levels
+mod - pair production only works for nano-scale manufacturing, but gives 3x (up from 2x) max energy
+press Z+X in testing mode to trigger player death
 
 ************** TODO - n-gon **************
 
+plasma field gets longer as you hold it longer
+
+mod - AoE radiation might work when the effect ends
+    or maybe just anytime another mob is near
+
+wave beam: mod - longitudinal waves (bullets oscillate fast /slow not up/down)
+  trigger on crouch?
+
+medium caliber gun in between minigun and rail gun
+  mod: electricity damages mobs that get near the bullet 
+  get ammo back if it hits mobs
+  ammo returns to you if it misses
+
 mob that flashes the player (makes the graphics not update for a couple seconds)
 
-held blocks aren't moving to the next level
-  only issue is setting held block to not collide
-
-mod do 50% more damage in close, but 50% less at a distance
+mod - do 50% more damage in close, but 50% less at a distance
   code it like mod.isFarAwayDmg
     have these mods disable each other
 

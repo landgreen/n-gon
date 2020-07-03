@@ -80,36 +80,24 @@ const mod = {
         return dmg * mod.slowFire
     },
     onHealthChange() { //used with acid mod
-        if (mod.isAcidDmg && mech.health > 0.8) {
-            mod.acidDmg = 0.5
-            if (!build.isCustomSelection) {
-                setTimeout(function () {
-                    if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = " (on)"
-                }, 10);
-            }
-        } else {
-            mod.acidDmg = 0
-            if (!build.isCustomSelection) {
-                setTimeout(function () {
-                    if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = " (off)"
-                }, 10);
+        if (mod.isAcidDmg) {
+            if (mech.health > 0.8) {
+                mod.acidDmg = 0.5
+                if (!build.isCustomSelection) {
+                    setTimeout(function () {
+                        if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = " (on)"
+                    }, 10);
+                }
+            } else {
+                mod.acidDmg = 0
+                if (!build.isCustomSelection) {
+                    setTimeout(function () {
+                        if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = " (off)"
+                    }, 10);
+                }
             }
         }
-        // if (mod.isLowHealthDmg) {
-        //   if (!build.isCustomSelection) {
-        //     setTimeout(function () {
-        //       if (document.getElementById("mod-low-health-damage")) document.getElementById("mod-low-health-damage").innerHTML = " +" + (((3 / (2 + Math.min(mech.health, 1))) - 1) * 100).toFixed(0) + "%"
-        //     }, 10);
-        //   }
-        // }
     },
-    resetModText() {
-        setTimeout(function () {
-            if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = "";
-            if (document.getElementById("mod-low-health-damage")) document.getElementById("mod-low-health-damage").innerHTML = "";
-        }, 10);
-    },
-
     mods: [{
             name: "capacitor",
             // nameInfo: "<span id='mod-capacitor'></span>",
@@ -178,7 +166,6 @@ const mod = {
         },
         {
             name: "negative feedback",
-            // nameInfo: "<span id='mod-low-health-damage'></span>",
             description: "do extra <strong class='color-d'>damage</strong> at <strong>low health</strong><br><em>up to <strong>50%</strong> increase when near death</em>",
             maxCount: 1,
             count: 0,
@@ -587,7 +574,7 @@ const mod = {
         },
         {
             name: "Pauli exclusion",
-            description: `<strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> second<br>activates after being <strong>harmed</strong> from a collision`,
+            description: `after being <strong>harmed</strong> from a collision<br><strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> second`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -621,6 +608,11 @@ const mod = {
         {
             name: "entanglement",
             nameInfo: "<span id = 'mod-entanglement'></span>",
+            addNameInfo() {
+                setTimeout(function () {
+                    game.boldActiveGunHUD();
+                }, 1000);
+            },
             description: "<strong>16%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
             maxCount: 1,
             count: 0,
@@ -769,7 +761,7 @@ const mod = {
         },
         {
             name: "negentropy",
-            description: "when below  <strong>25%</strong> of <strong>maximum health</strong><br> <strong class='color-h'>heal</strong> <strong>1%</strong> of <strong>maximum health</strong> per second",
+            description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>50%</strong> of <strong>maximum health</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -785,7 +777,7 @@ const mod = {
         },
         {
             name: "crystallized armor",
-            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>4%</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
+            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>5%</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -813,23 +805,6 @@ const mod = {
             },
             remove() {
                 mod.recursiveHealing = 1;
-            }
-        },
-        {
-            name: "pair production",
-            description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>twice</strong> your max <strong class='color-f'>energy</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect: () => {
-                mod.isMassEnergy = true // used in mech.grabPowerUp
-                mech.energy = mech.maxEnergy * 2
-            },
-            remove() {
-                mod.isMassEnergy = false;
             }
         },
         {
@@ -886,7 +861,7 @@ const mod = {
         },
         {
             name: "supply chain",
-            description: "double your current <strong>ammo</strong> for all <strong>gun</strong>",
+            description: "double your current <strong>ammo</strong> for all <strong>guns</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -936,7 +911,7 @@ const mod = {
         },
         {
             name: "cardinality",
-            description: "<strong>2</strong> extra <strong>choices</strong> when selecting <strong>power ups</strong>",
+            description: "<strong>2</strong> extra <strong>choices</strong> for <strong class='color-m'>mods</strong>, <strong>guns</strong>, and <strong>fields</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -994,7 +969,7 @@ const mod = {
         },
         {
             name: "many-worlds",
-            description: "after choosing a <strong>gun</strong>, <strong>field</strong>, or <strong class='color-m'>mod</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
+            description: "after choosing a <strong class='color-m'>mod</strong>, <strong>gun</strong>, or <strong>field</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1011,7 +986,12 @@ const mod = {
         {
             name: "anthropic principle",
             nameInfo: "<span id = 'mod-anthropic'></span>",
-            description: "<strong class='color-h'>heal</strong> to <strong>50%</strong> health instead of <strong>dying</strong><br>consumes <strong>1</strong> <strong class='color-r'>reroll</strong>",
+            addNameInfo() {
+                setTimeout(function () {
+                    powerUps.reroll.changeRerolls(0)
+                }, 1000);
+            },
+            description: "<strong class='color-h'>heal</strong> to <strong>60%</strong> health instead of <strong>dying</strong><br>consumes <strong>1</strong> <strong class='color-r'>reroll</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1030,7 +1010,7 @@ const mod = {
         },
         {
             name: "quantum immortality",
-            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>3</strong> <strong class='color-r'>rerolls</strong>",
+            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>5</strong> <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1039,9 +1019,9 @@ const mod = {
             requires: "",
             effect() {
                 mod.isImmortal = true;
-                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
-                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
-                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                for (let i = 0; i < 5; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                }
             },
             remove() {
                 mod.isImmortal = false;
@@ -1143,6 +1123,9 @@ const mod = {
         {
             name: "fluoroantimonic acid",
             nameInfo: "<span id='mod-acid'></span>",
+            addNameInfo() {
+                mod.onHealthChange();
+            },
             description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
             maxCount: 1,
             count: 0,
@@ -1153,7 +1136,6 @@ const mod = {
             requires: "health above 80%",
             effect() {
                 mod.isAcidDmg = true;
-                mod.onHealthChange();
             },
             remove() {
                 mod.acidDmg = 0;
@@ -1698,6 +1680,22 @@ const mod = {
             }
         },
         {
+            name: "superfluidity",
+            description: "<strong class='color-s'>freeze</strong> effects apply to mobs near it's target",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("ice IX") || mod.isIceCrystals || mod.isSporeFreeze || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && mod.isIceField)
+            },
+            requires: "a freeze effect",
+            effect() {
+                mod.isAoESlow = true
+            },
+            remove() {
+                mod.isAoESlow = false
+            }
+        },
+        {
             name: "heavy water",
             description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over 3 seconds",
             maxCount: 1,
@@ -1992,6 +1990,23 @@ const mod = {
             }
         },
         {
+            name: "pair production",
+            description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>3x</strong> your maximum <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+            },
+            requires: "nano-scale manufacturing",
+            effect: () => {
+                mod.isMassEnergy = true // used in mech.grabPowerUp
+                mech.energy = mech.maxEnergy * 3
+            },
+            remove() {
+                mod.isMassEnergy = false;
+            }
+        },
+        {
             name: "mycelium manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
             maxCount: 1,
@@ -2276,5 +2291,6 @@ const mod = {
     isPulseAim: null,
     isSporeFreeze: null,
     isShotgunRecoil: null,
-    isHealLowHealth: null
+    isHealLowHealth: null,
+    isAoESlow: null
 }

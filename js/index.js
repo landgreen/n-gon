@@ -248,7 +248,6 @@ const build = {
       document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
       localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     });
-    mod.resetModText();
   },
   reset() {
     build.isCustomSelection = true;

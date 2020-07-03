@@ -476,7 +476,7 @@ const mech = {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
 
-          mech.energy = mech.maxEnergy * 0.5
+          mech.energy = mech.maxEnergy * 0.6
           // if (mech.energy < 0.05) mech.energy = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
@@ -505,7 +505,7 @@ const mech = {
       if (mech.health < 0 || isNaN(mech.health)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
-          mech.health = mech.maxHealth * 0.5
+          mech.health = mech.maxHealth * 0.6
           // if (mech.health < 0.05) mech.health = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
@@ -942,7 +942,7 @@ const mech = {
           y: powerUp[i].velocity.y * 0.11
         });
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-          if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 2;
+          if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
@@ -1950,7 +1950,7 @@ const mech = {
                     y: powerUp[i].velocity.y * 0.11
                   });
                   if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-                    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 2;
+                    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
                     powerUp[i].effect();
                     Matter.World.remove(engine.world, powerUp[i]);
                     powerUp.splice(i, 1);

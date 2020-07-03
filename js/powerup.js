@@ -79,7 +79,7 @@ const powerUps = {
       }
       return out
     },
-    use(type) {
+    use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or mod
       powerUps.reroll.changeRerolls(-1)
       powerUps[type].effect();
     },
@@ -217,7 +217,6 @@ const powerUps = {
     },
     choiceLog: [], //records all previous choice options
     effect() {
-
 
       function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
