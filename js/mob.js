@@ -233,7 +233,7 @@ const mobs = {
           if (this.status[j].endCycle < game.cycle) this.status.splice(j, 1);
         }
       },
-      seeAtDistance2: 4000000, //sqrt(4000000) = 2000 = max seeing range
+      seeAtDistance2: Infinity, //sqrt(4000000) = 2000 = max seeing range
       distanceToPlayer() {
         const dx = this.position.x - player.position.x;
         const dy = this.position.y - player.position.y;
@@ -974,7 +974,7 @@ const mobs = {
           dmg *= mod.damageFromMods()
           //mobs specific damage changes
           dmg /= Math.sqrt(this.mass)
-          if (this.shield) dmg *= 0.04
+          if (this.shield) dmg *= 0.05
           if (mod.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
 
           //energy and heal drain should be calculated after damage boosts

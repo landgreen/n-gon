@@ -10,12 +10,12 @@ const b = {
     if (game.mouseDown && mech.fireCDcycle < mech.cycle && (!(keys[32] || game.mouseDownRight) || mech.fieldFire) && b.inventory.length) {
       if (b.guns[b.activeGun].ammo > 0) {
         b.guns[b.activeGun].fire();
-        if (mod.noAmmo && mech.crouch) {
-          if (mod.noAmmo % 2) {
+        if (mod.isCrouchAmmo && mech.crouch) {
+          if (mod.isCrouchAmmo % 2) {
             b.guns[b.activeGun].ammo--;
             game.updateGunHUD();
           }
-          mod.noAmmo++ //makes the no ammo toggle off and on
+          mod.isCrouchAmmo++ //makes the no ammo toggle off and on
         } else {
           b.guns[b.activeGun].ammo--;
           game.updateGunHUD();
@@ -507,7 +507,6 @@ const b = {
         if (mod.isMutualism && this.isMutualismActive && !mod.isEnergyHealth) {
           mech.health += 0.01
           if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
-          mod.onHealthChange();
           mech.displayHealth();
         }
       },
@@ -588,7 +587,6 @@ const b = {
 
     if (mod.isMutualism && mech.health > 0.02) {
       mech.health -= 0.01
-      mod.onHealthChange();
       mech.displayHealth();
       bullet[bIndex].isMutualismActive = true
     }
@@ -728,7 +726,7 @@ const b = {
                 }
               }
             }
-            if (!this.lockedOn) {
+            if (!this.lockedOn && !mod.isAmmoFromHealth) {
               //grab a power up if it is (ammo) or (a heal when player is low)
               let closeDist = Infinity;
               for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -1126,7 +1124,7 @@ const b = {
 
         //fire plasma at target
 
-        const DRAIN = 0.0017
+        const DRAIN = 0.002
         if (this.lockedOn && this.lockedOn.alive && mech.energy > DRAIN && mech.fieldCDcycle < mech.cycle) {
           mech.energy -= DRAIN;
           if (mech.energy < 0) {
@@ -1537,7 +1535,7 @@ const b = {
     },
     {
       name: "shotgun",
-      description: "fire a <strong>burst</strong> of short range bullets<br><em>crouch to reduce recoil</em>",
+      description: "fire a <strong>burst</strong> of short range <strong> bullets</strong> <br><em>crouch to reduce recoil</em>",
       ammo: 0,
       ammoPack: 9,
       have: false,

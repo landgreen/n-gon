@@ -71,37 +71,19 @@ const mod = {
     },
     damageFromMods() {
         let dmg = 1
-        if (mod.isLowHealthDmg) dmg *= (3 / (2 + Math.min(mech.health, 1))) //up to 50% dmg at zero player health  //if this changes all update display in modonHealthChange()
-        if (mod.isHarmDamage && mech.lastHarmCycle + 300 > mech.cycle) dmg *= 2;
+        if (mod.isLowHealthDmg) dmg *= 1 + 0.4 * Math.max(0, 1 - mech.health)
+        if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.33;
+        if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.006
         return dmg * mod.slowFire
     },
-    onHealthChange() { //used with acid mod
-        if (mod.isAcidDmg) {
-            if (mech.health > 0.8) {
-                mod.acidDmg = 0.5
-                if (!build.isCustomSelection) {
-                    setTimeout(function () {
-                        if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = " (on)"
-                    }, 10);
-                }
-            } else {
-                mod.acidDmg = 0
-                if (!build.isCustomSelection) {
-                    setTimeout(function () {
-                        if (document.getElementById("mod-acid")) document.getElementById("mod-acid").innerHTML = " (off)"
-                    }, 10);
-                }
-            }
-        }
-    },
     mods: [{
             name: "capacitor",
             // nameInfo: "<span id='mod-capacitor'></span>",
-            description: "increase <strong class='color-d'>damage</strong> based on stored <strong class='color-f'>energy</strong><br><strong>1%</strong> <strong class='color-d'>damage</strong> for every <strong>5.5%</strong> <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>5.5%</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -116,9 +98,25 @@ const mod = {
             }
         },
         {
+            name: "acute stress response",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>after a mob <strong>dies</strong> drain <strong>33%</strong> <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect() {
+                mod.isEnergyLoss = true;
+            },
+            remove() {
+                mod.isEnergyLoss = false;
+            }
+        },
+        {
             name: "rest frame",
             // nameInfo: "<span id='mod-rest'></span>",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong> when not <strong>moving</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br>when not <strong>moving</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -134,7 +132,7 @@ const mod = {
         },
         {
             name: "kinetic bombardment",
-            description: "do up to <strong>33%</strong> more <strong class='color-d'>damage</strong> at a <strong>distance</strong><br><em>increase maxes out at about 40 steps away</em>",
+            description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -150,7 +148,7 @@ const mod = {
         },
         {
             name: "fracture analysis",
-            description: "<strong>bullets</strong> do <strong>5x</strong> <strong class='color-d'>damage</strong> to <strong>unaware</strong> mobs<br><em>unaware mobs don't have a health bar</em>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>400%</strong><br>for mobs that are <strong>unaware</strong> of you",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -165,14 +163,30 @@ const mod = {
             }
         },
         {
-            name: "negative feedback",
-            description: "do extra <strong class='color-d'>damage</strong> at <strong>low health</strong><br><em>up to <strong>50%</strong> increase when near death</em>",
+            name: "fluoroantimonic acid",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your base <strong>health</strong> is above <strong>100%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.health < 0.8 || build.isCustomSelection
+                return mech.maxHealth > 1;
             },
-            requires: "health below 80%",
+            requires: "health above 100%",
+            effect() {
+                mod.isAcidDmg = true;
+            },
+            remove() {
+                mod.isAcidDmg = false;
+            }
+        },
+        {
+            name: "negative feedback",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each <strong>10%</strong> missing <strong>health</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.health < 0.6 || build.isCustomSelection
+            },
+            requires: "health below 60%",
             effect() {
                 mod.isLowHealthDmg = true; //used in mob.damage()
             },
@@ -182,7 +196,7 @@ const mod = {
         },
         {
             name: "radiative equilibrium",
-            description: "after receiving any <strong>harm</strong><br>do <strong>2x</strong> <strong class='color-d'>damage</strong> for <strong>5 seconds</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>for <strong>10 seconds</strong> after receiving <strong>harm</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -197,19 +211,20 @@ const mod = {
             }
         },
         {
-            name: "acute stress response",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>but, after a mob <strong>dies</strong> lose <strong>1/3</strong> your <strong class='color-f'>energy</strong>",
+            name: "electrostatic discharge",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br><strong>25%</strong> increased <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return true
             },
-            requires: "not mass-energy equivalence",
             effect() {
-                mod.isEnergyLoss = true;
+                mod.slowFire = 1.25
+                b.setFireCD();
             },
             remove() {
-                mod.isEnergyLoss = false;
+                mod.slowFire = 1;
+                b.setFireCD();
             }
         },
         {
@@ -231,25 +246,8 @@ const mod = {
             }
         },
         {
-            name: "electrostatic discharge",
-            description: "<strong>25%</strong> increased <strong class='color-d'>damage</strong><br><strong>25%</strong> increased <strong>delay</strong> after firing",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            effect() {
-                mod.slowFire = 1.25
-                b.setFireCD();
-            },
-            remove() {
-                mod.slowFire = 1;
-                b.setFireCD();
-            }
-        },
-        {
             name: "mass driver",
-            description: "<strong>blocks</strong> do <strong>2x</strong> more <strong class='color-d'>damage</strong> to mobs<br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
+            description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -261,6 +259,78 @@ const mod = {
             },
             remove() {
                 mod.throwChargeRate = 1
+            }
+        },
+        {
+            name: "reaction inhibitor",
+            description: "mobs spawn with <strong>12%</strong> less <strong>health</strong>",
+            maxCount: 3,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                mod.mobSpawnWithHealth *= 0.88
+
+                //set all mobs at full health to 0.85
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob.health > mod.mobSpawnWithHealth) mob.health = mod.mobSpawnWithHealth
+                }
+            },
+            remove() {
+                mod.mobSpawnWithHealth = 1;
+            }
+        },
+        {
+            name: "zoospore vector",
+            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>11%</strong> chance",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.sporesOnDeath += 0.11;
+                for (let i = 0; i < 10; i++) {
+                    b.spore(mech.pos)
+                }
+            },
+            remove() {
+                mod.sporesOnDeath = 0;
+            }
+        },
+        {
+            name: "thermal runaway",
+            description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                mod.isExplodeMob = true;
+            },
+            remove() {
+                mod.isExplodeMob = false;
+            }
+        },
+        {
+            name: "impact shear",
+            description: "mobs release <strong>2</strong> <strong>nails</strong> when they <strong>die</strong><br>nails target nearby mobs",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                mod.nailsDeathMob += 2
+            },
+            remove() {
+                mod.nailsDeathMob = 0;
             }
         },
         {
@@ -449,110 +519,6 @@ const mod = {
             }
         },
         {
-            name: "zoospore vector",
-            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>11%</strong> chance",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.sporesOnDeath += 0.11;
-                for (let i = 0; i < 10; i++) {
-                    b.spore(mech.pos)
-                }
-            },
-            remove() {
-                mod.sporesOnDeath = 0;
-            }
-        },
-        {
-            name: "thermal runaway",
-            description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect: () => {
-                mod.isExplodeMob = true;
-            },
-            remove() {
-                mod.isExplodeMob = false;
-            }
-        },
-        {
-            name: "impact shear",
-            description: "mobs release <strong>2</strong> <strong>nails</strong> when they <strong>die</strong><br>nails target nearby mobs",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect: () => {
-                mod.nailsDeathMob += 2
-            },
-            remove() {
-                mod.nailsDeathMob = 0;
-            }
-        },
-        {
-            name: "reaction inhibitor",
-            description: "mobs spawn with <strong>12%</strong> less <strong>health</strong>",
-            maxCount: 3,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect: () => {
-                mod.mobSpawnWithHealth *= 0.88
-
-                //set all mobs at full health to 0.85
-                for (let i = 0; i < mob.length; i++) {
-                    if (mob.health > mod.mobSpawnWithHealth) mob.health = mod.mobSpawnWithHealth
-                }
-            },
-            remove() {
-                mod.mobSpawnWithHealth = 1;
-            }
-        },
-        {
-            name: "scrap recycling",
-            description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isEnergyHealth
-            },
-            requires: "not mass-energy equivalence",
-            effect() {
-                mod.isHealthRecovery = true;
-            },
-            remove() {
-                mod.isHealthRecovery = false;
-            }
-        },
-        {
-            name: "waste energy recovery",
-            description: "regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.isEnergyRecovery = true;
-            },
-            remove() {
-                mod.isEnergyRecovery = false;
-            }
-        },
-        {
             name: "squirrel-cage rotor",
             description: "<strong>jump</strong> higher and <strong>move</strong> faster",
             maxCount: 9,
@@ -574,7 +540,7 @@ const mod = {
         },
         {
             name: "Pauli exclusion",
-            description: `after being <strong>harmed</strong> from a collision<br><strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> second`,
+            description: `after receiving <strong>harm</strong> from a collision<br><strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> second`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -590,8 +556,24 @@ const mod = {
             }
         },
         {
+            name: "non-Newtonian armor",
+            description: "for <strong>10 seconds</strong> after receiving <strong>harm</strong><br>reduce <strong>harm</strong> by <strong>50%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect() {
+                mod.isHarmArmor = true;
+            },
+            remove() {
+                mod.isHarmArmor = false;
+            }
+        },
+        {
             name: "clock gating",
-            description: `reduce all <strong>harm</strong> by <strong>15%</strong><br><strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong>harm</strong>`,
+            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong>harm</strong><br>reduce <strong>harm</strong> by <strong>15%</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -613,7 +595,7 @@ const mod = {
                     game.boldActiveGunHUD();
                 }, 1000);
             },
-            description: "<strong>16%</strong> less <strong>harm</strong> for each gun in your <strong>inventory</strong><br> while your <strong>first gun</strong> is equipped",
+            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>16%</strong> for each of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -629,31 +611,6 @@ const mod = {
             },
             remove() {
                 mod.isEntanglement = false;
-            }
-        },
-        {
-            name: "mass-energy equivalence",
-            description: "<strong class='color-f'>energy</strong> protects you instead of <strong>health</strong><br><strong>harm reduction</strong> effects provide <strong>no</strong> benefit",
-            // description: "you can't <strong>die</strong> if your <strong class='color-f'>energy</strong> is above <strong>zero</strong><br>your <strong>health</strong> is permanently set to <strong>zero</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isPiezo && !mod.isEnergyLoss
-            },
-            requires: "not piezoelectricity<br>or acute stress response",
-            effect: () => {
-                mech.health = 0
-                mod.onHealthChange();
-                mech.displayHealth();
-                document.getElementById("health-bg").style.display = "none"
-                document.getElementById("dmg").style.backgroundColor = "#0cf";
-                mod.isEnergyHealth = true;
-            },
-            remove() {
-                mod.isEnergyHealth = false;
-                document.getElementById("health-bg").style.display = "inline"
-                document.getElementById("dmg").style.backgroundColor = "#f67";
-                mech.health = mech.energy;
             }
         },
         {
@@ -692,6 +649,29 @@ const mod = {
             }
         },
         {
+            name: "mass-energy equivalence",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong>health</strong><br><strong>harm reduction</strong> effects provide <strong>no</strong> benefit",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isPiezo
+            },
+            requires: "not piezoelectricity<br>or acute stress response",
+            effect: () => {
+                mech.health = 0
+                mech.displayHealth();
+                document.getElementById("health-bg").style.display = "none"
+                document.getElementById("dmg").style.backgroundColor = "#0cf";
+                mod.isEnergyHealth = true;
+            },
+            remove() {
+                mod.isEnergyHealth = false;
+                document.getElementById("health-bg").style.display = "inline"
+                document.getElementById("dmg").style.backgroundColor = "#f67";
+                mech.health = mech.energy;
+            }
+        },
+        {
             name: "energy conservation",
             description: "<strong>13%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
@@ -725,6 +705,38 @@ const mod = {
             }
         },
         {
+            name: "waste energy recovery",
+            description: "regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.isEnergyRecovery = true;
+            },
+            remove() {
+                mod.isEnergyRecovery = false;
+            }
+        },
+        {
+            name: "scrap recycling",
+            description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect() {
+                mod.isHealthRecovery = true;
+            },
+            remove() {
+                mod.isHealthRecovery = false;
+            }
+        },
+        {
             name: "entropy exchange",
             description: "<strong class='color-h'>heal</strong> for <strong>1.5%</strong> of <strong class='color-d'>damage</strong> done",
             maxCount: 9,
@@ -755,7 +767,6 @@ const mod = {
             },
             remove() {
                 mech.maxHealth = 1;
-                mod.onHealthChange();
                 mech.displayHealth();
             }
         },
@@ -765,7 +776,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mech.maxHealth > 1
+                return mech.maxHealth > 1 || mod.isArmorFromPowerUps
             },
             requires: "increased max health",
             effect() {
@@ -833,7 +844,7 @@ const mod = {
             },
             requires: "",
             effect: () => {
-                mod.bayesian = 0.40;
+                mod.bayesian = 0.4;
             },
             remove() {
                 mod.bayesian = 0;
@@ -841,7 +852,7 @@ const mod = {
         },
         {
             name: "logistics",
-            description: "<strong>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>4 ammo</strong>",
+            description: "<strong>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>5 ammo</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -850,7 +861,7 @@ const mod = {
             requires: "at least 2 guns",
             effect() {
                 mod.isAmmoForGun = true;
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < 5; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                 }
@@ -861,7 +872,7 @@ const mod = {
         },
         {
             name: "supply chain",
-            description: "double your current <strong>ammo</strong> for all <strong>guns</strong>",
+            description: "double your current <strong>ammo</strong> for all <strong class='color-g'>guns</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -903,15 +914,31 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.noAmmo = 1
+                mod.isCrouchAmmo = true
             },
             remove() {
-                mod.noAmmo = 0;
+                mod.isCrouchAmmo = false;
+            }
+        },
+        {
+            name: "gun turret",
+            description: "reduce <strong>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isCrouchAmmo
+            },
+            requires: "desublimated ammunition",
+            effect() {
+                mod.isTurret = true
+            },
+            remove() {
+                mod.isTurret = false;
             }
         },
         {
             name: "cardinality",
-            description: "<strong>2</strong> extra <strong>choices</strong> for <strong class='color-m'>mods</strong>, <strong>guns</strong>, and <strong>fields</strong>",
+            description: "<strong>2</strong> extra <strong>choices</strong> for <strong class='color-m'>mods</strong>, <strong class='color-g'>guns</strong>, and <strong>fields</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -927,7 +954,7 @@ const mod = {
         },
         {
             name: "determinism",
-            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong>power ups</strong> are limited to <strong>one choice</strong>",
+            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-g'>guns</strong>, and <strong>fields</strong> have only <strong>1 choice</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -948,7 +975,7 @@ const mod = {
         },
         {
             name: "superdeterminism",
-            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong>guns</strong>, and <strong>fields</strong> will no longer <strong>spawn</strong>",
+            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong>fields</strong> no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -969,7 +996,7 @@ const mod = {
         },
         {
             name: "many-worlds",
-            description: "after choosing a <strong class='color-m'>mod</strong>, <strong>gun</strong>, or <strong>field</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
+            description: "after choosing a <strong class='color-m'>mod</strong>, <strong class='color-g'>gun</strong>, or <strong>field</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1059,7 +1086,7 @@ const mod = {
         },
         {
             name: "reallocation",
-            description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong>guns</strong><br><em>recursive mods lose all stacks</em>",
+            description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong class='color-g'>guns</strong><br><em>recursive mods lose all stacks</em>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1106,7 +1133,7 @@ const mod = {
         },
         {
             name: "microstates",
-            description: "<strong>6%</strong> <strong class='color-d'>damage</strong> for every <strong>10</strong> active <strong>bullets</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1118,29 +1145,6 @@ const mod = {
             },
             remove() {
                 mod.isDamageFromBulletCount = false
-            }
-        },
-        {
-            name: "fluoroantimonic acid",
-            nameInfo: "<span id='mod-acid'></span>",
-            addNameInfo() {
-                mod.onHealthChange();
-            },
-            description: "each <strong>bullet</strong> does instant <strong class='color-p'>acid</strong> <strong class='color-d'>damage</strong><br><strong>active</strong> when you are above <strong>80%</strong> base health",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return (mech.health > 0.8 || build.isCustomSelection) &&
-                    (mod.haveGunCheck("mine") || mod.haveGunCheck("minigun") || mod.haveGunCheck("shotgun") || mod.haveGunCheck("super balls") || mod.haveGunCheck("spores") || mod.haveGunCheck("drones") || mod.haveGunCheck("ice IX"))
-            },
-            requires: "health above 80%",
-            effect() {
-                mod.isAcidDmg = true;
-            },
-            remove() {
-                mod.acidDmg = 0;
-                mod.isAcidDmg = false;
-                game.playerDmgColor = "rgba(0,0,0,0.7)"
             }
         },
         {
@@ -1306,7 +1310,7 @@ const mod = {
         },
         {
             name: "6s half-life",
-            description: "<strong>flechette</strong> needles made of <strong class='color-p'>plutonium-238</strong><br><strong>2x</strong> <strong class='color-d'>damage</strong> spread over <strong>6</strong> seconds",
+            description: "<strong>flechette</strong> needles made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1354,7 +1358,7 @@ const mod = {
         },
         {
             name: "wave packet",
-            description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>wave particles do <strong>40%</strong> less <strong class='color-d'>damage</strong>",
+            description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>40%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1404,7 +1408,7 @@ const mod = {
         },
         {
             name: "high explosives",
-            description: "<strong class='color-e'>explosions</strong> do <strong>20%</strong> more <strong class='color-d'>damage</strong><br><strong class='color-e'>explosive</strong> area is <strong>44% larger</strong>",
+            description: "increase <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> by <strong>20%</strong><br><strong class='color-e'>explosive</strong> area is <strong>44% larger</strong>",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -1452,7 +1456,7 @@ const mod = {
         },
         {
             name: "MIRV",
-            description: "launch <strong>3</strong> small <strong>missiles</strong> instead of 1<br><strong>1.5x</strong> increase in <strong>delay</strong> after firing",
+            description: "launch <strong>3</strong> small <strong>missiles</strong> instead of <strong>1</strong> <br><strong>1.5x</strong> increase in <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1520,7 +1524,7 @@ const mod = {
         },
         {
             name: "electromagnetic pulse",
-            description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> destroys <strong>shields</strong><br>and does <strong>20%</strong> more <strong class='color-d'>damage</strong>",
+            description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> destroys <strong>shields</strong><br>increase bomb <strong class='color-d'>damage</strong> by <strong>20%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1632,7 +1636,7 @@ const mod = {
         },
         {
             name: "mutualism",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>2x</strong> <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>1%</strong> <strong>health</strong> until they <strong>die</strong>",
+            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>1%</strong> <strong>health</strong> until they <strong>die</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1697,7 +1701,7 @@ const mod = {
         },
         {
             name: "heavy water",
-            description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over 3 seconds",
+            description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1851,7 +1855,7 @@ const mod = {
         },
         {
             name: "timelike world line",
-            description: "<strong>time dilation</strong> increases your time <strong>rate</strong> by <strong>2x</strong><br> and makes you <strong>immune</strong> to <strong>harm</strong>",
+            description: "<strong>time dilation</strong> doubles your time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong>harm</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2056,7 +2060,7 @@ const mod = {
         },
         {
             name: "renormalization",
-            description: "<strong>phase decoherence</strong> adds <strong>visibility</strong> to bullets<br><strong>5x</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+            description: "<strong>phase decoherence</strong> adds <strong>visibility</strong> to bullets<br><strong>80%</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2072,8 +2076,7 @@ const mod = {
         },
         {
             name: "superposition",
-            // description: "<strong>phase decoherence field</strong> applies a <strong>stun</strong><br> to unshielded <strong>mobs</strong> for <strong>2</strong> seconds",
-            description: "while <strong>phase decoherence field</strong> is active<br>mobs that <strong>overlap</strong> with the player are <strong>stunned</strong>",
+            description: "mobs that <strong>touch</strong> the <strong>phased</strong> player<br> are <strong>stunned</strong> for <strong>4</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2160,7 +2163,7 @@ const mod = {
         },
         {
             name: "gun",
-            description: "spawn a <strong>gun</strong> power up",
+            description: "spawn a <strong class='color-g'>gun</strong> power up",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -2197,15 +2200,13 @@ const mod = {
     bulletSize: null,
     energySiphon: null,
     healthDrain: null,
-    noAmmo: null,
+    isCrouchAmmo: null,
     isBulletsLastLonger: null,
     isImmortal: null,
     sporesOnDeath: null,
     isImmuneExplosion: null,
     isExplodeMob: null,
     isDroneOnDamage: null,
-    // isMineOnDamage: null,
-    acidDmg: null,
     isAcidDmg: null,
     isAnnihilation: null,
     recursiveHealing: null,
@@ -2292,5 +2293,7 @@ const mod = {
     isSporeFreeze: null,
     isShotgunRecoil: null,
     isHealLowHealth: null,
-    isAoESlow: null
+    isAoESlow: null,
+    isHarmArmor: null,
+    isTurret: null
 }

@@ -13,8 +13,8 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(9)
       // mech.isStealth = true;
-      // mod.giveMod("supply chain");
-      b.giveGuns("ice IX")
+      // mod.giveMod("superfluidity");
+      // b.giveGuns("ice IX")
       // mech.setField("plasma torch")
 
       level.intro(); //starting level
@@ -1955,7 +1955,6 @@ const level = {
     game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
     if (mod.isHealLowHealth && mech.health < mech.maxHealth * 0.5) {
       mech.health = mech.maxHealth * 0.5
-      mod.onHealthChange();
       mech.displayHealth();
     }
   },
@@ -2082,7 +2081,7 @@ const level = {
       if (target.velocity.y > 30) {
         Matter.Body.setVelocity(target, {
           x: target.velocity.x + (Math.random() - 0.5) * 2,
-          y: -23 //gentle bounce if coming down super fast
+          y: -15 //gentle bounce if coming down super fast
         });
       } else {
         Matter.Body.setVelocity(target, {

@@ -459,6 +459,11 @@ em {
   letter-spacing: 1px;
 }
 
+.color-g {
+  color: hsl(218, 100%, 27%);
+  letter-spacing: 1px;
+}
+
 .color-r {
   color: #f7b;
   letter-spacing: 1px;
@@ -484,6 +489,20 @@ em {
   display: inline-block;
   margin-bottom: -5px;
 }
+
+.circle-gun-mod {
+  box-shadow: 0 0 0 3px #025;
+}
+
+/* .circle-grid-gun {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: 0px;
+  background: #025;
+  box-shadow: 0 0 0 8px hsl(253, 80%, 67%);
+} */
 
 .field {
   background: #0cf;

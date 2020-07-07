@@ -241,7 +241,6 @@ const game = {
       }
     }
     document.getElementById("mods").innerHTML = text
-    mod.onHealthChange()
   },
   replaceTextLog: true,
   // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
@@ -278,7 +277,7 @@ const game = {
     }
   },
   switchGun() {
-    if (mod.noAmmo) mod.noAmmo = 1 //this prevents hacking the mod by switching guns
+    if (mod.isCrouchAmmo) mod.isCrouchAmmo = 1 //this prevents hacking the mod by switching guns
     b.activeGun = b.inventory[b.inventoryGun];
     game.updateGunHUD();
     game.boldActiveGunHUD();
@@ -645,7 +644,7 @@ const game = {
       }
       for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
         if (b.guns[i].name === "mine") {
-          if (mod.noAmmo) count = Math.ceil(count / 2)
+          if (mod.isCrouchAmmo) count = Math.ceil(count / 2)
           b.guns[i].ammo += count
           game.updateGunHUD();
           break;
@@ -658,7 +657,6 @@ const game = {
         if (bullet[i].isMutualismActive) {
           mech.health += 0.01
           if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
-          mod.onHealthChange();
           mech.displayHealth();
         }
       }

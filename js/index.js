@@ -68,7 +68,6 @@ const build = {
         b.activeGun = b.inventory[0] //set first gun to active gun
         game.makeGunHUD();
       }
-      mod.onHealthChange();
     }
   },
   pauseGrid() {
@@ -292,8 +291,6 @@ const build = {
   },
   startBuildRun() {
     build.isCustomSelection = false;
-    mod.onHealthChange()
-
     spawn.setSpawnList(); //gives random mobs,  not starter mobs
     spawn.setSpawnList();
     if (b.inventory.length > 0) {

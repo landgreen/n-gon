@@ -1,20 +1,26 @@
 
-negentropy - heals player to 50% max health at the end of a level
-crystallized armor - give 5% (was 4%) max health for a power up
-mod - superfluidity: AoE freeze effect
-bomberBoss's bombs split into 3 bombs on later levels
-mod - pair production only works for nano-scale manufacturing, but gives 3x (up from 2x) max energy
-press Z+X in testing mode to trigger player death
+drones stop auto grabbing power ups when you have crystallized armor
+mod - non-Newtonian armor: take 50% less harm for 10 seconds after getting hit
+radiative equilibrium damage lasts 10s after getting hit (up from 5s)
+fluoroantimonic acid mod simplified- now gives 40% damage when your base health is above 100%
+mod - gun turret: take 50% less harm while crouched
+
+boss mob power up drop rework:
+  easy and normal have about a 66% chance
+  hard has a 100% chance
+  why has a 133% chance, plus a bonus 60% chance for a second power up
+  if you miss a roll, your odds double on the next roll
+  for each level above level 10 you need to roll 10% higher to get a power up
 
 ************** TODO - n-gon **************
 
-plasma field gets longer as you hold it longer
+field that pushes blocks and mobs away
+  charges up on mouse down and triggers on mouse up
+    drain mana while charging up
+  maybe push effect should last 10 cycles to give a more gentle feeling
 
 mod - AoE radiation might work when the effect ends
     or maybe just anytime another mob is near
-
-wave beam: mod - longitudinal waves (bullets oscillate fast /slow not up/down)
-  trigger on crouch?
 
 medium caliber gun in between minigun and rail gun
   mod: electricity damages mobs that get near the bullet 

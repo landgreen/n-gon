@@ -431,7 +431,6 @@ const mech = {
     if (!mod.isEnergyHealth) {
       mech.health += heal * game.healScale;
       if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
-      mod.onHealthChange();
       mech.displayHealth();
     }
   },
@@ -441,7 +440,9 @@ const mech = {
     let dmg = 1
     dmg *= mech.fieldHarmReduction
     dmg *= mod.isSlowFPS ? 0.85 : 1
+    if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
     if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
+    if (mod.isTurret && mech.crouch) dmg /= 2;
     if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.84 // 1 - 0.16
@@ -452,23 +453,12 @@ const mech = {
   damage(dmg) {
     mech.lastHarmCycle = mech.cycle
 
-    //chance to build a drone on damage  from mod
-    if (mod.isDroneOnDamage) {
+    if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
       const len = (dmg - 0.06 * Math.random()) * 40
       for (let i = 0; i < len; i++) {
         if (Math.random() < 0.5) b.drone() //spawn drone
       }
     }
-    // if (mod.isMineOnDamage && dmg > 0.004 + 0.05 * Math.random()) {
-    //   b.mine({
-    //     x: mech.pos.x,
-    //     y: mech.pos.y - 80
-    //   }, {
-    //     x: 0,
-    //     y: 0
-    //   })
-    // }
-
 
     if (mod.isEnergyHealth) {
       mech.energy -= dmg;
@@ -525,7 +515,6 @@ const mech = {
           return;
         }
       }
-      mod.onHealthChange();
       mech.displayHealth();
       document.getElementById("dmg").style.transition = "opacity 0s";
       document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
@@ -1301,7 +1290,7 @@ const mech = {
     },
     {
       name: "nano-scale manufacturing",
-      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>2x</strong> <strong class='color-f'>energy</strong> regeneration",
+      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong class='color-f'>energy</strong> regeneration is <strong>doubled</strong>",
       isEasyToAim: true,
       effect: () => {
         // mech.fieldRegen *= 2;
@@ -1449,9 +1438,9 @@ const mech = {
                 const ICE_DRAIN = 0.00015
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].distanceToPlayer() + mob[i].radius < this.fieldDrawRadius && !mob[i].shield && !mob[i].isShielded) {
-                    if (mech.energy > ICE_DRAIN) {
-                      this.fieldDrawRadius -= 2;
+                    if (mech.energy > ICE_DRAIN * 2) {
                       mech.energy -= ICE_DRAIN;
+                      this.fieldDrawRadius -= 2;
                       mobs.statusSlow(mob[i], 45)
                     } else {
                       break;
