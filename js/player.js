@@ -1163,7 +1163,7 @@ const mech = {
   },
   fieldUpgrades: [{
       name: "field emitter",
-      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong>harm</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
+      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-harm'>harm</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
       isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
@@ -1190,7 +1190,7 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong>harm</strong> by <strong>33%</strong>",
+      description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong>",
       isEasyToAim: true,
       effect: () => {
         mech.fieldHarmReduction = 0.67;
@@ -1347,7 +1347,7 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong>harm</strong> by <strong>60%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong>",
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {

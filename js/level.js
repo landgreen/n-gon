@@ -18,7 +18,7 @@ const level = {
       // mech.setField("plasma torch")
 
       level.intro(); //starting level
-      // level.bossRoom1()
+      // level.sewer()
       // level.testing();
       // level.template()
       // level.bosses();
@@ -68,17 +68,79 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-  bossRoom1() {
+  rotor(x, y, radius = 900, width = 50, density = 0.0002) {
+    const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
+      density: density,
+    });
+    const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
+      angle: Math.PI / 2,
+      density: density,
+    });
+    const rotor = Body.create({ //combine rotor1 and rotor2
+      parts: [rotor1, rotor2],
+      // friction: 0,
+      // frictionAir: 0,
+      // frictionStatic: 0,
+      // restitution: 0,
+      collisionFilter: {
+        category: cat.body,
+        mask: cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.powerUp | cat.player | cat.bullet
+      },
+    });
+    Matter.Body.setPosition(rotor, {
+      x: x,
+      y: y
+    });
+    World.add(engine.world, [rotor]);
+    body[body.length] = rotor1
+    body[body.length] = rotor2
+
+    setTimeout(function () {
+      rotor.collisionFilter.category = cat.body;
+      rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
+    }, 1000);
+
+    const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+      pointA: {
+        x: x,
+        y: y
+      },
+      bodyB: rotor
+    });
+    World.add(engine.world, constraint);
+    return rotor
+  },
+  sewer() {
+    const rotor = level.rotor(3050, 1850)
+    // const rotor2 = level.rotor(3050, 1200)
+
     level.custom = () => {
+      Matter.Body.applyForce(rotor, {
+        x: rotor.position.x + 100,
+        y: rotor.position.y + 100
+      }, {
+        x: 0.001 * rotor.mass,
+        y: 0
+      })
+      // Matter.Body.applyForce(rotor2, {
+      //   x: rotor2.position.x + 100,
+      //   y: rotor2.position.y + 100
+      // }, {
+      //   x: -0.001 * rotor2.mass,
+      //   y: 0
+      // })
+
       level.playerExitCheck();
     };
-    level.setPosToSpawn(0, -50); //normal spawn
+    level.setPosToSpawn(3775, 425); //normal spawn
+    // level.setPosToSpawn(0, -50); //normal spawn
+
     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
     level.exit.x = 1500;
     level.exit.y = -1875;
     level.defaultZoom = 1800
     game.zoomTransition(level.defaultZoom)
-    document.body.style.backgroundColor = "#dcdcde";
+    document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
     // powerUps.spawnStartingPowerUps(1475, -1175);
     // spawn.debris(750, -2200, 3700, 16); //16 debris per level
     // level.fill.push({     //foreground
@@ -96,7 +158,27 @@ const level = {
     //   color: "#d4d4d7"
     // });
 
-    spawn.mapRect(-100, 0, 1000, 100);
+    spawn.mapRect(-400, -500, 100, 600); //left entrance wall
+    spawn.mapRect(-400, -500, 3800, 100); //ceiling
+    spawn.mapRect(-400, 0, 3000, 100); //floor
+    spawn.mapRect(300, -500, 100, 400); //right entrance wall
+
+
+    spawn.mapRect(600, -200, 400, 100);
+    spawn.mapRect(1250, -250, 300, 300);
+    spawn.mapRect(2000, -150, 300, 200);
+
+    spawn.mapRect(3300, -500, 100, 700); //right down tube wall
+    spawn.mapRect(3000, 500, 100, 1400); //right down tube wall
+    spawn.mapRect(3000, 500, 1000, 100); //tube right exit floor
+    spawn.mapRect(3300, 100, 1000, 100); //tube right exit ceiling
+
+    spawn.mapRect(2500, 0, 100, 1900); //left down tube wall
+    spawn.mapRect(850, 2300, 2800, 100);
+    spawn.mapRect(3000, 1800, 600, 100);
+
+
+
     // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
     // spawn.boost(4150, 0, 1300);
     // spawn.randomSmallMob(1300, -70);

@@ -388,6 +388,7 @@ const b = {
                 if (Matter.Query.collides(this, map).length > 0) { //touching map
                   if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
                     Matter.Body.setStatic(this, true) //don't set to static if not touching map
+                    this.collisionFilter.mask = cat.map | cat.bullet
                   } else {
                     Matter.Body.setVelocity(this, {
                       x: 0,

@@ -196,7 +196,7 @@ const mod = {
         },
         {
             name: "radiative equilibrium",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>for <strong>10 seconds</strong> after receiving <strong>harm</strong>",
+            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -436,7 +436,7 @@ const mod = {
         },
         {
             name: "bot replication",
-            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>90%</strong> of your <strong>ammo</strong>",
+            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>90%</strong> of your <strong class='color-g'>ammo</strong>",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
@@ -501,7 +501,7 @@ const mod = {
         // },
         {
             name: "ablative drones",
-            description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after being <strong>harmed</strong>",
+            description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after receiving <strong class='color-harm'>harm</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -540,7 +540,7 @@ const mod = {
         },
         {
             name: "Pauli exclusion",
-            description: `after receiving <strong>harm</strong> from a collision<br><strong>immune</strong> to <strong>harm</strong> for <strong>1</strong> second`,
+            description: `after receiving <strong class='color-harm'>harm</strong> from a collision<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -557,7 +557,7 @@ const mod = {
         },
         {
             name: "non-Newtonian armor",
-            description: "for <strong>10 seconds</strong> after receiving <strong>harm</strong><br>reduce <strong>harm</strong> by <strong>50%</strong>",
+            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -573,7 +573,7 @@ const mod = {
         },
         {
             name: "clock gating",
-            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong>harm</strong><br>reduce <strong>harm</strong> by <strong>15%</strong>`,
+            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -595,7 +595,7 @@ const mod = {
                     game.boldActiveGunHUD();
                 }, 1000);
             },
-            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong>harm</strong> by <strong>16%</strong> for each of your <strong class='color-g'>guns</strong>",
+            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>16%</strong> for each of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -615,7 +615,7 @@ const mod = {
         },
         {
             name: "piezoelectricity",
-            description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong>harm</strong> from mob collisions",
+            description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong class='color-harm'>harm</strong> from mob collisions",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -632,7 +632,7 @@ const mod = {
         },
         {
             name: "ground state",
-            description: "reduce <strong>harm</strong> by <strong>50%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -650,7 +650,7 @@ const mod = {
         },
         {
             name: "mass-energy equivalence",
-            description: "<strong class='color-f'>energy</strong> protects you instead of <strong>health</strong><br><strong>harm reduction</strong> effects provide <strong>no</strong> benefit",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -819,198 +819,6 @@ const mod = {
             }
         },
         {
-            name: "bubble fusion",
-            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>3</strong> <strong class='color-h'>heals</strong>, <strong>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.isShieldAmmo = true;
-            },
-            remove() {
-                mod.isShieldAmmo = false;
-            }
-        },
-        {
-            name: "Bayesian inference",
-            description: "<strong>40%</strong> chance for double <strong>power ups</strong> to drop<br><strong>ammo</strong> will no longer <strong>spawn</strong> from mobs",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect: () => {
-                mod.bayesian = 0.4;
-            },
-            remove() {
-                mod.bayesian = 0;
-            }
-        },
-        {
-            name: "logistics",
-            description: "<strong>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>5 ammo</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return b.inventory.length > 1
-            },
-            requires: "at least 2 guns",
-            effect() {
-                mod.isAmmoForGun = true;
-                for (let i = 0; i < 5; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-                }
-            },
-            remove() {
-                mod.isAmmoForGun = false;
-            }
-        },
-        {
-            name: "supply chain",
-            description: "double your current <strong>ammo</strong> for all <strong class='color-g'>guns</strong>",
-            maxCount: 9,
-            count: 0,
-            isNonRefundable: true,
-            allowed() {
-                return mod.isAmmoForGun
-            },
-            requires: "logistics",
-            effect() {
-                for (let i = 0; i < b.guns.length; i++) {
-                    if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
-                }
-                game.makeGunHUD();
-            },
-            remove() {}
-        },
-        {
-            name: "catabolism",
-            description: "gain <strong>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong>ammo</strong><br>drains <strong>2%</strong> of <strong>max health</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isEnergyHealth
-            },
-            requires: "not mass-energy equivalence",
-            effect: () => {
-                mod.isAmmoFromHealth = 0.02;
-            },
-            remove() {
-                mod.isAmmoFromHealth = 0;
-            }
-        },
-        {
-            name: "desublimated ammunition",
-            description: "use <strong>50%</strong> less <strong>ammo</strong> when <strong>crouching</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.isCrouchAmmo = true
-            },
-            remove() {
-                mod.isCrouchAmmo = false;
-            }
-        },
-        {
-            name: "gun turret",
-            description: "reduce <strong>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.isCrouchAmmo
-            },
-            requires: "desublimated ammunition",
-            effect() {
-                mod.isTurret = true
-            },
-            remove() {
-                mod.isTurret = false;
-            }
-        },
-        {
-            name: "cardinality",
-            description: "<strong>2</strong> extra <strong>choices</strong> for <strong class='color-m'>mods</strong>, <strong class='color-g'>guns</strong>, and <strong>fields</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isDeterminism
-            },
-            requires: "not determinism",
-            effect: () => {
-                mod.isExtraChoice = true;
-            },
-            remove() {
-                mod.isExtraChoice = false;
-            }
-        },
-        {
-            name: "determinism",
-            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-g'>guns</strong>, and <strong>fields</strong> have only <strong>1 choice</strong>",
-            maxCount: 1,
-            count: 0,
-            isNonRefundable: true,
-            allowed() {
-                return !mod.isExtraChoice
-            },
-            requires: "not cardinality",
-            effect: () => {
-                mod.isDeterminism = true;
-                for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                }
-            },
-            remove() {
-                mod.isDeterminism = false;
-            }
-        },
-        {
-            name: "superdeterminism",
-            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong>fields</strong> no longer <strong>spawn</strong>",
-            maxCount: 1,
-            count: 0,
-            isNonRefundable: true,
-            allowed() {
-                return mod.isDeterminism && !mod.manyWorlds
-            },
-            requires: "determinism",
-            effect: () => {
-                mod.isSuperDeterminism = true;
-                for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                }
-            },
-            remove() {
-                mod.isSuperDeterminism = false;
-            }
-        },
-        {
-            name: "many-worlds",
-            description: "after choosing a <strong class='color-m'>mod</strong>, <strong class='color-g'>gun</strong>, or <strong>field</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isSuperDeterminism
-            },
-            requires: "not superdeterminism",
-            effect: () => {
-                mod.manyWorlds = true;
-            },
-            remove() {
-                mod.manyWorlds = false;
-            }
-        },
-        {
             name: "anthropic principle",
             nameInfo: "<span id = 'mod-anthropic'></span>",
             addNameInfo() {
@@ -1035,6 +843,199 @@ const mod = {
                 mod.isDeathAvoid = false;
             }
         },
+        {
+            name: "bubble fusion",
+            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>3</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.isShieldAmmo = true;
+            },
+            remove() {
+                mod.isShieldAmmo = false;
+            }
+        },
+        {
+            name: "Bayesian inference",
+            description: "<strong>40%</strong> chance for double <strong>power ups</strong> to drop<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong> from mobs",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                mod.bayesian = 0.4;
+            },
+            remove() {
+                mod.bayesian = 0;
+            }
+        },
+        {
+            name: "logistics",
+            description: "<strong class='color-g'>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>5 ammo</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1
+            },
+            requires: "at least 2 guns",
+            effect() {
+                mod.isAmmoForGun = true;
+                for (let i = 0; i < 5; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                }
+            },
+            remove() {
+                mod.isAmmoForGun = false;
+            }
+        },
+        {
+            name: "supply chain",
+            description: "double your current <strong class='color-g'>ammo</strong> for all <strong class='color-g'>guns</strong>",
+            maxCount: 9,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return mod.isAmmoForGun
+            },
+            requires: "logistics",
+            effect() {
+                for (let i = 0; i < b.guns.length; i++) {
+                    if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
+                }
+                game.makeGunHUD();
+            },
+            remove() {}
+        },
+        {
+            name: "catabolism",
+            description: "gain <strong class='color-g'>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>drains <strong>2%</strong> of <strong>max health</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect: () => {
+                mod.isAmmoFromHealth = 0.02;
+            },
+            remove() {
+                mod.isAmmoFromHealth = 0;
+            }
+        },
+        {
+            name: "desublimated ammunition",
+            description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.isCrouchAmmo = true
+            },
+            remove() {
+                mod.isCrouchAmmo = false;
+            }
+        },
+        {
+            name: "gun turret",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isCrouchAmmo
+            },
+            requires: "desublimated ammunition",
+            effect() {
+                mod.isTurret = true
+            },
+            remove() {
+                mod.isTurret = false;
+            }
+        },
+        {
+            name: "cardinality",
+            description: "<strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isDeterminism
+            },
+            requires: "not determinism",
+            effect: () => {
+                mod.isExtraChoice = true;
+            },
+            remove() {
+                mod.isExtraChoice = false;
+            }
+        },
+        {
+            name: "determinism",
+            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return !mod.isExtraChoice
+            },
+            requires: "not cardinality",
+            effect: () => {
+                mod.isDeterminism = true;
+                for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                }
+            },
+            remove() {
+                mod.isDeterminism = false;
+            }
+        },
+        {
+            name: "superdeterminism",
+            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return mod.isDeterminism && !mod.manyWorlds
+            },
+            requires: "determinism",
+            effect: () => {
+                mod.isSuperDeterminism = true;
+                for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                }
+            },
+            remove() {
+                mod.isSuperDeterminism = false;
+            }
+        },
+        {
+            name: "many-worlds",
+            description: "after choosing a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isSuperDeterminism
+            },
+            requires: "not superdeterminism",
+            effect: () => {
+                mod.manyWorlds = true;
+            },
+            remove() {
+                mod.manyWorlds = false;
+            }
+        },
+
         {
             name: "quantum immortality",
             description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>5</strong> <strong class='color-r'>rerolls</strong>",
@@ -1198,7 +1199,7 @@ const mod = {
         },
         {
             name: "shotgun spin-statistics",
-            description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to <strong>harm</strong> while on cooldown",
+            description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to <strong class='color-harm'>harm</strong> while on cooldown",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1278,7 +1279,7 @@ const mod = {
         },
         {
             name: "flechettes cartridges",
-            description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong>ammo</strong> cost are increases by <strong>3x</strong>",
+            description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong class='color-g'>ammo</strong> cost are increases by <strong>3x</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1472,7 +1473,7 @@ const mod = {
         },
         {
             name: "optimized shell packing",
-            description: "<strong>flak</strong> ammo drops contain <strong>3x</strong> more shells",
+            description: "<strong>flak</strong> <strong class='color-g'>ammo</strong> drops contain <strong>3x</strong> more shells",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -1572,7 +1573,7 @@ const mod = {
         },
         {
             name: "mine reclamation",
-            description: "retrieve <strong>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
+            description: "retrieve <strong class='color-g'>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1855,7 +1856,7 @@ const mod = {
         },
         {
             name: "timelike world line",
-            description: "<strong>time dilation</strong> doubles your time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong>harm</strong>",
+            description: "<strong>time dilation</strong> doubles your time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1911,7 +1912,7 @@ const mod = {
         },
         {
             name: "degenerate matter",
-            description: "<strong>harm</strong> reduction from <strong>negative mass field</strong><br>is increased from 60% to <strong>80%</strong>",
+            description: "<strong class='color-harm'>harm</strong> reduction from <strong>negative mass field</strong><br>is increased from 60% to <strong>80%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2126,7 +2127,7 @@ const mod = {
         },
         {
             name: "ammo",
-            description: "spawn <strong>6 ammo</strong> power ups",
+            description: "spawn <strong>6</strong> <strong class='color-g'>ammo</strong> power ups",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -2179,7 +2180,7 @@ const mod = {
         },
         {
             name: "field",
-            description: "spawn a <strong>field</strong> power up",
+            description: "spawn a <strong class='color-f'>field</strong> power up",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,

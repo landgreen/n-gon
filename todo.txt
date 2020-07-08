@@ -1,16 +1,4 @@
 
-drones stop auto grabbing power ups when you have crystallized armor
-mod - non-Newtonian armor: take 50% less harm for 10 seconds after getting hit
-radiative equilibrium damage lasts 10s after getting hit (up from 5s)
-fluoroantimonic acid mod simplified- now gives 40% damage when your base health is above 100%
-mod - gun turret: take 50% less harm while crouched
-
-boss mob power up drop rework:
-  easy and normal have about a 66% chance
-  hard has a 100% chance
-  why has a 133% chance, plus a bonus 60% chance for a second power up
-  if you miss a roll, your odds double on the next roll
-  for each level above level 10 you need to roll 10% higher to get a power up
 
 ************** TODO - n-gon **************
 
@@ -26,6 +14,7 @@ medium caliber gun in between minigun and rail gun
   mod: electricity damages mobs that get near the bullet 
   get ammo back if it hits mobs
   ammo returns to you if it misses
+  bullets have a gentle arc?
 
 mob that flashes the player (makes the graphics not update for a couple seconds)
 
@@ -51,9 +40,6 @@ mod harmonic shield: slow everything in range around shield (temporal shield)
 mod: bot very slowly follows you and gives you a bonus when it's in range
   it moves through walls
   effect: damage bonus?, damage reduction?, push away mobs, limit top speed of mobs/blocks/player?
-
-pulse and laser can auto aim
-  can hit multiple targets if they are in range
 
 make a visual indication of max health
 

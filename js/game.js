@@ -13,7 +13,6 @@ const game = {
       mech.airControl()
     }
     // level.checkZones();
-    level.custom();
     level.checkQuery();
     mech.move();
     mech.look();
@@ -23,6 +22,7 @@ const game = {
     level.drawFillBGs();
     level.exit.draw();
     level.enter.draw();
+    level.custom();
     game.draw.powerUp();
     mobs.draw();
     game.draw.cons();
