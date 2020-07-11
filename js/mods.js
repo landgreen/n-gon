@@ -1482,7 +1482,7 @@ const mod = {
             requires: "flak",
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (3 + this.count);
+                    if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (3 * this.count);
                 }
             },
             remove() {

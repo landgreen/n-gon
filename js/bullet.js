@@ -1965,8 +1965,8 @@ const b = {
       name: "flak",
       description: "fire a <strong>cluster</strong> of short range <strong>projectiles</strong><br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after half a second",
       ammo: 0,
-      ammoPack: 6,
-      defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
+      ammoPack: 8,
+      defaultAmmoPack: 8, //use to revert ammoPack after mod changes drop rate
       have: false,
       isEasyToAim: false,
       fire() {
@@ -2264,10 +2264,16 @@ const b = {
           } else {
             const bodyCollisions = Matter.Query.collides(this, body)
             if (bodyCollisions.length) {
-              onCollide(this)
-              this.stuckTo = bodyCollisions[0].bodyA
-              //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-              this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+
+
+              if (!bodyCollisions[0].bodyA.isNotSticky) {
+                onCollide(this)
+                this.stuckTo = bodyCollisions[0].bodyA
+                //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+                this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+              } else {
+                this.do = this.radiationMode;
+              }
               this.stuck = function () {
                 if (this.stuckTo) {
                   const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
@@ -2419,10 +2425,14 @@ const b = {
           } else {
             const bodyCollisions = Matter.Query.collides(this, body)
             if (bodyCollisions.length) {
-              onCollide(this)
-              this.stuckTo = bodyCollisions[0].bodyA
-              //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-              this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+              if (!bodyCollisions[0].bodyA.isNotSticky) {
+                onCollide(this)
+                this.stuckTo = bodyCollisions[0].bodyA
+                //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+                this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+              } else {
+                this.do = this.grow;
+              }
               this.stuck = function () {
                 if (this.stuckTo) {
                   const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector

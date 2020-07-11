@@ -81,9 +81,8 @@ const spawn = {
       }
     }
   },
-  randomLevelBoss(x, y) {
+  randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"]) {
     // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
-    const options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"] // , "timeSkipBoss"
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -897,18 +896,18 @@ const spawn = {
       };
     }
   },
-  laserTargetingBoss(x, y, radius = 65) {
+  laserTargetingBoss(x, y, radius = 80) {
     const color = "#05f"
     mobs.spawn(x, y, 3, radius, color);
     let me = mob[mob.length - 1];
     me.isBoss = true;
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-    me.accelMag = 0.0005 * game.accelScale;
+    me.accelMag = 0.00065 * game.accelScale;
     me.seePlayerFreq = Math.floor(25 * game.lookFreqScale);
     me.memory = 420;
     me.restitution = 1;
-    me.frictionAir = 0.05;
+    me.frictionAir = 0.035;
     me.frictionStatic = 0;
     me.friction = 0;
 
@@ -1015,7 +1014,7 @@ const spawn = {
         // hitting player
         if (best.who === player) {
           if (mech.immuneCycle < mech.cycle) {
-            const dmg = 0.002 * game.dmgScale;
+            const dmg = 0.001 * game.dmgScale;
             mech.damage(dmg);
             //draw damage
             ctx.fillStyle = color;

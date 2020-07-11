@@ -6,12 +6,12 @@ const level = {
   defaultZoom: 1400,
   onLevel: 0,
   levelsCleared: 0,
-  levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite"],
+  levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers"],
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // game.enableConstructMode() //used to build maps in testing mode
-      // level.difficultyIncrease(9)
+      // level.difficultyIncrease(4)
       // mech.isStealth = true;
       // mod.giveMod("superfluidity");
       // b.giveGuns("ice IX")
@@ -68,20 +68,19 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-  rotor(x, y, radius = 900, width = 50, density = 0.0002) {
+  rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.001) {
     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
       density: density,
+      isNotSticky: true
     });
     const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
       angle: Math.PI / 2,
       density: density,
+      isNotSticky: true
     });
     const rotor = Body.create({ //combine rotor1 and rotor2
       parts: [rotor1, rotor2],
-      // friction: 0,
-      // frictionAir: 0,
-      // frictionStatic: 0,
-      // restitution: 0,
+      restitution: 0,
       collisionFilter: {
         category: cat.body,
         mask: cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.powerUp | cat.player | cat.bullet
@@ -108,83 +107,215 @@ const level = {
       bodyB: rotor
     });
     World.add(engine.world, constraint);
+
+    if (rotate) {
+      rotor.rotate = function () {
+        if (!mech.isBodiesAsleep) {
+          Matter.Body.applyForce(rotor, {
+            x: rotor.position.x + 100,
+            y: rotor.position.y + 100
+          }, {
+            x: rotate * rotor.mass,
+            y: 0
+          })
+        } else {
+          Matter.Body.setAngularVelocity(rotor, 0);
+        }
+      }
+    }
+
     return rotor
   },
-  sewer() {
-    const rotor = level.rotor(3050, 1850)
-    // const rotor2 = level.rotor(3050, 1200)
+  button(x, y, width = 70, height = 20) {
+    spawn.mapVertex(x + 35, y + 27, "70 10 -70 10 -40 -10 40 -10");
+    // map[map.length - 1].friction = 1;
+    return {
+      isUp: false,
+      min: {
+        x: x,
+        y: y
+      },
+      max: {
+        x: x + width,
+        y: y + height
+      },
+      width: width,
+      height: height,
+      query() {
+        if (Matter.Query.region(body, this).length === 0 && Matter.Query.region([player], this).length === 0) {
+          this.isUp = true;
+        } else {
+          this.isUp = false;
+        }
+      },
+      draw() {
+        ctx.fillStyle = "hsl(0, 100%, 70%)"
+        // ctx.fillStyle = "hsl(287, 30%, 65%)"
+        if (this.isUp) {
+          ctx.fillRect(this.min.x, this.min.y, this.width, 20)
+        } else {
+          ctx.fillRect(this.min.x, this.min.y + 10, this.width, 25)
+        }
+      }
+    }
+  },
+  hazard(x, y, width, height, damage = 0.0005, color = "hsl(160, 100%, 35%)") {
+    return {
+      min: {
+        x: x,
+        y: y
+      },
+      max: {
+        x: x + width,
+        y: y + height
+      },
+      width: width,
+      height: height,
+      maxHeight: height,
+      query() {
+        if (this.height > 0 && Matter.Query.region([player], this).length) {
+          mech.damage(damage)
+          const drain = 0.005
+          if (mech.energy > drain) mech.energy -= drain
+        }
+      },
+      draw() {
+        ctx.fillStyle = color
+        ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
+      },
+      level(isFill) {
+        const growSpeed = 1
+        if (isFill) {
+          if (this.height < this.maxHeight) {
+            this.height += growSpeed
+            this.min.y -= growSpeed
+            this.max.y = this.min.y + this.height
+          }
+        } else if (this.height > 0) {
+          this.height -= growSpeed
+          this.min.y += growSpeed
+          this.max.y = this.min.y + this.height
+        }
+      }
+    }
+  },
+  sewers() {
+    const rotor = level.rotor(5100, 2425, -0.001)
+    const button = level.button(6600, 2650)
+    const hazard = level.hazard(4550, 2750, 4550, 150)
 
     level.custom = () => {
-      Matter.Body.applyForce(rotor, {
-        x: rotor.position.x + 100,
-        y: rotor.position.y + 100
-      }, {
-        x: 0.001 * rotor.mass,
-        y: 0
-      })
-      // Matter.Body.applyForce(rotor2, {
-      //   x: rotor2.position.x + 100,
-      //   y: rotor2.position.y + 100
-      // }, {
-      //   x: -0.001 * rotor2.mass,
-      //   y: 0
-      // })
-
+      button.query();
+      button.draw();
+      hazard.draw();
+      hazard.query();
+      hazard.level(button.isUp)
+      rotor.rotate();
       level.playerExitCheck();
     };
-    level.setPosToSpawn(3775, 425); //normal spawn
-    // level.setPosToSpawn(0, -50); //normal spawn
+
+    level.setPosToSpawn(0, -50); //normal spawn
 
     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-    level.exit.x = 1500;
-    level.exit.y = -1875;
+    level.exit.x = 9700;
+    level.exit.y = 2560;
     level.defaultZoom = 1800
     game.zoomTransition(level.defaultZoom)
     document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
-    // powerUps.spawnStartingPowerUps(1475, -1175);
-    // spawn.debris(750, -2200, 3700, 16); //16 debris per level
-    // level.fill.push({     //foreground
-    //   x: 2500,
-    //   y: -1100,
-    //   width: 450,
-    //   height: 250,
-    //   color: "rgba(0,0,0,0.1)"
-    // });
-    // level.fillBG.push({     //background
-    //   x: 1300,
-    //   y: -1800,
-    //   width: 750,
-    //   height: 1800,
-    //   color: "#d4d4d7"
-    // });
+    powerUps.spawnStartingPowerUps(3475, 1775);
+    spawn.debris(4575, 2550, 1600, 9); //16 debris per level
+    spawn.debris(7000, 2550, 2000, 7); //16 debris per level
+
+    level.fill.push({
+      x: 9300,
+      y: 2200,
+      width: 600,
+      height: 400,
+      color: "rgba(0,255,255,0.1)"
+    });
+    level.fillBG.push({
+      x: 9300,
+      y: 2200,
+      width: 600,
+      height: 400,
+      color: "hsl(138, 10%, 80%)" //c4f4f4
+    });
 
     spawn.mapRect(-400, -500, 100, 600); //left entrance wall
-    spawn.mapRect(-400, -500, 3800, 100); //ceiling
+    spawn.mapRect(-400, -500, 3550, 100); //ceiling
     spawn.mapRect(-400, 0, 3000, 100); //floor
     spawn.mapRect(300, -500, 100, 400); //right entrance wall
+    spawn.bodyRect(340, -100, 25, 100);
+    spawn.bodyRect(1450, -300, 150, 50);
 
+    const xPos = shuffle([600, 1250, 2000]);
+    spawn.mapRect(xPos[0], -200, 400, 100);
+    spawn.mapRect(xPos[1], -250, 300, 300);
+    spawn.mapRect(xPos[2], -150, 300, 200);
 
-    spawn.mapRect(600, -200, 400, 100);
-    spawn.mapRect(1250, -250, 300, 300);
-    spawn.mapRect(2000, -150, 300, 200);
+    spawn.bodyRect(3100, 410, 75, 100);
+    spawn.bodyRect(2450, -25, 250, 25);
 
-    spawn.mapRect(3300, -500, 100, 700); //right down tube wall
-    spawn.mapRect(3000, 500, 100, 1400); //right down tube wall
-    spawn.mapRect(3000, 500, 1000, 100); //tube right exit floor
-    spawn.mapRect(3300, 100, 1000, 100); //tube right exit ceiling
+    spawn.mapRect(3050, -500, 100, 700); //right down tube wall
+    spawn.mapRect(3050, 100, 1250, 100); //tube right exit ceiling
+    spawn.mapRect(4200, 100, 100, 1800);
+    spawn.mapRect(3000, 400, 1000, 1250);
+    spawn.mapRect(3000, 1925, 1000, 150);
 
-    spawn.mapRect(2500, 0, 100, 1900); //left down tube wall
-    spawn.mapRect(850, 2300, 2800, 100);
-    spawn.mapRect(3000, 1800, 600, 100);
+    spawn.mapRect(3100, 1875, 800, 100);
+    spawn.mapRect(3100, 1600, 800, 100);
+    spawn.mapRect(3100, 350, 800, 100);
+    spawn.mapRect(3100, 2025, 800, 100);
 
+    spawn.mapRect(2500, 0, 100, 1950); //left down tube wall
+    spawn.mapRect(600, 2300, 3750, 100);
+    spawn.bodyRect(3800, 275, 125, 125);
 
+    spawn.mapRect(4200, 1800, 5000, 100);
+    spawn.mapRect(4250, 2300, 100, 400);
+    spawn.mapRect(4250, 2300, 100, 400);
 
-    // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
-    // spawn.boost(4150, 0, 1300);
-    // spawn.randomSmallMob(1300, -70);
-    // spawn.randomMob(2650, -975, 0.8);
-    // spawn.randomBoss(1700, -900, 0.4);
-    // if (game.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
+    spawn.mapRect(600, 1800, 2000, 100); //bottom left room ceiling
+    spawn.mapRect(600, 1800, 100, 600); //left wall
+    spawn.mapRect(1775, 2225, 550, 125);
+    spawn.mapRect(675, 1875, 325, 150);
+
+    spawn.mapRect(4450, 2900, 4900, 100); //boss room floor
+    spawn.mapRect(4250, 2600, 300, 400);
+    spawn.mapRect(6250, 2675, 700, 325);
+    spawn.mapRect(8000, 2600, 600, 400);
+    spawn.bodyRect(5875, 2725, 200, 200);
+    spawn.bodyRect(6800, 2490, 50, 50);
+    spawn.bodyRect(6800, 2540, 50, 50);
+    spawn.bodyRect(6800, 2590, 50, 50);
+    spawn.bodyRect(8225, 2200, 100, 400);
+    spawn.mapRect(6250, 1875, 700, 150);
+    spawn.mapRect(8000, 1875, 600, 150);
+
+    spawn.mapRect(9100, 1800, 900, 400); //exit
+    spawn.mapRect(9100, 2600, 900, 400);
+    spawn.mapRect(9900, 2125, 100, 575); //back wall
+    spawn.mapRect(9300, 2150, 50, 250);
+    spawn.mapRect(9300, 2590, 650, 25);
+    spawn.mapRect(9700, 2580, 100, 50);
+
+    spawn.randomBoss(1300, 2100, 0.7);
+    spawn.randomMob(8300, 2225, 0.5);
+    spawn.randomSmallMob(2575, -75, 0.5); //entrance
+    spawn.randomMob(8125, 2450, 0.5);
+    spawn.randomSmallMob(3200, 250, 0.5);
+    spawn.randomMob(2425, 2150, 0.5);
+    spawn.randomSmallMob(3825, 300, 0.5);
+    spawn.randomMob(3800, 2175, 0.5);
+    spawn.randomSmallMob(1100, -300, 0.5); //entrance
+    spawn.randomMob(4450, 2500, 0.5);
+    spawn.randomMob(6350, 2525, 0.5);
+    spawn.randomSmallMob(1900, -250, 0.5); //entrance
+    spawn.randomMob(1500, 2100, 0.8);
+    spawn.randomSmallMob(1700, -150, 0.5); //entrance
+    spawn.randomMob(8800, 2725, 0.5);
+    spawn.randomBoss(8650, 2275, 0.5);
+    if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"]);
   },
   template() {
     level.custom = () => {
@@ -611,8 +742,8 @@ const level = {
       height: 1500,
       color: "rgba(0,20,40,0.13)"
     });
-    spawn.mapRect(3950, -350, 375, 50);
-    spawn.mapRect(4725, -350, 375, 50);
+    spawn.mapRect(3925, -300, 425, 50);
+    spawn.mapRect(4700, -375, 425, 50);
     spawn.mapRect(4000, -1300, 1050, 100);
 
     //steep stairs

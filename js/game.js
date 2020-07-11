@@ -606,23 +606,6 @@ const game = {
     if (game.firstRun) {
       mech.spawn(); //spawns the player
       mod.setupAllMods(); //doesn't run on reset so that gun mods carry over to new runs
-
-      function shuffle(array) {
-        var currentIndex = array.length,
-          temporaryValue,
-          randomIndex;
-        // While there remain elements to shuffle...
-        while (0 !== currentIndex) {
-          // Pick a remaining element...
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex -= 1;
-          // And swap it with the current element.
-          temporaryValue = array[currentIndex];
-          array[currentIndex] = array[randomIndex];
-          array[randomIndex] = temporaryValue;
-        }
-        return array;
-      }
       if (game.isCommunityMaps) level.levels.push("stronghold");
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
@@ -806,9 +789,9 @@ const game = {
     }
   },
   testingOutput() {
+    ctx.fillStyle = "#000";
     if (!game.isConstructionMode) {
       ctx.textAlign = "right";
-      ctx.fillStyle = "#000";
       let line = 500;
       const x = canvas.width - 5;
       ctx.fillText("T: exit testing mode", x, line);
@@ -1083,7 +1066,7 @@ const game = {
   enableConstructMode() {
     game.isConstructionMode = true;
     game.isAutoZoom = false;
-    game.zoomScale = 2200;
+    game.zoomScale = 2600;
     game.setZoom();
 
     document.body.addEventListener("mouseup", (e) => {

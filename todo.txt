@@ -1,6 +1,34 @@
 
+new level, sewers
+flak ammo buff
 
 ************** TODO - n-gon **************
+
+mod: do more damage for each reroll you are holding
+  do more damage for the ammo/ammoPack ratio?
+
+mod: taking damage slows (or stuns) all mobs on the map
+  requires the mod that slows time, overclock
+
+button: blocks that are on the button at an angle will slowly slide off the button
+  maybe just avoid long blocks near the button?
+  maybe actively hold the button in place?
+
+slime should affect blocks, bullets, mobs
+  and do mob damage?
+
+rotor doesn't work with
+  plasma torch
+    seems to have no effect
+  pilot wave
+    maybe rewrite pilot wave to apply a force from an angle, like plasma torch
+      this would be probably too much work, but worth a try
+  time dilation field (mostly fixed, but it would be nice if it started up faster after a pause)
+  sporangium and neutron bomb  (mostly fixed, but it would be nice if it sticked instead of bounced)
+
+new gun - deploy a turret that last for 20 seconds
+  fire nails at nearby targets once a second.
+  use mine code and bot code
 
 field that pushes blocks and mobs away
   charges up on mouse down and triggers on mouse up

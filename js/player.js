@@ -451,6 +451,7 @@ const mech = {
     return dmg
   },
   damage(dmg) {
+    // , noTransition = false
     mech.lastHarmCycle = mech.cycle
 
     if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
@@ -549,6 +550,11 @@ const mech = {
       }
       mech.defaultFPSCycle = mech.cycle
     }
+    // if (!noTransition) {
+    //   document.getElementById("health").style.transition = "width 0s ease-out"
+    // } else {
+    //   document.getElementById("health").style.transition = "width 1s ease-out"
+    // }
   },
   hitMob(i, dmg) {
     //prevents damage happening too quick
