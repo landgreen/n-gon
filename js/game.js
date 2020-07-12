@@ -675,6 +675,8 @@ const game = {
     consBB = [];
     removeAll(bullet);
     bullet = [];
+    removeAll(composite);
+    composite = [];
     // if player was holding something this makes a new copy to hold
     if (holdTarget) {
       len = body.length;

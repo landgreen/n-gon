@@ -2,6 +2,7 @@ let body = []; //non static bodies
 let map = []; //all static bodies
 let cons = []; //all constraints between a point and a body
 let consBB = []; //all constraints between two bodies
+let composite = [] //rotors and other map elements that don't fit 
 const level = {
   defaultZoom: 1400,
   onLevel: 0,
@@ -78,7 +79,7 @@ const level = {
       density: density,
       isNotSticky: true
     });
-    const rotor = Body.create({ //combine rotor1 and rotor2
+    rotor = Body.create({ //combine rotor1 and rotor2
       parts: [rotor1, rotor2],
       restitution: 0,
       collisionFilter: {
@@ -123,7 +124,7 @@ const level = {
         }
       }
     }
-
+    composite[composite.length] = rotor
     return rotor
   },
   button(x, y, width = 70, height = 20) {
@@ -299,22 +300,22 @@ const level = {
     spawn.mapRect(9300, 2590, 650, 25);
     spawn.mapRect(9700, 2580, 100, 50);
 
-    spawn.randomBoss(1300, 2100, 0.7);
-    spawn.randomMob(8300, 2225, 0.5);
-    spawn.randomSmallMob(2575, -75, 0.5); //entrance
-    spawn.randomMob(8125, 2450, 0.5);
-    spawn.randomSmallMob(3200, 250, 0.5);
-    spawn.randomMob(2425, 2150, 0.5);
-    spawn.randomSmallMob(3825, 300, 0.5);
+    spawn.randomBoss(1300, 2100, 0.6);
+    spawn.randomMob(8300, 2100, 0.3);
+    spawn.randomSmallMob(2575, -75, 0.3); //entrance
+    spawn.randomMob(8125, 2450, 0.3);
+    spawn.randomSmallMob(3200, 250, 0.4);
+    spawn.randomMob(2425, 2150, 0.4);
+    spawn.randomSmallMob(3825, 300, 0.4);
     spawn.randomMob(3800, 2175, 0.5);
     spawn.randomSmallMob(1100, -300, 0.5); //entrance
-    spawn.randomMob(4450, 2500, 0.5);
-    spawn.randomMob(6350, 2525, 0.5);
-    spawn.randomSmallMob(1900, -250, 0.5); //entrance
+    spawn.randomMob(4450, 2500, 0.6);
+    spawn.randomMob(6350, 2525, 0.6);
+    spawn.randomBoss(9200, 2400, 0.5);
+    spawn.randomSmallMob(1900, -250, 0.7); //entrance
     spawn.randomMob(1500, 2100, 0.8);
-    spawn.randomSmallMob(1700, -150, 0.5); //entrance
-    spawn.randomMob(8800, 2725, 0.5);
-    spawn.randomBoss(8650, 2275, 0.5);
+    spawn.randomSmallMob(1700, -150, 0.8); //entrance
+    spawn.randomMob(8800, 2725, 0.9);
     if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"]);
   },
   template() {
@@ -2107,7 +2108,7 @@ const level = {
     spawn.randomBoss(2350, -850, 1);
     spawn.randomBoss(100, -450, 0.9);
 
-    if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400, 1);
+    if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400);
   },
   //******************************************************************************************************************
   //******************************************************************************************************************

@@ -78,6 +78,7 @@ const mod = {
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.006
+        if (mod.isRerollDamage) dmg *= 1 + 0.06 * powerUps.reroll.rerolls
         return dmg * mod.slowFire
     },
     mods: [{
@@ -128,6 +129,22 @@ const mod = {
             },
             remove() {
                 mod.isRest = false;
+            }
+        },
+        {
+            name: "perturbation theory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each <strong class='color-r'>reroll</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls > 1 || build.isCustomSelection
+            },
+            requires: "at least 2 rerolls",
+            effect() {
+                mod.isRerollDamage = true;
+            },
+            remove() {
+                mod.isRerollDamage = false;
             }
         },
         {
@@ -1035,7 +1052,6 @@ const mod = {
                 mod.manyWorlds = false;
             }
         },
-
         {
             name: "quantum immortality",
             description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>5</strong> <strong class='color-r'>rerolls</strong>",
@@ -1482,7 +1498,7 @@ const mod = {
             requires: "flak",
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (3 * this.count);
+                    if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (3 * (1 + this.count));
                 }
             },
             remove() {
@@ -2296,5 +2312,6 @@ const mod = {
     isHealLowHealth: null,
     isAoESlow: null,
     isHarmArmor: null,
-    isTurret: null
+    isTurret: null,
+    isRerollDamage: null
 }

@@ -1965,8 +1965,8 @@ const b = {
       name: "flak",
       description: "fire a <strong>cluster</strong> of short range <strong>projectiles</strong><br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after half a second",
       ammo: 0,
-      ammoPack: 8,
-      defaultAmmoPack: 8, //use to revert ammoPack after mod changes drop rate
+      ammoPack: 9,
+      defaultAmmoPack: 9, //use to revert ammoPack after mod changes drop rate
       have: false,
       isEasyToAim: false,
       fire() {

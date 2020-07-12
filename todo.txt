@@ -1,11 +1,5 @@
 
-new level, sewers
-flak ammo buff
-
 ************** TODO - n-gon **************
-
-mod: do more damage for each reroll you are holding
-  do more damage for the ammo/ammoPack ratio?
 
 mod: taking damage slows (or stuns) all mobs on the map
   requires the mod that slows time, overclock
@@ -14,7 +8,7 @@ button: blocks that are on the button at an angle will slowly slide off the butt
   maybe just avoid long blocks near the button?
   maybe actively hold the button in place?
 
-slime should affect blocks, bullets, mobs
+hazards should affect blocks, bullets, mobs
   and do mob damage?
 
 rotor doesn't work with
