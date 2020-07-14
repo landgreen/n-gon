@@ -84,7 +84,7 @@ const b = {
   },
   fireCD: 1,
   setFireCD() {
-    b.fireCD = mod.fireRate * mod.slowFire / mod.fastTime
+    b.fireCD = mod.fireRate * mod.slowFire * mod.rerollHaste / mod.fastTime
   },
   fireAttributes(dir, rotate = true) {
     if (rotate) {
@@ -458,7 +458,7 @@ const b = {
       },
       onEnd() {
         if (this.isArmed) {
-          b.targetedNail(this.position, 14)
+          b.targetedNail(this.position, 15)
         }
         if (isAmmoBack) { //get ammo back from mod.isMineAmmoBack
           for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
@@ -727,7 +727,7 @@ const b = {
                 }
               }
             }
-            if (!this.lockedOn && !mod.isAmmoFromHealth) {
+            if (!this.lockedOn && !mod.isArmorFromPowerUps) {
               //grab a power up if it is (ammo) or (a heal when player is low)
               let closeDist = Infinity;
               for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -964,6 +964,24 @@ const b = {
       }
     };
     bullet[me].do = function () {};
+  },
+  randomBot(where = mech.pos, isKeep = true) {
+    if (Math.random() < 0.05) { //very low chance of plasma bot
+      b.plasmaBot(where)
+      if (isKeep) mod.plasmaBotCount++;
+    } else if (Math.random() < 0.25) {
+      b.nailBot(where)
+      if (isKeep) mod.nailBotCount++;
+    } else if (Math.random() < 0.33) {
+      b.laserBot(where)
+      if (isKeep) mod.laserBotCount++;
+    } else if (Math.random() < 0.5) {
+      b.foamBot(where)
+      if (isKeep) mod.foamBotCount++;
+    } else {
+      b.boomBot(where)
+      if (isKeep) mod.boomBotCount++;
+    }
   },
   nailBot(position = mech.pos) {
     const me = bullet.length;
@@ -1965,8 +1983,8 @@ const b = {
       name: "flak",
       description: "fire a <strong>cluster</strong> of short range <strong>projectiles</strong><br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after half a second",
       ammo: 0,
-      ammoPack: 9,
-      defaultAmmoPack: 9, //use to revert ammoPack after mod changes drop rate
+      ammoPack: 7,
+      defaultAmmoPack: 7, //use to revert ammoPack after mod changes drop rate
       have: false,
       isEasyToAim: false,
       fire() {
@@ -2361,7 +2379,7 @@ const b = {
           x: speed * Math.cos(mech.angle),
           y: speed * Math.sin(mech.angle)
         }, 0, mod.isMineAmmoBack)
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 70 : 45) * b.fireCD); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 60 : 20) * b.fireCD); // cool down
       }
     },
     {
@@ -2460,9 +2478,10 @@ const b = {
         bullet[me].grow = function () {
           this.stuck(); //runs different code based on what the bullet is stuck to
           if (!mech.isBodiesAsleep) {
-            const SCALE = 1.013
-            Matter.Body.scale(this, SCALE, SCALE);
-            this.radius *= SCALE
+            let scale = 1.01
+            if (this.stuckTo && this.stuckTo.alive) scale = 1.03
+            Matter.Body.scale(this, scale, scale);
+            this.radius *= scale
             if (this.radius > this.maxRadius) this.endCycle = 0;
           }
 

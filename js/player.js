@@ -306,6 +306,7 @@ const mech = {
             if (mod.mods[i].count < mod.mods[i].maxCount &&
               !mod.mods[i].isNonRefundable &&
               mod.mods[i].name !== "quantum immortality" &&
+              mod.mods[i].name !== "Born rule" &&
               mod.mods[i].allowed()
             ) options.push(i);
           }
@@ -440,6 +441,7 @@ const mech = {
     let dmg = 1
     dmg *= mech.fieldHarmReduction
     dmg *= mod.isSlowFPS ? 0.85 : 1
+    if (mod.isBotArmor) dmg *= 0.94 ** mod.totalBots()
     if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
     if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
     if (mod.isTurret && mech.crouch) dmg /= 2;
@@ -467,7 +469,7 @@ const mech = {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
 
-          mech.energy = mech.maxEnergy * 0.6
+          mech.energy = mech.maxEnergy
           // if (mech.energy < 0.05) mech.energy = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
@@ -496,7 +498,7 @@ const mech = {
       if (mech.health < 0 || isNaN(mech.health)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
-          mech.health = mech.maxHealth * 0.6
+          mech.health = mech.maxHealth * game.healScale
           // if (mech.health < 0.05) mech.health = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
@@ -540,6 +542,11 @@ const mech = {
       game.fpsInterval = 1000 / game.fpsCap;
       //how long to wait to return to normal fps
       mech.defaultFPSCycle = mech.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
+      if (mod.isHarmFreeze) { //freeze all mobs
+        for (let i = 0, len = mob.length; i < len; i++) {
+          mobs.statusSlow(mob[i], 360)
+        }
+      }
     } else {
       if (dmg > 0.05) { // freeze game for high damage hits
         game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
@@ -938,6 +945,13 @@ const mech = {
         });
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
           if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
+          if (mod.isMineDrop) b.mine({
+            x: mech.pos.x,
+            y: mech.pos.y
+          }, {
+            x: 0,
+            y: 0
+          }, 0, mod.isMineAmmoBack)
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3

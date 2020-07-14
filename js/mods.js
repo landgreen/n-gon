@@ -78,8 +78,11 @@ const mod = {
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.006
-        if (mod.isRerollDamage) dmg *= 1 + 0.06 * powerUps.reroll.rerolls
+        if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         return dmg * mod.slowFire
+    },
+    totalBots() {
+        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount
     },
     mods: [{
             name: "capacitor",
@@ -129,22 +132,6 @@ const mod = {
             },
             remove() {
                 mod.isRest = false;
-            }
-        },
-        {
-            name: "perturbation theory",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each <strong class='color-r'>reroll</strong> in your inventory",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return powerUps.reroll.rerolls > 1 || build.isCustomSelection
-            },
-            requires: "at least 2 rerolls",
-            effect() {
-                mod.isRerollDamage = true;
-            },
-            remove() {
-                mod.isRerollDamage = false;
             }
         },
         {
@@ -225,6 +212,42 @@ const mod = {
             },
             remove() {
                 mod.isHarmDamage = false;
+            }
+        },
+        {
+            name: "perturbation theory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls > 3 || build.isCustomSelection
+            },
+            requires: "at least 4 rerolls",
+            effect() {
+                mod.isRerollDamage = true;
+            },
+            remove() {
+                mod.isRerollDamage = false;
+            }
+        },
+        {
+            name: "Ψ(t) collapse",
+            description: "<strong>33%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls === 0
+            },
+            requires: "no rerolls",
+            effect() {
+                mod.isRerollHaste = true;
+                mod.rerollHaste = 0.666;
+                b.setFireCD();
+            },
+            remove() {
+                mod.isRerollHaste = false;
+                mod.rerollHaste = 1;
+                b.setFireCD();
             }
         },
         {
@@ -436,12 +459,28 @@ const mod = {
             }
         },
         {
+            name: "bot fabrication",
+            description: "anytime you collect <strong>3</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls > 2 || build.isCustomSelection
+            },
+            requires: "at least 3 rerolls",
+            effect() {
+                mob.isRerollBots = true;
+            },
+            remove() {
+                mob.isRerollBots = false;
+            }
+        },
+        {
             name: "scrap bots",
             description: "<strong>12%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
             maxCount: 6,
             count: 0,
             allowed() {
-                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount > 0
+                return mod.totalBots() > 0
             },
             requires: "a bot",
             effect() {
@@ -452,13 +491,29 @@ const mod = {
             }
         },
         {
+            name: "perimeter defense",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>6%</strong><br>for each of your permanent <strong>bots</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.totalBots() > 1
+            },
+            requires: "2 or more bots",
+            effect() {
+                mod.isBotArmor = true
+            },
+            remove() {
+                mod.isBotArmor = false
+            }
+        },
+        {
             name: "bot replication",
             description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>90%</strong> of your <strong class='color-g'>ammo</strong>",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
             allowed() {
-                return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount > 1
+                return mod.totalBots() > 1
             },
             requires: "2 or more bots",
             effect() {
@@ -468,7 +523,6 @@ const mod = {
                         b.guns[i].ammo = Math.floor(b.guns[i].ammo * 0.1);
                     }
                 }
-
                 //double bots
                 for (let i = 0; i < mod.nailBotCount; i++) {
                     b.nailBot();
@@ -493,29 +547,6 @@ const mod = {
             },
             remove() {}
         },
-        // {
-        //     name: "ablative mines",
-        //     description: "rebuild your broken parts as a <strong>mine</strong><br>chance to occur after being <strong>harmed</strong>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     allowed() {
-        //         return true
-        //     },
-        //     requires: "",
-        //     effect() {
-        //         mod.isMineOnDamage = true;
-        //         b.mine({
-        //             x: mech.pos.x,
-        //             y: mech.pos.y - 80
-        //         }, {
-        //             x: 0,
-        //             y: 0
-        //         })
-        //     },
-        //     remove() {
-        //         mod.isMineOnDamage = false;
-        //     }
-        // },
         {
             name: "ablative drones",
             description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after receiving <strong class='color-harm'>harm</strong>",
@@ -533,6 +564,22 @@ const mod = {
             },
             remove() {
                 mod.isDroneOnDamage = false;
+            }
+        },
+        {
+            name: "mine synthesis",
+            description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.isMineDrop = true;
+            },
+            remove() {
+                mod.isMineDrop = false;
             }
         },
         {
@@ -557,7 +604,7 @@ const mod = {
         },
         {
             name: "Pauli exclusion",
-            description: `after receiving <strong class='color-harm'>harm</strong> from a collision<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second`,
+            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second<br>after receiving <strong class='color-harm'>harm</strong> from a collision`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -602,6 +649,22 @@ const mod = {
             },
             remove() {
                 mod.isSlowFPS = false;
+            }
+        },
+        {
+            name: "liquid cooling",
+            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>6</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isSlowFPS
+            },
+            requires: "clock gating",
+            effect() {
+                mod.isHarmFreeze = true;
+            },
+            remove() {
+                mod.isHarmFreeze = false;
             }
         },
         {
@@ -790,7 +853,7 @@ const mod = {
         {
             name: "negentropy",
             description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>50%</strong> of <strong>maximum health</strong>",
-            maxCount: 9,
+            maxCount: 1,
             count: 0,
             allowed() {
                 return mech.maxHealth > 1 || mod.isArmorFromPowerUps
@@ -843,7 +906,7 @@ const mod = {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
-            description: "<strong class='color-h'>heal</strong> to <strong>60%</strong> health instead of <strong>dying</strong><br>consumes <strong>1</strong> <strong class='color-r'>reroll</strong>",
+            description: "<strong class='color-h'>heal</strong> to full <strong>health</strong>  instead of <strong>dying</strong><br>consumes <strong>1</strong> <strong class='color-r'>reroll</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -862,7 +925,7 @@ const mod = {
         },
         {
             name: "bubble fusion",
-            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>3</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>2-3</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -894,7 +957,7 @@ const mod = {
         },
         {
             name: "logistics",
-            description: "<strong class='color-g'>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>5 ammo</strong>",
+            description: "<strong class='color-g'>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>6 ammo</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -903,7 +966,7 @@ const mod = {
             requires: "at least 2 guns",
             effect() {
                 mod.isAmmoForGun = true;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 6; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                 }
@@ -2313,5 +2376,11 @@ const mod = {
     isAoESlow: null,
     isHarmArmor: null,
     isTurret: null,
-    isRerollDamage: null
+    isRerollDamage: null,
+    isHarmFreeze: null,
+    isBotArmor: null,
+    isRerollHaste: null,
+    rerollHaste: null,
+    isMineDrop: null,
+    isRerollBots: null
 }

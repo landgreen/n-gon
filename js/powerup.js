@@ -54,8 +54,26 @@ const powerUps = {
     changeRerolls(amount) {
       powerUps.reroll.rerolls += amount
       if (powerUps.reroll.rerolls < 0) powerUps.reroll.rerolls = 0
+
+      if (mob.isRerollBots) {
+        const limit = 3
+        for (; powerUps.reroll.rerolls > limit - 1; powerUps.reroll.rerolls -= limit) {
+          b.randomBot()
+        }
+      }
+
+
       if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
         document.getElementById("mod-anthropic").innerHTML = `(${powerUps.reroll.rerolls})`
+      }
+      if (mod.isRerollHaste) {
+        if (powerUps.reroll.rerolls === 0) {
+          mod.rerollHaste = 0.66;
+          b.setFireCD();
+        } else {
+          mod.rerollHaste = 1;
+          b.setFireCD();
+        }
       }
     },
     diceText() {

@@ -1,15 +1,34 @@
 
+bubble fusion drops 2-3 power ups  (down from 3)
+perturbation theory: damage is 5% (down from 6%) per reroll
+  but the mod will not show up until you have 4 rerolls stockpiled
+sporeangium grow faster when stuck to a mob
+
+mod: liquid cooling - freeze all mobs for 6 seconds after receiving harm
+mod: perimeter defense - gain 6% harm reduction for each bot
+mod: bot fabrication - anytime you have 3 rerolls, convert them into a random bot
+mod: Ψ(x) collapse - 33% haste, if you have no rerolls
+mod: mine synthesis - drop a mine after picking up a power up
+
 ************** TODO - n-gon **************
 
-mod: taking damage slows (or stuns) all mobs on the map
-  requires the mod that slows time, overclock
+map: laboratory
+  rooms with switches that change physics
+    gravity room
+    portal room
+    laser room
+    radiation room
+
+map: prison
+  doors linked to buttons
+    mobs inside the doors?
 
 button: blocks that are on the button at an angle will slowly slide off the button
   maybe just avoid long blocks near the button?
   maybe actively hold the button in place?
 
-hazards should affect blocks, bullets, mobs
-  and do mob damage?
+hazards should slow blocks, bullets, mobs?
+  mob damage?
 
 rotor doesn't work with
   plasma torch

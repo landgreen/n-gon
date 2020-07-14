@@ -11,15 +11,15 @@ const level = {
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
-      // game.enableConstructMode() //used to build maps in testing mode
       // level.difficultyIncrease(4)
+      // game.enableConstructMode() //used to build maps in testing mode
       // mech.isStealth = true;
       // mod.giveMod("superfluidity");
       // b.giveGuns("ice IX")
       // mech.setField("plasma torch")
 
       level.intro(); //starting level
-      // level.sewer()
+      // level.sewers();
       // level.testing();
       // level.template()
       // level.bosses();
@@ -64,20 +64,26 @@ const level = {
       mech.maxHealth += 0.05 * powerUps.totalPowerUps
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
+    if (mod.isHealLowHealth && mech.health < mech.maxHealth * 0.5 * game.healScale) {
+      mech.health = mech.maxHealth * 0.5 * game.healScale
+      mech.displayHealth();
+    }
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-  rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.001) {
+  rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.0005) {
     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
       density: density,
-      isNotSticky: true
+      isNotSticky: true,
+      isNotHoldable: true
     });
     const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
       angle: Math.PI / 2,
       density: density,
-      isNotSticky: true
+      isNotSticky: true,
+      isNotHoldable: true
     });
     rotor = Body.create({ //combine rotor1 and rotor2
       parts: [rotor1, rotor2],
@@ -129,7 +135,6 @@ const level = {
   },
   button(x, y, width = 70, height = 20) {
     spawn.mapVertex(x + 35, y + 27, "70 10 -70 10 -40 -10 40 -10");
-    // map[map.length - 1].friction = 1;
     return {
       isUp: false,
       min: {
@@ -174,7 +179,7 @@ const level = {
       height: height,
       maxHeight: height,
       query() {
-        if (this.height > 0 && Matter.Query.region([player], this).length) {
+        if (this.height > 0 && Matter.Query.region([player], this).length && !mech.isStealth) {
           mech.damage(damage)
           const drain = 0.005
           if (mech.energy > drain) mech.energy -= drain
@@ -242,11 +247,11 @@ const level = {
       color: "hsl(138, 10%, 80%)" //c4f4f4
     });
 
-    spawn.mapRect(-400, -500, 100, 600); //left entrance wall
-    spawn.mapRect(-400, -500, 3550, 100); //ceiling
-    spawn.mapRect(-400, 0, 3000, 100); //floor
-    spawn.mapRect(300, -500, 100, 400); //right entrance wall
-    spawn.bodyRect(340, -100, 25, 100);
+    spawn.mapRect(-500, -600, 200, 800); //left entrance wall
+    spawn.mapRect(-400, -600, 3550, 200); //ceiling
+    spawn.mapRect(-400, 0, 3000, 200); //floor
+    spawn.mapRect(300, -500, 50, 400); //right entrance wall
+    spawn.bodyRect(312, -100, 25, 100);
     spawn.bodyRect(1450, -300, 150, 50);
 
     const xPos = shuffle([600, 1250, 2000]);
@@ -257,9 +262,9 @@ const level = {
     spawn.bodyRect(3100, 410, 75, 100);
     spawn.bodyRect(2450, -25, 250, 25);
 
-    spawn.mapRect(3050, -500, 100, 700); //right down tube wall
-    spawn.mapRect(3050, 100, 1250, 100); //tube right exit ceiling
-    spawn.mapRect(4200, 100, 100, 1800);
+    spawn.mapRect(3050, -600, 200, 800); //right down tube wall
+    spawn.mapRect(3100, 0, 1200, 200); //tube right exit ceiling
+    spawn.mapRect(4200, 0, 200, 1900);
     spawn.mapRect(3000, 400, 1000, 1250);
     spawn.mapRect(3000, 1925, 1000, 150);
 
@@ -268,21 +273,20 @@ const level = {
     spawn.mapRect(3100, 350, 800, 100);
     spawn.mapRect(3100, 2025, 800, 100);
 
-    spawn.mapRect(2500, 0, 100, 1950); //left down tube wall
-    spawn.mapRect(600, 2300, 3750, 100);
+    spawn.mapRect(2400, 0, 200, 1950); //left down tube wall
+    spawn.mapRect(600, 2300, 3750, 200);
     spawn.bodyRect(3800, 275, 125, 125);
 
-    spawn.mapRect(4200, 1800, 5000, 100);
-    spawn.mapRect(4250, 2300, 100, 400);
-    spawn.mapRect(4250, 2300, 100, 400);
+    spawn.mapRect(4200, 1700, 5000, 200);
+    spawn.mapRect(4150, 2300, 200, 400);
 
-    spawn.mapRect(600, 1800, 2000, 100); //bottom left room ceiling
-    spawn.mapRect(600, 1800, 100, 600); //left wall
+    spawn.mapRect(600, 1700, 2000, 200); //bottom left room ceiling
+    spawn.mapRect(500, 1700, 200, 800); //left wall
     spawn.mapRect(1775, 2225, 550, 125);
     spawn.mapRect(675, 1875, 325, 150);
 
-    spawn.mapRect(4450, 2900, 4900, 100); //boss room floor
-    spawn.mapRect(4250, 2600, 300, 400);
+    spawn.mapRect(4450, 2900, 4900, 200); //boss room floor
+    spawn.mapRect(4150, 2600, 400, 500);
     spawn.mapRect(6250, 2675, 700, 325);
     spawn.mapRect(8000, 2600, 600, 400);
     spawn.bodyRect(5875, 2725, 200, 200);
@@ -293,30 +297,33 @@ const level = {
     spawn.mapRect(6250, 1875, 700, 150);
     spawn.mapRect(8000, 1875, 600, 150);
 
-    spawn.mapRect(9100, 1800, 900, 400); //exit
-    spawn.mapRect(9100, 2600, 900, 400);
-    spawn.mapRect(9900, 2125, 100, 575); //back wall
+    spawn.mapRect(9100, 1700, 900, 500); //exit
+    spawn.mapRect(9100, 2600, 900, 500);
+    spawn.mapRect(9900, 1700, 200, 1400); //back wall
     spawn.mapRect(9300, 2150, 50, 250);
     spawn.mapRect(9300, 2590, 650, 25);
     spawn.mapRect(9700, 2580, 100, 50);
 
-    spawn.randomBoss(1300, 2100, 0.6);
-    spawn.randomMob(8300, 2100, 0.3);
-    spawn.randomSmallMob(2575, -75, 0.3); //entrance
-    spawn.randomMob(8125, 2450, 0.3);
-    spawn.randomSmallMob(3200, 250, 0.4);
-    spawn.randomMob(2425, 2150, 0.4);
-    spawn.randomSmallMob(3825, 300, 0.4);
-    spawn.randomMob(3800, 2175, 0.5);
-    spawn.randomSmallMob(1100, -300, 0.5); //entrance
-    spawn.randomMob(4450, 2500, 0.6);
-    spawn.randomMob(6350, 2525, 0.6);
-    spawn.randomBoss(9200, 2400, 0.5);
-    spawn.randomSmallMob(1900, -250, 0.7); //entrance
-    spawn.randomMob(1500, 2100, 0.8);
-    spawn.randomSmallMob(1700, -150, 0.8); //entrance
-    spawn.randomMob(8800, 2725, 0.9);
-    if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"]);
+    spawn.randomBoss(1300, 2100, 0.5);
+    spawn.randomMob(8300, 2100, 0.2);
+    spawn.randomSmallMob(2575, -75, 0.2); //entrance
+    spawn.randomMob(8125, 2450, 0.25);
+    spawn.randomSmallMob(3200, 250, 0.3);
+    spawn.randomMob(2425, 2150, 0.3);
+    spawn.randomSmallMob(3500, 250, 0.4);
+    spawn.randomMob(3800, 2175, 0.4);
+    spawn.randomSmallMob(1100, -300, 0.4); //entrance
+    spawn.randomMob(4450, 2500, 0.5);
+    spawn.randomMob(6350, 2525, 0.5);
+    spawn.randomBoss(9200, 2400, 0.6);
+    spawn.randomSmallMob(1900, -250, 0.6); //entrance
+    spawn.randomMob(1500, 2100, 0.7);
+    spawn.randomSmallMob(1700, -150, 0.7); //entrance
+    spawn.randomMob(8800, 2725, 0.8);
+    spawn.randomMob(7300, 2200, 0.8);
+    spawn.randomMob(2075, 2025, 0.8);
+    spawn.randomMob(3475, 2175, 0.8);
+    if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss"]);
   },
   template() {
     level.custom = () => {
@@ -2167,10 +2174,6 @@ const level = {
     level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
     if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
     game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
-    if (mod.isHealLowHealth && mech.health < mech.maxHealth * 0.5) {
-      mech.health = mech.maxHealth * 0.5
-      mech.displayHealth();
-    }
   },
   playerExitCheck() {
     if (

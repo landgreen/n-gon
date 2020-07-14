@@ -1016,20 +1016,7 @@ const mobs = {
               b.spore(this.position)
             }
           }
-          if (Math.random() < mod.isBotSpawner) {
-            if (Math.random() < 0.1) { //very low chance of plasma bot
-              b.plasmaBot(this.position)
-            } else if (Math.random() < 0.25) {
-              b.nailBot(this.position)
-            } else if (Math.random() < 0.33) {
-              b.laserBot(this.position)
-            } else if (Math.random() < 0.5) {
-              b.foamBot(this.position)
-            } else {
-              b.boomBot(this.position)
-            }
-            // if (mech.energy > 0.33) mech.energy -= 0.33
-          }
+          if (Math.random() < mod.isBotSpawner) b.randomBot(this.position, false)
           if (mod.isExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
           if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob)
         } else if (mod.isShieldAmmo && this.shield) {
@@ -1039,7 +1026,7 @@ const mobs = {
           } else if (Math.random() < 0.5 && !mod.isSuperDeterminism) {
             type = "reroll"
           }
-          for (let i = 0; i < 3; i++) {
+          for (let i = 0, len = 1 + Math.ceil(2 * Math.random()); i < len; i++) {
             powerUps.spawn(this.position.x, this.position.y, type);
             if (Math.random() < mod.bayesian) powerUps.spawn(this.position.x, this.position.y, type);
           }

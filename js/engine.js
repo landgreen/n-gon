@@ -222,7 +222,7 @@ function collisionChecks(event) {
           if (obj.classType === "body" && obj.speed > 6) {
             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 9) {
-              let dmg = b.dmgScale * (v * obj.mass * 0.07) * mod.throwChargeRate;
+              let dmg = b.dmgScale * v * obj.mass * 0.065 * mod.throwChargeRate;
               if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
               if (mob[k].isShielded) dmg *= 0.5
               mob[k].damage(dmg, true);
