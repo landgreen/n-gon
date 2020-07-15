@@ -472,7 +472,7 @@ const mech = {
           mech.energy = mech.maxEnergy
           // if (mech.energy < 0.05) mech.energy = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
-          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
+          game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)
 
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -501,7 +501,8 @@ const mech = {
           mech.health = mech.maxHealth * game.healScale
           // if (mech.health < 0.05) mech.health = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
-          game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
+          game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)
+          // game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
 
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = "rgba(255,255,255,0.03)";

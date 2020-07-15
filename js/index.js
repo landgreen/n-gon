@@ -93,17 +93,20 @@ const build = {
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
     </div>
     <div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
-      level: ${level.levelsCleared} - ${level.levels[level.onLevel]} (${level.difficultyText()})
-      <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
-      <br>mouse: (${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)}) &nbsp; ${mech.cycle} cycles
+      <strong>damage increase: ${((mod.damageFromMods()-1)*100).toFixed(0)}%
+      <br>harm reduction: ${((1-mech.harmReduction())*100).toFixed(0)}%
+      <br>fire delay decrease: ${((1-b.fireCD)*100).toFixed(0)}%</strong>
       <br>
       <br>health: (${(mech.health*100).toFixed(0)} / ${(mech.maxHealth*100).toFixed(0)}) &nbsp; energy: (${(mech.energy*100).toFixed(0)} / ${(mech.maxEnergy*100).toFixed(0)})
       <br>mass: ${player.mass.toFixed(1)} &nbsp; rerolls: ${powerUps.reroll.rerolls}
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
       <br>
-      <br>damage increase: ${((mod.damageFromMods()-1)*100).toFixed(0)}%
-      <br>harm reduction: ${((1-mech.harmReduction())*100).toFixed(0)}% 
-      <br>fire delay decrease: ${((1-b.fireCD)*100).toFixed(0)}% 
+      <br>level: ${level.levelsCleared} - ${level.levels[level.onLevel]} (${level.difficultyText()})
+      <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
+      <br>mouse: (${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)}) &nbsp; ${mech.cycle} cycles
+      <br>harm difficulty scale: ${(game.dmgScale*100).toFixed(0)}%
+      <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(0) }%
+      <br>heal difficulty scale: ${(game.healScale*100).toFixed(0)}%
     </div>`;
     let countGuns = 0
     let countMods = 0

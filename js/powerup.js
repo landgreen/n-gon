@@ -55,14 +55,12 @@ const powerUps = {
       powerUps.reroll.rerolls += amount
       if (powerUps.reroll.rerolls < 0) powerUps.reroll.rerolls = 0
 
-      if (mob.isRerollBots) {
+      if (mod.isRerollBots) {
         const limit = 3
         for (; powerUps.reroll.rerolls > limit - 1; powerUps.reroll.rerolls -= limit) {
           b.randomBot()
         }
       }
-
-
       if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
         document.getElementById("mod-anthropic").innerHTML = `(${powerUps.reroll.rerolls})`
       }
@@ -405,11 +403,11 @@ const powerUps = {
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field");
       return;
     }
-    if (Math.random() < 0.01) {
-      powerUps.spawn(x, y, "reroll");
-      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "reroll");
-      return;
-    }
+    // if (Math.random() < 0.01) {
+    //   powerUps.spawn(x, y, "reroll");
+    //   if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "reroll");
+    //   return;
+    // }
   },
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
@@ -465,12 +463,21 @@ const powerUps = {
 
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
-    if (Math.random() < 0.05) {
+    if (Math.random() < 0.01) {
       powerUps.spawn(x, y, "reroll");
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "reroll");
     } else if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
+      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "heal", false);
     } else if (!mod.bayesian) {
       powerUps.spawn(x, y, "ammo", false);
+    }
+  },
+  addRerollToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed reroll
+    if (mob.length) {
+      const index = Math.floor(Math.random() * mob.length)
+      powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");
+      if (Math.random() < mod.bayesian) powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun

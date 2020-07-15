@@ -1,14 +1,5 @@
 
-bubble fusion drops 2-3 power ups  (down from 3)
-perturbation theory: damage is 5% (down from 6%) per reroll
-  but the mod will not show up until you have 4 rerolls stockpiled
-sporeangium grow faster when stuck to a mob
-
-mod: liquid cooling - freeze all mobs for 6 seconds after receiving harm
-mod: perimeter defense - gain 6% harm reduction for each bot
-mod: bot fabrication - anytime you have 3 rerolls, convert them into a random bot
-mod: Ψ(x) collapse - 33% haste, if you have no rerolls
-mod: mine synthesis - drop a mine after picking up a power up
+rerolls now spawn at about 1 per level
 
 ************** TODO - n-gon **************
 

@@ -1143,18 +1143,19 @@ const b = {
 
         //fire plasma at target
 
-        const DRAIN = 0.002
-        if (this.lockedOn && this.lockedOn.alive && mech.energy > DRAIN && mech.fieldCDcycle < mech.cycle) {
-          mech.energy -= DRAIN;
-          if (mech.energy < 0) {
-            mech.fieldCDcycle = mech.cycle + 120;
-            mech.energy = 0;
-          }
 
+        if (this.lockedOn && this.lockedOn.alive && mech.fieldCDcycle < mech.cycle) {
           const sub = Vector.sub(this.lockedOn.position, this.position)
           const DIST = Vector.magnitude(sub);
           const unit = Vector.normalise(sub)
-          if (DIST < mod.isPlasmaRange * 600) {
+
+          const DRAIN = 0.0022
+          if (DIST < mod.isPlasmaRange * 550 && mech.energy > DRAIN) {
+            mech.energy -= DRAIN;
+            if (mech.energy < 0) {
+              mech.fieldCDcycle = mech.cycle + 120;
+              mech.energy = 0;
+            }
             //calculate laser collision
             let best;
             let range = mod.isPlasmaRange * (140 + 300 * Math.sqrt(Math.random()))

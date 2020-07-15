@@ -14,7 +14,7 @@ const level = {
       // level.difficultyIncrease(4)
       // game.enableConstructMode() //used to build maps in testing mode
       // mech.isStealth = true;
-      // mod.giveMod("superfluidity");
+      // mod.giveMod("bot fabrication");
       // b.giveGuns("ice IX")
       // mech.setField("plasma torch")
 
@@ -64,8 +64,8 @@ const level = {
       mech.maxHealth += 0.05 * powerUps.totalPowerUps
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
-    if (mod.isHealLowHealth && mech.health < mech.maxHealth * 0.5 * game.healScale) {
-      mech.health = mech.maxHealth * 0.5 * game.healScale
+    if (mod.isHealLowHealth && mech.health < mech.maxHealth * 0.66 * game.healScale) {
+      mech.health = mech.maxHealth * 0.66 * game.healScale
       mech.displayHealth();
     }
   },
@@ -133,20 +133,20 @@ const level = {
     composite[composite.length] = rotor
     return rotor
   },
-  button(x, y, width = 70, height = 20) {
-    spawn.mapVertex(x + 35, y + 27, "70 10 -70 10 -40 -10 40 -10");
+  button(x, y, width = 70) {
+    spawn.mapVertex(x + 35, y + 2, "70 10 -70 10 -40 -10 40 -10");
     return {
       isUp: false,
       min: {
         x: x,
-        y: y
+        y: y - 15
       },
       max: {
         x: x + width,
-        y: y + height
+        y: y - 5
       },
       width: width,
-      height: height,
+      height: 20,
       query() {
         if (Matter.Query.region(body, this).length === 0 && Matter.Query.region([player], this).length === 0) {
           this.isUp = true;
@@ -156,11 +156,10 @@ const level = {
       },
       draw() {
         ctx.fillStyle = "hsl(0, 100%, 70%)"
-        // ctx.fillStyle = "hsl(287, 30%, 65%)"
         if (this.isUp) {
-          ctx.fillRect(this.min.x, this.min.y, this.width, 20)
+          ctx.fillRect(this.min.x, this.min.y - 10, this.width, 20)
         } else {
-          ctx.fillRect(this.min.x, this.min.y + 10, this.width, 25)
+          ctx.fillRect(this.min.x, this.min.y, this.width, 25)
         }
       }
     }
@@ -207,7 +206,7 @@ const level = {
   },
   sewers() {
     const rotor = level.rotor(5100, 2425, -0.001)
-    const button = level.button(6600, 2650)
+    const button = level.button(6600, 2675)
     const hazard = level.hazard(4550, 2750, 4550, 150)
 
     level.custom = () => {
@@ -324,6 +323,7 @@ const level = {
     spawn.randomMob(2075, 2025, 0.8);
     spawn.randomMob(3475, 2175, 0.8);
     if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss"]);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   template() {
     level.custom = () => {
@@ -360,6 +360,7 @@ const level = {
     // spawn.randomMob(2650, -975, 0.8);
     // spawn.randomBoss(1700, -900, 0.4);
     // if (game.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   testing() {
     level.custom = () => {
@@ -495,6 +496,7 @@ const level = {
         spawn.randomBoss(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
       }
     }
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   intro() {
     level.custom = () => {
@@ -814,6 +816,7 @@ const level = {
         spawn.laserBoss(600 + 200 * Math.random(), -2150 + 250 * Math.random());
       }
     }
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   rooftops() {
     level.custom = () => {
@@ -1016,6 +1019,7 @@ const level = {
     spawn.randomBoss(2225, -1325, 0.4);
     spawn.randomBoss(4900, -1200, 0);
     if (game.difficulty > 3) spawn.randomLevelBoss(3200, -2050);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   aerie() {
     level.custom = () => {
@@ -1208,7 +1212,7 @@ const level = {
         spawn.suckerBoss(4500, -400);
       }
     }
-    //add mini boss, giant hopper?   or a black hole that spawns hoppers?
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   skyscrapers() {
     level.custom = () => {
@@ -1367,6 +1371,7 @@ const level = {
     spawn.randomBoss(3700, -1500, 0.4);
     spawn.randomBoss(1700, -900, 0.4);
     if (game.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   highrise() {
     level.custom = () => {
@@ -1529,6 +1534,7 @@ const level = {
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
     if (game.difficulty > 4) spawn.randomLevelBoss(-3400, -2800);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   warehouse() {
     level.custom = () => {
@@ -1698,6 +1704,7 @@ const level = {
         spawn.snakeBoss(-1300 + Math.random() * 2000, -2200); //boss snake with head
       }
     }
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   office() {
     level.custom = () => {
@@ -1881,6 +1888,7 @@ const level = {
         spawn.shooterBoss(2200, -650);
       }
     }
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   stronghold() { // player made level  by    Francois 👑 from discord
     level.custom = () => {
@@ -2116,6 +2124,7 @@ const level = {
     spawn.randomBoss(100, -450, 0.9);
 
     if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   //******************************************************************************************************************
   //******************************************************************************************************************

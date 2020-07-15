@@ -468,10 +468,11 @@ const mod = {
             },
             requires: "at least 3 rerolls",
             effect() {
-                mob.isRerollBots = true;
+                mod.isRerollBots = true;
+                powerUps.reroll.changeRerolls(0)
             },
             remove() {
-                mob.isRerollBots = false;
+                mod.isRerollBots = false;
             }
         },
         {
@@ -523,6 +524,7 @@ const mod = {
                         b.guns[i].ammo = Math.floor(b.guns[i].ammo * 0.1);
                     }
                 }
+                game.updateGunHUD();
                 //double bots
                 for (let i = 0; i < mod.nailBotCount; i++) {
                     b.nailBot();
@@ -753,7 +755,7 @@ const mod = {
         },
         {
             name: "energy conservation",
-            description: "<strong>13%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
+            description: "<strong>10%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -761,7 +763,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.energySiphon += 0.13;
+                mod.energySiphon += 0.1;
             },
             remove() {
                 mod.energySiphon = 0;
@@ -818,7 +820,7 @@ const mod = {
         },
         {
             name: "entropy exchange",
-            description: "<strong class='color-h'>heal</strong> for <strong>1.5%</strong> of <strong class='color-d'>damage</strong> done",
+            description: "<strong class='color-h'>heal</strong> for <strong>1%</strong> of <strong class='color-d'>damage</strong> done",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -826,7 +828,7 @@ const mod = {
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.healthDrain += 0.015;
+                mod.healthDrain += 0.01;
             },
             remove() {
                 mod.healthDrain = 0;
@@ -852,7 +854,7 @@ const mod = {
         },
         {
             name: "negentropy",
-            description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>50%</strong> of <strong>maximum health</strong>",
+            description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>66%</strong> of <strong>maximum health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
