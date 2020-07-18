@@ -1,7 +1,17 @@
+determinism mod no longer lets you cancel power ups
 
-rerolls now spawn at about 1 per level
+mod: frame dragging - rail gun doesn't drain energy, and slows time while charging
+mod: high caliber - minigun bullets are bigger, but fire slower
 
 ************** TODO - n-gon **************
+
+using a reroll gives you, a heal or ammo
+
+level boss: boss that dies and comes back to life but with one less side until it hits 3 sides
+  change color too (hsl)
+  boss shrinks and moves faster after each death
+
+mechanic: lose max health instead of taking fatal damage
 
 map: laboratory
   rooms with switches that change physics
@@ -10,9 +20,16 @@ map: laboratory
     laser room
     radiation room
 
+map: observatory
+  button controls rotation of telescope
+  laser beam shoots out of telescope
+  button opens the dome
+
 map: prison
   doors linked to buttons
     mobs inside the doors?
+
+map: airport
 
 button: blocks that are on the button at an angle will slowly slide off the button
   maybe just avoid long blocks near the button?
@@ -41,12 +58,6 @@ field that pushes blocks and mobs away
 
 mod - AoE radiation might work when the effect ends
     or maybe just anytime another mob is near
-
-medium caliber gun in between minigun and rail gun
-  mod: electricity damages mobs that get near the bullet 
-  get ammo back if it hits mobs
-  ammo returns to you if it misses
-  bullets have a gentle arc?
 
 mob that flashes the player (makes the graphics not update for a couple seconds)
 

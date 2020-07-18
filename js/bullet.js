@@ -740,6 +740,7 @@ const b = {
                   const DIST = Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
                     if (DIST < 60) { //eat the power up if close enough
+                      powerUps.onPickUp();
                       powerUp[i].effect();
                       Matter.World.remove(engine.world, powerUp[i]);
                       powerUp.splice(i, 1);
@@ -988,6 +989,7 @@ const b = {
     const dir = mech.angle;
     const RADIUS = (12 + 4 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
+      isBot: true,
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1043,6 +1045,7 @@ const b = {
     const dir = mech.angle;
     const RADIUS = (10 + 5 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 6, RADIUS, {
+      isBot: true,
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1098,6 +1101,7 @@ const b = {
     const dir = mech.angle;
     const RADIUS = 21
     bullet[me] = Bodies.polygon(position.x, position.y, 5, RADIUS, {
+      isBot: true,
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1288,6 +1292,7 @@ const b = {
     const dir = mech.angle;
     const RADIUS = (7 + 2 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
+      isBot: true,
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1364,6 +1369,7 @@ const b = {
     const dir = mech.angle;
     const RADIUS = (14 + 6 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 3, RADIUS, {
+      isBot: true,
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1391,11 +1397,6 @@ const b = {
       },
       onEnd() {},
       do() {
-        //move in a circle
-        // const radius = 1.5
-        // this.offPlayer.x -= radius * Math.cos(game.cycle * 0.02)
-        // this.offPlayer.y -= radius * Math.sin(game.cycle * 0.02)
-
         const playerPos = Vector.add(Vector.add(this.offPlayer, mech.pos), Vector.mult(player.velocity, 20)) //also include an offset unique to this bot to keep many bots spread out
         const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.followRange) //linear bounding well 
         const mag = Math.min(farAway, 4) * this.mass * this.acceleration
@@ -1405,7 +1406,6 @@ const b = {
           x: this.velocity.x * 0.95,
           y: this.velocity.y * 0.95
         });
-
         //find targets
         if (!(game.cycle % this.lookFrequency) && !mech.isStealth) {
           this.lockedOn = null;
@@ -1420,7 +1420,6 @@ const b = {
               this.lockedOn = mob[i]
             }
           }
-
           //randomize position relative to player
           if (Math.random() < 0.15) {
             this.offPlayer = {
@@ -1429,7 +1428,6 @@ const b = {
             }
           }
         }
-
         //hit target with laser
         if (this.lockedOn && this.lockedOn.alive && mech.energy > 0.15) {
           mech.energy -= 0.0014 * mod.isLaserDiode
@@ -1526,12 +1524,11 @@ const b = {
       fire() {
         const me = bullet.length;
         const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
-        bullet[me] = Bodies.rectangle(mech.pos.x + 23 * Math.cos(mech.angle), mech.pos.y + 23 * Math.sin(mech.angle), 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
-
+        bullet[me] = Bodies.rectangle(mech.pos.x + 23 * Math.cos(mech.angle), mech.pos.y + 23 * Math.sin(mech.angle), 20 * mod.bulletSize * mod.highCaliber, 6 * mod.bulletSize, b.fireAttributes(dir));
 
         //fire delay decreases as you hold fire, down to 3 from 15
         if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
-        const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+        const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) * mod.highCaliber //CD scales with cycles fire is held down
         this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
         b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
         // b.fireProps(mech.crouch ? 7 : 4, mech.crouch ? 40 : 34, dir, me); //cd , speed
@@ -1583,8 +1580,6 @@ const b = {
           player.force.y -= knock * Math.sin(mech.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
         }
 
-
-
         b.muzzleFlash(35);
         if (mod.isNailShot) {
           for (let i = 0; i < 14; i++) {
@@ -1635,8 +1630,8 @@ const b = {
       num: 5,
       isEasyToAim: true,
       fire() {
-        const SPEED = mech.crouch ? 40 : 30
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 28 : 20) * b.fireCD); // cool down
+        const SPEED = mech.crouch ? 43 : 32
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 18) * b.fireCD); // cool down
         if (mod.oneSuperBall) {
           let dir = mech.angle
           const me = bullet.length;
@@ -1649,7 +1644,7 @@ const b = {
           // Matter.Body.setDensity(bullet[me], 0.0001);
           bullet[me].endCycle = game.cycle + Math.floor((300 + 60 * Math.random()) * mod.isBulletsLastLonger);
           bullet[me].minDmgSpeed = 0;
-          bullet[me].restitution = 0.999;
+          bullet[me].restitution = 1;
           bullet[me].friction = 0;
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
@@ -1663,7 +1658,7 @@ const b = {
           let dir = mech.angle - SPREAD * (mod.superBallNumber - 1) / 2;
           for (let i = 0; i < mod.superBallNumber; i++) {
             const me = bullet.length;
-            bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 7 * mod.bulletSize, b.fireAttributes(dir, false));
+            bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 12, 7.5 * mod.bulletSize, b.fireAttributes(dir, false));
             World.add(engine.world, bullet[me]); //add bullet to world
             Matter.Body.setVelocity(bullet[me], {
               x: SPEED * Math.cos(dir),
@@ -1927,7 +1922,7 @@ const b = {
       name: "missiles",
       description: "launch missiles that <strong>accelerate</strong> towards <strong>mobs</strong><br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 5,
       have: false,
       isEasyToAim: true,
       fireCycle: 0,
@@ -2094,7 +2089,7 @@ const b = {
         bullet[me].restitution = 0.2;
         bullet[me].friction = 0.3;
         bullet[me].endCycle = Infinity
-        bullet[me].explodeRad = 440 + Math.floor(Math.random() * 30);
+        bullet[me].explodeRad = 450 + Math.floor(Math.random() * 30);
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
 
@@ -2218,7 +2213,7 @@ const b = {
         bullet[me].restitution = 0;
         bullet[me].minDmgSpeed = 0;
         bullet[me].damageRadius = 100;
-        bullet[me].maxDamageRadius = (425 + 125 * Math.random()) * (mod.isNeutronImmune ? 1.2 : 1)
+        bullet[me].maxDamageRadius = (435 + 150 * Math.random()) * (mod.isNeutronImmune ? 1.2 : 1)
         bullet[me].stuckTo = null;
         bullet[me].stuckToRelativePosition = null;
         bullet[me].onDmg = function () {};
@@ -2283,8 +2278,6 @@ const b = {
           } else {
             const bodyCollisions = Matter.Query.collides(this, body)
             if (bodyCollisions.length) {
-
-
               if (!bodyCollisions[0].bodyA.isNotSticky) {
                 onCollide(this)
                 this.stuckTo = bodyCollisions[0].bodyA
@@ -2329,7 +2322,6 @@ const b = {
               this.endCycle = 0;
             } else {
               //aoe damage to player
-
               if (!mod.isNeutronImmune && Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
                 const DRAIN = 0.0015
                 if (mech.energy > DRAIN) {
@@ -2380,7 +2372,7 @@ const b = {
           x: speed * Math.cos(mech.angle),
           y: speed * Math.sin(mech.angle)
         }, 0, mod.isMineAmmoBack)
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 60 : 20) * b.fireCD); // cool down
+        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 50 : 25) * b.fireCD); // cool down
       }
     },
     {
@@ -2508,7 +2500,7 @@ const b = {
       name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>crashes reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 14,
+      ammoPack: 15,
       have: false,
       isEasyToAim: true,
       fire() {
@@ -2621,7 +2613,10 @@ const b = {
                 this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
               }
             }
-
+            if (mod.isRailTimeSlow) {
+              game.fpsCap = game.fpsCapDefault
+              game.fpsInterval = 1000 / game.fpsCap;
+            }
 
             Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
             this.endCycle = game.cycle + 140
@@ -2672,7 +2667,12 @@ const b = {
             let chargeRate = (mech.crouch) ? 0.975 : 0.987
             chargeRate *= Math.pow(b.fireCD, 0.03)
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
-            mech.energy -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+            if (mod.isRailTimeSlow) {
+              game.fpsCap = 30 //new fps
+              game.fpsInterval = 1000 / game.fpsCap;
+            } else {
+              mech.energy -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+            }
 
             //draw targeting
             let best;

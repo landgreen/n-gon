@@ -195,7 +195,9 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
+        let text = ""
+        if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+        text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
         if (!mod.isDeterminism) {
           choice2 = pick(mech.fieldUpgrades, choice1)
@@ -263,7 +265,9 @@ const powerUps = {
         }
 
       }
-      let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
+      let text = ""
+      if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+      text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
       let choice1 = pick()
       let choice2 = -1
       let choice3 = -1
@@ -333,7 +337,9 @@ const powerUps = {
       let choice2 = -1
       let choice3 = -1
       if (choice1 > -1) {
-        let text = `<div class='cancel' onclick='powerUps.endDraft()'>✕</div><h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
+        let text = ""
+        if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+        text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
         text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
         if (!mod.isDeterminism) {
           choice2 = pick(b.guns, choice1)
@@ -364,6 +370,16 @@ const powerUps = {
         powerUps.giveRandomAmmo()
       }
     }
+  },
+  onPickUp() {
+    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
+    if (mod.isMineDrop) b.mine({
+      x: mech.pos.x,
+      y: mech.pos.y
+    }, {
+      x: 0,
+      y: 0
+    }, 0, mod.isMineAmmoBack)
   },
   giveRandomAmmo() {
     const ammoTarget = Math.floor(Math.random() * (b.guns.length));

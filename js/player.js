@@ -945,14 +945,7 @@ const mech = {
           y: powerUp[i].velocity.y * 0.11
         });
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-          if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
-          if (mod.isMineDrop) b.mine({
-            x: mech.pos.x,
-            y: mech.pos.y
-          }, {
-            x: 0,
-            y: 0
-          }, 0, mod.isMineAmmoBack)
+          powerUps.onPickUp();
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
@@ -1663,7 +1656,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp(180);
 
-            const DRAIN = 0.0017
+            const DRAIN = 0.0014
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < DRAIN) {

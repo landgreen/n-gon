@@ -39,6 +39,7 @@ const game = {
     b.bulletDraw();
     b.bulletDo();
     game.drawCircle();
+    level.customTopLayer();
     // game.clip();
     ctx.restore();
     game.drawCursor();
@@ -67,6 +68,7 @@ const game = {
     game.draw.testing();
     game.drawCircle();
     game.constructCycle()
+    level.customTopLayer();
     ctx.restore();
     game.testingOutput();
     game.drawCursor();
@@ -691,6 +693,9 @@ const game = {
       mech.holdingTarget.collisionFilter.category = 0;
       mech.holdingTarget.collisionFilter.mask = 0;
     }
+    //set fps back to default
+    game.fpsCap = game.fpsCapDefault
+    game.fpsInterval = 1000 / game.fpsCap;
   },
   getCoords: {
     //used when building maps, outputs a draw rect command to console, only works in testing mode
@@ -735,12 +740,16 @@ const game = {
             x: level.enter.x + 50,
             y: level.enter.y - 20
           });
-          // Matter.Body.setPosition(player, {
-          //   x: player.position.x,
-          //   y: -7000
-          // });
-          // game.noCameraScroll()
-
+          // move bots
+          for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].isBot) {
+              Matter.Body.setPosition(bullet[i], player.position);
+              Matter.Body.setVelocity(bullet[i], {
+                x: 0,
+                y: 0
+              });
+            }
+          }
           if (game.difficultyMode === 2) mech.damage(0.3);
           if (game.difficultyMode === 1) mech.damage(0.1);
           mech.energy = 0;

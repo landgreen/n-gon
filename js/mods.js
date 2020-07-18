@@ -643,7 +643,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return game.fpsCapDefault > 45
+                return game.fpsCapDefault > 45 && !mod.isRailTimeSlow
             },
             requires: "FPS above 45",
             effect() {
@@ -853,22 +853,6 @@ const mod = {
             }
         },
         {
-            name: "negentropy",
-            description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>66%</strong> of <strong>maximum health</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.maxHealth > 1 || mod.isArmorFromPowerUps
-            },
-            requires: "increased max health",
-            effect() {
-                mod.isHealLowHealth = true;
-            },
-            remove() {
-                mod.isHealLowHealth = false;
-            }
-        },
-        {
             name: "crystallized armor",
             description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>5%</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
             maxCount: 1,
@@ -884,6 +868,38 @@ const mod = {
                 mod.isArmorFromPowerUps = false;
             }
         },
+        {
+            name: "negentropy",
+            description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>66%</strong> of <strong>maximum health</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.maxHealth > 1 || mod.isArmorFromPowerUps
+            },
+            requires: "increased max health",
+            effect() {
+                mod.isHealLowHealth = true;
+            },
+            remove() {
+                mod.isHealLowHealth = false;
+            }
+        },
+        // {
+        //     name: "prismatic cleavage",
+        //     description: "harm that would be fatal no longer kills you<br>instead it is removed from your maximum health",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mech.maxHealth > 1 || mod.isArmorFromPowerUps
+        //     },
+        //     requires: "increased max health",
+        //     effect() {
+        //         mod.isMaxHealthRemove = true;
+        //     },
+        //     remove() {
+        //         mod.isMaxHealthRemove = false;
+        //     }
+        // },
         {
             name: "recursive healing",
             description: "<strong class='color-h'>healing</strong> <strong>power ups</strong> trigger <strong>1</strong> more time",
@@ -1243,6 +1259,22 @@ const mod = {
             },
             remove() {
                 mod.bulletSize = 1;
+            }
+        },
+        {
+            name: "high caliber",
+            description: "<strong>100%</strong> increased <strong>minigun</strong> bullet size<br><strong>100%</strong> increased <strong>delay</strong> after firing",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("minigun")
+            },
+            requires: "minigun",
+            effect() {
+                mod.highCaliber = 2
+            },
+            remove() {
+                mod.highCaliber = 1
             }
         },
         {
@@ -1813,7 +1845,22 @@ const mod = {
                 mod.isFoamGrowOnDeath = false;
             }
         },
-
+        {
+            name: "frame-dragging",
+            description: "<strong>slow time</strong> while charging the <strong>rail gun</strong><br>charging no longer drains <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS
+            },
+            requires: "rail gun && FPS above 45",
+            effect() {
+                mod.isRailTimeSlow = true;
+            },
+            remove() {
+                mod.isRailTimeSlow = false;
+            }
+        },
         {
             name: "fragmenting projectiles",
             description: "<strong>rail gun</strong> fragments into <strong>nails</strong><br>after hitting mobs at high speeds",
@@ -2384,5 +2431,7 @@ const mod = {
     isRerollHaste: null,
     rerollHaste: null,
     isMineDrop: null,
-    isRerollBots: null
+    isRerollBots: null,
+    isRailTimeSlow: null
+    // isMaxHealthRemove: null
 }

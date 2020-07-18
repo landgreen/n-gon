@@ -12,18 +12,18 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(4)
-      // game.enableConstructMode() //used to build maps in testing mode
+      game.enableConstructMode() //used to build maps in testing mode
+      // game.zoomScale = 1000;
+      // game.setZoom();
       // mech.isStealth = true;
-      // mod.giveMod("bot fabrication");
+      // mod.giveMod("nail-bot");
       // b.giveGuns("ice IX")
       // mech.setField("plasma torch")
 
-      level.intro(); //starting level
-      // level.sewers();
       // level.testing();
-      // level.template()
-      // level.bosses();
-      // level.stronghold()
+      // level.intro(); //starting level
+      level.testChamber()
+      // level.sewers();
       // level.satellite();
       // level.skyscrapers();
       // level.aerie();
@@ -31,7 +31,9 @@ const level = {
       // level.warehouse();
       // level.highrise();
       // level.office();
-
+      // level.bosses();
+      // level.template()
+      // level.stronghold() //fan level
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       // spawn.pickList = ["focuser", "focuser"]
@@ -43,24 +45,12 @@ const level = {
     game.setZoom();
     level.addToWorld(); //add bodies to game engine
     game.draw.setPaths();
-    for (let i = 0; i < mod.laserBotCount; i++) {
-      b.laserBot()
-    }
-    for (let i = 0; i < mod.nailBotCount; i++) {
-      b.nailBot()
-    }
-    for (let i = 0; i < mod.foamBotCount; i++) {
-      b.foamBot()
-    }
-    for (let i = 0; i < mod.boomBotCount; i++) {
-      b.boomBot()
-    }
-    for (let i = 0; i < mod.plasmaBotCount; i++) {
-      b.plasmaBot()
-    }
-
+    for (let i = 0; i < mod.laserBotCount; i++) b.laserBot()
+    for (let i = 0; i < mod.nailBotCount; i++) b.nailBot()
+    for (let i = 0; i < mod.foamBotCount; i++) b.foamBot()
+    for (let i = 0; i < mod.boomBotCount; i++) b.boomBot()
+    for (let i = 0; i < mod.plasmaBotCount; i++) b.plasmaBot()
     if (mod.isArmorFromPowerUps) {
-      // for (let i = 0; i < powerUps.totalPowerUps; i++) {}
       mech.maxHealth += 0.05 * powerUps.totalPowerUps
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
@@ -69,140 +59,249 @@ const level = {
       mech.displayHealth();
     }
   },
+  custom() {},
+  customTopLayer() {},
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-  rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.0005) {
-    const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
-      density: density,
-      isNotSticky: true,
-      isNotHoldable: true
-    });
-    const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
-      angle: Math.PI / 2,
-      density: density,
-      isNotSticky: true,
-      isNotHoldable: true
-    });
-    rotor = Body.create({ //combine rotor1 and rotor2
-      parts: [rotor1, rotor2],
-      restitution: 0,
-      collisionFilter: {
-        category: cat.body,
-        mask: cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.powerUp | cat.player | cat.bullet
-      },
-    });
-    Matter.Body.setPosition(rotor, {
-      x: x,
-      y: y
-    });
-    World.add(engine.world, [rotor]);
-    body[body.length] = rotor1
-    body[body.length] = rotor2
+  portal(centerA, angleA, centerB, angleB) {
+    const width = 30
+    const height = 150
+    const mapWidth = 200
+    const unitA = Matter.Vector.rotate({
+      x: 1,
+      y: 0
+    }, angleA)
+    const unitB = Matter.Vector.rotate({
+      x: 1,
+      y: 0
+    }, angleB)
 
-    setTimeout(function () {
-      rotor.collisionFilter.category = cat.body;
-      rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
-    }, 1000);
-
-    const constraint = Constraint.create({ //fix rotor in place, but allow rotation
-      pointA: {
-        x: x,
-        y: y
-      },
-      bodyB: rotor
-    });
-    World.add(engine.world, constraint);
-
-    if (rotate) {
-      rotor.rotate = function () {
-        if (!mech.isBodiesAsleep) {
-          Matter.Body.applyForce(rotor, {
-            x: rotor.position.x + 100,
-            y: rotor.position.y + 100
-          }, {
-            x: rotate * rotor.mass,
-            y: 0
-          })
-        } else {
-          Matter.Body.setAngularVelocity(rotor, 0);
-        }
+    draw = function () {
+      ctx.beginPath(); //portal
+      sensor = this.vertices;
+      ctx.moveTo(sensor[0].x, sensor[0].y);
+      for (let i = 1; i < sensor.length; ++i) {
+        ctx.lineTo(sensor[i].x, sensor[i].y);
       }
+      ctx.fillStyle = this.color
+      ctx.fill();
     }
-    composite[composite.length] = rotor
-    return rotor
-  },
-  button(x, y, width = 70) {
-    spawn.mapVertex(x + 35, y + 2, "70 10 -70 10 -40 -10 40 -10");
-    return {
-      isUp: false,
-      min: {
-        x: x,
-        y: y - 15
-      },
-      max: {
-        x: x + width,
-        y: y - 5
-      },
-      width: width,
-      height: 20,
-      query() {
-        if (Matter.Query.region(body, this).length === 0 && Matter.Query.region([player], this).length === 0) {
-          this.isUp = true;
+    query = function () {
+      if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
+        if (player.isInPortal === this) player.isInPortal = null
+      } else if (player.isInPortal !== this) { //touching player
+        //teleport
+        player.isInPortal = this.portalPair
+        Matter.Body.setPosition(player, this.portalPair.position);
+        //rotate velocity
+        // const unit = Vector.normalise(Vector.rotate(player.velocity, this.angle - this.portalPair.angle + Math.PI)) //rotate and flip velocity
+        // const mag = Math.max(20, Math.min(50, Vector.magnitude(player.velocity))) //20 is lowest speed, 50 is highest speed
+        // const v = Vector.mult(unit, mag)
+
+        let mag
+        if (this.angle === -Math.PI / 2) {
+          //portal that fires the player up
+          mag = Math.max(10, Math.min(50, player.velocity.y * 0.8)) + 11
         } else {
-          this.isUp = false;
+          mag = Math.max(3, Math.min(50, Vector.magnitude(player.velocity)))
         }
-      },
-      draw() {
-        ctx.fillStyle = "hsl(0, 100%, 70%)"
-        if (this.isUp) {
-          ctx.fillRect(this.min.x, this.min.y - 10, this.width, 20)
-        } else {
-          ctx.fillRect(this.min.x, this.min.y, this.width, 25)
-        }
-      }
-    }
-  },
-  hazard(x, y, width, height, damage = 0.0005, color = "hsl(160, 100%, 35%)") {
-    return {
-      min: {
-        x: x,
-        y: y
-      },
-      max: {
-        x: x + width,
-        y: y + height
-      },
-      width: width,
-      height: height,
-      maxHeight: height,
-      query() {
-        if (this.height > 0 && Matter.Query.region([player], this).length && !mech.isStealth) {
-          mech.damage(damage)
-          const drain = 0.005
-          if (mech.energy > drain) mech.energy -= drain
-        }
-      },
-      draw() {
-        ctx.fillStyle = color
-        ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
-      },
-      level(isFill) {
-        const growSpeed = 1
-        if (isFill) {
-          if (this.height < this.maxHeight) {
-            this.height += growSpeed
-            this.min.y -= growSpeed
-            this.max.y = this.min.y + this.height
+        console.log(mag)
+        const v = Vector.mult(this.portalPair.unit, mag)
+        Matter.Body.setVelocity(player, v);
+        mech.buttonCD_jump = 0 //disable short jumps when letting go of jump key
+        // move bots to follow player
+        for (let i = 0; i < bullet.length; i++) {
+          if (bullet[i].isBot) {
+            Matter.Body.setPosition(bullet[i], this.portalPair.portal.position);
+            Matter.Body.setVelocity(bullet[i], {
+              x: 0,
+              y: 0
+            });
           }
-        } else if (this.height > 0) {
-          this.height -= growSpeed
-          this.min.y += growSpeed
-          this.max.y = this.min.y + this.height
         }
       }
     }
+
+    const portalA = Bodies.rectangle(centerA.x, centerA.y, width, height, {
+      isSensor: true,
+      angle: angleA,
+      color: "hsla(197, 100%, 50%,0.7)",
+      draw: draw,
+    });
+    const portalB = Bodies.rectangle(centerB.x, centerB.y, width, height, {
+      isSensor: true,
+      angle: angleB,
+      color: "hsla(29, 100%, 50%, 0.7)",
+      draw: draw
+    });
+    const mapA = Bodies.rectangle(centerA.x - 0.5 * unitA.x * mapWidth, centerA.y - 0.5 * unitA.y * mapWidth, mapWidth, height + 100, {
+      collisionFilter: {
+        category: cat.map,
+        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      unit: unitA,
+      angle: angleA,
+      color: game.draw.mapFill,
+      draw: draw,
+      query: query,
+      lastPortalCycle: 0
+    });
+    Matter.Body.setStatic(mapA, true); //make static
+    World.add(engine.world, mapA); //add to world
+
+    const mapB = Bodies.rectangle(centerB.x - 0.5 * unitB.x * mapWidth, centerB.y - 0.5 * unitB.y * mapWidth, mapWidth, height + 100, {
+      collisionFilter: {
+        category: cat.map,
+        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      unit: unitB,
+      angle: angleB,
+      color: game.draw.mapFill,
+      draw: draw,
+      query: query,
+      lastPortalCycle: 0
+    });
+    Matter.Body.setStatic(mapB, true); //make static
+    World.add(engine.world, mapB); //add to world
+    mapA.portal = portalA
+    mapB.portal = portalB
+    mapA.portalPair = mapB
+    mapB.portalPair = mapA
+    return [portalA, portalB, mapA, mapB]
+  },
+  testChamber() {
+    const portal = level.portal({
+      x: 2500,
+      y: -100
+    }, Math.PI, { //left
+      x: 2500,
+      y: -3100
+    }, Math.PI) //left
+    const portal2 = level.portal({
+      x: 100,
+      y: -2150
+    }, -Math.PI / 2, { //up
+      x: 1300,
+      y: -2150
+    }, -Math.PI / 2) //up
+    level.custom = () => {
+      level.playerExitCheck();
+      portal[2].query()
+      portal[3].query()
+      portal2[2].query()
+      portal2[3].query()
+    };
+    level.customTopLayer = () => {
+      portal[0].draw();
+      portal[1].draw();
+      portal[2].draw();
+      portal[3].draw();
+      portal2[0].draw();
+      portal2[1].draw();
+      portal2[2].draw();
+      portal2[3].draw();
+    };
+
+    if (false) {
+      level.setPosToSpawn(0, -50); //lower spawn
+      level.exit.y = level.enter.y - 550;
+      level.fillBG.push({
+        x: -300,
+        y: -1000,
+        width: 650,
+        height: 500,
+        color: "#d4f4f4"
+      });
+    } else {
+      level.setPosToSpawn(0, -600); //upper spawn
+      level.exit.y = level.enter.y + 550;
+      level.fillBG.push({
+        x: -300,
+        y: -500,
+        width: 650,
+        height: 500,
+        color: "#d4f4f4"
+      });
+    }
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+    level.exit.x = level.enter.x;
+    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+
+    level.defaultZoom = 1800
+    game.zoomTransition(level.defaultZoom)
+    document.body.style.backgroundColor = "#dcdcde";
+    // powerUps.spawnStartingPowerUps(1475, -1175);
+    // spawn.debris(750, -2200, 3700, 16); //16 debris per level
+
+    //outer wall
+    spawn.mapRect(-500, -3800, 200, 4000); //left map wall
+    spawn.mapRect(2500, -2975, 200, 2375); //right map middle wall
+    spawn.mapRect(-400, -3800, 3100, 200); //map ceiling
+    spawn.mapRect(-400, 0, 3100, 200); //floor
+
+    //entrance
+    spawn.mapRect(300, -550, 50, 350); //right entrance wall
+    spawn.mapRect(-400, -550, 3000, 50); //ceiling
+    //entrance clutter
+    const xPos = shuffle([550, 1100, 1850]);
+    spawn.mapRect(xPos[0], -350, 400, 100);
+    spawn.mapRect(xPos[1], -350, 300, 400);
+    spawn.mapRect(xPos[2], -150, 300, 200);
+
+    //exit
+    spawn.mapRect(-400, -1050, 750, 50);
+    spawn.mapRect(300, -1050, 50, 300);
+
+
+    //portal bottom
+    spawn.mapRect(2500, -700, 200, 540); //right portal wall
+    spawn.mapRect(2525, -200, 175, 250); //right portal back wall
+
+    //portal top
+    spawn.mapRect(1400, -3000, 1300, 50); //floor
+    spawn.mapRect(2500, -3700, 200, 540); //right portal wall
+    spawn.mapRect(2525, -3200, 175, 250); //right portal back wall
+    // spawn.mapRect(700, -3250, 775, 350);
+
+    spawn.mapRect(0, -3250, 1450, 50);
+    spawn.mapRect(1400, -3250, 50, 300);
+
+    // spawn.mapRect(-350, -2875, 175, 325);
+    spawn.mapRect(-150, -3000, 150, 50);
+    spawn.mapRect(-350, -2750, 175, 200);
+
+
+    //portal 2
+    spawn.mapRect(-300, -2600, 300, 700);
+    spawn.mapRect(-25, -1975, 250, 75);
+
+    spawn.mapRect(1400, -2600, 300, 700);
+    spawn.mapRect(1175, -1975, 250, 75);
+
+    // spawn.mapRect(200, -2150, 25, 250);
+    // spawn.mapRect(475, -2150, 25, 250);
+    //portal walls
+    // spawn.mapRect(575, -8, 100, 50);
+    // spawn.mapRect(925, -8, 100, 50);
+    // spawn.mapRect(675,t -625, 250, 675);
+
+    // spawn.mapRect(1700, 75, 150, 25);
+    // spawn.mapRect(1700, -700, 150, 25);
+    // spawn.mapRect(1850, 0, 525, 100);
+    // spawn.mapRect(1850, -700, 525, 100);
+
+
+
+
+    // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
+    // spawn.boost(4150, 0, 1300);
+    // spawn.randomSmallMob(1300, -70);
+    // spawn.randomMob(2650, -975, 0.8);
+    // spawn.randomBoss(1700, -900, 0.4);
+    // if (game.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   sewers() {
     const rotor = level.rotor(5100, 2425, -0.001)
@@ -2354,6 +2453,163 @@ const level = {
     }
     for (let i = 0; i < consBB.length; i++) {
       World.add(engine.world, consBB[i]);
+    }
+  },
+  rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.0005) {
+    const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
+      density: density,
+      isNotSticky: true,
+      isNotHoldable: true
+    });
+    const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
+      angle: Math.PI / 2,
+      density: density,
+      isNotSticky: true,
+      isNotHoldable: true
+    });
+    rotor = Body.create({ //combine rotor1 and rotor2
+      parts: [rotor1, rotor2],
+      restitution: 0,
+      collisionFilter: {
+        category: cat.body,
+        mask: cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.powerUp | cat.player | cat.bullet
+      },
+    });
+    Matter.Body.setPosition(rotor, {
+      x: x,
+      y: y
+    });
+    World.add(engine.world, [rotor]);
+    body[body.length] = rotor1
+    body[body.length] = rotor2
+
+    setTimeout(function () {
+      rotor.collisionFilter.category = cat.body;
+      rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
+    }, 1000);
+
+    const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+      pointA: {
+        x: x,
+        y: y
+      },
+      bodyB: rotor
+    });
+    World.add(engine.world, constraint);
+
+    if (rotate) {
+      rotor.rotate = function () {
+        if (!mech.isBodiesAsleep) {
+          Matter.Body.applyForce(rotor, {
+            x: rotor.position.x + 100,
+            y: rotor.position.y + 100
+          }, {
+            x: rotate * rotor.mass,
+            y: 0
+          })
+        } else {
+          Matter.Body.setAngularVelocity(rotor, 0);
+        }
+      }
+    }
+    composite[composite.length] = rotor
+    return rotor
+  },
+  button(x, y, width = 66) {
+    spawn.mapVertex(x + 35, y + 2, "70 10 -70 10 -40 -10 40 -10");
+    map[map.length - 1].restitution = 0;
+    map[map.length - 1].friction = 1;
+    map[map.length - 1].frictionStatic = 1;
+
+    // const buttonSensor = Bodies.rectangle(x + 35, y - 1, 70, 20, {
+    //   isSensor: true
+    // });
+
+    return {
+      isUp: false,
+      min: {
+        x: x + 2,
+        y: y - 11
+      },
+      max: {
+        x: x + width,
+        y: y - 10
+      },
+      width: width,
+      height: 20,
+      query() {
+        // if (Matter.Query.collides(buttonSensor, body).length === 0 && Matter.Query.collides(buttonSensor, [player]).length === 0) {
+        if (Matter.Query.region(body, this).length === 0 && Matter.Query.region([player], this).length === 0) {
+          this.isUp = true;
+        } else {
+          this.isUp = false;
+          // const list = Matter.Query.collides(buttonSensor, body)
+          // if (list.length > 0) {
+          //   Matter.Body.setVelocity(list[0].bodyB, {
+          //     x: 0,
+          //     y: 0
+          //   });
+          // }
+        }
+      },
+      draw() {
+        ctx.fillStyle = "hsl(0, 100%, 70%)"
+        if (this.isUp) {
+          ctx.fillRect(this.min.x, this.min.y - 10, this.width, 20)
+        } else {
+          ctx.fillRect(this.min.x, this.min.y, this.width, 25)
+        }
+        //draw sensor zone
+        // ctx.beginPath();
+        // sensor = buttonSensor.vertices;
+        // ctx.moveTo(sensor[0].x, sensor[0].y);
+        // for (let i = 1; i < sensor.length; ++i) {
+        //   ctx.lineTo(sensor[i].x, sensor[i].y);
+        // }
+        // ctx.lineTo(sensor[0].x, sensor[0].y);
+        // ctx.fillStyle = "rgba(255, 255, 0, 0.3)";
+        // ctx.fill();
+      }
+    }
+  },
+  hazard(x, y, width, height, damage = 0.0005, color = "hsl(160, 100%, 35%)") {
+    return {
+      min: {
+        x: x,
+        y: y
+      },
+      max: {
+        x: x + width,
+        y: y + height
+      },
+      width: width,
+      height: height,
+      maxHeight: height,
+      query() {
+        if (this.height > 0 && Matter.Query.region([player], this).length && !mech.isStealth) {
+          mech.damage(damage)
+          const drain = 0.005
+          if (mech.energy > drain) mech.energy -= drain
+        }
+      },
+      draw() {
+        ctx.fillStyle = color
+        ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
+      },
+      level(isFill) {
+        const growSpeed = 1
+        if (isFill) {
+          if (this.height < this.maxHeight) {
+            this.height += growSpeed
+            this.min.y -= growSpeed
+            this.max.y = this.min.y + this.height
+          }
+        } else if (this.height > 0) {
+          this.height -= growSpeed
+          this.min.y += growSpeed
+          this.max.y = this.min.y + this.height
+        }
+      }
     }
   },
 };
