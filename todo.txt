@@ -3,9 +3,29 @@ determinism mod no longer lets you cancel power ups
 mod: frame dragging - rail gun doesn't drain energy, and slows time while charging
 mod: high caliber - minigun bullets are bigger, but fire slower
 
+new level: testChamber
+  it's a bit different, so don't hold back on feedback positive or negative
+
 ************** TODO - n-gon **************
 
-using a reroll gives you, a heal or ammo
+testChamber 
+  make reverse path viable
+
+portals:
+  portal while holding block sometimes send player back to original portal
+    only seems to happen with the bottom right block
+  extend to bodies  (mobs?)
+  use buttons to turn on and off?
+
+mod: heals are twice as effective
+  actually make heals larger
+  maybe replace heals trigger twice with this?
+
+mod: stunned mobs take extra damage
+  who stuns - super ball, phase decoherence mod, neutron bomb mod, pulse mod, perfect diamagnetism mod
+  check damage order for super ball, pulse
+
+mod: using a reroll gives you, a heal or ammo
 
 level boss: boss that dies and comes back to life but with one less side until it hits 3 sides
   change color too (hsl)

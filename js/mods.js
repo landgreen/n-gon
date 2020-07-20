@@ -740,14 +740,16 @@ const mod = {
             },
             requires: "not piezoelectricity<br>or acute stress response",
             effect: () => {
-                mech.health = 0
-                mech.displayHealth();
+                // mech.health = 0
+                // mech.displayHealth();
+                document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
                 document.getElementById("dmg").style.backgroundColor = "#0cf";
                 mod.isEnergyHealth = true;
             },
             remove() {
                 mod.isEnergyHealth = false;
+                document.getElementById("health").style.display = "inline"
                 document.getElementById("health-bg").style.display = "inline"
                 document.getElementById("dmg").style.backgroundColor = "#f67";
                 mech.health = mech.energy;

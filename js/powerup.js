@@ -75,10 +75,12 @@ const powerUps = {
       }
     },
     diceText() {
+      const diceLimit = 5
       const r = powerUps.reroll.rerolls
-      const fullDice = Math.floor(r / 6)
+      const fullDice = Math.min(Math.floor(r / 6), diceLimit)
       const lastDice = r % 6
       let out = ''
+      if (Math.floor(r / 6) > diceLimit) out += "+"
       for (let i = 0; i < fullDice; i++) {
         out += '⚅'
       }
@@ -393,7 +395,7 @@ const powerUps = {
       game.makeTextLog("<span style='font-size:110%;'>+" + ammo + " ammo for " + b.guns[ammoTarget].name + "</span>", 300);
     }
   },
-  spawnRandomPowerUp(x, y) { //mostly used after mob dies 
+  spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
     if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !mod.isEnergyHealth) || Math.random() < 0.035) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "heal");

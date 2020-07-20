@@ -33,13 +33,13 @@ const game = {
     mech.hold();
     // v.draw(); //working on visibility work in progress
     level.drawFills();
+    level.customTopLayer();
     game.draw.drawMapPath();
     b.fire();
     b.bulletRemove();
     b.bulletDraw();
     b.bulletDo();
     game.drawCircle();
-    level.customTopLayer();
     // game.clip();
     ctx.restore();
     game.drawCursor();
@@ -63,12 +63,12 @@ const game = {
     ctx.save();
     game.camera();
     mech.draw();
+    level.customTopLayer();
     game.draw.wireFrame();
     game.draw.cons();
     game.draw.testing();
     game.drawCircle();
     game.constructCycle()
-    level.customTopLayer();
     ctx.restore();
     game.testingOutput();
     game.drawCursor();
@@ -550,6 +550,14 @@ const game = {
     game.replaceTextLog = true;
     game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
     mech.setField(mech.fieldMode)
+    //exit testing
+    if (game.testing) {
+      game.testing = false;
+      game.loop = game.normalLoop
+      if (game.isConstructionMode) {
+        document.getElementById("construct").style.display = 'none'
+      }
+    }
   },
   firstRun: true,
   splashReturn() {
