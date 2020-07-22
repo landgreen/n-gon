@@ -1,15 +1,23 @@
-determinism mod no longer lets you cancel power ups
 
-mod: frame dragging - rail gun doesn't drain energy, and slows time while charging
-mod: high caliber - minigun bullets are bigger, but fire slower
-
-new level: testChamber
-  it's a bit different, so don't hold back on feedback positive or negative
+mod: upgrade all bots (current and future bots)
+some difficulty scaling changes (harm ramps a bit faster at high levels)
 
 ************** TODO - n-gon **************
 
-testChamber 
+too many mods are dropping at high levels on hard
+
+mod: upgrade all your current bots
+  upgrade should be equal to a 50% increases in value for the bot
+  nail-bot fires faster
+  foam bot fires larger radius foam
+  larger boom-bot explosions
+  laser-bot does more damage
+  plasma-bot uses less energy
+
+testChamber
+  too much block clutter near portals
   make reverse path viable
+  removing block from button releases boss?
 
 portals:
   portal while holding block sometimes send player back to original portal

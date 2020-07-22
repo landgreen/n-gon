@@ -467,8 +467,8 @@ em {
 .color-harm {
   /* color:  */
   /* text-shadow: #FC0 1px 0 10px; */
-  background-color: hsla(325, 100%, 85%, 0.2);
-  padding: 3px;
+  background-color: hsla(325, 100%, 85%, 0.15);
+  padding: 2px;
   border-radius: 4px;
   letter-spacing: 1px;
 }

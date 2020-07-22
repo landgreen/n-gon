@@ -441,13 +441,14 @@ const mech = {
     let dmg = 1
     dmg *= mech.fieldHarmReduction
     dmg *= mod.isSlowFPS ? 0.85 : 1
-    if (mod.isBotArmor) dmg *= 0.94 ** mod.totalBots()
+    if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
+    if (mod.isBotArmor) dmg *= 0.95 ** mod.totalBots()
     if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
     if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
-    if (mod.isTurret && mech.crouch) dmg /= 2;
+    if (mod.isTurret && mech.crouch) dmg *= 0.6;
     if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
-        dmg *= 0.84 // 1 - 0.16
+        dmg *= 0.85 // 1 - 0.15
       }
     }
     return dmg
@@ -684,6 +685,7 @@ const mech = {
   holdingTarget: null,
   timeSkipLastCycle: 0,
   // these values are set on reset by setHoldDefaults()
+  isFieldActive: false,
   fieldRange: 155,
   fieldShieldingScale: 1,
   energy: 0,
@@ -713,7 +715,7 @@ const mech = {
     mech.airSpeedLimit = 125
     mech.drop();
     mech.holdingMassScale = 0.5;
-
+    mech.isFieldActive = false; //only being used by negative mass field
     mech.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.isBodiesAsleep = true;
@@ -1361,21 +1363,18 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
       fieldDrawRadius: 0,
       isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
         mech.fieldMeterColor = "#000"
-        if (mod.isHarmReduce) {
-          mech.fieldHarmReduction = 0.2;
-        } else {
-          mech.fieldHarmReduction = 0.4;
-        }
+        mech.fieldHarmReduction = 0.5;
         mech.hold = function () {
           mech.airSpeedLimit = 125 //5 * player.mass * player.mass
           mech.FxAir = 0.016
+          mech.isFieldActive = false;
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
@@ -1385,6 +1384,7 @@ const mech = {
             mech.lookForPickUp();
             const DRAIN = 0.00035
             if (mech.energy > DRAIN) {
+              mech.isFieldActive = true; //used with mod.isHarmReduce
               mech.airSpeedLimit = 400 // 7* player.mass * player.mass
               mech.FxAir = 0.005
               // mech.pushMobs360();
@@ -1399,8 +1399,6 @@ const mech = {
               //     mob[i].force.y = force.y
               //   }
               // }
-
-
               //look for nearby objects to make zero-g
               function zeroG(who, range, mag = 1.06) {
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -1496,7 +1494,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.0014
+            const DRAIN = 0.0017
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
@@ -1656,7 +1654,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp(180);
 
-            const DRAIN = 0.0014
+            const DRAIN = 0.001
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < DRAIN) {
@@ -1793,7 +1791,7 @@ const mech = {
               // game.draw.bodyFill = "transparent"
               // game.draw.bodyStroke = "transparent"
 
-              const DRAIN = 0.0002 + 0.0001 * player.speed + ((!mod.renormalization && mech.fireCDcycle > mech.cycle) ? 0.005 : 0.001)
+              const DRAIN = 0.00014 + ((!mod.renormalization && mech.fireCDcycle > mech.cycle) ? 0.007 : 0.001)
               if (mech.energy > DRAIN) {
                 mech.energy -= DRAIN;
                 // if (mech.energy < 0.001) {

@@ -200,7 +200,7 @@ const game = {
       if (b.inventory[0] === b.activeGun) {
         let lessDamage = 1
         for (let i = 0, len = b.inventory.length; i < len; i++) {
-          lessDamage *= 0.84 // 1 - 0.16
+          lessDamage *= 0.85 // 1 - 0.15
         }
         document.getElementById("mod-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
       } else {
@@ -908,9 +908,9 @@ const game = {
       ctx.stroke();
     },
     wireFrame() {
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "#999";
+      // ctx.textAlign = "center";
+      // ctx.textBaseline = "middle";
+      // ctx.fillStyle = "#999";
       const bodies = Composite.allBodies(engine.world);
       ctx.beginPath();
       for (let i = 0; i < bodies.length; ++i) {
@@ -928,17 +928,17 @@ const game = {
     },
     testing() {
       //query zones
-      ctx.beginPath();
-      for (let i = 0, len = level.queryList.length; i < len; ++i) {
-        ctx.rect(
-          level.queryList[i].bounds.max.x,
-          level.queryList[i].bounds.max.y,
-          level.queryList[i].bounds.min.x - level.queryList[i].bounds.max.x,
-          level.queryList[i].bounds.min.y - level.queryList[i].bounds.max.y
-        );
-      }
-      ctx.fillStyle = "rgba(0, 0, 255, 0.2)";
-      ctx.fill();
+      // ctx.beginPath();
+      // for (let i = 0, len = level.queryList.length; i < len; ++i) {
+      //   ctx.rect(
+      //     level.queryList[i].bounds.max.x,
+      //     level.queryList[i].bounds.max.y,
+      //     level.queryList[i].bounds.min.x - level.queryList[i].bounds.max.x,
+      //     level.queryList[i].bounds.min.y - level.queryList[i].bounds.max.y
+      //   );
+      // }
+      // ctx.fillStyle = "rgba(0, 0, 255, 0.2)";
+      // ctx.fill();
       //jump
       ctx.beginPath();
       let bodyDraw = jumpSensor.vertices;
@@ -947,10 +947,10 @@ const game = {
         ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
       }
       ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
-      ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
+      ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
       ctx.fill();
-      ctx.strokeStyle = "#000";
-      ctx.stroke();
+      // ctx.strokeStyle = "#000";
+      // ctx.stroke();
       //main body
       ctx.beginPath();
       bodyDraw = playerBody.vertices;
@@ -959,9 +959,9 @@ const game = {
         ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
       }
       ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
-      ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+      ctx.fillStyle = "rgba(0, 255, 255, 0.25)";
       ctx.fill();
-      ctx.stroke();
+      // ctx.stroke();
       //head
       ctx.beginPath();
       bodyDraw = playerHead.vertices;
@@ -970,9 +970,9 @@ const game = {
         ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
       }
       ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
-      ctx.fillStyle = "rgba(255, 255, 0, 0.3)";
+      ctx.fillStyle = "rgba(255, 255, 0, 0.4)";
       ctx.fill();
-      ctx.stroke();
+      // ctx.stroke();
       //head sensor
       ctx.beginPath();
       bodyDraw = headSensor.vertices;
@@ -981,9 +981,9 @@ const game = {
         ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
       }
       ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
-      ctx.fillStyle = "rgba(0, 0, 255, 0.3)";
+      ctx.fillStyle = "rgba(0, 0, 255, 0.25)";
       ctx.fill();
-      ctx.stroke();
+      // ctx.stroke();
     }
   },
   checkLineIntersection(v1, v1End, v2, v2End) {

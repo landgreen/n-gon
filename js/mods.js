@@ -204,9 +204,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mech.harmReduction() < 1
             },
-            requires: "",
+            requires: "some harm reduction",
             effect() {
                 mod.isHarmDamage = true;
             },
@@ -460,13 +460,13 @@ const mod = {
         },
         {
             name: "bot fabrication",
-            description: "anytime you collect <strong>3</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
+            description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 2 || build.isCustomSelection
+                return powerUps.reroll.rerolls > 3 || build.isCustomSelection
             },
-            requires: "at least 3 rerolls",
+            requires: "at least 4 rerolls",
             effect() {
                 mod.isRerollBots = true;
                 powerUps.reroll.changeRerolls(0)
@@ -493,7 +493,23 @@ const mod = {
         },
         {
             name: "perimeter defense",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>6%</strong><br>for each of your permanent <strong>bots</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>4%</strong><br>for each of your permanent <strong>bots</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.totalBots() > 4 && !mod.isEnergyHealth
+            },
+            requires: "5 or more bots",
+            effect() {
+                mod.isBotArmor = true
+            },
+            remove() {
+                mod.isBotArmor = false
+            }
+        },
+        {
+            name: "bot upgrades",
+            description: "<strong>50% improved:</strong> nail fire rate, boom explosion,<br>foam size, laser drain, and plasma drain",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -501,10 +517,16 @@ const mod = {
             },
             requires: "2 or more bots",
             effect() {
-                mod.isBotArmor = true
+                mod.isBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].isBot) bullet[i].isUpgraded = true
+                }
             },
             remove() {
-                mod.isBotArmor = false
+                mod.isBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].isBot) bullet[i].isUpgraded = false
+                }
             }
         },
         {
@@ -514,9 +536,9 @@ const mod = {
             count: 0,
             // isNonRefundable: true,
             allowed() {
-                return mod.totalBots() > 1
+                return mod.totalBots() > 2
             },
-            requires: "2 or more bots",
+            requires: "3 or more bots",
             effect() {
                 //remove ammo
                 for (let i = 0, len = b.guns.length; i < len; ++i) {
@@ -627,9 +649,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !mod.isEnergyHealth && mech.harmReduction() < 1
             },
-            requires: "not mass-energy equivalence",
+            requires: "some harm reduction",
             effect() {
                 mod.isHarmArmor = true;
             },
@@ -677,7 +699,7 @@ const mod = {
                     game.boldActiveGunHUD();
                 }, 1000);
             },
-            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>16%</strong> for each of your <strong class='color-g'>guns</strong>",
+            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong> for each of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -740,7 +762,7 @@ const mod = {
             },
             requires: "not piezoelectricity<br>or acute stress response",
             effect: () => {
-                // mech.health = 0
+                mech.health = 0
                 // mech.displayHealth();
                 document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
@@ -752,7 +774,7 @@ const mod = {
                 document.getElementById("health").style.display = "inline"
                 document.getElementById("health-bg").style.display = "inline"
                 document.getElementById("dmg").style.backgroundColor = "#f67";
-                mech.health = mech.energy;
+                mech.health = Math.min(mech.maxHealth, mech.energy);
             }
         },
         {
@@ -872,7 +894,7 @@ const mod = {
         },
         {
             name: "negentropy",
-            description: "at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> up to <strong>66%</strong> of <strong>maximum health</strong>",
+            description: `at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> a percent of <strong>maximum health</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -926,7 +948,7 @@ const mod = {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
-            description: "<strong class='color-h'>heal</strong> to full <strong>health</strong>  instead of <strong>dying</strong><br>consumes <strong>1</strong> <strong class='color-r'>reroll</strong>",
+            description: "instead of <strong>dying</strong> consume <strong>1</strong> <strong class='color-r'>reroll</strong><br><strong class='color-h'>heal</strong> a percent of <strong>max health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -945,7 +967,7 @@ const mod = {
         },
         {
             name: "bubble fusion",
-            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>2-3</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-3</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -961,7 +983,7 @@ const mod = {
         },
         {
             name: "Bayesian inference",
-            description: "<strong>40%</strong> chance for double <strong>power ups</strong> to drop<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong> from mobs",
+            description: "<strong>33%</strong> chance for double <strong>power ups</strong> to drop<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong> from mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -969,7 +991,7 @@ const mod = {
             },
             requires: "",
             effect: () => {
-                mod.bayesian = 0.4;
+                mod.bayesian = 0.33;
             },
             remove() {
                 mod.bayesian = 0;
@@ -977,7 +999,7 @@ const mod = {
         },
         {
             name: "logistics",
-            description: "<strong class='color-g'>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>6 ammo</strong>",
+            description: "<strong class='color-g'>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>7 ammo</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -986,7 +1008,7 @@ const mod = {
             requires: "at least 2 guns",
             effect() {
                 mod.isAmmoForGun = true;
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 7; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                 }
@@ -1023,7 +1045,7 @@ const mod = {
             },
             requires: "not mass-energy equivalence",
             effect: () => {
-                mod.isAmmoFromHealth = 0.02;
+                mod.isAmmoFromHealth = 0.023;
             },
             remove() {
                 mod.isAmmoFromHealth = 0;
@@ -1047,7 +1069,7 @@ const mod = {
         },
         {
             name: "gun turret",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong> when <strong>crouching</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1640,7 +1662,7 @@ const mod = {
         },
         {
             name: "electromagnetic pulse",
-            description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> destroys <strong>shields</strong><br>increase bomb <strong class='color-d'>damage</strong> by <strong>20%</strong>",
+            description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> removes<br><strong>80%</strong> of <strong>shields</strong> and <strong>100%</strong> of <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1970,7 +1992,7 @@ const mod = {
         //************************************************** 
         {
             name: "flux pinning",
-            description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>1</strong> second",
+            description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>+1</strong> second",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2004,7 +2026,7 @@ const mod = {
         },
         {
             name: "Lorentz transformation",
-            description: "<strong>time dilation field</strong> has an effect while inactive<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster",
+            description: "<strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster<br>while <strong>time dilation</strong> is active or inactive ",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2042,7 +2064,7 @@ const mod = {
         },
         {
             name: "degenerate matter",
-            description: "<strong class='color-harm'>harm</strong> reduction from <strong>negative mass field</strong><br>is increased from 60% to <strong>80%</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>while <strong>negative mass field</strong> is active",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2051,11 +2073,10 @@ const mod = {
             requires: "negative mass field",
             effect() {
                 mod.isHarmReduce = true
-                mech.fieldHarmReduction = 0.2;
             },
             remove() {
                 mod.isHarmReduce = false;
-                if (mech.fieldUpgrades[mech.fieldMode].name === "negative mass field") mech.setField("negative mass field") //reset harm reduction
+                // if (mech.fieldUpgrades[mech.fieldMode].name === "negative mass field") mech.setField("negative mass field") //reset harm reduction
             }
         },
         {
@@ -2276,7 +2297,7 @@ const mod = {
 
         {
             name: "rerolls",
-            description: "spawn <strong>6</strong> <strong class='color-r'>reroll</strong> power ups",
+            description: "spawn <strong>5</strong> <strong class='color-r'>reroll</strong> power ups",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -2285,7 +2306,7 @@ const mod = {
             },
             requires: "not superdeterminism",
             effect() {
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 5; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                 }
@@ -2434,6 +2455,7 @@ const mod = {
     rerollHaste: null,
     isMineDrop: null,
     isRerollBots: null,
-    isRailTimeSlow: null
+    isRailTimeSlow: null,
+    isBotUpgrade: null
     // isMaxHealthRemove: null
 }

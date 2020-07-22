@@ -1026,7 +1026,7 @@ const mobs = {
           } else if (Math.random() < 0.5 && !mod.isSuperDeterminism) {
             type = "reroll"
           }
-          for (let i = 0, len = 1 + Math.ceil(2 * Math.random()); i < len; i++) {
+          for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
             powerUps.spawn(this.position.x, this.position.y, type);
             if (Math.random() < mod.bayesian) powerUps.spawn(this.position.x, this.position.y, type);
           }

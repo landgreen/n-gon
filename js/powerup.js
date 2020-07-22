@@ -56,7 +56,7 @@ const powerUps = {
       if (powerUps.reroll.rerolls < 0) powerUps.reroll.rerolls = 0
 
       if (mod.isRerollBots) {
-        const limit = 3
+        const limit = 4
         for (; powerUps.reroll.rerolls > limit - 1; powerUps.reroll.rerolls -= limit) {
           b.randomBot()
         }
