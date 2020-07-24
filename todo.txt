@@ -1,8 +1,6 @@
 
-heal power ups scale in size to indicate mod effects, and level based heal scaling
-testingChamber changes
-
 ************** TODO - n-gon **************
+
 new gun - deploy a turret that last for 20 seconds
   fire nails at nearby targets once a second.
   use mine code and bot code

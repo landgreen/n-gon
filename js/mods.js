@@ -863,7 +863,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !mod.isEnergyHealth && !mod.isDroneGrab
             },
             requires: "not mass-energy equivalence",
             effect() {
@@ -1803,6 +1803,22 @@ const mod = {
             }
         },
         {
+            name: "harvester",
+            description: "when <strong>drones</strong> pick up <strong>power ups</strong><br> improve drone size, lifespan, and vision rate",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isArmorFromPowerUps && (mod.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)))
+            },
+            requires: "drones",
+            effect() {
+                mod.isDroneGrab = true
+            },
+            remove() {
+                mod.isDroneGrab = false
+            }
+        },
+        {
             name: "superfluidity",
             description: "<strong class='color-s'>freeze</strong> effects apply to mobs near it's target",
             maxCount: 1,
@@ -2454,6 +2470,7 @@ const mod = {
     isMineDrop: null,
     isRerollBots: null,
     isRailTimeSlow: null,
-    isBotUpgrade: null
+    isBotUpgrade: null,
+    isDroneGrab: null
     // isMaxHealthRemove: null
 }

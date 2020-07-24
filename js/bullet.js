@@ -675,7 +675,7 @@ const b = {
       frictionAir: FRICTION,
       restitution: 1,
       dmg: 0.28, //damage done in addition to the damage from momentum
-      lookFrequency: 100 + Math.floor(23 * Math.random()),
+      lookFrequency: 80 + Math.floor(23 * Math.random()),
       endCycle: game.cycle + Math.floor((1100 + 420 * Math.random()) * mod.isBulletsLastLonger),
       classType: "bullet",
       collisionFilter: {
@@ -686,6 +686,7 @@ const b = {
       lockedOn: null,
       isFollowMouse: true,
       deathCycles: 110 + RADIUS * 5,
+      isImproved: false,
       onDmg(who) {
         //move away from target after hitting
         const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20)
@@ -727,8 +728,7 @@ const b = {
                 }
               }
             }
-            if (!this.lockedOn && !mod.isArmorFromPowerUps) {
-              //grab a power up if it is (ammo) or (a heal when player is low)
+            if (!this.lockedOn && !mod.isArmorFromPowerUps && !this.isImproved) { //grab a power up
               let closeDist = Infinity;
               for (let i = 0, len = powerUp.length; i < len; ++i) {
                 if (
@@ -739,11 +739,19 @@ const b = {
                   const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
                   const DIST = Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
-                    if (DIST < 60) { //eat the power up if close enough
+                    if (DIST < 100) { //eat the power up if close enough
                       powerUps.onPickUp();
                       powerUp[i].effect();
                       Matter.World.remove(engine.world, powerUp[i]);
                       powerUp.splice(i, 1);
+                      if (mod.isDroneGrab) {
+                        this.isImproved = true;
+                        const SCALE = 2
+                        Matter.Body.scale(this, SCALE, SCALE);
+                        this.lookFrequency = 30;
+                        this.endCycle = game.cycle + Math.floor((1100 + 420 * Math.random()) * mod.isBulletsLastLonger) * 2 //set to double a normal lifespan
+                        // this.dmg *= 1.5;
+                      }
                       break;
                     }
                     closeDist = DIST;
