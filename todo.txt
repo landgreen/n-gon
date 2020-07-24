@@ -1,23 +1,17 @@
 
-mod: upgrade all bots (current and future bots)
-some difficulty scaling changes (harm ramps a bit faster at high levels)
+heal power ups scale in size to indicate mod effects, and level based heal scaling
+testingChamber changes
 
 ************** TODO - n-gon **************
+new gun - deploy a turret that last for 20 seconds
+  fire nails at nearby targets once a second.
+  use mine code and bot code
 
-too many mods are dropping at high levels on hard
+minigun: high caliber - rework
+  slow down the bullets even more and increase the size?
+  remove and actually make a full gun like this?
 
-mod: upgrade all your current bots
-  upgrade should be equal to a 50% increases in value for the bot
-  nail-bot fires faster
-  foam bot fires larger radius foam
-  larger boom-bot explosions
-  laser-bot does more damage
-  plasma-bot uses less energy
-
-testChamber
-  too much block clutter near portals
-  make reverse path viable
-  removing block from button releases boss?
+gun: hit scan bullets?
 
 portals:
   portal while holding block sometimes send player back to original portal
@@ -66,26 +60,12 @@ button: blocks that are on the button at an angle will slowly slide off the butt
 hazards should slow blocks, bullets, mobs?
   mob damage?
 
-rotor doesn't work with
-  plasma torch
-    seems to have no effect
-  pilot wave
-    maybe rewrite pilot wave to apply a force from an angle, like plasma torch
-      this would be probably too much work, but worth a try
-  time dilation field (mostly fixed, but it would be nice if it started up faster after a pause)
-  sporangium and neutron bomb  (mostly fixed, but it would be nice if it sticked instead of bounced)
-
-new gun - deploy a turret that last for 20 seconds
-  fire nails at nearby targets once a second.
-  use mine code and bot code
-
 field that pushes blocks and mobs away
   charges up on mouse down and triggers on mouse up
     drain mana while charging up
   maybe push effect should last 10 cycles to give a more gentle feeling
-
-mod - AoE radiation might work when the effect ends
-    or maybe just anytime another mob is near
+  mod - AoE radiation might work when the effect ends
+      or maybe just anytime another mob is near
 
 mob that flashes the player (makes the graphics not update for a couple seconds)
 

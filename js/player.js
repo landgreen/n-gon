@@ -454,27 +454,21 @@ const mech = {
     return dmg
   },
   damage(dmg) {
-    // , noTransition = false
     mech.lastHarmCycle = mech.cycle
-
     if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
       const len = (dmg - 0.06 * Math.random()) * 40
       for (let i = 0; i < len; i++) {
         if (Math.random() < 0.5) b.drone() //spawn drone
       }
     }
-
     if (mod.isEnergyHealth) {
-      mech.energy -= dmg;
-      if (mech.energy < 0 || isNaN(mech.energy)) {
-        if (mod.isDeathAvoid && powerUps.reroll.rerolls) { //&& Math.random() < 0.5
+      mech.energy -= dmg * 1.2; //20% extra damage for energy as health for balance reasons
+      if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
+        if (mod.isDeathAvoid && powerUps.reroll.rerolls) {
           powerUps.reroll.changeRerolls(-1)
-
           mech.energy = mech.maxEnergy
-          // if (mech.energy < 0.05) mech.energy = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)
-
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = "rgba(255,255,255,0.03)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -486,7 +480,7 @@ const mech = {
           }, 2000);
 
           return;
-        } else {
+        } else { //death
           mech.health = 0;
           mech.energy = 0;
           mech.death();

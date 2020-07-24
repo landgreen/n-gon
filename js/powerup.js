@@ -106,12 +106,11 @@ const powerUps = {
     name: "heal",
     color: "#0eb",
     size() {
-      return 40 * Math.sqrt(0.1 + Math.random() * 0.5);
+      return 40 * (game.healScale ** 0.25) * Math.sqrt(mod.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5); //(game.healScale ** 0.25)  gives a smaller radius as heal scale goes down
     },
     effect() {
       if (!mod.isEnergyHealth && mech.alive) {
-        let heal = 0
-        for (let i = 0; i < mod.recursiveHealing; i++) heal += ((this.size / 40) ** 2)
+        const heal = mod.largerHeals * (this.size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on mech.addHealth()
         if (heal > 0) {
           game.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
           mech.addHealth(heal);
@@ -432,7 +431,7 @@ const powerUps = {
 
     if (game.difficultyMode < 2) { //easy and normal mode
       powerUps.randomPowerUpCounter += 0.5;
-    } else if (game.difficultyMode === 3) { //hard mode
+    } else if (game.difficultyMode === 2) { //hard mode
       powerUps.randomPowerUpCounter += 1;
     } else { //why mode
       powerUps.randomPowerUpCounter += 1.33;

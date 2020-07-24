@@ -18,7 +18,7 @@ const level = {
       // mech.isStealth = true;
       // mod.giveMod("bot upgrades");
       // mod.nailBotCount += 10
-      // b.giveGuns("ice IX")
+      // b.giveGuns("maser")
       // mech.setField("plasma torch")
 
       // level.testing();
@@ -50,8 +50,8 @@ const level = {
       mech.maxHealth += 0.05 * powerUps.totalPowerUps
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
-    if (mod.isHealLowHealth && mech.health < mech.maxHealth * 0.66 * game.healScale) {
-      mech.health = mech.maxHealth * 0.66 * game.healScale
+    if (mod.isHealLowHealth && mech.health < mech.maxHealth * game.healScale) {
+      mech.health = mech.maxHealth * game.healScale
       mech.displayHealth();
     }
   },
@@ -188,15 +188,15 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
     level.defaultZoom = 2000
     game.zoomTransition(level.defaultZoom)
-    document.body.style.backgroundColor = "#444";
+    document.body.style.backgroundColor = "#d5d5d5";
 
-    level.fillBG.push({ //full map white
-      x: -375,
-      y: -3700,
-      width: 2975,
-      height: 3800,
-      color: "#ddd"
-    });
+    // level.fillBG.push({ //full map white
+    //   x: -375,
+    //   y: -3700,
+    //   width: 2975,
+    //   height: 3800,
+    //   color: "#ddd"
+    // });
 
     level.fillBG.push({ //exit room
       x: -300,
@@ -223,13 +223,13 @@ const level = {
 
     const portal3 = level.portal({
       x: 1850,
-      y: -550
+      y: -585
     }, -Math.PI / 2, { //up
       x: 2425,
       y: -600
     }, -2 * Math.PI / 3) //up left
-    const hazard = level.hazard(175, -2050, 1050, 10, 0.15, "hsl(0, 100%, 50%)") //laser
-    const hazard2 = level.hazard(1775, -2550, 150, 10, 0.15, "hsl(0, 100%, 50%)") //laser
+    const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)") //laser
+    const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
     const button = level.button(2100, -2600)
 
     level.custom = () => {
@@ -287,11 +287,13 @@ const level = {
     powerUps.chooseRandomPowerUp(powerUpPos[1].x, powerUpPos[1].y);
 
     //outer wall
-    spawn.mapRect(-500, -3800, 200, 4000); //left map wall
-    spawn.mapRect(2500, -2975, 200, 2825); //right map middle wall above right portal
+    spawn.mapRect(-1400, -3800, 1100, 3900); //left map wall
+    spawn.mapRect(2500, -2975, 1200, 2825); //right map middle wall above right portal
+    spawn.mapRect(2700, -3600, 1000, 3650);
+    // far far right wall right of portals
     // spawn.mapRect(2500, -1425, 200, 1275); // below right portal
-    spawn.mapRect(-400, -3800, 3100, 200); //map ceiling
-    spawn.mapRect(-400, 0, 3100, 200); //floor
+    spawn.mapRect(-1400, -4800, 5100, 1200); //map ceiling
+    spawn.mapRect(-1400, 0, 5100, 1200); //floor
 
     //lower entrance /exit
     // spawn.mapRect(300, -550, 50, 350); //right entrance wall
@@ -299,19 +301,26 @@ const level = {
     // spawn.mapRect(1075, -100, 575, 200);
     // spawn.bodyRect(312, -200, 25, 200);
     // spawn.bodyRect(1775, -75, 100, 100);
-    spawn.mapRect(1075, -375, 50, 225);
-    spawn.bodyRect(1087, -150, 25, 150);
+    spawn.mapRect(300, -375, 50, 225);
+    spawn.bodyRect(312, -150, 25, 140);
+    spawn.mapRect(300, -10, 50, 50);
 
     //upper entrance / exit
     spawn.mapRect(-400, -1050, 750, 50);
     spawn.mapRect(300, -1050, 50, 300);
-    spawn.bodyRect(312, -750, 25, 200);
+    spawn.bodyRect(312, -750, 25, 190);
+    spawn.mapRect(300, -560, 50, 50);
+
     // spawn.mapRect(1400, -1025, 50, 300);
     // spawn.mapRect(1400, -1025, 50, 825);
     spawn.mapRect(600, -600, 275, 75);
     spawn.bodyRect(675, -725, 125, 125);
-    spawn.mapRect(1075, -1050, 550, 400);
-    spawn.mapRect(-400, -550, 2175, 250);
+    // spawn.mapRect(1075, -1050, 550, 400);
+    // spawn.mapRect(1150, -1000, 150, 575);
+    spawn.mapRect(1150, -1000, 250, 575);
+    spawn.mapRect(1600, -550, 175, 250);
+
+    spawn.mapRect(-400, -550, 1800, 250);
     spawn.mapRect(-200, -1700, 150, 25); //platform above exit room
     spawn.mapRect(-200, -1325, 350, 25);
 
@@ -319,7 +328,8 @@ const level = {
     // spawn.mapRect(1425, -550, 350, 250);
     spawn.mapRect(1925, -550, 500, 250);
     spawn.mapRect(2425, -450, 100, 150);
-    spawn.mapRect(1750, -360, 225, 60);
+    spawn.mapRect(1750, -390, 225, 90);
+
 
     //portal 1 bottom
     spawn.mapRect(2525, -200, 175, 250); //right portal back wall
@@ -333,14 +343,15 @@ const level = {
     spawn.mapRect(1400, -3625, 50, 200);
     spawn.mapRect(350, -3625, 50, 225);
     spawn.mapRect(350, -3260, 50, 60);
-    spawn.bodyRect(362, -3400, 25, 140);
+    // spawn.bodyRect(362, -3400, 25, 140);
 
     spawn.mapRect(200, -3250, 1250, 50);
     spawn.mapRect(1400, -3260, 50, 310);
     spawn.bodyRect(1412, -3425, 25, 165);
 
-    spawn.mapRect(-150, -3000, 150, 25);
-    spawn.mapRect(-350, -2750, 175, 200);
+    // spawn.mapRect(-150, -3000, 150, 25);
+    // spawn.mapRect(-350, -2925, 175, 25);
+    spawn.mapRect(-150, -2925, 150, 25);
 
     //portal 2
     spawn.mapRect(-300, -2600, 300, 675); //left platform
@@ -350,18 +361,18 @@ const level = {
 
     spawn.mapRect(0, -1975, 175, 50);
     spawn.mapRect(1225, -1975, 175, 50);
-    spawn.mapRect(150, -2150, 25, 225);
-    spawn.mapRect(1225, -2150, 25, 225);
+    spawn.mapRect(150, -2100, 200, 175);
+    spawn.mapRect(1050, -2100, 200, 175);
 
     //mobs
-    spawn.randomMob(1075, -3500, 0);
+    spawn.randomMob(1075, -3500, -0.3);
     // spawn.randomMob(-75, -3425, 0.2);
-    spawn.randomMob(1475, -225, 0);
-    spawn.randomMob(2075, -150, 0);
-    spawn.randomMob(2175, -700, 0);
-    spawn.randomMob(-75, -850, 0.1);
-    spawn.randomMob(1300, -600, 0.1);
-    spawn.randomMob(550, -3400, 0.1);
+    spawn.randomMob(1475, -225, -0.3);
+    spawn.randomMob(2075, -150, -0.2);
+    spawn.randomMob(2175, -700, -0.2);
+    spawn.randomMob(-75, -850, -0.1);
+    spawn.randomMob(1300, -600, -0.1);
+    spawn.randomMob(550, -3400, 0);
     if (game.difficulty > 50) {
       spawn.randomMob(2300, -2775, -0.5);
       spawn.randomMob(600, -925, -0.5);
@@ -370,7 +381,7 @@ const level = {
       spawn.randomMob(-75, -1475, 0);
       spawn.randomBoss(600, -2600, 0);
     }
-    if (game.difficulty < 30) {
+    if (game.difficulty < 32) {
       spawn.randomMob(700, -1650, 0);
       spawn.randomMob(600, -3500, 0.2);
       spawn.randomMob(-75, -1175, 0.2);
@@ -604,7 +615,7 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
     spawn.boost(1500, 0, 900);
 
-    spawn.bomberBoss(2900, -500)
+    // spawn.bomberBoss(2900, -500)
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
@@ -613,7 +624,7 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    // spawn.shooter(1600, -500)
+    spawn.starter(1600, -500, 60)
     // spawn.striker(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 

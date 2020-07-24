@@ -2104,7 +2104,7 @@ const b = {
             for (let i = 0, len = mob.length; i < len; ++i) {
               if (mob[i].shield) {
                 const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
-                if (dist < this.explodeRad) mob[i].health *= 0.8
+                if (dist < this.explodeRad) mob[i].health *= 0.2
               }
             }
             const dist = Vector.magnitude(Vector.sub(this.position, player.position))
@@ -2669,7 +2669,7 @@ const b = {
           } else if (mech.energy > 0.005) { // charging on mouse down
             mech.fireCDcycle = Infinity //can't fire until mouse is released
             const lastCharge = this.charge
-            let chargeRate = (mech.crouch) ? 0.975 : 0.987
+            let chargeRate = (mech.crouch) ? 0.98 : 0.984
             chargeRate *= Math.pow(b.fireCD, 0.03)
             this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
             if (mod.isRailTimeSlow) {
@@ -2950,6 +2950,7 @@ const b = {
         }
       }
     },
+
     {
       name: "pulse",
       description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
@@ -3100,6 +3101,41 @@ const b = {
         }
       }
     },
+    // {
+    //   name: "maser",
+    //   description: "emit a <strong>beam</strong> of collimated coherent <strong>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
+    //   ammo: 0,
+    //   ammoPack: Infinity,
+    //   have: false,
+    //   isEasyToAim: false,
+    //   fire() {
+    //     if (mech.energy < 0.002) {
+    //       mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
+    //     } else {
+    //       // mech.energy -= mech.fieldRegen + 0.002 * mod.isLaserDiode
+
+    //       let range = 2000
+    //       const looking = Vector.mult(Vector.rotate({
+    //         x: 1,
+    //         y: 0
+    //       }, mech.angle), range)
+    //       const endpoint = Matter.Vector.add(mech.pos, looking)
+    //       const hits = Matter.Query.ray(body, mech.pos, endpoint, 100)
+    //       for (let i = 0; i < hits.length; i++) {
+
+
+    //       }
+    //       // console.log(hits, target, range)
+
+
+    //       //draw beam
+    //       ctx.beginPath();
+    //       ctx.moveTo(mech.pos.x, mech.pos.y);
+    //       ctx.lineTo(endpoint.x, endpoint.y);
+    //       ctx.stroke();
+    //     }
+    //   }
+    // },
     // {
     //   name: "dwarf star", //14
     //   description: "drop a mine that gravitational pulls in matter",

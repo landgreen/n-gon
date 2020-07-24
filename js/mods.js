@@ -91,9 +91,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mech.maxEnergy > 1 || mod.isEnergyRecovery || mod.isPiezo || mod.energySiphon > 0
             },
-            requires: "",
+            requires: "increased energy regen or max energy",
             effect: () => {
                 mod.isEnergyDamage = true // used in mech.grabPowerUp
             },
@@ -103,7 +103,7 @@ const mod = {
         },
         {
             name: "acute stress response",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>after a mob <strong>dies</strong> drain <strong>33%</strong> <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -232,16 +232,16 @@ const mod = {
         },
         {
             name: "Ψ(t) collapse",
-            description: "<strong>33%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            description: "<strong>40%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls === 0
+                return powerUps.reroll.rerolls === 0 && !mod.manyWorlds
             },
             requires: "no rerolls",
             effect() {
                 mod.isRerollHaste = true;
-                mod.rerollHaste = 0.666;
+                mod.rerollHaste = 0.6;
                 b.setFireCD();
             },
             remove() {
@@ -269,7 +269,7 @@ const mod = {
         },
         {
             name: "auto-loading heuristics",
-            description: "<strong>20%</strong> decreased <strong>delay</strong> after firing",
+            description: "<strong>25%</strong> decreased <strong>delay</strong> after firing",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -277,7 +277,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.fireRate *= 0.8
+                mod.fireRate *= 0.75
                 b.setFireCD();
             },
             remove() {
@@ -442,23 +442,6 @@ const mod = {
             }
         },
         {
-            name: "plasma-bot",
-            description: "a bot uses <strong class='color-f'>energy</strong> to emit short range <strong>plasma</strong><br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
-            },
-            requires: "plasma torch",
-            effect() {
-                mod.plasmaBotCount++;
-                b.plasmaBot();
-            },
-            remove() {
-                mod.plasmaBotCount = 0;
-            }
-        },
-        {
             name: "bot fabrication",
             description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
             maxCount: 1,
@@ -531,7 +514,7 @@ const mod = {
         },
         {
             name: "bot replication",
-            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>90%</strong> of your <strong class='color-g'>ammo</strong>",
+            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>ammo</strong>",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
@@ -542,9 +525,7 @@ const mod = {
             effect() {
                 //remove ammo
                 for (let i = 0, len = b.guns.length; i < len; ++i) {
-                    if (b.guns[i].ammo != Infinity) {
-                        b.guns[i].ammo = Math.floor(b.guns[i].ammo * 0.1);
-                    }
+                    if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
                 }
                 game.updateGunHUD();
                 //double bots
@@ -577,9 +558,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mech.harmReduction() < 1
             },
-            requires: "",
+            requires: "some harm reduction",
             effect() {
                 mod.isDroneOnDamage = true;
                 for (let i = 0; i < 4; i++) {
@@ -812,7 +793,7 @@ const mod = {
         },
         {
             name: "waste energy recovery",
-            description: "regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
+            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -828,7 +809,7 @@ const mod = {
         },
         {
             name: "scrap recycling",
-            description: "<strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second<br>active for <strong>5 seconds</strong> after any mob <strong>dies</strong>",
+            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -925,19 +906,19 @@ const mod = {
         //     }
         // },
         {
-            name: "recursive healing",
-            description: "<strong class='color-h'>healing</strong> <strong>power ups</strong> trigger <strong>1</strong> more time",
-            maxCount: 9,
+            name: "adiabatic healing",
+            description: "<strong class='color-h'>heal</strong> <strong>power ups</strong> are <strong>100%</strong> more effective",
+            maxCount: 3,
             count: 0,
             allowed() {
                 return (mech.health < 0.7 || build.isCustomSelection) && !mod.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.recursiveHealing += 1
+                mod.largerHeals++;
             },
             remove() {
-                mod.recursiveHealing = 1;
+                mod.largerHeals = 1;
             }
         },
         {
@@ -1147,9 +1128,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isSuperDeterminism
+                return !mod.isSuperDeterminism && !mod.isRerollHaste
             },
-            requires: "not superdeterminism",
+            requires: "not superdeterminism or Ψ(t) collapse",
             effect: () => {
                 mod.manyWorlds = true;
             },
@@ -2063,6 +2044,23 @@ const mod = {
             }
         },
         {
+            name: "plasma-bot",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit short range <strong>plasma</strong><br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+            },
+            requires: "plasma torch",
+            effect() {
+                mod.plasmaBotCount++;
+                b.plasmaBot();
+            },
+            remove() {
+                mod.plasmaBotCount = 0;
+            }
+        },
+        {
             name: "degenerate matter",
             description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>while <strong>negative mass field</strong> is active",
             maxCount: 1,
@@ -2361,7 +2359,7 @@ const mod = {
     isDroneOnDamage: null,
     isAcidDmg: null,
     isAnnihilation: null,
-    recursiveHealing: null,
+    largerHeals: null,
     squirrelFx: null,
     isCrit: null,
     bayesian: null,
