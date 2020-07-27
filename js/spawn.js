@@ -652,6 +652,7 @@ const spawn = {
     }
   },
   spiderBoss(x, y, radius = 60 + Math.ceil(Math.random() * 10)) {
+    const isDaddyLongLegs = Math.random() < 0.3
     let targets = [] //track who is in the node boss, for shields
     mobs.spawn(x, y, 6, radius, "#b386e8");
     let me = mob[mob.length - 1];
@@ -692,7 +693,8 @@ const spawn = {
     });
     cons[len2].length = 100 + 1.5 * radius;
     me.cons2 = cons[len2];
-    // Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
+    if (isDaddyLongLegs) Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
+
     me.onDeath = function () {
       this.removeCons();
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -705,7 +707,7 @@ const spawn = {
     };
 
     radius = 22 // radius of each node mob
-    const sideLength = 100 // distance between each node mob
+    const sideLength = isDaddyLongLegs ? 50 : 100 // distance between each node mob
     const nodes = 6
     const angle = 2 * Math.PI / nodes
 
@@ -713,23 +715,23 @@ const spawn = {
 
     for (let i = 0; i < nodes; ++i) {
       spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
-      // const who = mob[mob.length - 1]
-      // who.frictionAir = 0.06
-      // who.accelMag = 0.005 * game.accelScale
-
+      if (isDaddyLongLegs) Matter.Body.setDensity(mob[mob.length - 1], 0.005); //extra dense //normal is 0.001 //makes effective life much larger
       targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
     }
-    //spawn shield for entire boss
-    spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
+    //spawn shield around all nodes
+    if (!isDaddyLongLegs) spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
     spawn.allowShields = true;
 
-    spawn.constrain2AdjacentMobs(nodes + 1, 0.05, true); //loop mobs together
+    const attachmentStiffness = isDaddyLongLegs ? 0.0001 : 0.05
+    if (!isDaddyLongLegs) spawn.constrain2AdjacentMobs(nodes + 2, attachmentStiffness, true); //loop mobs together
     for (let i = 0; i < nodes; ++i) { //attach to center mob
       consBB[consBB.length] = Constraint.create({
         bodyA: me,
         bodyB: mob[mob.length - i - 1],
-        stiffness: 0.05
+        stiffness: attachmentStiffness,
+        damping: 0.01
       });
+      console.log(consBB[consBB.length - 1])
     }
   },
   timeSkipBoss(x, y, radius = 55) {
@@ -1072,10 +1074,9 @@ const spawn = {
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
-    me.rotateVelocity = Math.min(0.0054, 0.0022 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
+    me.rotateVelocity = Math.min(0.005, 0.002 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
-
       if (!mech.isBodiesAsleep) {
         //check if slowed
         let slowed = false
@@ -1090,7 +1091,6 @@ const spawn = {
           Matter.Body.setAngle(me, this.count * this.rotateVelocity)
         }
       }
-
       // this.torque -= this.inertia * 0.0000025 / (4 + this.health);
       Matter.Body.setVelocity(this, {
         x: 0,
@@ -2041,7 +2041,7 @@ const spawn = {
       };
     }
   },
-  bossShield(targets, x, y, radius) {
+  bossShield(targets, x, y, radius, stiffness = 0.4) {
     const nodes = targets.length
     mobs.spawn(x, y, 9, radius, "rgba(220,220,255,0.9)");
     let me = mob[mob.length - 1];
@@ -2057,7 +2057,7 @@ const spawn = {
       consBB[consBB.length] = Constraint.create({
         bodyA: me,
         bodyB: mob[mob.length - i - 2],
-        stiffness: 0.4,
+        stiffness: stiffness,
         damping: 0.1
       });
     }

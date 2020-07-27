@@ -1,5 +1,11 @@
+mod - 25% damage but you can only have one gun
+added an elevator to the aerie map
+25% chance for spider boss to go daddy long legs mode
 
 ************** TODO - n-gon **************
+
+level boss: fires a line intersection in a random direction every few seconds.
+  the last two intersections have a destructive laser between them.
 
 new gun - deploy a turret that last for 20 seconds
   fire nails at nearby targets once a second.
@@ -9,7 +15,11 @@ minigun: high caliber - rework
   slow down the bullets even more and increase the size?
   remove and actually make a full gun like this?
 
-gun: hit scan bullets?
+moving map platform
+  button activation
+  elevator on aerie
+
+door controlled by a button
 
 portals:
   portal while holding block sometimes send player back to original portal
@@ -17,21 +27,9 @@ portals:
   extend to bodies  (mobs?)
   use buttons to turn on and off?
 
-mod: heals are twice as effective
-  actually make heals larger
-  maybe replace heals trigger twice with this?
-
-mod: stunned mobs take extra damage
-  who stuns - super ball, phase decoherence mod, neutron bomb mod, pulse mod, perfect diamagnetism mod
-  check damage order for super ball, pulse
-
-mod: using a reroll gives you, a heal or ammo
-
 level boss: boss that dies and comes back to life but with one less side until it hits 3 sides
   change color too (hsl)
   boss shrinks and moves faster after each death
-
-mechanic: lose max health instead of taking fatal damage
 
 map: laboratory
   rooms with switches that change physics
@@ -39,6 +37,7 @@ map: laboratory
     portal room
     laser room
     radiation room
+  a button that spawns a heal.
 
 map: observatory
   button controls rotation of telescope

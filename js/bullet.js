@@ -41,6 +41,15 @@ const b = {
       }
     }
   },
+  removeAllGuns() {
+    b.inventory = []; //removes guns and ammo  
+    for (let i = 0, len = b.guns.length; i < len; ++i) {
+      b.guns[i].count = 0;
+      b.guns[i].have = false;
+      if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
+    }
+    b.activeGun = null;
+  },
   bulletRemove() { //run in main loop
     //remove bullet if at end cycle for that bullet
     let i = bullet.length;
@@ -750,7 +759,8 @@ const b = {
                         Matter.Body.scale(this, SCALE, SCALE);
                         this.lookFrequency = 30;
                         this.endCycle = game.cycle + Math.floor((1100 + 420 * Math.random()) * mod.isBulletsLastLonger) * 2 //set to double a normal lifespan
-                        // this.dmg *= 1.5;
+                        this.dmg *= 1.5;
+                        this.frictionAir *= 0.9
                       }
                       break;
                     }
@@ -1487,6 +1497,7 @@ const b = {
   // **************************************************************************************************
   // **************************************************************************************************
   giveGuns(gun = "random", ammoPacks = 6) {
+    if (mod.isOneGun) b.removeAllGuns();
     if (gun === "random") {
       //find what guns player doesn't have
       options = []

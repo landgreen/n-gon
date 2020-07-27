@@ -79,12 +79,28 @@ const mod = {
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.006
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
+        if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         return dmg * mod.slowFire
     },
     totalBots() {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount
     },
     mods: [{
+            name: "integrated armament",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length < 2
+            },
+            requires: "no more than 1 gun",
+            effect() {
+                mod.isOneGun = true;
+            },
+            remove() {
+                mod.isOneGun = false;
+            }
+        }, {
             name: "capacitor",
             // nameInfo: "<span id='mod-capacitor'></span>",
             description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>5.5%</strong> stored <strong class='color-f'>energy</strong>",
@@ -1804,7 +1820,7 @@ const mod = {
         },
         {
             name: "harvester",
-            description: "when <strong>drones</strong> pick up <strong>power ups</strong><br> improve drone size, lifespan, and vision rate",
+            description: "when a <strong>drone</strong> picks up a <strong>power up</strong><br> improve its size, duration, and vision rate",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2471,6 +2487,6 @@ const mod = {
     isRerollBots: null,
     isRailTimeSlow: null,
     isBotUpgrade: null,
-    isDroneGrab: null
-    // isMaxHealthRemove: null
+    isDroneGrab: null,
+    isOneGun: null
 }

@@ -21,8 +21,8 @@ const level = {
       // b.giveGuns("maser")
       // mech.setField("plasma torch")
 
-      // level.testing();
       level.intro(); //starting level
+      // level.testing();
       // level.testChamber()
       // level.sewers();
       // level.satellite();
@@ -61,150 +61,16 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-  portal(centerA, angleA, centerB, angleB) {
-    const width = 50
-    const height = 150
-    const mapWidth = 200
-    const unitA = Matter.Vector.rotate({
-      x: 1,
-      y: 0
-    }, angleA)
-    const unitB = Matter.Vector.rotate({
-      x: 1,
-      y: 0
-    }, angleB)
-
-    draw = function () {
-      ctx.beginPath(); //portal
-      sensor = this.vertices;
-      ctx.moveTo(sensor[0].x, sensor[0].y);
-      for (let i = 1; i < sensor.length; ++i) {
-        ctx.lineTo(sensor[i].x, sensor[i].y);
-      }
-      ctx.fillStyle = this.color
-      ctx.fill();
-    }
-    query = function () {
-      if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
-        if (player.isInPortal === this) player.isInPortal = null
-      } else if (player.isInPortal !== this) { //touching player
-        if (mech.buttonCD_jump === mech.cycle) player.force.y = 0 // undo a jump right before entering the portal
-        mech.buttonCD_jump = 0 //disable short jumps when letting go of jump key
-        //teleport
-        player.isInPortal = this.portalPair
-        if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
-          Matter.Body.setPosition(player, this.portalPair.portal.position);
-        } else { //if at some odd angle
-          Matter.Body.setPosition(player, this.portalPair.position);
-        }
-        //rotate velocity
-        let mag
-        if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
-          mag = Math.max(10, Math.min(50, player.velocity.y * 0.8)) + 11
-        } else {
-          mag = Math.max(3, Math.min(50, Vector.magnitude(player.velocity)))
-        }
-        let v = Vector.mult(this.portalPair.unit, mag)
-        Matter.Body.setVelocity(player, v);
-        // move bots to follow player
-        for (let i = 0; i < bullet.length; i++) {
-          if (bullet[i].isBot) {
-            Matter.Body.setPosition(bullet[i], this.portalPair.portal.position);
-            Matter.Body.setVelocity(bullet[i], {
-              x: 0,
-              y: 0
-            });
-          }
-        }
-      }
-      //remove block if touching
-      touching = Matter.Query.collides(this, body)
-      if (touching.length !== 0) {
-        if (body.length) {
-          for (let i = 0; i < body.length; i++) {
-            if (body[i] === touching[0].bodyB) {
-              body.splice(i, 1);
-              break;
-            }
-          }
-        }
-        Matter.World.remove(engine.world, touching[0].bodyB);
-      }
-    }
-
-    const portalA = composite[composite.length] = Bodies.rectangle(centerA.x, centerA.y, width, height, {
-      isSensor: true,
-      angle: angleA,
-      color: "hsla(197, 100%, 50%,0.7)",
-      draw: draw,
-    });
-    const portalB = composite[composite.length] = Bodies.rectangle(centerB.x, centerB.y, width, height, {
-      isSensor: true,
-      angle: angleB,
-      color: "hsla(29, 100%, 50%, 0.7)",
-      draw: draw
-    });
-    const mapA = composite[composite.length] = Bodies.rectangle(centerA.x - 0.5 * unitA.x * mapWidth, centerA.y - 0.5 * unitA.y * mapWidth, mapWidth, height + 10, {
-      collisionFilter: {
-        category: cat.map,
-        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-      },
-      unit: unitA,
-      angle: angleA,
-      color: game.draw.mapFill,
-      draw: draw,
-      query: query,
-      lastPortalCycle: 0
-    });
-    Matter.Body.setStatic(mapA, true); //make static
-    World.add(engine.world, mapA); //add to world
-
-    const mapB = composite[composite.length] = Bodies.rectangle(centerB.x - 0.5 * unitB.x * mapWidth, centerB.y - 0.5 * unitB.y * mapWidth, mapWidth, height + 10, {
-      collisionFilter: {
-        category: cat.map,
-        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-      },
-      unit: unitB,
-      angle: angleB,
-      color: game.draw.mapFill,
-      draw: draw,
-      query: query,
-      lastPortalCycle: 0
-    });
-    Matter.Body.setStatic(mapB, true); //make static
-    World.add(engine.world, mapB); //add to world
-
-    mapA.portal = portalA
-    mapB.portal = portalB
-    mapA.portalPair = mapB
-    mapB.portalPair = mapA
-    return [portalA, portalB, mapA, mapB]
-  },
   testChamber() {
     level.setPosToSpawn(0, -50); //lower start
     level.exit.y = level.enter.y - 550;
     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
     level.exit.x = level.enter.x;
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
-    level.defaultZoom = 2000
+    level.defaultZoom = 2200
     game.zoomTransition(level.defaultZoom)
     document.body.style.backgroundColor = "#d5d5d5";
 
-    // level.fillBG.push({ //full map white
-    //   x: -375,
-    //   y: -3700,
-    //   width: 2975,
-    //   height: 3800,
-    //   color: "#ddd"
-    // });
-
-    level.fillBG.push({ //exit room
-      x: -300,
-      y: -1000,
-      width: 650,
-      height: 500,
-      color: "#d4f4f4"
-    });
     const portal = level.portal({
       x: 2500,
       y: -75
@@ -212,7 +78,6 @@ const level = {
       x: 2500,
       y: -3075
     }, Math.PI) //left
-
     const portal2 = level.portal({
       x: 75,
       y: -2150
@@ -220,7 +85,6 @@ const level = {
       x: 1325,
       y: -2150
     }, -Math.PI / 2) //up
-
     const portal3 = level.portal({
       x: 1850,
       y: -585
@@ -228,6 +92,7 @@ const level = {
       x: 2425,
       y: -600
     }, -2 * Math.PI / 3) //up left
+
     const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)") //laser
     const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
     const button = level.button(2100, -2600)
@@ -285,7 +150,13 @@ const level = {
     }]);
     powerUps.chooseRandomPowerUp(powerUpPos[0].x, powerUpPos[0].y);
     powerUps.chooseRandomPowerUp(powerUpPos[1].x, powerUpPos[1].y);
-
+    level.fillBG.push({ //exit room
+      x: -300,
+      y: -1000,
+      width: 650,
+      height: 500,
+      color: "#d4f4f4"
+    });
     //outer wall
     spawn.mapRect(-1400, -3800, 1100, 3900); //left map wall
     spawn.mapRect(2500, -2975, 1200, 2825); //right map middle wall above right portal
@@ -624,12 +495,12 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    spawn.starter(1600, -500, 60)
+    // spawn.starter(1600, -500, 60)
     // spawn.striker(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "launcher")
-    // spawn.spiderBoss(1200, -500)
+    spawn.spiderBoss(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
   },
@@ -819,10 +690,27 @@ const level = {
     spawn.wireHead();
   },
   satellite() {
+    const elevator = level.platform(4210, -1325, 380, 30, -10)
     level.custom = () => {
       level.playerExitCheck();
     };
-    level.customTopLayer = () => {};
+    level.customTopLayer = () => {
+      //elevator move
+      if (elevator.pauseUntilCycle < game.cycle && !mech.isBodiesAsleep) {
+        if (elevator.plat.position.y > -1275) { //bottom
+          elevator.plat.speed = -10
+          elevator.pauseUntilCycle = game.cycle + 90
+        } else if (elevator.plat.position.y < -3455) { //top
+          elevator.plat.speed = 30
+          elevator.pauseUntilCycle = game.cycle + 90
+        }
+        elevator.plat.position = {
+          x: elevator.plat.position.x,
+          y: elevator.plat.position.y + elevator.plat.speed
+        }
+        elevator.pointA = elevator.plat.position
+      }
+    };
 
     level.setPosToSpawn(-50, -50); //normal spawn
     level.exit.x = -100;
@@ -952,32 +840,35 @@ const level = {
     });
     spawn.mapRect(3925, -300, 425, 50);
     spawn.mapRect(4700, -375, 425, 50);
-    spawn.mapRect(4000, -1300, 1050, 100);
+    // spawn.mapRect(4000, -1300, 1050, 100);
+    spawn.mapRect(4000, -1300, 200, 100);
+    spawn.mapRect(4600, -1300, 450, 100);
 
     //steep stairs
-    spawn.mapRect(4100, -1700, 100, 100);
-    spawn.mapRect(4200, -2050, 100, 450);
-    spawn.mapRect(4300, -2400, 100, 800);
-    spawn.mapRect(4400, -2750, 100, 1150);
-    spawn.mapRect(4500, -3100, 100, 1500);
+    // spawn.mapRect(4100, -1700, 100, 100);
+    // spawn.mapRect(4200, -2050, 100, 450);
+    // spawn.mapRect(4300, -2400, 100, 800);
+    // spawn.mapRect(4400, -2750, 100, 1150);
+    // spawn.mapRect(4500, -3100, 100, 1500);
+    spawn.mapRect(4100, -2250, 100, 650);
+    spawn.mapRect(4100, -3450, 100, 650); //left top shelf
     spawn.mapRect(4600, -3450, 100, 1850);
-    spawn.mapRect(4100, -3450, 100, 700); //left top shelf
-    spawn.mapRect(4200, -3450, 100, 400); //left top shelf
-    spawn.mapRect(4300, -3450, 100, 100); //left top shelf
+    // spawn.mapRect(4200, -3450, 100, 400); //left top shelf
+    // spawn.mapRect(4300, -3450, 100, 100); //left top shelf
     level.fill.push({
       x: 4100,
       y: -3450,
-      width: 500,
-      height: 1750,
-      color: "rgba(0,20,40,0.1)"
-    });
-    level.fill.push({
-      x: 4100,
-      y: -1600,
       width: 600,
-      height: 300,
+      height: 2250,
       color: "rgba(0,20,40,0.13)"
     });
+    // level.fill.push({
+    //   x: 4100,
+    //   y: -1600,
+    //   width: 600,
+    //   height: 300,
+    //   color: "rgba(0,20,40,0.13)"
+    // });
 
     spawn.randomSmallMob(4400, -3500);
     spawn.randomSmallMob(4800, -800);
@@ -1221,11 +1112,15 @@ const level = {
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   aerie() {
+    // const elevator = level.platform(4112, -2300, 280, 50)
+
     level.custom = () => {
       level.playerExitCheck();
     };
-    level.customTopLayer = () => {};
-    // game.setZoom(3000);
+    level.customTopLayer = () => {
+      // elevator.move()
+    };
+
     // game.difficulty = 4; //for testing to simulate possible mobs spawns
     level.defaultZoom = 2100
     game.zoomTransition(level.defaultZoom)
@@ -1270,14 +1165,14 @@ const level = {
       x: 3700,
       y: -3150,
       width: 1100,
-      height: 900,
+      height: 950,
       color: "rgba(0,0,0,0.1)"
     });
 
     //background
     level.fillBG.push({
       x: 4200,
-      y: -2250,
+      y: -2200,
       width: 100,
       height: 2600,
       color: "#c7c7ca"
@@ -2561,6 +2456,52 @@ const level = {
       World.add(engine.world, consBB[i]);
     }
   },
+  platform(x, y, width, height, speed) {
+    x = x + width / 2
+    y = y + height / 2
+    const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
+      collisionFilter: {
+        category: cat.body,
+        mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      inertia: Infinity, //prevents rotation
+      isNotSticky: true,
+      isNotHoldable: true,
+      friction: 1,
+      frictionStatic: 1,
+      restitution: 0,
+    });
+
+    const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+      pointA: {
+        x: x,
+        y: y
+      },
+      bodyB: who,
+      stiffness: 0.1,
+      damping: 0.3
+    });
+    World.add(engine.world, constraint);
+    constraint.plat = {
+      position: who.position,
+      speed: speed,
+    }
+
+    // constraint.move = function () {
+    //   if (this.plat.position.y > 350) {
+    //     this.plat.speed = speed
+    //   } else if (this.plat.position.y < -2435) {
+    //     this.plat.speed = -speed
+    //   }
+    //   this.plat.position = {
+    //     x: this.plat.position.x,
+    //     y: this.plat.position.y + this.plat.speed
+    //   }
+    //   this.pointA = this.plat.position
+    // }
+    constraint.pauseUntilCycle = 0 //to to pause platform at top and bottom
+    return constraint
+  },
   rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.0005) {
     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
       density: density,
@@ -2678,6 +2619,125 @@ const level = {
       }
     }
   },
+  portal(centerA, angleA, centerB, angleB) {
+    const width = 50
+    const height = 150
+    const mapWidth = 200
+    const unitA = Matter.Vector.rotate({
+      x: 1,
+      y: 0
+    }, angleA)
+    const unitB = Matter.Vector.rotate({
+      x: 1,
+      y: 0
+    }, angleB)
+
+    draw = function () {
+      ctx.beginPath(); //portal
+      sensor = this.vertices;
+      ctx.moveTo(sensor[0].x, sensor[0].y);
+      for (let i = 1; i < sensor.length; ++i) {
+        ctx.lineTo(sensor[i].x, sensor[i].y);
+      }
+      ctx.fillStyle = this.color
+      ctx.fill();
+    }
+    query = function () {
+      if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
+        if (player.isInPortal === this) player.isInPortal = null
+      } else if (player.isInPortal !== this) { //touching player
+        if (mech.buttonCD_jump === mech.cycle) player.force.y = 0 // undo a jump right before entering the portal
+        mech.buttonCD_jump = 0 //disable short jumps when letting go of jump key
+        //teleport
+        player.isInPortal = this.portalPair
+        if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
+          Matter.Body.setPosition(player, this.portalPair.portal.position);
+        } else { //if at some odd angle
+          Matter.Body.setPosition(player, this.portalPair.position);
+        }
+        //rotate velocity
+        let mag
+        if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
+          mag = Math.max(10, Math.min(50, player.velocity.y * 0.8)) + 11
+        } else {
+          mag = Math.max(3, Math.min(50, Vector.magnitude(player.velocity)))
+        }
+        let v = Vector.mult(this.portalPair.unit, mag)
+        Matter.Body.setVelocity(player, v);
+        // move bots to follow player
+        for (let i = 0; i < bullet.length; i++) {
+          if (bullet[i].isBot) {
+            Matter.Body.setPosition(bullet[i], this.portalPair.portal.position);
+            Matter.Body.setVelocity(bullet[i], {
+              x: 0,
+              y: 0
+            });
+          }
+        }
+      }
+      //remove block if touching
+      touching = Matter.Query.collides(this, body)
+      if (touching.length !== 0) {
+        if (body.length) {
+          for (let i = 0; i < body.length; i++) {
+            if (body[i] === touching[0].bodyB) {
+              body.splice(i, 1);
+              break;
+            }
+          }
+        }
+        Matter.World.remove(engine.world, touching[0].bodyB);
+      }
+    }
+
+    const portalA = composite[composite.length] = Bodies.rectangle(centerA.x, centerA.y, width, height, {
+      isSensor: true,
+      angle: angleA,
+      color: "hsla(197, 100%, 50%,0.7)",
+      draw: draw,
+    });
+    const portalB = composite[composite.length] = Bodies.rectangle(centerB.x, centerB.y, width, height, {
+      isSensor: true,
+      angle: angleB,
+      color: "hsla(29, 100%, 50%, 0.7)",
+      draw: draw
+    });
+    const mapA = composite[composite.length] = Bodies.rectangle(centerA.x - 0.5 * unitA.x * mapWidth, centerA.y - 0.5 * unitA.y * mapWidth, mapWidth, height + 10, {
+      collisionFilter: {
+        category: cat.map,
+        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      unit: unitA,
+      angle: angleA,
+      color: game.draw.mapFill,
+      draw: draw,
+      query: query,
+      lastPortalCycle: 0
+    });
+    Matter.Body.setStatic(mapA, true); //make static
+    World.add(engine.world, mapA); //add to world
+
+    const mapB = composite[composite.length] = Bodies.rectangle(centerB.x - 0.5 * unitB.x * mapWidth, centerB.y - 0.5 * unitB.y * mapWidth, mapWidth, height + 10, {
+      collisionFilter: {
+        category: cat.map,
+        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      unit: unitB,
+      angle: angleB,
+      color: game.draw.mapFill,
+      draw: draw,
+      query: query,
+      lastPortalCycle: 0
+    });
+    Matter.Body.setStatic(mapB, true); //make static
+    World.add(engine.world, mapB); //add to world
+
+    mapA.portal = portalA
+    mapB.portal = portalB
+    mapA.portalPair = mapB
+    mapB.portalPair = mapA
+    return [portalA, portalB, mapA, mapB]
+  },
   hazard(x, y, width, height, damage = 0.0005, color = "hsla(160, 100%, 35%,0.75)") {
     return {
       min: {
@@ -2694,11 +2754,18 @@ const level = {
       isOn: true,
       query() {
         if (this.isOn && this.height > 0 && Matter.Query.region([player], this).length && !mech.isStealth) {
-          if (damage < 0.01) {
+          if (damage < 0.02) {
             mech.damage(damage)
           } else if (mech.immuneCycle < mech.cycle) {
             mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles;
             mech.damage(damage)
+            game.drawList.push({ //add dmg to draw queue
+              x: player.position.x,
+              y: player.position.y,
+              radius: damage * 1500,
+              color: game.mobDmgColor,
+              time: 20
+            });
           }
           const drain = 0.005
           if (mech.energy > drain) mech.energy -= drain
