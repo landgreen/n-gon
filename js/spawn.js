@@ -652,7 +652,7 @@ const spawn = {
     }
   },
   spiderBoss(x, y, radius = 60 + Math.ceil(Math.random() * 10)) {
-    const isDaddyLongLegs = Math.random() < 0.3
+    const isDaddyLongLegs = Math.random() < 0.25
     let targets = [] //track who is in the node boss, for shields
     mobs.spawn(x, y, 6, radius, "#b386e8");
     let me = mob[mob.length - 1];
@@ -663,8 +663,8 @@ const spawn = {
     me.lookTorque = 0.0000008; //controls spin while looking for player
     me.g = 0.00025; //required if using 'gravity'
     me.seePlayerFreq = Math.round((30 + 20 * Math.random()) * game.lookFreqScale);
-    const springStiffness = 0.000065;
-    const springDampening = 0.0006;
+    const springStiffness = isDaddyLongLegs ? 0.0001 : 0.000065;
+    const springDampening = isDaddyLongLegs ? 0 : 0.0006;
 
     me.springTarget = {
       x: me.position.x,
@@ -693,7 +693,7 @@ const spawn = {
     });
     cons[len2].length = 100 + 1.5 * radius;
     me.cons2 = cons[len2];
-    if (isDaddyLongLegs) Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
+    if (isDaddyLongLegs) Matter.Body.setDensity(me, 0.017); //extra dense //normal is 0.001 //makes effective life much larger
 
     me.onDeath = function () {
       this.removeCons();
@@ -707,7 +707,7 @@ const spawn = {
     };
 
     radius = 22 // radius of each node mob
-    const sideLength = isDaddyLongLegs ? 50 : 100 // distance between each node mob
+    const sideLength = 100 // distance between each node mob
     const nodes = 6
     const angle = 2 * Math.PI / nodes
 
@@ -715,14 +715,14 @@ const spawn = {
 
     for (let i = 0; i < nodes; ++i) {
       spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
-      if (isDaddyLongLegs) Matter.Body.setDensity(mob[mob.length - 1], 0.005); //extra dense //normal is 0.001 //makes effective life much larger
+      if (isDaddyLongLegs) Matter.Body.setDensity(mob[mob.length - 1], 0.01); //extra dense //normal is 0.001 //makes effective life much larger
       targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
     }
     //spawn shield around all nodes
     if (!isDaddyLongLegs) spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
     spawn.allowShields = true;
 
-    const attachmentStiffness = isDaddyLongLegs ? 0.0001 : 0.05
+    const attachmentStiffness = isDaddyLongLegs ? 0.0003 : 0.05
     if (!isDaddyLongLegs) spawn.constrain2AdjacentMobs(nodes + 2, attachmentStiffness, true); //loop mobs together
     for (let i = 0; i < nodes; ++i) { //attach to center mob
       consBB[consBB.length] = Constraint.create({

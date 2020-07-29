@@ -12,13 +12,13 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(4)
-      // game.enableConstructMode() //used to build maps in testing mode
+      game.enableConstructMode() //used to build maps in testing mode
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // mod.giveMod("bot upgrades");
+      // mod.giveMod("neutron");
       // mod.nailBotCount += 10
-      // b.giveGuns("maser")
+      // b.giveGuns("neutron bomb")
       // mech.setField("plasma torch")
 
       level.intro(); //starting level
@@ -50,7 +50,7 @@ const level = {
       mech.maxHealth += 0.05 * powerUps.totalPowerUps
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
-    if (mod.isHealLowHealth && mech.health < mech.maxHealth * game.healScale) {
+    if (mod.isHealLowHealth && mech.health < 0.8 * mech.maxHealth * Math.sqrt(game.healScale)) {
       mech.health = mech.maxHealth * game.healScale
       mech.displayHealth();
     }
@@ -72,11 +72,11 @@ const level = {
     document.body.style.backgroundColor = "#d5d5d5";
 
     const portal = level.portal({
-      x: 2500,
-      y: -75
+      x: 2475,
+      y: -140
     }, Math.PI, { //left
-      x: 2500,
-      y: -3075
+      x: 2475,
+      y: -3140
     }, Math.PI) //left
     const portal2 = level.portal({
       x: 75,
@@ -97,8 +97,21 @@ const level = {
     const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
     const button = level.button(2100, -2600)
 
+
+    const buttonDoor = level.button(600, -550)
+    // spawn.mapRect(600, -600, 275, 75);
+    const door = level.door(312, -750, 25, 190)
+
     level.custom = () => {
-      level.playerExitCheck();
+      buttonDoor.query();
+      buttonDoor.draw();
+      if (buttonDoor.isUp) {
+        door.isOpen = true
+      } else {
+        door.isOpen = false
+      }
+      door.openClose();
+
       portal[2].query()
       portal[3].query()
       portal2[2].query()
@@ -116,8 +129,10 @@ const level = {
       }
       button.query();
       button.draw();
+      level.playerExitCheck();
     };
     level.customTopLayer = () => {
+      door.draw();
       hazard.draw();
       hazard2.draw();
       portal[0].draw();
@@ -133,7 +148,7 @@ const level = {
       portal3[2].draw();
       portal3[3].draw();
     };
-    powerUps.spawnStartingPowerUps(1975, -3075);
+    powerUps.spawnStartingPowerUps(1875, -3075);
 
     const powerUpPos = shuffle([{ //no debris on this level but 2 random spawn instead
       x: -150,
@@ -158,9 +173,10 @@ const level = {
       color: "#d4f4f4"
     });
     //outer wall
+    spawn.mapRect(2500, -3700, 1200, 3800); //right map wall
     spawn.mapRect(-1400, -3800, 1100, 3900); //left map wall
-    spawn.mapRect(2500, -2975, 1200, 2825); //right map middle wall above right portal
-    spawn.mapRect(2700, -3600, 1000, 3650);
+    // spawn.mapRect(2500, -2975, 1200, 2825); //right map middle wall above right portal
+    // spawn.mapRect(2700, -3600, 1000, 3650);
     // far far right wall right of portals
     // spawn.mapRect(2500, -1425, 200, 1275); // below right portal
     spawn.mapRect(-1400, -4800, 5100, 1200); //map ceiling
@@ -179,37 +195,50 @@ const level = {
     //upper entrance / exit
     spawn.mapRect(-400, -1050, 750, 50);
     spawn.mapRect(300, -1050, 50, 300);
-    spawn.bodyRect(312, -750, 25, 190);
+    // spawn.bodyRect(312, -750, 25, 190);
     spawn.mapRect(300, -560, 50, 50);
 
     // spawn.mapRect(1400, -1025, 50, 300);
     // spawn.mapRect(1400, -1025, 50, 825);
-    spawn.mapRect(600, -600, 275, 75);
-    spawn.bodyRect(675, -725, 125, 125);
+    // spawn.mapRect(600, -600, 275, 75);
     // spawn.mapRect(1075, -1050, 550, 400);
     // spawn.mapRect(1150, -1000, 150, 575);
-    spawn.mapRect(1150, -1000, 250, 575);
-    spawn.mapRect(1600, -550, 175, 250);
+    // spawn.mapRect(1600, -550, 175, 200);
+    spawn.bodyRect(750, -725, 125, 125);
+    spawn.mapRect(1150, -1050, 250, 575);
 
-    spawn.mapRect(-400, -550, 1800, 250);
+    spawn.mapRect(1725, -550, 50, 200); //walls around portal 3
+    // spawn.mapRect(1925, -550, 50, 200);
+    spawn.mapRect(1925, -550, 500, 200);
+    spawn.mapRect(1750, -390, 200, 40);
+    // spawn.mapRect(2350, -550, 75, 200);
+
+    spawn.mapRect(-400, -550, 1800, 200);
     spawn.mapRect(-200, -1700, 150, 25); //platform above exit room
     spawn.mapRect(-200, -1325, 350, 25);
 
     //portal 3 angled
     // spawn.mapRect(1425, -550, 350, 250);
-    spawn.mapRect(1925, -550, 500, 250);
-    spawn.mapRect(2425, -450, 100, 150);
-    spawn.mapRect(1750, -390, 225, 90);
+    // spawn.mapRect(1925, -550, 500, 200);
+    spawn.mapRect(2425, -450, 100, 100);
 
 
     //portal 1 bottom
-    spawn.mapRect(2525, -200, 175, 250); //right portal back wall
+    // spawn.mapRect(2525, -200, 175, 250); //right portal back wall
+    // spawn.mapRect(2500, -50, 200, 100);
+    spawn.mapRect(2290, -12, 375, 100);
+    spawn.mapRect(2350, -24, 375, 100);
+    spawn.mapRect(2410, -36, 375, 100);
 
     //portal 1 top
+    spawn.mapRect(2290, -3012, 375, 50);
+    spawn.mapRect(2350, -3024, 375, 50);
+    spawn.mapRect(2410, -3036, 375, 50);
+
     spawn.mapRect(1400, -3000, 1300, 50); //floor
-    spawn.mapRect(2500, -3700, 200, 565); //right portal wall
-    spawn.mapRect(2525, -3200, 175, 250); //right portal back wall
-    spawn.mapRect(1850, -3050, 250, 75);
+    // spawn.mapRect(2500, -3700, 200, 565); //right portal wall
+    // spawn.mapRect(2525, -3200, 175, 250); //right portal back wall
+    spawn.mapRect(1750, -3050, 250, 75);
     // spawn.bodyRect(1950, -3100, 50, 50);
     spawn.mapRect(1400, -3625, 50, 200);
     spawn.mapRect(350, -3625, 50, 225);
@@ -695,20 +724,18 @@ const level = {
       level.playerExitCheck();
     };
     level.customTopLayer = () => {
-      //elevator move
-      if (elevator.pauseUntilCycle < game.cycle && !mech.isBodiesAsleep) {
-        if (elevator.plat.position.y > -1275) { //bottom
+      if (elevator.pauseUntilCycle < game.cycle && !mech.isBodiesAsleep) { //elevator move
+        if (elevator.pointA.y > -1275) { //bottom
           elevator.plat.speed = -10
           elevator.pauseUntilCycle = game.cycle + 90
-        } else if (elevator.plat.position.y < -3455) { //top
+        } else if (elevator.pointA.y < -3455) { //top
           elevator.plat.speed = 30
           elevator.pauseUntilCycle = game.cycle + 90
         }
-        elevator.plat.position = {
-          x: elevator.plat.position.x,
-          y: elevator.plat.position.y + elevator.plat.speed
+        elevator.pointA = {
+          x: elevator.pointA.x,
+          y: elevator.pointA.y + elevator.plat.speed
         }
-        elevator.pointA = elevator.plat.position
       }
     };
 
@@ -908,10 +935,28 @@ const level = {
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   rooftops() {
+    const elevator = level.platform(1450, -1000, 235, 30, -2)
     level.custom = () => {
+      ctx.fillStyle = "#ccc"
+      ctx.fillRect(1567, -1990, 5, 1020)
       level.playerExitCheck();
     };
-    level.customTopLayer = () => {};
+    level.customTopLayer = () => {
+
+      if (elevator.pauseUntilCycle < game.cycle && !mech.isBodiesAsleep) { //elevator move
+        if (elevator.pointA.y > -980) { //bottom
+          elevator.plat.speed = -2
+          elevator.pauseUntilCycle = game.cycle + 60
+        } else if (elevator.pointA.y < -1980) { //top
+          elevator.plat.speed = 1
+          elevator.pauseUntilCycle = game.cycle + 60
+        }
+        elevator.pointA = {
+          x: elevator.pointA.x,
+          y: elevator.pointA.y + elevator.plat.speed
+        }
+      }
+    };
 
     level.defaultZoom = 1700
     game.zoomTransition(level.defaultZoom)
@@ -1012,14 +1057,14 @@ const level = {
     level.fill.push({
       x: 1735,
       y: -1550,
-      width: 1390,
+      width: 1405,
       height: 550,
       color: "rgba(0,0,0,0.1)"
     });
     level.fill.push({
-      x: 1600,
+      x: 1735,
       y: -900,
-      width: 1650,
+      width: 1515,
       height: 1900,
       color: "rgba(0,0,0,0.1)"
     });
@@ -1057,15 +1102,15 @@ const level = {
     spawn.mapRect(1000, -1350, 410, 50);
     spawn.bodyRect(1050, -2350, 30, 30, 0.8);
     // spawn.boost(1800, -1000, 1200);
-    spawn.bodyRect(1625, -1100, 100, 75);
-    spawn.bodyRect(1350, -1025, 400, 25); // ground plank
+    // spawn.bodyRect(1625, -1100, 100, 75);
+    // spawn.bodyRect(1350, -1025, 400, 25); // ground plank
     spawn.mapRect(-725, -1000, 2150, 100); //lower left ledge
     spawn.bodyRect(350, -1100, 200, 100, 0.8);
     spawn.bodyRect(370, -1200, 100, 100, 0.8);
     spawn.bodyRect(360, -1300, 100, 100, 0.8);
     spawn.bodyRect(950, -1050, 300, 50, 0.8);
     spawn.bodyRect(-600, -1250, 400, 250, 0.8);
-    spawn.mapRect(1575, -1000, 1700, 100); //middle ledge
+    spawn.mapRect(1710, -1000, 1565, 100); //middle ledge
     spawn.mapRect(3400, -1000, 75, 25);
     spawn.bodyRect(2600, -1950, 100, 250, 0.8);
     spawn.bodyRect(2700, -1125, 125, 125, 0.8);
@@ -1805,16 +1850,10 @@ const level = {
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   office() {
-    level.custom = () => {
-      level.playerExitCheck();
-    };
-    level.customTopLayer = () => {};
-
-    level.defaultZoom = 1400
-    game.zoomTransition(level.defaultZoom)
-
-    if (Math.random() < 0.75) {
-      //normal direction start in top left
+    let button, door
+    if (Math.random() < 0.75) { //normal direction start in top left
+      button = level.button(525, 0)
+      door = level.door(1362, -200, 25, 200)
       level.setPosToSpawn(1375, -1550); //normal spawn
       level.exit.x = 3250;
       level.exit.y = -530;
@@ -1826,8 +1865,9 @@ const level = {
         height: 500,
         color: "#dff"
       });
-    } else {
-      //reverse direction, start in bottom right
+    } else { //reverse direction, start in bottom right
+      button = level.button(4300, 0)
+      door = level.door(3012, -200, 25, 200)
       level.setPosToSpawn(3250, -550); //normal spawn
       level.exit.x = 1375;
       level.exit.y = -1530;
@@ -1840,6 +1880,25 @@ const level = {
         color: "#dff"
       });
     }
+
+
+    level.custom = () => {
+      button.query();
+      button.draw();
+      if (button.isUp) {
+        door.isOpen = true
+      } else {
+        door.isOpen = false
+      }
+      door.openClose();
+      level.playerExitCheck();
+    };
+    level.customTopLayer = () => {
+      door.draw();
+    };
+
+    level.defaultZoom = 1400
+    game.zoomTransition(level.defaultZoom)
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
 
     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -1921,7 +1980,7 @@ const level = {
     spawn.mapRect(-600, -1000, 1100, 50); //2nd floor
     spawn.mapRect(600, -1000, 500, 50); //2nd floor
     spawn.spawnStairs(-600, -1000, 4, 250, 350); //stairs 2nd
-    spawn.mapRect(350, -600, 350, 150); //center table
+    spawn.mapRect(375, -600, 350, 150); //center table
     spawn.mapRect(-600 + 300, -2000 * 0.25, 2000 - 300, 50); //1st floor
     spawn.spawnStairs(-600 + 2000 - 50, -500, 4, 250, 350, true); //stairs 1st
     spawn.spawnStairs(-600, 0, 4, 250, 350); //stairs ground
@@ -1932,7 +1991,7 @@ const level = {
     spawn.mapRect(2980, 13, 30, 20); //step right
     spawn.mapRect(3000, 0, 2000, 50); //ground
     spawn.bodyRect(4250, -700, 50, 100);
-    spawn.bodyRect(3000, -200, 50, 200); //door
+    // spawn.bodyRect(3000, -200, 50, 200); //door
     spawn.mapRect(3000, -1000, 50, 800); //left wall
     spawn.mapRect(3000 + 2000 - 50, -1300, 50, 1100); //right wall
     spawn.mapRect(4150, -600, 350, 150); //table
@@ -2562,8 +2621,8 @@ const level = {
     composite[composite.length] = rotor
     return rotor
   },
-  button(x, y, width = 66) {
-    spawn.mapVertex(x + 35, y + 2, "70 10 -70 10 -40 -10 40 -10");
+  button(x, y, width = 126) {
+    spawn.mapVertex(x + 65, y + 2, "100 10 -100 10 -70 -10 70 -10");
     map[map.length - 1].restitution = 0;
     map[map.length - 1].friction = 1;
     map[map.length - 1].frictionStatic = 1;
@@ -2619,6 +2678,63 @@ const level = {
       }
     }
   },
+  door(x, y, width, height) {
+    x = x + width / 2
+    y = y + height / 2
+    const doorBlock = body[body.length] = Bodies.rectangle(x, y, width, height, {
+      collisionFilter: {
+        category: cat.body,
+        mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      inertia: Infinity, //prevents rotation
+      isNotSticky: true,
+      isNotHoldable: true,
+      friction: 1,
+      frictionStatic: 1,
+      restitution: 0,
+      isOpen: false,
+      openClose() {
+        if (!mech.isBodiesAsleep) {
+          if (!this.isOpen) {
+            if (this.position.y > y - height) { //try to open 
+              const position = {
+                x: this.position.x,
+                y: this.position.y - 1
+              }
+              Matter.Body.setPosition(this, position)
+            }
+          } else {
+            if (this.position.y < y) { //try to close
+              if (
+                Matter.Query.collides(this, [player]).length === 0 &&
+                Matter.Query.collides(this, body).length < 2 &&
+                Matter.Query.collides(this, mob).length === 0
+              ) {
+                const position = {
+                  x: this.position.x,
+                  y: this.position.y + 1
+                }
+                Matter.Body.setPosition(this, position)
+              }
+            }
+          }
+        }
+      },
+      draw() {
+        ctx.fillStyle = "#555"
+        ctx.beginPath();
+        const v = this.vertices;
+        ctx.moveTo(v[0].x, v[0].y);
+        for (let i = 1; i < v.length; ++i) {
+          ctx.lineTo(v[i].x, v[i].y);
+        }
+        ctx.lineTo(v[0].x, v[0].y);
+        ctx.fill();
+      }
+    });
+    Matter.Body.setStatic(doorBlock, true); //make static
+    return doorBlock
+  },
   portal(centerA, angleA, centerB, angleB) {
     const width = 50
     const height = 150
@@ -2660,7 +2776,7 @@ const level = {
         if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
           mag = Math.max(10, Math.min(50, player.velocity.y * 0.8)) + 11
         } else {
-          mag = Math.max(3, Math.min(50, Vector.magnitude(player.velocity)))
+          mag = Math.max(6, Math.min(50, Vector.magnitude(player.velocity)))
         }
         let v = Vector.mult(this.portalPair.unit, mag)
         Matter.Body.setVelocity(player, v);
@@ -2676,18 +2792,32 @@ const level = {
         }
       }
       //remove block if touching
-      touching = Matter.Query.collides(this, body)
-      if (touching.length !== 0) {
-        if (body.length) {
-          for (let i = 0; i < body.length; i++) {
-            if (body[i] === touching[0].bodyB) {
-              body.splice(i, 1);
-              break;
+      if (body.length) {
+        touching = Matter.Query.collides(this, body)
+        for (let i = 0; i < touching.length; i++) {
+          if (touching[i].bodyB !== mech.holdingTarget) {
+            for (let j = 0, len = body.length; j < len; j++) {
+              if (body[j] === touching[i].bodyB) {
+                body.splice(j, 1);
+                len--
+                Matter.World.remove(engine.world, touching[i].bodyB);
+                break;
+              }
             }
           }
         }
-        Matter.World.remove(engine.world, touching[0].bodyB);
       }
+      // if (touching.length !== 0 && touching[0].bodyB !== mech.holdingTarget) {
+      //   if (body.length) {
+      //     for (let i = 0; i < body.length; i++) {
+      //       if (body[i] === touching[0].bodyB) {
+      //         body.splice(i, 1);
+      //         break;
+      //       }
+      //     }
+      //   }
+      //   Matter.World.remove(engine.world, touching[0].bodyB);
+      // }
     }
 
     const portalA = composite[composite.length] = Bodies.rectangle(centerA.x, centerA.y, width, height, {
