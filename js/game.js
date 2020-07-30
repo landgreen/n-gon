@@ -110,7 +110,7 @@ const game = {
     x: 0,
     y: 0
   },
-  g: 0.001,
+  g: 0.0024, // applies to player, bodies, and power ups  (not mobs)
   onTitlePage: true,
   paused: false,
   isChoosing: false,
@@ -493,7 +493,7 @@ const game = {
     }
     addGravity(powerUp, game.g);
     addGravity(body, game.g);
-    player.force.y += player.mass * mech.gravity;
+    player.force.y += player.mass * game.g;
   },
   reset() { //run on first run, and each later run after you die
     b.removeAllGuns();

@@ -626,7 +626,7 @@ const mobs = {
       },
       curl(range = 1000, mag = -10) {
         //cause all mobs, and bodies to rotate in a circle
-        applyCurl = function (center, array) {
+        applyCurl = function (center, array, isAntiGravity = true) {
           for (let i = 0; i < array.length; ++i) {
             const sub = Vector.sub(center, array[i].position)
             const radius2 = Vector.magnitudeSquared(sub);
@@ -639,7 +639,8 @@ const mobs = {
                 x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
                 y: array[i].velocity.y * 0.94 + curlVector.y * 0.06
               })
-              // //draw curl
+              if (isAntiGravity) array[i].force.y -= 0.8 * game.g * array[i].mass
+              // //draw curl, for debugging
               // ctx.beginPath();
               // ctx.moveTo(array[i].position.x, array[i].position.y);
               // ctx.lineTo(array[i].position.x + curlVector.x * 10, array[i].position.y + curlVector.y * 10);
@@ -649,7 +650,7 @@ const mobs = {
             }
           }
         }
-        applyCurl(this.position, mob);
+        applyCurl(this.position, mob, false);
         applyCurl(this.position, body);
         applyCurl(this.position, powerUp);
         // applyCurl(this.position, bullet);  // too powerful, just stops all bullets need to write a curl function just for bullets

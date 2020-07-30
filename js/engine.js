@@ -196,7 +196,6 @@ function collisionChecks(event) {
                 color: game.mobDmgColor,
                 time: game.drawTime
               });
-
             }
             return;
             // }

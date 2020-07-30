@@ -2559,7 +2559,7 @@ const spawn = {
   },
   bodyRect(x, y, width, height, chance = 1, properties = {
     friction: 0.05,
-    frictionAir: 0.01
+    frictionAir: 0.001,
   }) {
     if (Math.random() < chance) body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
   },

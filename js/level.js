@@ -12,7 +12,7 @@ const level = {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(4)
-      game.enableConstructMode() //used to build maps in testing mode
+      // game.enableConstructMode() //used to build maps in testing mode
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
@@ -22,8 +22,9 @@ const level = {
       // mech.setField("plasma torch")
 
       level.intro(); //starting level
-      // level.testing();
-      // level.testChamber()
+      // level.testing(); //not in rotation
+      // level.template() //not in rotation
+      // level.testChamber() //less mobs, more puzzle
       // level.sewers();
       // level.satellite();
       // level.skyscrapers();
@@ -32,8 +33,7 @@ const level = {
       // level.warehouse();
       // level.highrise();
       // level.office();
-      // level.bosses();
-      // level.template()
+      // level.bosses(); //only fighting, very simple map
       // level.stronghold() //fan level
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
@@ -1771,7 +1771,7 @@ const level = {
         y: -500
       },
       bodyB: body[body.length - 1],
-      stiffness: 0.000076,
+      stiffness: 0.0001815,
       length: 1
     });
 
@@ -1783,7 +1783,7 @@ const level = {
         y: 100
       },
       bodyB: body[body.length - 1],
-      stiffness: 0.000076,
+      stiffness: 0.0001815,
       length: 1
     });
 
@@ -1796,7 +1796,7 @@ const level = {
         y: 150
       },
       bodyB: body[body.length - 1],
-      stiffness: 0.0002,
+      stiffness: 0.0005,
       length: 566
     });
 
@@ -2764,8 +2764,8 @@ const level = {
       } else if (player.isInPortal !== this) { //touching player
         if (mech.buttonCD_jump === mech.cycle) player.force.y = 0 // undo a jump right before entering the portal
         mech.buttonCD_jump = 0 //disable short jumps when letting go of jump key
-        //teleport
         player.isInPortal = this.portalPair
+        //teleport
         if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
           Matter.Body.setPosition(player, this.portalPair.portal.position);
         } else { //if at some odd angle
@@ -2791,22 +2791,53 @@ const level = {
           }
         }
       }
-      //remove block if touching
+
+
       if (body.length) {
-        touching = Matter.Query.collides(this, body)
-        for (let i = 0; i < touching.length; i++) {
-          if (touching[i].bodyB !== mech.holdingTarget) {
-            for (let j = 0, len = body.length; j < len; j++) {
-              if (body[j] === touching[i].bodyB) {
-                body.splice(j, 1);
-                len--
-                Matter.World.remove(engine.world, touching[i].bodyB);
-                break;
+        for (let i = 0, len = body.length; i < len; i++) {
+          if (body[i] !== mech.holdingTarget) {
+            // body[i].bounds.max.x - body[i].bounds.min.x < 100 && body[i].bounds.max.y - body[i].bounds.min.y < 100
+            if (Matter.Query.collides(this, [body[i]]).length === 0) {
+              if (body[i].isInPortal === this) body[i].isInPortal = null
+            } else if (body[i].isInPortal !== this) {
+              body[i].isInPortal = this.portalPair
+              //teleport
+              if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
+                Matter.Body.setPosition(body[i], this.portalPair.portal.position);
+              } else { //if at some odd angle
+                Matter.Body.setPosition(body[i], this.portalPair.position);
               }
+              //rotate velocity
+              let mag
+              if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
+                mag = Math.max(10, Math.min(50, body[i].velocity.y * 0.8)) + 11
+              } else {
+                mag = Math.max(6, Math.min(50, Vector.magnitude(body[i].velocity)))
+              }
+              let v = Vector.mult(this.portalPair.unit, mag)
+              Matter.Body.setVelocity(body[i], v);
             }
           }
         }
       }
+
+      //remove block if touching
+      // if (body.length) {
+      //   touching = Matter.Query.collides(this, body)
+      //   for (let i = 0; i < touching.length; i++) {
+      //     if (touching[i].bodyB !== mech.holdingTarget) {
+      //       for (let j = 0, len = body.length; j < len; j++) {
+      //         if (body[j] === touching[i].bodyB) {
+      //           body.splice(j, 1);
+      //           len--
+      //           Matter.World.remove(engine.world, touching[i].bodyB);
+      //           break;
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
       // if (touching.length !== 0 && touching[0].bodyB !== mech.holdingTarget) {
       //   if (body.length) {
       //     for (let i = 0; i < body.length; i++) {
@@ -2835,7 +2866,7 @@ const level = {
     const mapA = composite[composite.length] = Bodies.rectangle(centerA.x - 0.5 * unitA.x * mapWidth, centerA.y - 0.5 * unitA.y * mapWidth, mapWidth, height + 10, {
       collisionFilter: {
         category: cat.map,
-        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+        mask: cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
       },
       unit: unitA,
       angle: angleA,
@@ -2850,7 +2881,7 @@ const level = {
     const mapB = composite[composite.length] = Bodies.rectangle(centerB.x - 0.5 * unitB.x * mapWidth, centerB.y - 0.5 * unitB.y * mapWidth, mapWidth, height + 10, {
       collisionFilter: {
         category: cat.map,
-        mask: cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+        mask: cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
       },
       unit: unitB,
       angle: angleB,

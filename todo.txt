@@ -1,6 +1,11 @@
-added doors controlled by a button  (office level)
+block air friction is now the same as the player (lower)
+block and power up gravity is now the same as the player (higher)
+portals now affect blocks (high speed and large blocks are unpredictable)
 
 ************** TODO - n-gon **************
+
+test block gravity increase
+test throw damage
 
 atmosphere levels
   change the pace, give the user a rest between combat

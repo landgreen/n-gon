@@ -97,7 +97,7 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-  gravity: 0.0024, //0.0019  //game.g is 0.001
+
   friction: {
     ground: 0.01,
     air: 0.0025
@@ -862,7 +862,8 @@ const mech = {
         setTimeout(solid, 150, mech.holdingTarget);
 
         const charge = Math.min(mech.throwCharge / 5, 1)
-        let speed = charge * Math.min(80, 64 / Math.pow(mech.holdingTarget.mass, 0.25));
+        //***** scale throw speed with the first number, 80 *****
+        let speed = 80 * charge * Math.min(1, 0.8 / Math.pow(mech.holdingTarget.mass, 0.25));
 
         if (Matter.Query.collides(mech.holdingTarget, map).length !== 0) {
           speed *= 0.7 //drop speed by 30% if touching map
@@ -1407,20 +1408,20 @@ const mech = {
               // zeroG(mob);  //mobs are too irregular to make this work?
 
               if (keys[83] || keys[40]) { //down
-                player.force.y -= 0.5 * player.mass * mech.gravity;
+                player.force.y -= 0.5 * player.mass * game.g;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 400 * 0.03;
                 zeroG(powerUp, this.fieldDrawRadius, 0.7);
                 zeroG(body, this.fieldDrawRadius, 0.7);
               } else if (keys[87] || keys[38]) { //up
                 mech.energy -= 5 * DRAIN;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
-                player.force.y -= 1.45 * player.mass * mech.gravity;
+                player.force.y -= 1.45 * player.mass * game.g;
                 zeroG(powerUp, this.fieldDrawRadius, 1.38);
                 zeroG(body, this.fieldDrawRadius, 1.38);
               } else {
                 mech.energy -= DRAIN;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 650 * 0.03;
-                player.force.y -= 1.07 * player.mass * mech.gravity; // slow upward drift
+                player.force.y -= 1.07 * player.mass * game.g; // slow upward drift
                 zeroG(powerUp, this.fieldDrawRadius);
                 zeroG(body, this.fieldDrawRadius);
               }
