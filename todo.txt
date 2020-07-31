@@ -1,11 +1,26 @@
-block air friction is now the same as the player (lower)
-block and power up gravity is now the same as the player (higher)
-portals now affect blocks (high speed and large blocks are unpredictable)
+the game zooms out a bit when the mouse is near the edge of the browser window
+  (is it annoying or helpful?)
+  maybe I should add in a smoothing variable for the edge zoom
 
 ************** TODO - n-gon **************
 
-test block gravity increase
-test throw damage
+drop level boss rate mods a bit earlier
+  or increase damage scaling
+
+fix tension on stronghold
+
+zoom out a bit when mouse is near edge of screen
+
+map: laboratory
+  rooms with switches that change physics
+    gravity room
+    portal room
+    laser room
+    radiation room
+  a button that spawns a heal.
+
+mob: wall mounted guns / lasers
+  not part of randomized mob pool, customized to each level
 
 atmosphere levels
   change the pace, give the user a rest between combat
@@ -56,14 +71,6 @@ level boss: boss that dies and comes back to life but with one less side until i
 
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
-
-map: laboratory
-  rooms with switches that change physics
-    gravity room
-    portal room
-    laser room
-    radiation room
-  a button that spawns a heal.
 
 map: observatory
   button controls rotation of telescope

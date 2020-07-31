@@ -1022,12 +1022,12 @@ const mobs = {
           if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob)
         } else if (mod.isShieldAmmo && this.shield) {
           let type = "ammo"
-          if (Math.random() < 0.33 || mod.bayesian) {
+          if (Math.random() < 0.4 || mod.bayesian) {
             type = "heal"
-          } else if (Math.random() < 0.5 && !mod.isSuperDeterminism) {
+          } else if (Math.random() < 0.3 && !mod.isSuperDeterminism) {
             type = "reroll"
           }
-          for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
+          for (let i = 0, len = Math.ceil(2.8 * Math.random()); i < len; i++) {
             powerUps.spawn(this.position.x, this.position.y, type);
             if (Math.random() < mod.bayesian) powerUps.spawn(this.position.x, this.position.y, type);
           }

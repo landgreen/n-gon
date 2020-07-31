@@ -1042,7 +1042,7 @@ const b = {
       onEnd() {},
       do() {
         if (this.lastLookCycle < game.cycle) {
-          this.lastLookCycle = game.cycle + 65 - this.isUpgraded * 30
+          this.lastLookCycle = game.cycle + 65 - this.isUpgraded * 25
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1107,7 +1107,7 @@ const b = {
               const radius = 6 + 7 * Math.random()
               const SPEED = 29 - radius * 0.5; //(mech.crouch ? 32 : 20) - radius * 0.7;
               const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-              b.foam(this.position, velocity, radius + 8 * this.isUpgraded)
+              b.foam(this.position, velocity, radius + 7 * this.isUpgraded)
               break;
             }
           }
@@ -1189,7 +1189,7 @@ const b = {
         }
         //hit target with laser
         if (this.lockedOn && this.lockedOn.alive && mech.energy > 0.15) {
-          mech.energy -= 0.0014 * mod.isLaserDiode - 0.0007 * this.isUpgraded
+          mech.energy -= 0.0014 * mod.isLaserDiode - 0.0006 * this.isUpgraded
           //make sure you can still see vertex
           const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
           if (DIST - this.lockedOn.radius < this.range + 150 &&
@@ -2302,7 +2302,7 @@ const b = {
           } else {
             const bodyCollisions = Matter.Query.collides(this, body)
             if (bodyCollisions.length) {
-              if (!bodyCollisions[0].bodyA.isNotSticky) {
+              if (!bodyCollisions[0].bodyA.isNotHoldable) {
                 onCollide(this)
                 this.stuckTo = bodyCollisions[0].bodyA
                 //find the relative position for when the mob is at angle zero by undoing the mobs rotation
@@ -2460,7 +2460,7 @@ const b = {
           } else {
             const bodyCollisions = Matter.Query.collides(this, body)
             if (bodyCollisions.length) {
-              if (!bodyCollisions[0].bodyA.isNotSticky) {
+              if (!bodyCollisions[0].bodyA.isNotHoldable) {
                 onCollide(this)
                 this.stuckTo = bodyCollisions[0].bodyA
                 //find the relative position for when the mob is at angle zero by undoing the mobs rotation

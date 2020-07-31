@@ -508,7 +508,7 @@ const mod = {
         },
         {
             name: "bot upgrades",
-            description: "<strong>50% improved:</strong> nail fire rate, boom explosion,<br>foam size, laser drain, and plasma drain",
+            description: "<strong>40% improved:</strong> nail fire rate, boom explosion,<br>foam size, laser drain, and plasma drain",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -530,7 +530,7 @@ const mod = {
         },
         {
             name: "bot replication",
-            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>ammo</strong>",
+            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
@@ -539,11 +539,8 @@ const mod = {
             },
             requires: "3 or more bots",
             effect() {
-                //remove ammo
-                for (let i = 0, len = b.guns.length; i < len; ++i) {
-                    if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
-                }
-                game.updateGunHUD();
+                b.removeAllGuns();
+                game.makeGunHUD();
                 //double bots
                 for (let i = 0; i < mod.nailBotCount; i++) {
                     b.nailBot();

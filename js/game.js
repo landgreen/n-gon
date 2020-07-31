@@ -470,14 +470,22 @@ const game = {
     mech.transX += (mech.transSmoothX - mech.transX) * 1;
     mech.transY += (mech.transSmoothY - mech.transY) * 1;
   },
+  edgeZoomOutSmooth: 1,
   camera() {
+    //zoom out when mouse gets near the edge of the window
+    const dx = game.mouse.x / window.innerWidth - 0.5 //x distance from mouse to window center scaled by window width
+    const dy = game.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
+    const d = Math.max(dx * dx, dy * dy)
+    game.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.05 + game.edgeZoomOutSmooth * 0.95
+
+
     ctx.save();
     ctx.translate(canvas.width2, canvas.height2); //center
-    ctx.scale(game.zoom, game.zoom); //zoom in once centered
+    ctx.scale(game.zoom / game.edgeZoomOutSmooth, game.zoom / game.edgeZoomOutSmooth); //zoom in once centered
     ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
     //calculate in game mouse position by undoing the zoom and translations
-    game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom + canvas.width2 - mech.transX;
-    game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom + canvas.height2 - mech.transY;
+    game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom * game.edgeZoomOutSmooth + canvas.width2 - mech.transX;
+    game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom * game.edgeZoomOutSmooth + canvas.height2 - mech.transY;
   },
   restoreCamera() {
     ctx.restore();
@@ -609,7 +617,10 @@ const game = {
     if (game.firstRun) {
       mech.spawn(); //spawns the player
       mod.setupAllMods(); //doesn't run on reset so that gun mods carry over to new runs
-      if (game.isCommunityMaps) level.levels.push("stronghold");
+      if (game.isCommunityMaps) {
+        level.levels.push("stronghold");
+        level.levels.push("basement");
+      }
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
     }

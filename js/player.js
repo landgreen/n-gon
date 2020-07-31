@@ -1974,7 +1974,7 @@ const mech = {
                 mech.fieldRadius = mech.fieldRadius * radiusSmooth + radius * (1 - radiusSmooth)
 
                 for (let i = 0, len = body.length; i < len; ++i) {
-                  if (Vector.magnitude(Vector.sub(body[i].position, mech.fieldPosition)) < mech.fieldRadius) {
+                  if (Vector.magnitude(Vector.sub(body[i].position, mech.fieldPosition)) < mech.fieldRadius && !body[i].isNotHoldable) {
                     const DRAIN = speed * body[i].mass * 0.000015
                     if (mech.energy > DRAIN) {
                       mech.energy -= DRAIN;

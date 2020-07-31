@@ -11,12 +11,12 @@ const level = {
   start() {
     if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
-      // level.difficultyIncrease(4)
+      // level.difficultyIncrease(12)
       // game.enableConstructMode() //used to build maps in testing mode
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // mod.giveMod("neutron");
+      // mod.giveMod("bot replication");
       // mod.nailBotCount += 10
       // b.giveGuns("neutron bomb")
       // mech.setField("plasma torch")
@@ -34,6 +34,7 @@ const level = {
       // level.highrise();
       // level.office();
       // level.bosses(); //only fighting, very simple map
+      // level.basement(); //fan level
       // level.stronghold() //fan level
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
@@ -100,7 +101,7 @@ const level = {
 
     const buttonDoor = level.button(600, -550)
     // spawn.mapRect(600, -600, 275, 75);
-    const door = level.door(312, -750, 25, 190)
+    const door = level.door(312, -750, 25, 190, 185)
 
     level.custom = () => {
       buttonDoor.query();
@@ -1853,7 +1854,7 @@ const level = {
     let button, door
     if (Math.random() < 0.75) { //normal direction start in top left
       button = level.button(525, 0)
-      door = level.door(1362, -200, 25, 200)
+      door = level.door(1362, -200, 25, 200, 195)
       level.setPosToSpawn(1375, -1550); //normal spawn
       level.exit.x = 3250;
       level.exit.y = -530;
@@ -1867,7 +1868,7 @@ const level = {
       });
     } else { //reverse direction, start in bottom right
       button = level.button(4300, 0)
-      door = level.door(3012, -200, 25, 200)
+      door = level.door(3012, -200, 25, 200, 195)
       level.setPosToSpawn(3250, -550); //normal spawn
       level.exit.x = 1375;
       level.exit.y = -1530;
@@ -2199,7 +2200,7 @@ const level = {
         y: -1700,
       },
       bodyB: body[body.length - 1],
-      stiffness: 0.0001217,
+      stiffness: 0.0002, //1217,
       length: 200
     });
 
@@ -2284,6 +2285,331 @@ const level = {
 
     if (game.difficulty > 3) spawn.randomLevelBoss(1850, -1400);
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
+  },
+  basement() { // player made level  by    Francois 👑 from discord
+    let button, door, buttonDoor, buttonPlateformEnd, doorPlateform
+    let isLevelReversed = Math.random();
+    if (isLevelReversed < 0.1) {
+      isLevelReversed = false;
+    } else {
+      isLevelReversed = true;
+    }
+    const elevator = level.platform(4545, -200, 110, 30, -20)
+    const hazard = level.hazard(1675, -1050, 800, 150);
+    const portal = level.portal({
+      x: -620,
+      y: -257
+    }, Math.PI / 2, { //down
+      x: 500,
+      y: 2025
+    }, -Math.PI / 2) //up
+    spawn.mapRect(350, 2025, 300, 300); //Bloc portail n°2
+
+    if (isLevelReversed === false) { /// Normal Spawn  
+      button = level.button(2700, -1150);
+      level.setPosToSpawn(2600, -2050); //normal spawn
+      level.exit.x = level.enter.x + 4510;
+      level.exit.y = level.enter.y + 600;
+      spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+      spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+    } else { /// Reversed spawn
+      button = level.button(1450, -1150);
+      buttonPlateformEnd = level.button(3530, -1150);
+      buttonDoor = level.button(8033, -3625);
+      door = level.door(7700, -3905, 25, 184, 184);
+      doorPlateform = level.door(3200, -1225, 299, 80, 525);
+      level.setPosToSpawn(7110, -1450); //normal spawn
+      level.exit.x = level.enter.x - 4510;
+      level.exit.y = level.enter.y - 600;
+      spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+      spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+      spawn.mapRect(7675, -3935, 75, 25);
+      spawn.mapRect(7675, -3715, 75, 25);
+      spawn.bodyRect(8075, -3675, 50, 25);
+    }
+    level.custom = () => {
+      level.playerExitCheck();
+      portal[2].query()
+      portal[3].query()
+      button.query();
+      button.draw();
+      if (isLevelReversed === true) { ///Reversed spawn
+        buttonDoor.draw();
+        buttonDoor.query();
+        buttonPlateformEnd.draw();
+        buttonPlateformEnd.query();
+        hazard.query();
+        if (buttonDoor.isUp) {
+          door.isOpen = false
+        } else {
+          door.isOpen = true
+        }
+        door.openClose();
+        if (buttonPlateformEnd.isUp) {
+          doorPlateform.isOpen = true;
+        } else {
+          doorPlateform.isOpen = false;
+        }
+        door.openClose();
+        doorPlateform.openClose();
+      }
+      hazard.level(button.isUp)
+    };
+
+    level.customTopLayer = () => {
+      if (isLevelReversed === true) {
+        door.draw();
+        doorPlateform.draw();
+      }
+      portal[0].draw();
+      portal[1].draw();
+      portal[2].draw();
+      portal[3].draw();
+      hazard.draw();
+      //elevator
+      if (elevator.pauseUntilCycle < game.cycle && !mech.isBodiesAsleep) {
+        if (elevator.plat.position.y > -200) { //bottom
+          elevator.plat.speed = -20
+          elevator.pauseUntilCycle = game.cycle + 90
+        } else if (elevator.plat.position.y < -3000) { //top
+          elevator.plat.speed = 30
+          elevator.pauseUntilCycle = game.cycle + 90
+        }
+        elevator.plat.position = {
+          x: elevator.plat.position.x,
+          y: elevator.plat.position.y + elevator.plat.speed
+        }
+        elevator.pointA = elevator.plat.position
+      }
+    };
+
+    level.defaultZoom = 1300
+    game.zoomTransition(level.defaultZoom)
+    document.body.style.backgroundColor = "#c7c7c7";
+
+    // GROUND //
+    spawn.mapRect(-400, -2000, 400, 1430); //Gros left wall 
+    spawn.mapRect(3700, -3000, 700, 2650); //Gros right wall //Puit
+    spawn.mapRect(-400, -2000, 3700, 250); //Ground
+    spawn.mapRect(2475, -1150, 1225, 250);
+    spawn.mapRect(500, -1150, 1175, 250); //Ground level 3
+    spawn.mapRect(350, -180, 4450, 1255); // Last ground
+    spawn.mapRect(-400, -458, 750, 3337); //mur left sous-sol
+    spawn.mapRect(-2850, -3375, 5300, 1375);
+    spawn.mapRect(-2850, -4200, 8000, 825);
+    spawn.mapRect(3700, -3375, 550, 375);
+    spawn.mapRect(-2850, -5200, 10200, 1000);
+    spawn.mapRect(5600, -1250, 3550, 2000);
+    spawn.mapRect(9150, -5200, 1725, 5800);
+    // SPAWN BOX //
+    spawn.mapRect(2300, -3375, 950, 1000);
+    spawn.mapRect(3550, -3375, 150, 1625);
+    spawn.mapVertex(2020, -791, "  250 250  -860 250  -2200 0  250 0"); //map vertex en haut
+    spawn.mapVertex(690, -295, "1700 0  -200 0  -200 -284  500 -284"); //map vertex en bas
+    spawn.mapRect(2950, -900, 750, 250); //Extension ground apres map vertex
+    if (isLevelReversed === false) {
+      spawn.mapRect(3250, -1800, 50, 150); //Petit picot en haut, à gauche
+      spawn.mapRect(3400, -1800, 50, 150); //Petit picot en haut, à droite
+      spawn.mapRect(3150, -1300, 50, 200) //Petit picot en bas, à gauche
+      spawn.mapRect(3500, -1300, 50, 200) //Petit picot en bas, à droite
+      spawn.mapRect(3050, -3375, 500, 1260);
+      spawn.mapRect(3400, -2265, 150, 515); //Mur fond tunnel
+      spawn.bodyRect(3625, -1225, 75, 75); //Pitit bloc à droite en bas spawn
+    } else {
+      spawn.mapRect(3050, -3375, 500, 1000);
+      spawn.mapRect(3400, -2400, 150, 650); //Mur fond tunnel
+      spawn.bodyRect(3425, -1515, 75, 75); //Petit en bas spawn
+      spawn.mapRect(3200, -1275, 300, 175);
+    }
+
+    // TRAMPOLING //
+    if (isLevelReversed === false) { /// Normal spawn
+      spawn.bodyRect(0, -1000, 500, 120, 1, spawn.propsHoist); //hoist
+      cons[cons.length] = Constraint.create({
+        pointA: {
+          x: 250,
+          y: -1750,
+        },
+        bodyB: body[body.length - 1],
+        stiffness: 0.00014,
+        length: 120
+      });
+      spawn.bodyRect(0, -1250, 240, 190) //Fat cube ascenseur
+    } else { /// Reversed spawn
+      spawn.bodyRect(0, -650, 225, 175);
+      spawn.mapRect(425, -950, 175, 50);
+      spawn.mapRect(-25, -1150, 100, 50);
+    }
+    // PUIT //
+    spawn.mapVertex(4200, -1810, "0 0 450 0 600 -2500 0 -2500")
+    spawn.mapVertex(5000, -1809, "0 0 450 0 450 -2500 -150 -2500")
+    spawn.mapRect(4800, -3000, 800, 5875); //big right Puit
+    // BOSS AREA //
+    spawn.mapRect(4800, -3150, 50, 200); //Premiere barriere
+    spawn.mapRect(5100, -3530, 50, 380); //2nd barriere
+    spawn.mapRect(5100, -3200, 150, 50); //Marche en dessous mapVertex 1
+    spawn.mapVertex(5450, -3650, "220 0  200 30  -200 30  -220 0  -200 -30  200 -30");
+    spawn.mapVertex(6225, -3350, "275 0  250 50  -250 50  -275 0  -250 -50  250 -50");
+    spawn.mapRect(5600, -3000, 1600, 725); //ground Boss Area
+    //Ouverture right boss area
+    spawn.mapRect(7300, -3325, 50, 50); //petite marche pour accéder à l'ouverture 
+    spawn.mapRect(7350, -4075, 850, 50); //Bouche
+    spawn.mapRect(7400, -4050, 800, 50); //Bouche
+    spawn.mapRect(7450, -4025, 750, 50); //Bouche
+    spawn.mapRect(7500, -4000, 700, 50); //Bouche
+    spawn.mapRect(7550, -3975, 650, 50); //Bouche
+    spawn.mapRect(7350, -3600, 850, 50); //Bouche
+    spawn.mapRect(7400, -3625, 800, 50); //Bouche
+    spawn.mapRect(7450, -3650, 575, 50); //Bouche
+    spawn.mapRect(7500, -3675, 525, 50); //Bouche
+    spawn.mapRect(7550, -3700, 475, 50); //Bouche
+    spawn.boost(8290, -2100, 1800);
+    //Murs
+    spawn.mapRect(7350, -5200, 1800, 1125);
+    spawn.mapRect(8475, -4075, 675, 2825);
+    spawn.mapRect(7300, -2100, 1175, 850);
+    spawn.mapRect(7350, -3550, 850, 1275);
+    //Escaliers
+    spawn.mapRect(6600, -2100, 200, 75); //escaliers
+    spawn.mapRect(6750, -2100, 750, 250); //escaliers
+    spawn.mapRect(6950, -1850, 550, 200); //escaliers
+    spawn.mapRect(6750, -1400, 750, 150); //escaliers
+    spawn.mapRect(6550, -1625, 250, 375); //escaliers
+    spawn.mapRect(6350, -1800, 250, 550); //escaliers
+    spawn.mapRect(5600, -2275, 800, 1025); //escaliers
+    // BLOCS
+    if (isLevelReversed === false) { /// Normal spawn
+      spawn.bodyRect(1350, -1175, 225, 25);
+      spawn.bodyRect(1450, -1200, 25, 25);
+    } else { /// Reversed spawn
+      spawn.bodyRect(700, -1175, 225, 25);
+      spawn.bodyRect(800, -1200, 25, 25);
+    }
+    spawn.bodyRect(1100, -1375, 225, 225);
+    spawn.bodyRect(1775, -925, 75, 25);
+    spawn.bodyRect(2225, -950, 75, 50);
+    spawn.bodyRect(2000, -1000, 50, 100);
+    spawn.bodyRect(3100, -1175, 50, 25);
+    spawn.bodyRect(2200, -375, 50, 50);
+    spawn.bodyRect(2200, -425, 50, 50);
+    spawn.bodyRect(2200, -475, 50, 50);
+    spawn.bodyRect(2200, -525, 50, 50);
+    spawn.bodyRect(1050, -400, 50, 25);
+    spawn.mapRect(2200, -650, 50, 125);
+    spawn.mapRect(2200, -325, 50, 150);
+    spawn.mapRect(2875, -225, 250, 50);
+    spawn.mapRect(2050, -1225, 75, 100); //Plateforme over acid
+    // MOBS
+    if (isLevelReversed === false) { ///Normal spawn
+      if (game.difficulty > 2) {
+        if (Math.random() < 0.2) {
+          // tether ball
+          spawn.tetherBoss(7000, -3300)
+          cons[cons.length] = Constraint.create({
+            pointA: {
+              x: 7300,
+              y: -3300
+            },
+            bodyB: mob[mob.length - 1],
+            stiffness: 0.00006
+          });
+          if (game.difficulty > 4) spawn.nodeBoss(7000, -3300, "spawns", 8, 20, 105);
+        } else if (game.difficulty > 3) {
+          spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss"]);
+        }
+      }
+    } else { /// Reversed spawn
+      if (game.difficulty > 2) {
+        if (Math.random() < 0.2) {
+          // tether ball
+          spawn.tetherBoss(2300, -1300)
+          cons[cons.length] = Constraint.create({
+            pointA: {
+              x: 2300,
+              y: -1750
+            },
+            bodyB: mob[mob.length - 1],
+            stiffness: 0.00036
+          });
+          if (game.difficulty > 4) spawn.nodeBoss(2350, -1300, "spawns", 8, 20, 105);
+        } else if (game.difficulty > 3) {
+          spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss"]);
+        }
+      }
+    }
+    spawn.randomSmallMob(100, -1000, 1);
+    spawn.randomSmallMob(1340, -675, 1);
+    spawn.randomSmallMob(7000, -3750, 1);
+    spawn.randomSmallMob(6050, -3200, 1);
+    spawn.randomMob(1970 + 10 * Math.random(), -1150 + 20 * Math.random(), 1);
+    spawn.randomMob(3500, -525, 0.8);
+    spawn.randomMob(6700, -3700, 0.8);
+    spawn.randomMob(2600, -1300, 0.7);
+    spawn.randomMob(600, -1250, 0.7);
+    spawn.randomMob(2450, -250, 0.6);
+    spawn.randomMob(6200, -3200, 0.6);
+    spawn.randomMob(900, -700, 0.5);
+    spawn.randomMob(1960, -400, 0.5);
+    spawn.randomMob(5430, -3520, 0.5);
+    spawn.randomMob(400, -700, 0.5);
+    spawn.randomMob(6500, -4000, 0.4);
+    spawn.randomMob(3333, -400, 0.4);
+    spawn.randomMob(3050, -1220, 0.4);
+    spawn.randomMob(800, 1200, 0.3);
+    spawn.randomMob(7200, -4000, 0.3);
+    spawn.randomMob(250, -1550, 0.3);
+    spawn.randomBoss(900, -1450, 0.3);
+    spawn.randomBoss(2980, -400, 0.3);
+    spawn.randomBoss(5750, -3860, 0.4);
+    spawn.randomBoss(1130, 1300, 0.1);
+    powerUps.addRerollToLevel() //needs to run after mobs are spawned
+    powerUps.spawn(1900, -940, "heal");
+    powerUps.spawn(3000, -230, "heal");
+    powerUps.spawn(5450, -3675, "ammo");
+
+    // SECRET BOSS AREA //
+    //hidden zone
+    level.fill.push({
+      x: -750,
+      y: -900,
+      width: 750,
+      height: 450,
+      color: "rgba(61,62,62,0.95)"
+    });
+    //hidden house
+    spawn.mapRect(-850, -2000, 600, 1150); //Toit hidden house
+    spawn.mapRect(-2850, -2000, 2150, 4880); //Mur gauche hidden house
+    spawn.mapRect(-850, -458, 500, 3340); //Bloc sol hidden house
+    //
+    spawn.mapRect(-400, 2025, 3450, 850); //Sol secret boss area
+    spawn.mapRect(625, 1300, 225, 50); //Plateforme horizontale n°1 
+    spawn.mapRect(850, 1775, 470, 50); //Plateforme horizontale n°2
+    spawn.mapRect(1000, 1625, 100, 150); //Plateforme vertiale n°1
+    spawn.mapRect(1400, 1275, 100, 100); //Plateforme carrée
+    spawn.mapRect(1700, 1675, 75, 450); //Plateforme verticale n°2
+    spawn.mapRect(2100, 1375, 450, 50); //Plateforme accroche boss
+    spawn.mapRect(2900, 900, 175, 325); //Débord de toit droite haut
+    spawn.mapRect(2900, 1675, 150, 350); //Muret en bas à droite
+    spawn.mapRect(2900, 1225, 75, 100); //Picot haut entrée salle trésor
+    spawn.mapRect(2900, 1575, 75, 100); //Picot bas entrée salle trésor
+    spawn.mapRect(2800, 1575, 100, 25); //Plongeoir sortie salle trésor
+    spawn.mapRect(3050, 1675, 400, 1200); //Sol sallle trésor
+    spawn.mapRect(3075, 1075, 375, 150); //Plafond salle trésor
+    spawn.mapRect(3300, 1075, 1500, 1800); //Mur droite salle trésor
+    // tether ball
+    spawn.tetherBoss(2330, 1850)
+    cons[cons.length] = Constraint.create({
+      pointA: {
+        x: 2330,
+        y: 1425
+      },
+      bodyB: mob[mob.length - 1],
+      stiffness: 0.00017
+    });
+    //chance to spawn a ring of exploding mobs around this boss
+    if (game.difficulty > 4) spawn.nodeBoss(2330, 1850, "spawns", 8, 20, 105);
+    powerUps.spawn(3010, 1630, "mod");
+    powerUps.spawn(3100, 1630, "heal");
   },
   //******************************************************************************************************************
   //******************************************************************************************************************
@@ -2524,7 +2850,6 @@ const level = {
         mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
       },
       inertia: Infinity, //prevents rotation
-      isNotSticky: true,
       isNotHoldable: true,
       friction: 1,
       frictionStatic: 1,
@@ -2564,13 +2889,11 @@ const level = {
   rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.0005) {
     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
       density: density,
-      isNotSticky: true,
       isNotHoldable: true
     });
     const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
       angle: Math.PI / 2,
       density: density,
-      isNotSticky: true,
       isNotHoldable: true
     });
     rotor = Body.create({ //combine rotor1 and rotor2
@@ -2678,7 +3001,7 @@ const level = {
       }
     }
   },
-  door(x, y, width, height) {
+  door(x, y, width, height, distance) {
     x = x + width / 2
     y = y + height / 2
     const doorBlock = body[body.length] = Bodies.rectangle(x, y, width, height, {
@@ -2687,7 +3010,6 @@ const level = {
         mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
       },
       inertia: Infinity, //prevents rotation
-      isNotSticky: true,
       isNotHoldable: true,
       friction: 1,
       frictionStatic: 1,
@@ -2696,7 +3018,7 @@ const level = {
       openClose() {
         if (!mech.isBodiesAsleep) {
           if (!this.isOpen) {
-            if (this.position.y > y - height) { //try to open 
+            if (this.position.y > y - distance) { //try to open 
               const position = {
                 x: this.position.x,
                 y: this.position.y - 1

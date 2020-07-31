@@ -410,7 +410,7 @@ const powerUps = {
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0027 * (15 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
+    if (Math.random() < 0.0027 * (20 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod");
       return;
@@ -480,10 +480,7 @@ const powerUps = {
 
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
-    if (Math.random() < 0.01) {
-      powerUps.spawn(x, y, "reroll");
-      if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "reroll");
-    } else if (Math.random() < 0.5) {
+    if (Math.random() < 0.5) {
       powerUps.spawn(x, y, "heal", false);
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "heal", false);
     } else if (!mod.bayesian) {
@@ -491,7 +488,7 @@ const powerUps = {
     }
   },
   addRerollToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed reroll
-    if (mob.length) {
+    if (mob.length && Math.random() < 0.9) { // 80% chance
       const index = Math.floor(Math.random() * mob.length)
       powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");
       if (Math.random() < mod.bayesian) powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");
