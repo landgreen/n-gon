@@ -1175,7 +1175,6 @@ const mech = {
   fieldUpgrades: [{
       name: "field emitter",
       description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-harm'>harm</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
-      isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
         mech.hold = function () {
@@ -1202,7 +1201,6 @@ const mech = {
     {
       name: "standing wave harmonics",
       description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong>",
-      isEasyToAim: true,
       effect: () => {
         mech.fieldHarmReduction = 0.67;
         mech.fieldBlockCD = 0;
@@ -1245,7 +1243,6 @@ const mech = {
       name: "perfect diamagnetism",
       // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
       description: "<strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>cool down</strong> and less <strong>recoil</strong>",
-      isEasyToAim: false,
       effect: () => {
         mech.fieldShieldingScale = 0;
         // mech.fieldMeterColor = "#0af"
@@ -1302,7 +1299,6 @@ const mech = {
     {
       name: "nano-scale manufacturing",
       description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong class='color-f'>energy</strong> regeneration is <strong>doubled</strong>",
-      isEasyToAim: true,
       effect: () => {
         // mech.fieldRegen *= 2;
         mech.hold = function () {
@@ -1326,7 +1322,7 @@ const mech = {
                 1, mod.babyMissiles)
             } else if (mod.isIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.061;
+              mech.energy -= 0.045;
               b.iceIX(1)
             } else {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
@@ -1360,7 +1356,6 @@ const mech = {
       name: "negative mass field",
       description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
       fieldDrawRadius: 0,
-      isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
@@ -1478,7 +1473,6 @@ const mech = {
     {
       name: "plasma torch",
       description: "use <strong class='color-f'>energy</strong> to emit short range plasma<br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
-      isEasyToAim: false,
       effect() {
         mech.fieldMeterColor = "#f0f"
         mech.hold = function () {
@@ -1634,7 +1628,6 @@ const mech = {
     {
       name: "time dilation field",
       description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><em>you can move and fire while time is stopped</em>",
-      isEasyToAim: true,
       effect: () => {
         // mech.fieldMeterColor = "#000"
         mech.fieldFire = true;
@@ -1727,7 +1720,6 @@ const mech = {
     {
       name: "phase decoherence field",
       description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>firing</strong> and touching <strong>shields</strong> increases <strong>drain</strong>",
-      isEasyToAim: true,
       effect: () => {
         mech.fieldFire = true;
         mech.fieldMeterColor = "#fff";
@@ -1876,7 +1868,6 @@ const mech = {
     {
       name: "pilot wave",
       description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
-      isEasyToAim: false,
       effect: () => {
         game.replaceTextLog = true; //allow text over write
         game.isBodyDamage = false;

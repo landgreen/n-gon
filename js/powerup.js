@@ -171,7 +171,7 @@ const powerUps = {
       function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 1; i < who.length; i++) {
-          if (i !== mech.fieldMode && (!game.isEasyToAimMode || mech.fieldUpgrades[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
+          if (i !== mech.fieldMode && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
         }
         //remove repeats from last selection
         const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
@@ -310,7 +310,7 @@ const powerUps = {
       function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
         let options = [];
         for (let i = 0; i < who.length; i++) {
-          if (!who[i].have && (!game.isEasyToAimMode || b.guns[i].isEasyToAim) && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) {
+          if (!who[i].have && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) {
             options.push(i);
           }
         }

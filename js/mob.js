@@ -47,7 +47,7 @@ const mobs = {
     applySlow(who)
     //look for mobs near the target
     if (mod.isAoESlow) {
-      const range = (220 + 150 * Math.random()) ** 2
+      const range = (320 + 150 * Math.random()) ** 2
       for (let i = 0, len = mob.length; i < len; i++) {
         if (Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range) applySlow(mob[i])
       }
@@ -705,10 +705,13 @@ const mobs = {
         //accelerate towards the player
         if (this.seePlayer.recall) {
           // && dx * dx + dy * dy < 2000000) {
-          const forceMag = this.accelMag * this.mass;
-          const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-          this.force.x += forceMag * Math.cos(angle);
-          this.force.y += forceMag * Math.sin(angle);
+          // const forceMag = this.accelMag * this.mass;
+          // const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+          // this.force.x += forceMag * Math.cos(angle);
+          // this.force.y += forceMag * Math.sin(angle);
+          const force = Vector.mult(Vector.normalise(Vector.sub(this.seePlayer.position, this.position)), this.accelMag * this.mass)
+          this.force.x += force.x;
+          this.force.y += force.y;
         }
       },
       repulsionRange: 500000,
@@ -1076,7 +1079,7 @@ const mobs = {
       //replace dead mob with a regular body
       replace(i) {
         //if there are too many bodies don't turn into blocks to help performance
-        if (this.leaveBody && body.length < 60 && this.mass < 100) {
+        if (this.leaveBody && body.length < 60 && this.mass < 200) {
           const len = body.length;
           const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
           body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
@@ -1091,7 +1094,7 @@ const mobs = {
           World.add(engine.world, body[len]); //add to world
 
           //large mobs shrink so they don't block paths
-          if (body[len].mass > 10) {
+          if (body[len].mass > 9) {
             const shrink = function (that, massLimit) {
               if (that.mass > massLimit) {
                 const scale = 0.95;
@@ -1099,7 +1102,7 @@ const mobs = {
                 setTimeout(shrink, 20, that, massLimit);
               }
             };
-            shrink(body[len], 9 + 5 * Math.random())
+            shrink(body[len], 7 + 4 * Math.random())
           }
         }
         Matter.World.remove(engine.world, this);

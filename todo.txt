@@ -1,15 +1,32 @@
-the game zooms out a bit when the mouse is near the edge of the browser window
-  (is it annoying or helpful?)
-  maybe I should add in a smoothing variable for the edge zoom
+removed eay to aim setting
+  the addition of gun selection make this setting less important
+
+mod: bot upgrades - forked into 4 different mods for each bot
+  effect is increased to 100% improvement (up from 40%)
+
+drones are more likely to pick up power ups
+mod harvester: now also gives the drone immortality
+
+new level boss: after it dies it returns with one less vertex
+  also it steals all your power ups (what!)
 
 ************** TODO - n-gon **************
 
-drop level boss rate mods a bit earlier
-  or increase damage scaling
+ghosters are always visible
+ghoster mobs eat power ups and drop them on death
+  draw ghoster if it has a power up
+    or just always draw ghoster?
+  if no power ups on map go for player
 
-fix tension on stronghold
-
-zoom out a bit when mouse is near edge of screen
+give mobs more animal-like behaviors
+  like rain world
+  give mobs something to do when they don't see player
+    explore map
+  mobs some times aren't aggressive
+    when low on life or after taking a large hit
+  mobs can fight each other
+    this might be hard to code
+  isolated mobs try to group up
 
 map: laboratory
   rooms with switches that change physics
@@ -54,6 +71,8 @@ lore - a robot (the player) gains self awareness
 new gun - deploy a turret that last for 20 seconds
   fire nails at nearby targets once a second.
   use mine code and bot code
+mod - mines become a turret that fires nails
+  it could float to the mouse location on fire
 
 minigun: high caliber - rework
   slow down the bullets even more and increase the size?
@@ -64,10 +83,6 @@ portals:
     only seems to happen with the bottom right block
   extend to bodies  (mobs?)
   use buttons to turn on and off?
-
-level boss: boss that dies and comes back to life but with one less side until it hits 3 sides
-  change color too (hsl)
-  boss shrinks and moves faster after each death
 
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
@@ -82,10 +97,6 @@ map: prison
     mobs inside the doors?
 
 map: airport
-
-button: blocks that are on the button at an angle will slowly slide off the button
-  maybe just avoid long blocks near the button?
-  maybe actively hold the button in place?
 
 mod - do 50% more damage in close, but 50% less at a distance
   code it like mod.isFarAwayDmg
@@ -130,8 +141,6 @@ redblobgames.com/articles/visibility
   https://github.com/Silverwolf90/2d-visibility/tree/master/src
   could apply to explosions, neutron bomb, player LOS
 
-bug - sticking bullets don't always gain the correct speed from mobs after they die
-
 possible names for mods
   Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
 
@@ -145,46 +154,18 @@ boss levels - small levels just a boss, and maybe a few mobs
   boss level for timeSkipBoss because of game instability for boss on normal levels
     this might not fix issues
 
-bullets cost 5 life instead of ammo, but return 5 life when they hit a mob
-  replace life with energy or ammo?
-
 an effect when canceling a power up
   ammo? heals?
   50% chance for a mod, 25% heal, 25% ammo
 
-liquid nitrogen cooling
-  Mobs freeze on contact with the player
-
-uranium reactor core
-  Mobs get irradiated on contact with the player
-
 add player Scent Trails for mob navigation
   https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
 
-mod - scale squirrel cage rotor with current energy
-  is variable speed going to be hard to deal with?
-
 mod - you can no longer see your current health
-
-mod - increase laser bot range, and reduce energy drain
-
-mod - mines become a turret that fires nails
-  it could float to the mouse location on fire
-
-mod - blocks stun mobs
 
 settings - custom keys binding
 
 css transition for pause menu
-
-gun/field: portals
-  use the code from mines to get them to stick to walls
-    or lasers
-  alternate red and blue portals
-  
-weekly random challenge where everyone playing each week gets the same random setup.
-  The randomness would be determined by the date so it would sync everyone.
-  power ups still drop, but the drops are determined by a preset list that changes each week.
 
 gun:  Spirit Bomb (singularity)
   use charge up like rail gun
@@ -194,41 +175,11 @@ gun:  Spirit Bomb (singularity)
   uses energy
   hold above the player's head
 
-add a key that player picks up and needs to set on the exit door to open it
-
 make power ups keep moving to player if the pickup field is turned off before they get picked up
   not sure how to do this without adding a constant check
 
 animate new level spawn by having the map aspects randomly fly into place
     
-give mobs more animal-like behaviors
-  like rain world
-  give mobs something to do when they don't see player
-    explore map
-    eat power ups
-      drop power up (if killed after eating one)
-  mobs some times aren't aggressive
-    when low on life or after taking a large hit
-  mobs can fight each other
-    this might be hard to code
-  isolated mobs try to group up.
-    
-game mechanics
-  mechanics that support the physics engine
-    add rope/constraint
-  get ideas from game: limbo / inside
-  environmental hazards
-    laser
-    lava
-  button / switch
-  door
-  fizzler
-  moving platform
-  map zones
-    water
-    low friction ground
-    bouncy ground
-
 n-gon outreach ideas
   blips - errant signal on youtube
   reddit - r/IndieGaming

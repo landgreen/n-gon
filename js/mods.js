@@ -79,7 +79,7 @@ const mod = {
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.006
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
-        if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
+        if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.22
         return dmg * mod.slowFire
     },
     totalBots() {
@@ -87,7 +87,7 @@ const mod = {
     },
     mods: [{
             name: "integrated armament",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>22%</strong><br>your inventory can only hold <strong>1 gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -390,6 +390,23 @@ const mod = {
             }
         },
         {
+            name: "bot fabrication",
+            description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls > 3 || build.isCustomSelection
+            },
+            requires: "at least 4 rerolls",
+            effect() {
+                mod.isRerollBots = true;
+                powerUps.reroll.changeRerolls(0)
+            },
+            remove() {
+                mod.isRerollBots = false;
+            }
+        },
+        {
             name: "nail-bot",
             description: "a bot fires <strong>nails</strong> at targets in line of sight",
             maxCount: 9,
@@ -404,6 +421,28 @@ const mod = {
             },
             remove() {
                 mod.nailBotCount = 0;
+            }
+        },
+        {
+            name: "nail-bot upgrade",
+            description: "<strong>100%</strong> increased nail-bot <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.nailBotCount > 1
+            },
+            requires: "2 or more nail bots",
+            effect() {
+                mod.isNailBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'nail') bullet[i].isUpgraded = true
+                }
+            },
+            remove() {
+                mod.isNailBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'nail') bullet[i].isUpgraded = false
+                }
             }
         },
         {
@@ -424,6 +463,28 @@ const mod = {
             }
         },
         {
+            name: "foam-bot upgrade",
+            description: "<strong>100%</strong> increased foam-bot <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.foamBotCount > 1
+            },
+            requires: "2 or more foam bots",
+            effect() {
+                mod.isFoamBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'foam') bullet[i].isUpgraded = true
+                }
+            },
+            remove() {
+                mod.isFoamBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'foam') bullet[i].isUpgraded = false
+                }
+            }
+        },
+        {
             name: "boom-bot",
             description: "a bot <strong>defends</strong> the space around you<br>ignites an <strong class='color-e'>explosion</strong> after hitting a mob",
             maxCount: 9,
@@ -438,6 +499,28 @@ const mod = {
             },
             remove() {
                 mod.boomBotCount = 0;
+            }
+        },
+        {
+            name: "boom-bot upgrade",
+            description: "<strong>100%</strong> increased boom-bot <strong class='color-e'>explosion</strong> size<br><em>applies to all current and future boom-bots</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.boomBotCount > 1
+            },
+            requires: "2 or more boom bots",
+            effect() {
+                mod.isBoomBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'boom') bullet[i].isUpgraded = true
+                }
+            },
+            remove() {
+                mod.isBoomBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'boom') bullet[i].isUpgraded = false
+                }
             }
         },
         {
@@ -458,20 +541,25 @@ const mod = {
             }
         },
         {
-            name: "bot fabrication",
-            description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
+            name: "laser-bot upgrade",
+            description: "<strong>100%</strong> increased laser-bot <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 3 || build.isCustomSelection
+                return mod.laserBotCount > 1
             },
-            requires: "at least 4 rerolls",
+            requires: "2 or more laser bots",
             effect() {
-                mod.isRerollBots = true;
-                powerUps.reroll.changeRerolls(0)
+                mod.isLaserBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'laser') bullet[i].isUpgraded = true
+                }
             },
             remove() {
-                mod.isRerollBots = false;
+                mod.isLaserBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'laser') bullet[i].isUpgraded = false
+                }
             }
         },
         {
@@ -504,28 +592,6 @@ const mod = {
             },
             remove() {
                 mod.isBotArmor = false
-            }
-        },
-        {
-            name: "bot upgrades",
-            description: "<strong>40% improved:</strong> nail fire rate, boom explosion,<br>foam size, laser drain, and plasma drain",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.totalBots() > 1
-            },
-            requires: "2 or more bots",
-            effect() {
-                mod.isBotUpgrade = true
-                for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].isBot) bullet[i].isUpgraded = true
-                }
-            },
-            remove() {
-                mod.isBotUpgrade = false
-                for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].isBot) bullet[i].isUpgraded = false
-                }
             }
         },
         {
@@ -1724,7 +1790,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob > 1 || mod.haveGunCheck("mine") || mod.isRailNails || mod.isNailShot
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot > 1
             },
             requires: "nails",
             effect() {
@@ -1817,7 +1883,7 @@ const mod = {
         },
         {
             name: "harvester",
-            description: "when a <strong>drone</strong> picks up a <strong>power up</strong><br> improve its size, duration, and vision rate",
+            description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>bigger</strong>, <strong>faster</strong>, and infinitely <strong>durable</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2483,7 +2549,10 @@ const mod = {
     isMineDrop: null,
     isRerollBots: null,
     isRailTimeSlow: null,
-    isBotUpgrade: null,
+    isNailBotUpgrade: null,
+    isFoamBotUpgrade: null,
+    isLaserBotUpgrade: null,
+    isBoomBotUpgrade: null,
     isDroneGrab: null,
     isOneGun: null
 }

@@ -81,7 +81,7 @@ const spawn = {
       }
     }
   },
-  randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss"]) {
+  randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss"]) {
     // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
@@ -226,6 +226,50 @@ const spawn = {
         this.dropPowerUp = false;
       }
     }
+  },
+  powerUpBoss(x, y, vertices = 9, radius = 150) {
+    mobs.spawn(x, y, vertices, radius, "transparent");
+    let me = mob[mob.length - 1];
+    me.isBoss = true;
+    me.frictionAir = 0.05
+    me.seeAtDistance2 = 600000;
+    me.accelMag = 0.0005 * game.accelScale;
+    if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
+    Matter.Body.setDensity(me, 0.001); //normal is 0.001
+    me.collisionFilter.mask = cat.bullet | cat.player
+    // me.memory = 480;
+    // me.seePlayerFreq = 40 + Math.floor(10 * Math.random())
+
+    me.lockedOn = null;
+    if (vertices === 9) {
+      powerUps.spawnBossPowerUp(me.position.x, me.position.y)
+      powerUp[powerUp.length - 1].collisionFilter.mask = 0
+      me.powerUpInventory = [powerUp[powerUp.length - 1]];
+    }
+
+    me.onDeath = function () {
+      if (vertices > 3) spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
+      for (let i = 0; i < powerUp.length; i++) {
+        powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
+      }
+    };
+    me.do = function () {
+      this.stroke = `hsl(0,0%,${80+25*Math.sin(game.cycle*0.01)}%)`
+
+      //steal all power ups
+      for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
+        powerUp[i].collisionFilter.mask = 0
+        Matter.Body.setPosition(powerUp[i], this.vertices[i])
+        Matter.Body.setVelocity(powerUp[i], {
+          x: 0,
+          y: 0
+        })
+      }
+
+      this.seePlayerByLookingAt();
+      this.attraction();
+      this.checkStatus();
+    };
   },
   // healer(x, y, radius = 20) {
   //   mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");

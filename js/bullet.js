@@ -674,14 +674,14 @@ const b = {
   drone(speed = 1) {
     const me = bullet.length;
     const THRUST = mod.isFastDrones ? 0.0025 : 0.0015
-    const FRICTION = mod.isFastDrones ? 0.008 : 0.0005
+    // const FRICTION = mod.isFastDrones ? 0.008 : 0.0005
     const dir = mech.angle + 0.4 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random())
     bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 8, RADIUS, {
       angle: dir,
       inertia: Infinity,
       friction: 0.05,
-      frictionAir: FRICTION,
+      frictionAir: 0,
       restitution: 1,
       dmg: 0.28, //damage done in addition to the damage from momentum
       lookFrequency: 80 + Math.floor(23 * Math.random()),
@@ -741,32 +741,32 @@ const b = {
               let closeDist = Infinity;
               for (let i = 0, len = powerUp.length; i < len; ++i) {
                 if (
-                  ((powerUp[i].name !== "field" && powerUp[i].name !== "heal") || (powerUp[i].name === "heal" && mech.health < 0.9 * mech.maxHealth)) &&
+                  (powerUp[i].name !== "heal" || mech.health < 0.9 * mech.maxHealth || mod.isDroneGrab) &&
                   Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
                   Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
                 ) {
                   const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
                   const DIST = Vector.magnitude(TARGET_VECTOR);
                   if (DIST < closeDist) {
-                    if (DIST < 100) { //eat the power up if close enough
-                      powerUps.onPickUp();
-                      powerUp[i].effect();
-                      Matter.World.remove(engine.world, powerUp[i]);
-                      powerUp.splice(i, 1);
-                      if (mod.isDroneGrab) {
-                        this.isImproved = true;
-                        const SCALE = 2
-                        Matter.Body.scale(this, SCALE, SCALE);
-                        this.lookFrequency = 30;
-                        this.endCycle = game.cycle + Math.floor((1100 + 420 * Math.random()) * mod.isBulletsLastLonger) * 2 //set to double a normal lifespan
-                        this.dmg *= 1.5;
-                        this.frictionAir *= 0.9
-                      }
-                      break;
-                    }
                     closeDist = DIST;
                     this.lockedOn = powerUp[i]
                   }
+                }
+                if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000) {
+                  powerUps.onPickUp();
+                  powerUp[i].effect();
+                  Matter.World.remove(engine.world, powerUp[i]);
+                  powerUp.splice(i, 1);
+                  if (mod.isDroneGrab) {
+                    this.isImproved = true;
+                    const SCALE = 2
+                    Matter.Body.scale(this, SCALE, SCALE);
+                    this.lookFrequency = 30;
+                    this.endCycle = Infinity
+                    this.dmg *= 1.5;
+                    this.frictionAir = 0
+                  }
+                  break;
                 }
               }
             }
@@ -1011,13 +1011,13 @@ const b = {
       if (isKeep) mod.boomBotCount++;
     }
   },
-  nailBot(position = mech.pos, isUpgraded = mod.isBotUpgrade) {
+  nailBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (12 + 4 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
-      isUpgraded: isUpgraded,
-      isBot: true,
+      isUpgraded: mod.isNailBotUpgrade,
+      botType: "nail",
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1042,7 +1042,7 @@ const b = {
       onEnd() {},
       do() {
         if (this.lastLookCycle < game.cycle) {
-          this.lastLookCycle = game.cycle + 65 - this.isUpgraded * 25
+          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 40
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1066,13 +1066,13 @@ const b = {
     })
     World.add(engine.world, bullet[me]); //add bullet to world
   },
-  foamBot(position = mech.pos, isUpgraded = mod.isBotUpgrade) {
+  foamBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (10 + 5 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 6, RADIUS, {
-      isUpgraded: isUpgraded,
-      isBot: true,
+      isUpgraded: mod.isFoamBotUpgrade,
+      botType: "foam",
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1080,7 +1080,7 @@ const b = {
       restitution: 0.6 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
-      lookFrequency: 47 + Math.floor(17 * Math.random()),
+      lookFrequency: 60 + Math.floor(17 * Math.random()) - 10 * mod.isFoamBotUpgrade,
       cd: 0,
       delay: 100,
       acceleration: 0.005 * (1 + 0.5 * Math.random()),
@@ -1107,7 +1107,7 @@ const b = {
               const radius = 6 + 7 * Math.random()
               const SPEED = 29 - radius * 0.5; //(mech.crouch ? 32 : 20) - radius * 0.7;
               const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-              b.foam(this.position, velocity, radius + 7 * this.isUpgraded)
+              b.foam(this.position, velocity, radius + 8 * this.isUpgraded)
               break;
             }
           }
@@ -1122,13 +1122,13 @@ const b = {
     })
     World.add(engine.world, bullet[me]); //add bullet to world
   },
-  laserBot(position = mech.pos, isUpgraded = mod.isBotUpgrade) {
+  laserBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (14 + 6 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 3, RADIUS, {
-      isUpgraded: isUpgraded,
-      isBot: true,
+      isUpgraded: mod.isLaserBotUpgrade,
+      botType: "laser",
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1136,9 +1136,9 @@ const b = {
       restitution: 0.5 * (1 + 0.5 * Math.random()),
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 2,
-      lookFrequency: 27 + Math.floor(17 * Math.random()),
+      lookFrequency: 40 + Math.floor(7 * Math.random()),
       acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-      range: 600 * (1 + 0.2 * Math.random()),
+      range: 600 * (1 + 0.2 * Math.random()) + 200 * mod.isLaserBotUpgrade,
       followRange: 150 + Math.floor(30 * Math.random()),
       offPlayer: {
         x: 0,
@@ -1189,7 +1189,7 @@ const b = {
         }
         //hit target with laser
         if (this.lockedOn && this.lockedOn.alive && mech.energy > 0.15) {
-          mech.energy -= 0.0014 * mod.isLaserDiode - 0.0006 * this.isUpgraded
+          mech.energy -= 0.0014 * mod.isLaserDiode
           //make sure you can still see vertex
           const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
           if (DIST - this.lockedOn.radius < this.range + 150 &&
@@ -1207,7 +1207,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * 0.05;
+            const dmg = b.dmgScale * (0.04 + 0.04 * this.isUpgraded);
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 
@@ -1230,13 +1230,13 @@ const b = {
     })
     World.add(engine.world, bullet[me]); //add bullet to world
   },
-  boomBot(position = mech.pos, isUpgraded = mod.isBotUpgrade) {
+  boomBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = (7 + 2 * Math.random())
     bullet[me] = Bodies.polygon(position.x, position.y, 4, RADIUS, {
-      isUpgraded: isUpgraded,
-      isBot: true,
+      isUpgraded: mod.isBoomBotUpgrade,
+      botType: "boom",
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1244,9 +1244,9 @@ const b = {
       restitution: 1,
       dmg: 0,
       minDmgSpeed: 0,
-      lookFrequency: 35 + Math.floor(7 * Math.random()),
+      lookFrequency: 43 + Math.floor(7 * Math.random()),
       acceleration: 0.005 * (1 + 0.5 * Math.random()),
-      range: 500 * (1 + 0.1 * Math.random()),
+      range: 500 * (1 + 0.1 * Math.random()) + 250 * mod.isBoomBotUpgrade,
       endCycle: Infinity,
       classType: "bullet",
       collisionFilter: {
@@ -1257,7 +1257,7 @@ const b = {
       explode: 0,
       onDmg() {
         if (this.lockedOn) {
-          const explosionRadius = Math.min(170 + 70 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
+          const explosionRadius = Math.min(170 + 110 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
           if (explosionRadius > 60) {
             this.explode = explosionRadius
             // 
@@ -1308,13 +1308,12 @@ const b = {
     })
     World.add(engine.world, bullet[me]); //add bullet to world
   },
-  plasmaBot(position = mech.pos, isUpgraded = mod.isBotUpgrade) {
+  plasmaBot(position = mech.pos) {
     const me = bullet.length;
     const dir = mech.angle;
     const RADIUS = 21
     bullet[me] = Bodies.polygon(position.x, position.y, 5, RADIUS, {
-      isUpgraded: isUpgraded,
-      isBot: true,
+      botType: "plasma",
       angle: dir,
       friction: 0,
       frictionStatic: 0,
@@ -1543,7 +1542,6 @@ const b = {
       defaultAmmoPack: 75,
       recordedAmmo: 0,
       have: false,
-      isEasyToAim: false,
       nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       startingHoldCycle: 0,
       fire() {
@@ -1581,7 +1579,6 @@ const b = {
       ammo: 0,
       ammoPack: 9,
       have: false,
-      isEasyToAim: true,
       fire() {
         let knock, spread
         if (mech.crouch) {
@@ -1653,7 +1650,6 @@ const b = {
       ammoPack: 15,
       have: false,
       num: 5,
-      isEasyToAim: true,
       fire() {
         const SPEED = mech.crouch ? 43 : 32
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 18) * b.fireCD); // cool down
@@ -1709,7 +1705,6 @@ const b = {
       ammoPack: 42,
       defaultAmmoPack: 42,
       have: false,
-      isEasyToAim: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       fire() {
@@ -1813,7 +1808,6 @@ const b = {
       ammo: 0,
       ammoPack: 110,
       have: false,
-      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
         const dir = mech.angle
@@ -1949,7 +1943,6 @@ const b = {
       ammo: 0,
       ammoPack: 5,
       have: false,
-      isEasyToAim: true,
       fireCycle: 0,
       ammoLoaded: 0,
       fire() {
@@ -2007,7 +2000,6 @@ const b = {
       ammoPack: 6,
       defaultAmmoPack: 6, //use to revert ammoPack after mod changes drop rate
       have: false,
-      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * b.fireCD); // cool down
         b.muzzleFlash(30);
@@ -2051,7 +2043,6 @@ const b = {
       ammo: 0,
       ammoPack: 7,
       have: false,
-      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
@@ -2103,7 +2094,6 @@ const b = {
       ammo: 0,
       ammoPack: 3,
       have: false,
-      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
@@ -2223,7 +2213,6 @@ const b = {
       ammo: 0,
       ammoPack: 7,
       have: false,
-      isEasyToAim: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
@@ -2382,7 +2371,6 @@ const b = {
       ammo: 0,
       ammoPack: 3,
       have: false,
-      isEasyToAim: true,
       fire() {
         const pos = {
           x: mech.pos.x + 30 * Math.cos(mech.angle),
@@ -2405,7 +2393,6 @@ const b = {
       ammo: 0,
       ammoPack: 5,
       have: false,
-      isEasyToAim: true,
       fire() {
         const me = bullet.length;
         const dir = mech.angle;
@@ -2526,7 +2513,6 @@ const b = {
       ammo: 0,
       ammoPack: 15,
       have: false,
-      isEasyToAim: true,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 5) * b.fireCD); // cool down
@@ -2538,7 +2524,6 @@ const b = {
       ammo: 0,
       ammoPack: 73,
       have: false,
-      isEasyToAim: true,
       fire() {
         if (mech.crouch) {
           b.iceIX(10, 0.3)
@@ -2556,7 +2541,6 @@ const b = {
       ammo: 0,
       ammoPack: 50,
       have: false,
-      isEasyToAim: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
         const radius = mech.crouch ? 10 + 7 * Math.random() : 4 + 6 * Math.random() //(4 + (mech.crouch ? 15 : 6) * Math.random())
@@ -2579,7 +2563,6 @@ const b = {
       ammo: 0,
       ammoPack: 4,
       have: false,
-      isEasyToAim: false,
       fire() {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(0, 0, 0.015, 0.0015, {
@@ -2817,7 +2800,6 @@ const b = {
       ammo: 0,
       ammoPack: Infinity,
       have: false,
-      isEasyToAim: false,
       fire() {
         const reflectivity = 1 - 1 / (mod.laserReflections * 1.5)
         let damage = b.dmgScale * mod.laserDamage
@@ -2976,7 +2958,6 @@ const b = {
       ammo: 0,
       ammoPack: Infinity,
       have: false,
-      isEasyToAim: false,
       fire() {
         //calculate laser collision
         let best, energy, explosionRange;
@@ -3126,7 +3107,6 @@ const b = {
     //   ammo: 0,
     //   ammoPack: Infinity,
     //   have: false,
-    //   isEasyToAim: false,
     //   fire() {
     //     if (mech.energy < 0.002) {
     //       mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy

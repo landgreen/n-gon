@@ -118,7 +118,6 @@ const game = {
   cycle: 0, //total cycles, 60 per second
   fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
   fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
-  isEasyToAimMode: true, //removes power ups that don't work well with a track pad
   isCommunityMaps: false,
   cyclePaused: 0,
   fallHeight: 3000, //below this y position the player dies
@@ -476,7 +475,7 @@ const game = {
     const dx = game.mouse.x / window.innerWidth - 0.5 //x distance from mouse to window center scaled by window width
     const dy = game.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
     const d = Math.max(dx * dx, dy * dy)
-    game.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.05 + game.edgeZoomOutSmooth * 0.95
+    game.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.04 + game.edgeZoomOutSmooth * 0.96
 
 
     ctx.save();
@@ -754,7 +753,7 @@ const game = {
           });
           // move bots
           for (let i = 0; i < bullet.length; i++) {
-            if (bullet[i].isBot) {
+            if (bullet[i].botType) {
               Matter.Body.setPosition(bullet[i], player.position);
               Matter.Body.setVelocity(bullet[i], {
                 x: 0,
@@ -1050,6 +1049,7 @@ const game = {
       document.execCommand('copy');
     } catch (err) {
       // Unable to copy
+      console.log(err)
     } finally {
       // Remove the textarea
       document.body.removeChild(textAreaEle);
@@ -1083,6 +1083,7 @@ const game = {
       out += game.constructMapString[i];
       outHTML += "<div>" + game.constructMapString[i] + "</div>"
     }
+    console.log(out)
     game.copyToClipBoard(out)
     document.getElementById("construct").innerHTML = outHTML
   },
