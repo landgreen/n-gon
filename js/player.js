@@ -972,7 +972,7 @@ const mech = {
         //draw electricity
         const step = 40
         ctx.beginPath();
-        for (let i = 0, len = 2 * mod.blockDmg; i < len; i++) {
+        for (let i = 0, len = 2.5 * mod.blockDmg; i < len; i++) {
           let x = mech.pos.x - 20 * unit.x;
           let y = mech.pos.y - 20 * unit.y;
           ctx.moveTo(x, y);
@@ -1298,9 +1298,8 @@ const mech = {
     },
     {
       name: "nano-scale manufacturing",
-      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong class='color-f'>energy</strong> regeneration is <strong>doubled</strong>",
+      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>increase <strong class='color-f'>energy</strong> regeneration by <strong>100%</strong>",
       effect: () => {
-        // mech.fieldRegen *= 2;
         mech.hold = function () {
           if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle) {
             if (mod.isSporeField) {
@@ -1483,7 +1482,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.0017
+            const DRAIN = 0.002
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
@@ -1492,7 +1491,7 @@ const mech = {
               }
               //calculate laser collision
               let best;
-              let range = mod.isPlasmaRange * (140 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
+              let range = mod.isPlasmaRange * (120 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
               // const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
               const path = [{
                   x: mech.pos.x + 20 * Math.cos(mech.angle),

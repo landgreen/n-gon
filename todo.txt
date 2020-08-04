@@ -1,27 +1,13 @@
-removed eay to aim setting
-  the addition of gun selection make this setting less important
-
-mod: bot upgrades - forked into 4 different mods for each bot
-  effect is increased to 100% improvement (up from 40%)
-
-drones are more likely to pick up power ups
-mod harvester: now also gives the drone immortality
-
-new level boss: after it dies it returns with one less vertex
-  also it steals all your power ups (what!)
+power up level boss: adjustments
 
 ************** TODO - n-gon **************
 
-ghosters are always visible
-ghoster mobs eat power ups and drop them on death
-  draw ghoster if it has a power up
-    or just always draw ghoster?
-  if no power ups on map go for player
+level concept:  several stationary platforms that are free to rotate, but with some air friction
 
-give mobs more animal-like behaviors
-  like rain world
-  give mobs something to do when they don't see player
-    explore map
+foam isFoamGrowOnDeath causes performance issues when too many mobs die fast
+
+give mobs more animal-like behaviors like rain world
+  mobs play, look for food, explore
   mobs some times aren't aggressive
     when low on life or after taking a large hit
   mobs can fight each other

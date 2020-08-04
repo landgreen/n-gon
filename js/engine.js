@@ -175,8 +175,8 @@ function collisionChecks(event) {
               y: mob[k].velocity.y - 8 * Math.sin(angle)
             });
 
-            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.2) {
-              mech.energy -= 0.2
+            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.33) {
+              mech.energy -= 0.33
               mech.immuneCycle = 0; //player doesn't go immune to collision damage
               mob[k].death();
               game.drawList.push({
@@ -224,7 +224,7 @@ function collisionChecks(event) {
             if (v > 9) {
               let dmg = 0.06 * b.dmgScale * v * obj.mass * mod.throwChargeRate;
               if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
-              if (mob[k].isShielded) dmg *= 0.4
+              if (mob[k].isShielded) dmg *= 0.35
               mob[k].damage(dmg, true);
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
               game.drawList.push({

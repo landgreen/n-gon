@@ -268,14 +268,14 @@ const mod = {
         },
         {
             name: "electrostatic discharge",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br><strong>25%</strong> increased <strong>delay</strong> after firing",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br><strong>20%</strong> increased <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
                 return true
             },
             effect() {
-                mod.slowFire = 1.25
+                mod.slowFire = 1.2
                 b.setFireCD();
             },
             remove() {
@@ -2124,7 +2124,7 @@ const mod = {
         },
         {
             name: "plasma jet",
-            description: "increase <strong>plasma torch's</strong> range by <strong>33%</strong>",
+            description: "increase <strong>plasma torch's</strong> range by <strong>27%</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2132,7 +2132,7 @@ const mod = {
             },
             requires: "plasma torch",
             effect() {
-                mod.isPlasmaRange += 0.33;
+                mod.isPlasmaRange += 0.27;
             },
             remove() {
                 mod.isPlasmaRange = 1;
@@ -2174,7 +2174,7 @@ const mod = {
         },
         {
             name: "annihilation",
-            description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>20%</strong> of base <strong class='color-f'>energy</strong>",
+            description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of base <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2214,7 +2214,7 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mod.blockDmg += 0.5 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+                mod.blockDmg += 0.35 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
             },
             remove() {
                 mod.blockDmg = 0;

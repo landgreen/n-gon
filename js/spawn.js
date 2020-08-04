@@ -81,7 +81,8 @@ const spawn = {
       }
     }
   },
-  randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss"]) {
+  //"shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", 
+  randomLevelBoss(x, y, options = ["powerUpBoss"]) {
     // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
@@ -108,7 +109,7 @@ const spawn = {
       this.gravity();
       this.checkStatus();
       if (this.seePlayer.recall) {
-        this.seePlayerByDistAndLOS();
+        this.seePlayerCheck();
         this.attraction();
         //tether to other blocks
         ctx.beginPath();
@@ -116,7 +117,7 @@ const spawn = {
           if (mob[i].isGrouper && mob[i] != this && mob[i].dropPowerUp) { //don't tether to self, bullets, shields, ...
             const distance2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
             if (distance2 < this.groupingRangeMax) {
-              if (!mob[i].seePlayer.recall) mob[i].seePlayerByDistAndLOS(); //wake up sleepy mobs
+              if (!mob[i].seePlayer.recall) mob[i].seePlayerCheck(); //wake up sleepy mobs
               if (distance2 > this.groupingRangeMin) {
                 const angle = Math.atan2(mob[i].position.y - this.position.y, mob[i].position.x - this.position.x);
                 const forceMag = this.groupingStrength * mob[i].mass;
@@ -231,23 +232,28 @@ const spawn = {
     mobs.spawn(x, y, vertices, radius, "transparent");
     let me = mob[mob.length - 1];
     me.isBoss = true;
-    me.frictionAir = 0.05
-    me.seeAtDistance2 = 600000;
-    me.accelMag = 0.0005 * game.accelScale;
-    if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
-    Matter.Body.setDensity(me, 0.001); //normal is 0.001
+    me.frictionAir = 0.025
+    me.seeAtDistance2 = 9000000;
+    me.accelMag = 0.0006 * game.accelScale;
+    Matter.Body.setDensity(me, 0.002); //normal is 0.001
     me.collisionFilter.mask = cat.bullet | cat.player
-    // me.memory = 480;
-    // me.seePlayerFreq = 40 + Math.floor(10 * Math.random())
+    me.memory = Infinity;
+    me.seePlayerFreq = 85 + Math.floor(10 * Math.random())
 
     me.lockedOn = null;
     if (vertices === 9) {
+      //on primary spawn
       powerUps.spawnBossPowerUp(me.position.x, me.position.y)
-      powerUp[powerUp.length - 1].collisionFilter.mask = 0
-      me.powerUpInventory = [powerUp[powerUp.length - 1]];
+      powerUps.spawn(me.position.x, me.position.y, "heal");
+      powerUps.spawn(me.position.x, me.position.y, "ammo");
+    } else {
+      me.foundPlayer();
     }
 
     me.onDeath = function () {
+      this.leaveBody = false;
+      this.dropPowerUp = false;
+
       if (vertices > 3) spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
       for (let i = 0; i < powerUp.length; i++) {
         powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
@@ -266,7 +272,7 @@ const spawn = {
         })
       }
 
-      this.seePlayerByLookingAt();
+      this.seePlayerCheckByDistance();
       this.attraction();
       this.checkStatus();
     };

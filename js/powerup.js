@@ -488,7 +488,7 @@ const powerUps = {
     }
   },
   addRerollToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed reroll
-    if (mob.length && Math.random() < 0.9) { // 80% chance
+    if (mob.length && Math.random() < 0.8) { // 80% chance
       const index = Math.floor(Math.random() * mob.length)
       powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");
       if (Math.random() < mod.bayesian) powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");

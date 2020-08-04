@@ -306,20 +306,6 @@ const mobs = {
           }
         }
       },
-      seePlayerByDistAndLOS() {
-        if (!(game.cycle % this.seePlayerFreq)) {
-          if (
-            this.distanceToPlayer2() < this.seeAtDistance2 &&
-            Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-            Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-            !mech.isStealth
-          ) {
-            this.foundPlayer();
-          } else if (this.seePlayer.recall) {
-            this.lostPlayer();
-          }
-        }
-      },
       isLookingAtPlayer(threshold) {
         const diff = Vector.normalise(Vector.sub(player.position, this.position));
         //make a vector for the mob's direction of length 1
