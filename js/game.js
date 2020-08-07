@@ -761,9 +761,9 @@ const game = {
               });
             }
           }
-          if (game.difficultyMode === 2) mech.damage(0.3);
+          if (game.difficultyMode === 2) mech.damage(0.25);
           if (game.difficultyMode === 1) mech.damage(0.1);
-          mech.energy = 0;
+          mech.energy = 0.01;
         }
       }
 

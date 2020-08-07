@@ -177,7 +177,7 @@ const b = {
       time: game.drawTime
     });
     let dist, sub, knock;
-    let dmg = b.dmgScale * radius * 0.009;
+    let dmg = radius * 0.01;
 
     const alertRange = 100 + radius * 2; //alert range
     //add alert to draw queue
@@ -194,17 +194,15 @@ const b = {
     dist = Vector.magnitude(sub);
 
     if (dist < radius) {
-      if (mod.isImmuneExplosion) {
-        mech.energy += Math.max(radius * 0.0003, 0.15)
-      } else {
-        mech.damage(radius * 0.0002); //normal player damage from explosions
+      if (!(mod.isImmuneExplosion && mech.energy > 0.75)) {
+        mech.damage(radius * 0.0001); //normal player damage from explosions
         mech.drop();
       }
-      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 30);
+      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.015);
       player.force.x += knock.x;
       player.force.y += knock.y;
     } else if (dist < alertRange) {
-      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass / 55);
+      knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.008);
       player.force.x += knock.x;
       player.force.y += knock.y;
     }
@@ -214,11 +212,11 @@ const b = {
       sub = Vector.sub(where, body[i].position);
       dist = Vector.magnitude(sub);
       if (dist < radius) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 18);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.022);
         body[i].force.x += knock.x;
         body[i].force.y += knock.y;
       } else if (dist < alertRange) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) / 40);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.013);
         body[i].force.x += knock.x;
         body[i].force.y += knock.y;
       }
@@ -229,11 +227,11 @@ const b = {
       sub = Vector.sub(where, powerUp[i].position);
       dist = Vector.magnitude(sub);
       if (dist < radius) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 30);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.015);
         powerUp[i].force.x += knock.x;
         powerUp[i].force.y += knock.y;
       } else if (dist < alertRange) {
-        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) / 45);
+        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.01);
         powerUp[i].force.x += knock.x;
         powerUp[i].force.y += knock.y;
       }
@@ -248,16 +246,16 @@ const b = {
         if (dist < radius) {
           if (mob[i].shield) dmg *= 3 //balancing explosion dmg to shields
           if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-          mob[i].damage(dmg * damageScale);
+          mob[i].damage(dmg * damageScale * b.dmgScale);
           mob[i].locatePlayer();
-          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 50);
+          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.01);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
           radius *= 0.95 //reduced range for each additional explosion target
-          damageScale *= 0.85 //reduced damage for each additional explosion target
+          damageScale *= 0.87 //reduced damage for each additional explosion target
         } else if (!mob[i].seePlayer.recall && dist < alertRange) {
           mob[i].locatePlayer();
-          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) / 80);
+          knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.006);
           mob[i].force.x += knock.x;
           mob[i].force.y += knock.y;
         }
@@ -910,7 +908,8 @@ const b = {
             this.target = null
             this.collisionFilter.category = cat.bullet;
             this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-            if (mod.isFoamGrowOnDeath) {
+            if (mod.isFoamGrowOnDeath && bullet.length < 300) {
+              console.log(bullet.length)
               let targets = []
               for (let i = 0, len = mob.length; i < len; i++) {
                 const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -933,6 +932,7 @@ const b = {
                 }
               }
             }
+
           }
         }
       }
@@ -1360,8 +1360,9 @@ const b = {
           const sub = Vector.sub(this.lockedOn.position, this.position)
           const DIST = Vector.magnitude(sub);
           const unit = Vector.normalise(sub)
-          const DRAIN = 0.0016 - 0.0008 * this.isUpgraded
-          if (DIST < mod.isPlasmaRange * 550 && mech.energy > DRAIN) {
+          const DRAIN = 0.002
+          if (DIST < mod.isPlasmaRange * 500 && mech.energy > DRAIN) {
+            console.log('fire')
             mech.energy -= DRAIN;
             if (mech.energy < 0) {
               mech.fieldCDcycle = mech.cycle + 120;
@@ -1369,7 +1370,7 @@ const b = {
             }
             //calculate laser collision
             let best;
-            let range = mod.isPlasmaRange * (140 + 300 * Math.sqrt(Math.random()))
+            let range = mod.isPlasmaRange * (120 + 300 * Math.sqrt(Math.random()))
             const path = [{
                 x: this.position.x,
                 y: this.position.y

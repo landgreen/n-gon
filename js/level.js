@@ -51,9 +51,11 @@ const level = {
       mech.maxHealth += 0.05 * powerUps.totalPowerUps
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
-    if (mod.isHealLowHealth && mech.health < 0.8 * mech.maxHealth * Math.sqrt(game.healScale)) {
-      mech.health = mech.maxHealth * game.healScale
-      mech.displayHealth();
+    if (mod.isHealLowHealth) {
+      const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
+      for (let i = 0; i < len; i++) {
+        powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
+      }
     }
   },
   custom() {},
@@ -412,10 +414,14 @@ const level = {
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   sewers() {
-    const rotor = level.rotor(5100, 2425, -0.001)
+    const rotor = level.rotor(5100, 2475, -0.001)
     const button = level.button(6600, 2675)
     const hazard = level.hazard(4550, 2750, 4550, 150)
-
+    const balance1 = level.spinner(300, -395, 25, 390, 0.001) //entrance
+    const balance2 = level.spinner(2605, 500, 390, 25, 0.005) //falling
+    const balance3 = level.spinner(2608, 1900, 584, 25, 0.005) //falling
+    const balance4 = level.spinner(9300, 2205, 25, 380, 0.001) //exit
+    console.log(balance1)
     level.custom = () => {
       button.query();
       button.draw();
@@ -425,6 +431,17 @@ const level = {
       level.playerExitCheck();
     };
     level.customTopLayer = () => {
+      ctx.fillStyle = "#233"
+      ctx.beginPath();
+      ctx.arc(balance1.pointA.x, balance1.pointA.y, 9, 0, 2 * Math.PI);
+      ctx.moveTo(balance2.pointA.x, balance2.pointA.y)
+      ctx.arc(balance2.pointA.x, balance2.pointA.y, 9, 0, 2 * Math.PI);
+      ctx.moveTo(balance3.pointA.x, balance3.pointA.y)
+      ctx.arc(balance3.pointA.x, balance3.pointA.y, 9, 0, 2 * Math.PI);
+      ctx.moveTo(balance4.pointA.x, balance4.pointA.y)
+      ctx.arc(balance4.pointA.x, balance4.pointA.y, 9, 0, 2 * Math.PI);
+      ctx.fill();
+
       hazard.draw();
     };
 
@@ -440,26 +457,26 @@ const level = {
     spawn.debris(4575, 2550, 1600, 9); //16 debris per level
     spawn.debris(7000, 2550, 2000, 7); //16 debris per level
 
-    level.fill.push({
-      x: 9300,
-      y: 2200,
-      width: 600,
-      height: 400,
-      color: "rgba(0,255,255,0.1)"
-    });
+    // level.fill.push({
+    //   x: 9325,
+    //   y: 2200,
+    //   width: 575,
+    //   height: 400,
+    //   color: "rgba(0,255,255,0.1)"
+    // });
     level.fillBG.push({
       x: 9300,
       y: 2200,
       width: 600,
       height: 400,
-      color: "hsl(138, 10%, 80%)" //c4f4f4
+      color: "hsl(175, 15%, 76%)" //c4f4f4
     });
 
     spawn.mapRect(-500, -600, 200, 800); //left entrance wall
     spawn.mapRect(-400, -600, 3550, 200); //ceiling
     spawn.mapRect(-400, 0, 3000, 200); //floor
-    spawn.mapRect(300, -500, 50, 400); //right entrance wall
-    spawn.bodyRect(312, -100, 25, 100);
+    // spawn.mapRect(300, -500, 50, 400); //right entrance wall
+    // spawn.bodyRect(312, -100, 25, 100);
     spawn.bodyRect(1450, -300, 150, 50);
 
     const xPos = shuffle([600, 1250, 2000]);
@@ -473,15 +490,23 @@ const level = {
     spawn.mapRect(3050, -600, 200, 800); //right down tube wall
     spawn.mapRect(3100, 0, 1200, 200); //tube right exit ceiling
     spawn.mapRect(4200, 0, 200, 1900);
-    spawn.mapRect(3000, 400, 1000, 1250);
-    spawn.mapRect(3000, 1925, 1000, 150);
 
-    spawn.mapRect(3100, 1875, 800, 100);
-    spawn.mapRect(3100, 1600, 800, 100);
-    spawn.mapRect(3100, 350, 800, 100);
-    spawn.mapRect(3100, 2025, 800, 100);
 
-    spawn.mapRect(2400, 0, 200, 1950); //left down tube wall
+    spawn.mapVertex(3500, 1000, "-500 -500  -400 -600   400 -600 500 -500   500 500 400 600  -400 600 -500 500");
+    spawn.mapVertex(3600, 1940, "-400 -40  -350 -90   350 -90 400 -40   400 40 350 90  -350 90 -400 40");
+    spawn.mapRect(3925, 2288, 310, 50);
+    spawn.mapRect(3980, 2276, 200, 50);
+
+    spawn.mapRect(2625, 2288, 650, 50);
+    spawn.mapRect(2700, 2276, 500, 50);
+    // spawn.mapRect(3000, 400, 1000, 1250);
+    // spawn.mapRect(3000, 1925, 1000, 150);
+    // spawn.mapRect(3100, 1875, 800, 100);
+    // spawn.mapRect(3100, 1600, 800, 100);
+    // spawn.mapRect(3100, 350, 800, 100);
+    // spawn.mapRect(3100, 2025, 800, 100);
+
+    spawn.mapRect(2400, 0, 200, 1925); //left down tube wall
     spawn.mapRect(600, 2300, 3750, 200);
     spawn.bodyRect(3800, 275, 125, 125);
 
@@ -490,8 +515,8 @@ const level = {
 
     spawn.mapRect(600, 1700, 2000, 200); //bottom left room ceiling
     spawn.mapRect(500, 1700, 200, 800); //left wall
-    spawn.mapRect(1775, 2225, 550, 125);
-    spawn.mapRect(675, 1875, 325, 150);
+    spawn.mapRect(675, 1875, 325, 150, 0.5);
+
 
     spawn.mapRect(4450, 2900, 4900, 200); //boss room floor
     spawn.mapRect(4150, 2600, 400, 500);
@@ -508,7 +533,7 @@ const level = {
     spawn.mapRect(9100, 1700, 900, 500); //exit
     spawn.mapRect(9100, 2600, 900, 500);
     spawn.mapRect(9900, 1700, 200, 1400); //back wall
-    spawn.mapRect(9300, 2150, 50, 250);
+    // spawn.mapRect(9300, 2150, 50, 250);
     spawn.mapRect(9300, 2590, 650, 25);
     spawn.mapRect(9700, 2580, 100, 50);
 
@@ -772,7 +797,7 @@ const level = {
     // spawn.mapRect(-100, -410, 100, 30);
     spawn.mapRect(-300, -800, 500, 50);
     spawn.mapRect(150, -800, 50, 110);
-    spawn.bodyRect(170, -690, 14, 175, 1, spawn.propsFriction); //door to exit room
+    spawn.bodyRect(170, -690, 14, 180, 1, spawn.propsFriction); //door to exit room
     spawn.mapRect(-300, -400, 500, 100); //far left starting ceiling
     level.fill.push({
       x: -250,
@@ -2289,7 +2314,7 @@ const level = {
   basement() { // player made level  by    Francois 👑 from discord
     let button, door, buttonDoor, buttonPlateformEnd, doorPlateform
     let isLevelReversed = Math.random();
-    if (isLevelReversed < 0.1) {
+    if (isLevelReversed < 0.7) {
       isLevelReversed = false;
     } else {
       isLevelReversed = true;
@@ -2841,7 +2866,35 @@ const level = {
       World.add(engine.world, consBB[i]);
     }
   },
-  platform(x, y, width, height, speed) {
+  spinner(x, y, width, height, density = 0.001) {
+    x = x + width / 2
+    y = y + height / 2
+    const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
+      collisionFilter: {
+        category: cat.body,
+        mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+      },
+      isNotHoldable: true,
+      frictionAir: 0.001,
+      friction: 1,
+      frictionStatic: 1,
+      restitution: 0,
+    });
+
+    Matter.Body.setDensity(who, density)
+    const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+      pointA: {
+        x: x,
+        y: y
+      },
+      bodyB: who,
+      stiffness: 1,
+      damping: 1
+    });
+    World.add(engine.world, constraint);
+    return constraint
+  },
+  platform(x, y, width, height, speed = 0, density = 0.001) {
     x = x + width / 2
     y = y + height / 2
     const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
@@ -2856,6 +2909,7 @@ const level = {
       restitution: 0,
     });
 
+    Matter.Body.setDensity(who, density)
     const constraint = Constraint.create({ //fix rotor in place, but allow rotation
       pointA: {
         x: x,
@@ -2870,23 +2924,10 @@ const level = {
       position: who.position,
       speed: speed,
     }
-
-    // constraint.move = function () {
-    //   if (this.plat.position.y > 350) {
-    //     this.plat.speed = speed
-    //   } else if (this.plat.position.y < -2435) {
-    //     this.plat.speed = -speed
-    //   }
-    //   this.plat.position = {
-    //     x: this.plat.position.x,
-    //     y: this.plat.position.y + this.plat.speed
-    //   }
-    //   this.pointA = this.plat.position
-    // }
     constraint.pauseUntilCycle = 0 //to to pause platform at top and bottom
     return constraint
   },
-  rotor(x, y, rotate = 0, radius = 900, width = 50, density = 0.0005) {
+  rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
       density: density,
       isNotHoldable: true

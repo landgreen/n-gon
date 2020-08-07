@@ -1,10 +1,14 @@
-power up level boss: adjustments
+
+added rotating platforms to sewers level
+mod negentropy: now spawns a heal power up for every 50% missing health at the start of a level
+
+all explosions do about 10% more damage
+knock back no longer gets weaker at high levels
+mod - electric reactive armor now gives explosion damage immunity when your energy is above 75%
 
 ************** TODO - n-gon **************
 
-level concept:  several stationary platforms that are free to rotate, but with some air friction
-
-foam isFoamGrowOnDeath causes performance issues when too many mobs die fast
+level element:  a hanging chain of connected blocks
 
 give mobs more animal-like behaviors like rain world
   mobs play, look for food, explore
@@ -67,7 +71,6 @@ minigun: high caliber - rework
 portals:
   portal while holding block sometimes send player back to original portal
     only seems to happen with the bottom right block
-  extend to bodies  (mobs?)
   use buttons to turn on and off?
 
 level boss: fires a line intersection in a random direction every few seconds.
@@ -128,6 +131,7 @@ redblobgames.com/articles/visibility
   could apply to explosions, neutron bomb, player LOS
 
 possible names for mods
+  holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
 
 have a mob apply a positive status effect on other mobs,

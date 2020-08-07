@@ -77,7 +77,7 @@ const mod = {
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
-        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.006
+        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.22
         return dmg * mod.slowFire
@@ -954,7 +954,7 @@ const mod = {
         },
         {
             name: "negentropy",
-            description: `at the start of each <strong>level</strong><br><strong class='color-h'>heal</strong> a percent of <strong>maximum health</strong>`,
+            description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>50%</strong> missing health`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1315,7 +1315,7 @@ const mod = {
         },
         {
             name: "microstates",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1622,11 +1622,11 @@ const mod = {
         },
         {
             name: "electric reactive armor",
-            description: "<strong class='color-e'>explosions</strong> give you <strong class='color-f'>energy</strong><br>instead of <strong>harming</strong> you",
+            description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>75%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.isExplodeMob
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || (mod.haveGunCheck("pulse") && mech.maxEnergy > 1) || mod.isMissileField || mod.isExplodeMob
             },
             requires: "an explosive gun",
             effect: () => {
@@ -1953,7 +1953,7 @@ const mod = {
             allowed() {
                 return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS
             },
-            requires: "rail gun && FPS above 45",
+            requires: "rail gun and FPS above 45",
             effect() {
                 mod.isRailTimeSlow = true;
             },
