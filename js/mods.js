@@ -79,7 +79,7 @@ const mod = {
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
-        if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.22
+        if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         return dmg * mod.slowFire
     },
     totalBots() {
@@ -87,7 +87,7 @@ const mod = {
     },
     mods: [{
             name: "integrated armament",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>22%</strong><br>your inventory can only hold <strong>1 gun</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -759,13 +759,13 @@ const mod = {
                     game.boldActiveGunHUD();
                 }, 1000);
             },
-            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong> for each of your <strong class='color-g'>guns</strong>",
+            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return b.inventory.length > 1 && !mod.isEnergyHealth
             },
-            requires: "not mass-energy equivalence",
+            requires: "at least 2 guns",
             effect() {
                 mod.isEntanglement = true
                 setTimeout(function () {
@@ -1059,19 +1059,15 @@ const mod = {
         },
         {
             name: "logistics",
-            description: "<strong class='color-g'>ammo</strong> power ups add to your <strong>current gun</strong><br>spawn <strong>7 ammo</strong>",
+            description: "<strong class='color-g'>ammo</strong> power ups give <strong>100%</strong> more <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your <strong>current gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return b.inventory.length > 1
+                return true
             },
-            requires: "at least 2 guns",
+            requires: "",
             effect() {
                 mod.isAmmoForGun = true;
-                for (let i = 0; i < 7; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-                }
             },
             remove() {
                 mod.isAmmoForGun = false;

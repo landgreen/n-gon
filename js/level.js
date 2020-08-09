@@ -9,7 +9,7 @@ const level = {
   levelsCleared: 0,
   levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
   start() {
-    if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
+    // if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
       // level.difficultyIncrease(12)
       // game.enableConstructMode() //used to build maps in testing mode

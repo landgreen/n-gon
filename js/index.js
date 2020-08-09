@@ -51,7 +51,66 @@ window.addEventListener('load', (event) => {
   const set = getUrlVars()
   if (Object.keys(set).length !== 0) {
     build.isURLBuild = true;
-    game.startGame()
+    // game.startGame()
+    openCustomBuildMenu();
+    //add custom selections based on url
+    for (const property in set) {
+      // console.log(set[property], property);
+      set[property] = set[property].replace(/%20/g, " ")
+      if (property.substring(0, 3) === "gun") {
+        let found = false
+        let index
+        for (let i = 0; i < b.guns.length; i++) {
+          if (set[property] === b.guns[i].name) {
+            index = i;
+            found = true;
+            break;
+          }
+        }
+        if (found) build.choosePowerUp(document.getElementById(`gun-${index}`), index, 'gun')
+      }
+
+      if (property.substring(0, 3) === "mod") {
+        let found = false
+        let index
+        for (let i = 0; i < mod.mods.length; i++) {
+          if (set[property] === mod.mods[i].name) {
+            index = i;
+            found = true;
+            break;
+          }
+        }
+        if (found) build.choosePowerUp(document.getElementById(`mod-${index}`), index, 'mod')
+      }
+
+      if (property === "field") {
+        let found = false
+        let index
+        for (let i = 0; i < mech.fieldUpgrades.length; i++) {
+          if (set[property] === mech.fieldUpgrades[i].name) {
+            index = i;
+            found = true;
+            break;
+          }
+        }
+        if (found) build.choosePowerUp(document.getElementById(`field-${index}`), index, 'field')
+      }
+      if (property === "difficulty") {
+        game.difficultyMode = Number(set[property])
+        localSettings.difficultyMode = Number(set[property])
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("difficulty-select").value = Number(set[property])
+        document.getElementById("difficulty-select-custom").value = Number(set[property])
+      }
+      if (property === "level") {
+        document.getElementById("starting-level").value = Number(set[property])
+
+        // level.levelsCleared += Number(set[property]);
+        // level.difficultyIncrease(Number(set[property]) * game.difficultyMode) //increase difficulty based on modes
+        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+        // level.onLevel++
+      }
+    }
   }
 });
 
@@ -248,7 +307,7 @@ const build = {
       text += `<div id ="field-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
     }
     for (let i = 0, len = b.guns.length; i < len; i++) {
-      text += `<div class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+      text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
     }
     for (let i = 0, len = mod.mods.length; i < len; i++) {
       if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
@@ -333,7 +392,7 @@ const build = {
   }
 }
 
-document.getElementById("build-button").addEventListener("click", () => { //setup build run
+function openCustomBuildMenu() {
   build.isURLBuild = false;
   document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
@@ -347,6 +406,10 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
   build.isCustomSelection = true;
   game.paused = true;
   build.reset();
+}
+
+document.getElementById("build-button").addEventListener("click", () => { //setup build run
+  openCustomBuildMenu();
 });
 
 

@@ -199,7 +199,7 @@ const game = {
       if (b.inventory[0] === b.activeGun) {
         let lessDamage = 1
         for (let i = 0, len = b.inventory.length; i < len; i++) {
-          lessDamage *= 0.85 // 1 - 0.15
+          lessDamage *= 0.87 // 1 - 0.15
         }
         document.getElementById("mod-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
       } else {
@@ -594,24 +594,6 @@ const game = {
     document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
     document.getElementById("dmg").style.display = "inline";
     document.getElementById("health-bg").style.display = "inline";
-
-    // window.onmousedown = function (e) {
-    //   //mouse up event in set in index.js
-
-    //   // game.mouseDown = true;
-    //   if (e.which === 3) {
-    //     game.mouseDownRight = true;
-    //   } else {
-    //     game.mouseDown = true;
-    //   }
-    //   // keep this disabled unless building maps
-    //   // if (!game.mouseDown){
-    //   // 	game.getCoords.pos1.x = Math.round(game.mouseInGame.x / 25) * 25;
-    //   // 	game.getCoords.pos1.y = Math.round(game.mouseInGame.y / 25) * 25;
-    //   // }
-
-    //   // mech.throwBlock();
-    // };
 
     if (game.firstRun) {
       mech.spawn(); //spawns the player

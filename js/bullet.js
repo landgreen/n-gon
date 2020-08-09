@@ -485,7 +485,7 @@ const b = {
   spore(where, isFreeze = mod.isSporeFreeze) { //used with the mod upgrade in mob.death()
     const bIndex = bullet.length;
     const side = 4;
-    bullet[bIndex] = Bodies.polygon(where.x, where.y, 5, side, {
+    bullet[bIndex] = Bodies.polygon(where.x, where.y, 4, side, {
       // density: 0.0015,			//frictionAir: 0.01,
       inertia: Infinity,
       isFreeze: isFreeze,
@@ -1578,7 +1578,7 @@ const b = {
       name: "shotgun",
       description: "fire a <strong>burst</strong> of short range <strong> bullets</strong> <br><em>crouch to reduce recoil</em>",
       ammo: 0,
-      ammoPack: 8,
+      ammoPack: 6,
       have: false,
       fire() {
         let knock, spread
@@ -1591,7 +1591,7 @@ const b = {
           mech.fireCDcycle = mech.cycle + Math.floor(45 * b.fireCD); // cool down
           if (mod.isShotgunImmune) mech.immuneCycle = mech.cycle + Math.floor(47 * b.fireCD); //player is immune to collision damage for 30 cycles
           spread = 1.3
-          knock = 0.08
+          knock = 0.1
         }
 
         if (mod.isShotgunRecoil) {
@@ -1616,27 +1616,27 @@ const b = {
               x: speed * Math.cos(dir),
               y: speed * Math.sin(dir)
             }
-            b.nail(pos, velocity, 0.6)
+            b.nail(pos, velocity, 1)
           }
         } else {
-          const side = 19 * mod.bulletSize
+          const side = 21 * mod.bulletSize
           for (let i = 0; i < 15; i++) {
             const me = bullet.length;
             const dir = mech.angle + (Math.random() - 0.5) * spread
             bullet[me] = Bodies.rectangle(mech.pos.x + 35 * Math.cos(mech.angle) + 15 * (Math.random() - 0.5), mech.pos.y + 35 * Math.sin(mech.angle) + 15 * (Math.random() - 0.5), side, side, b.fireAttributes(dir));
             World.add(engine.world, bullet[me]); //add bullet to world
-            const SPEED = 50 + Math.random() * 10
+            const SPEED = 52 + Math.random() * 8
             Matter.Body.setVelocity(bullet[me], {
               x: SPEED * Math.cos(dir),
               y: SPEED * Math.sin(dir)
             });
             bullet[me].endCycle = game.cycle + 40
-            bullet[me].minDmgSpeed = 20
+            bullet[me].minDmgSpeed = 15
             // bullet[me].dmg = 0.1
             bullet[me].frictionAir = 0.034;
             bullet[me].do = function () {
               if (!mech.isBodiesAsleep) {
-                const scale = 1 - 0.035 / mod.isBulletsLastLonger
+                const scale = 1 - 0.034 / mod.isBulletsLastLonger
                 Matter.Body.scale(this, scale, scale);
               }
             };
@@ -2093,7 +2093,7 @@ const b = {
       name: "vacuum bomb",
       description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br><strong>click</strong> left mouse again to <strong>detonate</strong>",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: 2.5,
       have: false,
       fire() {
         const me = bullet.length;
@@ -2105,7 +2105,7 @@ const b = {
         bullet[me].restitution = 0.2;
         bullet[me].friction = 0.3;
         bullet[me].endCycle = Infinity
-        bullet[me].explodeRad = 450 + Math.floor(Math.random() * 30);
+        bullet[me].explodeRad = 450 + Math.floor(Math.random() * 50);
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
 
@@ -2562,7 +2562,7 @@ const b = {
       name: "rail gun",
       description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 3,
       have: false,
       fire() {
         const me = bullet.length;

@@ -125,39 +125,55 @@ const powerUps = {
       return 17;
     },
     effect() {
-      //only get ammo for guns player has
-      let target;
-      if (b.inventory.length > 0) {
-        if (mod.isAmmoForGun) {
-          target = b.guns[b.activeGun];
-        } else {
-          //find a gun in your inventory
-          target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
-          //try 3 more times to give ammo to a gun with ammo, not Infinity
-          if (target.ammo === Infinity) {
-            target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-            if (target.ammo === Infinity) {
-              target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-              if (target.ammo === Infinity) target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-            }
+      //give ammo to all guns in inventory
+      if (mod.isAmmoForGun) {
+        const target = b.guns[b.activeGun]
+        target.ammo += Math.ceil(Math.random() * target.ammoPack)
+        target.ammo += Math.ceil(Math.random() * target.ammoPack)
+      } else {
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+          const target = b.guns[b.inventory[i]]
+          if (target.ammo !== Infinity) {
+            target.ammo += Math.ceil(Math.random() * target.ammoPack)
           }
         }
-        //give ammo
-        if (target.ammo === Infinity) {
-          if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
-          if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
-        } else {
-          let ammo = Math.ceil((target.ammoPack * (0.8 + 0.25 * Math.random())));
-          // if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
-          target.ammo += ammo;
-          game.updateGunHUD();
-          game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
-        }
-      } else {
-        // target = b.guns[Math.floor(Math.random() * b.guns.length)];         //if you don't have any guns just add ammo to a random gun you don't have yet
-        if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
-        if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
       }
+      game.updateGunHUD();
+
+
+      // //only get ammo for guns player has
+      // let target;
+      // if (b.inventory.length > 0) {
+      //   if (mod.isAmmoForGun) {
+      //     target = b.guns[b.activeGun];
+      //   } else {
+      //     //find a gun in your inventory
+      //     target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
+      //     //try 3 more times to give ammo to a gun with ammo, not Infinity
+      //     if (target.ammo === Infinity) {
+      //       target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+      //       if (target.ammo === Infinity) {
+      //         target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+      //         if (target.ammo === Infinity) target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
+      //       }
+      //     }
+      //   }
+      //   //give ammo
+      //   if (target.ammo === Infinity) {
+      //     if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
+      //     if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
+      //   } else {
+      //     let ammo = Math.ceil((target.ammoPack * (0.8 + 0.25 * Math.random())));
+      //     // if (level.isBuildRun) ammo = Math.floor(ammo * 1.1) //extra ammo on build run because no ammo from getting a new gun
+      //     target.ammo += ammo;
+      //     game.updateGunHUD();
+      //     game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
+      //   }
+      // } else {
+      //   // target = b.guns[Math.floor(Math.random() * b.guns.length)];         //if you don't have any guns just add ammo to a random gun you don't have yet
+      //   if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
+      //   if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
+      // }
     }
   },
   field: {
@@ -405,7 +421,7 @@ const powerUps = {
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.002 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
+    if (Math.random() < 0.001 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
       powerUps.spawn(x, y, "gun");
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun");
       return;
@@ -468,7 +484,7 @@ const powerUps = {
       if (mech.fieldMode === 0) {
         powerUps.spawn(x, y, "field")
         if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "field")
-      } else if (Math.random() < 0.94) {
+      } else if (Math.random() < 0.95) {
         powerUps.spawn(x, y, "mod")
         if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod")
       } else {
@@ -500,8 +516,8 @@ const powerUps = {
         powerUps.spawn(x, y, "gun", false);
       } else if (mod.totalCount === 0) {
         powerUps.spawn(x, y, "mod", false); //starting gun
-      } else if (b.inventory.length < 2 && Math.random() < 0.5) {
-        powerUps.spawn(x, y, "gun", false);
+        // } else if (b.inventory.length < 2 && Math.random() < 0.2) {
+        //   powerUps.spawn(x, y, "gun", false);
       } else {
         powerUps.spawnRandomPowerUp(x, y);
         powerUps.spawnRandomPowerUp(x, y);

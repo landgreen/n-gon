@@ -1,12 +1,18 @@
 
-added rotating platforms to sewers level
-mod negentropy: now spawns a heal power up for every 50% missing health at the start of a level
+ammo power ups give ammo to every gun in your inventory now,
+  but they only give half as much for each ammo power up
+  this should give a greater incentive for having more guns
+mod: logistics now gives double ammo to only your current gun
 
-all explosions do about 10% more damage
-knock back no longer gets weaker at high levels
-mod - electric reactive armor now gives explosion damage immunity when your energy is above 75%
+custom build links now bring you to the custom build menu, not directly into the game
 
 ************** TODO - n-gon **************
+
+have custom links goto the custom build menu, not the intro level
+
+performance issues with large numbers of spores
+consider limiting total bullets?
+  300?
 
 level element:  a hanging chain of connected blocks
 
