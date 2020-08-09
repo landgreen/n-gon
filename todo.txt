@@ -1,14 +1,6 @@
 
-ammo power ups give ammo to every gun in your inventory now,
-  but they only give half as much for each ammo power up
-  this should give a greater incentive for having more guns
-mod: logistics now gives double ammo to only your current gun
-
-custom build links now bring you to the custom build menu, not directly into the game
 
 ************** TODO - n-gon **************
-
-have custom links goto the custom build menu, not the intro level
 
 performance issues with large numbers of spores
 consider limiting total bullets?

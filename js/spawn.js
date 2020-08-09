@@ -781,7 +781,7 @@ const spawn = {
         stiffness: attachmentStiffness,
         damping: 0.01
       });
-      console.log(consBB[consBB.length - 1])
+      // console.log(consBB[consBB.length - 1])
     }
   },
   timeSkipBoss(x, y, radius = 55) {

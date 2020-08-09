@@ -421,7 +421,7 @@ const level = {
     const balance2 = level.spinner(2605, 500, 390, 25, 0.005) //falling
     const balance3 = level.spinner(2608, 1900, 584, 25, 0.005) //falling
     const balance4 = level.spinner(9300, 2205, 25, 380, 0.001) //exit
-    console.log(balance1)
+
     level.custom = () => {
       button.query();
       button.draw();
@@ -1789,7 +1789,7 @@ const level = {
     // spawn.mapRect(-1950, -400, 100, 25);
     spawn.mapRect(-3150, 50, 775, 100);
     spawn.mapRect(-2600, -250, 775, 100);
-    spawn.bodyRect(-1350, -200, 200, 200, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(-1350, -100, 100, 100, 1, spawn.propsSlide); //weight
     spawn.bodyRect(-1800, 0, 300, 100, 1, spawn.propsHoist); //hoist
     cons[cons.length] = Constraint.create({
       pointA: {
@@ -1801,7 +1801,7 @@ const level = {
       length: 1
     });
 
-    spawn.bodyRect(400, 400, 200, 200, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(400, 500, 100, 100, 1, spawn.propsSlide); //weight
     spawn.bodyRect(800, 600, 300, 100, 1, spawn.propsHoist); //hoist
     cons[cons.length] = Constraint.create({
       pointA: {

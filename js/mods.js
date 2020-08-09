@@ -37,32 +37,31 @@ const mod = {
                 }
                 if (!found) return //if name not found don't give any mod
             }
-
             mod.mods[index].effect(); //give specific mod
             mod.mods[index].count++
             mod.totalCount++ //used in power up randomization
             game.updateModHUD();
         }
     },
-    giveBasicMod(index = 'random') {
-        // if (isNaN(index)) { //find index by name
-        //     let found = false;
-        //     for (let i = 0; i < mod.mods.length; i++) {
-        //         if (index === mod.mods[i].name) {
-        //             index = i;
-        //             found = true;
-        //             break;
-        //         }
-        //     }
-        //     if (!found) return //if name not found don't give any mod
-        // }
+    // giveBasicMod(index = 'random') {
+    //     // if (isNaN(index)) { //find index by name
+    //     //     let found = false;
+    //     //     for (let i = 0; i < mod.mods.length; i++) {
+    //     //         if (index === mod.mods[i].name) {
+    //     //             index = i;
+    //     //             found = true;
+    //     //             break;
+    //     //         }
+    //     //     }
+    //     //     if (!found) return //if name not found don't give any mod
+    //     // }
 
-        mod.basicMods[index].effect(); //give specific mod
-        mod.mods[index].count++
-        mod.totalCount++ //used in power up randomization
-        game.updateModHUD();
+    //     mod.basicMods[index].effect(); //give specific mod
+    //     mod.mods[index].count++
+    //     mod.totalCount++ //used in power up randomization
+    //     game.updateModHUD();
 
-    },
+    // },
     haveGunCheck(name) {
         for (i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].name === name) return true
@@ -1927,7 +1926,7 @@ const mod = {
         },
         {
             name: "necrophoresis",
-            description: "if the mob <strong>foam</strong> is stuck to <strong>dies</strong><br><strong>foam</strong> grows and splits into 3 <strong>copies</strong>",
+            description: "<strong>foam</strong> bullets grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
             maxCount: 1,
             count: 0,
             allowed() {

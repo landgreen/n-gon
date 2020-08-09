@@ -57,6 +57,20 @@ window.addEventListener('load', (event) => {
     for (const property in set) {
       // console.log(set[property], property);
       set[property] = set[property].replace(/%20/g, " ")
+
+      if (property === "field") {
+        let found = false
+        let index
+        for (let i = 0; i < mech.fieldUpgrades.length; i++) {
+          if (set[property] === mech.fieldUpgrades[i].name) {
+            index = i;
+            found = true;
+            break;
+          }
+        }
+        if (found) build.choosePowerUp(document.getElementById(`field-${index}`), index, 'field')
+      }
+
       if (property.substring(0, 3) === "gun") {
         let found = false
         let index
@@ -80,26 +94,14 @@ window.addEventListener('load', (event) => {
             break;
           }
         }
-        if (found) build.choosePowerUp(document.getElementById(`mod-${index}`), index, 'mod')
+        if (found) build.choosePowerUp(document.getElementById(`mod-${index}`), index, 'mod', true)
       }
 
-      if (property === "field") {
-        let found = false
-        let index
-        for (let i = 0; i < mech.fieldUpgrades.length; i++) {
-          if (set[property] === mech.fieldUpgrades[i].name) {
-            index = i;
-            found = true;
-            break;
-          }
-        }
-        if (found) build.choosePowerUp(document.getElementById(`field-${index}`), index, 'field')
-      }
       if (property === "difficulty") {
         game.difficultyMode = Number(set[property])
-        localSettings.difficultyMode = Number(set[property])
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        document.getElementById("difficulty-select").value = Number(set[property])
+        // localSettings.difficultyMode = Number(set[property])
+        // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        // document.getElementById("difficulty-select").value = Number(set[property])
         document.getElementById("difficulty-select-custom").value = Number(set[property])
       }
       if (property === "level") {
@@ -206,7 +208,7 @@ const build = {
     window.scrollTo(0, 0);
   },
   isCustomSelection: true,
-  choosePowerUp(who, index, type) {
+  choosePowerUp(who, index, type, isAllowed = false) {
     if (type === "gun") {
       let isDeselect = false
       for (let i = 0, len = b.inventory.length; i < len; i++) { //look for selection in inventory
@@ -265,7 +267,7 @@ const build = {
           modID.classList.add("build-grid-disabled");
           modID.onclick = null
         }
-        if (mod.mods[i].count > 0) {
+        if (mod.mods[i].count > 0 && !isAllowed) {
           mod.removeMod(i)
         }
         if (modID.classList.contains("build-mod-selected")) {
@@ -348,12 +350,14 @@ const build = {
   shareURL() {
     let url = "https://landgreen.github.io/sidescroller/index.html?"
     let count = 0;
-    for (let i = 0; i < b.guns.length; i++) {
-      if (b.guns[i].have) {
-        url += `&gun${count}=${encodeURIComponent(b.guns[i].name.trim())}`
+
+    for (let i = 0; i < b.inventory.length; i++) {
+      if (b.guns[b.inventory[i]].have) {
+        url += `&gun${count}=${encodeURIComponent(b.guns[b.inventory[i]].name.trim())}`
         count++
       }
     }
+
     count = 0;
     for (let i = 0; i < mod.mods.length; i++) {
       for (let j = 0; j < mod.mods[i].count; j++) {

@@ -750,7 +750,7 @@ const b = {
                     this.lockedOn = powerUp[i]
                   }
                 }
-                if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000) {
+                if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 && !game.isChoosing) {
                   powerUps.onPickUp();
                   powerUp[i].effect();
                   Matter.World.remove(engine.world, powerUp[i]);
@@ -909,7 +909,6 @@ const b = {
             this.collisionFilter.category = cat.bullet;
             this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
             if (mod.isFoamGrowOnDeath && bullet.length < 300) {
-              console.log(bullet.length)
               let targets = []
               for (let i = 0, len = mob.length; i < len; i++) {
                 const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1539,8 +1538,8 @@ const b = {
       name: "minigun",
       description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong><br>fire <strong>delay</strong> decreases as you shoot",
       ammo: 0,
-      ammoPack: 70,
-      defaultAmmoPack: 70,
+      ammoPack: 65,
+      defaultAmmoPack: 65,
       recordedAmmo: 0,
       have: false,
       nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -1648,7 +1647,7 @@ const b = {
       name: "super balls",
       description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
       ammo: 0,
-      ammoPack: 13,
+      ammoPack: 12,
       have: false,
       num: 5,
       fire() {
@@ -1703,8 +1702,8 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 38,
-      defaultAmmoPack: 38,
+      ammoPack: 35,
+      defaultAmmoPack: 35,
       have: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -1807,7 +1806,7 @@ const b = {
       name: "wave beam",
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles <strong>slowly</strong> propagate through <strong>solids</strong>",
       ammo: 0,
-      ammoPack: 100,
+      ammoPack: 90,
       have: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
@@ -1942,7 +1941,7 @@ const b = {
       name: "missiles",
       description: "launch missiles that <strong>accelerate</strong> towards <strong>mobs</strong><br><strong class='color-e'>explodes</strong> when near target",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 3,
       have: false,
       fireCycle: 0,
       ammoLoaded: 0,
@@ -1998,8 +1997,8 @@ const b = {
       name: "flak",
       description: "fire a <strong>cluster</strong> of short range <strong>projectiles</strong><br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after half a second",
       ammo: 0,
-      ammoPack: 5,
-      defaultAmmoPack: 5, //use to revert ammoPack after mod changes drop rate
+      ammoPack: 4,
+      defaultAmmoPack: 4, //use to revert ammoPack after mod changes drop rate
       have: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 25 : 10) * b.fireCD); // cool down
@@ -2042,7 +2041,7 @@ const b = {
       name: "grenades",
       description: "lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 5,
       have: false,
       fire() {
         const me = bullet.length;
@@ -2093,7 +2092,7 @@ const b = {
       name: "vacuum bomb",
       description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br><strong>click</strong> left mouse again to <strong>detonate</strong>",
       ammo: 0,
-      ammoPack: 2.5,
+      ammoPack: 2,
       have: false,
       fire() {
         const me = bullet.length;
@@ -2212,7 +2211,7 @@ const b = {
       name: "neutron bomb",
       description: "toss a chunk of <strong class='color-p'>Cf-252</strong> that emits <strong class='color-p'>neutrons</strong><br><strong class='color-d'>damages</strong> and drains <strong class='color-f'>energy</strong> in area of effect",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 5,
       have: false,
       fire() {
         const me = bullet.length;
@@ -2370,7 +2369,7 @@ const b = {
       name: "mine",
       description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: 2.7,
       have: false,
       fire() {
         const pos = {
@@ -2392,7 +2391,7 @@ const b = {
       name: "spores",
       description: "fire a <strong>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
       ammo: 0,
-      ammoPack: 4,
+      ammoPack: 3.5,
       have: false,
       fire() {
         const me = bullet.length;
@@ -2523,7 +2522,7 @@ const b = {
       name: "ice IX",
       description: "synthesize <strong>short-lived</strong> ice crystals<br>crystals <strong>seek</strong> out and <strong class='color-s'>freeze</strong> mobs",
       ammo: 0,
-      ammoPack: 69,
+      ammoPack: 64,
       have: false,
       fire() {
         if (mech.crouch) {
@@ -2540,7 +2539,7 @@ const b = {
       name: "foam",
       description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
       ammo: 0,
-      ammoPack: 45,
+      ammoPack: 40,
       have: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
@@ -2562,7 +2561,7 @@ const b = {
       name: "rail gun",
       description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: 2.6,
       have: false,
       fire() {
         const me = bullet.length;
