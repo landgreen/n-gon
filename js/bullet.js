@@ -23,7 +23,7 @@ const b = {
       } else {
         if (mod.isAmmoFromHealth) {
           if (mech.health > 2 * mod.isAmmoFromHealth * mech.maxHealth) {
-            mech.damage(mod.isAmmoFromHealth * mech.maxHealth);
+            mech.damage(mod.isAmmoFromHealth * mech.maxHealth / mech.harmReduction());
             powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
             if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
           } else {

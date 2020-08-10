@@ -250,7 +250,7 @@ const build = {
     for (let i = 0, len = mod.mods.length; i < len; i++) {
       const modID = document.getElementById("mod-" + i)
 
-      if (mod.mods[i].allowed()) {
+      if (mod.mods[i].allowed() || isAllowed) {
         if (mod.mods[i].count > 1) {
           modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
         } else {
@@ -267,7 +267,7 @@ const build = {
           modID.classList.add("build-grid-disabled");
           modID.onclick = null
         }
-        if (mod.mods[i].count > 0 && !isAllowed) {
+        if (mod.mods[i].count > 0) {
           mod.removeMod(i)
         }
         if (modID.classList.contains("build-mod-selected")) {
