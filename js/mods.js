@@ -70,7 +70,7 @@ const mod = {
     },
     damageFromMods() {
         let dmg = 1
-        if (mod.isLowHealthDmg) dmg *= 1 + 0.4 * Math.max(0, 1 - mech.health)
+        if (mod.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.33;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
@@ -199,7 +199,7 @@ const mod = {
         },
         {
             name: "negative feedback",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each <strong>10%</strong> missing <strong>health</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10%</strong> missing base <strong>health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1058,7 +1058,7 @@ const mod = {
         },
         {
             name: "logistics",
-            description: "<strong class='color-g'>ammo</strong> power ups give <strong>100%</strong> more <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your <strong>current gun</strong>",
+            description: "<strong class='color-g'>ammo</strong> power ups give <strong>200%</strong> <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your <strong>current gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1391,7 +1391,7 @@ const mod = {
         },
         {
             name: "shotgun spin-statistics",
-            description: "firing the <strong>shotgun</strong> makes you <br><strong>immune</strong> to <strong class='color-harm'>harm</strong> while on cooldown",
+            description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>receive <strong>33%</strong> less <strong>shotgun</strong> <strong class='color-g'>ammo</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1400,9 +1400,21 @@ const mod = {
             requires: "shotgun",
             effect() {
                 mod.isShotgunImmune = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "shotgun") {
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.66
+                        break;
+                    }
+                }
             },
             remove() {
                 mod.isShotgunImmune = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "shotgun") {
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                        break;
+                    }
+                }
             }
         },
         {
@@ -1785,7 +1797,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot > 1
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -1999,12 +2011,12 @@ const mod = {
             requires: "laser",
             effect() {
                 mod.laserReflections++;
-                mod.laserDamage += 0.045; //base is 0.08
+                mod.laserDamage += 0.05; //base is 0.1
                 mod.laserFieldDrain += 0.001 //base is 0.002
             },
             remove() {
                 mod.laserReflections = 2;
-                mod.laserDamage = 0.09;
+                mod.laserDamage = 0.1;
                 mod.laserFieldDrain = 0.002;
             }
         },
@@ -2097,7 +2109,7 @@ const mod = {
         },
         {
             name: "Lorentz transformation",
-            description: "<strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster<br>while <strong>time dilation</strong> is active or inactive ",
+            description: "<strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2300,7 +2312,7 @@ const mod = {
         },
         {
             name: "renormalization",
-            description: "<strong>phase decoherence</strong> adds <strong>visibility</strong> to bullets<br><strong>80%</strong> less <strong class='color-f'>energy</strong> drain when <strong>firing</strong>",
+            description: "using a <strong class='color-r'>reroll</strong> to change selection options<br>has a <strong>60%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
             maxCount: 1,
             count: 0,
             allowed() {

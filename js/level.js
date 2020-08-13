@@ -18,7 +18,7 @@ const level = {
       // mech.isStealth = true;
       // mod.giveMod("bot replication");
       // mod.nailBotCount += 10
-      // b.giveGuns("neutron bomb")
+      // b.giveGuns("rail gun")
       // mech.setField("plasma torch")
 
       level.intro(); //starting level
@@ -418,8 +418,8 @@ const level = {
     const button = level.button(6600, 2675)
     const hazard = level.hazard(4550, 2750, 4550, 150)
     const balance1 = level.spinner(300, -395, 25, 390, 0.001) //entrance
-    const balance2 = level.spinner(2605, 500, 390, 25, 0.005) //falling
-    const balance3 = level.spinner(2608, 1900, 584, 25, 0.005) //falling
+    const balance2 = level.spinner(2605, 500, 390, 25, 0.001) //falling
+    const balance3 = level.spinner(2608, 1900, 584, 25, 0.001) //falling
     const balance4 = level.spinner(9300, 2205, 25, 380, 0.001) //exit
 
     level.custom = () => {
@@ -526,7 +526,7 @@ const level = {
     spawn.bodyRect(6800, 2490, 50, 50);
     spawn.bodyRect(6800, 2540, 50, 50);
     spawn.bodyRect(6800, 2590, 50, 50);
-    spawn.bodyRect(8225, 2200, 100, 400);
+    spawn.bodyRect(8225, 2225, 50, 375);
     spawn.mapRect(6250, 1875, 700, 150);
     spawn.mapRect(8000, 1875, 600, 150);
 
@@ -745,6 +745,8 @@ const level = {
     spawn.wireHead();
   },
   satellite() {
+    // level.chain(4025, -1175, 15, 20)
+
     const elevator = level.platform(4210, -1325, 380, 30, -10)
     level.custom = () => {
       level.playerExitCheck();
@@ -3314,5 +3316,29 @@ const level = {
         }
       }
     }
+  },
+  chain(x, y, len = 15, radius = 20) {
+    for (let i = 0; i < len; i++) {
+      body[body.length] = Bodies.polygon(x, y + 2 * radius * i, 12, radius, {
+        inertia: Infinity
+      });
+    }
+    for (let i = 1; i < len; i++) {
+      consBB[consBB.length] = Constraint.create({
+        bodyA: body[body.length - i],
+        bodyB: body[body.length - i - 1],
+        stiffness: 0.4,
+        damping: 0.01
+      });
+    }
+    cons[cons.length] = Constraint.create({ //pin first block to a point in space
+      pointA: {
+        x: x,
+        y: y - radius
+      },
+      bodyB: body[body.length - len],
+      stiffness: 0.4,
+      damping: 0.01
+    });
   },
 };

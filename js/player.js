@@ -942,7 +942,7 @@ const mech = {
           y: powerUp[i].velocity.y * 0.11
         });
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-          powerUps.onPickUp();
+          powerUps.onPickUp(mech.pos);
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
             x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
             y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
@@ -1733,24 +1733,17 @@ const mech = {
           // }
 
           function drawField(radius) {
-            radius *= 0.9 + 1.5 * mech.energy * mech.energy;
+            radius *= 0.9 + 2 * mech.energy * mech.energy;
             const rotate = mech.cycle * 0.005;
             mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(mech.energy, 1)));
             const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);
             const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
             ctx.beginPath();
             ctx.ellipse(mech.pos.x, mech.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
-            if (mod.renormalization) {
-              for (let i = 0; i < bullet.length; i++) {
-                ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
-                ctx.arc(bullet[i].position.x, bullet[i].position.y, radius, 0, 2 * Math.PI);
-              }
-            } else {
-              if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
-                ctx.lineWidth = 5;
-                ctx.strokeStyle = `rgba(0, 204, 255,1)`
-                ctx.stroke()
-              }
+            if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
+              ctx.lineWidth = 5;
+              ctx.strokeStyle = `rgba(0, 204, 255,1)`
+              ctx.stroke()
             }
             ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*mech.energy})`;
             ctx.globalCompositeOperation = "destination-in"; //in or atop
@@ -1777,7 +1770,7 @@ const mech = {
               // game.draw.bodyFill = "transparent"
               // game.draw.bodyStroke = "transparent"
 
-              const DRAIN = 0.00014 + ((!mod.renormalization && mech.fireCDcycle > mech.cycle) ? 0.007 : 0.001)
+              const DRAIN = 0.00014 + (mech.fireCDcycle > mech.cycle ? 0.007 : 0.001)
               if (mech.energy > DRAIN) {
                 mech.energy -= DRAIN;
                 // if (mech.energy < 0.001) {

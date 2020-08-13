@@ -100,6 +100,10 @@ const powerUps = {
     use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or mod
       powerUps.reroll.changeRerolls(-1)
       powerUps[type].effect();
+      if (mod.renormalization && Math.random() < 0.6) {
+        powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+        if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+      }
     },
   },
   heal: {
@@ -388,11 +392,11 @@ const powerUps = {
       }
     }
   },
-  onPickUp() {
+  onPickUp(where) {
     if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
     if (mod.isMineDrop) b.mine({
-      x: mech.pos.x,
-      y: mech.pos.y
+      x: where.x,
+      y: where.y
     }, {
       x: 0,
       y: 0

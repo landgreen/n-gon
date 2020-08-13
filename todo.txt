@@ -1,12 +1,21 @@
-
+mod: renormalization now gives a 60% chance to return a reroll after using a reroll
+  (the old renormalization was causing too much lag)
 
 ************** TODO - n-gon **************
+
+level Boss: fractal Sierpiński triangle
+  https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
+  spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
+    they spawn once at the start of the level
+    if a version dies, one can be replaced every ten seconds by the largest version
 
 performance issues with large numbers of spores
 consider limiting total bullets?
   300?
 
 level element:  a hanging chain of connected blocks
+level element:  a zone with wind, anti-gravity, extra gravity
+  control with button
 
 give mobs more animal-like behaviors like rain world
   mobs play, look for food, explore
@@ -149,8 +158,6 @@ an effect when canceling a power up
 add player Scent Trails for mob navigation
   https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
 
-mod - you can no longer see your current health
-
 settings - custom keys binding
 
 css transition for pause menu
@@ -162,9 +169,6 @@ gun:  Spirit Bomb (singularity)
     sucked in stuff increase size
   uses energy
   hold above the player's head
-
-make power ups keep moving to player if the pickup field is turned off before they get picked up
-  not sure how to do this without adding a constant check
 
 animate new level spawn by having the map aspects randomly fly into place
     

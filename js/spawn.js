@@ -228,7 +228,7 @@ const spawn = {
       }
     }
   },
-  powerUpBoss(x, y, vertices = 9, radius = 150) {
+  powerUpBoss(x, y, vertices = 9, radius = 130) {
     mobs.spawn(x, y, vertices, radius, "transparent");
     let me = mob[mob.length - 1];
     me.isBoss = true;
@@ -1124,7 +1124,7 @@ const spawn = {
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     };
-    me.rotateVelocity = Math.min(0.005, 0.002 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
+    me.rotateVelocity = Math.min(0.0045, 0.0015 * game.accelScale * game.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
     me.do = function () {
       this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
       if (!mech.isBodiesAsleep) {

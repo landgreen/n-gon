@@ -751,7 +751,7 @@ const b = {
                   }
                 }
                 if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 && !game.isChoosing) {
-                  powerUps.onPickUp();
+                  powerUps.onPickUp(this.position);
                   powerUp[i].effect();
                   Matter.World.remove(engine.world, powerUp[i]);
                   powerUp.splice(i, 1);
@@ -898,7 +898,7 @@ const b = {
             if (this.target.isShielded) {
               this.target.damage(b.dmgScale * 0.005, true); //shield damage bypass
               //shrink if mob is shielded
-              const SCALE = 1 - 0.016 / mod.isBulletsLastLonger
+              const SCALE = 1 - 0.018 / mod.isBulletsLastLonger
               Matter.Body.scale(this, SCALE, SCALE);
               this.radius *= SCALE;
             } else {
@@ -977,9 +977,7 @@ const b = {
     bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
     bullet[me].dmg = dmg
     bullet[me].onDmg = function (who) {
-      if (mod.isNailPoison) {
-        mobs.statusDoT(who, dmg * 0.055, 300) //66% / (360 / 30)  one tick every 30 cycles in 360 cycles total
-      }
+      if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.15, 180) // one tick every 30 cycles
     };
     bullet[me].do = function () {};
   },
@@ -1137,7 +1135,7 @@ const b = {
       minDmgSpeed: 2,
       lookFrequency: 40 + Math.floor(7 * Math.random()),
       acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-      range: 600 * (1 + 0.2 * Math.random()) + 200 * mod.isLaserBotUpgrade,
+      range: 500 * (1 + 0.2 * Math.random()) + 150 * mod.isLaserBotUpgrade,
       followRange: 150 + Math.floor(30 * Math.random()),
       offPlayer: {
         x: 0,
@@ -1206,7 +1204,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * (0.04 + 0.04 * this.isUpgraded);
+            const dmg = b.dmgScale * (0.06 + 0.06 * this.isUpgraded);
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 
@@ -1577,7 +1575,8 @@ const b = {
       name: "shotgun",
       description: "fire a <strong>burst</strong> of short range <strong> bullets</strong> <br><em>crouch to reduce recoil</em>",
       ammo: 0,
-      ammoPack: 6,
+      ammoPack: 7,
+      defaultAmmoPack: 7,
       have: false,
       fire() {
         let knock, spread
@@ -1619,7 +1618,7 @@ const b = {
           }
         } else {
           const side = 21 * mod.bulletSize
-          for (let i = 0; i < 15; i++) {
+          for (let i = 0; i < 17; i++) {
             const me = bullet.length;
             const dir = mech.angle + (Math.random() - 0.5) * spread
             bullet[me] = Bodies.rectangle(mech.pos.x + 35 * Math.cos(mech.angle) + 15 * (Math.random() - 0.5), mech.pos.y + 35 * Math.sin(mech.angle) + 15 * (Math.random() - 0.5), side, side, b.fireAttributes(dir));
@@ -1631,7 +1630,7 @@ const b = {
             });
             bullet[me].endCycle = game.cycle + 40
             bullet[me].minDmgSpeed = 15
-            // bullet[me].dmg = 0.1
+            // bullet[me].restitution = 0.4
             bullet[me].frictionAir = 0.034;
             bullet[me].do = function () {
               if (!mech.isBodiesAsleep) {
@@ -1702,8 +1701,8 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 35,
-      defaultAmmoPack: 35,
+      ammoPack: 40,
+      defaultAmmoPack: 40,
       have: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -1731,9 +1730,9 @@ const b = {
                     who.foundPlayer();
 
                     if (mod.isFastDot) {
-                      mobs.statusDoT(who, 3.6, 30)
+                      mobs.statusDoT(who, 3.9, 30)
                     } else {
-                      mobs.statusDoT(who, 0.6, mod.isSlowDot ? 360 : 180)
+                      mobs.statusDoT(who, 0.65, mod.isSlowDot ? 360 : 180)
                     }
 
                     game.drawList.push({ //add dmg to draw queue
@@ -1774,7 +1773,6 @@ const b = {
             }
           };
 
-
           const SPEED = 50
           Matter.Body.setVelocity(bullet[me], {
             x: mech.Vx / 2 + SPEED * Math.cos(angle),
@@ -1806,7 +1804,7 @@ const b = {
       name: "wave beam",
       description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles <strong>slowly</strong> propagate through <strong>solids</strong>",
       ammo: 0,
-      ammoPack: 90,
+      ammoPack: 80,
       have: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
@@ -2311,13 +2309,6 @@ const b = {
             } else {
               if (Matter.Query.collides(this, map).length) {
                 onCollide(this)
-
-                // this.stuck = function () {
-                // Matter.Body.setVelocity(this, {
-                //   x: 0,
-                //   y: 0
-                // });
-                // }
               } else { //if colliding with nothing just fall
                 this.force.y += this.mass * 0.001;
               }
@@ -2527,7 +2518,7 @@ const b = {
       fire() {
         if (mech.crouch) {
           b.iceIX(10, 0.3)
-          mech.fireCDcycle = mech.cycle + Math.floor(10 * b.fireCD); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(8 * b.fireCD); // cool down
         } else {
           b.iceIX(2)
           mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
@@ -2606,13 +2597,12 @@ const b = {
         bullet[me].charge = 0;
         bullet[me].do = function () {
           if ((!game.mouseDown && this.charge > 0.6) || mech.energy < 0.005) { //fire on mouse release
-            if (mech.energy < 0.005) {
-              this.charge = 0.1;
+            if (mech.energy < 0.005 && !mod.isRailTimeSlow) {
+              // this.charge = 0;
+              mech.energy += this.charge * 0.4
               mech.fireCDcycle = mech.cycle + 120; // cool down if out of energy
-              //normal bullet behavior occurs after firing, overwrite this function
-              this.do = function () {
-                this.force.y += this.mass * 0.001; //normal gravity
-              }
+              this.endCycle = 0;
+              return
             } else {
               mech.fireCDcycle = mech.cycle + 2; // set fire cool down
               //normal bullet behavior occurs after firing, overwrite this function
@@ -3024,7 +3014,7 @@ const b = {
         if (mod.isPulseAim) { //find mobs in line of sight
           let dist = 2200
           energy = 0.25 * Math.min(mech.energy, 1.75)
-          explosionRange = 1000 * energy
+          explosionRange = 1100 * energy
           for (let i = 0, len = mob.length; i < len; i++) {
             const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
             if (explosionRange < newDist &&
@@ -3036,8 +3026,6 @@ const b = {
               path[path.length - 1] = mob[i].position
             }
           }
-
-
         }
         if (!best.who) {
           vertexCollision(path[0], path[1], mob);
@@ -3058,7 +3046,7 @@ const b = {
         } else {
           energy = 0.3 * Math.min(mech.energy, 1.75)
           mech.energy -= energy * mod.isLaserDiode
-          explosionRange = 1000 * energy
+          explosionRange = 1100 * energy
           if (best.who) b.explosion(path[1], explosionRange, true)
           mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
         }
