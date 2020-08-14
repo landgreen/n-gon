@@ -57,6 +57,11 @@ const level = {
         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
       }
     }
+    if (mod.isGunCycle) {
+      b.inventoryGun++;
+      if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
+      game.switchGun();
+    }
   },
   custom() {},
   customTopLayer() {},

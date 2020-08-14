@@ -264,14 +264,14 @@ const game = {
     }
   },
   nextGun() {
-    if (b.inventory.length > 0) {
+    if (b.inventory.length > 0 && !mod.isGunCycle) {
       b.inventoryGun++;
       if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
       game.switchGun();
     }
   },
   previousGun() {
-    if (b.inventory.length > 0) {
+    if (b.inventory.length > 0 && !mod.isGunCycle) {
       b.inventoryGun--;
       if (b.inventoryGun < 0) b.inventoryGun = b.inventory.length - 1;
       game.switchGun();
@@ -315,14 +315,11 @@ const game = {
     // }
 
 
-    if (keys[69]) {
-      // e    swap to next active gun
+    if (keys[69]) { // e    swap to next active gun
       game.nextGun();
-    } else if (keys[81]) {
-      //q    swap to previous active gun
+    } else if (keys[81]) { //q    swap to previous active gun
       game.previousGun();
     }
-
     if (keys[80] && !game.isChoosing) { //p  for pause
       if (game.paused) {
         build.unPauseGrid()

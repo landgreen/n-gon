@@ -425,7 +425,7 @@ const powerUps = {
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "ammo");
       return;
     }
-    if (Math.random() < 0.001 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
+    if (Math.random() < 0.0015 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
       powerUps.spawn(x, y, "gun");
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun");
       return;
@@ -515,13 +515,18 @@ const powerUps = {
     }
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-    if (level.levelsCleared < 6) {
+    if (level.levelsCleared < 4) { //runs 4 times on all difficulty levels
       if (b.inventory.length === 0) {
-        powerUps.spawn(x, y, "gun", false);
-      } else if (mod.totalCount === 0) {
-        powerUps.spawn(x, y, "mod", false); //starting gun
-        // } else if (b.inventory.length < 2 && Math.random() < 0.2) {
-        //   powerUps.spawn(x, y, "gun", false);
+        powerUps.spawn(x, y, "gun", false); //first gun
+      } else if (mod.totalCount === 0) { //first mod
+        powerUps.spawn(x, y, "mod", false);
+      } else if (b.inventory.length < 2) { //second gun or extra ammo
+        if (Math.random() < 0.5) {
+          powerUps.spawn(x, y, "gun", false);
+        } else {
+          powerUps.spawn(x, y, "ammo", false);
+          powerUps.spawn(x, y, "ammo", false);
+        }
       } else {
         powerUps.spawnRandomPowerUp(x, y);
         powerUps.spawnRandomPowerUp(x, y);

@@ -70,6 +70,7 @@ const mod = {
     },
     damageFromMods() {
         let dmg = 1
+        if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.33;
@@ -1054,6 +1055,43 @@ const mod = {
             },
             remove() {
                 mod.bayesian = 0;
+            }
+        },
+        {
+            name: "arsenal",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1
+            },
+            requires: "at least 2 guns",
+            effect() {
+                mod.isDamageForGuns = true;
+            },
+            remove() {
+                mod.isDamageForGuns = false;
+            }
+        },
+        {
+            name: "generalist",
+            description: "<strong>spawn</strong> 3 <strong class='color-g'>gun</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br>automatically cycle <strong class='color-g'>guns</strong> with each new level",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return mod.isDamageForGuns
+            },
+            requires: "arsenal",
+            effect() {
+                mod.isGunCycle = true;
+                for (let i = 0; i < 3; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                }
+            },
+            remove() {
+                mod.isGunCycle = false;
             }
         },
         {
@@ -2561,5 +2599,7 @@ const mod = {
     isLaserBotUpgrade: null,
     isBoomBotUpgrade: null,
     isDroneGrab: null,
-    isOneGun: null
+    isOneGun: null,
+    isDamageForGuns: null,
+    isGunCycle: null
 }
