@@ -63,6 +63,15 @@ const mod = {
 
     // },
     haveGunCheck(name) {
+        if (
+            !build.isCustomSelection &&
+            b.inventory.length > 2 &&
+            name !== b.guns[b.activeGun].name &&
+            Math.random() < -0.1 + 0.1 * (b.inventory.length + mod.isGunCycle * 2) //lower chance of mods specific to a gun if you have lots of guns
+        ) {
+            return false
+        }
+
         for (i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].name === name) return true
         }
@@ -70,7 +79,7 @@ const mod = {
     },
     damageFromMods() {
         let dmg = 1
-        if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
+        if (mod.isDamageForGuns) dmg *= 1 + 0.066 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.33;
@@ -752,32 +761,6 @@ const mod = {
             }
         },
         {
-            name: "entanglement",
-            nameInfo: "<span id = 'mod-entanglement'></span>",
-            addNameInfo() {
-                setTimeout(function () {
-                    game.boldActiveGunHUD();
-                }, 1000);
-            },
-            description: "while your <strong>first gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return b.inventory.length > 1 && !mod.isEnergyHealth
-            },
-            requires: "at least 2 guns",
-            effect() {
-                mod.isEntanglement = true
-                setTimeout(function () {
-                    game.boldActiveGunHUD();
-                }, 1000);
-
-            },
-            remove() {
-                mod.isEntanglement = false;
-            }
-        },
-        {
             name: "piezoelectricity",
             description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong class='color-harm'>harm</strong> from mob collisions",
             maxCount: 1,
@@ -1058,8 +1041,34 @@ const mod = {
             }
         },
         {
+            name: "entanglement",
+            nameInfo: "<span id = 'mod-entanglement'></span>",
+            addNameInfo() {
+                setTimeout(function () {
+                    game.boldActiveGunHUD();
+                }, 1000);
+            },
+            description: "while your <strong>first</strong> <strong class='color-g'>gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1 && !mod.isEnergyHealth
+            },
+            requires: "at least 2 guns",
+            effect() {
+                mod.isEntanglement = true
+                setTimeout(function () {
+                    game.boldActiveGunHUD();
+                }, 1000);
+
+            },
+            remove() {
+                mod.isEntanglement = false;
+            }
+        },
+        {
             name: "arsenal",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6.6%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1075,7 +1084,7 @@ const mod = {
         },
         {
             name: "generalist",
-            description: "<strong>spawn</strong> 3 <strong class='color-g'>gun</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br>automatically cycle <strong class='color-g'>guns</strong> with each new level",
+            description: "<strong>spawn</strong> 5 <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1085,7 +1094,7 @@ const mod = {
             requires: "arsenal",
             effect() {
                 mod.isGunCycle = true;
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < 5; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
