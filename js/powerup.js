@@ -496,8 +496,6 @@ const powerUps = {
         if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun")
       }
     }
-
-
   },
   chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
     if (Math.random() < 0.5) {
@@ -524,6 +522,8 @@ const powerUps = {
         if (Math.random() < 0.5) {
           powerUps.spawn(x, y, "gun", false);
         } else {
+          powerUps.spawn(x, y, "ammo", false);
+          powerUps.spawn(x, y, "ammo", false);
           powerUps.spawn(x, y, "ammo", false);
           powerUps.spawn(x, y, "ammo", false);
         }

@@ -1,4 +1,9 @@
+
+mods: foam does 200% more damage, but dissolves 50% faster
+
 ************** TODO - n-gon **************
+
+
 
 Mod: "Instant Acceleration": Minigun instantly starts firing at max fire rate, skipping the accelerated fire rate stage.
 

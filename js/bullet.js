@@ -624,7 +624,7 @@ const b = {
       onDmg(who) {
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
-        if (mod.isHeavyWater) mobs.statusDoT(who, 0.1, 180)
+        if (mod.isHeavyWater) mobs.statusDoT(who, 0.1, 300)
       },
       onEnd() {},
       do() {
@@ -681,7 +681,7 @@ const b = {
       friction: 0.05,
       frictionAir: 0,
       restitution: 1,
-      dmg: 0.28, //damage done in addition to the damage from momentum
+      dmg: 0.24, //damage done in addition to the damage from momentum
       lookFrequency: 80 + Math.floor(23 * Math.random()),
       endCycle: game.cycle + Math.floor((1100 + 420 * Math.random()) * mod.isBulletsLastLonger),
       classType: "bullet",
@@ -794,13 +794,14 @@ const b = {
     radius *= Math.sqrt(mod.bulletSize)
     const me = bullet.length;
     bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
-      angle: 0,
+      // angle: 0,
       density: 0.00005, //  0.001 is normal density
       inertia: Infinity,
       frictionAir: 0.003,
-      friction: 0.2,
-      restitution: 0.2,
-      dmg: 0.1, //damage done in addition to the damage from momentum
+      // friction: 0.2,
+      // restitution: 0.2,
+      dmg: mod.isFastFoam ? 0.02 : 0.0055, //damage done in addition to the damage from momentum
+      scale: 1 - 0.005 / mod.isBulletsLastLonger * (mod.isFastFoam ? 1.7 : 1),
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -845,31 +846,6 @@ const b = {
       onEnd() {},
       do() {
         if (!mech.isBodiesAsleep) { //if time dilation isn't active
-          //check for touching map
-
-          // if (Matter.Query.collides(this, map).length > 0) {
-          if (Matter.Query.point(map, this.position).length > 0) {
-            const slow = 0.85
-            Matter.Body.setVelocity(this, {
-              x: this.velocity.x * slow,
-              y: this.velocity.y * slow
-            });
-            const SCALE = 0.96
-            Matter.Body.scale(this, SCALE, SCALE);
-            this.radius *= SCALE;
-            // } else if (Matter.Query.collides(this, body).length > 0) {
-          } else if (Matter.Query.point(body, this.position).length > 0) {
-            const slow = 0.9
-            Matter.Body.setVelocity(this, {
-              x: this.velocity.x * slow,
-              y: this.velocity.y * slow
-            });
-            const SCALE = 0.96
-            Matter.Body.scale(this, SCALE, SCALE);
-            this.radius *= SCALE;
-          } else {
-            this.force.y += this.mass * 0.00008; //gravity
-          }
           if (this.count < 20) {
             this.count++
             //grow
@@ -878,9 +854,8 @@ const b = {
             this.radius *= SCALE;
           } else {
             //shrink
-            const SCALE = 1 - 0.005 / mod.isBulletsLastLonger
-            Matter.Body.scale(this, SCALE, SCALE);
-            this.radius *= SCALE;
+            Matter.Body.scale(this, this.scale, this.scale);
+            this.radius *= this.scale;
             if (this.radius < 8) this.endCycle = 0;
           }
 
@@ -896,13 +871,13 @@ const b = {
 
             // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
             if (this.target.isShielded) {
-              this.target.damage(b.dmgScale * 0.005, true); //shield damage bypass
+              this.target.damage(b.dmgScale * this.dmg, true); //shield damage bypass
               //shrink if mob is shielded
               const SCALE = 1 - 0.018 / mod.isBulletsLastLonger
               Matter.Body.scale(this, SCALE, SCALE);
               this.radius *= SCALE;
             } else {
-              this.target.damage(b.dmgScale * 0.005);
+              this.target.damage(b.dmgScale * this.dmg);
             }
           } else if (this.target !== null) { //look for a new target
             this.target = null
@@ -931,7 +906,27 @@ const b = {
                 }
               }
             }
-
+          } else if (Matter.Query.point(map, this.position).length > 0) { //slow when touching map or blocks
+            const slow = 0.85
+            Matter.Body.setVelocity(this, {
+              x: this.velocity.x * slow,
+              y: this.velocity.y * slow
+            });
+            const SCALE = 0.96
+            Matter.Body.scale(this, SCALE, SCALE);
+            this.radius *= SCALE;
+            // } else if (Matter.Query.collides(this, body).length > 0) {
+          } else if (Matter.Query.point(body, this.position).length > 0) {
+            const slow = 0.9
+            Matter.Body.setVelocity(this, {
+              x: this.velocity.x * slow,
+              y: this.velocity.y * slow
+            });
+            const SCALE = 0.96
+            Matter.Body.scale(this, SCALE, SCALE);
+            this.radius *= SCALE;
+          } else {
+            this.force.y += this.mass * 0.00008; //gravity
           }
         }
       }
@@ -1843,7 +1838,7 @@ const b = {
                   // check if inside a mob
                   q = Matter.Query.point(mob, this.position)
                   for (let i = 0; i < q.length; i++) {
-                    let dmg = b.dmgScale * 0.40 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                    let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.66) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                     q[i].damage(dmg);
                     q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue

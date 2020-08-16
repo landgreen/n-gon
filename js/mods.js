@@ -79,7 +79,7 @@ const mod = {
     },
     damageFromMods() {
         let dmg = 1
-        if (mod.isDamageForGuns) dmg *= 1 + 0.066 * b.inventory.length
+        if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.33;
@@ -173,22 +173,6 @@ const mod = {
             },
             remove() {
                 mod.isFarAwayDmg = false;
-            }
-        },
-        {
-            name: "fracture analysis",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>400%</strong><br>for mobs that are <strong>unaware</strong> of you",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mod.isCrit = true;
-            },
-            remove() {
-                mod.isCrit = false;
             }
         },
         {
@@ -1068,7 +1052,7 @@ const mod = {
         },
         {
             name: "arsenal",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6.6%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1610,7 +1594,7 @@ const mod = {
         },
         {
             name: "wave packet",
-            description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>40%</strong>",
+            description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>33%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1969,7 +1953,7 @@ const mod = {
         },
         {
             name: "heavy water",
-            description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
+            description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>5</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1997,6 +1981,22 @@ const mod = {
             },
             remove() {
                 mod.isFoamGrowOnDeath = false;
+            }
+        },
+        {
+            name: "colloidal foam",
+            description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>50%</strong> faster",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("foam") || mod.foamBotCount > 2
+            },
+            requires: "foam",
+            effect() {
+                mod.isFastFoam = true
+            },
+            remove() {
+                mod.isFastFoam = false;
             }
         },
         {
@@ -2138,7 +2138,7 @@ const mod = {
         },
         {
             name: "timelike world line",
-            description: "<strong>time dilation</strong> doubles your time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
+            description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2156,7 +2156,7 @@ const mod = {
         },
         {
             name: "Lorentz transformation",
-            description: "<strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster",
+            description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2194,7 +2194,7 @@ const mod = {
         },
         {
             name: "plasma-bot",
-            description: "a bot uses <strong class='color-f'>energy</strong> to emit short range <strong>plasma</strong><br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit short range <strong>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2390,6 +2390,22 @@ const mod = {
             }
         },
         {
+            name: "fracture analysis",
+            description: "bullet impacts do <strong>500%</strong> <strong class='color-d'>damage</strong><br>to mobs that are <strong>unaware</strong> of you or <strong>stunned</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isStunField || mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
+            },
+            requires: "phase decoherence field or flux pinning",
+            effect() {
+                mod.isCrit = true;
+            },
+            remove() {
+                mod.isCrit = false;
+            }
+        },
+        {
             name: "Bose Einstein condensate",
             description: "<strong>mobs</strong> in superposition with the <strong>pilot wave</strong><br>are <strong class='color-s'>frozen</strong> for <strong>2</strong> seconds",
             maxCount: 1,
@@ -2420,6 +2436,7 @@ const mod = {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
                 }
+                this.count--
             },
             remove() {}
         },
@@ -2438,6 +2455,7 @@ const mod = {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                 }
+                this.count--
             },
             remove() {}
         },
@@ -2457,6 +2475,7 @@ const mod = {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                     if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                 }
+                this.count--
             },
             remove() {}
         },
@@ -2473,6 +2492,7 @@ const mod = {
             effect() {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                this.count--
             },
             remove() {}
         },
@@ -2489,6 +2509,7 @@ const mod = {
             effect() {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "field");
                 if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "field");
+                this.count--
             },
             remove() {}
         },
@@ -2610,5 +2631,6 @@ const mod = {
     isDroneGrab: null,
     isOneGun: null,
     isDamageForGuns: null,
-    isGunCycle: null
+    isGunCycle: null,
+    isFastFoam: null
 }

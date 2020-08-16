@@ -202,9 +202,7 @@ function collisionChecks(event) {
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
-            // const dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)));
             let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            // console.log(dmg)
             if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
             mob[k].foundPlayer();
             mob[k].damage(dmg);
@@ -223,7 +221,6 @@ function collisionChecks(event) {
             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 9) {
               let dmg = 0.06 * b.dmgScale * v * obj.mass * mod.throwChargeRate;
-              if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
               if (mob[k].isShielded) dmg *= 0.35
               mob[k].damage(dmg, true);
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
