@@ -492,11 +492,19 @@ em {
 }
 
 .circle-grid {
-  width: 23px;
-  height: 23px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
   display: inline-block;
-  margin-bottom: -5px;
+  margin-bottom: -7px;
+}
+
+.circle-grid-shadow {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: -15px;
 }
 
 .circle-gun-mod {
@@ -527,7 +535,7 @@ em {
 }
 
 .gun {
-  background: #149;
+  background: rgb(15, 75, 179);
 }
 
 .heal {

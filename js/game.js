@@ -112,6 +112,7 @@ const game = {
   },
   g: 0.0024, // applies to player, bodies, and power ups  (not mobs)
   onTitlePage: true,
+  isCheating: false,
   paused: false,
   isChoosing: false,
   testing: false, //testing mode: shows wire frame and some variables
@@ -347,8 +348,9 @@ const game = {
         if (game.isConstructionMode) {
           document.getElementById("construct").style.display = 'none'
         }
-      } else {
+      } else { //if (keys[191])
         game.testing = true;
+        game.isCheating = true;
         if (game.isConstructionMode) {
           document.getElementById("construct").style.display = 'inline'
         }
@@ -500,12 +502,14 @@ const game = {
     player.force.y += player.mass * game.g;
   },
   reset() { //run on first run, and each later run after you die
+    game.isCheating = false
     b.removeAllGuns();
     mod.setupAllMods(); //sets mods to default values
     b.setFireCD();
     game.updateModHUD();
     powerUps.totalPowerUps = 0;
     powerUps.reroll.rerolls = 0;
+    mech.setFillColors();
     mech.maxHealth = 1
     mech.maxEnergy = 1
     mech.energy = 1
@@ -792,10 +796,11 @@ const game = {
   testingOutput() {
     ctx.fillStyle = "#000";
     if (!game.isConstructionMode) {
-      ctx.textAlign = "right";
-      let line = 500;
-      const x = canvas.width - 5;
-      ctx.fillText("T: exit testing mode", x, line);
+      // ctx.textAlign = "right";
+      ctx.fillText("T: exit testing mode", canvas.width / 2, canvas.height - 10);
+      // let line = 500;
+      // const x = canvas.width - 5;
+      // ctx.fillText("T: exit testing mode", x, line);
       // line += 20;
       // ctx.fillText("Y: give all mods", x, line);
       // line += 20;

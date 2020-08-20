@@ -86,7 +86,7 @@ const mod = {
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
-        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
+        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.004
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         return dmg * mod.slowFire
@@ -693,7 +693,7 @@ const mod = {
                 mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             },
             remove() {
-                mod.collisionImmuneCycles = 15;
+                mod.collisionImmuneCycles = 25;
             }
         },
         {
@@ -1341,7 +1341,7 @@ const mod = {
         },
         {
             name: "microstates",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2013,6 +2013,8 @@ const mod = {
             },
             remove() {
                 mod.isRailTimeSlow = false;
+                game.fpsCap = game.fpsCapDefault
+                game.fpsInterval = 1000 / game.fpsCap;
             }
         },
         {
@@ -2268,7 +2270,7 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mod.blockDmg += 0.35 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+                mod.blockDmg += 0.66 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
             },
             remove() {
                 mod.blockDmg = 0;
@@ -2284,7 +2286,7 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mech.fieldRange += 175 * 0.21
+                mech.fieldRange += 175 * 0.17
                 mech.fieldShieldingScale *= 0.6
             },
             remove() {
@@ -2359,7 +2361,7 @@ const mod = {
         },
         {
             name: "renormalization",
-            description: "using a <strong class='color-r'>reroll</strong> to change selection options<br>has a <strong>60%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
+            description: "using a <strong class='color-r'>reroll</strong> to change selection options<br>has a <strong>66%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2375,7 +2377,7 @@ const mod = {
         },
         {
             name: "superposition",
-            description: "mobs that <strong>touch</strong> the <strong>phased</strong> player<br> are <strong>stunned</strong> for <strong>4</strong> seconds",
+            description: "mobs that <strong>touch</strong> the <strong>phased</strong> player<br> are <strong>stunned</strong> for <strong>5</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {

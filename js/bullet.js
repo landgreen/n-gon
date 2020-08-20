@@ -740,31 +740,38 @@ const b = {
               for (let i = 0, len = powerUp.length; i < len; ++i) {
                 if (
                   (powerUp[i].name !== "heal" || mech.health < 0.9 * mech.maxHealth || mod.isDroneGrab) &&
-                  Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
-                  Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                  (powerUp[i].name !== "field" || !mod.isDeterminism)
                 ) {
-                  const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
-                  const DIST = Vector.magnitude(TARGET_VECTOR);
-                  if (DIST < closeDist) {
-                    closeDist = DIST;
-                    this.lockedOn = powerUp[i]
+                  //pick up nearby power ups
+                  if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 &&
+                    !game.isChoosing) {
+                    powerUps.onPickUp(this.position);
+                    powerUp[i].effect();
+                    Matter.World.remove(engine.world, powerUp[i]);
+                    powerUp.splice(i, 1);
+                    if (mod.isDroneGrab) {
+                      this.isImproved = true;
+                      const SCALE = 2
+                      Matter.Body.scale(this, SCALE, SCALE);
+                      this.lookFrequency = 30;
+                      this.endCycle = Infinity
+                      this.dmg *= 1.5;
+                      this.frictionAir = 0
+                    }
+                    break;
                   }
-                }
-                if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 && !game.isChoosing) {
-                  powerUps.onPickUp(this.position);
-                  powerUp[i].effect();
-                  Matter.World.remove(engine.world, powerUp[i]);
-                  powerUp.splice(i, 1);
-                  if (mod.isDroneGrab) {
-                    this.isImproved = true;
-                    const SCALE = 2
-                    Matter.Body.scale(this, SCALE, SCALE);
-                    this.lookFrequency = 30;
-                    this.endCycle = Infinity
-                    this.dmg *= 1.5;
-                    this.frictionAir = 0
+                  //look for power ups to lock onto
+                  if (
+                    Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
+                    Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                  ) {
+                    const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
+                    const DIST = Vector.magnitude(TARGET_VECTOR);
+                    if (DIST < closeDist) {
+                      closeDist = DIST;
+                      this.lockedOn = powerUp[i]
+                    }
                   }
-                  break;
                 }
               }
             }
@@ -1563,6 +1570,34 @@ const b = {
         }
         bullet[me].do = function () {
           this.force.y += this.mass * 0.0003;
+
+
+          // //place in bullet do
+          // //slow  player
+          // const range = 1000
+          // if (Vector.magnitude(Vector.sub(player.position, this.position)) < range) {
+          //   Matter.Body.setVelocity(player, {
+          //     x: player.velocity.x * 0.95,
+          //     y: player.velocity.y * 0.95
+          //   });
+          // }
+          // //aoe damage to mobs
+          // for (let i = 0, len = mob.length; i < len; i++) {
+          //   if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < range) {
+          //     let dmg = b.dmgScale * 0.023
+          //     if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
+          //     if (mob[i].shield) dmg *= 5 //x5 to make up for the /5 that shields normally take
+          //     mob[i].damage(dmg);
+          //     mob[i].locatePlayer();
+          //   }
+          // } 
+
+          // //draw it
+          // ctx.beginPath();
+          // ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
+          // ctx.fillStyle = `rgba(255,0,0,0.2)`;
+          // ctx.fill();
+
         };
       }
     },
@@ -1797,9 +1832,9 @@ const b = {
     },
     {
       name: "wave beam",
-      description: "emit a <strong>sine wave</strong> of oscillating particles<br>particles <strong>slowly</strong> propagate through <strong>solids</strong>",
+      description: "emit a <strong>sine wave</strong> of oscillating particles<br>that can propagate <strong>through solids</strong>",
       ammo: 0,
-      ammoPack: 80,
+      ammoPack: 70,
       have: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
@@ -1871,7 +1906,7 @@ const b = {
                       for (let i = 0; i < q.length; i++) {
                         slowCheck = 0.3;
                         Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                        let dmg = b.dmgScale * 0.37 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.6) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                        let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.66) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                         q[i].damage(dmg);
                         q[i].foundPlayer();
                         game.drawList.push({ //add dmg to draw queue
@@ -2202,7 +2237,7 @@ const b = {
     },
     {
       name: "neutron bomb",
-      description: "toss a chunk of <strong class='color-p'>Cf-252</strong> that emits <strong class='color-p'>neutrons</strong><br><strong class='color-d'>damages</strong> and drains <strong class='color-f'>energy</strong> in area of effect",
+      description: "toss a chunk of <strong class='color-p'>Cf-252</strong> which emits <strong class='color-p'>neutrons</strong><br>that do <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and <strong class='color-f'>energy</strong> drain",
       ammo: 0,
       ammoPack: 5,
       have: false,
@@ -2591,19 +2626,18 @@ const b = {
         bullet[me].endCycle = Infinity
         bullet[me].charge = 0;
         bullet[me].do = function () {
-          if ((!game.mouseDown && this.charge > 0.6) || mech.energy < 0.005) { //fire on mouse release
-            if (mech.energy < 0.005 && !mod.isRailTimeSlow) {
-              // this.charge = 0;
-              mech.energy += this.charge * 0.4
-              mech.fireCDcycle = mech.cycle + 120; // cool down if out of energy
-              this.endCycle = 0;
-              return
-            } else {
-              mech.fireCDcycle = mech.cycle + 2; // set fire cool down
-              //normal bullet behavior occurs after firing, overwrite this function
-              this.do = function () {
-                this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
-              }
+          if (mech.energy < 0.005 && !mod.isRailTimeSlow) {
+            mech.energy += 0.05 + this.charge * 0.3
+            mech.fireCDcycle = mech.cycle + 120; // cool down if out of energy
+            this.endCycle = 0;
+            return
+          }
+
+          if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release or on low energy
+            mech.fireCDcycle = mech.cycle + 2; // set fire cool down
+            //normal bullet behavior occurs after firing, overwrites this function
+            this.do = function () {
+              this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
             }
             if (mod.isRailTimeSlow) {
               game.fpsCap = game.fpsCapDefault
@@ -2653,7 +2687,7 @@ const b = {
                 mob[i].force.y += 1.5 * FORCE.y;
               }
             }
-          } else if (mech.energy > 0.005) { // charging on mouse down
+          } else { // charging on mouse down
             mech.fireCDcycle = Infinity //can't fire until mouse is released
             const lastCharge = this.charge
             let chargeRate = (mech.crouch) ? 0.98 : 0.984

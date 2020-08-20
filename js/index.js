@@ -398,6 +398,7 @@ const build = {
 
 function openCustomBuildMenu() {
   build.isURLBuild = false;
+  game.isCheating = true;
   document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
   el.style.display = "grid"
@@ -441,6 +442,7 @@ if (localSettings) {
     isCommunityMaps: false,
     difficultyMode: '1',
     fpsCapDefault: 'max',
+    runCount: -1,
   };
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
   document.getElementById("community-maps").checked = localSettings.isCommunityMaps
@@ -466,7 +468,9 @@ function setupCanvas() {
   canvas.width2 = canvas.width / 2; //precalculated because I use this often (in mouse look)
   canvas.height2 = canvas.height / 2;
   canvas.diagonal = Math.sqrt(canvas.width2 * canvas.width2 + canvas.height2 * canvas.height2);
-  ctx.font = "18px Arial";
+  // ctx.font = "18px Arial";
+  // ctx.textAlign = "center";
+  ctx.font = "25px Arial";
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
   // ctx.lineCap='square';

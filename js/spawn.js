@@ -368,7 +368,7 @@ const spawn = {
     // Matter.Body.setDensity(me, 0.0007); //extra dense //normal is 0.001 //makes effective life much lower
     me.friction = 0;
     me.frictionAir = 0;
-    me.accelMag = 0.001 * game.accelScale;;
+    me.accelMag = 0.001 * Math.sqrt(game.accelScale);
     me.g = me.accelMag * 0.6; //required if using 'gravity'
     me.memory = 50;
     spawn.shield(me, x, y);

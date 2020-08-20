@@ -100,7 +100,7 @@ const powerUps = {
     use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or mod
       powerUps.reroll.changeRerolls(-1)
       powerUps[type].effect();
-      if (mod.renormalization && Math.random() < 0.6) {
+      if (mod.renormalization && Math.random() < 0.66) {
         powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
         if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
       }

@@ -16,10 +16,9 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // mod.giveMod("bot replication");
-      // mod.nailBotCount += 10
       // b.giveGuns("rail gun")
-      // mech.setField("plasma torch")
+      // mech.setField("standing wave harmonics")
+      // mod.giveMod("frame-dragging");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation
@@ -40,6 +39,10 @@ const level = {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       // spawn.pickList = ["focuser", "focuser"]
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
+      if (!game.isCheating) {
+        localSettings.runCount += level.levelsCleared //track the number of total runs locally
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+      }
     }
     level.levelAnnounce();
     game.noCameraScroll();
@@ -629,7 +632,71 @@ const level = {
     level.custom = () => {
       level.playerExitCheck();
     };
-    level.customTopLayer = () => {};
+    // ctx.font = "30px Arial";
+    // ctx.textAlign = "center";
+    level.customTopLayer = () => {
+      // ctx.fillStyle = '#000';
+      // ctx.fillText(`${(localSettings.runCount >>> 0).toString(2)}`, 2850, -530);
+    };
+    const binary = (localSettings.runCount >>> 0).toString(2)
+    const height = 25
+    const thick = 2
+    const color = "#aaa"
+    const xOff = -130 //2622
+    const yOff = -45 //-580
+    let xLetter = 0
+    for (let i = 0; i < binary.length; i++) {
+      if (binary[i] === "0") {
+        zero(xOff + xLetter, yOff)
+      } else {
+        one(xOff + xLetter, yOff)
+      }
+    }
+
+    function one(x, y) {
+      level.fillBG.push({
+        x: x,
+        y: y,
+        width: thick,
+        height: height,
+        color: color
+      });
+      xLetter += 10
+    }
+
+    function zero(x, y) {
+      const width = 10
+      level.fillBG.push({
+        x: x,
+        y: y,
+        width: thick,
+        height: height,
+        color: color
+      });
+      level.fillBG.push({
+        x: x + width,
+        y: y,
+        width: thick,
+        height: height,
+        color: color
+      });
+      level.fillBG.push({
+        x: x,
+        y: y,
+        width: width,
+        height: thick,
+        color: color
+      });
+      level.fillBG.push({
+        x: x,
+        y: y + height - thick,
+        width: width,
+        height: thick,
+        color: color
+      });
+      xLetter += 10 + width
+    }
+
 
     level.setPosToSpawn(460, -100); //normal spawn
     level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
@@ -1981,13 +2048,13 @@ const level = {
     spawn.debris(3500, -650, 800, 5); //1st floor debris //16 debris per level
     powerUps.spawnStartingPowerUps(-525, -700);
 
-    spawn.mapRect(-600, 25, 5600, 300); //ground
-    spawn.mapRect(-600, 0, 2000, 50); //ground
+    spawn.mapRect(-600, 0, 2000, 325); //ground
+    spawn.mapRect(1400, 25, 1600, 300); //ground
+    spawn.mapRect(3000, 0, 2000, 325); //ground
     spawn.mapRect(-600, -1700, 50, 2000 - 100); //left wall
     spawn.bodyRect(-295, -1540, 40, 40); //center block under wall
     spawn.bodyRect(-298, -1580, 40, 40); //center block under wall
     spawn.bodyRect(1500, -1540, 30, 30); //left of entrance
-
     spawn.mapRect(1550, -2000, 50, 550); //right wall
     spawn.mapRect(1350, -2000 + 505, 50, 1295); //right wall
     spawn.mapRect(-600, -2000 + 250, 2000 - 700, 50); //roof left
@@ -2022,9 +2089,7 @@ const level = {
     spawn.bodyRect(700, -400, 100, 100); //center block under wall
     spawn.mapRect(1390, 13, 30, 20); //step left
     spawn.mapRect(2980, 13, 30, 20); //step right
-    spawn.mapRect(3000, 0, 2000, 50); //ground
     spawn.bodyRect(4250, -700, 50, 100);
-    // spawn.bodyRect(3000, -200, 50, 200); //door
     spawn.mapRect(3000, -1000, 50, 800); //left wall
     spawn.mapRect(3000 + 2000 - 50, -1300, 50, 1100); //right wall
     spawn.mapRect(4150, -600, 350, 150); //table

@@ -1,9 +1,21 @@
 
-mods: foam does 200% more damage, but dissolves 50% faster
+base collisions immunity frames is now 25/60 of a second (up from 15/60)
+
+mod: bremsstrahlung radiation - damage increased by 5x
+  bug fix it is now properly affected by damage scaling (huge nerf late game)
+
 
 ************** TODO - n-gon **************
 
+look into why wave beam is so good vs. shields
 
+group shields having way too much health at higher levels?
+
+give missiles a suck and delay explosion, like vacuum bomb
+
+bot, does AOE damage while it rotates around player
+  no physics / collisions
+  cap 3 ?
 
 Mod: "Instant Acceleration": Minigun instantly starts firing at max fire rate, skipping the accelerated fire rate stage.
 

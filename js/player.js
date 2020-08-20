@@ -57,8 +57,16 @@ const mech = {
   lastHarmCycle: 0,
   width: 50,
   radius: 30,
-  fillColor: "#fff", //changed by mod piezoelectric plating (damage immunity)
+  fillColor: "#fff",
   fillColorDark: "#ccc",
+  setFillColors() {
+    const hue = 0
+    const saturation = 10
+    const light = 70 + mech.harmReduction() * 30
+    // console.log(mech.harmReduction())
+    this.fillColor = `hsl(${hue},${saturation}%,${light}%)`
+    this.fillColorDark = `hsl(${hue},${saturation}%,${light-20}%)`
+  },
   height: 42,
   yOffWhen: {
     crouch: 22,
@@ -967,8 +975,8 @@ const mech = {
       }
       if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
-      if (mod.blockDmg && mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics") {
-        who.damage(mod.blockDmg)
+      if (mod.blockDmg) {
+        who.damage(mod.blockDmg * b.dmgScale)
         //draw electricity
         const step = 40
         ctx.beginPath();
@@ -1797,7 +1805,7 @@ const mech = {
                       // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
                       // mech.energy += 0.005;
 
-                      mobs.statusStun(inPlayer[i], 240)
+                      mobs.statusStun(inPlayer[i], 300)
                       //draw outline of mob in a few random locations to show blurriness
                       const vertices = inPlayer[i].vertices;
                       const off = 30
