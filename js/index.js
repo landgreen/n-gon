@@ -249,29 +249,30 @@ const build = {
     //update mod text //disable not allowed mods
     for (let i = 0, len = mod.mods.length; i < len; i++) {
       const modID = document.getElementById("mod-" + i)
+      if (!mod.mods[i].isCustomHide) {
+        if (mod.mods[i].allowed() || isAllowed) {
+          if (mod.mods[i].count > 1) {
+            modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
+          } else {
+            modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
+          }
 
-      if (mod.mods[i].allowed() || isAllowed) {
-        if (mod.mods[i].count > 1) {
-          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
+          if (modID.classList.contains("build-grid-disabled")) {
+            modID.classList.remove("build-grid-disabled");
+            modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
+          }
         } else {
-          modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
-        }
-
-        if (modID.classList.contains("build-grid-disabled")) {
-          modID.classList.remove("build-grid-disabled");
-          modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
-        }
-      } else {
-        modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
-        if (!modID.classList.contains("build-grid-disabled")) {
-          modID.classList.add("build-grid-disabled");
-          modID.onclick = null
-        }
-        if (mod.mods[i].count > 0) {
-          mod.removeMod(i)
-        }
-        if (modID.classList.contains("build-mod-selected")) {
-          modID.classList.remove("build-mod-selected");
+          modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+          if (!modID.classList.contains("build-grid-disabled")) {
+            modID.classList.add("build-grid-disabled");
+            modID.onclick = null
+          }
+          if (mod.mods[i].count > 0) {
+            mod.removeMod(i)
+          }
+          if (modID.classList.contains("build-mod-selected")) {
+            modID.classList.remove("build-mod-selected");
+          }
         }
       }
     }
@@ -312,12 +313,14 @@ const build = {
       text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
     }
     for (let i = 0, len = mod.mods.length; i < len; i++) {
-      if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
-        text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
-      } else if (mod.mods[i].count > 1) {
-        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
-      } else {
-        text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+      if (!mod.mods[i].isCustomHide) {
+        if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
+          text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+        } else if (mod.mods[i].count > 1) {
+          text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
+        } else {
+          text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+        }
       }
     }
     document.getElementById("build-grid").innerHTML = text

@@ -384,7 +384,7 @@ const mod = {
         },
         {
             name: "bot fabrication",
-            description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a random <strong>bot</strong>",
+            description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a <strong>random bot</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -593,6 +593,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return mod.totalBots() > 2
             },
@@ -975,7 +976,7 @@ const mod = {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
-            description: "instead of <strong>dying</strong> consume <strong>1</strong> <strong class='color-r'>reroll</strong><br><strong class='color-h'>heal</strong> a percent of <strong>max health</strong>",
+            description: "instead of <strong>dying</strong> consume a <strong class='color-r'>reroll</strong><br>and spawn <strong>4</strong> <strong class='color-h'>heal</strong> power ups",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1010,7 +1011,7 @@ const mod = {
         },
         {
             name: "Bayesian inference",
-            description: "<strong>33%</strong> chance for double <strong>power ups</strong> to drop<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong> from mobs",
+            description: "<strong>33%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong> from mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1229,7 +1230,7 @@ const mod = {
         },
         {
             name: "many-worlds",
-            description: "after choosing a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>spawn a <strong class='color-r'>reroll</strong>, if you have none",
+            description: "if you have no <strong class='color-r'>rerolls</strong> spawn one<br>after choosing a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1244,14 +1245,30 @@ const mod = {
             }
         },
         {
+            name: "renormalization",
+            description: "consuming a <strong class='color-r'>reroll</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isSuperDeterminism && !mod.isRerollHaste
+            },
+            requires: "not superdeterminism or Ψ(t) collapse",
+            effect() {
+                mod.renormalization = true;
+            },
+            remove() {
+                mod.renormalization = false;
+            }
+        },
+        {
             name: "quantum immortality",
             description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>5</strong> <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return powerUps.reroll.rerolls > 1 || build.isCustomSelection
             },
-            requires: "",
+            requires: "at least 2 rerolls",
             effect() {
                 mod.isImmortal = true;
                 for (let i = 0; i < 5; i++) {
@@ -1268,8 +1285,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 6) && !build.isCustomSelection
+                return (mod.totalCount > 6)
             },
             requires: "more than 6 mods",
             effect: () => {
@@ -1298,8 +1316,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 0) && !build.isCustomSelection && !mod.isSuperDeterminism
+                return (mod.totalCount > 0) && !mod.isSuperDeterminism
             },
             requires: "at least 1 mod",
             effect: () => {
@@ -1839,8 +1858,24 @@ const mod = {
             }
         },
         {
+            name: "mycelial fragmentation",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release an extra <strong class='color-p' style='letter-spacing: 2px;'>spore</strong><br> once a <strong>second</strong> during their <strong>growth</strong> phase",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("spores")
+            },
+            requires: "spores",
+            effect() {
+                mod.isSporeGrowth = true
+            },
+            remove() {
+                mod.isSporeGrowth = false
+            }
+        },
+        {
             name: "tinsellated flagella",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1852,6 +1887,23 @@ const mod = {
             },
             remove() {
                 mod.isFastSpores = false
+            }
+        },
+        {
+            name: "cryodesiccation",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1</strong> second",
+            // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
+            },
+            requires: "spores",
+            effect() {
+                mod.isSporeFreeze = true
+            },
+            remove() {
+                mod.isSporeFreeze = false
             }
         },
         {
@@ -1884,23 +1936,6 @@ const mod = {
             },
             remove() {
                 mod.isMutualism = false
-            }
-        },
-        {
-            name: "cryodesiccation",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1</strong> second",
-            // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
-            },
-            requires: "spores",
-            effect() {
-                mod.isSporeFreeze = true
-            },
-            remove() {
-                mod.isSporeFreeze = false
             }
         },
         {
@@ -2360,22 +2395,6 @@ const mod = {
             }
         },
         {
-            name: "renormalization",
-            description: "using a <strong class='color-r'>reroll</strong> to change selection options<br>has a <strong>66%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
-            },
-            requires: "phase decoherence field",
-            effect() {
-                mod.renormalization = true;
-            },
-            remove() {
-                mod.renormalization = false;
-            }
-        },
-        {
             name: "superposition",
             description: "mobs that <strong>touch</strong> the <strong>phased</strong> player<br> are <strong>stunned</strong> for <strong>5</strong> seconds",
             maxCount: 1,
@@ -2429,6 +2448,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return true
             },
@@ -2448,6 +2468,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return true
             },
@@ -2468,6 +2489,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return !mod.isSuperDeterminism
             },
@@ -2487,6 +2509,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return !mod.isSuperDeterminism
             },
@@ -2504,6 +2527,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return !mod.isSuperDeterminism
             },
@@ -2634,5 +2658,6 @@ const mod = {
     isOneGun: null,
     isDamageForGuns: null,
     isGunCycle: null,
-    isFastFoam: null
+    isFastFoam: null,
+    isSporeGrowth: null
 }

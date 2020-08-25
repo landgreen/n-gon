@@ -501,7 +501,10 @@ const mech = {
       if (mech.health < 0 || isNaN(mech.health)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
           powerUps.reroll.changeRerolls(-1)
-          mech.health = mech.maxHealth * game.healScale
+          for (let i = 0; i < 4; i++) {
+            powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
+            if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
+          }
           // if (mech.health < 0.05) mech.health = 0.05
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)

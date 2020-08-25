@@ -1,19 +1,47 @@
+mod: mycelial fragmentation - sporangium release spores as they grow
 
-base collisions immunity frames is now 25/60 of a second (up from 15/60)
+mod: renormalization 37% chance to spawn reroll when you use a reroll for any reason.
 
-mod: bremsstrahlung radiation - damage increased by 5x
-  bug fix it is now properly affected by damage scaling (huge nerf late game)
+difficulty balancing
+  much more damage done by mobs
+  more effective heals
+  more damage done by player
+  more mod spawns
 
+spring attack mobs take smaller steps
+  this should stop them from "coming in like a wrecking ball"
+
+mob alert range is reduced for large mobs
+  this controls how mobs that see you tell other mobs about your location
 
 ************** TODO - n-gon **************
 
-look into why wave beam is so good vs. shields
+make bayesian inference a part of power up spawn code more directly 
 
-group shields having way too much health at higher levels?
+removing supersaturation sets total health to 1
+  this cancels the health benefits from crystallized armor
+  produce a method that calculates max health based on mods
+
+fix door.isOpen actually meaning isClosed
+
+getting stuck above a mob can immobilize player
+  add a minimum knock from player mob collisions?
+  player goes intangible while immune after getting hit?
+
+the laser fire 3 beams
+
+after you die custom should be populated with your last build
+
+considering removing the perfect diamagnetism field from the game
+
+use canvas pixel array effects for full screen graphics
+  add some pixels after player gets hit?
+
+difficulty ramp late game?
 
 give missiles a suck and delay explosion, like vacuum bomb
 
-bot, does AOE damage while it rotates around player
+bot that does AOE damage while it rotates around player
   no physics / collisions
   cap 3 ?
 
@@ -115,7 +143,6 @@ mod - do 50% more damage in close, but 50% less at a distance
     have these mods disable each other
 
 phase field still isn't fun
-  rework renormalization mod as well
   does phase field need the stealth flag?
 
 mod: use the stealth flag from the phase decoherence field

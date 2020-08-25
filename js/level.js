@@ -33,6 +33,7 @@ const level = {
       // level.highrise();
       // level.office();
       // level.bosses(); //only fighting, very simple map
+      // level.newLevel() //fan level
       // level.basement(); //fan level
       // level.stronghold() //fan level
     } else {
@@ -58,6 +59,7 @@ const level = {
       const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
       for (let i = 0; i < len; i++) {
         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
+        if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
       }
     }
     if (mod.isGunCycle) {
@@ -129,19 +131,19 @@ const level = {
     spawn.mapRect(6400, -200, 400, 300); //right wall
     spawn.mapRect(6700, -1800, 800, 2600); //right wall
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
-    spawn.boost(1500, 0, 900);
+    // spawn.boost(1500, 0, 900);
 
     // spawn.bomberBoss(2900, -500)
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
     // spawn.sniper(1700, -120, 50)
-    // spawn.sniper(1400, -120)
+    spawn.springer(1400, -120)
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
     // spawn.starter(1600, -500, 60)
-    spawn.powerUpBoss(1600, -500)
+    // spawn.powerUpBoss(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "launcher")
@@ -847,7 +849,7 @@ const level = {
     level.defaultZoom = 1700 // 4500 // 1400
     game.zoomTransition(level.defaultZoom)
 
-    powerUps.spawnStartingPowerUps(4450, -1400);
+    powerUps.spawnStartingPowerUps(4900, -500);
     spawn.debris(1000, 20, 1800, 3); //16 debris per level //but less here because a few mobs die from laser
     spawn.debris(4830, -1330, 850, 3); //16 debris per level
     spawn.debris(3035, -3900, 1500, 3); //16 debris per level
@@ -857,16 +859,18 @@ const level = {
     //spawn start building
     spawn.mapRect(-300, -800, 50, 800);
     spawn.mapRect(-100, -20, 100, 30);
-    spawn.mapRect(-300, -10, 500, 50);
+    // spawn.mapRect(-300, -10, 500, 50);
     spawn.mapRect(150, -510, 50, 365);
     spawn.bodyRect(170, -130, 14, 145, 1, spawn.propsFriction); //door to starting room
-    spawn.mapRect(-300, 0, 1000, 300); //ground
+    // spawn.mapRect(-300, 0, 1000, 300); //ground
+    spawn.mapVertex(-18, 145, "625 0  0 0  0 -300  500 -300"); //entrance ramp
     spawn.mapRect(-300, 250, 6300, 300); //deeper ground
     spawn.bodyRect(2100, 50, 80, 80);
     spawn.bodyRect(2000, 50, 60, 60);
     // spawn.bodyRect(1650, 50, 300, 200);
-    spawn.bodyRect(3175, -155, 325, 325);
-    spawn.mapRect(1800, Math.floor(Math.random() * 200), 850, 300); //stops above body from moving to right
+    // spawn.mapRect(1800, Math.floor(Math.random() * 200), 850, 300); //stops above body from moving to right
+    spawn.mapVertex(2225, 250, "575 0  -575 0  -450 -100  450 -100"); //base
+
     //exit building
     // spawn.mapRect(-100, -410, 100, 30);
     spawn.mapRect(-300, -800, 500, 50);
@@ -933,7 +937,8 @@ const level = {
       color: "#d0d4d6"
     });
     //tall platform
-    spawn.mapVertex(3350, 250, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
+    spawn.mapVertex(3350, 200, "375 0  -375 0  -250 -250  250 -250"); //base
+    spawn.bodyRect(3400, -150, 150, 150);
     spawn.mapRect(2850, -3150, 1000, 50); //super high shade
     spawn.bodyRect(3675, -3470, 525, 20); //plank
     spawn.bodyRect(3600, -3450, 200, 300); //plank support block
@@ -1197,7 +1202,7 @@ const level = {
     spawn.bodyRect(-240, -2080, 30, 35); //door to starting room
     spawn.bodyRect(-240, -2045, 30, 35); //door to starting room
     spawn.mapRect(1850, -2000, 650, 50);
-    spawn.bodyRect(200, -2150, 200, 220, 0.8);
+    spawn.bodyRect(200, -2150, 80, 220, 0.8);
     spawn.mapRect(700, -2275, 600, 50);
     spawn.mapRect(1000, -1350, 410, 50);
     spawn.bodyRect(1050, -2350, 30, 30, 0.8);
@@ -1209,7 +1214,7 @@ const level = {
     spawn.bodyRect(370, -1200, 100, 100, 0.8);
     spawn.bodyRect(360, -1300, 100, 100, 0.8);
     spawn.bodyRect(950, -1050, 300, 50, 0.8);
-    spawn.bodyRect(-600, -1250, 400, 250, 0.8);
+    spawn.bodyRect(-575, -1150, 125, 150, 0.8);
     spawn.mapRect(1710, -1000, 1565, 100); //middle ledge
     spawn.mapRect(3400, -1000, 75, 25);
     spawn.bodyRect(2600, -1950, 100, 250, 0.8);
@@ -1258,7 +1263,7 @@ const level = {
   },
   aerie() {
     // const elevator = level.platform(4112, -2300, 280, 50)
-
+    // game.g = 0.0012 //0.0024
     level.custom = () => {
       level.playerExitCheck();
     };
@@ -1285,10 +1290,6 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 15, 100, 20);
 
     powerUps.spawnStartingPowerUps(1075, -550);
-    spawn.debris(-250, 50, 1650, 2); //16 debris per level
-    spawn.debris(2475, 0, 750, 2); //16 debris per level
-    spawn.debris(3450, 0, 2000, 16); //16 debris per level
-    spawn.debris(3500, -2350, 1500, 2); //16 debris per level
     document.body.style.backgroundColor = "#dcdcde";
 
     //foreground
@@ -1437,7 +1438,13 @@ const level = {
         if (game.difficulty > 4) spawn.nodeBoss(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
       } else if (Math.random() < 0.15) {
         spawn.randomLevelBoss(4250, -250);
+        spawn.debris(-250, 50, 1650, 2); //16 debris per level
+        spawn.debris(2475, 0, 750, 2); //16 debris per level
+        spawn.debris(3450, 0, 2000, 16); //16 debris per level
+        spawn.debris(3500, -2350, 1500, 2); //16 debris per level
       } else {
+        powerUps.chooseRandomPowerUp(4000, 200);
+        powerUps.chooseRandomPowerUp(4000, 200);
         //floor below right tall tower
         spawn.bodyRect(3000, 50, 150, 250, 0.9);
         spawn.bodyRect(4500, -500, 300, 250, 0.7);
@@ -1574,7 +1581,7 @@ const level = {
     spawn.bodyRect(3200, -1375, 300, 25, 0.9);
     spawn.bodyRect(1825, -1875, 400, 25, 0.9);
     // spawn.bodyRect(1800, -575, 250, 150, 0.8);
-    spawn.bodyRect(1800, -600, 250, 200, 0.8);
+    spawn.bodyRect(1800, -600, 110, 150, 0.8);
     spawn.bodyRect(2557, -450, 35, 55, 0.7);
     spawn.bodyRect(2957, -450, 30, 15, 0.7);
     spawn.bodyRect(2900, -450, 60, 45, 0.7);
@@ -2708,6 +2715,452 @@ const level = {
     powerUps.spawn(3010, 1630, "mod");
     powerUps.spawn(3100, 1630, "heal");
   },
+  newLevel() {
+    level.setPosToSpawn(0, 0); //lower start
+    level.exit.y = 150;
+    spawn.mapRect(level.enter.x, 45, 100, 20);
+    level.exit.x = 10625;
+    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+    level.defaultZoom = 1400;
+    game.zoomTransition(level.defaultZoom)
+    document.body.style.backgroundColor = "#d5d5d5";
+    const BGColor = "rgba(0,0,0,0.1)";
+    level.fill.push({
+      x: -150,
+      y: -250,
+      width: 625,
+      height: 325,
+      color: BGColor
+    });
+    level.fill.push({
+      x: 475,
+      y: -520,
+      width: 5375,
+      height: 875,
+      color: BGColor
+    });
+    level.fill.push({
+      x: 5850,
+      y: -1275,
+      width: 2800,
+      height: 2475,
+      color: BGColor
+    });
+    level.fill.push({
+      x: 8650,
+      y: -500,
+      width: 1600,
+      height: 750,
+      color: BGColor
+    });
+    level.fill.push({
+      x: 10250,
+      y: -700,
+      width: 900,
+      height: 950,
+      color: BGColor
+    });
+    const rotor = level.rotor(7000, 580, -0.001);
+    const buttonCouloirEnBas = level.button(5000, 255);
+    const door = level.door(5825, -430, 25, 690, 700);
+    const doorSortieSalle = level.door(8590, -520, 20, 800, 750)
+    let doorPortal1Center
+    let isAlreadySpawned = false;
+    let door12isOpen = true;
+    let door3isOpen = true;
+    let buttonPorteSalle
+    let buttonSortieSalle
+    let portalEnBas
+    let portalEnHaut
+
+    function drawOnTheMapMapRect(x, y, dx, dy) {
+      spawn.mapRect(x, y, dx, dy);
+      len = map.length - 1
+      map[len].collisionFilter.category = cat.map;
+      map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+      Matter.Body.setStatic(map[len], true); //make static
+      World.add(engine.world, map[len]); //add to world
+      game.draw.setPaths() //update map graphics
+    }
+
+    function drawOnTheMapBodyRect(x, y, dx, dy) {
+      spawn.bodyRect(x, y, dx, dy);
+      len = body.length - 1
+      body[len].collisionFilter.category = cat.body;
+      body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+      World.add(engine.world, body[len]); //add to world
+      body[len].classType = "body"
+    }
+
+    function spawnCouloirEnBas() {
+      isAlreadySpawned = true;
+      level.fill.push({
+        x: 1950,
+        y: 355,
+        width: 2025,
+        height: 2120,
+        color: BGColor
+      });
+      drawOnTheMapMapRect(1925, 255, 125, 2250)
+      drawOnTheMapMapRect(2575, 255, 1550, 100);
+      drawOnTheMapMapRect(2570, 255, 80, 400);
+      drawOnTheMapMapRect(1925, 1030, 1325, 75);
+      drawOnTheMapMapRect(3900, 255, 100, 2250);
+      drawOnTheMapMapRect(1925, 2380, 2075, 125);
+      drawOnTheMapMapRect(2600, 1680, 1400, 75);
+      drawOnTheMapMapRect(1925, 1880, 225, 625);
+      drawOnTheMapMapRect(2050, 1980, 200, 525);
+      drawOnTheMapMapRect(2150, 2080, 200, 425);
+      drawOnTheMapMapRect(2250, 2180, 200, 325);
+      drawOnTheMapMapRect(2350, 2280, 200, 225);
+      drawOnTheMapMapRect(3800, 1080, 200, 675);
+      drawOnTheMapMapRect(3700, 1180, 200, 575);
+      drawOnTheMapMapRect(3600, 1280, 200, 475);
+      drawOnTheMapMapRect(3500, 1380, 200, 375);
+      drawOnTheMapMapRect(3400, 1480, 200, 275);
+      drawOnTheMapMapRect(3300, 1580, 200, 175);
+      buttonPorteSalle = level.button(3050, 2380);
+      spawn.mapVertex(3115, 2382, "100 10 -100 10 -70 -10 70 -10");
+      len = map.length - 1
+      map[len].collisionFilter.category = cat.map;
+      map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+      Matter.Body.setStatic(map[len], true); //make static
+      World.add(engine.world, map[len]); //add to world
+      game.draw.setPaths() //update map graphics
+      drawOnTheMapMapRect(3775, 1680, 225, 825);
+      drawOnTheMapMapRect(2250, -370, 200, 350);
+      drawOnTheMapMapRect(2250, -370, 400, 50);
+      drawOnTheMapMapRect(2575, -845, 75, 425);
+      drawOnTheMapMapRect(1975, -520, 675, 100);
+      drawOnTheMapBodyRect(2950, 1530, 150, 175);
+      drawOnTheMapBodyRect(2925, 1665, 25, 25);
+      drawOnTheMapBodyRect(2775, 1605, 75, 75);
+      drawOnTheMapBodyRect(2050, 905, 125, 125);
+      drawOnTheMapBodyRect(2650, 980, 50, 50);
+      drawOnTheMapBodyRect(3375, 2280, 100, 100);
+      drawOnTheMapBodyRect(2550, 2355, 75, 25);
+      drawOnTheMapBodyRect(3575, 1255, 125, 25);
+      drawOnTheMapBodyRect(2450, 2255, 25, 25);
+      doorPortal1Center = level.door(2595, -345, 20, 280, 360)
+      len = body.length - 1
+      body[len].collisionFilter.category = cat.body;
+      body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+      World.add(engine.world, body[len]); //add to world
+      body[len].classType = "body"
+      portalEnBas = level.portal({
+        x: 3750,
+        y: 2280
+      }, Math.PI, {
+        x: 2500,
+        y: -199
+      }, 0)
+      spawn.randomSmallMob(3000, 830, 1);
+      spawn.randomSmallMob(2800, 1930, 1);
+      spawn.randomMob(3400, 1980, 0.9);
+      spawn.randomMob(2750, 1330, 0.8);
+      spawn.randomMob(2800, 515, 0.6);
+      spawn.randomMob(2500, 1230, 0.5)
+      spawn.randomMob(2450, 2030, 0.3)
+      spawn.randomMob(3300, 1980, 0.3)
+      levelCustom2();
+    }
+
+    function spawnCouloirEnHaut() {
+      level.fill.push({
+        x: 2575,
+        y: -1150,
+        width: 2550,
+        height: 630,
+        color: BGColor
+      });
+      level.fill.push({
+        x: 1900,
+        y: -2300,
+        width: 1650,
+        height: 1150,
+        color: BGColor
+      });
+      level.fill.push({
+        x: 3550,
+        y: -1625,
+        width: 1650,
+        height: 475,
+        color: BGColor
+      });
+      drawOnTheMapMapRect(3800, -270, 75, 75);
+      drawOnTheMapMapRect(3900, -895, 500, 75);
+      drawOnTheMapMapRect(3900, -1195, 75, 375);
+      drawOnTheMapMapRect(3525, -1195, 450, 75);
+      drawOnTheMapMapRect(3525, -1995, 50, 1575);
+      drawOnTheMapMapRect(3325, -1995, 50, 1575);
+      drawOnTheMapMapRect(3525, -1670, 1675, 75);
+      drawOnTheMapMapRect(5100, -1670, 100, 1250);
+      drawOnTheMapMapRect(1800, -1195, 1575, 75);
+      drawOnTheMapMapRect(1800, -1520, 375, 400);
+      drawOnTheMapMapRect(1800, -2370, 100, 1250);
+      drawOnTheMapMapRect(2375, -1845, 375, 250);
+      drawOnTheMapMapRect(2700, -1745, 650, 75);
+      drawOnTheMapMapRect(1800, -2370, 1775, 100);
+      drawOnTheMapMapRect(3525, -2370, 50, 775);
+      drawOnTheMapMapRect(4650, -1220, 550, 75);
+      drawOnTheMapBodyRect(3225, -1845, 100, 100);
+      drawOnTheMapBodyRect(3575, 1255, 125, 25);
+      drawOnTheMapBodyRect(2450, 2255, 25, 25);
+      drawOnTheMapBodyRect(3975, -945, 175, 50);
+      drawOnTheMapBodyRect(4825, -1295, 50, 75);
+      drawOnTheMapBodyRect(4850, -720, 250, 200);
+      drawOnTheMapBodyRect(4050, -970, 25, 25);
+      drawOnTheMapBodyRect(3075, -1245, 50, 50);
+      buttonSortieSalle = level.button(3000, -1745)
+      spawn.mapVertex(3065, -1745, "100 10 -100 10 -70 -10 70 -10");
+      len = map.length - 1
+      map[len].collisionFilter.category = cat.map;
+      map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+      Matter.Body.setStatic(map[len], true); //make static
+      World.add(engine.world, map[len]); //add to world
+      game.draw.setPaths() //update map graphics
+
+      portalEnHaut = level.portal({
+        x: 3650,
+        y: -1470
+      }, Math.PI / 2, {
+        x: 3250,
+        y: -1473
+      }, Math.PI / 2)
+
+      spawn.randomSmallMob(2500, -2070 + Math.random(), 1);
+      spawn.randomSmallMob(5000, -1370, 1);
+      spawn.randomMob(5000, -645, 0.9);
+      spawn.randomMob(4050, 970, 0.9);
+      spawn.randomSmallMob(2800, -1620, 0.7);
+      spawn.randomMob(2400, -1370, 0.5);
+      spawn.randomMob(3725, -1320, 0.3);
+      spawn.randomBoss(2115, -2020, 0.1)
+
+      powerUps.spawn(5000, -1275, "heal");
+      levelCustom3();
+    }
+
+    // ////////////////////////////////////////
+    level.custom = () => {
+      buttonCouloirEnBas.query();
+      buttonCouloirEnBas.draw();
+      if (buttonCouloirEnBas.isUp) {} else {
+        if (isAlreadySpawned == false) {
+          spawnCouloirEnBas()
+        }
+      }
+      level.playerExitCheck();
+      rotor.rotate();
+    };
+    level.customTopLayer = () => {
+      door.draw();
+      doorSortieSalle.draw();
+    };
+    // ////////////////////////////////////////
+
+    function levelCustom2() {
+      level.custom = () => {
+        portalEnBas[2].query()
+        portalEnBas[3].query()
+        rotor.rotate();
+        buttonPorteSalle.query();
+        buttonPorteSalle.draw();
+        buttonCouloirEnBas.query();
+        buttonCouloirEnBas.draw();
+        ////////
+        if (buttonCouloirEnBas.isUp) {} else {
+          if (isAlreadySpawned == false) {
+            spawnCouloirEnBas()
+          }
+        }
+        ////////////
+        if (buttonPorteSalle.isUp) {
+          door.isOpen = door12isOpen;
+          doorPortal1Center.isOpen = door12isOpen;
+        } else {
+          door.isOpen = false;
+          doorPortal1Center.isOpen = false;
+          door12isOpen = false;
+        }
+        door.openClose();
+        doorPortal1Center.openClose();
+        level.playerExitCheck();
+      };
+      // //////////////////////////////////////
+      level.customTopLayer = () => {
+        door.draw();
+        doorSortieSalle.draw();
+        doorPortal1Center.draw();
+        portalEnBas[0].draw();
+        portalEnBas[1].draw();
+        portalEnBas[2].draw();
+        portalEnBas[3].draw();
+      };
+    }
+    // //////////////////////////////////////
+    function levelCustom3() {
+      level.custom = () => {
+        portalEnBas[2].query()
+        portalEnBas[3].query()
+        portalEnHaut[2].query();
+        portalEnHaut[3].query();
+        rotor.rotate();
+        buttonPorteSalle.query();
+        buttonPorteSalle.draw();
+        buttonSortieSalle.query();
+        buttonSortieSalle.draw();
+        buttonCouloirEnBas.query();
+        buttonCouloirEnBas.draw();
+        ////////////
+        if (buttonPorteSalle.isUp) {
+          door.isOpen = door12isOpen;
+          doorPortal1Center.isOpen = door12isOpen;
+        } else {
+          door.isOpen = false;
+          doorPortal1Center.isOpen = false;
+          door12isOpen = false;
+        }
+        door.openClose();
+        doorPortal1Center.openClose();
+        if (buttonSortieSalle.isUp) {
+          doorSortieSalle.isOpen = door3isOpen;
+        } else {
+          doorSortieSalle.isOpen = false;
+          door3isOpen = false;
+        }
+        doorSortieSalle.openClose();
+        level.playerExitCheck();
+      };
+      // //////////////////////////////////////
+      level.customTopLayer = () => {
+        door.draw();
+        doorPortal1Center.draw();
+        doorSortieSalle.draw();
+        portalEnBas[0].draw();
+        portalEnBas[1].draw();
+        portalEnBas[2].draw();
+        portalEnBas[3].draw();
+        portalEnHaut[0].draw();
+        portalEnHaut[1].draw();
+        portalEnHaut[2].draw();
+        portalEnHaut[3].draw();
+      };
+    }
+    //spawn box
+    spawn.mapRect(-200, -295, 75, 425);
+    spawn.mapRect(-200, 55, 700, 75);
+    spawn.mapRect(-200, -295, 700, 75);
+    spawn.bodyRect(470, -220, 25, 275); //porte spawn box
+    //couloir
+    spawn.mapRect(450, -520, 50, 300); //muret gauche haut
+    spawn.mapRect(450, 55, 50, 300); //muret gauche bas
+    spawn.mapRect(1700, -520, 50, 325); //muret 2 haut
+    spawn.mapRect(1700, 55, 50, 300); //muret 2 bas
+    spawn.mapRect(4375, 55, 50, 300);
+    spawn.mapRect(4575, 55, 50, 300);
+    spawn.bodyRect(4625, 155, 75, 100);
+    spawn.bodyRect(4725, 230, 50, 25);
+    if (Math.random() > 0.5) {
+      powerUps.chooseRandomPowerUp(4500, 200);
+    } else {
+      powerUps.chooseRandomPowerUp(8350, -630);
+    }
+    //blocs
+    spawn.bodyRect(7475, 1055, 50, 75);
+    spawn.bodyRect(7775, 1105, 25, 25);
+    spawn.bodyRect(6925, 1105, 125, 25);
+    spawn.bodyRect(6375, 380, 50, 50);
+    spawn.bodyRect(6425, -220, 125, 150);
+    spawn.bodyRect(6475, -245, 125, 25);
+    spawn.bodyRect(7675, -245, 100, 50);
+    spawn.bodyRect(7075, -520, 50, 100);
+    spawn.bodyRect(8400, -595, 100, 75);
+    spawn.bodyRect(1700, 5, 50, 50);
+    spawn.bodyRect(1700, -45, 50, 50);
+    spawn.bodyRect(1700, -95, 50, 50);
+    spawn.bodyRect(1700, -145, 50, 50);
+    spawn.bodyRect(1700, -195, 50, 50);
+    spawn.mapRect(450, -520, 1600, 100); //plafond 1
+    spawn.mapRect(450, 255, 1600, 100); //sol 1
+    spawn.mapRect(2250, -95, 1450, 75); //entresol
+    spawn.mapRect(3900, -520, 2000, 100); //plafond 2
+    spawn.mapRect(3900, 255, 2000, 100); //sol 2
+    //grande salle
+    spawn.bodyRect(5900, 830, 325, 300); //bloc en bas à gauche
+    spawn.mapRect(5775, -1295, 2900, 100);
+    spawn.mapRect(5775, 1130, 2900, 100); //plancher + sol grande salle
+    spawn.mapRect(5925, -70, 650, 50); //plateforme middle entrée
+    spawn.mapRect(7575, -520, 1100, 100); //sol salle en haut à droite
+    spawn.mapRect(6800, -420, 450, 50); //petite plateforme transition vers salle en haut
+    spawn.mapRect(7750, -1295, 75, 575); //mur gauche salle en haut à droite
+    spawn.mapRect(6100, 430, 375, 50); //plateforme en bas, gauche rotor
+    spawn.mapRect(7450, -195, 1225, 75); //longue plateforme
+    //murs grande salle
+    spawn.mapRect(5775, -1295, 125, 875);
+    spawn.mapRect(5775, 255, 125, 975);
+    spawn.mapRect(8550, -1295, 125, 875);
+    spawn.mapRect(8550, 180, 125, 1050);
+    //couloir 2
+    spawn.mapRect(8875, -520, 1425, 325);
+    spawn.mapRect(8550, -520, 1750, 100);
+    spawn.mapRect(8550, 180, 2625, 100);
+    spawn.mapRect(10175, -745, 125, 325);
+    spawn.mapRect(10175, -745, 1000, 125);
+    spawn.mapRect(11050, -745, 125, 1025);
+    spawn.mapRect(8875, 80, 1425, 200);
+    //MOBS
+    spawn.randomSmallMob(900, -70, 1);
+    spawn.randomMob(4300, 95, 1);
+    spawn.randomSmallMob(6250, 630, 1);
+    spawn.randomMob(6255, -835, 0.9);
+    spawn.randomMob(8200, -900, 0.7);
+    spawn.randomMob(5700, -270, 0.7);
+    spawn.randomMob(8275, -320, 0.7);
+    spawn.randomMob(2700, -270, 0.7);
+    spawn.randomMob(7575, 950, 0.5);
+    spawn.randomMob(7000, -695, 0.4);
+    spawn.randomMob(1850, -345, 0.3);
+    spawn.randomMob(3600, -270, 0.3);
+    spawn.randomMob(1500, -270, 0.2);
+    spawn.randomMob(1250, 55, 0.2);
+    spawn.randomMob(8800, -45, 0.2);
+    spawn.randomBoss(8025, -845, 0.2);
+
+    if (game.difficulty > 2) {
+      if (Math.random() < 0.2) {
+        // tether ball
+        spawn.tetherBoss(8000, 630)
+        let me = mob[mob.length - 1];
+        me.onDeath = function () {
+          this.removeCons(); //remove constraint
+          spawnCouloirEnHaut()
+        };
+        cons[cons.length] = Constraint.create({
+          pointA: {
+            x: 8550,
+            y: 680
+          },
+          bodyB: mob[mob.length - 1],
+          stiffness: 0.00015
+        });
+        if (game.difficulty > 4) spawn.nodeBoss(8000, 630, "spawns", 8, 20, 105);
+      } else if (game.difficulty > 3) {
+        spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss"]);
+        let me = mob[mob.length - 1];
+        me.onDeath = function () {
+          this.removeCons(); //remove constraint
+          spawnCouloirEnHaut()
+        };
+      }
+    } else {
+      spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
+      let me = mob[mob.length - 1];
+      me.onDeath = function () {
+        spawnCouloirEnHaut()
+      };
+    }
+  },
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
@@ -2717,26 +3170,26 @@ const level = {
     // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.25; //damage done by mobs increases each level
-      b.dmgScale *= 0.92; //damage done by player decreases each level
+      game.dmgScale += 0.3; //damage done by mobs increases each level
+      b.dmgScale *= 0.93; //damage done by player decreases each level
       game.accelScale *= 1.027 //mob acceleration increases each level
       game.lookFreqScale *= 0.975 //mob cycles between looks decreases each level
       game.CDScale *= 0.966 //mob CD time decreases each level
     }
-    game.healScale = 1 / (1 + game.difficulty * 0.08) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
+    game.healScale = 1 / (1 + game.difficulty * 0.07) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.25; //damage done by mobs increases each level
+      game.dmgScale -= 0.3; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
-      b.dmgScale /= 0.92; //damage done by player decreases each level
+      b.dmgScale /= 0.93; //damage done by player decreases each level
       game.accelScale /= 1.027 //mob acceleration increases each level
       game.lookFreqScale /= 0.975 //mob cycles between looks decreases each level
       game.CDScale /= 0.966 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 0;
-    game.healScale = 1 / (1 + game.difficulty * 0.08)
+    game.healScale = 1 / (1 + game.difficulty * 0.07)
   },
   difficultyText(mode = document.getElementById("difficulty-select").value) {
     if (mode === "0") {

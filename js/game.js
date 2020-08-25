@@ -458,8 +458,8 @@ const game = {
       }
     }
   },
-  noCameraScroll() {
-    // makes the camera not scroll after changing locations
+  noCameraScroll() { //makes the camera not scroll after changing locations
+    //only works if velocity is zero
     mech.pos.x = player.position.x;
     mech.pos.y = playerBody.position.y - mech.yOff;
     const scale = 0.8;
@@ -540,7 +540,7 @@ const game = {
       game.difficultyMode = 1
       level.difficultyDecrease(6); //if this stops being -6  change in build.calculateCustomDifficulty()
     }
-    if (game.difficultyMode === 4) level.difficultyIncrease(2)
+    if (game.difficultyMode === 4) level.difficultyIncrease(3)
 
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
@@ -602,6 +602,7 @@ const game = {
       if (game.isCommunityMaps) {
         level.levels.push("stronghold");
         level.levels.push("basement");
+        level.levels.push("newLevel");
       }
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
@@ -726,6 +727,21 @@ const game = {
         if (game.difficultyMode > 2) {
           mech.death();
         } else {
+
+          // Matter.Body.setPosition(player, {
+          //   x: player.position.x,
+          //   y: level.enter.y - 5000
+          // });
+
+          // mech.pos.x = player.position.x;
+          // mech.pos.y = playerBody.position.y - mech.yOff;
+          // const scale = 0.8;
+          // const velocityScale = 12
+          // mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale + player.velocity.x * velocityScale;
+          // mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale + player.velocity.y * velocityScale;
+          // mech.transX += (mech.transSmoothX - mech.transX) * 1;
+          // mech.transY += (mech.transSmoothY - mech.transY) * 1;
+
           Matter.Body.setVelocity(player, {
             x: 0,
             y: 0

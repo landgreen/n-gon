@@ -1731,8 +1731,8 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 40,
-      defaultAmmoPack: 40,
+      ammoPack: 45,
+      defaultAmmoPack: 45,
       have: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -2412,7 +2412,7 @@ const b = {
       name: "spores",
       description: "fire a <strong>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
       ammo: 0,
-      ammoPack: 3.5,
+      ammoPack: 3,
       have: false,
       fire() {
         const me = bullet.length;
@@ -2427,6 +2427,7 @@ const b = {
         bullet[me].maxRadius = 30;
         bullet[me].restitution = 0.3;
         bullet[me].minDmgSpeed = 0;
+        bullet[me].totalSpores = 9 + 2 * mod.isFastSpores + 2 * mod.isSporeFreeze
         bullet[me].stuck = function () {};
         bullet[me].onDmg = function () {};
         bullet[me].do = function () {
@@ -2504,10 +2505,19 @@ const b = {
           this.stuck(); //runs different code based on what the bullet is stuck to
           if (!mech.isBodiesAsleep) {
             let scale = 1.01
-            if (this.stuckTo && this.stuckTo.alive) scale = 1.03
-            Matter.Body.scale(this, scale, scale);
-            this.radius *= scale
-            if (this.radius > this.maxRadius) this.endCycle = 0;
+            if (mod.isSporeGrowth && !(game.cycle % 60)) { //release a spore
+              b.spore(this.position)
+              // this.totalSpores--
+              scale = 0.94
+              if (this.stuckTo && this.stuckTo.alive) scale = 0.88
+              Matter.Body.scale(this, scale, scale);
+              this.radius *= scale
+            } else {
+              if (this.stuckTo && this.stuckTo.alive) scale = 1.03
+              Matter.Body.scale(this, scale, scale);
+              this.radius *= scale
+              if (this.radius > this.maxRadius) this.endCycle = 0;
+            }
           }
 
           // this.force.y += this.mass * 0.00045;
@@ -2521,7 +2531,7 @@ const b = {
 
         //spawn bullets on end
         bullet[me].onEnd = function () {
-          const NUM = 10
+          const NUM = this.totalSpores
           for (let i = 0; i < NUM; i++) {
             b.spore(this.position)
           }

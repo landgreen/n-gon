@@ -59,10 +59,23 @@ const powerUps = {
         const limit = 4
         for (; powerUps.reroll.rerolls > limit - 1; powerUps.reroll.rerolls -= limit) {
           b.randomBot()
+          if (mod.renormalization) {
+            for (let i = 0; i < limit; i++) {
+              if (Math.random() < 0.37) {
+                mech.fieldCDcycle = mech.cycle + 30;
+                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+                if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+              }
+            }
+          }
         }
       }
       if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
         document.getElementById("mod-anthropic").innerHTML = `(${powerUps.reroll.rerolls})`
+      }
+      if (mod.renormalization && Math.random() < 0.37 && amount < 0) {
+        powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+        if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
       }
       if (mod.isRerollHaste) {
         if (powerUps.reroll.rerolls === 0) {
@@ -100,10 +113,6 @@ const powerUps = {
     use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or mod
       powerUps.reroll.changeRerolls(-1)
       powerUps[type].effect();
-      if (mod.renormalization && Math.random() < 0.66) {
-        powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-        if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-      }
     },
   },
   heal: {
@@ -430,7 +439,7 @@ const powerUps = {
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0027 * (20 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
+    if (Math.random() < 0.0027 * (26 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
       if (Math.random() < mod.bayesian) powerUps.spawn(x, y, "mod");
       return;
@@ -448,14 +457,13 @@ const powerUps = {
   },
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
-
     if (game.difficultyMode < 2) { //easy and normal mode
-      powerUps.randomPowerUpCounter += 0.5;
+      powerUps.randomPowerUpCounter += 0.65;
     } else if (game.difficultyMode === 2) { //hard mode
       powerUps.randomPowerUpCounter += 1;
     } else { //why mode
       powerUps.randomPowerUpCounter += 1.33;
-      if (Math.random() < 0.6) { //why mode gets a free power up chance
+      if (Math.random() < 0.5) { //why mode gets a free power up chance
         powerUps.randomPowerUpCounter *= 0.5
         spawnPowerUps()
       }
