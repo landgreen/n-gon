@@ -428,7 +428,8 @@ const mech = {
   },
   displayHealth() {
     id = document.getElementById("health");
-    id.style.width = Math.floor(300 * mech.health) + "px";
+    // health display follows a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
+    id.style.width = Math.floor(300 * Math.pow(mech.health, 1.5)) + "px";
     //css animation blink if health is low
     if (mech.health < 0.3) {
       id.classList.add("low-health");
@@ -500,12 +501,12 @@ const mech = {
       mech.health -= dmg;
       if (mech.health < 0 || isNaN(mech.health)) {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
+          mech.health = 0.05
           powerUps.reroll.changeRerolls(-1)
           for (let i = 0; i < 4; i++) {
             powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
-            if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
           }
-          // if (mech.health < 0.05) mech.health = 0.05
+
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
           game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)
           // game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)

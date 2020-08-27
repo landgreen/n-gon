@@ -25,7 +25,6 @@ const b = {
           if (mech.health > 2 * mod.isAmmoFromHealth * mech.maxHealth) {
             mech.damage(mod.isAmmoFromHealth * mech.maxHealth / mech.harmReduction());
             powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-            if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
           } else {
             game.replaceTextLog = true;
             game.makeTextLog("not enough health for catabolism to produce ammo", 120);
@@ -1545,60 +1544,46 @@ const b = {
       nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       startingHoldCycle: 0,
       fire() {
-        const me = bullet.length;
-        const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
-        bullet[me] = Bodies.rectangle(mech.pos.x + 23 * Math.cos(mech.angle), mech.pos.y + 23 * Math.sin(mech.angle), 20 * mod.bulletSize * mod.highCaliber, 6 * mod.bulletSize, b.fireAttributes(dir));
-
         //fire delay decreases as you hold fire, down to 3 from 15
-        if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
-        const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) * mod.highCaliber //CD scales with cycles fire is held down
-        this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
-        b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
-        // b.fireProps(mech.crouch ? 7 : 4, mech.crouch ? 40 : 34, dir, me); //cd , speed
-
-        bullet[me].endCycle = game.cycle + 70;
-        bullet[me].dmg = 0.25;
-        bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
-        if (mod.isIceCrystals) {
-          bullet[me].onDmg = function (who) {
-            mobs.statusSlow(who, 30)
-          };
-          mech.energy -= mech.fieldRegen + 0.0075
-          if (mech.energy < 0.02) {
-            mech.fireCDcycle = mech.cycle + 60; // cool down
-          }
+        const pos = {
+          x: mech.pos.x + 23 * Math.cos(mech.angle),
+          y: mech.pos.y + 23 * Math.sin(mech.angle)
         }
-        bullet[me].do = function () {
-          this.force.y += this.mass * 0.0003;
+        if (mod.nailGun) {
+          mech.fireCDcycle = mech.cycle + Math.floor(2.1 * b.fireCD); // cool down
+          const speed = 33 + 10 * Math.random()
+          const angle = mech.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (mech.crouch ? 0.22 : 0.65)
+          const velocity = {
+            x: speed * Math.cos(angle),
+            y: speed * Math.sin(angle)
+          }
+          b.nail(pos, velocity, 1) //position, velocity, damage
+        } else {
+          if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
+          const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+          this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
 
+          const me = bullet.length;
+          const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
+          bullet[me] = Bodies.rectangle(pos.x, pos.y, 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
+          b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
 
-          // //place in bullet do
-          // //slow  player
-          // const range = 1000
-          // if (Vector.magnitude(Vector.sub(player.position, this.position)) < range) {
-          //   Matter.Body.setVelocity(player, {
-          //     x: player.velocity.x * 0.95,
-          //     y: player.velocity.y * 0.95
-          //   });
-          // }
-          // //aoe damage to mobs
-          // for (let i = 0, len = mob.length; i < len; i++) {
-          //   if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < range) {
-          //     let dmg = b.dmgScale * 0.023
-          //     if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-          //     if (mob[i].shield) dmg *= 5 //x5 to make up for the /5 that shields normally take
-          //     mob[i].damage(dmg);
-          //     mob[i].locatePlayer();
-          //   }
-          // } 
-
-          // //draw it
-          // ctx.beginPath();
-          // ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
-          // ctx.fillStyle = `rgba(255,0,0,0.2)`;
-          // ctx.fill();
-
-        };
+          bullet[me].endCycle = game.cycle + 70;
+          bullet[me].dmg = 0.25;
+          bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
+          if (mod.isIceCrystals) {
+            bullet[me].onDmg = function (who) {
+              mobs.statusSlow(who, 30)
+            };
+            mech.energy -= mech.fieldRegen + 0.0075
+            if (mech.energy < 0.02) {
+              mech.fireCDcycle = mech.cycle + 60; // cool down
+            }
+          }
+          bullet[me].do = function () {
+            this.force.y += this.mass * 0.0003;
+          };
+        }
       }
     },
     {

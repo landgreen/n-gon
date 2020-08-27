@@ -16,9 +16,9 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // b.giveGuns("rail gun")
+      // b.giveGuns("minigun")
       // mech.setField("standing wave harmonics")
-      // mod.giveMod("frame-dragging");
+      // mod.giveMod("nail gun");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation
@@ -59,7 +59,6 @@ const level = {
       const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
       for (let i = 0; i < len; i++) {
         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
-        if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
       }
     }
     if (mod.isGunCycle) {
@@ -138,7 +137,7 @@ const level = {
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
     // spawn.sniper(1700, -120, 50)
-    spawn.springer(1400, -120)
+    spawn.starter(1400, -120, 100)
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
@@ -3214,8 +3213,8 @@ const level = {
     level.levelsCleared++;
     level.onLevel++; //cycles map to next level
     if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
-
     level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
+    if (level.levelsCleared > level.levels.length) level.difficultyIncrease(game.difficultyMode)
     if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
     game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
   },

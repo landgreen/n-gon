@@ -1,22 +1,17 @@
-mod: mycelial fragmentation - sporangium release spores as they grow
 
-mod: renormalization 37% chance to spawn reroll when you use a reroll for any reason.
-
-difficulty balancing
-  much more damage done by mobs
-  more effective heals
-  more damage done by player
-  more mod spawns
-
-spring attack mobs take smaller steps
-  this should stop them from "coming in like a wrecking ball"
-
-mob alert range is reduced for large mobs
-  this controls how mobs that see you tell other mobs about your location
+2x difficulty increases after clearing every level once
+mod - minigun fires nails,  nails are inaccurate, but fire rapidly
+added an option to play older versions of n-gon in settings
 
 ************** TODO - n-gon **************
 
-make bayesian inference a part of power up spawn code more directly 
+player goes intangible while immune after getting hit?
+getting stuck above a mob can immobilize player
+  add a minimum knock from player mob collisions?
+
+perfect diamagnetism be able to grab and launch mobs
+
+Gun: Launch yourself at high speed to the enemy, gaining temporary invincibility while in the air and for 3 seconds after landing. Upon impact, trigger a large explosion.
 
 removing supersaturation sets total health to 1
   this cancels the health benefits from crystallized armor
@@ -24,11 +19,7 @@ removing supersaturation sets total health to 1
 
 fix door.isOpen actually meaning isClosed
 
-getting stuck above a mob can immobilize player
-  add a minimum knock from player mob collisions?
-  player goes intangible while immune after getting hit?
-
-the laser fire 3 beams
+mod - laser fires 3 beams
 
 after you die custom should be populated with your last build
 
@@ -37,15 +28,12 @@ considering removing the perfect diamagnetism field from the game
 use canvas pixel array effects for full screen graphics
   add some pixels after player gets hit?
 
-difficulty ramp late game?
-
 give missiles a suck and delay explosion, like vacuum bomb
 
 bot that does AOE damage while it rotates around player
   no physics / collisions
   cap 3 ?
 
-Mod: "Instant Acceleration": Minigun instantly starts firing at max fire rate, skipping the accelerated fire rate stage.
 
 level Boss: fractal Sierpiński triangle
   https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle

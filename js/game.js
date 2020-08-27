@@ -360,17 +360,17 @@ const game = {
     //in testing mode
     if (game.testing) {
       if (keys[192]) { // `
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
       } else if (keys[49]) { // give power ups with 1
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
       } else if (keys[50]) { // 2
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
       } else if (keys[51]) { // 3
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
       } else if (keys[52]) { // 4
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "field");
       } else if (keys[53]) { // 5
-        powerUps.spawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
       } else if (keys[54]) { // 6  spawn mob
         const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
         spawn.allowShields = false;
@@ -399,6 +399,16 @@ const game = {
           x: 0,
           y: 0
         });
+        // move bots to follow player
+        for (let i = 0; i < bullet.length; i++) {
+          if (bullet[i].botType) {
+            Matter.Body.setPosition(bullet[i], player.position);
+            Matter.Body.setVelocity(bullet[i], {
+              x: 0,
+              y: 0
+            });
+          }
+        }
         // game.noCameraScroll()
       } else if (keys[85]) { // next level with U
         level.nextLevel();

@@ -1011,7 +1011,7 @@ const mod = {
         },
         {
             name: "Bayesian inference",
-            description: "<strong>33%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong> from mobs",
+            description: "<strong>33%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1019,10 +1019,10 @@ const mod = {
             },
             requires: "",
             effect: () => {
-                mod.bayesian = 0.33;
+                mod.isBayesian = true
             },
             remove() {
-                mod.bayesian = 0;
+                mod.isBayesian = false
             }
         },
         {
@@ -1081,7 +1081,6 @@ const mod = {
                 mod.isGunCycle = true;
                 for (let i = 0; i < 5; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
             },
             remove() {
@@ -1200,7 +1199,6 @@ const mod = {
                 mod.isDeterminism = true;
                 for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
             remove() {
@@ -1221,7 +1219,6 @@ const mod = {
                 mod.isSuperDeterminism = true;
                 for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
             remove() {
@@ -1333,7 +1330,6 @@ const mod = {
 
                 for (let i = 0; i < 2; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
             },
             remove() {}
@@ -1380,7 +1376,7 @@ const mod = {
             count: 0,
             maxCount: 9,
             allowed() {
-                return mod.haveGunCheck("minigun") || mod.haveGunCheck("shotgun") || mod.haveGunCheck("super balls")
+                return (mod.haveGunCheck("minigun") && !mod.nailGun) || mod.haveGunCheck("shotgun") || mod.haveGunCheck("super balls")
             },
             requires: "minigun, shotgun, super balls",
             effect() {
@@ -1391,28 +1387,28 @@ const mod = {
             }
         },
         {
-            name: "high caliber",
-            description: "<strong>100%</strong> increased <strong>minigun</strong> bullet size<br><strong>100%</strong> increased <strong>delay</strong> after firing",
+            name: "nail gun",
+            description: "the <strong>minigun</strong> is modified to fire <strong>nails</strong><br>with a short <strong>fire delay</strong> and a low <strong>precision</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("minigun")
+                return mod.haveGunCheck("minigun") && !mod.isIceCrystals
             },
             requires: "minigun",
             effect() {
-                mod.highCaliber = 2
+                mod.nailGun = true
             },
             remove() {
-                mod.highCaliber = 1
+                mod.nailGun = false
             }
         },
         {
             name: "ice crystal nucleation",
-            description: "your <strong>minigun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>bullets</strong> from water vapor",
+            description: "the <strong>minigun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>bullets</strong> from water vapor",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("minigun")
+                return mod.haveGunCheck("minigun") && !mod.nailGun
             },
             requires: "minigun",
             effect() {
@@ -1847,7 +1843,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot) * 2 > 1
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + mod.nailGun) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2456,7 +2452,6 @@ const mod = {
             effect() {
                 for (let i = 0; i < 6; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
                 }
                 this.count--
             },
@@ -2476,7 +2471,6 @@ const mod = {
             effect() {
                 for (let i = 0; i < 6; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
                 }
                 this.count--
             },
@@ -2497,7 +2491,6 @@ const mod = {
             effect() {
                 for (let i = 0; i < 5; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-                    if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                 }
                 this.count--
             },
@@ -2516,7 +2509,6 @@ const mod = {
             requires: "not superdeterminism",
             effect() {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 this.count--
             },
             remove() {}
@@ -2534,7 +2526,6 @@ const mod = {
             requires: "not superdeterminism",
             effect() {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "field");
-                if (Math.random() < mod.bayesian) powerUps.spawn(mech.pos.x, mech.pos.y, "field");
                 this.count--
             },
             remove() {}
@@ -2558,7 +2549,6 @@ const mod = {
     largerHeals: null,
     squirrelFx: null,
     isCrit: null,
-    bayesian: null,
     isLowHealthDmg: null,
     isFarAwayDmg: null,
     isEntanglement: null,
@@ -2659,5 +2649,7 @@ const mod = {
     isDamageForGuns: null,
     isGunCycle: null,
     isFastFoam: null,
-    isSporeGrowth: null
+    isSporeGrowth: null,
+    isBayesian: null,
+    nailGun: null
 }
