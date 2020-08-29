@@ -286,18 +286,6 @@ const game = {
     // mech.drop();
   },
   keyPress() { //runs on key down event
-    if (keys[189] || keys[79]) {
-      // - key
-      game.isAutoZoom = false;
-      game.zoomScale /= 0.9;
-      game.setZoom();
-    } else if (keys[187] || keys[73]) {
-      // = key
-      game.isAutoZoom = false;
-      game.zoomScale *= 0.9;
-      game.setZoom();
-    }
-
     //full screen toggle
     // if (keys[13]) {
     //   //enter key
@@ -314,8 +302,6 @@ const game = {
     //   }
     //   setupCanvas();
     // }
-
-
     if (keys[69]) { // e    swap to next active gun
       game.nextGun();
     } else if (keys[81]) { //q    swap to previous active gun
@@ -359,6 +345,19 @@ const game = {
     }
     //in testing mode
     if (game.testing) {
+
+      if (keys[79]) {
+        // - key
+        game.isAutoZoom = false;
+        game.zoomScale /= 0.9;
+        game.setZoom();
+      } else if (keys[73]) {
+        // = key
+        game.isAutoZoom = false;
+        game.zoomScale *= 0.9;
+        game.setZoom();
+      }
+
       if (keys[192]) { // `
         powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
       } else if (keys[49]) { // give power ups with 1

@@ -445,7 +445,7 @@ if (localSettings) {
     isCommunityMaps: false,
     difficultyMode: '1',
     fpsCapDefault: 'max',
-    runCount: -1,
+    runCount: 0,
   };
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
   document.getElementById("community-maps").checked = localSettings.isCommunityMaps

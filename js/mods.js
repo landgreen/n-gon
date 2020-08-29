@@ -67,7 +67,7 @@ const mod = {
             !build.isCustomSelection &&
             b.inventory.length > 2 &&
             name !== b.guns[b.activeGun].name &&
-            Math.random() < -0.1 + 0.1 * (b.inventory.length + mod.isGunCycle * 2) //lower chance of mods specific to a gun if you have lots of guns
+            Math.random() > 2 / (b.inventory.length + mod.isGunCycle * 3) //lower chance of mods specific to a gun if you have lots of guns
         ) {
             return false
         }
@@ -82,7 +82,7 @@ const mod = {
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
-        if (mod.isEnergyLoss) dmg *= 1.33;
+        if (mod.isEnergyLoss) dmg *= 1.37;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
@@ -128,7 +128,7 @@ const mod = {
         },
         {
             name: "acute stress response",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>37%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -557,7 +557,7 @@ const mod = {
         },
         {
             name: "scrap bots",
-            description: "<strong>12%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
+            description: "<strong>11%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
             maxCount: 6,
             count: 0,
             allowed() {
@@ -565,7 +565,7 @@ const mod = {
             },
             requires: "a bot",
             effect() {
-                mod.isBotSpawner += 0.12;
+                mod.isBotSpawner += 0.11;
             },
             remove() {
                 mod.isBotSpawner = 0;
@@ -1371,50 +1371,50 @@ const mod = {
             }
         },
         {
-            name: "depleted uranium rounds",
-            description: `your <strong>bullets</strong> are <strong>18%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
-            count: 0,
-            maxCount: 9,
-            allowed() {
-                return (mod.haveGunCheck("minigun") && !mod.nailGun) || mod.haveGunCheck("shotgun") || mod.haveGunCheck("super balls")
-            },
-            requires: "minigun, shotgun, super balls",
-            effect() {
-                mod.bulletSize += 0.18
-            },
-            remove() {
-                mod.bulletSize = 1;
-            }
-        },
-        {
-            name: "nail gun",
-            description: "the <strong>minigun</strong> is modified to fire <strong>nails</strong><br>with a short <strong>fire delay</strong> and a low <strong>precision</strong>",
+            name: "pneumatic actuator",
+            description: "<strong>nail gun</strong> takes <strong>50%</strong> less time to ramp up<br>to it's shortest <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("minigun") && !mod.isIceCrystals
+                return mod.haveGunCheck("nail gun")
             },
-            requires: "minigun",
+            requires: "nail gun",
             effect() {
-                mod.nailGun = true
+                mod.nailFireRate = true
             },
             remove() {
-                mod.nailGun = false
+                mod.nailFireRate = false
+            }
+        },
+        {
+            name: "powder-actuated",
+            description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>20%</strong> faster muzzle <strong>speed</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("nail gun") && mod.nailFireRate && !mod.isIceCrystals
+            },
+            requires: "nail gun",
+            effect() {
+                mod.nailInstantFireRate = true
+            },
+            remove() {
+                mod.nailInstantFireRate = false
             }
         },
         {
             name: "ice crystal nucleation",
-            description: "the <strong>minigun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>bullets</strong> from water vapor",
+            description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("minigun") && !mod.nailGun
+                return mod.haveGunCheck("nail gun") && !mod.nailInstantFireRate
             },
-            requires: "minigun",
+            requires: "nail gun",
             effect() {
                 mod.isIceCrystals = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "minigun") {
+                    if (b.guns[i].name === "nail gun") {
                         b.guns[i].ammoPack = Infinity
                         b.guns[i].recordedAmmo = b.guns[i].ammo
                         b.guns[i].ammo = Infinity
@@ -1426,7 +1426,7 @@ const mod = {
             remove() {
                 mod.isIceCrystals = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "minigun") {
+                    if (b.guns[i].name === "nail gun") {
                         b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
                         b.guns[i].ammo = b.guns[i].recordedAmmo
                         game.updateGunHUD();
@@ -1525,6 +1525,22 @@ const mod = {
             },
             remove() {
                 mod.oneSuperBall = false;
+            }
+        },
+        {
+            name: "super sized",
+            description: `your <strong>super balls</strong> are <strong>22%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
+            count: 0,
+            maxCount: 9,
+            allowed() {
+                return mod.haveGunCheck("super balls")
+            },
+            requires: "super balls",
+            effect() {
+                mod.bulletSize += 0.22
+            },
+            remove() {
+                mod.bulletSize = 1;
             }
         },
         {
@@ -1843,7 +1859,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + mod.nailGun) * 2 > 1
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIceCrystals)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2016,7 +2032,7 @@ const mod = {
         },
         {
             name: "colloidal foam",
-            description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>50%</strong> faster",
+            description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>40%</strong> faster",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2030,6 +2046,22 @@ const mod = {
                 mod.isFastFoam = false;
             }
         },
+        // {
+        //     name: "foam size",
+        //     description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>50%</strong> faster",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mod.haveGunCheck("foam") || mod.foamBotCount > 2
+        //     },
+        //     requires: "foam",
+        //     effect() {
+        //         mod.isLargeFoam = true
+        //     },
+        //     remove() {
+        //         mod.isLargeFoam = false;
+        //     }
+        // },
         {
             name: "frame-dragging",
             description: "<strong>slow time</strong> while charging the <strong>rail gun</strong><br>charging no longer drains <strong class='color-f'>energy</strong>",
@@ -2651,5 +2683,6 @@ const mod = {
     isFastFoam: null,
     isSporeGrowth: null,
     isBayesian: null,
-    nailGun: null
+    nailGun: null,
+    nailInstantFireRate: null
 }

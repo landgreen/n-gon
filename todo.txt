@@ -1,29 +1,43 @@
 
-2x difficulty increases after clearing every level once
-mod - minigun fires nails,  nails are inaccurate, but fire rapidly
-added an option to play older versions of n-gon in settings
+zoom now only works in testing mode with keys: i / o
+
+minigun is now nailgun  (higher damage, lower ammo)
+mod: pneumatic actuator - nail gun's ramp up time is 50% shorter
+mod: powder-actuated - removes ramp up time and increases nail speed
+
+removed mod depleted uranium
+mod: super size - larger super balls
 
 ************** TODO - n-gon **************
+
+mod: railroad ties - nails are larger and do more damage
+
+foam needs a new mod
+  is the foam mod colloidal foam fun?
+  increase foam bullet size?
+  foam explodes when it runs out?
+
+removing supersaturation sets total health to 1
+  this cancels the health benefits from crystallized armor
+  produce a method that calculates max health based on mods
 
 player goes intangible while immune after getting hit?
 getting stuck above a mob can immobilize player
   add a minimum knock from player mob collisions?
 
+use mac automator to speed up your n-gon -> git sync
+
+considering removing the perfect diamagnetism field from the game
 perfect diamagnetism be able to grab and launch mobs
 
 Gun: Launch yourself at high speed to the enemy, gaining temporary invincibility while in the air and for 3 seconds after landing. Upon impact, trigger a large explosion.
-
-removing supersaturation sets total health to 1
-  this cancels the health benefits from crystallized armor
-  produce a method that calculates max health based on mods
 
 fix door.isOpen actually meaning isClosed
 
 mod - laser fires 3 beams
 
 after you die custom should be populated with your last build
-
-considering removing the perfect diamagnetism field from the game
+also you should be able to share while paused
 
 use canvas pixel array effects for full screen graphics
   add some pixels after player gets hit?

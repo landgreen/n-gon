@@ -797,7 +797,7 @@ const b = {
     });
   },
   foam(position, velocity, radius) {
-    radius *= Math.sqrt(mod.bulletSize)
+    // radius *= Math.sqrt(mod.bulletSize)
     const me = bullet.length;
     bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
       // angle: 0,
@@ -807,7 +807,7 @@ const b = {
       // friction: 0.2,
       // restitution: 0.2,
       dmg: mod.isFastFoam ? 0.02 : 0.0055, //damage done in addition to the damage from momentum
-      scale: 1 - 0.005 / mod.isBulletsLastLonger * (mod.isFastFoam ? 1.7 : 1),
+      scale: 1 - 0.005 / mod.isBulletsLastLonger * (mod.isFastFoam ? 1.6 : 1),
       classType: "bullet",
       collisionFilter: {
         category: cat.bullet,
@@ -1534,56 +1534,78 @@ const b = {
     game.makeGunHUD();
   },
   guns: [{
-      name: "minigun",
-      description: "<strong>rapidly</strong> fire a stream of small <strong>bullets</strong><br>fire <strong>delay</strong> decreases as you shoot",
+      name: "nail gun",
+      description: "use compressed air to fire a stream of <strong>nails</strong><br><strong>delay</strong> after firing <strong>decreases</strong> as you shoot",
       ammo: 0,
-      ammoPack: 65,
-      defaultAmmoPack: 65,
+      ammoPack: 60,
+      defaultAmmoPack: 60,
       recordedAmmo: 0,
       have: false,
       nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       startingHoldCycle: 0,
       fire() {
-        //fire delay decreases as you hold fire, down to 3 from 15
-        const pos = {
-          x: mech.pos.x + 23 * Math.cos(mech.angle),
-          y: mech.pos.y + 23 * Math.sin(mech.angle)
-        }
-        if (mod.nailGun) {
-          mech.fireCDcycle = mech.cycle + Math.floor(2.1 * b.fireCD); // cool down
-          const speed = 33 + 10 * Math.random()
-          const angle = mech.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (mech.crouch ? 0.22 : 0.65)
-          const velocity = {
-            x: speed * Math.cos(angle),
-            y: speed * Math.sin(angle)
+        let CD
+        if (mod.nailFireRate) { //fire delay decreases as you hold fire, down to 3 from 15
+          if (mod.nailInstantFireRate) {
+            CD = 2
+          } else {
+            if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
+            CD = Math.max(5 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+            this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
           }
-          b.nail(pos, velocity, 1) //position, velocity, damage
         } else {
           if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
-          const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+          CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
           this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
-
-          const me = bullet.length;
-          const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
-          bullet[me] = Bodies.rectangle(pos.x, pos.y, 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
-          b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
-
-          bullet[me].endCycle = game.cycle + 70;
-          bullet[me].dmg = 0.25;
-          bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
-          if (mod.isIceCrystals) {
-            bullet[me].onDmg = function (who) {
-              mobs.statusSlow(who, 30)
-            };
-            mech.energy -= mech.fieldRegen + 0.0075
-            if (mech.energy < 0.02) {
-              mech.fireCDcycle = mech.cycle + 60; // cool down
-            }
-          }
-          bullet[me].do = function () {
-            this.force.y += this.mass * 0.0003;
-          };
         }
+        mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
+
+        const speed = 28 + 8 * Math.random() + 6 * mod.nailInstantFireRate
+        const angle = mech.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (mech.crouch ? 1.35 : 3.2) / CD
+        b.nail({
+          x: mech.pos.x + 23 * Math.cos(mech.angle),
+          y: mech.pos.y + 23 * Math.sin(mech.angle)
+        }, {
+          x: mech.Vx / 2 + speed * Math.cos(angle),
+          y: mech.Vy / 2 + speed * Math.sin(angle)
+        }, 0.9) //position, velocity, damage
+
+        if (mod.isIceCrystals) {
+          bullet[bullet.length - 1].onDmg = function (who) {
+            mobs.statusSlow(who, 30)
+          };
+          mech.energy -= mech.fieldRegen + 0.008
+          if (mech.energy < 0.02) mech.fireCDcycle = mech.cycle + 60; // cool down
+        }
+
+
+
+        // } else {
+        //   if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
+        //   const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+        //   this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
+
+        //   const me = bullet.length;
+        //   const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
+        //   bullet[me] = Bodies.rectangle(pos.x, pos.y, 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
+        //   b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
+
+        //   bullet[me].endCycle = game.cycle + 70;
+        //   bullet[me].dmg = 0.25;
+        //   bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
+        //   if (mod.isIceCrystals) {
+        //     bullet[me].onDmg = function (who) {
+        //       mobs.statusSlow(who, 30)
+        //     };
+        //     mech.energy -= mech.fieldRegen + 0.0075
+        //     if (mech.energy < 0.02) {
+        //       mech.fireCDcycle = mech.cycle + 60; // cool down
+        //     }
+        //   }
+        //   bullet[me].do = function () {
+        //     this.force.y += this.mass * 0.0003;
+        //   };
+        // }
       }
     },
     {
@@ -1632,7 +1654,7 @@ const b = {
             b.nail(pos, velocity, 1)
           }
         } else {
-          const side = 21 * mod.bulletSize
+          const side = 21
           for (let i = 0; i < 17; i++) {
             const me = bullet.length;
             const dir = mech.angle + (Math.random() - 0.5) * spread
@@ -2559,7 +2581,7 @@ const b = {
       have: false,
       fire() {
         mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
-        const radius = mech.crouch ? 10 + 7 * Math.random() : 4 + 6 * Math.random() //(4 + (mech.crouch ? 15 : 6) * Math.random())
+        const radius = (mech.crouch ? 10 + 7 * Math.random() : 4 + 6 * Math.random())
         const dir = mech.angle + 0.2 * (Math.random() - 0.5)
         const position = {
           x: mech.pos.x + 30 * Math.cos(mech.angle),

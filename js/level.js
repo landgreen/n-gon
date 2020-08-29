@@ -16,9 +16,9 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // b.giveGuns("minigun")
+      // b.giveGuns("nail gun")
       // mech.setField("standing wave harmonics")
-      // mod.giveMod("nail gun");
+      // mod.giveMod("pneumatic actuator");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation
