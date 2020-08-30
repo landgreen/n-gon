@@ -1372,7 +1372,7 @@ const mod = {
         },
         {
             name: "pneumatic actuator",
-            description: "<strong>nail gun</strong> takes <strong>50%</strong> less time to ramp up<br>to it's shortest <strong>delay</strong> after firing",
+            description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1388,7 +1388,7 @@ const mod = {
         },
         {
             name: "powder-actuated",
-            description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>20%</strong> faster muzzle <strong>speed</strong>",
+            description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1529,7 +1529,7 @@ const mod = {
         },
         {
             name: "super sized",
-            description: `your <strong>super balls</strong> are <strong>22%</strong> larger<br>increased mass and physical <strong class='color-d'>damage</strong>`,
+            description: `your <strong>super balls</strong> are <strong>22%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
             count: 0,
             maxCount: 9,
             allowed() {
@@ -1855,11 +1855,11 @@ const mod = {
         },
         {
             name: "irradiated nails",
-            description: "<strong>nails</strong> are made with a <strong class='color-p'>cobalt-60</strong> alloy<br><strong>66%</strong> extra <strong class='color-d'>damage</strong> over <strong>6</strong> seconds",
+            description: "<strong>nails</strong> are made with a <strong class='color-p'>cobalt-60</strong> alloy<br><strong>85%</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIceCrystals)) * 2 > 1
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + mod.haveGunCheck("nail gun")) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -1867,6 +1867,22 @@ const mod = {
             },
             remove() {
                 mod.isNailPoison = false;
+            }
+        },
+        {
+            name: "railroad ties",
+            description: "<strong>nails</strong> are <strong>80%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + mod.haveGunCheck("nail gun")) * 2 > 1
+            },
+            requires: "nails",
+            effect() {
+                mod.biggerNails += 0.8
+            },
+            remove() {
+                mod.biggerNails = 1
             }
         },
         {

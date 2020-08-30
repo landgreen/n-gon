@@ -1,16 +1,11 @@
 
-zoom now only works in testing mode with keys: i / o
-
-minigun is now nailgun  (higher damage, lower ammo)
-mod: pneumatic actuator - nail gun's ramp up time is 50% shorter
-mod: powder-actuated - removes ramp up time and increases nail speed
-
-removed mod depleted uranium
-mod: super size - larger super balls
+mod: rail road ties - nails are 40% bigger
 
 ************** TODO - n-gon **************
 
-mod: railroad ties - nails are larger and do more damage
+map element - player rotates a rotor that makes a platform go up or down
+
+reduce damage by 80%, but lose ammo when you get hit
 
 foam needs a new mod
   is the foam mod colloidal foam fun?
@@ -28,7 +23,8 @@ getting stuck above a mob can immobilize player
 use mac automator to speed up your n-gon -> git sync
 
 considering removing the perfect diamagnetism field from the game
-perfect diamagnetism be able to grab and launch mobs
+  or just rework perfect diamagnetism
+  perfect diamagnetism be able to grab and launch mobs
 
 Gun: Launch yourself at high speed to the enemy, gaining temporary invincibility while in the air and for 3 seconds after landing. Upon impact, trigger a large explosion.
 

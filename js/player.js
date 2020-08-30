@@ -303,7 +303,7 @@ const mech = {
       }
       if (mod.isDeterminism) totalMods -= 3 //remove the bonus mods 
       if (mod.isSuperDeterminism) totalMods -= 2 //remove the bonus mods 
-
+      totalMods = totalMods * 1.15 + 1 // a few extra to make it stronger
       const totalGuns = b.inventory.length //count guns
 
       function randomizeMods() {

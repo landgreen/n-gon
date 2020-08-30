@@ -972,13 +972,15 @@ const b = {
   },
   nail(pos, velocity, dmg = 0) {
     const me = bullet.length;
-    bullet[me] = Bodies.rectangle(pos.x, pos.y, 25, 2, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
+    // bullet[me] = Bodies.rectangle(pos.x, pos.y, 25, 2, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
+    bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * mod.biggerNails, 2 * mod.biggerNails, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
+
     Matter.Body.setVelocity(bullet[me], velocity);
     World.add(engine.world, bullet[me]); //add bullet to world
     bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
     bullet[me].dmg = dmg
     bullet[me].onDmg = function (who) {
-      if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.15, 180) // one tick every 30 cycles
+      if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
     };
     bullet[me].do = function () {};
   },
@@ -1550,7 +1552,7 @@ const b = {
             CD = 2
           } else {
             if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
-            CD = Math.max(5 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+            CD = Math.max(7.5 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
             this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
           }
         } else {
@@ -1560,19 +1562,21 @@ const b = {
         }
         mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
 
-        const speed = 28 + 8 * Math.random() + 6 * mod.nailInstantFireRate
+        const speed = 28 + 7 * Math.random() + 9 * mod.nailInstantFireRate
         const angle = mech.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (mech.crouch ? 1.35 : 3.2) / CD
+        const dmg = 0.9
         b.nail({
-          x: mech.pos.x + 23 * Math.cos(mech.angle),
-          y: mech.pos.y + 23 * Math.sin(mech.angle)
+          x: mech.pos.x + 30 * Math.cos(mech.angle),
+          y: mech.pos.y + 30 * Math.sin(mech.angle)
         }, {
           x: mech.Vx / 2 + speed * Math.cos(angle),
           y: mech.Vy / 2 + speed * Math.sin(angle)
-        }, 0.9) //position, velocity, damage
+        }, dmg) //position, velocity, damage
 
         if (mod.isIceCrystals) {
           bullet[bullet.length - 1].onDmg = function (who) {
             mobs.statusSlow(who, 30)
+            if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
           };
           mech.energy -= mech.fieldRegen + 0.008
           if (mech.energy < 0.02) mech.fireCDcycle = mech.cycle + 60; // cool down
@@ -1736,7 +1740,7 @@ const b = {
     },
     {
       name: "flechettes",
-      description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
+      description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
       ammoPack: 45,
       defaultAmmoPack: 45,

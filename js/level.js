@@ -1869,7 +1869,7 @@ const level = {
     // spawn.mapRect(-1950, -400, 100, 25);
     spawn.mapRect(-3150, 50, 775, 100);
     spawn.mapRect(-2600, -250, 775, 100);
-    spawn.bodyRect(-1350, -100, 100, 100, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(-1450, -125, 125, 125, 1, spawn.propsSlide); //weight
     spawn.bodyRect(-1800, 0, 300, 100, 1, spawn.propsHoist); //hoist
     cons[cons.length] = Constraint.create({
       pointA: {
@@ -1881,7 +1881,7 @@ const level = {
       length: 1
     });
 
-    spawn.bodyRect(400, 500, 100, 100, 1, spawn.propsSlide); //weight
+    spawn.bodyRect(600, 525, 125, 125, 1, spawn.propsSlide); //weight
     spawn.bodyRect(800, 600, 300, 100, 1, spawn.propsHoist); //hoist
     cons[cons.length] = Constraint.create({
       pointA: {
@@ -2496,7 +2496,7 @@ const level = {
     spawn.mapRect(-400, -2000, 3700, 250); //Ground
     spawn.mapRect(2475, -1150, 1225, 250);
     spawn.mapRect(500, -1150, 1175, 250); //Ground level 3
-    spawn.mapRect(350, -180, 4450, 1255); // Last ground
+    spawn.mapRect(350, -180, 4600, 1255); // Last ground
     spawn.mapRect(-400, -458, 750, 3337); //mur left sous-sol
     spawn.mapRect(-2850, -3375, 5300, 1375);
     spawn.mapRect(-2850, -4200, 8000, 825);
@@ -3171,9 +3171,9 @@ const level = {
       game.difficulty++
       game.dmgScale += 0.3; //damage done by mobs increases each level
       b.dmgScale *= 0.93; //damage done by player decreases each level
-      game.accelScale *= 1.027 //mob acceleration increases each level
-      game.lookFreqScale *= 0.975 //mob cycles between looks decreases each level
-      game.CDScale *= 0.966 //mob CD time decreases each level
+      if (game.accelScale < 5) game.accelScale *= 1.027 //mob acceleration increases each level
+      if (game.lookFreqScale > 0.2) game.lookFreqScale *= 0.975 //mob cycles between looks decreases each level
+      if (game.CDScale > 0.2) game.CDScale *= 0.966 //mob CD time decreases each level
     }
     game.healScale = 1 / (1 + game.difficulty * 0.07) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
@@ -3183,9 +3183,9 @@ const level = {
       game.dmgScale -= 0.3; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.93; //damage done by player decreases each level
-      game.accelScale /= 1.027 //mob acceleration increases each level
-      game.lookFreqScale /= 0.975 //mob cycles between looks decreases each level
-      game.CDScale /= 0.966 //mob CD time decreases each level
+      if (game.accelScale > 0.2) game.accelScale /= 1.027 //mob acceleration increases each level
+      if (game.lookFreqScale < 5) game.lookFreqScale /= 0.975 //mob cycles between looks decreases each level
+      if (game.CDScale < 5) game.CDScale /= 0.966 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 0;
     game.healScale = 1 / (1 + game.difficulty * 0.07)
@@ -3215,6 +3215,8 @@ const level = {
     if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
     level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
     if (level.levelsCleared > level.levels.length) level.difficultyIncrease(game.difficultyMode)
+    if (level.levelsCleared > level.levels.length * 1.5) level.difficultyIncrease(game.difficultyMode)
+    if (level.levelsCleared > level.levels.length * 2) level.difficultyIncrease(game.difficultyMode)
     if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
     game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
   },
