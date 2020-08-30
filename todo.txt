@@ -1,5 +1,4 @@
 
-mod: rail road ties - nails are 40% bigger
 
 ************** TODO - n-gon **************
 

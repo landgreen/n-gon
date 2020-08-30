@@ -611,7 +611,7 @@ const game = {
       if (game.isCommunityMaps) {
         level.levels.push("stronghold");
         level.levels.push("basement");
-        level.levels.push("newLevel");
+        // level.levels.push("newLevel");
       }
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list

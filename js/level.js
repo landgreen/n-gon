@@ -3841,7 +3841,7 @@ const level = {
       }
     }
   },
-  chain(x, y, len = 15, radius = 20) {
+  chain(x, y, len = 15, radius = 20, stiffness = 0.4, damping = 0.01) {
     for (let i = 0; i < len; i++) {
       body[body.length] = Bodies.polygon(x, y + 2 * radius * i, 12, radius, {
         inertia: Infinity
@@ -3851,8 +3851,8 @@ const level = {
       consBB[consBB.length] = Constraint.create({
         bodyA: body[body.length - i],
         bodyB: body[body.length - i - 1],
-        stiffness: 0.4,
-        damping: 0.01
+        stiffness: stiffness,
+        damping: damping
       });
     }
     cons[cons.length] = Constraint.create({ //pin first block to a point in space
@@ -3861,8 +3861,8 @@ const level = {
         y: y - radius
       },
       bodyB: body[body.length - len],
-      stiffness: 0.4,
-      damping: 0.01
+      stiffness: stiffness,
+      damping: damping
     });
   },
 };
