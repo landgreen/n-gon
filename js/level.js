@@ -16,9 +16,9 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // b.giveGuns("nail gun")
       // mech.setField("standing wave harmonics")
-      // mod.giveMod("pneumatic actuator");
+      // b.giveGuns("rail gun")
+      // mod.giveMod("capacitor bank");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation
@@ -372,7 +372,7 @@ const level = {
     spawn.mapRect(350, -3260, 50, 60);
     // spawn.bodyRect(362, -3400, 25, 140);
 
-    spawn.mapRect(200, -3250, 1250, 50);
+    spawn.mapRect(200, -3250, 1240, 50);
     spawn.mapRect(1400, -3260, 50, 310);
     spawn.bodyRect(1412, -3425, 25, 165);
 

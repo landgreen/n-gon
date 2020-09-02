@@ -115,6 +115,18 @@ const mobs = {
             y: who.position.y + 100 * (Math.random() - 0.5)
           }
           if (who.velocity.y < 2) who.force.y += who.mass * 0.0004 //extra gravity
+
+          //draw health bar
+          const h = who.radius * 0.3;
+          const w = who.radius * 2;
+          const x = who.position.x - w / 2;
+          const y = who.position.y - w * 0.7;
+          ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+          ctx.fillRect(x, y, w, h);
+          ctx.fillStyle = `rgba(${Math.floor(255*Math.random())},${Math.floor(255*Math.random())},${Math.floor(255*Math.random())},0.5)`
+          ctx.fillRect(x, y, w * who.health, h);
+
+          //draw fill inside mob
           ctx.beginPath();
           ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
           for (let j = 1, len = who.vertices.length; j < len; ++j) {
@@ -122,9 +134,9 @@ const mobs = {
           }
           ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
           ctx.stroke();
-          ctx.fillStyle = `rgba(${Math.floor(255*Math.random())},${Math.floor(255*Math.random())},${Math.floor(255*Math.random())},0.5)`
-          // ctx.fillStyle = `rgba(255,255,255,${Math.random()})`
           ctx.fill();
+
+
         },
         type: "stun",
         endCycle: game.cycle + cycles,

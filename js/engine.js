@@ -220,9 +220,11 @@ function collisionChecks(event) {
           if (obj.classType === "body" && obj.speed > 6) {
             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
             if (v > 9) {
-              let dmg = 0.06 * b.dmgScale * v * obj.mass * mod.throwChargeRate;
+              let dmg = 0.05 * b.dmgScale * v * obj.mass * mod.throwChargeRate;
               if (mob[k].isShielded) dmg *= 0.35
               mob[k].damage(dmg, true);
+              const stunTime = dmg / Math.sqrt(obj.mass)
+              if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
               if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
               game.drawList.push({
                 x: pairs[i].activeContacts[0].vertex.x,

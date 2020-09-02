@@ -1871,7 +1871,7 @@ const mod = {
         },
         {
             name: "railroad ties",
-            description: "<strong>nails</strong> are <strong>80%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
+            description: "<strong>nails</strong> are <strong>70%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1879,7 +1879,7 @@ const mod = {
             },
             requires: "nails",
             effect() {
-                mod.biggerNails += 0.8
+                mod.biggerNails += 0.7
             },
             remove() {
                 mod.biggerNails = 1
@@ -2084,7 +2084,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS
+                return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS && !mod.isCapacitor
             },
             requires: "rail gun and FPS above 45",
             effect() {
@@ -2097,8 +2097,24 @@ const mod = {
             }
         },
         {
+            name: "capacitor bank",
+            description: "the <strong>rail gun</strong> no longer takes time to <strong>charge</strong><br><strong>rail gun</strong> rods are <strong>66%</strong> less massive",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("rail gun") && !mod.isRailTimeSlow
+            },
+            requires: "rail gun",
+            effect() {
+                mod.isCapacitor = true;
+            },
+            remove() {
+                mod.isCapacitor = false;
+            }
+        },
+        {
             name: "fragmenting projectiles",
-            description: "<strong>rail gun</strong> fragments into <strong>nails</strong><br>after hitting mobs at high speeds",
+            description: "<strong>rail gun</strong> rods fragment into <strong>nails</strong><br>after hitting mobs at high speeds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2700,5 +2716,6 @@ const mod = {
     isSporeGrowth: null,
     isBayesian: null,
     nailGun: null,
-    nailInstantFireRate: null
+    nailInstantFireRate: null,
+    isCapacitor: null
 }

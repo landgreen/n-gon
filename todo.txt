@@ -1,6 +1,21 @@
+rail gun mod: capacitor bank - no charge time, but smaller bullets
 
+stunned mobs now still display health bar
+when you hit a mob hard with a block they get stunned
+  blocks do about 15% less collision damage
+  stuns lasts longer for larger and faster blocks
+  
 
 ************** TODO - n-gon **************
+
+player goes intangible while immune after getting hit?
+getting stuck above a mob can immobilize player
+  add a minimum knock from player mob collisions?
+
+when crouched make it harder for mobs to see player
+  reduce arc size of mob vision cone
+  reduce look range
+    * (mech.crouch ? 0.7 : 1)
 
 map element - player rotates a rotor that makes a platform go up or down
 
@@ -14,10 +29,6 @@ foam needs a new mod
 removing supersaturation sets total health to 1
   this cancels the health benefits from crystallized armor
   produce a method that calculates max health based on mods
-
-player goes intangible while immune after getting hit?
-getting stuck above a mob can immobilize player
-  add a minimum knock from player mob collisions?
 
 use mac automator to speed up your n-gon -> git sync
 
@@ -216,3 +227,7 @@ n-gon outreach ideas
   blips - errant signal on youtube
   reddit - r/IndieGaming
   hacker news - show hacker news post
+
+
+  paste this into console to see fps
+  javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()

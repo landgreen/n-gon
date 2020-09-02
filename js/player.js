@@ -1212,9 +1212,9 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong>",
+      description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong class='color-harm'>harm</strong> by <strong>30%</strong>",
       effect: () => {
-        mech.fieldHarmReduction = 0.67;
+        mech.fieldHarmReduction = 0.70;
         mech.fieldBlockCD = 0;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1365,13 +1365,13 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>45%</strong>",
       fieldDrawRadius: 0,
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
         mech.fieldMeterColor = "#000"
-        mech.fieldHarmReduction = 0.5;
+        mech.fieldHarmReduction = 0.55;
         mech.hold = function () {
           mech.airSpeedLimit = 125 //5 * player.mass * player.mass
           mech.FxAir = 0.016
