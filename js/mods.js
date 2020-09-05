@@ -86,7 +86,7 @@ const mod = {
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.isRest && player.speed < 1) dmg *= 1.20;
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
-        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.004
+        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         return dmg * mod.slowFire
@@ -714,6 +714,22 @@ const mod = {
             }
         },
         {
+            name: "exciton-lattice",
+            description: `reduce <strong class='color-harm'>harm</strong> by <strong>80%</strong>, but<br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isEnergyHealth && (mod.isBayesian || mod.isExtraChoice || mod.manyWorlds || mod.isImmortal || mod.isMineDrop || mod.renormalization)
+            },
+            requires: "Bayesian, cardinality, many worlds, immortality, renormalization, or mine synthesis",
+            effect() {
+                mod.isEjectMod = true;
+            },
+            remove() {
+                mod.isEjectMod = false;
+            }
+        },
+        {
             name: "clock gating",
             description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
             maxCount: 1,
@@ -1093,9 +1109,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return !mod.isBayesian
             },
-            requires: "",
+            requires: "not Bayesian inference",
             effect() {
                 mod.isAmmoForGun = true;
             },
@@ -1127,9 +1143,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !mod.isEnergyHealth && !mod.isBayesian
             },
-            requires: "not mass-energy equivalence",
+            requires: "not mass-energy equivalence<br>not Bayesian inference",
             effect: () => {
                 mod.isAmmoFromHealth = 0.023;
             },
@@ -1288,7 +1304,7 @@ const mod = {
             },
             requires: "more than 6 mods",
             effect: () => {
-                //remove bullets  //to get rid of bots
+                //remove active bullets  //to get rid of bots
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = [];
 
@@ -1324,13 +1340,13 @@ const mod = {
                     if (mod.mods[i].count > 0) have.push(i)
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
+                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by reallocation`, 300)
+                for (let i = 0; i < 2 * mod.mods[choose].count; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                }
                 mod.mods[choose].remove(); // remove a random mod form the list of mods you have
                 mod.mods[choose].count = 0;
                 game.updateModHUD();
-
-                for (let i = 0; i < 2; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                }
             },
             remove() {}
         },
@@ -2155,13 +2171,13 @@ const mod = {
             requires: "laser",
             effect() {
                 mod.laserReflections++;
-                mod.laserDamage += 0.05; //base is 0.1
-                mod.laserFieldDrain += 0.001 //base is 0.002
+                mod.laserDamage += 0.065; //base is 0.11
+                mod.laserFieldDrain += 0.0009 //base is 0.002
             },
             remove() {
                 mod.laserReflections = 2;
-                mod.laserDamage = 0.1;
-                mod.laserFieldDrain = 0.002;
+                mod.laserDamage = 0.13;
+                mod.laserFieldDrain = 0.0018;
             }
         },
         {
@@ -2717,5 +2733,6 @@ const mod = {
     isBayesian: null,
     nailGun: null,
     nailInstantFireRate: null,
-    isCapacitor: null
+    isCapacitor: null,
+    isEjectMod: null
 }

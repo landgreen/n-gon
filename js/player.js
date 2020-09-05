@@ -359,9 +359,31 @@ const mech = {
         game.makeGunHUD(); //update gun HUD
       }
 
+
+      function pixelWindows() {
+
+        //pixel graphics
+        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height); //copy current canvas pixel data
+        let data = imgData.data;
+        //change random pixels
+        //strange draw offset
+        // const off = canvas.height * canvas.width * 4 / 16
+        for (let i = 0; i < data.length; i += 4) {
+          index = i % canvas.width
+          data[index + 0] = data[index + 0]; // red
+          data[index + 1] = data[index + 1]; // red
+          data[index + 2] = data[index + 2]; // red
+          data[index + 3] = data[index + 3]; // red
+        }
+        ctx.putImageData(imgData, 0, 0); //draw new pixel data to canvas
+
+      }
+
+
       game.wipe = function () { //set wipe to have trails
         ctx.fillStyle = "rgba(255,255,255,0)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // pixelWindows()
       }
 
       function randomizeEverything() {
@@ -387,6 +409,7 @@ const mech = {
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.006})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // pixelWindows()
           }
         }, (i + 1) * swapPeriod);
       }
@@ -450,6 +473,7 @@ const mech = {
     let dmg = 1
     dmg *= mech.fieldHarmReduction
     dmg *= mod.isSlowFPS ? 0.85 : 1
+    if (mod.isEjectMod) dmg *= 0.2
     if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
     if (mod.isBotArmor) dmg *= 0.95 ** mod.totalBots()
     if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
@@ -691,6 +715,7 @@ const mech = {
   holdingTarget: null,
   timeSkipLastCycle: 0,
   // these values are set on reset by setHoldDefaults()
+  grabPowerUpRange2: 0,
   isFieldActive: false,
   fieldRange: 155,
   fieldShieldingScale: 1,
@@ -713,6 +738,7 @@ const mech = {
     mech.fieldBlockCD = 10;
     game.isBodyDamage = true;
     mech.fieldHarmReduction = 1;
+    mech.grabPowerUpRange2 = 156000;
     mech.fieldRange = 155;
     mech.fieldFire = false;
     mech.fieldCDcycle = 0;
@@ -939,15 +965,18 @@ const mech = {
     ctx.stroke();
   },
   grabPowerUp() { //look for power ups to grab with field
-    const grabPowerUpRange2 = 156000 //(mech.fieldRange + 220) * (mech.fieldRange + 220)
     for (let i = 0, len = powerUp.length; i < len; ++i) {
       const dxP = mech.pos.x - powerUp[i].position.x;
       const dyP = mech.pos.y - powerUp[i].position.y;
       const dist2 = dxP * dxP + dyP * dyP;
       // float towards player  if looking at and in range  or  if very close to player
-      if (dist2 < grabPowerUpRange2 && (mech.lookingAt(powerUp[i]) || dist2 < 16000) && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
-        powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
-        powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+      if (dist2 < mech.grabPowerUpRange2 &&
+        (mech.lookingAt(powerUp[i]) || dist2 < 16000) &&
+        !(mech.health === mech.maxHealth && powerUp[i].name === "heal") &&
+        Matter.Query.ray(map, powerUp[i].position, mech.pos).length === 0
+      ) {
+        powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
+        powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
         //extra friction
         Matter.Body.setVelocity(powerUp[i], {
           x: powerUp[i].velocity.x * 0.11,
@@ -1186,7 +1215,7 @@ const mech = {
   },
   fieldUpgrades: [{
       name: "field emitter",
-      description: "use <strong class='color-f'>energy</strong> to <strong>shield</strong> yourself from <strong class='color-harm'>harm</strong><br><strong>pick up</strong> and <strong>throw</strong> objects",
+      description: "use <strong class='color-f'>energy</strong> to <strong>push</strong> mobs away<br><strong>throw</strong> blocks to <strong class='color-d'>damage</strong> mobs<br><strong>pick up</strong> power ups",
       effect: () => {
         game.replaceTextLog = true; //allow text over write
         mech.hold = function () {
@@ -1212,9 +1241,9 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are permanently active<br>reduce <strong class='color-harm'>harm</strong> by <strong>30%</strong>",
+      description: "three oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> has no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>",
       effect: () => {
-        mech.fieldHarmReduction = 0.70;
+        mech.fieldHarmReduction = 0.20;
         mech.fieldBlockCD = 0;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1231,8 +1260,8 @@ const mech = {
           }
           if (mech.energy > 0.1 && mech.fieldCDcycle < mech.cycle) {
             const fieldRange1 = (0.7 + 0.3 * Math.sin(mech.cycle / 23)) * mech.fieldRange
-            const fieldRange2 = (0.6 + 0.4 * Math.sin(mech.cycle / 37)) * mech.fieldRange
-            const fieldRange3 = (0.55 + 0.45 * Math.sin(mech.cycle / 47)) * mech.fieldRange
+            const fieldRange2 = (0.63 + 0.37 * Math.sin(mech.cycle / 37)) * mech.fieldRange
+            const fieldRange3 = (0.65 + 0.35 * Math.sin(mech.cycle / 47)) * mech.fieldRange
             const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
             ctx.fillStyle = "rgba(110,170,200," + (0.04 + mech.energy * (0.12 + 0.13 * Math.random())) + ")";
             ctx.beginPath();
@@ -1254,16 +1283,18 @@ const mech = {
     {
       name: "perfect diamagnetism",
       // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
-      description: "<strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>cool down</strong> and less <strong>recoil</strong>",
+      description: "<strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>cool down</strong> and less <strong>recoil</strong><br><strong>attract</strong> power ups from <strong>far away</strong>",
       effect: () => {
         mech.fieldShieldingScale = 0;
+        mech.grabPowerUpRange2 = 4000000
+        // mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
         // mech.fieldMeterColor = "#0af"
         // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         // mech.calculateFieldThreshold();
         mech.hold = function () {
           const wave = Math.sin(mech.cycle * 0.022);
-          mech.fieldRange = 165 + 12 * wave
-          mech.fieldArc = 0.3 + 0.035 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+          mech.fieldRange = 170 + 12 * wave
+          mech.fieldArc = 0.33 + 0.045 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
           mech.calculateFieldThreshold();
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1317,13 +1348,13 @@ const mech = {
             if (mod.isSporeField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
               const len = Math.floor(6 + 4 * Math.random())
-              mech.energy -= len * 0.074;
+              mech.energy -= len * 0.07;
               for (let i = 0; i < len; i++) {
                 b.spore(mech.pos)
               }
             } else if (mod.isMissileField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.6;
+              mech.energy -= 0.55;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -1333,11 +1364,11 @@ const mech = {
                 1, mod.babyMissiles)
             } else if (mod.isIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.045;
+              mech.energy -= 0.04;
               b.iceIX(1)
             } else {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.33;
+              mech.energy -= 0.3;
               b.drone(1)
             }
 
@@ -1365,13 +1396,15 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>45%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to nullify  &nbsp; <strong style='letter-spacing: 12px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>45%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
       fieldDrawRadius: 0,
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
         mech.fieldMeterColor = "#000"
         mech.fieldHarmReduction = 0.55;
+        mech.fieldDrawRadius = 0;
+
         mech.hold = function () {
           mech.airSpeedLimit = 125 //5 * player.mass * player.mass
           mech.FxAir = 0.016
@@ -1483,7 +1516,7 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit short range plasma<br>plasma <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+      description: "use <strong class='color-f'>energy</strong> to emit short range plasma<br>plasma <strong class='color-d'>damages</strong> mobs<br>plasma <strong>pushes</strong> mobs and blocks away",
       effect() {
         mech.fieldMeterColor = "#f0f"
         mech.hold = function () {
@@ -1638,7 +1671,7 @@ const mech = {
     },
     {
       name: "time dilation field",
-      description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><em>you can move and fire while time is stopped</em>",
+      description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br><strong>touching</strong> mobs still does <strong class='color-harm'>harm</strong>",
       effect: () => {
         // mech.fieldMeterColor = "#000"
         mech.fieldFire = true;
@@ -1667,6 +1700,7 @@ const mech = {
               ctx.fillStyle = "#ccc";
               ctx.fillRect(-100000, -100000, 200000, 200000)
               ctx.globalCompositeOperation = "source-over"
+
               //stop time
               mech.isBodiesAsleep = true;
 
@@ -1730,7 +1764,7 @@ const mech = {
     },
     {
       name: "phase decoherence field",
-      description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>firing</strong> and touching <strong>shields</strong> increases <strong>drain</strong>",
+      description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>firing</strong> and touching <strong>shields</strong> <strong>drains</strong> <strong class='color-f'>energy</strong><br>unable to <strong>see</strong> and be <strong>seen</strong> by mobs",
       effect: () => {
         mech.fieldFire = true;
         mech.fieldMeterColor = "#fff";

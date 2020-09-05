@@ -43,6 +43,7 @@ const game = {
     // game.clip();
     ctx.restore();
     game.drawCursor();
+    // game.pixelGraphics();
   },
   testingLoop() {
     game.gravity();
@@ -153,6 +154,84 @@ const game = {
   // clip() {
 
   // },
+  pixelGraphics() {
+    //copy current canvas pixel data
+    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imgData.data;
+    //change pixel data
+
+
+    // const off = 4 * Math.floor(x) + 4 * canvas.width * Math.floor(y);
+    // multiple windows
+    for (let i = data.length / 2; i < data.length; i += 4) {
+      index = i % (canvas.width * canvas.height * 2) // + canvas.width*4*canvas.height
+
+      data[i + 0] = data[index + 0]; // red
+      data[i + 1] = data[index + 1]; // red
+      data[i + 2] = data[index + 2]; // red
+      data[i + 3] = data[index + 3]; // red
+    }
+
+    for (let x = 0; x < len; x++) {
+
+    }
+
+
+
+    // const startX = 2 * canvas.width + 2 * canvas.width * canvas.height
+    // const endX = 4 * canvas.width + 4 * canvas.width * canvas.height
+    // const startY = 2 * canvas.width + 2 * canvas.width * canvas.height
+    // const endY = 4 * canvas.width + 4 * canvas.width * canvas.height
+    // for (let x = startX; x < endX; x++) {
+    //   for (let y = startY; y < endY; y++) {
+
+    //   }
+    // }
+
+
+
+
+    //strange draw offset
+    // const off = canvas.height * canvas.width * 4 / 2
+    // for (let index = 0; index < data.length; index += 4) {
+    //   data[index + 0] = data[index + 0 + off]; // red
+    //   data[index + 1] = data[index + 1 + off]; // red
+    //   data[index + 2] = data[index + 2 + off]; // red
+    //   data[index + 3] = data[index + 3 + off]; // red
+    // }
+
+    //change all pixels
+    // for (let index = 0; index < data.length; index += 4) {
+    // data[index + 0] = 255; // red
+    // data[index + 1] = 255; // green
+    // data[index + 2] = 255; // blue
+    // data[index + 3] = 255; // alpha 
+    // }
+
+    //change random pixels
+    // for (let i = 0, len = Math.floor(data.length / 10); i < len; ++i) {
+    //   const index = Math.floor((Math.random() * data.length) / 4) * 4;
+    //   data[index + 0] = 255; // red
+    //   data[index + 1] = 0; // green
+    //   data[index + 2] = 0; // blue
+    //   data[index + 3] = 255 //Math.floor(Math.random() * Math.random() * 255); // alpha
+    // }
+
+    // //change random pixels
+    // for (let i = 0, len = Math.floor(data.length / 1000); i < len; ++i) {
+    //   const index = Math.floor((Math.random() * data.length) / 4) * 4;
+    //   // data[index] = data[index] ^ 255; // Invert Red
+    //   // data[index + 1] = data[index + 1] ^ 255; // Invert Green
+    //   // data[index + 2] = data[index + 2] ^ 255; // Invert Blue
+    //   data[index + 0] = 0; // red
+    //   data[index + 1] = 0; // green
+    //   data[index + 2] = 0; // blue
+    //   // data[index + 3] = 255 //Math.floor(Math.random() * Math.random() * 255); // alpha
+    // }
+
+    //draw new pixel data to canvas
+    ctx.putImageData(imgData, 0, 0);
+  },
   drawCursor() {
     const size = 10;
     ctx.beginPath();

@@ -21,23 +21,29 @@ const powerUps = {
     }
     powerUps.endDraft();
   },
-  endDraft() {
-    if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
-      powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-    }
-    document.body.style.cursor = "none";
-    document.getElementById("choose-grid").style.display = "none"
-    document.getElementById("choose-background").style.display = "none"
-    game.paused = false;
-    game.isChoosing = false; //stops p from un pausing on key down
-    requestAnimationFrame(cycle);
-  },
   showDraft() {
     document.getElementById("choose-grid").style.display = "grid"
     document.getElementById("choose-background").style.display = "inline"
     document.body.style.cursor = "auto";
+    if (mod.isExtraChoice) {
+      document.body.style.overflowY = "scroll";
+      document.body.style.overflowX = "hidden";
+    }
     game.paused = true;
     game.isChoosing = true; //stops p from un pausing on key down
+  },
+  endDraft() {
+    if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
+      powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+    }
+    document.getElementById("choose-grid").style.display = "none"
+    document.getElementById("choose-background").style.display = "none"
+    document.body.style.cursor = "none";
+    document.body.style.overflow = "hidden"
+    game.paused = false;
+    game.isChoosing = false; //stops p from un pausing on key down
+    mech.immuneCycle = mech.cycle + 60; //player is immune to collision damage for 30 cycles
+    requestAnimationFrame(cycle);
   },
   reroll: {
     rerolls: 0,
@@ -48,7 +54,7 @@ const powerUps = {
     },
     effect() {
       powerUps.reroll.changeRerolls(1)
-      game.makeTextLog("<div class='circle reroll'></div> &nbsp; <span style='font-size:115%;'> <strong>+1 reroll</strong></span>", 300)
+      game.makeTextLog(`<div class='circle reroll'></div> &nbsp; <span style='font-size:115%;'><strong>rerolls:</strong> ${powerUps.reroll.rerolls}</span>`, 300)
     },
     changeRerolls(amount) {
       powerUps.reroll.rerolls += amount
@@ -262,66 +268,67 @@ const powerUps = {
     },
     choiceLog: [], //records all previous choice options
     effect() {
-
-      function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
-        let options = [];
-        for (let i = 0; i < mod.mods.length; i++) {
-          if (mod.mods[i].count < mod.mods[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && mod.mods[i].allowed()) {
-            options.push(i);
+      if (mech.alive) {
+        function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
+          let options = [];
+          for (let i = 0; i < mod.mods.length; i++) {
+            if (mod.mods[i].count < mod.mods[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && mod.mods[i].allowed()) {
+              options.push(i);
+            }
           }
-        }
-        //remove repeats from last selection
-        const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
-        if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
-          for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
-            if (options.length > totalChoices) {
-              for (let j = 0, len = options.length; j < len; j++) {
-                if (powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i] === options[j]) {
-                  options.splice(j, 1) //remove previous choice from option pool
-                  break
+          //remove repeats from last selection
+          const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
+          if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+            for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+              if (options.length > totalChoices) {
+                for (let j = 0, len = options.length; j < len; j++) {
+                  if (powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i] === options[j]) {
+                    options.splice(j, 1) //remove previous choice from option pool
+                    break
+                  }
                 }
               }
             }
           }
-        }
 
-        if (options.length > 0) {
-          const choose = options[Math.floor(Math.random() * options.length)]
-          text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choose].name}</div> ${mod.mods[choose].description}</div>`
-          return choose
-        }
+          if (options.length > 0) {
+            const choose = options[Math.floor(Math.random() * options.length)]
+            text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choose].name}</div> ${mod.mods[choose].description}</div>`
+            return choose
+          }
 
-      }
-      let text = ""
-      if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
-      text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
-      let choice1 = pick()
-      let choice2 = -1
-      let choice3 = -1
-      if (choice1 > -1) {
-        if (!mod.isDeterminism) {
-          choice2 = pick(choice1)
-          // if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice2].name}</div> ${mod.mods[choice2].description}</div>`
-          choice3 = pick(choice1, choice2)
-          // if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice3].name}</div> ${mod.mods[choice3].description}</div>`
         }
-        if (mod.isExtraChoice) {
-          let choice4 = pick(choice1, choice2, choice3)
-          // if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice4].name}</div> ${mod.mods[choice4].description}</div>`
-          let choice5 = pick(choice1, choice2, choice3, choice4)
-          // if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice5].name}</div> ${mod.mods[choice5].description}</div>`
-          powerUps.mod.choiceLog.push(choice4)
-          powerUps.mod.choiceLog.push(choice5)
-        }
-        powerUps.mod.choiceLog.push(choice1)
-        powerUps.mod.choiceLog.push(choice2)
-        powerUps.mod.choiceLog.push(choice3)
-        if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('mod')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
+        let text = ""
+        if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+        text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
+        let choice1 = pick()
+        let choice2 = -1
+        let choice3 = -1
+        if (choice1 > -1) {
+          if (!mod.isDeterminism) {
+            choice2 = pick(choice1)
+            // if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice2})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice2].name}</div> ${mod.mods[choice2].description}</div>`
+            choice3 = pick(choice1, choice2)
+            // if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice3})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice3].name}</div> ${mod.mods[choice3].description}</div>`
+          }
+          if (mod.isExtraChoice) {
+            let choice4 = pick(choice1, choice2, choice3)
+            // if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice4})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice4].name}</div> ${mod.mods[choice4].description}</div>`
+            let choice5 = pick(choice1, choice2, choice3, choice4)
+            // if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choice5})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choice5].name}</div> ${mod.mods[choice5].description}</div>`
+            powerUps.mod.choiceLog.push(choice4)
+            powerUps.mod.choiceLog.push(choice5)
+          }
+          powerUps.mod.choiceLog.push(choice1)
+          powerUps.mod.choiceLog.push(choice2)
+          powerUps.mod.choiceLog.push(choice3)
+          if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('mod')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class='dice'>${powerUps.reroll.diceText()}</span></div></div>`
 
-        document.getElementById("choose-grid").innerHTML = text
-        powerUps.showDraft();
-      } else {
-        powerUps.giveRandomAmmo()
+          document.getElementById("choose-grid").innerHTML = text
+          powerUps.showDraft();
+        } else {
+          powerUps.giveRandomAmmo()
+        }
       }
     }
   },
@@ -449,11 +456,7 @@ const powerUps = {
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     powerUps.randomPowerUpCounter++;
-    if (game.difficultyMode === 4 && Math.random() < 0.5) { //why mode gets a free power up chance
-      powerUps.randomPowerUpCounter *= 0.5
-      spawnPowerUps()
-    }
-
+    if (game.difficultyMode === 4) spawnPowerUps() //why mode gets a free power up chance
     const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
     if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
       powerUps.randomPowerUpCounter = 0;
@@ -528,8 +531,8 @@ const powerUps = {
     size = target.size();
     powerUp[index] = Matter.Bodies.polygon(x, y, 0, size, {
       density: 0.001,
-      frictionAir: 0.01,
-      restitution: 0.8,
+      frictionAir: 0.03,
+      restitution: 0.85,
       inertia: Infinity, //prevents rotation
       collisionFilter: {
         group: 0,

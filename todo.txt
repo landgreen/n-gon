@@ -1,42 +1,45 @@
-rail gun mod: capacitor bank - no charge time, but smaller bullets
+field: perfect diamagnetism is a bit larger
+  can now grab power ups from far away
 
-stunned mobs now still display health bar
-when you hit a mob hard with a block they get stunned
-  blocks do about 15% less collision damage
-  stuns lasts longer for larger and faster blocks
-  
+mod: exciton-lattice - reduce harm by 80%, but after taking collision damage eject a random mod
+  eject extra mods if you have recursive stacks
+
+power ups have a bit more air friction
+power ups must be in line of sight to be pulled by the player
+why mode now gets 100% chance for a second boss power up (up from 50%)
+  this should let why mode reach more interesting build depth
+laser and pulse got a damage and energy use buff
+immune to harm for a second after exiting the power up selection menu
 
 ************** TODO - n-gon **************
 
-player goes intangible while immune after getting hit?
-getting stuck above a mob can immobilize player
-  add a minimum knock from player mob collisions?
+new gun fire 3+ balls in arc
+  name: something about energy
+  does damage in area, like neutron bomb
+  ends on contact with wall, doesn't stick or bounce
+  hold fire to charge: increases the size of the balls
+  mod: balls are attracted to mobs
 
-when crouched make it harder for mobs to see player
-  reduce arc size of mob vision cone
-  reduce look range
-    * (mech.crouch ? 0.7 : 1)
+fix: even with a scroll bar the top of the selection window is off screen for very short windows
+
+rework perfect diamagnetism
+  keep the zero energy cost
+  add a very short blocking CD
+  let the shield also do bremsstrahlung radiation
+  mod: grab and launch mobs?
+
+getting stuck above a mob can immobilize player
+  seems to only occur with Pauli exclusion
+    add a knock to player mob collisions even while player is immune to damage
+      keep the knock very small
 
 map element - player rotates a rotor that makes a platform go up or down
-
-reduce damage by 80%, but lose ammo when you get hit
-
-foam needs a new mod
-  is the foam mod colloidal foam fun?
-  increase foam bullet size?
-  foam explodes when it runs out?
 
 removing supersaturation sets total health to 1
   this cancels the health benefits from crystallized armor
   produce a method that calculates max health based on mods
 
 use mac automator to speed up your n-gon -> git sync
-
-considering removing the perfect diamagnetism field from the game
-  or just rework perfect diamagnetism
-  perfect diamagnetism be able to grab and launch mobs
-
-Gun: Launch yourself at high speed to the enemy, gaining temporary invincibility while in the air and for 3 seconds after landing. Upon impact, trigger a large explosion.
 
 fix door.isOpen actually meaning isClosed
 
@@ -45,15 +48,11 @@ mod - laser fires 3 beams
 after you die custom should be populated with your last build
 also you should be able to share while paused
 
-use canvas pixel array effects for full screen graphics
-  add some pixels after player gets hit?
-
 give missiles a suck and delay explosion, like vacuum bomb
 
 bot that does AOE damage while it rotates around player
   no physics / collisions
   cap 3 ?
-
 
 level Boss: fractal Sierpiński triangle
   https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
@@ -61,11 +60,6 @@ level Boss: fractal Sierpiński triangle
     they spawn once at the start of the level
     if a version dies, one can be replaced every ten seconds by the largest version
 
-performance issues with large numbers of spores
-consider limiting total bullets?
-  300?
-
-level element:  a hanging chain of connected blocks
 level element:  a zone with wind, anti-gravity, extra gravity
   control with button
 
@@ -123,15 +117,6 @@ new gun - deploy a turret that last for 20 seconds
 mod - mines become a turret that fires nails
   it could float to the mouse location on fire
 
-minigun: high caliber - rework
-  slow down the bullets even more and increase the size?
-  remove and actually make a full gun like this?
-
-portals:
-  portal while holding block sometimes send player back to original portal
-    only seems to happen with the bottom right block
-  use buttons to turn on and off?
-
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
 
@@ -144,17 +129,12 @@ map: prison
   doors linked to buttons
     mobs inside the doors?
 
-map: airport
-
 mod - do 50% more damage in close, but 50% less at a distance
   code it like mod.isFarAwayDmg
     have these mods disable each other
 
 phase field still isn't fun
   does phase field need the stealth flag?
-
-mod: use the stealth flag from the phase decoherence field
-  maybe trigger it along with the damage immunity CD
 
 mod harmonic shield: slow everything in range around shield (temporal shield)
   set max speed?
@@ -165,10 +145,6 @@ mod: bot very slowly follows you and gives you a bonus when it's in range
 
 graphic idea:  bezier curve that moves smoothly from mob to mob
   loops around player
-
-graphic: give rail gun projectile a trail
-  only draw above speed 5
-  track previous positions?
 
 movement fluidity
   let legs jump on mobs, but player will still take damage

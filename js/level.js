@@ -16,9 +16,9 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
-      // mech.setField("standing wave harmonics")
+      // mech.setField("time dilation field")
       // b.giveGuns("rail gun")
-      // mod.giveMod("capacitor bank");
+      // mod.giveMod("quantum immortality");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation

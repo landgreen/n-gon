@@ -162,6 +162,21 @@ function collisionChecks(event) {
               dmg *= 0.85
             }
             mech.damage(dmg);
+            if (mod.isEjectMod) {
+              const have = [] //find which mods you have
+              for (let i = 0; i < mod.mods.length; i++) {
+                if (mod.mods[i].count > 0) have.push(i)
+              }
+              const choose = have[Math.floor(Math.random() * have.length)]
+              //message about what mod was lost
+              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by exciton-lattice`, 300)
+
+
+              for (let i = 0; i < mod.mods[choose].count; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+              mod.mods[choose].count = 0;
+              mod.mods[choose].remove(); // remove a random mod form the list of mods you have
+              game.updateModHUD();
+            }
             if (mob[k].onHit) mob[k].onHit(k);
 
             //extra kick between player and mob              //this section would be better with forces but they don't work...

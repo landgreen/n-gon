@@ -670,7 +670,7 @@ const b = {
   },
   drone(speed = 1) {
     const me = bullet.length;
-    const THRUST = mod.isFastDrones ? 0.0025 : 0.0015
+    const THRUST = mod.isFastDrones ? 0.0023 : 0.0015
     // const FRICTION = mod.isFastDrones ? 0.008 : 0.0005
     const dir = mech.angle + 0.4 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random())
@@ -2550,7 +2550,7 @@ const b = {
       name: "drones",
       description: "deploy drones that <strong>crash</strong> into mobs<br>crashes reduce their <strong>lifespan</strong> by 1 second",
       ammo: 0,
-      ammoPack: 13,
+      ammoPack: 14,
       have: false,
       fire() {
         b.drone(mech.crouch ? 45 : 1)
@@ -3173,8 +3173,8 @@ const b = {
         };
         if (mod.isPulseAim) { //find mobs in line of sight
           let dist = 2200
-          energy = 0.25 * Math.min(mech.energy, 1.75)
-          explosionRange = 1100 * energy
+          energy = 0.23 * Math.min(mech.energy, 1.75)
+          explosionRange = 1300 * energy
           for (let i = 0, len = mob.length; i < len; i++) {
             const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
             if (explosionRange < newDist &&
@@ -3206,7 +3206,7 @@ const b = {
         } else {
           energy = 0.3 * Math.min(mech.energy, 1.75)
           mech.energy -= energy * mod.isLaserDiode
-          explosionRange = 1100 * energy
+          explosionRange = 1200 * energy
           if (best.who) b.explosion(path[1], explosionRange, true)
           mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
         }
