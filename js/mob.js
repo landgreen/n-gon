@@ -60,7 +60,6 @@ const mobs = {
       });
     }
 
-
     function applySlow(target) {
       if (!target.shield && !target.isShielded && !mech.isBodiesAsleep) {
         if (target.isBoss) cycles = Math.floor(cycles * 0.25)
@@ -69,6 +68,7 @@ const mobs = {
         while (i--) {
           if (target.status[i].type === "slow") target.status.splice(i, 1); //remove other "slow" effects on this mob
         }
+        target.isSlowed = true;
         target.status.push({
           effect() {
             Matter.Body.setVelocity(target, {
@@ -87,6 +87,10 @@ const mobs = {
             ctx.stroke();
             ctx.fillStyle = target.fill
             ctx.fill();
+          },
+          endEffect() {
+            //check to see if there are not other freeze effects?
+            target.isSlowed = false;
           },
           type: "slow",
           endCycle: game.cycle + cycles,
@@ -138,6 +142,7 @@ const mobs = {
 
 
         },
+        endEffect() {},
         type: "stun",
         endCycle: game.cycle + cycles,
       })
@@ -163,6 +168,7 @@ const mobs = {
 
           }
         },
+        endEffect() {},
         // type: "DoT",
         endCycle: game.cycle + cycles,
         startCycle: game.cycle
@@ -242,9 +248,14 @@ const mobs = {
         let j = this.status.length;
         while (j--) {
           this.status[j].effect();
-          if (this.status[j].endCycle < game.cycle) this.status.splice(j, 1);
+          if (this.status[j].endCycle < game.cycle) {
+            this.status[j].endEffect();
+            this.status.splice(j, 1);
+          }
         }
       },
+      isSlowed: false,
+      isStunned: false,
       seeAtDistance2: Infinity, //sqrt(4000000) = 2000 = max seeing range
       distanceToPlayer() {
         const dx = this.position.x - player.position.x;
@@ -882,7 +893,7 @@ const mobs = {
             //set direction to turn to fire
             if (!(game.cycle % this.seePlayerFreq)) {
               this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-              this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 1600; //gives the bullet an arc
+              this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 2500; //gives the bullet an arc  //was    / 1600
             }
             //rotate towards fireAngle
             const angle = this.angle + Math.PI / 2;
@@ -897,8 +908,8 @@ const mobs = {
               spawn.bullet(this.vertices[1].x, this.vertices[1].y, 5 + Math.ceil(this.radius / 15), 5);
               const v = 15;
               Matter.Body.setVelocity(mob[mob.length - 1], {
-                x: this.velocity.x + this.fireDir.x * v + Math.random(),
-                y: this.velocity.y + this.fireDir.y * v + Math.random()
+                x: this.velocity.x + this.fireDir.x * v + 3 * Math.random(),
+                y: this.velocity.y + this.fireDir.y * v + 3 * Math.random()
               });
               this.noseLength = 0;
               // recoil
@@ -1029,7 +1040,7 @@ const mobs = {
           }
           if (Math.random() < mod.isBotSpawner) b.randomBot(this.position, false)
           if (mod.isExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
-          if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob)
+          if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob, 40 + 7 * Math.random())
         } else if (mod.isShieldAmmo && this.shield) {
           let type = "ammo"
           if (Math.random() < 0.4) {

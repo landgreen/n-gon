@@ -135,25 +135,11 @@ function collisionChecks(event) {
 
         function collideMob(obj) {
           //player + mob collision
-          if (mech.immuneCycle < mech.cycle && (obj === playerBody || obj === playerHead)) {
-            // const a = Object.values(event.pairs[0].contacts)
-            // contains = Matter.Bounds.contains({
-            //   max: {
-            //     x: player.position.x + 60,
-            //     y: player.position.y + 120
-            //   },
-            //   min: {
-            //     x: player.position.x - 60,
-            //     y: player.position.y + 40
-            //   }
-            // }, {
-            //   x: a[0].vertex.x,
-            //   y: a[0].vertex.y
-            // })
-            // // Matter.Query.point([jumpSensor], point)
-            // console.log(contains)
-            // if (!contains) {
-
+          if (
+            mech.immuneCycle < mech.cycle &&
+            (obj === playerBody || obj === playerHead) &&
+            !(mod.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
+          ) {
             mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             mob[k].foundPlayer();
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
@@ -168,10 +154,7 @@ function collisionChecks(event) {
                 if (mod.mods[i].count > 0) have.push(i)
               }
               const choose = have[Math.floor(Math.random() * have.length)]
-              //message about what mod was lost
-              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by exciton-lattice`, 300)
-
-
+              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by exciton-lattice`, 300) //message about what mod was lost
               for (let i = 0; i < mod.mods[choose].count; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
               mod.mods[choose].count = 0;
               mod.mods[choose].remove(); // remove a random mod form the list of mods you have

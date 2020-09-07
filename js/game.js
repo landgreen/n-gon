@@ -621,7 +621,6 @@ const game = {
     game.CDScale = 1;
     game.difficulty = 0;
     game.difficultyMode = Number(document.getElementById("difficulty-select").value)
-    level.isBuildRun = false;
     build.isCustomSelection = false;
     if (game.difficultyMode === 0) {
       game.isEasyMode = true;
@@ -652,7 +651,6 @@ const game = {
   splashReturn() {
     game.onTitlePage = true;
     // document.getElementById('splash').onclick = 'run(this)';
-    // build.isURLBuild = false;
     document.getElementById("splash").onclick = function () {
       game.startGame();
     };
@@ -669,8 +667,8 @@ const game = {
   },
   fpsInterval: 0, //set in startGame
   then: null,
-  startGame() {
-    if (!level.isBuildRun) { //if a build run logic flow returns to "build-button").addEventListener
+  startGame(isBuildRun = false) {
+    if (!isBuildRun) { //if a build run logic flow returns to "build-button").addEventListener
       document.body.style.cursor = "none";
       document.body.style.overflow = "hidden"
     }
@@ -686,7 +684,6 @@ const game = {
 
     if (game.firstRun) {
       mech.spawn(); //spawns the player
-      mod.setupAllMods(); //doesn't run on reset so that gun mods carry over to new runs
       if (game.isCommunityMaps) {
         level.levels.push("stronghold");
         level.levels.push("basement");

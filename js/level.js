@@ -9,15 +9,14 @@ const level = {
   levelsCleared: 0,
   levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
   start() {
-    // if (build.isURLBuild && level.levelsCleared === 0) build.onLoadPowerUps();
     if (level.levelsCleared === 0) { //this code only runs on the first level
-      // level.difficultyIncrease(12)
+      // level.difficultyIncrease(8)
       // game.enableConstructMode() //used to build maps in testing mode
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isStealth = true;
       // mech.setField("time dilation field")
-      // b.giveGuns("rail gun")
+      // b.giveGuns("ice IX")
       // mod.giveMod("quantum immortality");
 
       level.intro(); //starting level
@@ -136,8 +135,8 @@ const level = {
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
-    // spawn.sniper(1700, -120, 50)
-    spawn.starter(1400, -120, 100)
+    spawn.sniper(1700, -120, 50)
+    // spawn.bomberBoss(1400, -500)
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
@@ -3164,9 +3163,7 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-  isBuildRun: false,
   difficultyIncrease(num = 1) {
-    // if (level.isBuildRun) num++
     for (let i = 0; i < num; i++) {
       game.difficulty++
       game.dmgScale += 0.3; //damage done by mobs increases each level

@@ -81,9 +81,9 @@ const spawn = {
       }
     }
   },
-
-  randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss"]) {
-    // other bosses: suckerBoss, laserBoss, tetherBoss, snakeBoss   //all need a particular level to work so they are not included
+  //"shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", 
+  randomLevelBoss(x, y, options = ["snakeBoss"]) {
+    // other bosses: suckerBoss, laserBoss, tetherBoss,    //all need a particular level to work so they are not included
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },
   //mob templates *********************************************************************************************
@@ -955,21 +955,21 @@ const spawn = {
     me.isBoss = true;
     me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
     Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-    me.accelMag = 0.00065 * game.accelScale;
-    me.seePlayerFreq = Math.floor(25 * game.lookFreqScale);
+    me.accelMag = 0.0002 * Math.sqrt(game.accelScale);
+    me.seePlayerFreq = Math.floor(30 * game.lookFreqScale);
     me.memory = 420;
     me.restitution = 1;
-    me.frictionAir = 0.035;
+    me.frictionAir = 0.01;
     me.frictionStatic = 0;
     me.friction = 0;
 
-    me.lookTorque = 0.000005 * (Math.random() > 0.5 ? -1 : 1);
+    me.lookTorque = 0.000001 * (Math.random() > 0.5 ? -1 : 1);
 
     me.fireDir = {
       x: 0,
       y: 0
     }
-    Matter.Body.setDensity(me, 0.025); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.023); //extra dense //normal is 0.001 //makes effective life much larger
     spawn.shield(me, x, y, 1);
     me.onHit = function () {
       //run this function on hitting player
@@ -994,7 +994,7 @@ const spawn = {
         //rotate towards fireAngle
         const angle = this.angle + Math.PI / 2;
         c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-        const threshold = 0.04;
+        const threshold = 0.4;
         if (c > threshold) {
           this.torque += 0.000004 * this.inertia;
         } else if (c < -threshold) {
@@ -1087,7 +1087,6 @@ const spawn = {
         ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
         ctx.stroke();
         ctx.setLineDash([0, 0]);
-
       }
     };
   },
@@ -1515,7 +1514,7 @@ const spawn = {
   //     }
   //   };
   // },
-  bomberBoss(x, y, radius = 80 + Math.floor(Math.random() * 15)) {
+  bomberBoss(x, y, radius = 88) {
     //boss that drops bombs from above and holds a set distance from player
     mobs.spawn(x, y, 3, radius, "transparent");
     let me = mob[mob.length - 1];
@@ -1524,7 +1523,7 @@ const spawn = {
 
     me.stroke = "rgba(255,0,200)"; //used for drawGhost
     me.seeAtDistance2 = 1500000;
-    me.fireFreq = Math.ceil(60 + 3000 / radius);
+    me.fireFreq = Math.floor(120 * game.CDScale);
     me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
     me.hoverElevation = 460 + (Math.random() - 0.5) * 200; //squared
     me.hoverXOff = (Math.random() - 0.5) * 100;
@@ -1581,7 +1580,7 @@ const spawn = {
       this.fire();
     };
   },
-  shooterBoss(x, y, radius = 130) {
+  shooterBoss(x, y, radius = 110) {
     mobs.spawn(x, y, 3, radius, "rgb(255,70,180)");
     let me = mob[mob.length - 1];
     me.isBoss = true;
@@ -1592,7 +1591,7 @@ const spawn = {
       x: x,
       y: y
     };
-    me.fireFreq = 0.02;
+    me.fireFreq = 0.025;
     me.noseLength = 0;
     me.fireAngle = 0;
     me.accelMag = 0.005 * game.accelScale;
@@ -1602,7 +1601,7 @@ const spawn = {
       x: 0,
       y: 0
     };
-    Matter.Body.setDensity(me, 0.02 + 0.0008 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    Matter.Body.setDensity(me, 0.03 + 0.0008 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
     me.onDeath = function () {
       powerUps.spawnBossPowerUp(this.position.x, this.position.y)
       // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -1649,7 +1648,7 @@ const spawn = {
       this.explode(this.mass * 10);
     };
     me.onDeath = function () {
-      if (game.difficulty > 10) {
+      if (game.difficulty > 7) {
         spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
         spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
         spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
@@ -1679,7 +1678,7 @@ const spawn = {
       }
     }
     Matter.Body.setDensity(me, 0.0001); //normal is 0.001
-    me.timeLeft = 95 + Math.floor(Math.random() * 15);
+    me.timeLeft = 140 + Math.floor(Math.random() * 30);
     me.g = 0.001; //required if using 'gravity'
     me.frictionAir = 0;
     me.restitution = 1;
@@ -1693,7 +1692,6 @@ const spawn = {
       this.timeLimit();
     };
   },
-
   sniper(x, y, radius = 35 + Math.ceil(Math.random() * 30)) {
     mobs.spawn(x, y, 3, radius, "transparent"); //"rgb(25,0,50)")
     let me = mob[mob.length - 1];
@@ -1761,8 +1759,6 @@ const spawn = {
             // recoil
             this.force.x -= 0.005 * this.fireDir.x * this.mass;
             this.force.y -= 0.005 * this.fireDir.y * this.mass;
-          } else {
-            this.torque += 0.000001 * this.inertia; //
           }
           if (this.noseLength < 1.5) this.noseLength += this.fireFreq;
           setNoseShape();
@@ -1804,12 +1800,11 @@ const spawn = {
         this.canTouchPlayer = false;
         this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
       }
-
     };
   },
   sniperBullet(x, y, radius = 6, sides = 4) {
     //bullets
-    mobs.spawn(x, y, sides, radius, "rgb(190,0,255)");
+    mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
@@ -1826,9 +1821,7 @@ const spawn = {
     me.collisionFilter.category = cat.mobBullet;
     me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
     me.do = function () {
-      // this.gravity();
       this.timeLimit();
-
       if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 3) {
         this.dropPowerUp = false;
         this.death(); //death with no power up
@@ -1864,12 +1857,12 @@ const spawn = {
       }
     };
   },
-  launcherBoss(x, y, radius = 90) {
+  launcherBoss(x, y, radius = 85) {
     mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
     me.isBoss = true;
     me.accelMag = 0.00008 * game.accelScale;
-    me.fireFreq = Math.floor(330 * game.CDScale)
+    me.fireFreq = Math.floor(360 * game.CDScale)
     me.frictionStatic = 0;
     me.friction = 0;
     me.frictionAir = 0.02;

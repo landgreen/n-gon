@@ -368,7 +368,7 @@ const mod = {
         },
         {
             name: "impact shear",
-            description: "mobs release <strong>2</strong> <strong>nails</strong> when they <strong>die</strong><br>nails target nearby mobs",
+            description: "mobs release <strong>1-2</strong> <strong>nails</strong> when they <strong>die</strong><br>nails target nearby mobs",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -761,6 +761,23 @@ const mod = {
                 mod.isHarmFreeze = false;
             }
         },
+
+        {
+            name: "osmoprotectant",
+            description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.superposition + !!mod.isStunField + mod.isPulseStun + !!mod.isNeutronStun + mod.oneSuperBall + mod.isHarmFreeze + mod.isIceField + mod.isIceCrystals + mod.isSporeFreeze + mod.isAoESlow + mod.isFreezeMobs + mod.isPilotFreeze + mod.haveGunCheck("ice IX") > 1
+            },
+            requires: "at least 2 freezing or stunning effects",
+            effect() {
+                mod.isFreezeHarmImmune = true;
+            },
+            remove() {
+                mod.isFreezeHarmImmune = false;
+            }
+        },
         {
             name: "piezoelectricity",
             description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong class='color-harm'>harm</strong> from mob collisions",
@@ -952,22 +969,6 @@ const mod = {
                 mod.isHealLowHealth = false;
             }
         },
-        // {
-        //     name: "prismatic cleavage",
-        //     description: "harm that would be fatal no longer kills you<br>instead it is removed from your maximum health",
-        //     maxCount: 1,
-        //     count: 0,
-        //     allowed() {
-        //         return mech.maxHealth > 1 || mod.isArmorFromPowerUps
-        //     },
-        //     requires: "increased max health",
-        //     effect() {
-        //         mod.isMaxHealthRemove = true;
-        //     },
-        //     remove() {
-        //         mod.isMaxHealthRemove = false;
-        //     }
-        // },
         {
             name: "adiabatic healing",
             description: "<strong class='color-h'>heal</strong> <strong>power ups</strong> are <strong>100%</strong> more effective",
@@ -2020,7 +2021,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("ice IX") || mod.isIceCrystals || mod.isSporeFreeze || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && mod.isIceField)
+                return mod.haveGunCheck("ice IX") || mod.isIceCrystals || mod.isSporeFreeze || mod.isIceField
             },
             requires: "a freeze effect",
             effect() {
@@ -2171,13 +2172,13 @@ const mod = {
             requires: "laser",
             effect() {
                 mod.laserReflections++;
-                mod.laserDamage += 0.065; //base is 0.11
-                mod.laserFieldDrain += 0.0009 //base is 0.002
+                mod.laserDamage += 0.06; //base is 0.12
+                mod.laserFieldDrain += 0.0008 //base is 0.002
             },
             remove() {
                 mod.laserReflections = 2;
-                mod.laserDamage = 0.13;
-                mod.laserFieldDrain = 0.0018;
+                mod.laserDamage = 0.12;
+                mod.laserFieldDrain = 0.0016;
             }
         },
         {
@@ -2213,22 +2214,6 @@ const mod = {
                 mod.isPulseAim = false;
             }
         },
-        // {
-        //     name: "fast ignition",
-        //     description: "<strong>pulse</strong> <strong class='color-e'>explosions</strong> more <strong>efficient</strong><br><strong>delay</strong> after firing is <strong>shorter</strong>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     allowed() {
-        //         return mod.haveGunCheck("pulse")
-        //     },
-        //     requires: "pulse",
-        //     effect() {
-        //         mod.isRapidPulse = true;
-        //     },
-        //     remove() {
-        //         mod.isRapidPulse = false;
-        //     }
-        // },
         //************************************************** 
         //************************************************** field
         //************************************************** mods
@@ -2734,5 +2719,6 @@ const mod = {
     nailGun: null,
     nailInstantFireRate: null,
     isCapacitor: null,
-    isEjectMod: null
+    isEjectMod: null,
+    isFreezeHarmImmune: null
 }

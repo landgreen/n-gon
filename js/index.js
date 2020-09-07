@@ -50,7 +50,6 @@ function getUrlVars() {
 window.addEventListener('load', (event) => {
   const set = getUrlVars()
   if (Object.keys(set).length !== 0) {
-    build.isURLBuild = true;
     // game.startGame()
     openCustomBuildMenu();
     //add custom selections based on url
@@ -118,7 +117,6 @@ window.addEventListener('load', (event) => {
 
 //build build grid display
 const build = {
-  isURLBuild: false,
   onLoadPowerUps() {
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
@@ -309,6 +307,7 @@ const build = {
     for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div id ="field-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
     }
+
     for (let i = 0, len = b.guns.length; i < len; i++) {
       text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
     }
@@ -400,7 +399,6 @@ const build = {
 }
 
 function openCustomBuildMenu() {
-  build.isURLBuild = false;
   game.isCheating = true;
   document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
@@ -409,15 +407,38 @@ function openCustomBuildMenu() {
   document.body.style.overflowX = "hidden";
   document.getElementById("info").style.display = 'none'
 
-  level.isBuildRun = true;
-  game.startGame(); //starts game, but pauses it
+  game.startGame(true); //starts game, but pauses it
   build.isCustomSelection = true;
   game.paused = true;
   build.reset();
 }
 
 document.getElementById("build-button").addEventListener("click", () => { //setup build run
+  //record settings so they can be reproduced in the custom menu
+  let field = 0;
+  let inventory = [];
+  let modList = [];
+  if (!game.firstRun) {
+    field = mech.fieldMode
+    inventory = [...b.inventory]
+    for (let i = 0; i < mod.mods.length; i++) {
+      modList.push(mod.mods[i].count)
+    }
+  }
   openCustomBuildMenu();
+
+  if (!game.firstRun) { //if player has already died once load that previous build
+    // console.log(modList)
+    build.choosePowerUp(document.getElementById(`field-${field}`), field, 'field')
+    for (let i = 0; i < inventory.length; i++) {
+      build.choosePowerUp(document.getElementById(`gun-${inventory[i]}`), inventory[i], 'gun')
+    }
+    for (let i = 0; i < modList.length; i++) {
+      for (let j = 0; j < modList[i]; j++) {
+        build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod')
+      }
+    }
+  }
 });
 
 

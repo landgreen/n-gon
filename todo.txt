@@ -1,19 +1,37 @@
-field: perfect diamagnetism is a bit larger
-  can now grab power ups from far away
+after you die, you can find the build you used in the custom menu
 
-mod: exciton-lattice - reduce harm by 80%, but after taking collision damage eject a random mod
-  eject extra mods if you have recursive stacks
+shooterBoss - smaller, but more massive,
+  aims better at short range, and fires faster
+bomberBoss fires faster, bombs are more likely to split
 
-power ups have a bit more air friction
-power ups must be in line of sight to be pulled by the player
-why mode now gets 100% chance for a second boss power up (up from 50%)
-  this should let why mode reach more interesting build depth
-laser and pulse got a damage and energy use buff
-immune to harm for a second after exiting the power up selection menu
+mod: osmoprotectant - stunned or frozen mobs cause no harm
 
 ************** TODO - n-gon **************
 
-new gun fire 3+ balls in arc
+after you die custom should be populated with your last build
+also you should be able to share while paused
+
+standing wave harmonics mod - push things away
+  push scales with mass up to about 4
+    has a 25% effect on shielded mobs?
+  push when using field key
+  or push away at the peak of an oscillation
+  or always push
+
+give drones bremstranlung radiation?
+  name: micro-harmonics?
+  reduce drone life span by 50%
+  drone drain energy on hits?
+
+add tailed level boss to random pool?
+
+hit scan bullets -> nails
+
+mod: frozen mobs can't do collision damage
+  also stunned mobs can't do collision damage
+  or they do reduced damage
+
+new gun or field - fire 3+ balls in arc
   name: something about energy
   does damage in area, like neutron bomb
   ends on contact with wall, doesn't stick or bounce
@@ -23,8 +41,6 @@ new gun fire 3+ balls in arc
 fix: even with a scroll bar the top of the selection window is off screen for very short windows
 
 rework perfect diamagnetism
-  keep the zero energy cost
-  add a very short blocking CD
   let the shield also do bremsstrahlung radiation
   mod: grab and launch mobs?
 
@@ -44,9 +60,6 @@ use mac automator to speed up your n-gon -> git sync
 fix door.isOpen actually meaning isClosed
 
 mod - laser fires 3 beams
-
-after you die custom should be populated with your last build
-also you should be able to share while paused
 
 give missiles a suck and delay explosion, like vacuum bomb
 
