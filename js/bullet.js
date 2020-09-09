@@ -243,7 +243,7 @@ const b = {
         sub = Vector.sub(where, mob[i].position);
         dist = Vector.magnitude(sub) - mob[i].radius;
         if (dist < radius) {
-          if (mob[i].shield) dmg *= 3 //balancing explosion dmg to shields
+          if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
           if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
           mob[i].damage(dmg * damageScale * b.dmgScale);
           mob[i].locatePlayer();
@@ -2378,7 +2378,7 @@ const b = {
                 if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
                   let dmg = b.dmgScale * 0.023
                   if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-                  if (mob[i].shield) dmg *= 5 //x5 to make up for the /5 that shields normally take
+                  if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
                   mob[i].damage(dmg);
                   mob[i].locatePlayer();
                 }

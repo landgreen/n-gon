@@ -381,6 +381,28 @@ const game = {
     //   }
     //   setupCanvas();
     // }
+
+    //color testing
+    // if (keys[49]) {
+    //   mech.color.hue--
+    //   mech.setFillColors();
+    // } else if (keys[50]) {
+    //   mech.color.hue++
+    //   mech.setFillColors();
+    // } else if (keys[51]) {
+    //   mech.color.sat--
+    //   mech.setFillColors();
+    // } else if (keys[52]) {
+    //   mech.color.sat++
+    //   mech.setFillColors();
+    // } else if (keys[53]) {
+    //   mech.color.light--
+    //   mech.setFillColors();
+    // } else if (keys[54]) {
+    //   mech.color.light++
+    //   mech.setFillColors();
+    // }
+
     if (keys[69]) { // e    swap to next active gun
       game.nextGun();
     } else if (keys[81]) { //q    swap to previous active gun

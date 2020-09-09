@@ -148,13 +148,13 @@ function collisionChecks(event) {
               dmg *= 0.85
             }
             mech.damage(dmg);
-            if (mod.isEjectMod) {
+            if (mod.isBayesian) {
               const have = [] //find which mods you have
               for (let i = 0; i < mod.mods.length; i++) {
                 if (mod.mods[i].count > 0) have.push(i)
               }
               const choose = have[Math.floor(Math.random() * have.length)]
-              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by exciton-lattice`, 300) //message about what mod was lost
+              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 300) //message about what mod was lost
               for (let i = 0; i < mod.mods[choose].count; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
               mod.mods[choose].count = 0;
               mod.mods[choose].remove(); // remove a random mod form the list of mods you have

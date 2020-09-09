@@ -59,13 +59,15 @@ const mech = {
   radius: 30,
   fillColor: "#fff",
   fillColorDark: "#ccc",
+  color: {
+    hue: 0,
+    sat: 0,
+    light: 100,
+  },
   setFillColors() {
-    const hue = 0
-    const saturation = 10
-    const light = 70 + mech.harmReduction() * 30
-    // console.log(mech.harmReduction())
-    this.fillColor = `hsl(${hue},${saturation}%,${light}%)`
-    this.fillColorDark = `hsl(${hue},${saturation}%,${light-20}%)`
+    console.log(mech.color)
+    this.fillColor = `hsl(${mech.color.hue},${mech.color.sat}%,${mech.color.light}%)`
+    this.fillColorDark = `hsl(${mech.color.hue},${mech.color.sat}%,${mech.color.light-20}%)`
   },
   height: 42,
   yOffWhen: {
@@ -473,7 +475,6 @@ const mech = {
     let dmg = 1
     dmg *= mech.fieldHarmReduction
     dmg *= mod.isSlowFPS ? 0.85 : 1
-    if (mod.isEjectMod) dmg *= 0.2
     if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
     if (mod.isBotArmor) dmg *= 0.95 ** mod.totalBots()
     if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
@@ -1481,7 +1482,7 @@ const mech = {
                 });
               }
               if (mod.isFreezeMobs) {
-                const ICE_DRAIN = 0.00015
+                const ICE_DRAIN = 0.0003
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].distanceToPlayer() + mob[i].radius < this.fieldDrawRadius && !mob[i].shield && !mob[i].isShielded) {
                     if (mech.energy > ICE_DRAIN * 2) {
@@ -2009,7 +2010,12 @@ const mech = {
                       mech.energy -= DRAIN;
                       Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
                       Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0.8)
-                      body[i].force.y -= body[i].mass * game.g; //remove gravity effects
+                      // body[i].force.y -= body[i].mass * game.g; //remove gravity effects
+                      //blocks drift towards center of pilot wave
+                      const sub = Vector.sub(mech.fieldPosition, body[i].position)
+                      const unit = Vector.mult(Vector.normalise(sub), 0.00005 * Vector.magnitude(sub))
+                      body[i].force.x += unit.x
+                      body[i].force.y += unit.y - body[i].mass * game.g //remove gravity effects
                     } else {
                       mech.fieldCDcycle = mech.cycle + 120;
                       mech.fieldOn = false

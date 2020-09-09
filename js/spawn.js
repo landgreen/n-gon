@@ -81,8 +81,7 @@ const spawn = {
       }
     }
   },
-  //"shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", 
-  randomLevelBoss(x, y, options = ["snakeBoss"]) {
+  randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss"]) {
     // other bosses: suckerBoss, laserBoss, tetherBoss,    //all need a particular level to work so they are not included
     spawn[options[Math.floor(Math.random() * options.length)]](x, y)
   },

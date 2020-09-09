@@ -557,10 +557,10 @@ const powerUps = {
   spawn(x, y, target, moving = true, mode = null) {
     if (
       !(mod.isSuperDeterminism && (target === 'gun' || target === 'field' || target === 'reroll')) &&
-      !(mod.isBayesian && target === 'ammo')
+      !(mod.isEnergyNoAmmo && target === 'ammo')
     ) {
       powerUps.directSpawn(x, y, target, moving, mode)
-      if (mod.isBayesian && Math.random() < 0.33) powerUps.directSpawn(x, y, target, moving, mode)
+      if (mod.isBayesian && Math.random() < 0.3) powerUps.directSpawn(x, y, target, moving, mode)
     }
   },
 };

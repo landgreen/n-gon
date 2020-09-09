@@ -60,37 +60,37 @@ const mobs = {
       });
     }
 
-    function applySlow(target) {
-      if (!target.shield && !target.isShielded && !mech.isBodiesAsleep) {
-        if (target.isBoss) cycles = Math.floor(cycles * 0.25)
+    function applySlow() {
+      if (!who.shield && !who.isShielded && !mech.isBodiesAsleep) {
+        if (who.isBoss) cycles = Math.floor(cycles * 0.25)
 
-        let i = target.status.length
+        let i = who.status.length
         while (i--) {
-          if (target.status[i].type === "slow") target.status.splice(i, 1); //remove other "slow" effects on this mob
+          if (who.status[i].type === "slow") who.status.splice(i, 1); //remove other "slow" effects on this mob
         }
-        target.isSlowed = true;
-        target.status.push({
+        who.isSlowed = true;
+        who.status.push({
           effect() {
-            Matter.Body.setVelocity(target, {
+            Matter.Body.setVelocity(who, {
               x: 0,
               y: 0
             });
-            Matter.Body.setAngularVelocity(target, 0);
+            Matter.Body.setAngularVelocity(who, 0);
             ctx.beginPath();
-            ctx.moveTo(target.vertices[0].x, target.vertices[0].y);
-            for (let j = 1, len = target.vertices.length; j < len; ++j) {
-              ctx.lineTo(target.vertices[j].x, target.vertices[j].y);
+            ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
+            for (let j = 1, len = who.vertices.length; j < len; ++j) {
+              ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
             }
-            ctx.lineTo(target.vertices[0].x, target.vertices[0].y);
+            ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
             ctx.strokeStyle = "rgba(0,100,255,0.8)";
             ctx.lineWidth = 15;
             ctx.stroke();
-            ctx.fillStyle = target.fill
+            ctx.fillStyle = who.fill
             ctx.fill();
           },
           endEffect() {
             //check to see if there are not other freeze effects?
-            target.isSlowed = false;
+            who.isSlowed = false;
           },
           type: "slow",
           endCycle: game.cycle + cycles,
@@ -110,6 +110,7 @@ const mobs = {
       while (i--) {
         if (who.status[i].type === "stun") who.status.splice(i, 1);
       }
+      who.isStunned = true;
       who.status.push({
         effect() {
           who.seePlayer.yes = false;
@@ -142,7 +143,9 @@ const mobs = {
 
 
         },
-        endEffect() {},
+        endEffect() {
+          who.isStunned = false
+        },
         type: "stun",
         endCycle: game.cycle + cycles,
       })
@@ -996,7 +999,7 @@ const mobs = {
           dmg *= mod.damageFromMods()
           //mobs specific damage changes
           if (mod.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
-          if (this.shield) dmg *= 0.05
+          if (this.shield) dmg *= 0.075
 
           //energy and heal drain should be calculated after damage boosts
           if (mod.energySiphon && dmg !== Infinity && this.dropPowerUp) {

@@ -79,8 +79,9 @@ const mod = {
     },
     damageFromMods() {
         let dmg = 1
+        if (mod.isEnergyNoAmmo) dmg *= 1.4
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
-        if (mod.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - mech.health)
+        if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.37;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
@@ -124,6 +125,22 @@ const mod = {
             },
             remove() {
                 mod.isEnergyDamage = false;
+            }
+        },
+        {
+            name: "exciton-lattice",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mod.haveGunCheck("nail gun") && mod.isIceCrystals) || mod.haveGunCheck("laser") || mod.haveGunCheck("pulse") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+            },
+            requires: "energy based damage",
+            effect() {
+                mod.isEnergyNoAmmo = true;
+            },
+            remove() {
+                mod.isEnergyNoAmmo = false;
             }
         },
         {
@@ -193,7 +210,7 @@ const mod = {
         },
         {
             name: "negative feedback",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10%</strong> missing base <strong>health</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10%</strong> missing base <strong>health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -714,22 +731,6 @@ const mod = {
             }
         },
         {
-            name: "exciton-lattice",
-            description: `reduce <strong class='color-harm'>harm</strong> by <strong>80%</strong>, but<br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>`,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !mod.isEnergyHealth && (mod.isBayesian || mod.isExtraChoice || mod.manyWorlds || mod.isImmortal || mod.isMineDrop || mod.renormalization)
-            },
-            requires: "Bayesian, cardinality, many worlds, immortality, renormalization, or mine synthesis",
-            effect() {
-                mod.isEjectMod = true;
-            },
-            remove() {
-                mod.isEjectMod = false;
-            }
-        },
-        {
             name: "clock gating",
             description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
             maxCount: 1,
@@ -768,9 +769,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.superposition + !!mod.isStunField + mod.isPulseStun + !!mod.isNeutronStun + mod.oneSuperBall + mod.isHarmFreeze + mod.isIceField + mod.isIceCrystals + mod.isSporeFreeze + mod.isAoESlow + mod.isFreezeMobs + mod.isPilotFreeze + mod.haveGunCheck("ice IX") > 1
+                return mod.superposition || mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX")
             },
-            requires: "at least 2 freezing or stunning effects",
+            requires: "a freezing or stunning effect",
             effect() {
                 mod.isFreezeHarmImmune = true;
             },
@@ -1027,8 +1028,8 @@ const mod = {
             }
         },
         {
-            name: "Bayesian inference",
-            description: "<strong>33%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>",
+            name: "Bayesian statistics",
+            description: "<strong>25%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1110,9 +1111,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isBayesian
+                return true
             },
-            requires: "not Bayesian inference",
+            requires: "",
             effect() {
                 mod.isAmmoForGun = true;
             },
@@ -1144,9 +1145,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && !mod.isBayesian
+                return !mod.isEnergyHealth
             },
-            requires: "not mass-energy equivalence<br>not Bayesian inference",
+            requires: "not mass-energy equivalence",
             effect: () => {
                 mod.isAmmoFromHealth = 0.023;
             },
@@ -1840,7 +1841,7 @@ const mod = {
         },
         {
             name: "inertial confinement",
-            description: "<strong>neutron bomb's</strong> initial detonation <br><strong>stuns</strong> nearby mobs for <strong>1</strong> seconds",
+            description: "<strong>neutron bomb's</strong> detonation <br><strong>stuns</strong> nearby mobs for <strong>1.5</strong> seconds",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -1848,7 +1849,7 @@ const mod = {
             },
             requires: "neutron bomb",
             effect() {
-                mod.isNeutronStun += 60;
+                mod.isNeutronStun += 90;
             },
             remove() {
                 mod.isNeutronStun = 0;
@@ -2183,7 +2184,7 @@ const mod = {
         },
         {
             name: "shock wave",
-            description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong>",
+            description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2719,6 +2720,6 @@ const mod = {
     nailGun: null,
     nailInstantFireRate: null,
     isCapacitor: null,
-    isEjectMod: null,
+    isEnergyNoAmmo: null,
     isFreezeHarmImmune: null
 }

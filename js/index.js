@@ -84,32 +84,20 @@ window.addEventListener('load', (event) => {
       }
 
       if (property.substring(0, 3) === "mod") {
-        let found = false
-        let index
         for (let i = 0; i < mod.mods.length; i++) {
           if (set[property] === mod.mods[i].name) {
-            index = i;
-            found = true;
+            build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod', true)
             break;
           }
         }
-        if (found) build.choosePowerUp(document.getElementById(`mod-${index}`), index, 'mod', true)
       }
 
       if (property === "difficulty") {
         game.difficultyMode = Number(set[property])
-        // localSettings.difficultyMode = Number(set[property])
-        // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        // document.getElementById("difficulty-select").value = Number(set[property])
         document.getElementById("difficulty-select-custom").value = Number(set[property])
       }
       if (property === "level") {
         document.getElementById("starting-level").value = Number(set[property])
-
-        // level.levelsCleared += Number(set[property]);
-        // level.difficultyIncrease(Number(set[property]) * game.difficultyMode) //increase difficulty based on modes
-        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-        // level.onLevel++
       }
     }
   }
@@ -265,12 +253,8 @@ const build = {
             modID.classList.add("build-grid-disabled");
             modID.onclick = null
           }
-          if (mod.mods[i].count > 0) {
-            mod.removeMod(i)
-          }
-          if (modID.classList.contains("build-mod-selected")) {
-            modID.classList.remove("build-mod-selected");
-          }
+          if (mod.mods[i].count > 0) mod.removeMod(i)
+          if (modID.classList.contains("build-mod-selected")) modID.classList.remove("build-mod-selected");
         }
       }
     }
@@ -425,6 +409,7 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
       modList.push(mod.mods[i].count)
     }
   }
+
   openCustomBuildMenu();
 
   if (!game.firstRun) { //if player has already died once load that previous build
@@ -435,7 +420,32 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
     }
     for (let i = 0; i < modList.length; i++) {
       for (let j = 0; j < modList[i]; j++) {
-        build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod')
+        build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod', true)
+      }
+    }
+    //update mod text //disable not allowed mods  
+    for (let i = 0, len = mod.mods.length; i < len; i++) {
+      const modID = document.getElementById("mod-" + i)
+      if (!mod.mods[i].isCustomHide) {
+        if (mod.mods[i].allowed() || mod.mods[i].count > 1) {
+          if (mod.mods[i].count > 1) {
+            modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
+          } else {
+            modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
+          }
+          if (modID.classList.contains("build-grid-disabled")) {
+            modID.classList.remove("build-grid-disabled");
+            modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
+          }
+        } else {
+          modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+          if (!modID.classList.contains("build-grid-disabled")) {
+            modID.classList.add("build-grid-disabled");
+            modID.onclick = null
+          }
+          // if (mod.mods[i].count > 0) mod.removeMod(i)
+          // if (modID.classList.contains("build-mod-selected")) modID.classList.remove("build-mod-selected");
+        }
       }
     }
   }
