@@ -477,6 +477,7 @@ if (localSettings) {
     difficultyMode: '1',
     fpsCapDefault: 'max',
     runCount: 0,
+    levelsClearedLastGame: 0
   };
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
   document.getElementById("community-maps").checked = localSettings.isCommunityMaps
@@ -617,6 +618,7 @@ document.getElementById("community-maps").addEventListener("input", () => {
 document.getElementById("difficulty-select").addEventListener("input", () => {
   game.difficultyMode = Number(document.getElementById("difficulty-select").value)
   localSettings.difficultyMode = game.difficultyMode
+  localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 

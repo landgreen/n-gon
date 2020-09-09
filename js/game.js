@@ -612,7 +612,6 @@ const game = {
     player.force.y += player.mass * game.g;
   },
   reset() { //run on first run, and each later run after you die
-    game.isCheating = false
     b.removeAllGuns();
     mod.setupAllMods(); //sets mods to default values
     b.setFireCD();
@@ -668,6 +667,7 @@ const game = {
         document.getElementById("construct").style.display = 'none'
       }
     }
+    game.isCheating = false
   },
   firstRun: true,
   splashReturn() {

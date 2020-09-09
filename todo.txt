@@ -1,9 +1,3 @@
-blocks drift towards the center of pilot wave's field
-
-mod: Bayesian statistics - no longer stops ammo spawns
-  30% to double power ups, but ejects a mod when you take damage
-
-mod: exciton-lattice - 40% damage, but no ammo can spawn
 
 ************** TODO - n-gon **************
 

@@ -65,7 +65,7 @@ const mech = {
     light: 100,
   },
   setFillColors() {
-    console.log(mech.color)
+    // console.log(mech.color)
     this.fillColor = `hsl(${mech.color.hue},${mech.color.sat}%,${mech.color.light}%)`
     this.fillColorDark = `hsl(${mech.color.hue},${mech.color.sat}%,${mech.color.light-20}%)`
   },

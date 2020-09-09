@@ -35,12 +35,15 @@ const level = {
       // level.newLevel() //fan level
       // level.basement(); //fan level
       // level.stronghold() //fan level
+
+
     } else {
       spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
       // spawn.pickList = ["focuser", "focuser"]
       level[level.levels[level.onLevel]](); //picks the current map from the the levels array
       if (!game.isCheating) {
         localSettings.runCount += level.levelsCleared //track the number of total runs locally
+        localSettings.levelsClearedLastGame = level.levelsCleared
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
       }
     }
@@ -3166,7 +3169,7 @@ const level = {
   difficultyIncrease(num = 1) {
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.35; //damage done by mobs increases each level
+      game.dmgScale += 0.37; //damage done by mobs increases each level
       b.dmgScale *= 0.92; //damage done by player decreases each level
       if (game.accelScale < 5) game.accelScale *= 1.027 //mob acceleration increases each level
       if (game.lookFreqScale > 0.2) game.lookFreqScale *= 0.975 //mob cycles between looks decreases each level
@@ -3177,7 +3180,7 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.35; //damage done by mobs increases each level
+      game.dmgScale -= 0.37; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.92; //damage done by player decreases each level
       if (game.accelScale > 0.2) game.accelScale /= 1.027 //mob acceleration increases each level

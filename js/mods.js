@@ -1029,7 +1029,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>25%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>20%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
