@@ -1,5 +1,21 @@
 
+mod: recursion - gives missiles a 30% chance to spawn a larger missile when they explode
+mod: electric reactive armor - immune to harm from explosions while energy is full (was 80%)
+
+mod: ammonium nitrate - explosions are 60% bigger, but they do 300% more damage to you
+mod: trinitrotoluene - explosions are 50% smaller and do 71% more damage
+
 ************** TODO - n-gon **************
+
+mod: radiation effects can spread to nearby mobs
+
+mod: foam is attracted to mobs
+  use a gravitational attraction model?
+    could foam be attracted to other foam bullets too?
+      or foam is only attracted to foam bullets that are stuck to mobs
+    is this too computationally intense?
+  name - static cling
+  could also do bremsstrahlung radiation like damage on attachment
 
 change player color based on harm reduction
 

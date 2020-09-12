@@ -490,13 +490,13 @@ const mech = {
   damage(dmg) {
     mech.lastHarmCycle = mech.cycle
     if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
-      const len = (dmg - 0.06 * Math.random()) * 40
+      const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40)
       for (let i = 0; i < len; i++) {
         if (Math.random() < 0.5) b.drone() //spawn drone
       }
     }
     if (mod.isEnergyHealth) {
-      mech.energy -= dmg * 1.2; //20% extra damage for energy as health for balance reasons
+      mech.energy -= dmg;
       if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
         if (mod.isDeathAvoid && powerUps.reroll.rerolls) {
           powerUps.reroll.changeRerolls(-1)
@@ -660,13 +660,6 @@ const mech = {
     mech.knee.x = (l / d) * (mech.foot.x - mech.hip.x) - (h / d) * (mech.foot.y - mech.hip.y) + mech.hip.x + offset;
     mech.knee.y = (l / d) * (mech.foot.y - mech.hip.y) + (h / d) * (mech.foot.x - mech.hip.x) + mech.hip.y;
   },
-  // collisionImmune: false,
-  // beginCollisionImmune() {
-
-  // },
-  // endCollisionImmune() {
-
-  // },
   draw() {
     ctx.fillStyle = mech.fillColor;
     mech.walk_cycle += mech.flipLegs * mech.Vx;
@@ -1362,7 +1355,7 @@ const mech = {
                 },
                 mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
                 -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.fireCD,
-                1, mod.babyMissiles)
+                1, mod.recursiveMissiles)
             } else if (mod.isIceField) {
               // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
               mech.energy -= 0.04;
@@ -1772,15 +1765,8 @@ const mech = {
         mech.fieldPhase = 0;
 
         mech.hold = function () {
-          // function expandField() {
-          //   if (this.fieldRange < 2000) {
-          //     this.fieldRange += 100
-          //     drawField(this.fieldRange)
-          //   }
-          // }
-
           function drawField(radius) {
-            radius *= 0.9 + 2.2 * mech.energy * mech.energy;
+            radius *= Math.min(4, 0.9 + 2.2 * mech.energy * mech.energy);
             const rotate = mech.cycle * 0.005;
             mech.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(mech.energy, 1)));
             const off1 = 1 + 0.06 * Math.sin(mech.fieldPhase);

@@ -164,23 +164,25 @@ const b = {
       }
     }
   },
-  explosion(where, radius) {
-    radius *= mod.explosionRadius
-    // typically explode is used for some bullets with .onEnd
-    //add dmg to draw queue
-    game.drawList.push({
+  explosion(where, radius) { // typically explode is used for some bullets with .onEnd
+    let dist, sub, knock;
+    let dmg = radius * 0.01;
+    if (mod.isExplosionHarm) radius *= 1.35
+    if (mod.isSmallExplosion) {
+      radius *= 0.5
+      dmg *= 1.5
+    }
+
+    game.drawList.push({ //add dmg to draw queue
       x: where.x,
       y: where.y,
       radius: radius,
       color: "rgba(255,25,0,0.6)",
       time: game.drawTime
     });
-    let dist, sub, knock;
-    let dmg = radius * 0.01;
 
     const alertRange = 100 + radius * 2; //alert range
-    //add alert to draw queue
-    game.drawList.push({
+    game.drawList.push({ //add alert to draw queue
       x: where.x,
       y: where.y,
       radius: alertRange,
@@ -193,8 +195,12 @@ const b = {
     dist = Vector.magnitude(sub);
 
     if (dist < radius) {
-      if (!(mod.isImmuneExplosion && mech.energy > 0.75)) {
-        mech.damage(radius * 0.0001); //normal player damage from explosions
+      if (!(mod.isImmuneExplosion && mech.energy > 0.97)) {
+        if (mod.isExplosionHarm) {
+          mech.damage(radius * 0.0004); //300% more player damage from explosions
+        } else {
+          mech.damage(radius * 0.0001); //normal player damage from explosions
+        }
         mech.drop();
       }
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.015);
@@ -276,8 +282,13 @@ const b = {
     bullet[me].lookFrequency = Math.floor(21 + Math.random() * 7);
     bullet[me].onEnd = function () {
       b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
-      for (let i = 0; i < spawn; i++) {
-        b.missile(this.position, 2 * Math.PI * Math.random(), 0, 0.7 * size)
+      if (spawn) {
+        for (let i = 0; i < mod.recursiveMissiles; i++) {
+          if (0.3 - 0.03 * i > Math.random()) {
+            b.missile(this.position, this.angle + Math.PI + 0.5 * (Math.random() - 0.5), 0, 0.33 + size, mod.recursiveMissiles)
+            break;
+          }
+        }
       }
     }
     bullet[me].onDmg = function () {
@@ -340,8 +351,8 @@ const b = {
 
         //draw rocket
         ctx.beginPath();
-        ctx.arc(this.position.x - Math.cos(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
-          this.position.y - Math.sin(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
+        ctx.arc(this.position.x - Math.cos(this.angle) * (25 * size - 3) + (Math.random() - 0.5) * 4,
+          this.position.y - Math.sin(this.angle) * (25 * size - 3) + (Math.random() - 0.5) * 4,
           11 * size, 0, 2 * Math.PI);
         ctx.fillStyle = "rgba(255,155,0,0.5)";
         ctx.fill();
@@ -350,7 +361,7 @@ const b = {
         ctx.beginPath();
         ctx.arc(this.position.x - Math.cos(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
           this.position.y - Math.sin(this.angle) * (30 * size - 3) + (Math.random() - 0.5) * 4,
-          11 * size, 0, 2 * Math.PI);
+          2 + 9 * size, 0, 2 * Math.PI);
         ctx.fillStyle = "rgba(255,155,0,0.5)";
         ctx.fill();
       }
@@ -1042,7 +1053,7 @@ const b = {
       onEnd() {},
       do() {
         if (this.lastLookCycle < game.cycle) {
-          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 40
+          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 50
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1107,7 +1118,7 @@ const b = {
               const radius = 6 + 7 * Math.random()
               const SPEED = 29 - radius * 0.5; //(mech.crouch ? 32 : 20) - radius * 0.7;
               const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-              b.foam(this.position, velocity, radius + 8 * this.isUpgraded)
+              b.foam(this.position, velocity, radius + 9 * this.isUpgraded)
               break;
             }
           }
@@ -1207,7 +1218,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * (0.06 + 0.06 * this.isUpgraded);
+            const dmg = b.dmgScale * (0.06 + 0.075 * this.isUpgraded);
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 
@@ -1257,7 +1268,7 @@ const b = {
       explode: 0,
       onDmg() {
         if (this.lockedOn) {
-          const explosionRadius = Math.min(170 + 110 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
+          const explosionRadius = Math.min(170 + 130 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
           if (explosionRadius > 60) {
             this.explode = explosionRadius
             // 
@@ -1995,7 +2006,7 @@ const b = {
               b.missile({
                 x: mech.pos.x + 40 * direction.x,
                 y: mech.pos.y + 40 * direction.y
-              }, mech.angle + 0.06 * (1 - i), 0, 0.7, mod.babyMissiles)
+              }, mech.angle + 0.06 * (1 - i), 0, 0.7, mod.recursiveMissiles)
               bullet[bullet.length - 1].force.x += push.x * (i - 1);
               bullet[bullet.length - 1].force.y += push.y * (i - 1);
             }
@@ -2011,7 +2022,7 @@ const b = {
               b.missile({
                 x: mech.pos.x + 40 * direction.x,
                 y: mech.pos.y + 40 * direction.y
-              }, mech.angle, 0, 0.7, mod.babyMissiles)
+              }, mech.angle, 0, 0.7, mod.recursiveMissiles)
               bullet[bullet.length - 1].force.x += push.x * (i - 1);
               bullet[bullet.length - 1].force.y += push.y * (i - 1);
             }
@@ -2024,7 +2035,7 @@ const b = {
             },
             mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
             -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.fireCD,
-            1, mod.babyMissiles)
+            1, mod.recursiveMissiles)
           bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
         }
       }
@@ -2196,14 +2207,14 @@ const b = {
                 suck(body, this.explodeRad * 2)
                 suck(powerUp, this.explodeRad * 1.5)
                 suck(bullet, this.explodeRad * 1.5)
-                suck([player], this.explodeRad * 1.5)
+                suck([player], this.explodeRad * 1.3)
               } else {
                 mag = 0.1
                 suck(mob, this.explodeRad * 3)
                 suck(body, this.explodeRad * 2)
                 suck(powerUp, this.explodeRad * 1.5)
                 suck(bullet, this.explodeRad * 1.5)
-                suck([player], this.explodeRad * 1.5)
+                suck([player], this.explodeRad * 1.3)
               }
               //keep bomb in place
               Matter.Body.setVelocity(this, {

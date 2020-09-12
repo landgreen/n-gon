@@ -1146,18 +1146,20 @@ const spawn = {
       });
       Matter.Body.setPosition(this, this.startingPosition);
 
-      ctx.beginPath();
-      this.laser(this.vertices[0], this.angle + Math.PI / 3);
-      this.laser(this.vertices[1], this.angle + Math.PI);
-      this.laser(this.vertices[2], this.angle - Math.PI / 3);
-      ctx.strokeStyle = "#50f";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
-      ctx.stroke(); // Draw it
-      ctx.setLineDash([0, 0]);
-      ctx.lineWidth = 20;
-      ctx.strokeStyle = "rgba(80,0,255,0.07)";
-      ctx.stroke(); // Draw it
+      if (!this.isStunned) {
+        ctx.beginPath();
+        this.laser(this.vertices[0], this.angle + Math.PI / 3);
+        this.laser(this.vertices[1], this.angle + Math.PI);
+        this.laser(this.vertices[2], this.angle - Math.PI / 3);
+        ctx.strokeStyle = "#50f";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+        ctx.stroke(); // Draw it
+        ctx.setLineDash([0, 0]);
+        ctx.lineWidth = 20;
+        ctx.strokeStyle = "rgba(80,0,255,0.07)";
+        ctx.stroke(); // Draw it
+      }
       // this.laser(this.vertices[2], this.angle + Math.PI / 3);
       this.checkStatus();
     };

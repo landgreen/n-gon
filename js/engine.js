@@ -159,6 +159,7 @@ function collisionChecks(event) {
               mod.mods[choose].count = 0;
               mod.mods[choose].remove(); // remove a random mod form the list of mods you have
               game.updateModHUD();
+              mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected mod
             }
             if (mob[k].onHit) mob[k].onHit(k);
 

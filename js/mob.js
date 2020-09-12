@@ -1042,7 +1042,7 @@ const mobs = {
             }
           }
           if (Math.random() < mod.isBotSpawner) b.randomBot(this.position, false)
-          if (mod.isExplodeMob) b.explosion(this.position, Math.min(450, Math.sqrt(this.mass + 3) * 80))
+          if (mod.isExplodeMob) b.explosion(this.position, Math.min(425, Math.sqrt(this.mass + 3) * 70))
           if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob, 40 + 7 * Math.random())
         } else if (mod.isShieldAmmo && this.shield) {
           let type = "ammo"

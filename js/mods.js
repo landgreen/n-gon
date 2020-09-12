@@ -368,6 +368,22 @@ const mod = {
             }
         },
         {
+            name: "impact shear",
+            description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br>nails target nearby mobs",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                mod.nailsDeathMob++
+            },
+            remove() {
+                mod.nailsDeathMob = 0;
+            }
+        },
+        {
             name: "thermal runaway",
             description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
             maxCount: 1,
@@ -384,19 +400,51 @@ const mod = {
             }
         },
         {
-            name: "impact shear",
-            description: "mobs release <strong>1-2</strong> <strong>nails</strong> when they <strong>die</strong><br>nails target nearby mobs",
-            maxCount: 9,
+            name: "trinitrotoluene",
+            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>50%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>area</strong> by <strong>71%</strong>",
+            maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1;
             },
-            requires: "",
+            requires: "an explosive damage source",
             effect: () => {
-                mod.nailsDeathMob += 2
+                mod.isSmallExplosion = true;
             },
             remove() {
-                mod.nailsDeathMob = 0;
+                mod.isSmallExplosion = false;
+            }
+        },
+        {
+            name: "ammonium nitrate",
+            description: "increase <strong class='color-e'>explosive</strong> <strong>area</strong> by <strong>60%</strong>, but<br>you take <strong>300%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField
+            },
+            requires: "an explosive damage source",
+            effect: () => {
+                mod.isExplosionHarm = true;
+            },
+            remove() {
+                mod.isExplosionHarm = false;
+            }
+        },
+        {
+            name: "electric reactive armor",
+            description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is <strong>full</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob
+            },
+            requires: "an explosive gun",
+            effect: () => {
+                mod.isImmuneExplosion = true;
+            },
+            remove() {
+                mod.isImmuneExplosion = false;
             }
         },
         {
@@ -612,9 +660,9 @@ const mod = {
             // isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return mod.totalBots() > 2
+                return mod.totalBots() > 3
             },
-            requires: "3 or more bots",
+            requires: "at least 3 bots",
             effect() {
                 b.removeAllGuns();
                 game.makeGunHUD();
@@ -1029,7 +1077,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>20%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>17%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1111,9 +1159,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return !mod.isEnergyNoAmmo
             },
-            requires: "",
+            requires: "not exciton-lattice",
             effect() {
                 mod.isAmmoForGun = true;
             },
@@ -1145,9 +1193,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !mod.isEnergyHealth && !mod.isEnergyNoAmmo
             },
-            requires: "not mass-energy equivalence",
+            requires: "not mass-energy equivalence<br>not exciton-lattice",
             effect: () => {
                 mod.isAmmoFromHealth = 0.023;
             },
@@ -1692,51 +1740,19 @@ const mod = {
             }
         },
         {
-            name: "high explosives",
-            description: "increase <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> by <strong>20%</strong><br><strong class='color-e'>explosive</strong> area is <strong>44% larger</strong>",
-            maxCount: 3,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField;
-            },
-            requires: "an explosive gun",
-            effect: () => {
-                mod.explosionRadius += 0.2;
-            },
-            remove() {
-                mod.explosionRadius = 1;
-            }
-        },
-        {
-            name: "electric reactive armor",
-            description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>75%</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || (mod.haveGunCheck("pulse") && mech.maxEnergy > 1) || mod.isMissileField || mod.isExplodeMob
-            },
-            requires: "an explosive gun",
-            effect: () => {
-                mod.isImmuneExplosion = true;
-            },
-            remove() {
-                mod.isImmuneExplosion = false;
-            }
-        },
-        {
             name: "recursion",
-            description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong><br>they launch <strong>1</strong> smaller <strong>missile</strong>",
-            maxCount: 9,
+            description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong> they have a<br><strong>30%</strong> chance to launch a larger <strong>missile</strong>",
+            maxCount: 6,
             count: 0,
             allowed() {
                 return mod.haveGunCheck("missiles") || mod.isMissileField
             },
             requires: "missiles",
             effect() {
-                mod.babyMissiles++
+                mod.recursiveMissiles++
             },
             remove() {
-                mod.babyMissiles = 0;
+                mod.recursiveMissiles = 0;
             }
         },
         {
@@ -2599,7 +2615,6 @@ const mod = {
     ],
     //variables use for gun mod upgrades
     fireRate: null,
-    explosionRadius: null,
     bulletSize: null,
     energySiphon: null,
     healthDrain: null,
@@ -2651,7 +2666,7 @@ const mod = {
     isPlasmaRange: null,
     isRailNails: null,
     isFreezeMobs: null,
-    babyMissiles: null,
+    recursiveMissiles: null,
     isIceCrystals: null,
     throwChargeRate: null,
     isBlockStun: null,
@@ -2721,5 +2736,7 @@ const mod = {
     nailInstantFireRate: null,
     isCapacitor: null,
     isEnergyNoAmmo: null,
-    isFreezeHarmImmune: null
+    isFreezeHarmImmune: null,
+    isSmallExplosion: null,
+    isExplosionHarm: null
 }

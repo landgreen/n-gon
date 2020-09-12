@@ -455,7 +455,7 @@ const powerUps = {
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     powerUps.randomPowerUpCounter++;
-    if (game.difficultyMode === 4) spawnPowerUps() //why mode gets a free power up chance
+    if (game.difficultyMode === 4) powerUps.spawn(x, y, "mod") //why mode gets a free mod
     const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
     if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
       powerUps.randomPowerUpCounter = 0;
@@ -499,11 +499,12 @@ const powerUps = {
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
     if (level.levelsCleared < 4) { //runs 4 times on all difficulty levels
+      if (game.difficultyMode === 4 && level.levelsCleared > 1) powerUps.spawn(x, y, "mod")
 
       //bonus power ups for clearing runs in the last game
       if (level.levelsCleared === 0 && !game.isCheating) {
         for (let i = 0; i < localSettings.levelsClearedLastGame / 5 - 1; i++) {
-          powerUps.spawn(x, y, "mod", false); //spawn a mod for every 5 levels cleared in last game
+          powerUps.spawn(mech.pos.x, mech.pos.y, "mod", false); //spawn a mod for every 5 levels cleared in last game
         }
         localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -569,7 +570,7 @@ const powerUps = {
       !(mod.isEnergyNoAmmo && target === 'ammo')
     ) {
       powerUps.directSpawn(x, y, target, moving, mode)
-      if (mod.isBayesian && Math.random() < 0.2) powerUps.directSpawn(x, y, target, moving, mode)
+      if (mod.isBayesian && Math.random() < 0.17) powerUps.directSpawn(x, y, target, moving, mode)
     }
   },
 };

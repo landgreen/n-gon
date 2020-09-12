@@ -30,6 +30,12 @@ function shuffle(array) {
   return array;
 }
 
+// shrink power up selection menu to find window height
+if (screen.height < 800) {
+  document.getElementById("choose-grid").style.fontSize = "1em"; //1.3em is normal
+  if (screen.height < 600) document.getElementById("choose-grid").style.fontSize = "0.8em"; //1.3em is normal
+}
+
 //example  https://landgreen.github.io/sidescroller/index.html?
 //          &gun1=minigun&gun2=laser
 //          &mod1=laser-bot&mod2=mass%20driver&mod3=overcharge&mod4=laser-bot&mod5=laser-bot&field=phase%20decoherence%20field&difficulty=2
