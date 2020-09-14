@@ -2982,12 +2982,17 @@ const b = {
             if (this.holdCount > 180) {
               this.holdCount = 0;
               const size = 15
-              const dmg = (mod.largerHeals * (size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2) / mech.harmReduction() * game.healScale
+              let dmg = (mod.largerHeals * (size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2) / mech.harmReduction() * game.healScale
               if (mech.health < 0.15) {
                 mech.fireCDcycle = mech.cycle + 120; // fire cool down if about to die
               } else {
+                const totalPowerUps = powerUp.length
                 powerUps.spawn(mech.pos.x, mech.pos.y, "heal", true, false, size);
                 mech.damage(dmg, false)
+                if (powerUp.length > totalPowerUps + 1) {
+                  dmg = (mod.largerHeals * (powerUp[powerUp.length - 1].size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2) / mech.harmReduction() * game.healScale
+                  mech.damage(dmg, false) //do bonus damage if you spawn bonus power ups
+                }
               }
             }
           } else {
