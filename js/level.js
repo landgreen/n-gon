@@ -20,7 +20,6 @@ const level = {
       // mod.giveMod("quantum immortality");
 
       level.intro(); //starting level
-      // level.house()
       // level.testing(); //not in rotation
       // level.template() //not in rotation
       // level.testChamber() //less mobs, more puzzle
@@ -33,6 +32,7 @@ const level = {
       // level.highrise();
       // level.office();
       // level.bosses(); //only fighting, very simple map
+      // level.house() //fan level
       // level.newLevel() //fan level
       // level.basement(); //fan level
       // level.stronghold() //fan level
@@ -74,488 +74,6 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
-
-  house() {
-    const rotor = level.rotor(4315, -315, -0.0002, 120, 20, 200);
-    const hazard = level.hazard(4350, -1000, 300, 110);
-    const doorBedroom = level.door(1152, -1150, 25, 250, 250);
-    const doorGrenier = level.door(1152, -1625, 25, 150, 160);
-    const buttonBedroom = level.button(1250, -850);
-    const voletLucarne1 = level.door(1401, -2150, 20, 26, 28);
-    const voletLucarne2 = level.door(1401, -2125, 20, 26, 53);
-    const voletLucarne3 = level.door(1401, -2100, 20, 26, 78);
-    const voletLucarne4 = level.door(1401, -2075, 20, 26, 103);
-    const voletLucarne5 = level.door(1401, -2050, 20, 26, 128);
-    const voletLucarne6 = level.door(1401, -2025, 20, 26, 153);
-    let hasAlreadyBeenActivated = false;
-    let grd
-    level.setPosToSpawn(0, -50); //normal spawn
-    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-    level.exit.x = 9700;
-    level.exit.y = 2560;
-    level.defaultZoom = 1800
-    game.zoomTransition(level.defaultZoom)
-    document.body.style.backgroundColor = "#969696"
-
-    level.fillBG.push({ //lampadaire
-      x: 624,
-      y: -1150,
-      width: 28,
-      height: 1075,
-      color: "rgb(77, 76, 76)"
-    });
-    //tele
-    level.fillBG.push({ //zone 1 
-      x: 3420,
-      y: -380,
-      width: 285,
-      height: 40,
-      color: "#ababab"
-    })
-    level.fillBG.push({ //poignée 1
-      x: 3555,
-      y: -367.5,
-      width: 15,
-      height: 15,
-      color: "#474747"
-    })
-    level.fillBG.push({ //entre-deux 1
-      x: 3418,
-      y: -344,
-      width: 288,
-      height: 8,
-      color: "#474747"
-    })
-    level.fillBG.push({ //zone 2
-      x: 3420,
-      y: -340,
-      width: 285,
-      height: 40,
-      color: "#ababab"
-    })
-    level.fillBG.push({ //poignée 2
-      x: 3555,
-      y: -327.5,
-      width: 15,
-      height: 15,
-      color: "#474747"
-    })
-    level.fillBG.push({ //entre-deux 2
-      x: 3418,
-      y: -304,
-      width: 288,
-      height: 8,
-      color: "#474747"
-    })
-    level.fillBG.push({ //zone 3
-      x: 3420,
-      y: -300,
-      width: 285,
-      height: 45,
-      color: "#ababab"
-    })
-    level.fillBG.push({ //poignée 3
-      x: 3555,
-      y: -285,
-      width: 15,
-      height: 15,
-      color: "#474747"
-    })
-    level.fillBG.push({ //door bathroom
-      x: 3800,
-      y: -1275,
-      width: 250,
-      height: 425,
-      color: "rgba(141, 141, 141,1)",
-    })
-    level.fillBG.push({ //door bathroom //top border
-      x: 3800,
-      y: -1275,
-      width: 250,
-      height: 3,
-      color: "#000",
-    })
-    level.fillBG.push({ //door bathroom //right border
-      x: 4048,
-      y: -1275,
-      width: 3,
-      height: 425,
-      color: "#000",
-    })
-    level.fillBG.push({ //door bathroom //left border
-      x: 3800,
-      y: -1275,
-      width: 3,
-      height: 425,
-      color: "#000",
-    })
-    level.fillBG.push({ //poignée door bathroom
-      x: 3830,
-      y: -1050,
-      width: 35,
-      height: 10,
-      color: "#000",
-    })
-    level.fillBG.push({ //background bathroom
-      x: 4050,
-      y: -1425,
-      width: 1125,
-      height: 600,
-      // color:"#c1d7db"
-      color: "rgba(225, 242, 245,0.6)"
-    })
-    level.fillBG.push({ //window
-      x: 1736,
-      y: -1300,
-      width: 3,
-      height: 150,
-      color: "#444"
-    })
-    level.fillBG.push({ //window
-      x: 1650,
-      y: -1224,
-      width: 175,
-      height: 3,
-      color: "#444"
-    })
-    let color = Math.random().toString(16).substr(-6);
-    level.fillBG.push({ //écran 
-      x: 3375,
-      y: -625,
-      width: 375,
-      height: 175,
-      color: '#' + color
-    })
-    level.fill.push({ //hidden zone
-      x: 2800,
-      y: -400,
-      width: 275,
-      height: 175,
-      color: "rgba(64,64,64,0.96)"
-    })
-
-
-    function drawCarreaux(x, y, width, height) {
-      level.fillBG.push({ //carreaux
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        color: "rgba(166, 166, 166,0.8)"
-      })
-    }
-    for (let i = 0; i < 28; i++) {
-      drawCarreaux(4050 + i * 40, -1425, 1, 600);
-    }
-    for (let i = 0; i < 15; i++) {
-      drawCarreaux(4050, -1425 + i * 40, 1125, 2);
-    }
-
-    const part1 = Matter.Bodies.rectangle(4525, -455, 25, 200, {
-      density: 0.0005,
-      isNotHoldable: true,
-    });
-    const part2 = Matter.Bodies.rectangle(4562, -435, 100, 25, {
-      density: 0.0005,
-      isNotHoldable: true,
-    });
-    const part3 = Matter.Bodies.rectangle(4600, -402, 25, 91.5, {
-      density: 0.0005,
-      isNotHoldable: true,
-    });
-    const part4 = Matter.Bodies.rectangle(5100, -455, 25, 200, {
-      density: 0.0005,
-      isNotHoldable: true,
-    });
-    const part5 = Matter.Bodies.rectangle(5063, -435, 100, 25, {
-      density: 0.0005,
-      isNotHoldable: true,
-    });
-    const part6 = Matter.Bodies.rectangle(5025, -402, 25, 91.5, {
-      density: 0.0005,
-      isNotHoldable: true,
-    });
-    chair = Body.create({
-      parts: [part1, part2, part3],
-    });
-    chair2 = Body.create({
-      parts: [part4, part5, part6],
-    });
-    World.add(engine.world, [chair]);
-    World.add(engine.world, [chair2]);
-    composite[composite.length] = chair;
-    composite[composite.length] = chair2;
-    body[body.length] = part1;
-    body[body.length] = part2;
-    body[body.length] = part3;
-    body[body.length] = part4;
-    body[body.length] = part5;
-    body[body.length] = part6;
-    setTimeout(function () {
-      chair.collisionFilter.category = cat.body;
-      chair.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
-    }, 1000);
-    setTimeout(function () {
-      chair2.collisionFilter.category = cat.body;
-      chair2.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
-    }, 1000);
-    var head = Matter.Bodies.rectangle(300, -400 - 60, 34, 40, {
-      isNotHoldable: true,
-    });
-    var chest = Matter.Bodies.rectangle(300, -400, 55, 80, {
-      isNotHoldable: true,
-    });
-    var rightUpperArm = Matter.Bodies.rectangle(300 + 39, -400 - 15, 20, 40, {
-      isNotHoldable: true,
-    });
-    var rightLowerArm = Matter.Bodies.rectangle(300 + 39, -400 + 25, 20, 60, {
-      isNotHoldable: true,
-    });
-    var leftUpperArm = Matter.Bodies.rectangle(300 - 39, -400 - 15, 20, 40, {
-      isNotHoldable: true,
-    });
-    var leftLowerArm = Matter.Bodies.rectangle(300 - 39, -400 + 25, 20, 60, {
-      isNotHoldable: true,
-    });
-    var leftUpperLeg = Matter.Bodies.rectangle(300 - 20, -400 + 57, 20, 40, {
-      isNotHoldable: true,
-    });
-    var leftLowerLeg = Matter.Bodies.rectangle(300 - 20, -400 + 97, 20, 60, {
-      isNotHoldable: true,
-    });
-    var rightUpperLeg = Matter.Bodies.rectangle(300 + 20, -400 + 57, 20, 40, {
-      isNotHoldable: true,
-    });
-    var rightLowerLeg = Matter.Bodies.rectangle(300 + 20, -400 + 97, 20, 60, {
-      isNotHoldable: true,
-    });
-
-    var person = Body.create({
-      parts: [chest, head, leftLowerArm, leftUpperArm,
-        rightLowerArm, rightUpperArm, leftLowerLeg,
-        rightLowerLeg, leftUpperLeg, rightUpperLeg
-      ],
-    });
-    World.add(engine.world, [person]);
-    composite[composite.length] = person
-    body[body.length] = chest
-    body[body.length] = head
-    body[body.length] = part3
-    body[body.length] = leftLowerLeg
-    body[body.length] = leftUpperLeg
-    body[body.length] = leftUpperArm
-    body[body.length] = leftLowerArm
-    body[body.length] = rightLowerLeg
-    body[body.length] = rightUpperLeg
-    body[body.length] = rightLowerArm
-    body[body.length] = rightUpperArm
-    setTimeout(function () {
-      person.collisionFilter.category = cat.body;
-      person.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
-    }, 1000);
-
-    level.custom = () => {
-      buttonBedroom.query();
-      buttonBedroom.draw();
-      if (buttonBedroom.isUp) {
-        if (hasAlreadyBeenActivated == false) {
-          doorBedroom.isOpen = true;
-          doorGrenier.isOpen = true;
-          voletLucarne1.isOpen = true;
-          voletLucarne2.isOpen = true;
-          voletLucarne3.isOpen = true;
-          voletLucarne4.isOpen = true;
-          voletLucarne5.isOpen = true;
-          voletLucarne6.isOpen = true;
-        }
-      } else {
-        doorBedroom.isOpen = false;
-        doorGrenier.isOpen = false;
-        voletLucarne1.isOpen = false;
-        voletLucarne2.isOpen = false;
-        voletLucarne3.isOpen = false;
-        voletLucarne4.isOpen = false;
-        voletLucarne5.isOpen = false;
-        voletLucarne6.isOpen = false;
-        if (hasAlreadyBeenActivated == false) {
-          hasAlreadyBeenActivated = true;
-        }
-      }
-      doorBedroom.openClose();
-      doorGrenier.openClose();
-      voletLucarne1.openClose();
-      voletLucarne2.openClose();
-      voletLucarne3.openClose();
-      voletLucarne4.openClose();
-      voletLucarne5.openClose();
-      voletLucarne6.openClose();
-      rotor.rotate();
-      hazard.query();
-      ///
-      grd = ctx.createRadialGradient(512.5, -1025, 5, 512.5, -1025, 100);
-      grd.addColorStop(0, "rgb(255, 199, 43)");
-      grd.addColorStop(1, "#969696");
-      ctx.fillStyle = grd;
-      ctx.fillRect(450, -1025, 125, 100);
-      ///
-      grd = ctx.createRadialGradient(762.5, -1025, 5, 762.5, -1025, 100);
-      grd.addColorStop(0, "rgb(255, 199, 43, 1)");
-      grd.addColorStop(1, "#969696");
-      ctx.fillStyle = grd;
-      ctx.fillRect(700, -1025, 125, 100);
-      ///
-      ctx.lineWidth = 7;
-      ctx.strokeStyle = "#444444"
-      ctx.strokeRect(1650, -1300, 175, 150);
-
-      chair.force.y += chair.mass * game.g;
-      chair2.force.y += chair2.mass * game.g;
-      person.force.y += person.mass * game.g;
-    };
-    level.customTopLayer = () => {
-      hazard.draw();
-      doorBedroom.draw();
-      doorGrenier.draw();
-      voletLucarne1.draw();
-      voletLucarne2.draw();
-      voletLucarne3.draw();
-      voletLucarne4.draw();
-      voletLucarne5.draw();
-      voletLucarne6.draw();
-    };
-
-    //rez de chaussée
-    spawn.mapRect(-200, 0, 5200, 100); //ground
-    spawn.mapRect(1150, -255, 4050, 355); //additionnal ground
-    spawn.mapRect(800, -255, 400, 90); //1st step
-    spawn.mapRect(650, -170, 550, 90); //2nd step
-    spawn.mapRect(500, -85, 700, 90); //3rd step
-    spawn.mapRect(1150, -850, 50, 175); //porte entrée
-    spawn.bodyRect(1162.5, -675, 25, 420) //porte entrée
-    spawn.mapRect(1150, -850, 1500, 50); //plafond 1
-    spawn.mapRect(3025, -850, 2175, 50); //plafond 2
-    spawn.mapRect(5150, -850, 50, 650); //mur cuisine
-    //lave-vaisselle
-    spawn.mapRect(4225, -400, 25, 150);
-    spawn.mapRect(4225, -400, 175, 25);
-    spawn.mapRect(4375, -400, 25, 150);
-    spawn.bodyRect(4350, -350, 20, 40);
-    spawn.bodyRect(4325, -325, 20, 20);
-    spawn.bodyRect(4325, -275, 20, 20);
-    /*escalier*/
-    spawn.mapRect(3025, -850, 50, 225);
-    spawn.mapRect(2925, -775, 150, 150);
-    spawn.mapRect(2800, -700, 275, 75);
-    spawn.mapRect(2575, -400, 175, 175);
-    spawn.mapRect(2475, -325, 175, 100);
-    // spawn.mapRect(2675, -475, 400, 250);
-    spawn.mapRect(2675, -475, 400, 100);
-    spawn.mapRect(2675, -475, 150, 250);
-    spawn.mapRect(4025, -850, 50, 175); //porte cuisine
-    /*table + chaises*/
-    spawn.mapRect(4025, -850, 50, 175);
-    spawn.mapRect(4650, -375, 325, 25);
-    spawn.mapRect(4700, -350, 25, 100);
-    spawn.mapRect(4900, -350, 25, 100);
-    spawn.bodyRect(4875, -400, 75, 25);
-    spawn.bodyRect(4700, -400, 75, 25);
-    /*murs télé*/
-    spawn.mapRect(3400, -400, 20, 150);
-    spawn.mapRect(3705, -400, 20, 150);
-    spawn.mapRect(3400, -400, 325, 20);
-    /*socle écran*/
-    spawn.mapRect(3500, -415, 125, 17);
-    spawn.mapRect(3550, -450, 25, 50);
-
-    //premier étage
-    spawn.mapRect(1150, -1450, 4050, 50);
-    spawn.mapRect(5150, -1450, 50, 650);
-    spawn.mapRect(1150, -1450, 50, 300);
-    spawn.mapRect(1150, -900, 50, 100);
-    spawn.mapVertex(1066, -730, "-200 60  0 -60  100 -60  100 60")
-    //chambre
-    spawn.mapRect(2350, -1450, 50, 175); //porte chambre
-    //lit
-    spawn.mapRect(1475, -1025, 25, 225); //pied de lit 1
-    spawn.mapRect(1850, -925, 25, 125); //pied de lit 2
-    spawn.mapRect(1475, -925, 400, 50); //sommier
-    spawn.bodyRect(1500, -950, 375, 25); //matelat 
-    spawn.bodyRect(1500, -1000, 75, 50); //oreiller
-    //table
-    spawn.bodyRect(1950, -1000, 30, 150); //pied table
-    spawn.bodyRect(2250, -1000, 30, 150); //pied table
-    spawn.bodyRect(1920, -1025, 390, 25); //table 
-    //salle de bain
-    spawn.mapRect(4025, -1450, 50, 175); //porte salle de bain
-    map[map.length] = Bodies.polygon(5050, -925, 0, 35.4);
-    spawn.mapRect(5015, -960, 125, 40);
-    spawn.mapRect(5050, -925, 90, 35.4);
-    spawn.mapVertex(5086.5, -875, "100 60  -30 60   20 0 100 0")
-    spawn.mapRect(5125, -1070, 15, 120)
-    spawn.bodyRect(5016, -965, 108, 15)
-    //baignoire
-    spawn.mapVertex(4316, -965, "30 100  0 100   -80 -50  30 -50") //bord 1
-    spawn.mapVertex(4675, -961.5, "30 100  0 100   0 -50  80 -50") //bord 2
-    spawn.mapVertex(4400, -860, "0 -20  -20 20   20 20  0 -20") //pied 1
-    spawn.mapVertex(4600, -860, "0 -20  -20 20   20 20  0 -20") //pied 2
-    spawn.mapRect(4325, -900, 350, 25); //fond baignoire
-    spawn.mapRect(4300, -1175, 25, 175);
-    spawn.mapRect(4300, -1175, 125, 25);
-    spawn.mapRect(4400, -1175, 25, 50); //pied pommeau de douche
-    spawn.mapVertex(4412.5, -1105, "-20 -20  -30 40   30 40  20 -20") //pommeau de douche
-
-    //grenier
-    // spawn.mapRect(1150, -1800, 50, 400);
-    spawn.mapRect(1150, -1475, 50, 50);
-    spawn.mapRect(1150, -1800, 50, 175);
-    spawn.mapRect(5150, -1800, 50, 400); //murs
-    spawn.mapVertex(1300, -1900, "-150 200  -200 200   50 0 100 0");
-    spawn.mapVertex(1800, -2300, "-150 200  -200 200   175 -100 225 -100");
-    spawn.mapRect(1390, -2180, 250, 30); //lucarne
-    spawn.mapVertex(5050, -1900, "150 200  200 200   -50 0 -100 0");
-    spawn.mapVertex(4550, -2300, "150 200  200 200   -175 -100 -225 -100");
-    spawn.mapRect(4710, -2175, 250, 25); //lucarne 2
-    //obstacles
-    spawn.mapRect(3775, -1800, 99, 50);
-    spawn.mapRect(2425, -2150, 50, 425);
-    spawn.mapRect(2150, -1775, 325, 50);
-    spawn.mapRect(3825, -2150, 50, 750);
-    spawn.mapRect(3826, -2150, 149, 50);
-    spawn.mapRect(4125, -2150, 149, 50);
-    spawn.mapRect(4225, -2150, 50, 450);
-    spawn.mapRect(4225, -1750, 250, 50);
-    // level.chain(2475, -2150, 2900, -2150, 8);
-    spawn.bodyRect(2350, -1850, 75, 75);
-    spawn.bodyRect(4275, -1900, 75, 100);
-    spawn.bodyRect(4825, -1650, 325, 200);
-    spawn.bodyRect(5025, -1725, 25, 25);
-    spawn.bodyRect(4900, -1700, 200, 75);
-    spawn.mapVertex(2975, -2096, "-75 -50  75 -50  75 0  0 100  -75 0")
-
-    /*cheminée + roof*/
-    spawn.mapRect(1963, -2450, 2425, 35);
-    spawn.mapRect(2925, -2900, 125, 480);
-    spawn.mapRect(2900, -2900, 175, 75);
-    spawn.mapRect(2900, -2975, 25, 100);
-    spawn.mapRect(3050, -2975, 25, 100);
-    spawn.mapRect(2875, -3000, 225, 25);
-    /*lampadaire + jump*/
-    spawn.mapRect(1000, -1450, 200, 25);
-    spawn.mapRect(500, -1150, 275, 25);
-    spawn.mapRect(750, -1150, 25, 75);
-    spawn.mapRect(500, -1150, 25, 75);
-    spawn.mapRect(450, -1075, 125, 50);
-    spawn.mapRect(700, -1075, 125, 50);
-    spawn.mapRect(2985, -4600, 0.1, 1700)
-
-    //Mobs
-    // spawn.mobBloc(3015, -315, 84.855, "#ffff");
-
-
-  },
-
-
-
   testing() {
     level.custom = () => {
       level.playerExitCheck();
@@ -619,7 +137,7 @@ const level = {
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
     // spawn.spawner(1600, -500)
-    spawn.sniper(1700, -120, 50)
+    // spawn.sniper(1700, -120, 50)
     // spawn.bomberBoss(1400, -500)
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
@@ -1288,7 +806,7 @@ const level = {
     powerUps.spawn(2050, -150, "heal", false); //starting gun
     // powerUps.spawn(2050, -150, "field", false); //starting gun
     // localSettings.levelsClearedLastGame = 20
-    if (localSettings.levelsClearedLastGame < 5) {
+    if (localSettings.levelsClearedLastGame < 6) {
       spawn.wireFoot();
       spawn.wireFootLeft();
       spawn.wireKnee();
@@ -1955,7 +1473,7 @@ const level = {
     spawn.randomMob(4700, -150, 0.2);
     spawn.randomBoss(4000, -350, 0.6);
     spawn.randomBoss(2750, -550, 0.1);
-    if (game.difficulty > 2) {
+    if (game.difficulty > 3) {
       if (Math.random() < 0.1) { // tether ball
         spawn.tetherBoss(4250, 0)
         cons[cons.length] = Constraint.create({
@@ -2313,7 +1831,7 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
-    if (game.difficulty > 4) spawn.randomLevelBoss(-3400, -2800);
+    if (game.difficulty > 3) spawn.randomLevelBoss(-3400, -2800);
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   warehouse() {
@@ -2657,7 +2175,7 @@ const level = {
     spawn.randomBoss(1800, -800, -0.2);
     spawn.randomBoss(4150, -1000, 0.6);
 
-    if (game.difficulty > 2) {
+    if (game.difficulty > 3) {
       if (Math.random() < 0.65) {
         // tether ball
         level.fillBG.push({
@@ -2677,7 +2195,7 @@ const level = {
           stiffness: 0.00012
         });
         //chance to spawn a ring of exploding mobs around this boss
-        if (game.difficulty > 4) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
+        if (game.difficulty > 6) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
       } else {
         spawn.randomLevelBoss(2200, -650)
       }
@@ -3692,6 +3210,571 @@ const level = {
       };
     }
   },
+  house() {
+    const rotor = level.rotor(4315, -315, -0.0002, 120, 20, 200);
+    const hazard = level.hazard(4350, -1000, 300, 110);
+    const doorBedroom = level.door(1152, -1150, 25, 250, 250);
+    const doorGrenier = level.door(1152, -1625, 25, 150, 160);
+    const buttonBedroom = level.button(1250, -850);
+    const voletLucarne1 = level.door(1401, -2150, 20, 26, 28);
+    const voletLucarne2 = level.door(1401, -2125, 20, 26, 53);
+    const voletLucarne3 = level.door(1401, -2100, 20, 26, 78);
+    const voletLucarne4 = level.door(1401, -2075, 20, 26, 103);
+    const voletLucarne5 = level.door(1401, -2050, 20, 26, 128);
+    const voletLucarne6 = level.door(1401, -2025, 20, 26, 153);
+    let hasAlreadyBeenActivated = false;
+    let grd
+
+    level.setPosToSpawn(0, -50); //normal spawn
+    spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+    level.exit.x = 3100;
+    level.exit.y = -2480;
+    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+    level.defaultZoom = 1800
+    game.zoomTransition(level.defaultZoom)
+    document.body.style.backgroundColor = "rgb(170 170 170)"
+
+    level.custom = () => {
+      hazard.query();
+      buttonBedroom.query();
+      buttonBedroom.draw();
+      if (buttonBedroom.isUp) {
+        if (hasAlreadyBeenActivated == false) {
+          doorBedroom.isOpen = true;
+          doorGrenier.isOpen = true;
+          voletLucarne1.isOpen = true;
+          voletLucarne2.isOpen = true;
+          voletLucarne3.isOpen = true;
+          voletLucarne4.isOpen = true;
+          voletLucarne5.isOpen = true;
+          voletLucarne6.isOpen = true;
+        }
+      } else {
+        doorBedroom.isOpen = false;
+        doorGrenier.isOpen = false;
+        voletLucarne1.isOpen = false;
+        voletLucarne2.isOpen = false;
+        voletLucarne3.isOpen = false;
+        voletLucarne4.isOpen = false;
+        voletLucarne5.isOpen = false;
+        voletLucarne6.isOpen = false;
+        if (hasAlreadyBeenActivated == false) {
+          hasAlreadyBeenActivated = true;
+        }
+      }
+      doorBedroom.openClose();
+      doorGrenier.openClose();
+      voletLucarne1.openClose();
+      voletLucarne2.openClose();
+      voletLucarne3.openClose();
+      voletLucarne4.openClose();
+      voletLucarne5.openClose();
+      voletLucarne6.openClose();
+      rotor.rotate();
+      ///
+      grd = ctx.createRadialGradient(512.5, -1025, 5, 512.5, -1025, 100);
+      grd.addColorStop(0, "rgb(255, 199, 43)");
+      grd.addColorStop(1, "rgb(170 170 170)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(450, -1025, 125, 100);
+      ///
+      grd = ctx.createRadialGradient(762.5, -1025, 5, 762.5, -1025, 100);
+      grd.addColorStop(0, "rgb(255, 199, 43, 1)");
+      grd.addColorStop(1, "rgb(170 170 170)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(700, -1025, 125, 100);
+      ///
+      ctx.lineWidth = 7;
+      ctx.strokeStyle = "#444444"
+      ctx.strokeRect(1650, -1300, 175, 150);
+
+      chair.force.y += chair.mass * game.g;
+      chair2.force.y += chair2.mass * game.g;
+      person.force.y += person.mass * game.g;
+      level.playerExitCheck();
+    };
+    level.customTopLayer = () => {
+      hazard.draw();
+      doorBedroom.draw();
+      doorGrenier.draw();
+      voletLucarne1.draw();
+      voletLucarne2.draw();
+      voletLucarne3.draw();
+      voletLucarne4.draw();
+      voletLucarne5.draw();
+      voletLucarne6.draw();
+    };
+
+    //colors
+    level.fillBG.push({
+      x: 1175,
+      y: -1425,
+      width: 4000,
+      height: 1200,
+      color: "rgb(221, 221, 221)"
+    })
+    level.fillBG.push({
+      x: 1650,
+      y: -1300,
+      width: 175,
+      height: 150,
+      color: "rgb(170 170 170)"
+    })
+    level.fillBG.push({ //lampadaire
+      x: 624,
+      y: -1150,
+      width: 28,
+      height: 1075,
+      color: "rgb(77, 76, 76)"
+    });
+    //tele
+    level.fillBG.push({ //zone 1 
+      x: 3420,
+      y: -380,
+      width: 285,
+      height: 40,
+      color: "#ababab"
+    })
+    level.fillBG.push({ //poignée 1
+      x: 3555,
+      y: -367.5,
+      width: 15,
+      height: 15,
+      color: "#474747"
+    })
+    level.fillBG.push({ //entre-deux 1
+      x: 3418,
+      y: -344,
+      width: 288,
+      height: 8,
+      color: "#474747"
+    })
+    level.fillBG.push({ //zone 2
+      x: 3420,
+      y: -340,
+      width: 285,
+      height: 40,
+      color: "#ababab"
+    })
+    level.fillBG.push({ //poignée 2
+      x: 3555,
+      y: -327.5,
+      width: 15,
+      height: 15,
+      color: "#474747"
+    })
+    level.fillBG.push({ //entre-deux 2
+      x: 3418,
+      y: -304,
+      width: 288,
+      height: 8,
+      color: "#474747"
+    })
+    level.fillBG.push({ //zone 3
+      x: 3420,
+      y: -300,
+      width: 285,
+      height: 45,
+      color: "#ababab"
+    })
+    level.fillBG.push({ //poignée 3
+      x: 3555,
+      y: -285,
+      width: 15,
+      height: 15,
+      color: "#474747"
+    })
+    level.fillBG.push({ //door bathroom
+      x: 3800,
+      y: -1275,
+      width: 250,
+      height: 425,
+      color: "rgba(141, 141, 141,1)",
+    })
+    level.fillBG.push({ //door bathroom //top border
+      x: 3800,
+      y: -1275,
+      width: 250,
+      height: 3,
+      color: "#000",
+    })
+    level.fillBG.push({ //door bathroom //right border
+      x: 4048,
+      y: -1275,
+      width: 3,
+      height: 425,
+      color: "#000",
+    })
+    level.fillBG.push({ //door bathroom //left border
+      x: 3800,
+      y: -1275,
+      width: 3,
+      height: 425,
+      color: "#000",
+    })
+    level.fillBG.push({ //poignée door bathroom
+      x: 3830,
+      y: -1050,
+      width: 35,
+      height: 10,
+      color: "#000",
+    })
+    level.fillBG.push({ //background bathroom
+      x: 4050,
+      y: -1425,
+      width: 1125,
+      height: 600,
+      // color:"#c1d7db"
+      color: "rgba(225, 242, 245,0.6)"
+    })
+    level.fillBG.push({ //window
+      x: 1736,
+      y: -1300,
+      width: 3,
+      height: 150,
+      color: "#444"
+    })
+    level.fillBG.push({ //window
+      x: 1650,
+      y: -1224,
+      width: 175,
+      height: 3,
+      color: "#444"
+    })
+    let color = Math.random().toString(16).substr(-6);
+    level.fillBG.push({ //écran 
+      x: 3375,
+      y: -625,
+      width: 375,
+      height: 175,
+      color: '#' + color
+    })
+    level.fill.push({ //hidden zone
+      x: 2800,
+      y: -400,
+      width: 275,
+      height: 175,
+      color: "rgba(64,64,64,0.96)"
+    })
+
+
+    function drawCarreaux(x, y, width, height) {
+      level.fillBG.push({ //carreaux
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        color: "rgba(166, 166, 166,0.8)"
+      })
+    }
+    for (let i = 0; i < 28; i++) {
+      drawCarreaux(4050 + i * 40, -1425, 1, 600);
+    }
+    for (let i = 0; i < 15; i++) {
+      drawCarreaux(4050, -1425 + i * 40, 1125, 2);
+    }
+
+    //chairs
+    const part1 = Matter.Bodies.rectangle(4525, -455, 25, 200, {
+      density: 0.0005,
+      isNotHoldable: true,
+    });
+    const part2 = Matter.Bodies.rectangle(4562, -435, 100, 25, {
+      density: 0.0005,
+      isNotHoldable: true,
+    });
+    const part3 = Matter.Bodies.rectangle(4600, -402, 25, 91.5, {
+      density: 0.0005,
+      isNotHoldable: true,
+    });
+    const part4 = Matter.Bodies.rectangle(5100, -455, 25, 200, {
+      density: 0.0005,
+      isNotHoldable: true,
+    });
+    const part5 = Matter.Bodies.rectangle(5063, -435, 100, 25, {
+      density: 0.0005,
+      isNotHoldable: true,
+    });
+    const part6 = Matter.Bodies.rectangle(5025, -402, 25, 91.5, {
+      density: 0.0005,
+      isNotHoldable: true,
+    });
+    chair = Body.create({
+      parts: [part1, part2, part3],
+    });
+    chair2 = Body.create({
+      parts: [part4, part5, part6],
+    });
+    World.add(engine.world, [chair]);
+    World.add(engine.world, [chair2]);
+    composite[composite.length] = chair;
+    composite[composite.length] = chair2;
+    body[body.length] = part1;
+    body[body.length] = part2;
+    body[body.length] = part3;
+    body[body.length] = part4;
+    body[body.length] = part5;
+    body[body.length] = part6;
+    setTimeout(function () {
+      chair.collisionFilter.category = cat.body;
+      chair.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+    }, 1000);
+    setTimeout(function () {
+      chair2.collisionFilter.category = cat.body;
+      chair2.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+    }, 1000);
+    var head = Matter.Bodies.rectangle(300, -400 - 60, 34, 40, {
+      isNotHoldable: true,
+    });
+    var chest = Matter.Bodies.rectangle(300, -400, 55, 80, {
+      isNotHoldable: true,
+    });
+    var rightUpperArm = Matter.Bodies.rectangle(300 + 39, -400 - 15, 20, 40, {
+      isNotHoldable: true,
+    });
+    var rightLowerArm = Matter.Bodies.rectangle(300 + 39, -400 + 25, 20, 60, {
+      isNotHoldable: true,
+    });
+    var leftUpperArm = Matter.Bodies.rectangle(300 - 39, -400 - 15, 20, 40, {
+      isNotHoldable: true,
+    });
+    var leftLowerArm = Matter.Bodies.rectangle(300 - 39, -400 + 25, 20, 60, {
+      isNotHoldable: true,
+    });
+    var leftUpperLeg = Matter.Bodies.rectangle(300 - 20, -400 + 57, 20, 40, {
+      isNotHoldable: true,
+    });
+    var leftLowerLeg = Matter.Bodies.rectangle(300 - 20, -400 + 97, 20, 60, {
+      isNotHoldable: true,
+    });
+    var rightUpperLeg = Matter.Bodies.rectangle(300 + 20, -400 + 57, 20, 40, {
+      isNotHoldable: true,
+    });
+    var rightLowerLeg = Matter.Bodies.rectangle(300 + 20, -400 + 97, 20, 60, {
+      isNotHoldable: true,
+    });
+
+    //man 
+    var person = Body.create({
+      parts: [chest, head, leftLowerArm, leftUpperArm,
+        rightLowerArm, rightUpperArm, leftLowerLeg,
+        rightLowerLeg, leftUpperLeg, rightUpperLeg
+      ],
+    });
+    World.add(engine.world, [person]);
+    composite[composite.length] = person
+    body[body.length] = chest
+    body[body.length] = head
+    body[body.length] = part3
+    body[body.length] = leftLowerLeg
+    body[body.length] = leftUpperLeg
+    body[body.length] = leftUpperArm
+    body[body.length] = leftLowerArm
+    body[body.length] = rightLowerLeg
+    body[body.length] = rightUpperLeg
+    body[body.length] = rightLowerArm
+    body[body.length] = rightUpperArm
+    setTimeout(function () {
+      person.collisionFilter.category = cat.body;
+      person.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+    }, 1000);
+
+    //rez de chaussée
+    spawn.mapRect(-200, 0, 5400, 100); //ground
+    spawn.mapRect(1150, -255, 4050, 355); //additionnal ground
+    spawn.mapRect(800, -255, 400, 90); //1st step
+    spawn.mapRect(650, -170, 550, 90); //2nd step
+    spawn.mapRect(500, -85, 700, 90); //3rd step
+    spawn.mapRect(1150, -850, 50, 175); //porte entrée
+    spawn.bodyRect(1162.5, -675, 25, 420) //porte entrée
+    spawn.mapRect(1150, -850, 1500, 50); //plafond 1
+    spawn.mapRect(3025, -850, 2175, 50); //plafond 2
+    spawn.mapRect(5150, -850, 50, 650); //mur cuisine
+    //lave-vaisselle
+    spawn.mapRect(4225, -400, 25, 150);
+    spawn.mapRect(4225, -400, 175, 25);
+    spawn.mapRect(4375, -400, 25, 150);
+    spawn.bodyRect(4350, -350, 20, 40);
+    spawn.bodyRect(4325, -325, 20, 20);
+    spawn.bodyRect(4325, -275, 20, 20);
+    //escalier
+    spawn.mapRect(3025, -850, 50, 225);
+    spawn.mapRect(2925, -775, 150, 150);
+    spawn.mapRect(2800, -700, 275, 75);
+    spawn.mapRect(2575, -400, 175, 175);
+    spawn.mapRect(2475, -325, 175, 100);
+    spawn.mapRect(2675, -475, 400, 100);
+    spawn.mapRect(2675, -475, 150, 250);
+    //cuisine
+    spawn.mapRect(4025, -850, 50, 175); //porte cuisine
+    spawn.mapRect(4025, -375, 50, 125); //porte cuisine
+    // blocs
+    spawn.bodyRect(4025, -425, 50, 50);
+    spawn.bodyRect(4025, -475, 50, 50);
+    spawn.bodyRect(4025, -525, 50, 50);
+    spawn.bodyRect(4025, -575, 50, 50);
+    spawn.bodyRect(4025, -625, 50, 50);
+    spawn.bodyRect(4025, -675, 50, 50);
+    //table + chaises
+    spawn.mapRect(4025, -850, 50, 175);
+    spawn.mapRect(4650, -375, 325, 25);
+    spawn.mapRect(4700, -350, 25, 100);
+    spawn.mapRect(4900, -350, 25, 100);
+    spawn.bodyRect(4875, -400, 75, 25);
+    spawn.bodyRect(4700, -400, 75, 25);
+
+    //murs télé
+    spawn.mapRect(3400, -400, 20, 150);
+    spawn.mapRect(3705, -400, 20, 150);
+    spawn.mapRect(3400, -400, 325, 20);
+    //socle écran
+    spawn.mapRect(3500, -415, 125, 17);
+    spawn.mapRect(3550, -450, 25, 50);
+    // ???
+    spawn.bodyRect(3075, -375, 125, 125);
+    spawn.bodyRect(3075, -400, 50, 25);
+    spawn.bodyRect(3725, -325, 100, 75);
+    spawn.bodyRect(3375, -275, 25, 25);
+    // premier étage
+    spawn.mapRect(1150, -1450, 4050, 50);
+    spawn.mapRect(5150, -1450, 50, 650);
+    spawn.mapRect(1150, -1450, 50, 300);
+    spawn.mapRect(1150, -900, 50, 100);
+    spawn.mapVertex(1066, -730, "-200 60  0 -60  100 -60  100 60")
+    //chambre
+    spawn.mapRect(2350, -1450, 50, 175); //porte chambre
+    //lit
+    spawn.mapRect(1475, -1025, 25, 225); //pied de lit 1
+    spawn.mapRect(1850, -925, 25, 125); //pied de lit 2
+    spawn.mapRect(1475, -925, 400, 50); //sommier
+    spawn.bodyRect(1500, -950, 375, 25); //matelat 
+    spawn.bodyRect(1500, -1000, 75, 50); //oreiller
+    //table
+    spawn.bodyRect(1950, -1000, 30, 150); //pied table
+    spawn.bodyRect(2250, -1000, 30, 150); //pied table
+    spawn.bodyRect(1920, -1025, 390, 25); //table 
+    //salle de bain
+    spawn.mapRect(4025, -1450, 50, 175); //porte salle de bain
+    map[map.length] = Bodies.polygon(5050, -925, 0, 35.4);
+    spawn.mapRect(5015, -960, 125, 40);
+    spawn.mapRect(5050, -925, 90, 35.4);
+    spawn.mapVertex(5086.5, -875, "100 60  -30 60   20 0 100 0")
+    spawn.mapRect(5125, -1070, 15, 120)
+    spawn.bodyRect(5016, -965, 108, 15)
+    //baignoire
+    spawn.mapVertex(4316, -965, "30 100  0 100   -80 -50  30 -50") //bord 1
+    spawn.mapVertex(4675, -961.5, "30 100  0 100   0 -50  80 -50") //bord 2
+    spawn.mapVertex(4400, -860, "0 -20  -20 20   20 20  0 -20") //pied 1
+    spawn.mapVertex(4600, -860, "0 -20  -20 20   20 20  0 -20") //pied 2
+    spawn.mapRect(4325, -900, 350, 25); //fond baignoire
+    spawn.mapRect(4300, -1175, 25, 175);
+    spawn.mapRect(4300, -1175, 125, 25);
+    spawn.mapRect(4400, -1175, 25, 50); //pied pommeau de douche
+    spawn.mapVertex(4412.5, -1105, "-20 -20  -30 40   30 40  20 -20") //pommeau de douche
+
+    //grenier
+    spawn.mapRect(1150, -1475, 50, 50);
+    spawn.mapRect(1150, -1800, 50, 175);
+    spawn.mapRect(5150, -1800, 50, 400); //murs
+    spawn.mapVertex(1300, -1900, "-150 200  -200 200   50 0 100 0");
+    spawn.mapVertex(1800, -2300, "-150 200  -200 200   175 -100 225 -100");
+    spawn.mapRect(1390, -2180, 250, 30); //lucarne
+    spawn.mapVertex(5050, -1900, "150 200  200 200   -50 0 -100 0");
+    spawn.mapVertex(4550, -2300, "150 200  200 200   -175 -100 -225 -100");
+    spawn.mapRect(4710, -2175, 250, 25); //lucarne 2
+    spawn.mapRect(5150, -1450, 200, 50);
+    //obstacles
+    spawn.mapRect(3775, -1800, 99, 50);
+    spawn.mapRect(2425, -2150, 50, 425);
+    spawn.mapRect(2150, -1775, 325, 50);
+    spawn.mapRect(3825, -2150, 50, 750);
+    spawn.mapRect(3826, -2150, 149, 50);
+    spawn.mapRect(4125, -2150, 149, 50);
+    spawn.mapRect(4225, -2150, 50, 450);
+    spawn.mapRect(4225, -1750, 250, 50);
+    level.chain(2495, -2130, 0, true, 10);
+
+    spawn.bodyRect(2350, -1850, 75, 75);
+    spawn.bodyRect(4275, -1900, 75, 100);
+    spawn.bodyRect(4825, -1650, 325, 200);
+    spawn.bodyRect(5025, -1725, 25, 25);
+    spawn.bodyRect(4900, -1700, 200, 75);
+    spawn.mapVertex(2950, -2096, "-75 -50  75 -50  75 0  0 100  -75 0")
+
+    /*cheminée + roof*/
+    spawn.mapRect(1963, -2450, 2425, 35);
+    spawn.mapRect(2925, -2900, 125, 480);
+    spawn.mapRect(2900, -2900, 175, 75);
+    spawn.mapRect(2900, -2975, 25, 100);
+    spawn.mapRect(3050, -2975, 25, 100);
+    spawn.mapRect(2875, -3000, 225, 25);
+    // lampadaire + jump 
+    spawn.mapRect(1000, -1450, 200, 25);
+    spawn.mapRect(500, -1150, 275, 25);
+    spawn.mapRect(750, -1150, 25, 75);
+    spawn.mapRect(500, -1150, 25, 75);
+    spawn.mapRect(450, -1075, 125, 50);
+    spawn.mapRect(700, -1075, 125, 50);
+    spawn.mapRect(2985, -4600, 0.1, 1700)
+
+    //bodyRects ~= debris
+    spawn.bodyRect(1740, -475, 80, 220)
+    spawn.bodyRect(1840, -290, 38, 23)
+    spawn.bodyRect(1200 + 1475 * Math.random(), -350, 15 + 110 * Math.random(), 15 + 110 * Math.random());
+    spawn.bodyRect(1200 + 1475 * Math.random(), -350, 15 + 110 * Math.random(), 15 + 110 * Math.random());
+    spawn.bodyRect(3070 + 600 * Math.random(), -1100, 20 + 50 * Math.random(), 150 + 100 * Math.random())
+    spawn.bodyRect(3050 + 1000 * Math.random(), -920, 30 + 100 * Math.random(), 15 + 65 * Math.random());
+    spawn.bodyRect(1600 + 250 * Math.random(), -1540, 80, 220) //boss room
+    spawn.debris(3070, -900, 1000, 3); //16 debris per level
+    spawn.debris(1200, -350, 1475, 4); //16 debris per level
+    spawn.debris(1250, -1550, 3565, 9); //16 debris per level
+
+
+    // Mobs
+    spawn.mobBloc(3013, -315, 87.68, "rgba(0,0,0,0");
+    spawn.randomSmallMob(1385, -600, 1);
+    spawn.randomSmallMob(5000, -680, 1);
+    spawn.randomSmallMob(4750, -925, 1);
+    spawn.randomSmallMob(2300, -1830, 1);
+    spawn.randomMob(3170, -720, 0.8);
+    spawn.randomMob(3700, -975, 0.8);
+    spawn.randomMob(2625, -1150, 0.7);
+    spawn.randomMob(4175, -750, 0.7);
+    spawn.randomMob(2100, -370, 0.7);
+    spawn.randomMob(2000, -1230, 0.7);
+    spawn.randomMob(4175, -1075, 0.6);
+    spawn.randomMob(3965, -1650, 0.6)
+    spawn.randomMob(4650, -1750, 0.6);
+    spawn.randomMob(830, -1170, 0.5);
+    spawn.randomBoss(3730, -1100, 0.5);
+    spawn.randomMob(2650, -2250, 0.3);
+    spawn.randomMob(1615, -2270, 0.3);
+    spawn.randomMob(1380, -1280, 0.25);
+    spawn.randomMob(2280, -650, 0.2);
+    spawn.randomBoss(2450, -2650, 0.2);
+    spawn.randomMob(3800, -580, 0.2);
+    spawn.randomMob(4630, -425, 0.1);
+    spawn.randomBoss(630, -1300, -0.1);
+    spawn.randomBoss(3450, -2880, -0.2)
+
+    if (game.difficulty > 3) {
+      if (Math.random() < 0.16) {
+        spawn.tetherBoss(3380, -1775)
+        cons[cons.length] = Constraint.create({
+          pointA: {
+            x: 3775,
+            y: -1775
+          },
+          bodyB: mob[mob.length - 1],
+          stiffness: 0.00018 + 0.000007 * level.levelsCleared
+        });
+        if (game.difficulty > 4) spawn.nodeBoss(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
+
+      } else {
+        spawn.randomLevelBoss(3100, -1850, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "snakeBoss", "laserBoss"]);
+      }
+    }
+  },
   //******************************************************************************************************************
   //******************************************************************************************************************
   //******************************************************************************************************************
@@ -3748,6 +3831,11 @@ const level = {
     if (level.levelsCleared > level.levels.length * 1.5) level.difficultyIncrease(game.difficultyMode)
     if (level.levelsCleared > level.levels.length * 2) level.difficultyIncrease(game.difficultyMode)
     if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
+    //reset lost mod display
+    for (let i = 0; i < mod.mods.length; i++) {
+      if (mod.mods[i].isLost) mod.mods[i].isLost = false;
+    }
+    game.updateModHUD();
     game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
   },
   playerExitCheck() {
@@ -4356,7 +4444,7 @@ const level = {
         }
       },
       level(isFill) {
-        if (mech.isBodiesAsleep) {
+        if (!mech.isBodiesAsleep) {
           const growSpeed = 1
           if (isFill) {
             if (this.height < this.maxHeight) {
@@ -4381,7 +4469,8 @@ const level = {
     }
     for (let i = 0; i < len; i++) {
       body[body.length] = Bodies.polygon(x + gap * unit.x * i, y + gap * unit.y * i, 12, radius, {
-        inertia: Infinity
+        inertia: Infinity,
+        isNotHoldable: true
       });
     }
     for (let i = 1; i < len; i++) { //attach blocks to each other

@@ -132,8 +132,12 @@ const powerUps = {
           mech.addHealth(heal);
         }
       }
+    },
+    spawn() { //used to spawn a heal with a specific size / heal amount, not normally used
+
     }
   },
+
   ammo: {
     name: "ammo",
     color: "#467",
@@ -534,10 +538,9 @@ const powerUps = {
       powerUps.spawnRandomPowerUp(x, y);
     }
   },
-  directSpawn(x, y, target, moving = true, mode = null) {
+  directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
     let index = powerUp.length;
     target = powerUps[target];
-    size = target.size();
     powerUp[index] = Matter.Bodies.polygon(x, y, 0, size, {
       density: 0.001,
       frictionAir: 0.03,
@@ -564,12 +567,12 @@ const powerUps = {
     }
     World.add(engine.world, powerUp[index]); //add to world
   },
-  spawn(x, y, target, moving = true, mode = null) {
+  spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
     if (
       !(mod.isSuperDeterminism && (target === 'gun' || target === 'field' || target === 'reroll')) &&
       !(mod.isEnergyNoAmmo && target === 'ammo')
     ) {
-      powerUps.directSpawn(x, y, target, moving, mode)
+      powerUps.directSpawn(x, y, target, moving, mode, size)
       if (mod.isBayesian && Math.random() < 0.17) powerUps.directSpawn(x, y, target, moving, mode)
     }
   },

@@ -1,11 +1,19 @@
 
-mod: recursion - gives missiles a 30% chance to spawn a larger missile when they explode
-mod: electric reactive armor - immune to harm from explosions while energy is full (was 80%)
+mod: electric reactive armor - reduce harm from explosions by 6% for every 10 energy
+mod: waste heat recovery - laser damage grows to 400%, but you start to eject your health as a heal power up
 
-mod: ammonium nitrate - explosions are 60% bigger, but they do 300% more damage to you
-mod: trinitrotoluene - explosions are 50% smaller and do 71% more damage
+new community level by Francois:  house
 
 ************** TODO - n-gon **************
+
+a bot that eats up health and ammo, but poops a reroll after picking up 2 power ups
+  it passes through walls
+  moves slower then the player so you can get to it before the bot if you hurry
+  4 rerolls can convert to a bot,  also 1 rerolls can convert to 5% damage
+    the mods that do those effects could be required before you see this bot
+  disable crystalized armor?
+
+laser-bot orbits player
 
 mod: radiation effects can spread to nearby mobs
 

@@ -487,7 +487,7 @@ const mech = {
     }
     return dmg
   },
-  damage(dmg) {
+  damage(dmg, isShowRed = true) {
     mech.lastHarmCycle = mech.cycle
     if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
       const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40)
@@ -552,8 +552,10 @@ const mech = {
         }
       }
       mech.displayHealth();
-      document.getElementById("dmg").style.transition = "opacity 0s";
-      document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
+      if (isShowRed) {
+        document.getElementById("dmg").style.transition = "opacity 0s";
+        document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
+      }
     }
 
     if (dmg > 0.06 / mech.holdingMassScale) mech.drop(); //drop block if holding
@@ -577,11 +579,11 @@ const mech = {
       mech.defaultFPSCycle = mech.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
       if (mod.isHarmFreeze) { //freeze all mobs
         for (let i = 0, len = mob.length; i < len; i++) {
-          mobs.statusSlow(mob[i], 360)
+          mobs.statusSlow(mob[i], 300)
         }
       }
     } else {
-      if (dmg > 0.05) { // freeze game for high damage hits
+      if (dmg > 0.05 && isShowRed) { // freeze game for high damage hits
         game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
         game.fpsInterval = 1000 / game.fpsCap;
       } else {

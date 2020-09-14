@@ -297,6 +297,13 @@ const mobs = {
       //     this.locatePlayer();
       //   }
       // },
+      alwaysSeePlayer() {
+        if (!mech.isStealth) {
+          this.seePlayer.recall = true;
+          this.seePlayer.position.x = player.position.x;
+          this.seePlayer.position.y = player.position.y;
+        }
+      },
       seePlayerCheck() {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
@@ -1051,7 +1058,7 @@ const mobs = {
           } else if (Math.random() < 0.3 && !mod.isSuperDeterminism) {
             type = "reroll"
           }
-          for (let i = 0, len = Math.ceil(2.8 * Math.random()); i < len; i++) {
+          for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
             powerUps.spawn(this.position.x, this.position.y, type);
           }
         }

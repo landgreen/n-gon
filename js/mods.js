@@ -350,7 +350,7 @@ const mod = {
         },
         {
             name: "zoospore vector",
-            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>11%</strong> chance",
+            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>9%</strong> chance",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -358,7 +358,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.sporesOnDeath += 0.11;
+                mod.sporesOnDeath += 0.09;
                 for (let i = 0; i < 10; i++) {
                     b.spore(mech.pos)
                 }
@@ -433,18 +433,35 @@ const mod = {
         },
         {
             name: "electric reactive armor",
-            description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is <strong>full</strong>",
+            // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
+            description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>6%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
                 return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob
             },
-            requires: "an explosive gun",
+            requires: "an explosive damage source",
             effect: () => {
                 mod.isImmuneExplosion = true;
             },
             remove() {
                 mod.isImmuneExplosion = false;
+            }
+        },
+        {
+            name: "scrap bots",
+            description: "<strong>11%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
+            maxCount: 6,
+            count: 0,
+            allowed() {
+                return mod.totalBots() > 0
+            },
+            requires: "a bot",
+            effect() {
+                mod.isBotSpawner += 0.11;
+            },
+            remove() {
+                mod.isBotSpawner = 0;
             }
         },
         {
@@ -621,22 +638,6 @@ const mod = {
             }
         },
         {
-            name: "scrap bots",
-            description: "<strong>11%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
-            maxCount: 6,
-            count: 0,
-            allowed() {
-                return mod.totalBots() > 0
-            },
-            requires: "a bot",
-            effect() {
-                mod.isBotSpawner += 0.11;
-            },
-            remove() {
-                mod.isBotSpawner = 0;
-            }
-        },
-        {
             name: "perimeter defense",
             description: "reduce <strong class='color-harm'>harm</strong> by <strong>4%</strong><br>for each of your permanent <strong>bots</strong>",
             maxCount: 1,
@@ -796,7 +797,7 @@ const mod = {
         },
         {
             name: "liquid cooling",
-            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>6</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>5</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -878,6 +879,7 @@ const mod = {
                 document.getElementById("health-bg").style.display = "none"
                 document.getElementById("dmg").style.backgroundColor = "#0cf";
                 mod.isEnergyHealth = true;
+                mech.displayHealth();
             },
             remove() {
                 mod.isEnergyHealth = false;
@@ -885,6 +887,8 @@ const mod = {
                 document.getElementById("health-bg").style.display = "inline"
                 document.getElementById("dmg").style.backgroundColor = "#f67";
                 mech.health = Math.min(mech.maxHealth, mech.energy);
+                mech.displayHealth();
+
             }
         },
         {
@@ -1061,7 +1065,7 @@ const mod = {
         },
         {
             name: "bubble fusion",
-            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-3</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1394,8 +1398,9 @@ const mod = {
                 for (let i = 0; i < 2 * mod.mods[choose].count; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
-                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
                 mod.mods[choose].count = 0;
+                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
+                mod.mods[choose].isLost = true
                 game.updateModHUD();
             },
             remove() {}
@@ -2018,7 +2023,7 @@ const mod = {
         },
         {
             name: "harvester",
-            description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>bigger</strong>, <strong>faster</strong>, and infinitely <strong>durable</strong>",
+            description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>larger</strong>, <strong>faster</strong>, and infinitely <strong>durable</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2196,6 +2201,22 @@ const mod = {
                 mod.laserReflections = 2;
                 mod.laserDamage = 0.12;
                 mod.laserFieldDrain = 0.0016;
+            }
+        },
+        {
+            name: "waste heat recovery",
+            description: "<strong>laser</strong> <strong class='color-d'>damage</strong> grows by <strong>400%</strong> as you fire<br>but you periodically <strong>eject</strong> your <strong class='color-h'>health</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("laser")
+            },
+            requires: "laser",
+            effect() {
+                mod.isLaserHealth = true;
+            },
+            remove() {
+                mod.isLaserHealth = false
             }
         },
         {
@@ -2738,5 +2759,6 @@ const mod = {
     isEnergyNoAmmo: null,
     isFreezeHarmImmune: null,
     isSmallExplosion: null,
-    isExplosionHarm: null
+    isExplosionHarm: null,
+    isLaserHealth: null
 }

@@ -245,7 +245,7 @@ const spawn = {
       powerUps.spawnBossPowerUp(me.position.x, me.position.y)
       powerUps.spawn(me.position.x, me.position.y, "heal");
       powerUps.spawn(me.position.x, me.position.y, "ammo");
-    } else {
+    } else if (!mech.isStealth) {
       me.foundPlayer();
     }
 
@@ -1916,10 +1916,7 @@ const spawn = {
     me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
     me.do = function () {
       // this.seePlayer.yes = false;
-      this.seePlayer.recall = true;
-      this.seePlayer.position.x = player.position.x;
-      this.seePlayer.position.y = player.position.y;
-
+      this.alwaysSeePlayer()
       this.attraction();
       this.timeLimit();
     };
@@ -2123,6 +2120,32 @@ const spawn = {
     mob[mob.length - 1] = mob[mob.length - 1 - nodes];
     mob[mob.length - 1 - nodes] = me;
     me.do = function () {
+      this.checkStatus();
+    };
+  },
+  //fan made mobs  *****************************************************************************************
+  //*******************************************************************************************************
+  mobBloc(x, y, radius, color) {
+    mobs.spawn(x, y, 4, radius, color);
+    let me = mob[mob.length - 1];
+    me.stroke = "transparent";
+    me.startingPosition = {
+      x: x,
+      y: y
+    }
+    Matter.Body.setDensity(me, 0.002);
+    me.leaveBody = false;
+    me.isStatic = true;
+    me.showHealthBar = false;
+    me.collisionFilter.category = cat.map;
+    me.collisionFilter.mask = cat.powerUp | cat.map | cat.player | cat.bullet | cat.body
+    me.rotateVelocity = 0
+    me.do = function () {
+      Matter.Body.setVelocity(this, {
+        x: 0,
+        y: 0
+      });
+      Matter.Body.setPosition(this, this.startingPosition);
       this.checkStatus();
     };
   },

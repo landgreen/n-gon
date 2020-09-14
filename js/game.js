@@ -311,7 +311,10 @@ const game = {
   updateModHUD() {
     let text = ""
     for (let i = 0, len = mod.mods.length; i < len; i++) { //add mods
-      if (mod.mods[i].count > 0) {
+      if (mod.mods[i].isLost) {
+        if (text) text += "<br>" //add a new line, but not on the first line
+        text += `<span style="text-decoration: line-through;">${mod.mods[i].name}</span>`
+      } else if (mod.mods[i].count > 0) {
         if (text) text += "<br>" //add a new line, but not on the first line
         text += mod.mods[i].name
         if (mod.mods[i].nameInfo) {
@@ -709,6 +712,7 @@ const game = {
       if (game.isCommunityMaps) {
         level.levels.push("stronghold");
         level.levels.push("basement");
+        level.levels.push("house");
         // level.levels.push("newLevel");
       }
       level.levels = shuffle(level.levels); //shuffles order of maps

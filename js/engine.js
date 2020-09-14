@@ -154,10 +154,11 @@ function collisionChecks(event) {
                 if (mod.mods[i].count > 0) have.push(i)
               }
               const choose = have[Math.floor(Math.random() * have.length)]
-              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 300) //message about what mod was lost
+              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 600) //message about what mod was lost
               for (let i = 0; i < mod.mods[choose].count; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
               mod.mods[choose].count = 0;
               mod.mods[choose].remove(); // remove a random mod form the list of mods you have
+              mod.mods[choose].isLost = true;
               game.updateModHUD();
               mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected mod
             }
@@ -203,7 +204,7 @@ function collisionChecks(event) {
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
             if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
-            mob[k].foundPlayer();
+            if (!mech.isStealth) mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
             game.drawList.push({ //add dmg to draw queue
@@ -224,7 +225,7 @@ function collisionChecks(event) {
               mob[k].damage(dmg, true);
               const stunTime = dmg / Math.sqrt(obj.mass)
               if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
-              if (mob[k].distanceToPlayer2() < 1000000) mob[k].foundPlayer();
+              if (mob[k].distanceToPlayer2() < 1000000 && !mech.isStealth) mob[k].foundPlayer();
               game.drawList.push({
                 x: pairs[i].activeContacts[0].vertex.x,
                 y: pairs[i].activeContacts[0].vertex.y,

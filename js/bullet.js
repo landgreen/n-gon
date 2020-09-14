@@ -195,14 +195,23 @@ const b = {
     dist = Vector.magnitude(sub);
 
     if (dist < radius) {
-      if (!(mod.isImmuneExplosion && mech.energy > 0.97)) {
-        if (mod.isExplosionHarm) {
-          mech.damage(radius * 0.0004); //300% more player damage from explosions
-        } else {
-          mech.damage(radius * 0.0001); //normal player damage from explosions
-        }
-        mech.drop();
+
+      if (mod.isImmuneExplosion) {
+        const mitigate = Math.min(1, Math.max(1 - mech.energy * 0.6, 0))
+        mech.damage(mitigate * radius * (mod.isExplosionHarm) ? 0.0004 : 0.0001);
+      } else {
+        mech.damage(radius * (mod.isExplosionHarm) ? 0.0004 : 0.0001);
       }
+
+
+      // if (!(mod.isImmuneExplosion && mech.energy > 0.97)) {
+      //   if (mod.isExplosionHarm) {
+      //     mech.damage(radius * 0.0004); //300% more player damage from explosions
+      //   } else {
+      //     mech.damage(radius * 0.0001); //normal player damage from explosions
+      //   }
+      //   mech.drop();
+      // }
       knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.015);
       player.force.x += knock.x;
       player.force.y += knock.y;
@@ -1779,7 +1788,7 @@ const b = {
                   }
                   if (!immune) {
                     this.immuneList.push(who.id)
-                    who.foundPlayer();
+                    if (!mech.isStealth) who.foundPlayer();
                     if (mod.isFastDot) {
                       mobs.statusDoT(who, 3.9, 30)
                     } else {
@@ -1795,7 +1804,7 @@ const b = {
                   }
                 } else {
                   this.endCycle = 0;
-                  who.foundPlayer();
+                  if (!mech.isStealth) who.foundPlayer();
                   if (mod.isFastDot) {
                     mobs.statusDoT(who, 3.78, 30)
                   } else {
@@ -1894,7 +1903,7 @@ const b = {
                   for (let i = 0; i < q.length; i++) {
                     let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.66) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                     q[i].damage(dmg);
-                    q[i].foundPlayer();
+                    if (!mech.isStealth) q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue
                       x: this.position.x,
                       y: this.position.y,
@@ -1927,7 +1936,7 @@ const b = {
                         Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
                         let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.66) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                         q[i].damage(dmg);
-                        q[i].foundPlayer();
+                        if (!mech.isStealth) q[i].foundPlayer();
                         game.drawList.push({ //add dmg to draw queue
                           x: this.position.x,
                           y: this.position.y,
@@ -2961,9 +2970,35 @@ const b = {
       ammo: 0,
       ammoPack: Infinity,
       have: false,
+      nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
+      holdDamage: 1,
+      holdCount: 0,
       fire() {
+        if (mod.isLaserHealth) {
+          if (this.nextFireCycle === mech.cycle) { //ramp up damage
+            this.holdDamage += 0.01
+            if (this.holdDamage > 4) this.holdDamage = 4
+            this.holdCount += this.holdDamage
+            if (this.holdCount > 180) {
+              this.holdCount = 0;
+              const size = 15
+              const dmg = (mod.largerHeals * (size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2) / mech.harmReduction() * game.healScale
+              if (mech.health < 0.15) {
+                mech.fireCDcycle = mech.cycle + 120; // fire cool down if about to die
+              } else {
+                powerUps.spawn(mech.pos.x, mech.pos.y, "heal", true, false, size);
+                mech.damage(dmg, false)
+              }
+            }
+          } else {
+            this.holdDamage = 1
+            this.holdCount = 0;
+          }
+          this.nextFireCycle = mech.cycle + 1
+        }
+
         const reflectivity = 1 - 1 / (mod.laserReflections * 1.5)
-        let damage = b.dmgScale * mod.laserDamage
+        let damage = b.dmgScale * mod.laserDamage * this.holdDamage
         if (mech.energy < mod.laserFieldDrain) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
@@ -3097,7 +3132,7 @@ const b = {
 
           ctx.fillStyle = color;
           ctx.strokeStyle = color;
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 2 * this.holdDamage;
           ctx.lineDashOffset = 300 * Math.random()
           ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
           for (let i = 1, len = path.length; i < len; ++i) {
@@ -3184,8 +3219,8 @@ const b = {
         };
         if (mod.isPulseAim) { //find mobs in line of sight
           let dist = 2200
-          energy = 0.23 * Math.min(mech.energy, 1.75)
-          explosionRange = 1300 * energy
+          energy = 0.23 * Math.min(mech.energy, 1.5)
+          explosionRange = 1400 * energy
           for (let i = 0, len = mob.length; i < len; i++) {
             const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
             if (explosionRange < newDist &&
@@ -3215,9 +3250,9 @@ const b = {
           if (best.who) b.explosion(path[1], explosionRange, true)
           mech.fireCDcycle = mech.cycle + Math.floor(25 * b.fireCD); // cool down
         } else {
-          energy = 0.3 * Math.min(mech.energy, 1.75)
+          energy = 0.27 * Math.min(mech.energy, 1.5)
           mech.energy -= energy * mod.isLaserDiode
-          explosionRange = 1200 * energy
+          explosionRange = 1300 * energy
           if (best.who) b.explosion(path[1], explosionRange, true)
           mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
         }
