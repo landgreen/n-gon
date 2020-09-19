@@ -464,6 +464,11 @@ em {
   letter-spacing: 1px;
 }
 
+.color-cloaked {
+  opacity: 0.25;
+  letter-spacing: 1px;
+}
+
 .color-harm {
   /* color:  */
   /* text-shadow: #FC0 1px 0 10px; */

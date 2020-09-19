@@ -245,7 +245,7 @@ const spawn = {
       powerUps.spawnBossPowerUp(me.position.x, me.position.y)
       powerUps.spawn(me.position.x, me.position.y, "heal");
       powerUps.spawn(me.position.x, me.position.y, "ammo");
-    } else if (!mech.isStealth) {
+    } else if (!mech.isCloak) {
       me.foundPlayer();
     }
 
@@ -578,7 +578,7 @@ const spawn = {
 
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-          mech.energy -= 0.004
+          if (mech.energy > 0) mech.energy -= 0.004
           if (mech.energy < 0.1) {
             mech.damage(0.00015 * game.dmgScale);
           }
@@ -677,7 +677,7 @@ const spawn = {
         ctx.fill();
         //when player is inside event horizon
         if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-          mech.energy -= 0.006
+          if (mech.energy > 0) mech.energy -= 0.006
           if (mech.energy < 0.1) {
             mech.damage(0.0002 * game.dmgScale);
           }
@@ -727,6 +727,7 @@ const spawn = {
       damping: springDampening
     });
     cons[len].length = 100 + 1.5 * radius;
+
     me.cons = cons[len];
 
     me.springTarget2 = {
@@ -780,7 +781,7 @@ const spawn = {
         stiffness: attachmentStiffness,
         damping: 0.01
       });
-      // console.log(consBB[consBB.length - 1])
+      World.add(engine.world, consBB[consBB.length - 1]);
     }
   },
   timeSkipBoss(x, y, radius = 55) {
@@ -1061,7 +1062,7 @@ const spawn = {
         };
         vertexCollision(this.position, look, map);
         vertexCollision(this.position, look, body);
-        if (!mech.isStealth) vertexCollision(this.position, look, [player]);
+        if (!mech.isCloak) vertexCollision(this.position, look, [player]);
         // hitting player
         if (best.who === player) {
           if (mech.immuneCycle < mech.cycle) {
@@ -1217,7 +1218,7 @@ const spawn = {
       // vertexCollision(where, look, mob);
       vertexCollision(where, look, map);
       vertexCollision(where, look, body);
-      if (!mech.isStealth) vertexCollision(where, look, [player]);
+      if (!mech.isCloak) vertexCollision(where, look, [player]);
       if (best.who && best.who === player && mech.immuneCycle < mech.cycle) {
         mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
         const dmg = 0.14 * game.dmgScale;
@@ -1336,7 +1337,7 @@ const spawn = {
           this.distanceToPlayer2() < this.seeAtDistance2 &&
           Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
           Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-          !mech.isStealth
+          !mech.isCloak
         ) {
           this.foundPlayer();
           if (this.cd === Infinity) this.cd = game.cycle + this.delay * 0.7;
@@ -1447,7 +1448,7 @@ const spawn = {
         if (this.alpha > 0) this.alpha -= 0.03;
       }
       if (this.alpha > 0) {
-        if (this.alpha > 0.9) {
+        if (this.alpha > 0.9 && this.seePlayer.recall) {
           this.healthBar();
           if (!this.canTouchPlayer) {
             this.canTouchPlayer = true;
@@ -2008,16 +2009,19 @@ const spawn = {
       bodyB: mob[mob.length - 1 - nodes],
       stiffness: 0.05
     });
+    World.add(engine.world, consBB[consBB.length - 1]);
     consBB[consBB.length] = Constraint.create({
       bodyA: mob[mob.length - nodes + 1],
       bodyB: mob[mob.length - 1 - nodes],
       stiffness: 0.05
     });
+    World.add(engine.world, consBB[consBB.length - 1]);
     consBB[consBB.length] = Constraint.create({
       bodyA: mob[mob.length - nodes + 2],
       bodyB: mob[mob.length - 1 - nodes],
       stiffness: 0.05
     });
+    World.add(engine.world, consBB[consBB.length - 1]);
 
   },
   tetherBoss(x, y, radius = 90) {
@@ -2057,6 +2061,8 @@ const spawn = {
         stiffness: 0.4,
         damping: 0.1
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
+
       me.onDamage = function () {
         //make sure the mob that owns the shield can tell when damage is done
         this.alertNearByMobs();
@@ -2101,6 +2107,7 @@ const spawn = {
         stiffness: stiffness,
         damping: 0.1
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
     }
     me.onDamage = function () {
       this.alertNearByMobs(); //makes sure the mob that owns the shield can tell when damage is done
@@ -2220,6 +2227,7 @@ const spawn = {
           bodyB: mob[mob.length - j],
           stiffness: stiffness
         });
+        World.add(engine.world, consBB[consBB.length - 1]);
       }
     }
   },
@@ -2231,6 +2239,7 @@ const spawn = {
         bodyB: mob[mob.length - i - 2],
         stiffness: stiffness
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
     }
     if (nodes > 2) {
       for (let i = 0; i < nodes - 2; ++i) {
@@ -2239,6 +2248,7 @@ const spawn = {
           bodyB: mob[mob.length - i - 3],
           stiffness: stiffness
         });
+        World.add(engine.world, consBB[consBB.length - 1]);
       }
     }
     //optional connect the tail to head
@@ -2248,16 +2258,19 @@ const spawn = {
         bodyB: mob[mob.length - nodes],
         stiffness: stiffness
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
       consBB[consBB.length] = Constraint.create({
         bodyA: mob[mob.length - 2],
         bodyB: mob[mob.length - nodes],
         stiffness: stiffness
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
       consBB[consBB.length] = Constraint.create({
         bodyA: mob[mob.length - 1],
         bodyB: mob[mob.length - nodes + 1],
         stiffness: stiffness
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
     }
   },
   constraintPB(x, y, bodyIndex, stiffness) {
@@ -2269,6 +2282,7 @@ const spawn = {
       bodyB: body[bodyIndex],
       stiffness: stiffness
     });
+    World.add(engine.world, cons[cons.length - 1]);
   },
   constraintBB(bodyIndexA, bodyIndexB, stiffness) {
     consBB[consBB.length] = Constraint.create({
@@ -2276,6 +2290,7 @@ const spawn = {
       bodyB: body[bodyIndexB],
       stiffness: stiffness
     });
+    World.add(engine.world, consBB[consBB.length - 1]);
   },
   // body and map spawns ******************************************************************************
   //**********************************************************************************************

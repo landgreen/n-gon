@@ -14,10 +14,10 @@ const level = {
       // game.enableConstructMode() //used to build maps in testing mode
       // game.zoomScale = 1000;
       // game.setZoom();
-      // mech.isStealth = true;
-      // mech.setField("pilot wave")
-      // b.giveGuns("ice IX")
-      // mod.giveMod("quantum immortality");
+      // mech.isCloak = true;
+      // mech.setField("metamaterial cloaking")
+      // b.giveGuns("laser")
+      // mod.giveMod("phase decoherence");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation
@@ -53,13 +53,14 @@ const level = {
     game.draw.setPaths();
     b.respawnBots();
     if (mod.isArmorFromPowerUps) {
-      mech.maxHealth += 0.05 * powerUps.totalPowerUps
+      mod.armorFromPowerUps += 0.05 * powerUps.totalPowerUps
+      mech.setMaxHealth();
       if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
     }
     if (mod.isHealLowHealth) {
       const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
       for (let i = 0; i < len; i++) {
-        powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
+        powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
       }
     }
     if (mod.isGunCycle) {
@@ -142,7 +143,7 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    // spawn.starter(1600, -500, 60)
+    spawn.starter(1600, -500, 60)
     // spawn.powerUpBoss(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
@@ -221,8 +222,8 @@ const level = {
       y: -600
     }, -2 * Math.PI / 3) //up left
 
-    const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)") //laser
-    const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
+    const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)", true) //laser
+    const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)", true) //laser
     const button = level.button(2100, -2600)
 
 
@@ -1484,6 +1485,8 @@ const level = {
           bodyB: mob[mob.length - 1],
           stiffness: 0.00007
         });
+        World.add(engine.world, cons[cons.length - 1]);
+
         if (game.difficulty > 4) spawn.nodeBoss(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
       } else if (Math.random() < 0.15) {
         spawn.randomLevelBoss(4250, -250);
@@ -1699,6 +1702,37 @@ const level = {
       height: 275,
       color: "#cff"
     });
+    level.fillBG.push({
+      x: -3375,
+      y: -2875,
+      width: 25,
+      height: 725,
+      color: "#d0d0d2"
+    });
+    level.fillBG.push({
+      x: -2975,
+      y: -2750,
+      width: 25,
+      height: 600,
+      color: "#d0d0d2"
+    });
+    level.fillBG.push({
+      x: -2475,
+      y: -2450,
+      width: 25,
+      height: 750,
+      color: "#d0d0d2"
+    });
+
+    //3 platforms that lead to exit
+    spawn.mapRect(-3440, -2875, 155, 25);
+    spawn.mapRect(-3025, -2775, 125, 25);
+    spawn.mapRect(-2525, -2475, 125, 25);
+    spawn.bodyRect(-2600, -2500, 225, 20, 0.7);
+    spawn.bodyRect(-3350, -2900, 25, 25, 0.5);
+    spawn.bodyRect(-3400, -2950, 50, 75, 0.5);
+
+
     //foreground
     level.fill.push({
       x: -1650,
@@ -1709,11 +1743,12 @@ const level = {
     });
     level.fill.push({
       x: -2600,
-      y: -2400,
+      y: -1675,
       width: 450,
-      height: 1800,
+      height: 1125,
       color: "rgba(0,0,0,0.12)"
     });
+
     level.fill.push({
       x: -3425,
       y: -2150,
@@ -1781,7 +1816,7 @@ const level = {
     spawn.mapRect(-3450, -1325, 550, 50);
     spawn.mapRect(-3425, -2200, 525, 50);
     spawn.mapRect(-2600, -1700, 450, 50);
-    spawn.mapRect(-2600, -2450, 450, 50);
+    // spawn.mapRect(-2600, -2450, 450, 50);
     spawn.bodyRect(-2275, -2700, 50, 60);
     spawn.bodyRect(-2600, -1925, 250, 225);
     spawn.bodyRect(-3415, -1425, 100, 100);
@@ -1798,6 +1833,7 @@ const level = {
     spawn.bodyRect(-2970, -2250, 50, 50);
     spawn.bodyRect(-3080, -2250, 40, 40);
     spawn.bodyRect(-3420, -650, 50, 50);
+
 
     //exit
     spawn.mapRect(-4450, -3075, 25, 300);
@@ -1831,7 +1867,8 @@ const level = {
     spawn.randomMob(-550, -100, -0.1);
     spawn.randomBoss(-3250, -2700, 0.2);
     spawn.randomBoss(-2450, -1100, 0);
-    if (game.difficulty > 3) spawn.randomLevelBoss(-3400, -2800);
+
+    if (game.difficulty > 3) spawn.randomLevelBoss(-2400, -3000);
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   warehouse() {
@@ -1930,6 +1967,7 @@ const level = {
       stiffness: 0.0001815,
       length: 1
     });
+    World.add(engine.world, cons[cons.length - 1]);
 
     spawn.bodyRect(600, 525, 125, 125, 1, spawn.propsSlide); //weight
     spawn.bodyRect(800, 600, 300, 100, 1, spawn.propsHoist); //hoist
@@ -1942,6 +1980,7 @@ const level = {
       stiffness: 0.0001815,
       length: 1
     });
+    World.add(engine.world, cons[cons.length - 1]);
 
     spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
     spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
@@ -1955,6 +1994,7 @@ const level = {
       stiffness: 0.0005,
       length: 566
     });
+    World.add(engine.world, cons[cons.length - 1]);
 
     //blocks
     spawn.bodyRect(-165, -150, 30, 35, 1);
@@ -2130,6 +2170,7 @@ const level = {
       bodyB: map[map.length - 1],
       stiffness: 1
     });
+    World.add(engine.world, consBB[consBB.length - 1]);
     spawn.mapRect(-600 + 300, -2000 * 0.75, 1900, 50); //3rd floor
     spawn.mapRect(-600 + 2000 * 0.7, -2000 * 0.74, 50, 375); //center wall
     spawn.bodyRect(-600 + 2000 * 0.7, -2000 * 0.5 - 106, 50, 106); //center block under wall
@@ -2194,6 +2235,7 @@ const level = {
           bodyB: mob[mob.length - 1],
           stiffness: 0.00012
         });
+        World.add(engine.world, cons[cons.length - 1]);
         //chance to spawn a ring of exploding mobs around this boss
         if (game.difficulty > 6) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
       } else {
@@ -2356,6 +2398,7 @@ const level = {
       stiffness: 0.0002, //1217,
       length: 200
     });
+    World.add(engine.world, cons[cons.length - 1]);
 
     spawn.bodyRect(2799, -870, 310, 290); //Gros bloc angle toit
     spawn.mapRect(4000, -1750, 50, 400); //Right Wall Cuve
@@ -2406,7 +2449,7 @@ const level = {
       bodyB: map[map.length - 1],
       stiffness: 1
     });
-
+    World.add(engine.world, consBB[consBB.length - 1]);
     spawn.bodyRect(650, 50, 70, 50);
     spawn.bodyRect(300, 0, 100, 60);
     spawn.bodyRect(400, 0, 100, 150);
@@ -2587,6 +2630,7 @@ const level = {
         stiffness: 0.00014,
         length: 120
       });
+      World.add(engine.world, cons[cons.length - 1]);
       spawn.bodyRect(0, -1250, 240, 190) //Fat cube ascenseur
     } else { /// Reversed spawn
       spawn.bodyRect(0, -650, 225, 175);
@@ -2666,6 +2710,7 @@ const level = {
             bodyB: mob[mob.length - 1],
             stiffness: 0.00006
           });
+          World.add(engine.world, cons[cons.length - 1]);
           if (game.difficulty > 4) spawn.nodeBoss(7000, -3300, "spawns", 8, 20, 105);
         } else if (game.difficulty > 3) {
           spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss"]);
@@ -2684,6 +2729,7 @@ const level = {
             bodyB: mob[mob.length - 1],
             stiffness: 0.00036
           });
+          World.add(engine.world, cons[cons.length - 1]);
           if (game.difficulty > 4) spawn.nodeBoss(2350, -1300, "spawns", 8, 20, 105);
         } else if (game.difficulty > 3) {
           spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss"]);
@@ -2759,6 +2805,7 @@ const level = {
       bodyB: mob[mob.length - 1],
       stiffness: 0.00017
     });
+    World.add(engine.world, cons[cons.length - 1]);
     //chance to spawn a ring of exploding mobs around this boss
     if (game.difficulty > 4) spawn.nodeBoss(2330, 1850, "spawns", 8, 20, 105);
     powerUps.spawn(3010, 1630, "mod");
@@ -3193,6 +3240,7 @@ const level = {
           bodyB: mob[mob.length - 1],
           stiffness: 0.00015
         });
+        World.add(engine.world, cons[cons.length - 1]);
         if (game.difficulty > 4) spawn.nodeBoss(8000, 630, "spawns", 8, 20, 105);
       } else if (game.difficulty > 3) {
         spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss"]);
@@ -3768,6 +3816,7 @@ const level = {
           bodyB: mob[mob.length - 1],
           stiffness: 0.00018 + 0.000007 * level.levelsCleared
         });
+        World.add(engine.world, cons[cons.length - 1]);
         if (game.difficulty > 4) spawn.nodeBoss(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
 
       } else {
@@ -4003,12 +4052,10 @@ const level = {
       Matter.Body.setStatic(map[i], true); //make static
       World.add(engine.world, map[i]); //add to world
     }
-    for (let i = 0; i < cons.length; i++) {
-      World.add(engine.world, cons[i]);
-    }
-    for (let i = 0; i < consBB.length; i++) {
-      World.add(engine.world, consBB[i]);
-    }
+    // for (let i = 0; i < cons.length; i++) {
+    //   World.add(engine.world, cons[i]);
+    // }
+
   },
   spinner(x, y, width, height, density = 0.001) {
     x = x + width / 2
@@ -4404,7 +4451,7 @@ const level = {
     mapB.portalPair = mapA
     return [portalA, portalB, mapA, mapB]
   },
-  hazard(x, y, width, height, damage = 0.0005, color = "hsla(160, 100%, 35%,0.75)") {
+  hazard(x, y, width, height, damage = 0.0005, color = "hsla(160, 100%, 35%,0.75)", isOptical = false) {
     return {
       min: {
         x: x,
@@ -4419,7 +4466,7 @@ const level = {
       maxHeight: height,
       isOn: true,
       query() {
-        if (this.isOn && this.height > 0 && Matter.Query.region([player], this).length && !mech.isStealth) {
+        if (this.isOn && this.height > 0 && Matter.Query.region([player], this).length && !(mech.isCloak && isOptical)) {
           if (damage < 0.02) {
             mech.damage(damage)
           } else if (mech.immuneCycle < mech.cycle) {
@@ -4480,6 +4527,7 @@ const level = {
         stiffness: stiffness,
         damping: damping
       });
+      World.add(engine.world, consBB[consBB.length - 1]);
     }
     cons[cons.length] = Constraint.create({ //pin first block to a point in space
       pointA: {
@@ -4490,6 +4538,7 @@ const level = {
       stiffness: 1,
       damping: damping
     });
+    World.add(engine.world, cons[cons.length - 1]);
     if (isAttached) {
       cons[cons.length] = Constraint.create({ //pin last block to a point in space
         pointA: {
@@ -4500,6 +4549,7 @@ const level = {
         stiffness: 1,
         damping: damping
       });
+      World.add(engine.world, cons[cons.length - 1]);
     }
   },
 };

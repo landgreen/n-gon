@@ -1,10 +1,34 @@
 
-mod: electric reactive armor - reduce harm from explosions by 6% for every 10 energy
-mod: waste heat recovery - laser damage grows to 400%, but you start to eject your health as a heal power up
 
-new community level by Francois:  house
 
 ************** TODO - n-gon **************
+
+mod - mines stun targets nearby when they explode
+
+cloaking field mods 
+  larger vision
+  return to stealth faster
+  +damage to nearby mobs
+  +damage to unaware mobs  (code for this doesn't seem to work)
+
+mod - negative mass field intangibility
+  doesn't seem that interesting
+
+mod - do something for 2 seconds after firing
+  if (mech.fireCDcycle + 120)
+
+getting stuck above a mob can immobilize player
+  occurs with Pauli exclusion, and time dilation field immunity - mod time-like world line
+    add a knock to player mob collisions even while player is immune to damage
+      keep the knock very small
+
+Health mod idea: health can go above max health. At the end of each level, the amount of health above max is halved.
+
+general idea: shrink mech.baseHealth in a mod or field
+
+mod: some drones(or spores) have a chance to spawn as a more power full version
+  do electric damage to nearby mobs
+    stun effect?
 
 a bot that eats up health and ammo, but poops a reroll after picking up 2 power ups
   it passes through walls
@@ -12,8 +36,12 @@ a bot that eats up health and ammo, but poops a reroll after picking up 2 power 
   4 rerolls can convert to a bot,  also 1 rerolls can convert to 5% damage
     the mods that do those effects could be required before you see this bot
   disable crystalized armor?
+  could convert rerolls, ammo, and health into mods instead
 
 laser-bot orbits player
+bot that does AOE damage while it rotates around player
+  no physics / collisions
+  cap 3 ?
 
 mod: radiation effects can spread to nearby mobs
 
@@ -43,22 +71,10 @@ new gun or field - fire 3+ balls in arc
   hold fire to charge: increases the size of the balls
   mod: balls are attracted to mobs
 
-fix: even with a scroll bar the top of the selection window is off screen for very short windows
-
 rework perfect diamagnetism
   let the shield also do bremsstrahlung radiation
-  mod: grab and launch mobs?
-
-getting stuck above a mob can immobilize player
-  seems to only occur with Pauli exclusion
-    add a knock to player mob collisions even while player is immune to damage
-      keep the knock very small
 
 map element - player rotates a rotor that makes a platform go up or down
-
-removing supersaturation sets total health to 1
-  this cancels the health benefits from crystallized armor
-  produce a method that calculates max health based on mods
 
 use mac automator to speed up your n-gon -> git sync
 
@@ -67,10 +83,6 @@ fix door.isOpen actually meaning isClosed
 mod - laser fires 3 beams
 
 give missiles a suck and delay explosion, like vacuum bomb
-
-bot that does AOE damage while it rotates around player
-  no physics / collisions
-  cap 3 ?
 
 level Boss: fractal Sierpiński triangle
   https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
@@ -150,9 +162,6 @@ map: prison
 mod - do 50% more damage in close, but 50% less at a distance
   code it like mod.isFarAwayDmg
     have these mods disable each other
-
-phase field still isn't fun
-  does phase field need the stealth flag?
 
 mod harmonic shield: slow everything in range around shield (temporal shield)
   set max speed?

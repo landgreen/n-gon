@@ -143,10 +143,7 @@ function collisionChecks(event) {
             mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             mob[k].foundPlayer();
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-            if (mod.isPiezo) {
-              mech.energy = mech.maxEnergy;
-              dmg *= 0.85
-            }
+            if (mod.isPiezo) mech.energy = mech.maxEnergy;
             mech.damage(dmg);
             if (mod.isBayesian) {
               const have = [] //find which mods you have
@@ -203,8 +200,9 @@ function collisionChecks(event) {
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            if (mod.isCrit && !mob[k].seePlayer.recall && !mob[k].shield) dmg *= 5
-            if (!mech.isStealth) mob[k].foundPlayer();
+            // console.log(mob[k].seePlayer.recall)
+            if (mod.isCrit && mob[k].isStunned) dmg *= 5
+            mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
             game.drawList.push({ //add dmg to draw queue
@@ -225,7 +223,7 @@ function collisionChecks(event) {
               mob[k].damage(dmg, true);
               const stunTime = dmg / Math.sqrt(obj.mass)
               if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
-              if (mob[k].distanceToPlayer2() < 1000000 && !mech.isStealth) mob[k].foundPlayer();
+              if (mob[k].distanceToPlayer2() < 1000000 && !mech.isCloak) mob[k].foundPlayer();
               game.drawList.push({
                 x: pairs[i].activeContacts[0].vertex.x,
                 y: pairs[i].activeContacts[0].vertex.y,

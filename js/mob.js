@@ -292,13 +292,16 @@ const mobs = {
         this.seePlayer.position.x = player.position.x;
         this.seePlayer.position.y = player.position.y;
       },
-      // locatePlayerByDist() {
-      //   if (this.distanceToPlayer2() < this.locateRange) {
-      //     this.locatePlayer();
-      //   }
-      // },
+      alertNearByMobs() {
+        //this.alertRange2 is set at the very bottom of this mobs, after mob is made
+        for (let i = 0; i < mob.length; i++) {
+          if (!mob[i].seePlayer.recall && Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < this.alertRange2) {
+            mob[i].locatePlayer();
+          }
+        }
+      },
       alwaysSeePlayer() {
-        if (!mech.isStealth) {
+        if (!mech.isCloak) {
           this.seePlayer.recall = true;
           this.seePlayer.position.x = player.position.x;
           this.seePlayer.position.y = player.position.y;
@@ -310,7 +313,7 @@ const mobs = {
             this.distanceToPlayer2() < this.seeAtDistance2 &&
             Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
             Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-            !mech.isStealth
+            !mech.isCloak
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -320,7 +323,7 @@ const mobs = {
       },
       seePlayerCheckByDistance() {
         if (!(game.cycle % this.seePlayerFreq)) {
-          if (this.distanceToPlayer2() < this.seeAtDistance2 && !mech.isStealth) {
+          if (this.distanceToPlayer2() < this.seeAtDistance2 && !mech.isCloak) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
             this.lostPlayer();
@@ -331,7 +334,7 @@ const mobs = {
         if (!(game.cycle % this.seePlayerFreq)) {
           if (
             (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0)) &&
-            !mech.isStealth
+            !mech.isCloak
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -363,7 +366,7 @@ const mobs = {
             this.distanceToPlayer2() < this.seeAtDistance2 &&
             Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
             Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-            !mech.isStealth
+            !mech.isCloak
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -411,7 +414,7 @@ const mobs = {
         if (game.cycle % 7 && this.seePlayer.yes) {
           ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
           // ctx.lineDashOffset = 6*(game.cycle % 215);
-          if (this.distanceToPlayer() < this.laserRange && !mech.isStealth) {
+          if (this.distanceToPlayer() < this.laserRange) {
             if (mech.immuneCycle < mech.cycle) mech.damage(0.0003 * game.dmgScale);
             if (mech.energy > 0.1) mech.energy -= 0.003
             ctx.beginPath();
@@ -497,7 +500,7 @@ const mobs = {
           };
           vertexCollision(this.position, look, map);
           vertexCollision(this.position, look, body);
-          if (!mech.isStealth) vertexCollision(this.position, look, [player]);
+          if (!mech.isCloak) vertexCollision(this.position, look, [player]);
           // hitting player
           if (best.who === player) {
             if (mech.immuneCycle < mech.cycle) {
@@ -538,7 +541,7 @@ const mobs = {
             this.distanceToPlayer2() < this.seeAtDistance2 &&
             Matter.Query.ray(map, this.position, player.position).length === 0 &&
             Matter.Query.ray(body, this.position, player.position).length === 0 &&
-            !mech.isStealth
+            !mech.isCloak
           ) {
             this.foundPlayer();
           } else if (this.seePlayer.recall) {
@@ -641,14 +644,6 @@ const mobs = {
               this.cons.length = 100 + 1.5 * this.radius;
               this.cons2.length = 100 + 1.5 * this.radius;
             }
-          }
-        }
-      },
-      alertNearByMobs() {
-        //this.alertRange2 is set at the very bottom of this mobs, after mob is made
-        for (let i = 0; i < mob.length; i++) {
-          if (!mob[i].seePlayer.recall && Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < this.alertRange2) {
-            mob[i].locatePlayer();
           }
         }
       },
@@ -1049,7 +1044,7 @@ const mobs = {
             }
           }
           if (Math.random() < mod.isBotSpawner) b.randomBot(this.position, false)
-          if (mod.isExplodeMob) b.explosion(this.position, Math.min(425, Math.sqrt(this.mass + 3) * 70))
+          if (mod.isExplodeMob) b.explosion(this.position, Math.min(550, Math.sqrt(this.mass + 2.5) * 50))
           if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob, 40 + 7 * Math.random())
         } else if (mod.isShieldAmmo && this.shield) {
           let type = "ammo"

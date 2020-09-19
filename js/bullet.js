@@ -770,11 +770,11 @@ const b = {
                     powerUp.splice(i, 1);
                     if (mod.isDroneGrab) {
                       this.isImproved = true;
-                      const SCALE = 2
+                      const SCALE = 3.5
                       Matter.Body.scale(this, SCALE, SCALE);
                       this.lookFrequency = 30;
-                      this.endCycle = Infinity
-                      this.dmg *= 1.5;
+                      this.endCycle += 2000
+                      // this.dmg *= 1.25;
                       this.frictionAir = 0
                     }
                     break;
@@ -1061,7 +1061,7 @@ const b = {
       },
       onEnd() {},
       do() {
-        if (this.lastLookCycle < game.cycle) {
+        if (this.lastLookCycle < game.cycle && !mech.isCloak) {
           this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 50
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
@@ -1117,7 +1117,7 @@ const b = {
       },
       onEnd() {},
       do() {
-        if (this.cd < game.cycle && !(game.cycle % this.lookFrequency) && !mech.isStealth) {
+        if (this.cd < game.cycle && !(game.cycle % this.lookFrequency) && !mech.isCloak) {
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1186,7 +1186,7 @@ const b = {
           y: this.velocity.y * 0.95
         });
         //find targets
-        if (!(game.cycle % this.lookFrequency) && !mech.isStealth) {
+        if (!(game.cycle % this.lookFrequency) && !mech.isCloak) {
           this.lockedOn = null;
           let closeDist = this.range;
           for (let i = 0, len = mob.length; i < len; ++i) {
@@ -1301,7 +1301,7 @@ const b = {
         } else if (distanceToPlayer < 250) { //close to player
           Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
           //find targets
-          if (!(game.cycle % this.lookFrequency) && !mech.isStealth) {
+          if (!(game.cycle % this.lookFrequency) && !mech.isCloak) {
             this.lockedOn = null;
             let closeDist = this.range;
             for (let i = 0, len = mob.length; i < len; ++i) {
@@ -1382,7 +1382,6 @@ const b = {
           const unit = Vector.normalise(sub)
           const DRAIN = 0.002
           if (DIST < mod.isPlasmaRange * 500 && mech.energy > DRAIN) {
-            console.log('fire')
             mech.energy -= DRAIN;
             if (mech.energy < 0) {
               mech.fieldCDcycle = mech.cycle + 120;
@@ -1788,7 +1787,7 @@ const b = {
                   }
                   if (!immune) {
                     this.immuneList.push(who.id)
-                    if (!mech.isStealth) who.foundPlayer();
+                    who.foundPlayer();
                     if (mod.isFastDot) {
                       mobs.statusDoT(who, 3.9, 30)
                     } else {
@@ -1804,7 +1803,7 @@ const b = {
                   }
                 } else {
                   this.endCycle = 0;
-                  if (!mech.isStealth) who.foundPlayer();
+                  who.foundPlayer();
                   if (mod.isFastDot) {
                     mobs.statusDoT(who, 3.78, 30)
                   } else {
@@ -1903,7 +1902,7 @@ const b = {
                   for (let i = 0; i < q.length; i++) {
                     let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.66) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                     q[i].damage(dmg);
-                    if (!mech.isStealth) q[i].foundPlayer();
+                    q[i].foundPlayer();
                     game.drawList.push({ //add dmg to draw queue
                       x: this.position.x,
                       y: this.position.y,
@@ -1936,7 +1935,7 @@ const b = {
                         Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
                         let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.66) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                         q[i].damage(dmg);
-                        if (!mech.isStealth) q[i].foundPlayer();
+                        q[i].foundPlayer();
                         game.drawList.push({ //add dmg to draw queue
                           x: this.position.x,
                           y: this.position.y,
@@ -2973,34 +2972,9 @@ const b = {
       nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
       holdDamage: 1,
       holdCount: 0,
+      healthLost: 0,
       fire() {
-        if (mod.isLaserHealth) {
-          if (this.nextFireCycle === mech.cycle) { //ramp up damage
-            this.holdDamage += 0.01
-            if (this.holdDamage > 4) this.holdDamage = 4
-            this.holdCount += this.holdDamage
-            if (this.holdCount > 180) {
-              this.holdCount = 0;
-              const size = 15
-              let dmg = (mod.largerHeals * (size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2) / mech.harmReduction() * game.healScale
-              if (mech.health < 0.15) {
-                mech.fireCDcycle = mech.cycle + 120; // fire cool down if about to die
-              } else {
-                const totalPowerUps = powerUp.length
-                powerUps.spawn(mech.pos.x, mech.pos.y, "heal", true, false, size);
-                mech.damage(dmg, false)
-                if (powerUp.length > totalPowerUps + 1) {
-                  dmg = (mod.largerHeals * (powerUp[powerUp.length - 1].size / 40 / Math.sqrt(mod.largerHeals) / (game.healScale ** 0.25)) ** 2) / mech.harmReduction() * game.healScale
-                  mech.damage(dmg, false) //do bonus damage if you spawn bonus power ups
-                }
-              }
-            }
-          } else {
-            this.holdDamage = 1
-            this.holdCount = 0;
-          }
-          this.nextFireCycle = mech.cycle + 1
-        }
+        mech.fireCDcycle = mech.cycle
 
         const reflectivity = 1 - 1 / (mod.laserReflections * 1.5)
         let damage = b.dmgScale * mod.laserDamage * this.holdDamage

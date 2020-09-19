@@ -5,6 +5,7 @@ const mod = {
             mod.mods[i].remove();
             mod.mods[i].count = 0
         }
+        mod.armorFromPowerUps = 0;
         mod.totalCount = 0;
         game.updateModHUD();
     },
@@ -37,6 +38,7 @@ const mod = {
                 }
                 if (!found) return //if name not found don't give any mod
             }
+            if (mod.mods[index].isLost) mod.mods[index].isLost = false; //give specific mod
             mod.mods[index].effect(); //give specific mod
             mod.mods[index].count++
             mod.totalCount++ //used in power up randomization
@@ -78,7 +80,7 @@ const mod = {
         return false
     },
     damageFromMods() {
-        let dmg = 1
+        let dmg = mech.fieldDamage
         if (mod.isEnergyNoAmmo) dmg *= 1.4
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
@@ -112,7 +114,6 @@ const mod = {
             }
         }, {
             name: "capacitor",
-            // nameInfo: "<span id='mod-capacitor'></span>",
             description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>5.5%</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
@@ -121,7 +122,7 @@ const mod = {
             },
             requires: "increased energy regen or max energy",
             effect: () => {
-                mod.isEnergyDamage = true // used in mech.grabPowerUp
+                mod.isEnergyDamage = true
             },
             remove() {
                 mod.isEnergyDamage = false;
@@ -161,7 +162,6 @@ const mod = {
         },
         {
             name: "rest frame",
-            // nameInfo: "<span id='mod-rest'></span>",
             description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br>when not <strong>moving</strong>",
             maxCount: 1,
             count: 0,
@@ -170,7 +170,7 @@ const mod = {
             },
             requires: "",
             effect: () => {
-                mod.isRest = true // used in mech.grabPowerUp
+                mod.isRest = true
             },
             remove() {
                 mod.isRest = false;
@@ -756,7 +756,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.collisionImmuneCycles += 60;
+                mod.collisionImmuneCycles += 55;
                 mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             },
             remove() {
@@ -818,7 +818,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.superposition || mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX")
+                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX")
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -830,7 +830,7 @@ const mod = {
         },
         {
             name: "piezoelectricity",
-            description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br><strong>15%</strong> less <strong class='color-harm'>harm</strong> from mob collisions",
+            description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -982,12 +982,14 @@ const mod = {
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mech.maxHealth += 0.50
+                mod.bonusHealth += 0.5
                 mech.addHealth(0.50)
+                mech.setMaxHealth();
             },
             remove() {
-                mech.maxHealth = 1;
-                mech.displayHealth();
+                mod.bonusHealth = 0
+                mech.setMaxHealth();
+
             }
         },
         {
@@ -996,14 +998,16 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && !mod.isDroneGrab
+                return !mod.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.isArmorFromPowerUps = true;
+                mod.isArmorFromPowerUps = true; //tracked by  mod.armorFromPowerUps
             },
             remove() {
                 mod.isArmorFromPowerUps = false;
+                // mod.armorFromPowerUps = 0;  //this is now reset in mod.setupAllMods();
+                mech.setMaxHealth();
             }
         },
         {
@@ -2023,7 +2027,7 @@ const mod = {
         },
         {
             name: "harvester",
-            description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>larger</strong>, <strong>faster</strong>, and infinitely <strong>durable</strong>",
+            description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>larger</strong>, <strong>faster</strong>, and very <strong>durable</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2203,22 +2207,22 @@ const mod = {
                 mod.laserFieldDrain = 0.0016;
             }
         },
-        {
-            name: "waste heat recovery",
-            description: "<strong>laser</strong> <strong class='color-d'>damage</strong> grows by <strong>400%</strong> as you fire<br>but you periodically <strong>eject</strong> your <strong class='color-h'>health</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("laser")
-            },
-            requires: "laser",
-            effect() {
-                mod.isLaserHealth = true;
-            },
-            remove() {
-                mod.isLaserHealth = false
-            }
-        },
+        // {
+        //     name: "waste heat recovery",
+        //     description: "<strong>laser</strong> <strong class='color-d'>damage</strong> grows by <strong>400%</strong> as you fire<br>but you periodically <strong>eject</strong> your <strong class='color-h'>health</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mod.haveGunCheck("laser") && !mod.isEnergyHealth
+        //     },
+        //     requires: "laser<br>not mass-energy equivalence",
+        //     effect() {
+        //         mod.isLaserHealth = true;
+        //     },
+        //     remove() {
+        //         mod.isLaserHealth = false
+        //     }
+        // },
         {
             name: "shock wave",
             description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
@@ -2270,6 +2274,22 @@ const mod = {
             },
             remove() {
                 mod.isStunField = 0;
+            }
+        },
+        {
+            name: "fracture analysis",
+            description: "bullet impacts do <strong>500%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isStunField || mod.oneSuperBall || mod.isCloakStun
+            },
+            requires: "flux pinning or super ball<br>or flashbang",
+            effect() {
+                mod.isCrit = true;
+            },
+            remove() {
+                mod.isCrit = false;
             }
         },
         {
@@ -2451,7 +2471,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isMissileField || mod.isIceField || mod.isFastDrones)
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isMissileField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
@@ -2467,7 +2487,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isIceField || mod.isFastDrones)
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
@@ -2483,7 +2503,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isFastDrones)
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isFastDrones || mod.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
@@ -2494,35 +2514,35 @@ const mod = {
             }
         },
         {
-            name: "superposition",
-            description: "mobs that <strong>touch</strong> the <strong>phased</strong> player<br> are <strong>stunned</strong> for <strong>5</strong> seconds",
+            name: "phase decoherence",
+            description: "become <strong>intangible</strong> while <strong class='color-cloaked'>cloaked</strong><br>but, passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
+                return mech.fieldUpgrades[mech.fieldMode].name === "metamaterial cloaking"
             },
-            requires: "phase decoherence field",
+            requires: "metamaterial cloaking",
             effect() {
-                mod.superposition = true;
+                mod.isIntangible = true;
             },
             remove() {
-                mod.superposition = false;
+                mod.isIntangible = false;
             }
         },
         {
-            name: "fracture analysis",
-            description: "bullet impacts do <strong>500%</strong> <strong class='color-d'>damage</strong><br>to mobs that are <strong>unaware</strong> of you or <strong>stunned</strong>",
+            name: "flashbang",
+            description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs for <strong>2</strong> second",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mech.fieldUpgrades[mech.fieldMode].name === "phase decoherence field"
+                return mech.fieldUpgrades[mech.fieldMode].name === "metamaterial cloaking"
             },
-            requires: "phase decoherence field or flux pinning",
+            requires: "metamaterial cloaking",
             effect() {
-                mod.isCrit = true;
+                mod.isCloakStun = true;
             },
             remove() {
-                mod.isCrit = false;
+                mod.isCloakStun = false;
             }
         },
         {
@@ -2760,5 +2780,8 @@ const mod = {
     isFreezeHarmImmune: null,
     isSmallExplosion: null,
     isExplosionHarm: null,
-    isLaserHealth: null
+    armorFromPowerUps: null,
+    bonusHealth: null,
+    isIntangible: null,
+    isCloakStun: null
 }

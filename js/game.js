@@ -476,9 +476,7 @@ const game = {
         powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
       } else if (keys[54]) { // 6  spawn mob
         const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-        spawn.allowShields = false;
         spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
-        spawn.allowShields = true;
       } else if (keys[55]) { // 7  spawn body
         index = body.length
         spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
@@ -712,8 +710,8 @@ const game = {
       if (game.isCommunityMaps) {
         level.levels.push("stronghold");
         level.levels.push("basement");
+        level.levels.push("newLevel");
         level.levels.push("house");
-        // level.levels.push("newLevel");
       }
       level.levels = shuffle(level.levels); //shuffles order of maps
       level.levels.unshift("bosses"); //add bosses level to the end of the randomized levels list
