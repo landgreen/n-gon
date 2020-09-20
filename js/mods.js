@@ -4,6 +4,7 @@ const mod = {
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             mod.mods[i].remove();
             mod.mods[i].count = 0
+            if (mod.mods[i].isLost) mod.mods[i].isLost = false;
         }
         mod.armorFromPowerUps = 0;
         mod.totalCount = 0;
@@ -87,7 +88,7 @@ const mod = {
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
         if (mod.isEnergyLoss) dmg *= 1.37;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
-        if (mod.isRest && player.speed < 1) dmg *= 1.20;
+        if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
@@ -162,18 +163,18 @@ const mod = {
         },
         {
             name: "rest frame",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br>when not <strong>moving</strong>",
-            maxCount: 1,
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>when not <strong>moving</strong>",
+            maxCount: 6,
             count: 0,
             allowed() {
                 return true
             },
             requires: "",
             effect: () => {
-                mod.isRest = true
+                mod.restDamage += 0.25
             },
             remove() {
-                mod.isRest = false;
+                mod.restDamage = 1;
             }
         },
         {
@@ -1261,7 +1262,7 @@ const mod = {
         },
         {
             name: "determinism",
-            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
+            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1271,7 +1272,7 @@ const mod = {
             requires: "not cardinality",
             effect: () => {
                 mod.isDeterminism = true;
-                for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
+                for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
@@ -1281,7 +1282,7 @@ const mod = {
         },
         {
             name: "superdeterminism",
-            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+            description: "spawn <strong>3</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1291,7 +1292,7 @@ const mod = {
             requires: "determinism",
             effect: () => {
                 mod.isSuperDeterminism = true;
-                for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
+                for (let i = 0; i < 3; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
@@ -2726,7 +2727,7 @@ const mod = {
     isEnergyHealth: null,
     isPulseStun: null,
     isPilotFreeze: null,
-    isRest: null,
+    restDamage: null,
     isRPG: null,
     is3Missiles: null,
     isDeterminism: null,

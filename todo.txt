@@ -3,6 +3,8 @@
 
 ************** TODO - n-gon **************
 
+add some more computer / AI stuff to the level lore text
+
 mod - mines stun targets nearby when they explode
 
 cloaking field mods 

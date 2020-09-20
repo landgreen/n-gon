@@ -878,7 +878,7 @@ const game = {
       // if (mod.isEnergyDamage) {
       //   document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
       // }
-      // if (mod.isRest) {
+      // if (mod.restDamage) {
       //   if (player.speed < 1) {
       //     document.getElementById("mod-rest").innerHTML = `(+20%)`
       //   } else {
