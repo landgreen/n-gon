@@ -3,6 +3,10 @@
 
 ************** TODO - n-gon **************
 
+exiting cloak gives +100 bonus damage for 2 seconds
++100 dmg while decloaked
+damage mitigation while cloaked
+
 add some more computer / AI stuff to the level lore text
 
 mod - mines stun targets nearby when they explode

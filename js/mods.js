@@ -819,7 +819,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX")
+                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -2532,7 +2532,7 @@ const mod = {
         },
         {
             name: "flashbang",
-            description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs for <strong>2</strong> second",
+            description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>25%</strong> of your stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {

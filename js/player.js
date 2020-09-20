@@ -1775,7 +1775,8 @@ const mech = {
         mech.fieldPhase = 0;
         mech.isCloak = false
         mech.fieldDamage = 1.66
-        const drawRadius = 900
+        mech.fieldDrawRadius = 0
+        const drawRadius = 1000
 
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1786,7 +1787,7 @@ const mech = {
           } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold and field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle - 40 //to disable cloak
+            if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle //to disable cloak
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding target exists, and field button is not pressed
             mech.pickUp();
           } else {
@@ -1796,31 +1797,56 @@ const mech = {
           //120 cycles after shooting (or using field) enable cloak
           if (mech.energy < 0.05 && mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
           if (mech.fireCDcycle + 50 < mech.cycle) {
-            if (!mech.isCloak) mech.isCloak = true
-          } else {
-            if (mech.isCloak) {
-              mech.isCloak = false
-              if (mod.isCloakStun) { //stun nearby mobs after exiting cloak
-                ctx.beginPath();
-                ctx.arc(mech.pos.x, mech.pos.y, 800, 0, 2 * Math.PI);
-                ctx.fillStyle = "#000"
-                ctx.fill();
-                for (let i = 0, len = mob.length; i < len; ++i) {
-                  if (Vector.magnitude(Vector.sub(mob[i].position, mech.pos)) < drawRadius) {
-                    mobs.statusStun(mob[i], 120)
-                  }
+            if (!mech.isCloak) {
+              mech.isCloak = true //enter cloak
+              if (mod.isIntangible) {
+                for (let i = 0; i < bullet.length; i++) {
+                  if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
                 }
+              }
+            }
+          } else if (mech.isCloak) { //exit cloak
+            mech.isCloak = false
+            if (mod.isIntangible) {
+              for (let i = 0; i < bullet.length; i++) {
+                if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+              }
+            }
+            if (mod.isCloakStun) { //stun nearby mobs after exiting cloak
+              let isMobsAround = false
+              const stunRange = mech.fieldDrawRadius * 1.15
+              const drain = 0.25 * mech.energy
+              for (let i = 0, len = mob.length; i < len; ++i) {
+                if (
+                  Vector.magnitude(Vector.sub(mob[i].position, mech.pos)) < stunRange &&
+                  Matter.Query.ray(map, mob[i].position, mech.pos).length === 0
+                ) {
+                  isMobsAround = true
+                  mobs.statusStun(mob[i], drain * 500)
+                }
+              }
+              if (isMobsAround && mech.energy > drain) {
+                mech.energy -= drain
+                game.drawList.push({
+                  x: mech.pos.x,
+                  y: mech.pos.y,
+                  radius: stunRange,
+                  color: "hsla(0,50%,100%,0.5)",
+                  time: 3
+                });
+                // ctx.beginPath();
+                // ctx.arc(mech.pos.x, mech.pos.y, 800, 0, 2 * Math.PI);
+                // ctx.fillStyle = "#000"
+                // ctx.fill();
               }
             }
           }
 
-          function drawField(radius) {
-            const energy = Math.max(0.01, Math.min(mech.energy, 1))
-            radius *= Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+          function drawField() {
             mech.fieldPhase += 0.007 + 0.07 * (1 - energy)
             const wiggle = 0.15 * Math.sin(mech.fieldPhase * 0.5)
             ctx.beginPath();
-            ctx.ellipse(mech.pos.x, mech.pos.y, radius * (1 - wiggle), radius * (1 + wiggle), mech.fieldPhase, 0, 2 * Math.PI);
+            ctx.ellipse(mech.pos.x, mech.pos.y, mech.fieldDrawRadius * (1 - wiggle), mech.fieldDrawRadius * (1 + wiggle), mech.fieldPhase, 0, 2 * Math.PI);
             if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
               ctx.lineWidth = 5;
               ctx.strokeStyle = `rgba(0, 204, 255,1)`
@@ -1833,13 +1859,16 @@ const mech = {
             ctx.clip();
           }
 
+          const energy = Math.max(0.01, Math.min(mech.energy, 1))
           if (mech.isCloak) {
             this.fieldRange = this.fieldRange * 0.9 + 0.1 * drawRadius
-            drawField(this.fieldRange)
+            mech.fieldDrawRadius = this.fieldRange * Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+            drawField()
           } else {
             if (this.fieldRange < 3000) {
               this.fieldRange += 200
-              drawField(this.fieldRange)
+              mech.fieldDrawRadius = this.fieldRange * Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+              drawField()
             }
           }
           if (mod.isIntangible) {

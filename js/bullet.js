@@ -1015,6 +1015,11 @@ const b = {
     for (let i = 0; i < mod.foamBotCount; i++) b.foamBot()
     for (let i = 0; i < mod.boomBotCount; i++) b.boomBot()
     for (let i = 0; i < mod.plasmaBotCount; i++) b.plasmaBot()
+    if (mod.isIntangible && mech.isCloak) {
+      for (let i = 0; i < bullet.length; i++) {
+        if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
+      }
+    }
   },
   randomBot(where = mech.pos, isKeep = true) {
     if (Math.random() < 0.25) {
@@ -1316,7 +1321,7 @@ const b = {
           }
         }
         //punch target
-        if (this.lockedOn && this.lockedOn.alive) {
+        if (this.lockedOn && this.lockedOn.alive && !mech.isCloak) {
           const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
           if (DIST - this.lockedOn.radius < this.range &&
             Matter.Query.ray(map, this.position, this.lockedOn.position).length === 0) {
