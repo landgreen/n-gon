@@ -367,6 +367,7 @@ const game = {
     game.boldActiveGunHUD();
     // mech.drop();
   },
+  isPauseKeyReady: true,
   keyPress() { //runs on key down event
     //full screen toggle
     // if (keys[13]) {
@@ -411,7 +412,13 @@ const game = {
     } else if (keys[81]) { //q    swap to previous active gun
       game.previousGun();
     }
-    if (keys[80] && !game.isChoosing) { //p  for pause
+    if (keys[80] && !game.isChoosing && game.isPauseKeyReady) { //p  for pause
+
+      game.isPauseKeyReady = false
+      setTimeout(function () {
+        game.isPauseKeyReady = true
+      }, 300);
+
       if (game.paused) {
         build.unPauseGrid()
         game.paused = false;
@@ -945,7 +952,17 @@ const game = {
     ctx.fillText(`(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`, game.mouse.x, game.mouse.y - 20);
   },
   draw: {
-    powerUp() {
+    powerUp() { //is set by Bayesian mod
+      // ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
+      // for (let i = 0, len = powerUp.length; i < len; ++i) {
+      //   ctx.beginPath();
+      //   ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+      //   ctx.fillStyle = powerUp[i].color;
+      //   ctx.fill();
+      // }
+      // ctx.globalAlpha = 1;
+    },
+    powerUpNormal() { //back up in case power up draw gets changed
       ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
       for (let i = 0, len = powerUp.length; i < len; ++i) {
         ctx.beginPath();

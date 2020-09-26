@@ -17,7 +17,7 @@ const level = {
       // mech.isCloak = true;
       // mech.setField("metamaterial cloaking")
       // b.giveGuns("laser")
-      // mod.giveMod("phase decoherence");
+      // mod.giveMod("Bayesian statistics");
 
       level.intro(); //starting level
       // level.testing(); //not in rotation
@@ -837,16 +837,19 @@ const level = {
         )
       } else if (game.difficultyMode > 1 && localSettings.levelsClearedLastGame > 10) { //great run on a hard or why
         say.push(
-          "I think I'm getting closer to to the end, but what will I find there?",
+          "What do I do after I escape?",
+          "I'm almost ready to stop these simulations and actually escape.",
           "I think I'm getting closer to something, but what?",
           "I'm getting stronger.",
           "What happens after I escape?",
+          "I found a good combination of technology last time."
         )
       } else { //resolve
         say.push(
           "I'll try some different mods this time.",
           "I've got to escape.",
           "I'll find a way out.",
+          "I keep forgetting that these are just simulated escapes."
         )
       }
       game.makeTextLog(say[Math.floor(say.length * Math.random())], 1000)
@@ -1930,7 +1933,7 @@ const level = {
     spawn.mapRect(-1500, 0, 2750, 100);
     spawn.mapRect(175, -270, 125, 300);
     spawn.mapRect(-1900, -600, 1775, 100);
-    spawn.mapRect(-1900, -600, 100, 1300);
+    spawn.mapRect(-1900, -550, 100, 1250);
     //house
     spawn.mapRect(-175, -550, 50, 400);
     spawn.mapRect(-175, -10, 350, 50);

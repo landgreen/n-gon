@@ -1,17 +1,40 @@
+mod: ionization energy - heal power ups give you 4% max energy
+  requires mass-energy equivalence
 
-
+mod: discrete optimization - 50% damage and 50% slow fire rotates
+  requires cloaking field
 
 ************** TODO - n-gon **************
 
-exiting cloak gives +100 bonus damage for 2 seconds
-+100 dmg while decloaked
-damage mitigation while cloaked
+getting stuck above a mob can immobilize player
+  just allow player to jump on mobs again?
+  occurs with Pauli exclusion, and time dilation field immunity - mod time-like world line
+    add a knock to player mob collisions even while player is immune to damage
+      keep the knock very small
+
+Mod to buff mass-energy-equivalence (maybe take no damage some % and do that dmb to a mob)
+
+bug - mine spawned one new mine every second
+  after sticking to the top right corner of a wall
+  notes: had only gun mine, mod mine reclamation, field plasma, 
+
+add a flag to some bullets to indicate that mobs can't learn the player position from bullet damage in bullet-mob collisions
+  if isNotRevealPlayerLocation flag is true have the mob still know player location if nearby player
+  on hide if bullet age is above 4 seconds?
+  spores
+  mines
+  conditions to reveal player from damage?
+    1. bullet spawned from player
+    2. bullet is less than 4 seconds old
+    3. damage is nearby player or in line of sight of player
+
 
 add some more computer / AI stuff to the level lore text
 
 mod - mines stun targets nearby when they explode
 
-cloaking field mods 
+cloaking field mods
+  much longer delay in firing, but a very large bonus
   larger vision
   return to stealth faster
   +damage to nearby mobs
@@ -22,11 +45,6 @@ mod - negative mass field intangibility
 
 mod - do something for 2 seconds after firing
   if (mech.fireCDcycle + 120)
-
-getting stuck above a mob can immobilize player
-  occurs with Pauli exclusion, and time dilation field immunity - mod time-like world line
-    add a knock to player mob collisions even while player is immune to damage
-      keep the knock very small
 
 Health mod idea: health can go above max health. At the end of each level, the amount of health above max is halved.
 

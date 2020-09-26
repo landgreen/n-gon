@@ -172,8 +172,8 @@ function collisionChecks(event) {
               y: mob[k].velocity.y - 8 * Math.sin(angle)
             });
 
-            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.33) {
-              mech.energy -= 0.33
+            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.34 * mech.maxEnergy) {
+              mech.energy -= 0.33 * mech.maxEnergy
               mech.immuneCycle = 0; //player doesn't go immune to collision damage
               mob[k].death();
               game.drawList.push({
@@ -200,8 +200,7 @@ function collisionChecks(event) {
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
             let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            // console.log(mob[k].seePlayer.recall)
-            if (mod.isCrit && mob[k].isStunned) dmg *= 5
+            if (mod.isCrit && mob[k].isStunned) dmg *= 4
             mob[k].foundPlayer();
             mob[k].damage(dmg);
             obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here

@@ -132,6 +132,10 @@ const powerUps = {
           mech.addHealth(heal);
         }
       }
+      if (mod.healGiveMaxEnergy) {
+        mod.healMaxEnergyBonus += 0.04
+        mech.setMaxEnergy();
+      }
     },
     spawn() { //used to spawn a heal with a specific size / heal amount, not normally used
 
@@ -507,7 +511,7 @@ const powerUps = {
 
       //bonus power ups for clearing runs in the last game
       if (level.levelsCleared === 0 && !game.isCheating) {
-        for (let i = 0; i < localSettings.levelsClearedLastGame / 5 - 1; i++) {
+        for (let i = 0; i < localSettings.levelsClearedLastGame / 4 - 1; i++) {
           powerUps.spawn(mech.pos.x, mech.pos.y, "mod", false); //spawn a mod for every 5 levels cleared in last game
         }
         localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
@@ -573,7 +577,10 @@ const powerUps = {
       !(mod.isEnergyNoAmmo && target === 'ammo')
     ) {
       powerUps.directSpawn(x, y, target, moving, mode, size)
-      if (mod.isBayesian && Math.random() < 0.17) powerUps.directSpawn(x, y, target, moving, mode)
+      if (mod.isBayesian && Math.random() < 0.17) {
+        powerUps.directSpawn(x, y, target, moving, mode)
+        powerUp[powerUp.length - 1].isBayesian = true
+      }
     }
   },
 };

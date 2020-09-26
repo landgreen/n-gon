@@ -475,6 +475,7 @@ const mech = {
     if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
     mech.displayHealth();
   },
+
   defaultFPSCycle: 0, //tracks when to return to normal fps
   immuneCycle: 0, //used in engine
   harmReduction() {
@@ -584,7 +585,7 @@ const mech = {
       mech.defaultFPSCycle = mech.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
       if (mod.isHarmFreeze) { //freeze all mobs
         for (let i = 0, len = mob.length; i < len; i++) {
-          mobs.statusSlow(mob[i], 300)
+          mobs.statusSlow(mob[i], 240)
         }
       }
     } else {
@@ -755,6 +756,12 @@ const mech = {
     mech.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
     mech.isBodiesAsleep = true;
     mech.wakeCheck();
+    mech.setMaxEnergy();
+  },
+  setMaxEnergy() {
+    mech.maxEnergy = 1 + mod.bonusEnergy + mod.healMaxEnergyBonus
+    if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
+    mech.displayHealth();
   },
   fieldMeterColor: "#0cf",
   drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
@@ -1485,7 +1492,7 @@ const mech = {
                 });
               }
               if (mod.isFreezeMobs) {
-                const ICE_DRAIN = 0.0003
+                const ICE_DRAIN = 0.0005
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].distanceToPlayer() + mob[i].radius < this.fieldDrawRadius && !mob[i].shield && !mob[i].isShielded) {
                     if (mech.energy > ICE_DRAIN * 2) {
@@ -1815,14 +1822,14 @@ const mech = {
             if (mod.isCloakStun) { //stun nearby mobs after exiting cloak
               let isMobsAround = false
               const stunRange = mech.fieldDrawRadius * 1.15
-              const drain = 0.25 * mech.energy
+              const drain = 0.3 * mech.energy
               for (let i = 0, len = mob.length; i < len; ++i) {
                 if (
                   Vector.magnitude(Vector.sub(mob[i].position, mech.pos)) < stunRange &&
                   Matter.Query.ray(map, mob[i].position, mech.pos).length === 0
                 ) {
                   isMobsAround = true
-                  mobs.statusStun(mob[i], drain * 500)
+                  mobs.statusStun(mob[i], 30 + drain * 300)
                 }
               }
               if (isMobsAround && mech.energy > drain) {
@@ -1831,8 +1838,8 @@ const mech = {
                   x: mech.pos.x,
                   y: mech.pos.y,
                   radius: stunRange,
-                  color: "hsla(0,50%,100%,0.5)",
-                  time: 3
+                  color: "hsla(0,50%,100%,0.6)",
+                  time: 4
                 });
                 // ctx.beginPath();
                 // ctx.arc(mech.pos.x, mech.pos.y, 800, 0, 2 * Math.PI);
@@ -1879,9 +1886,9 @@ const mech = {
                 for (let i = 0; i < inPlayer.length; i++) {
                   if (mech.energy > 0) {
                     if (inPlayer[i].shield) { //shields drain player energy
-                      mech.energy -= 0.02;
+                      mech.energy -= 0.014;
                     } else {
-                      mech.energy -= 0.007;
+                      mech.energy -= 0.004;
                     }
                   }
                 }

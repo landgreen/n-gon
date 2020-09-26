@@ -82,18 +82,19 @@ const mod = {
     },
     damageFromMods() {
         let dmg = mech.fieldDamage
+        // if (mod.aimDamage>1) 
         if (mod.isEnergyNoAmmo) dmg *= 1.4
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
-        if (mod.isEnergyLoss) dmg *= 1.37;
+        if (mod.isEnergyLoss) dmg *= 1.43;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
-        return dmg * mod.slowFire
+        return dmg * mod.slowFire * mod.aimDamage
     },
     totalBots() {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount
@@ -147,7 +148,7 @@ const mod = {
         },
         {
             name: "acute stress response",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>37%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>43%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -259,7 +260,7 @@ const mod = {
         },
         {
             name: "Ψ(t) collapse",
-            description: "<strong>40%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            description: "<strong>50%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -268,7 +269,7 @@ const mod = {
             requires: "no rerolls",
             effect() {
                 mod.isRerollHaste = true;
-                mod.rerollHaste = 0.6;
+                mod.rerollHaste = 0.5;
                 b.setFireCD();
             },
             remove() {
@@ -798,7 +799,7 @@ const mod = {
         },
         {
             name: "liquid cooling",
-            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>5</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>4</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -893,6 +894,51 @@ const mod = {
             }
         },
         {
+            name: "1st ionization energy",
+            description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>4%<strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isEnergyHealth
+            },
+            requires: "mass-energy equivalence",
+            effect() {
+                mod.healGiveMaxEnergy = true; //mod.healMaxEnergyBonus given from heal power up
+                powerUps.heal.color = "#0ae"
+                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                }
+            },
+            remove() {
+                mod.healGiveMaxEnergy = false;
+                mod.healMaxEnergyBonus = 0
+                powerUps.heal.color = "#0eb"
+                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                }
+            }
+        },
+        {
+            name: "overcharge",
+            description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>50%</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                // mech.maxEnergy += 0.5
+                // mech.energy += 0.5
+                mod.bonusEnergy += 0.5
+                mech.setMaxEnergy()
+            },
+            remove() {
+                mod.bonusEnergy = 0;
+                mech.setMaxEnergy()
+            }
+        },
+        {
             name: "energy conservation",
             description: "<strong>10%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
@@ -906,23 +952,6 @@ const mod = {
             },
             remove() {
                 mod.energySiphon = 0;
-            }
-        },
-        {
-            name: "overcharge",
-            description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>50%</strong>",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                mech.maxEnergy += 0.5
-                mech.energy += 0.5
-            },
-            remove() {
-                mech.maxEnergy = 1;
             }
         },
         {
@@ -943,7 +972,7 @@ const mod = {
         },
         {
             name: "scrap recycling",
-            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><strong class='color-h'>heal</strong> up to <strong>1%</strong> of max health every second",
+            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><strong class='color-h'>heal</strong> <strong>1%</strong> of max health every second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1095,9 +1124,48 @@ const mod = {
             requires: "",
             effect: () => {
                 mod.isBayesian = true
+                //change power up draw
+                game.draw.powerUp = function () {
+                    for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
+                        for (let i = 0, len = powerUp.length; i < len; ++i) {
+                            ctx.beginPath();
+                            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+                            ctx.fillStyle = powerUp[i].color;
+                            ctx.fill();
+                        }
+                        ctx.globalAlpha = 1;
+
+                        if (powerUp[i].isBayesian && Math.random() < 0.1) {
+                            //draw electricity
+                            const mag = 5 + powerUp[i].size / 5
+                            let unit = Vector.rotate({
+                                x: mag,
+                                y: mag
+                            }, 2 * Math.PI * Math.random())
+                            let path = {
+                                x: powerUp[i].position.x + unit.x,
+                                y: powerUp[i].position.y + unit.y
+                            }
+                            ctx.beginPath();
+                            ctx.moveTo(path.x, path.y);
+                            for (let i = 0; i < 6; i++) {
+                                unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
+                                path = Vector.add(path, unit)
+                                ctx.lineTo(path.x, path.y);
+                            }
+                            ctx.lineWidth = 0.5 + 2 * Math.random();
+                            ctx.strokeStyle = "#000"
+                            ctx.stroke();
+                        }
+                    }
+                    // ctx.globalAlpha = 1;
+                }
+
             },
             remove() {
                 mod.isBayesian = false
+                game.draw.powerUp = game.draw.powerUpNormal
             }
         },
         {
@@ -1234,9 +1302,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isCrouchAmmo
+                return mod.isCrouchAmmo && !mod.isEnergyHealth
             },
-            requires: "desublimated ammunition",
+            requires: "desublimated ammunition<br>not mass-energy equivalence",
             effect() {
                 mod.isTurret = true
             },
@@ -1513,7 +1581,7 @@ const mod = {
         },
         {
             name: "shotgun spin-statistics",
-            description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>receive <strong>33%</strong> less <strong>shotgun</strong> <strong class='color-g'>ammo</strong>",
+            description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br><strong class='color-g'>ammo</strong> costs are <strong>doubled</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1522,9 +1590,19 @@ const mod = {
             requires: "shotgun",
             effect() {
                 mod.isShotgunImmune = true;
+
+                //cut current ammo by 1/2
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "shotgun") {
-                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.66
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.5);
+                        break;
+                    }
+                }
+                game.updateGunHUD();
+
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "shotgun") {
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.5
                         break;
                     }
                 }
@@ -1556,7 +1634,7 @@ const mod = {
             }
         },
         {
-            name: "automatic shotgun",
+            name: "Newton's 3rd law",
             description: "the <strong>shotgun</strong> fires <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
             maxCount: 1,
             count: 0,
@@ -1613,7 +1691,7 @@ const mod = {
             },
             requires: "super balls",
             effect() {
-                mod.bulletSize += 0.22
+                mod.bulletSize += 0.2
             },
             remove() {
                 mod.bulletSize = 1;
@@ -1621,7 +1699,7 @@ const mod = {
         },
         {
             name: "flechettes cartridges",
-            description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong class='color-g'>ammo</strong> cost are increases by <strong>3x</strong>",
+            description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong class='color-g'>ammo</strong> costs are <strong>tripled</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2279,7 +2357,7 @@ const mod = {
         },
         {
             name: "fracture analysis",
-            description: "bullet impacts do <strong>500%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
+            description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2385,7 +2463,7 @@ const mod = {
         },
         {
             name: "annihilation",
-            description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of base <strong class='color-f'>energy</strong>",
+            description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2401,7 +2479,7 @@ const mod = {
         },
         {
             name: "negative temperature",
-            description: "<strong>negative mass field</strong> uses <strong class='color-f'>energy</strong><br>to <strong class='color-s'>freeze</strong> mobs caught in it's effect",
+            description: "<strong>negative mass field</strong> uses <strong class='color-f'>energy</strong><br>to <strong class='color-s'>freeze</strong> each mob caught in it's effect",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2531,8 +2609,8 @@ const mod = {
             }
         },
         {
-            name: "flashbang",
-            description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>25%</strong> of your stored <strong class='color-f'>energy</strong>",
+            name: "dazzler",
+            description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>30%</strong> of your stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2544,6 +2622,24 @@ const mod = {
             },
             remove() {
                 mod.isCloakStun = false;
+            }
+        },
+        {
+            name: "discrete optimization",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong>delay</strong> after firing",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "metamaterial cloaking"
+            },
+            requires: "metamaterial cloaking",
+            effect() {
+                mod.aimDamage = 1.5
+                b.setFireCD();
+            },
+            remove() {
+                mod.aimDamage = 1
+                b.setFireCD();
             }
         },
         {
@@ -2784,5 +2880,9 @@ const mod = {
     armorFromPowerUps: null,
     bonusHealth: null,
     isIntangible: null,
-    isCloakStun: null
+    isCloakStun: null,
+    bonusEnergy: null,
+    healGiveMaxEnergy: null,
+    healMaxEnergyBonus: null,
+    aimDamage: null
 }

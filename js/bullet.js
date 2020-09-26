@@ -92,7 +92,7 @@ const b = {
   },
   fireCD: 1,
   setFireCD() {
-    b.fireCD = mod.fireRate * mod.slowFire * mod.rerollHaste / mod.fastTime
+    b.fireCD = mod.fireRate * mod.slowFire * mod.rerollHaste * mod.aimDamage / mod.fastTime
   },
   fireAttributes(dir, rotate = true) {
     if (rotate) {
@@ -439,7 +439,7 @@ const b = {
                 //move until you are touching the wall
                 Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2)))
               }
-
+              break
             }
           }
         } else {
@@ -694,7 +694,7 @@ const b = {
     // const FRICTION = mod.isFastDrones ? 0.008 : 0.0005
     const dir = mech.angle + 0.4 * (Math.random() - 0.5);
     const RADIUS = (4.5 + 3 * Math.random())
-    bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 8, RADIUS, {
+    bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle) + Math.random(), mech.pos.y + 30 * Math.sin(mech.angle) + Math.random(), 8, RADIUS, {
       angle: dir,
       inertia: Infinity,
       friction: 0.05,
@@ -762,19 +762,17 @@ const b = {
                   (powerUp[i].name !== "field" || !mod.isDeterminism)
                 ) {
                   //pick up nearby power ups
-                  if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 &&
-                    !game.isChoosing) {
+                  if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 && !game.isChoosing) {
                     powerUps.onPickUp(this.position);
                     powerUp[i].effect();
                     Matter.World.remove(engine.world, powerUp[i]);
                     powerUp.splice(i, 1);
                     if (mod.isDroneGrab) {
                       this.isImproved = true;
-                      const SCALE = 3.5
+                      const SCALE = 3
                       Matter.Body.scale(this, SCALE, SCALE);
                       this.lookFrequency = 30;
-                      this.endCycle += 2000
-                      // this.dmg *= 1.25;
+                      this.endCycle += 2500
                       this.frictionAir = 0
                     }
                     break;
@@ -1640,8 +1638,8 @@ const b = {
       name: "shotgun",
       description: "fire a <strong>burst</strong> of short range <strong> bullets</strong> <br><em>crouch to reduce recoil</em>",
       ammo: 0,
-      ammoPack: 7,
-      defaultAmmoPack: 7,
+      ammoPack: 6,
+      defaultAmmoPack: 6,
       have: false,
       fire() {
         let knock, spread
@@ -1658,7 +1656,7 @@ const b = {
         }
 
         if (mod.isShotgunRecoil) {
-          mech.fireCDcycle -= 15
+          mech.fireCDcycle -= 0.66 * (45 * b.fireCD)
           player.force.x -= 2 * knock * Math.cos(mech.angle)
           player.force.y -= 2 * knock * Math.sin(mech.angle) //reduce knock back in vertical direction to stop super jumps
         } else {
@@ -1679,10 +1677,10 @@ const b = {
               x: speed * Math.cos(dir),
               y: speed * Math.sin(dir)
             }
-            b.nail(pos, velocity, 1)
+            b.nail(pos, velocity, 1.2)
           }
         } else {
-          const side = 21
+          const side = 22
           for (let i = 0; i < 17; i++) {
             const me = bullet.length;
             const dir = mech.angle + (Math.random() - 0.5) * spread
