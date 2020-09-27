@@ -486,8 +486,9 @@ const mech = {
     if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
     if (mod.isBotArmor) dmg *= 0.95 ** mod.totalBots()
     if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
+    if (mod.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
     if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
-    if (mod.isTurret && mech.crouch) dmg *= 0.6;
+    if (mod.isTurret && mech.crouch) dmg *= 0.5;
     if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
       for (let i = 0, len = b.inventory.length; i < len; i++) {
         dmg *= 0.85 // 1 - 0.15
@@ -846,6 +847,7 @@ const mech = {
     }
   },
   holding() {
+    if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
     if (mech.holdingTarget) {
       mech.energy -= mech.fieldRegen;
       if (mech.energy < 0) mech.energy = 0;
@@ -863,7 +865,7 @@ const mech = {
     if (mech.holdingTarget) {
       if (keys[32] || game.mouseDownRight) {
         if (mech.energy > 0.001) {
-          mech.fireCDcycle = mech.cycle
+          if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
           mech.energy -= 0.001 / mod.throwChargeRate;
           mech.throwCharge += 0.5 * mod.throwChargeRate / mech.holdingTarget.mass
           //draw charge
@@ -976,6 +978,7 @@ const mech = {
     ctx.stroke();
   },
   grabPowerUp() { //look for power ups to grab with field
+    if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
     for (let i = 0, len = powerUp.length; i < len; ++i) {
       const dxP = mech.pos.x - powerUp[i].position.x;
       const dyP = mech.pos.y - powerUp[i].position.y;
@@ -1226,7 +1229,7 @@ const mech = {
   },
   fieldUpgrades: [{
       name: "field emitter",
-      description: "use <strong class='color-f'>energy</strong> to <strong>push</strong> mobs away<br><strong>throw</strong> blocks to <strong class='color-d'>damage</strong> mobs<br><strong>pick up</strong> power ups",
+      description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br><strong>throw</strong> blocks to <strong class='color-d'>damage</strong> mobs<br><strong>pick up</strong> power ups",
       effect: () => {
         game.replaceTextLog = true; //allow text over write
         mech.hold = function () {
@@ -1254,7 +1257,7 @@ const mech = {
       name: "standing wave harmonics",
       description: "three oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> has no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>",
       effect: () => {
-        mech.fieldHarmReduction = 0.20;
+        mech.fieldHarmReduction = 0.80;
         mech.fieldBlockCD = 0;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1527,7 +1530,7 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit short range plasma<br>plasma <strong class='color-d'>damages</strong> mobs<br>plasma <strong>pushes</strong> mobs and blocks away",
+      description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> mobs<br><strong>pushes</strong> mobs and blocks away",
       effect() {
         mech.fieldMeterColor = "#f0f"
         mech.hold = function () {
@@ -1790,11 +1793,9 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-            if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle //to disable cloak
           } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold and field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle //to disable cloak
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding target exists, and field button is not pressed
             mech.pickUp();
           } else {

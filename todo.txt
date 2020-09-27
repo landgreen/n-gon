@@ -1,8 +1,8 @@
-mod: ionization energy - heal power ups give you 4% max energy
-  requires mass-energy equivalence
+mod: decorrelation - 2 seconds after you don't use your gun or field  get 40% harm reduction
 
-mod: discrete optimization - 50% damage and 50% slow fire rotates
-  requires cloaking field
+mod: anticorrelation - 2 seconds after you don't use your gun or field  get 50% damage
+  requires decorrelation
+
 
 ************** TODO - n-gon **************
 
@@ -11,8 +11,6 @@ getting stuck above a mob can immobilize player
   occurs with Pauli exclusion, and time dilation field immunity - mod time-like world line
     add a knock to player mob collisions even while player is immune to damage
       keep the knock very small
-
-Mod to buff mass-energy-equivalence (maybe take no damage some % and do that dmb to a mob)
 
 bug - mine spawned one new mine every second
   after sticking to the top right corner of a wall
@@ -32,16 +30,6 @@ add a flag to some bullets to indicate that mobs can't learn the player position
 add some more computer / AI stuff to the level lore text
 
 mod - mines stun targets nearby when they explode
-
-cloaking field mods
-  much longer delay in firing, but a very large bonus
-  larger vision
-  return to stealth faster
-  +damage to nearby mobs
-  +damage to unaware mobs  (code for this doesn't seem to work)
-
-mod - negative mass field intangibility
-  doesn't seem that interesting
 
 mod - do something for 2 seconds after firing
   if (mech.fireCDcycle + 120)

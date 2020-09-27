@@ -1065,7 +1065,7 @@ const b = {
       onEnd() {},
       do() {
         if (this.lastLookCycle < game.cycle && !mech.isCloak) {
-          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 50
+          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 55
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1130,7 +1130,7 @@ const b = {
               const radius = 6 + 7 * Math.random()
               const SPEED = 29 - radius * 0.5; //(mech.crouch ? 32 : 20) - radius * 0.7;
               const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-              b.foam(this.position, velocity, radius + 9 * this.isUpgraded)
+              b.foam(this.position, velocity, radius + 11 * this.isUpgraded)
               break;
             }
           }
@@ -1230,7 +1230,7 @@ const b = {
                 bestVertexDistance = dist
               }
             }
-            const dmg = b.dmgScale * (0.06 + 0.075 * this.isUpgraded);
+            const dmg = b.dmgScale * (0.06 + 0.08 * this.isUpgraded);
             this.lockedOn.damage(dmg);
             this.lockedOn.locatePlayer();
 
@@ -1280,7 +1280,7 @@ const b = {
       explode: 0,
       onDmg() {
         if (this.lockedOn) {
-          const explosionRadius = Math.min(170 + 130 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
+          const explosionRadius = Math.min(170 + 140 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
           if (explosionRadius > 60) {
             this.explode = explosionRadius
             // 
@@ -2575,8 +2575,13 @@ const b = {
       ammoPack: 14,
       have: false,
       fire() {
-        b.drone(mech.crouch ? 45 : 1)
-        mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 13 : 5) * b.fireCD); // cool down
+        if (mech.crouch) {
+          b.drone(45)
+          mech.fireCDcycle = mech.cycle + Math.floor(17 * b.fireCD); // cool down
+        } else {
+          b.drone(1)
+          mech.fireCDcycle = mech.cycle + Math.floor(10 * b.fireCD); // cool down
+        }
       }
     },
     {

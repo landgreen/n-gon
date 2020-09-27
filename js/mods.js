@@ -94,6 +94,7 @@ const mod = {
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
+        if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
         return dmg * mod.slowFire * mod.aimDamage
     },
     totalBots() {
@@ -502,7 +503,7 @@ const mod = {
         },
         {
             name: "nail-bot upgrade",
-            description: "<strong>100%</strong> increased nail-bot <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
+            description: "<strong>125%</strong> increased <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -541,7 +542,7 @@ const mod = {
         },
         {
             name: "foam-bot upgrade",
-            description: "<strong>100%</strong> increased foam-bot <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
+            description: "<strong>125%</strong> increased <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -580,7 +581,7 @@ const mod = {
         },
         {
             name: "boom-bot upgrade",
-            description: "<strong>100%</strong> increased boom-bot <strong class='color-e'>explosion</strong> size<br><em>applies to all current and future boom-bots</em>",
+            description: "<strong>125%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size<br><em>applies to all current and future boom-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -619,7 +620,7 @@ const mod = {
         },
         {
             name: "laser-bot upgrade",
-            description: "<strong>100%</strong> increased laser-bot <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
+            description: "<strong>125%</strong> increased laser <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -766,6 +767,38 @@ const mod = {
             }
         },
         {
+            name: "decorrelation",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.isNoFireDefense = true
+            },
+            remove() {
+                mod.isNoFireDefense = false
+            }
+        },
+        {
+            name: "anticorrelation",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isNoFireDefense
+            },
+            requires: "full annealing",
+            effect() {
+                mod.isNoFireDamage = true
+            },
+            remove() {
+                mod.isNoFireDamage = false
+            }
+        },
+        {
             name: "non-Newtonian armor",
             description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
             maxCount: 1,
@@ -895,7 +928,7 @@ const mod = {
         },
         {
             name: "1st ionization energy",
-            description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>4%<strong>",
+            description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>4%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1298,7 +1331,7 @@ const mod = {
         },
         {
             name: "gun turret",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong> when <strong>crouching</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2413,7 +2446,7 @@ const mod = {
         },
         {
             name: "plasma jet",
-            description: "increase <strong>plasma torch's</strong> range by <strong>27%</strong>",
+            description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2429,7 +2462,7 @@ const mod = {
         },
         {
             name: "plasma-bot",
-            description: "a bot uses <strong class='color-f'>energy</strong> to emit short range <strong>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2884,5 +2917,7 @@ const mod = {
     bonusEnergy: null,
     healGiveMaxEnergy: null,
     healMaxEnergyBonus: null,
-    aimDamage: null
+    aimDamage: null,
+    isNoFireDefense: null,
+    isNoFireDamage: null
 }

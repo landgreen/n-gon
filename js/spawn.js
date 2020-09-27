@@ -233,7 +233,7 @@ const spawn = {
     me.isBoss = true;
     me.frictionAir = 0.025
     me.seeAtDistance2 = 9000000;
-    me.accelMag = 0.0006 * game.accelScale;
+    me.accelMag = 0.0005 * game.accelScale;
     Matter.Body.setDensity(me, 0.002); //normal is 0.001
     me.collisionFilter.mask = cat.bullet | cat.player
     me.memory = Infinity;
