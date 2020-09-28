@@ -1,8 +1,5 @@
-mod: decorrelation - 2 seconds after you don't use your gun or field  get 40% harm reduction
-
-mod: anticorrelation - 2 seconds after you don't use your gun or field  get 50% damage
-  requires decorrelation
-
+mod: orbital-bot - 2 bots orbit you and damage mobs
+mod: orbital-bot upgrade - orbital bots orbit farther away
 
 ************** TODO - n-gon **************
 
@@ -50,10 +47,7 @@ a bot that eats up health and ammo, but poops a reroll after picking up 2 power 
   disable crystalized armor?
   could convert rerolls, ammo, and health into mods instead
 
-laser-bot orbits player
-bot that does AOE damage while it rotates around player
-  no physics / collisions
-  cap 3 ?
+
 
 mod: radiation effects can spread to nearby mobs
 

@@ -98,7 +98,7 @@ const mod = {
         return dmg * mod.slowFire * mod.aimDamage
     },
     totalBots() {
-        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount
+        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
     },
     mods: [{
             name: "integrated armament",
@@ -641,6 +641,46 @@ const mod = {
             }
         },
         {
+            name: "orbital-bot",
+            description: "2 bots are locked in <strong>orbit</strong> around you<br><strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                mod.orbitBotCount += 2;
+                b.orbitBot();
+                b.orbitBot();
+            },
+            remove() {
+                mod.orbitBotCount = 0;
+            }
+        },
+        {
+            name: "orbit-bot upgrade",
+            description: "<strong>125%</strong> increased orbital radius <br><em>applies to all current and future orbit-bots</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.orbitBotCount > 2
+            },
+            requires: "2 or more orbit bots",
+            effect() {
+                mod.isOrbitBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'orbit') bullet[i].isUpgraded = true
+                }
+            },
+            remove() {
+                mod.isOrbitBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType = 'orbit') bullet[i].isUpgraded = false
+                }
+            }
+        },
+        {
             name: "perimeter defense",
             description: "reduce <strong class='color-harm'>harm</strong> by <strong>4%</strong><br>for each of your permanent <strong>bots</strong>",
             maxCount: 1,
@@ -691,6 +731,10 @@ const mod = {
                     b.plasmaBot();
                 }
                 mod.plasmaBotCount *= 2
+                for (let i = 0; i < mod.orbitBotCount; i++) {
+                    b.orbitBot();
+                }
+                mod.orbitBotCount *= 2
             },
             remove() {}
         },
@@ -2811,6 +2855,7 @@ const mod = {
     foamBotCount: null,
     boomBotCount: null,
     plasmaBotCount: null,
+    orbitBotCount: null,
     collisionImmuneCycles: null,
     blockDmg: null,
     isPiezo: null,
@@ -2896,6 +2941,7 @@ const mod = {
     isFoamBotUpgrade: null,
     isLaserBotUpgrade: null,
     isBoomBotUpgrade: null,
+    isOrbitBotUpgrade: null,
     isDroneGrab: null,
     isOneGun: null,
     isDamageForGuns: null,

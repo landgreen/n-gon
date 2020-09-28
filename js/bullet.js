@@ -1013,6 +1013,7 @@ const b = {
     for (let i = 0; i < mod.foamBotCount; i++) b.foamBot()
     for (let i = 0; i < mod.boomBotCount; i++) b.boomBot()
     for (let i = 0; i < mod.plasmaBotCount; i++) b.plasmaBot()
+    for (let i = 0; i < mod.orbitBotCount; i++) b.orbitBot()
     if (mod.isIntangible && mech.isCloak) {
       for (let i = 0; i < bullet.length; i++) {
         if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
@@ -1020,7 +1021,11 @@ const b = {
     }
   },
   randomBot(where = mech.pos, isKeep = true) {
-    if (Math.random() < 0.25) {
+    if (Math.random() < 0.2) {
+      b.orbitBot(where)
+      b.orbitBot(where)
+      if (isKeep) mod.orbitBotCount += 2
+    } else if (Math.random() < 0.25) {
       b.nailBot(where)
       if (isKeep) mod.nailBotCount++;
     } else if (Math.random() < 0.33) {
@@ -1511,6 +1516,65 @@ const b = {
         }
       }
     })
+    World.add(engine.world, bullet[me]); //add bullet to world
+  },
+  orbitBot(position = mech.pos) {
+    const me = bullet.length;
+    bullet[me] = Bodies.polygon(position.x, position.y, 9, 7, {
+      isUpgraded: mod.isOrbitBotUpgrade,
+      botType: "orbit",
+      friction: 0,
+      frictionStatic: 0,
+      frictionAir: 0,
+      restitution: 0,
+      dmg: 0, // 0.14   //damage done in addition to the damage from momentum
+      minDmgSpeed: 0,
+      endCycle: Infinity,
+      classType: "bullet",
+      collisionFilter: {
+        category: cat.bullet,
+        mask: 0 //cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+      },
+      onDmg() {},
+      onEnd() {},
+      range: 100 + (100 + 220 * mod.isOrbitBotUpgrade) * (0.7 + 0.6 * Math.random()),
+      orbitalSpeed: 0,
+      phase: 2 * Math.PI * Math.random(),
+      // smoothPlayerPosition: {
+      //   x: player.position.x,
+      //   y: player.position.y
+      // },
+      do() {
+        //check for damage
+        if (!mech.isCloak && !mech.isBodiesAsleep) { //if time dilation isn't active
+          q = Matter.Query.point(mob, this.position)
+          for (let i = 0; i < q.length; i++) {
+            let dmg = 2.5 * b.dmgScale
+            q[i].damage(dmg);
+            q[i].foundPlayer();
+            game.drawList.push({ //add dmg to draw queue
+              x: this.position.x,
+              y: this.position.y,
+              radius: Math.log(2 * dmg + 1.1) * 40,
+              color: 'rgba(0,0,0,0.4)',
+              time: game.drawTime
+            });
+          }
+        }
+
+        //orbit player
+        const time = game.cycle * this.orbitalSpeed + this.phase
+        const orbit = {
+          x: Math.cos(time),
+          y: 1.1 * Math.sin(time)
+        }
+        // Matter.Body.setPosition(this, Vector.add(player.position, Vector.mult(orbit, this.range))) //bullets move with player
+        // this.smoothPlayerPosition = Vector.add(Vector.mult(Vector.add(player.position, Vector.mult(player.velocity, 5)), 0.1), Vector.mult(this.smoothPlayerPosition, 0.9))
+        // this.smoothPlayerPosition = Vector.add(Vector.mult(player.position, 0.1), Vector.mult(this.smoothPlayerPosition, 0.9))
+        Matter.Body.setPosition(this, Vector.add(player.position, Vector.mult(orbit, this.range))) //bullets move with player
+      }
+    })
+    bullet[me].orbitalSpeed = Math.sqrt(0.7 / bullet[me].range)
     World.add(engine.world, bullet[me]); //add bullet to world
   },
   // **************************************************************************************************

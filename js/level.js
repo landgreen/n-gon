@@ -17,7 +17,8 @@ const level = {
       // mech.isCloak = true;
       // mech.setField("metamaterial cloaking")
       // b.giveGuns("laser")
-      // mod.giveMod("Bayesian statistics");
+      // mod.giveMod("orbit-bot");
+
 
       level.intro(); //starting level
       // level.testing(); //not in rotation

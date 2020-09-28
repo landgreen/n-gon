@@ -1368,7 +1368,7 @@ const mech = {
               }
             } else if (mod.isMissileField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.55;
+              mech.energy -= 0.5;
               b.missile({
                   x: mech.pos.x + 40 * Math.cos(mech.angle),
                   y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
@@ -1382,7 +1382,7 @@ const mech = {
               b.iceIX(1)
             } else {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-              mech.energy -= 0.3;
+              mech.energy -= 0.33;
               b.drone(1)
             }
 
