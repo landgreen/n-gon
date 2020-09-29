@@ -3,6 +3,11 @@ mod: orbital-bot upgrade - orbital bots orbit farther away
 
 ************** TODO - n-gon **************
 
+mob: springer has a constraint issue, not pulling it
+
+mod: laser gets increased damage with each reflection
+mod: laser is 3 thick beams that look like one, but can separate into three at corners
+
 getting stuck above a mob can immobilize player
   just allow player to jump on mobs again?
   occurs with Pauli exclusion, and time dilation field immunity - mod time-like world line

@@ -761,8 +761,6 @@ const mech = {
   },
   setMaxEnergy() {
     mech.maxEnergy = 1 + mod.bonusEnergy + mod.healMaxEnergyBonus
-    if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
-    mech.displayHealth();
   },
   fieldMeterColor: "#0cf",
   drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
@@ -2122,7 +2120,7 @@ const mech = {
                     y: powerUp[i].velocity.y * 0.11
                   });
                   if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
-                    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
+                    powerUps.onPickUp(powerUp[i].position);
                     powerUp[i].effect();
                     Matter.World.remove(engine.world, powerUp[i]);
                     powerUp.splice(i, 1);

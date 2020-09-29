@@ -510,7 +510,10 @@ const game = {
         // move bots to follow player
         for (let i = 0; i < bullet.length; i++) {
           if (bullet[i].botType) {
-            Matter.Body.setPosition(bullet[i], player.position);
+            Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+              x: 250 * (Math.random() - 0.5),
+              y: 250 * (Math.random() - 0.5)
+            }));
             Matter.Body.setVelocity(bullet[i], {
               x: 0,
               y: 0
@@ -869,7 +872,10 @@ const game = {
           // move bots
           for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType) {
-              Matter.Body.setPosition(bullet[i], player.position);
+              Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                x: 250 * (Math.random() - 0.5),
+                y: 250 * (Math.random() - 0.5)
+              }));
               Matter.Body.setVelocity(bullet[i], {
                 x: 0,
                 y: 0

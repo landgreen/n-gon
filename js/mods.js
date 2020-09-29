@@ -98,7 +98,7 @@ const mod = {
         return dmg * mod.slowFire * mod.aimDamage
     },
     totalBots() {
-        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
+        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + Math.floor(mod.orbitBotCount / (2 + mod.isOrbitBotUpgrade))
     },
     mods: [{
             name: "integrated armament",
@@ -642,7 +642,7 @@ const mod = {
         },
         {
             name: "orbital-bot",
-            description: "2 bots are locked in <strong>orbit</strong> around you<br><strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
+            description: "<strong>2</strong> bots are locked in <strong>orbit</strong> around you<br><strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -650,9 +650,10 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.orbitBotCount += 2;
-                b.orbitBot();
-                b.orbitBot();
+                for (let i = 0; i < 2 + mod.isOrbitBotUpgrade; i++) {
+                    b.orbitBot();
+                    mod.orbitBotCount++;
+                }
             },
             remove() {
                 mod.orbitBotCount = 0;
@@ -660,23 +661,32 @@ const mod = {
         },
         {
             name: "orbit-bot upgrade",
-            description: "<strong>125%</strong> increased orbital radius <br><em>applies to all current and future orbit-bots</em>",
+            description: "get 3 orbital-bots instead of 2<br><em>applies to all current and future orbit-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
                 return mod.orbitBotCount > 2
             },
-            requires: "2 or more orbit bots",
+            requires: "2 or more orbital bots",
             effect() {
                 mod.isOrbitBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'orbit') bullet[i].isUpgraded = true
+                    if (bullet[i].botType === 'orbit') {
+                        bullet[i].isUpgraded = mod.isOrbitBotUpgrade
+                        bullet[i].range = 190 + 50 * mod.isOrbitBotUpgrade
+                        bullet[i].orbitalSpeed = Math.sqrt(0.25 / bullet[i].range)
+
+                    }
                 }
+                for (let i = 0, len = Math.floor(mod.orbitBotCount / 2); i < len; i++) {
+                    b.orbitBot();
+                }
+
             },
             remove() {
                 mod.isOrbitBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'orbit') bullet[i].isUpgraded = false
+                    if (bullet[i].botType === 'orbit') bullet[i].isUpgraded = false
                 }
             }
         },
@@ -1343,7 +1353,7 @@ const mod = {
         },
         {
             name: "catabolism",
-            description: "gain <strong class='color-g'>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>drains <strong>2%</strong> of <strong>max health</strong>",
+            description: "gain <strong class='color-g'>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>drains <strong>2.3%</strong> of <strong>max health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {

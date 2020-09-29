@@ -417,6 +417,8 @@ const spawn = {
       stiffness: springStiffness,
       damping: springDampening
     });
+    World.add(engine.world, cons[cons.length - 1]);
+
     cons[len].length = 100 + 1.5 * radius;
     me.cons = cons[len];
 
@@ -431,8 +433,10 @@ const spawn = {
       stiffness: springStiffness,
       damping: springDampening
     });
+    World.add(engine.world, cons[cons.length - 1]);
     cons[len2].length = 100 + 1.5 * radius;
     me.cons2 = cons[len2];
+
 
     me.onDeath = function () {
       this.removeCons();

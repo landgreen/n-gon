@@ -17,7 +17,10 @@ const level = {
       // mech.isCloak = true;
       // mech.setField("metamaterial cloaking")
       // b.giveGuns("laser")
-      // mod.giveMod("orbit-bot");
+      // for (let i = 0; i < 10; i++) {
+      //   mod.giveMod("orbital-bot");
+      // }
+      // mod.giveMod("orbit-bot upgrade")
 
 
       level.intro(); //starting level
@@ -4341,7 +4344,11 @@ const level = {
         // move bots to follow player
         for (let i = 0; i < bullet.length; i++) {
           if (bullet[i].botType) {
-            Matter.Body.setPosition(bullet[i], this.portalPair.portal.position);
+            // Matter.Body.setPosition(bullet[i], this.portalPair.portal.position);
+            Matter.Body.setPosition(bullet[i], Vector.add(this.portalPair.portal.position, {
+              x: 250 * (Math.random() - 0.5),
+              y: 250 * (Math.random() - 0.5)
+            }));
             Matter.Body.setVelocity(bullet[i], {
               x: 0,
               y: 0

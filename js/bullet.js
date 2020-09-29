@@ -1021,10 +1021,11 @@ const b = {
     }
   },
   randomBot(where = mech.pos, isKeep = true) {
-    if (Math.random() < 0.2) {
-      b.orbitBot(where)
-      b.orbitBot(where)
-      if (isKeep) mod.orbitBotCount += 2
+    if (isKeep && Math.random() < 0.2) {
+      for (let i = 0; i < 2 + mod.isOrbitBotUpgrade; i++) {
+        b.orbitBot();
+        mod.orbitBotCount++;
+      }
     } else if (Math.random() < 0.25) {
       b.nailBot(where)
       if (isKeep) mod.nailBotCount++;
@@ -1537,13 +1538,9 @@ const b = {
       },
       onDmg() {},
       onEnd() {},
-      range: 100 + (100 + 220 * mod.isOrbitBotUpgrade) * (0.7 + 0.6 * Math.random()),
+      range: 190 + 50 * mod.isOrbitBotUpgrade, //range is set in bot upgrade too! //150 + (80 + 100 * mod.isOrbitBotUpgrade) * Math.random(), // + 5 * mod.orbitBotCount,
       orbitalSpeed: 0,
       phase: 2 * Math.PI * Math.random(),
-      // smoothPlayerPosition: {
-      //   x: player.position.x,
-      //   y: player.position.y
-      // },
       do() {
         //check for damage
         if (!mech.isCloak && !mech.isBodiesAsleep) { //if time dilation isn't active
@@ -1561,21 +1558,33 @@ const b = {
             });
           }
         }
-
         //orbit player
         const time = game.cycle * this.orbitalSpeed + this.phase
         const orbit = {
           x: Math.cos(time),
-          y: 1.1 * Math.sin(time)
+          y: Math.sin(time) //*1.1
         }
-        // Matter.Body.setPosition(this, Vector.add(player.position, Vector.mult(orbit, this.range))) //bullets move with player
-        // this.smoothPlayerPosition = Vector.add(Vector.mult(Vector.add(player.position, Vector.mult(player.velocity, 5)), 0.1), Vector.mult(this.smoothPlayerPosition, 0.9))
-        // this.smoothPlayerPosition = Vector.add(Vector.mult(player.position, 0.1), Vector.mult(this.smoothPlayerPosition, 0.9))
-        Matter.Body.setPosition(this, Vector.add(player.position, Vector.mult(orbit, this.range))) //bullets move with player
+        Matter.Body.setPosition(this, Vector.add(mech.pos, Vector.mult(orbit, this.range))) //bullets move with player
       }
     })
-    bullet[me].orbitalSpeed = Math.sqrt(0.7 / bullet[me].range)
+    // bullet[me].orbitalSpeed = Math.sqrt(0.7 / bullet[me].range)
+    bullet[me].orbitalSpeed = Math.sqrt(0.25 / bullet[me].range) //also set in bot upgrade too!
+    // bullet[me].phase = (index / mod.orbitBotCount) * 2 * Math.PI
+
     World.add(engine.world, bullet[me]); //add bullet to world
+
+    //reorder orbital bot positions around a circle
+    let totalOrbitalBots = 0
+    for (let i = 0; i < bullet.length; i++) {
+      if (bullet[i].botType === 'orbit') totalOrbitalBots++
+    }
+    let index = 0
+    for (let i = 0; i < bullet.length; i++) {
+      if (bullet[i].botType === 'orbit') {
+        bullet[i].phase = (index / totalOrbitalBots) * 2 * Math.PI
+        index++
+      }
+    }
   },
   // **************************************************************************************************
   // **************************************************************************************************
