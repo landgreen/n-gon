@@ -17,9 +17,9 @@ const level = {
       // mech.isCloak = true;
       // mech.setField("metamaterial cloaking")
       // b.giveGuns("laser")
-      // for (let i = 0; i < 10; i++) {
-      //   mod.giveMod("orbital-bot");
-      // }
+      for (let i = 0; i < 1; i++) {
+        mod.giveMod("orbital-bot");
+      }
       // mod.giveMod("orbit-bot upgrade")
 
 

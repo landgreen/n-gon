@@ -509,9 +509,9 @@ const mech = {
       if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
         if (mod.isDeathAvoid && powerUps.reroll.rerolls) {
           powerUps.reroll.changeRerolls(-1)
+          game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> left</span>`, 420)
           mech.energy = mech.maxEnergy
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
-          game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)
           game.wipe = function () { //set wipe to have trails
             ctx.fillStyle = "rgba(255,255,255,0.03)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -537,12 +537,11 @@ const mech = {
         if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
           mech.health = 0.05
           powerUps.reroll.changeRerolls(-1)
+          game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> left</span>`, 420)
           for (let i = 0; i < 4; i++) {
             powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
           }
-
           mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
-          game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1/${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> consumed</span>`, 420)
           // game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
 
           game.wipe = function () { //set wipe to have trails
@@ -845,7 +844,7 @@ const mech = {
     }
   },
   holding() {
-    if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
+    if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle - 1
     if (mech.holdingTarget) {
       mech.energy -= mech.fieldRegen;
       if (mech.energy < 0) mech.energy = 0;
@@ -976,7 +975,7 @@ const mech = {
     ctx.stroke();
   },
   grabPowerUp() { //look for power ups to grab with field
-    if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
+    if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle - 1
     for (let i = 0, len = powerUp.length; i < len; ++i) {
       const dxP = mech.pos.x - powerUp[i].position.x;
       const dyP = mech.pos.y - powerUp[i].position.y;
@@ -1807,7 +1806,7 @@ const mech = {
               mech.isCloak = true //enter cloak
               if (mod.isIntangible) {
                 for (let i = 0; i < bullet.length; i++) {
-                  if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
+                  if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
                 }
               }
             }
@@ -1815,7 +1814,7 @@ const mech = {
             mech.isCloak = false
             if (mod.isIntangible) {
               for (let i = 0; i < bullet.length; i++) {
-                if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
               }
             }
             if (mod.isCloakStun) { //stun nearby mobs after exiting cloak

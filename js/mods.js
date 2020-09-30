@@ -98,7 +98,7 @@ const mod = {
         return dmg * mod.slowFire * mod.aimDamage
     },
     totalBots() {
-        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + Math.floor(mod.orbitBotCount / (2 + mod.isOrbitBotUpgrade))
+        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
     },
     mods: [{
             name: "integrated armament",
@@ -513,13 +513,13 @@ const mod = {
             effect() {
                 mod.isNailBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'nail') bullet[i].isUpgraded = true
+                    if (bullet[i].botType === 'nail') bullet[i].isUpgraded = true
                 }
             },
             remove() {
                 mod.isNailBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'nail') bullet[i].isUpgraded = false
+                    if (bullet[i].botType === 'nail') bullet[i].isUpgraded = false
                 }
             }
         },
@@ -552,13 +552,13 @@ const mod = {
             effect() {
                 mod.isFoamBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'foam') bullet[i].isUpgraded = true
+                    if (bullet[i].botType === 'foam') bullet[i].isUpgraded = true
                 }
             },
             remove() {
                 mod.isFoamBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'foam') bullet[i].isUpgraded = false
+                    if (bullet[i].botType === 'foam') bullet[i].isUpgraded = false
                 }
             }
         },
@@ -591,13 +591,13 @@ const mod = {
             effect() {
                 mod.isBoomBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'boom') bullet[i].isUpgraded = true
+                    if (bullet[i].botType === 'boom') bullet[i].isUpgraded = true
                 }
             },
             remove() {
                 mod.isBoomBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'boom') bullet[i].isUpgraded = false
+                    if (bullet[i].botType === 'boom') bullet[i].isUpgraded = false
                 }
             }
         },
@@ -630,19 +630,19 @@ const mod = {
             effect() {
                 mod.isLaserBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'laser') bullet[i].isUpgraded = true
+                    if (bullet[i].botType === 'laser') bullet[i].isUpgraded = true
                 }
             },
             remove() {
                 mod.isLaserBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType = 'laser') bullet[i].isUpgraded = false
+                    if (bullet[i].botType === 'laser') bullet[i].isUpgraded = false
                 }
             }
         },
         {
             name: "orbital-bot",
-            description: "<strong>2</strong> bots are locked in <strong>orbit</strong> around you<br><strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
+            description: "a bot is locked in <strong>orbit</strong> around you<br><strong class='color-d'>damages</strong> and <strong>stuns</strong> mobs on <strong>contact</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -650,36 +650,26 @@ const mod = {
             },
             requires: "",
             effect() {
-                for (let i = 0; i < 2 + mod.isOrbitBotUpgrade; i++) {
-                    b.orbitBot();
-                    mod.orbitBotCount++;
-                }
+                b.orbitBot();
+                mod.orbitBotCount++;
             },
             remove() {
                 mod.orbitBotCount = 0;
             }
         },
         {
-            name: "orbit-bot upgrade",
-            description: "get 3 orbital-bots instead of 2<br><em>applies to all current and future orbit-bots</em>",
+            name: "orbital-bot upgrade",
+            description: "<strong>125%</strong> increased <strong class='color-d'>damage</strong> and <strong>stun</strong> duration<br><em>applies to all current and future orbit-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.orbitBotCount > 2
+                return mod.orbitBotCount > 1
             },
             requires: "2 or more orbital bots",
             effect() {
                 mod.isOrbitBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType === 'orbit') {
-                        bullet[i].isUpgraded = mod.isOrbitBotUpgrade
-                        bullet[i].range = 190 + 50 * mod.isOrbitBotUpgrade
-                        bullet[i].orbitalSpeed = Math.sqrt(0.25 / bullet[i].range)
-
-                    }
-                }
-                for (let i = 0, len = Math.floor(mod.orbitBotCount / 2); i < len; i++) {
-                    b.orbitBot();
+                    if (bullet[i].botType === 'orbit') bullet[i].isUpgraded = true
                 }
 
             },

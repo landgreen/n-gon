@@ -1,9 +1,12 @@
-mod: orbital-bot - 2 bots orbit you and damage mobs
-mod: orbital-bot upgrade - orbital bots orbit farther away
+mod: orbital-bot - back to just 1 bot, but the bot can stun and hit mobs from a larger range
+
 
 ************** TODO - n-gon **************
 
-mob: springer has a constraint issue, not pulling it
+Ψ(t) collapse doesn't seem to work properly on custom links
+
+mod: take less harm if you are moving fast
+  require squirrel cage rotor
 
 mod: laser gets increased damage with each reflection
 mod: laser is 3 thick beams that look like one, but can separate into three at corners

@@ -1021,11 +1021,9 @@ const b = {
     }
   },
   randomBot(where = mech.pos, isKeep = true) {
-    if (isKeep && Math.random() < 0.2) {
-      for (let i = 0; i < 2 + mod.isOrbitBotUpgrade; i++) {
-        b.orbitBot();
-        mod.orbitBotCount++;
-      }
+    if (Math.random() < 0.2) {
+      b.orbitBot();
+      if (isKeep) mod.orbitBotCount++;
     } else if (Math.random() < 0.25) {
       b.nailBot(where)
       if (isKeep) mod.nailBotCount++;
@@ -1521,12 +1519,14 @@ const b = {
   },
   orbitBot(position = mech.pos) {
     const me = bullet.length;
-    bullet[me] = Bodies.polygon(position.x, position.y, 9, 7, {
+    bullet[me] = Bodies.polygon(position.x, position.y, 9, 12, {
       isUpgraded: mod.isOrbitBotUpgrade,
       botType: "orbit",
       friction: 0,
       frictionStatic: 0,
-      frictionAir: 0,
+      frictionAir: 1,
+      isStatic: true,
+      isSensor: true,
       restitution: 0,
       dmg: 0, // 0.14   //damage done in addition to the damage from momentum
       minDmgSpeed: 0,
@@ -1544,9 +1544,24 @@ const b = {
       do() {
         //check for damage
         if (!mech.isCloak && !mech.isBodiesAsleep) { //if time dilation isn't active
-          q = Matter.Query.point(mob, this.position)
+
+
+          // q = Matter.Query.point(mob, this.position)
+          // q = Matter.Query.collides(this, mob)
+          const size = 30
+          q = Matter.Query.region(mob, {
+            min: {
+              x: this.position.x - size,
+              y: this.position.y - size
+            },
+            max: {
+              x: this.position.x + size,
+              y: this.position.y + size
+            }
+          })
           for (let i = 0; i < q.length; i++) {
-            let dmg = 2.5 * b.dmgScale
+            mobs.statusStun(q[i], this.isUpgraded ? 240 : 120)
+            const dmg = 1 * b.dmgScale * (this.isUpgraded ? 2.25 : 1)
             q[i].damage(dmg);
             q[i].foundPlayer();
             game.drawList.push({ //add dmg to draw queue
