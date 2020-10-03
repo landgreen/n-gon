@@ -376,6 +376,164 @@ const b = {
       }
     }
   },
+  laser(where = {
+    x: mech.pos.x + 20 * Math.cos(mech.angle),
+    y: mech.pos.y + 20 * Math.sin(mech.angle)
+  }, angle = mech.angle, dmg = mod.laserDamage, reflections = mod.laserReflections, isThickBeam = false) {
+    const reflectivity = 1 - 1 / (reflections * 1.5)
+    let damage = b.dmgScale * dmg
+    let best = {
+      x: null,
+      y: null,
+      dist2: Infinity,
+      who: null,
+      v1: null,
+      v2: null
+    };
+    const color = "#f00";
+    const range = 3000;
+    const path = [{
+        x: where.x,
+        y: where.y
+      },
+      {
+        x: where.x + range * Math.cos(angle),
+        y: where.y + range * Math.sin(angle)
+      }
+    ];
+    const vertexCollision = function (v1, v1End, domain) {
+      for (let i = 0; i < domain.length; ++i) {
+        let vertices = domain[i].vertices;
+        const len = vertices.length - 1;
+        for (let j = 0; j < len; j++) {
+          results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+          if (results.onLine1 && results.onLine2) {
+            const dx = v1.x - results.x;
+            const dy = v1.y - results.y;
+            const dist2 = dx * dx + dy * dy;
+            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+              best = {
+                x: results.x,
+                y: results.y,
+                dist2: dist2,
+                who: domain[i],
+                v1: vertices[j],
+                v2: vertices[j + 1]
+              };
+            }
+          }
+        }
+        results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+        if (results.onLine1 && results.onLine2) {
+          const dx = v1.x - results.x;
+          const dy = v1.y - results.y;
+          const dist2 = dx * dx + dy * dy;
+          if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+            best = {
+              x: results.x,
+              y: results.y,
+              dist2: dist2,
+              who: domain[i],
+              v1: vertices[0],
+              v2: vertices[len]
+            };
+          }
+        }
+      }
+    };
+
+    const checkForCollisions = function () {
+      best = {
+        x: null,
+        y: null,
+        dist2: Infinity,
+        who: null,
+        v1: null,
+        v2: null
+      };
+      vertexCollision(path[path.length - 2], path[path.length - 1], mob);
+      vertexCollision(path[path.length - 2], path[path.length - 1], map);
+      vertexCollision(path[path.length - 2], path[path.length - 1], body);
+    };
+    const laserHitMob = function () {
+      if (best.who.alive) {
+        best.who.damage(damage);
+        best.who.locatePlayer();
+        ctx.fillStyle = color; //draw mob damage circle
+        ctx.beginPath();
+        ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(damage) * 100, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    };
+    const reflection = function () { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+      const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
+      const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
+      const nn = Vector.mult(n, 2 * Vector.dot(d, n));
+      const r = Vector.normalise(Vector.sub(d, nn));
+      path[path.length] = Vector.add(Vector.mult(r, range), path[path.length - 1]);
+    };
+
+    checkForCollisions();
+    let lastBestOdd
+    let lastBestEven = best.who //used in hack below
+    if (best.dist2 !== Infinity) { //if hitting something
+      path[path.length - 1] = {
+        x: best.x,
+        y: best.y
+      };
+      laserHitMob();
+      for (let i = 0; i < reflections; i++) {
+        reflection();
+        checkForCollisions();
+        if (best.dist2 !== Infinity) { //if hitting something
+          lastReflection = best
+
+          path[path.length - 1] = {
+            x: best.x,
+            y: best.y
+          };
+          damage *= reflectivity
+          laserHitMob();
+          //I'm not clear on how this works, but it gets ride of a bug where the laser reflects inside a block, often vertically.
+          //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
+          if (i % 2) {
+            if (lastBestOdd === best.who) break
+          } else {
+            lastBestOdd = best.who
+            if (lastBestEven === best.who) break
+          }
+        } else {
+          break
+        }
+      }
+    }
+    if (isThickBeam) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 8
+      ctx.globalAlpha = 0.5;
+      for (let i = 1, len = path.length; i < len; ++i) {
+        ctx.beginPath();
+        ctx.moveTo(path[i - 1].x, path[i - 1].y);
+        ctx.lineTo(path[i].x, path[i].y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2
+      ctx.lineDashOffset = 300 * Math.random()
+      ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
+      for (let i = 1, len = path.length; i < len; ++i) {
+        ctx.beginPath();
+        ctx.moveTo(path[i - 1].x, path[i - 1].y);
+        ctx.lineTo(path[i].x, path[i].y);
+        ctx.stroke();
+        ctx.globalAlpha *= reflectivity; //reflections are less intense
+      }
+      ctx.setLineDash([0, 0]);
+      ctx.globalAlpha = 1;
+    }
+  },
   mine(where, velocity, angle = 0, isAmmoBack = false) {
     const bIndex = bullet.length;
     bullet[bIndex] = Bodies.rectangle(where.x, where.y, 45, 16, {
@@ -1544,11 +1702,9 @@ const b = {
       do() {
         //check for damage
         if (!mech.isCloak && !mech.isBodiesAsleep) { //if time dilation isn't active
-
-
           // q = Matter.Query.point(mob, this.position)
           // q = Matter.Query.collides(this, mob)
-          const size = 30
+          const size = 33
           q = Matter.Query.region(mob, {
             min: {
               x: this.position.x - size,
@@ -1560,8 +1716,8 @@ const b = {
             }
           })
           for (let i = 0; i < q.length; i++) {
-            mobs.statusStun(q[i], this.isUpgraded ? 240 : 120)
-            const dmg = 1 * b.dmgScale * (this.isUpgraded ? 2.25 : 1)
+            mobs.statusStun(q[i], 180)
+            const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.25 : 1) * (mod.isCrit ? 4 : 1)
             q[i].damage(dmg);
             q[i].foundPlayer();
             game.drawList.push({ //add dmg to draw queue
@@ -3066,159 +3222,40 @@ const b = {
       ammoPack: Infinity,
       have: false,
       nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
-      holdDamage: 1,
-      holdCount: 0,
-      healthLost: 0,
       fire() {
-        mech.fireCDcycle = mech.cycle
-
-        const reflectivity = 1 - 1 / (mod.laserReflections * 1.5)
-        let damage = b.dmgScale * mod.laserDamage * this.holdDamage
         if (mech.energy < mod.laserFieldDrain) {
           mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
         } else {
+          mech.fireCDcycle = mech.cycle
           mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
-          let best = {
-            x: null,
-            y: null,
-            dist2: Infinity,
-            who: null,
-            v1: null,
-            v2: null
-          };
-          const color = "#f00";
-          const range = 3000;
-          const path = [{
+          if (mod.isWideLaser) {
+            const off = 8
+            const dmg = 0.6 * mod.laserDamage //  5 * 0.4 = 200% more damage
+            // ctx.lineCap = 'butt';
+            b.laser({
               x: mech.pos.x + 20 * Math.cos(mech.angle),
               y: mech.pos.y + 20 * Math.sin(mech.angle)
-            },
-            {
-              x: mech.pos.x + range * Math.cos(mech.angle),
-              y: mech.pos.y + range * Math.sin(mech.angle)
+            }, mech.angle, dmg, 0, true)
+            for (let i = 1; i < 3; i++) {
+              b.laser(Vector.add({
+                x: mech.pos.x + 20 * Math.cos(mech.angle),
+                y: mech.pos.y + 20 * Math.sin(mech.angle)
+              }, {
+                x: i * off * Math.cos(mech.angle + Math.PI / 2),
+                y: i * off * Math.sin(mech.angle + Math.PI / 2)
+              }), mech.angle, dmg, 0, true)
+              b.laser(Vector.add({
+                x: mech.pos.x + 20 * Math.cos(mech.angle),
+                y: mech.pos.y + 20 * Math.sin(mech.angle)
+              }, {
+                x: i * off * Math.cos(mech.angle - Math.PI / 2),
+                y: i * off * Math.sin(mech.angle - Math.PI / 2)
+              }), mech.angle, dmg, 0, true)
             }
-          ];
-          const vertexCollision = function (v1, v1End, domain) {
-            for (let i = 0; i < domain.length; ++i) {
-              let vertices = domain[i].vertices;
-              const len = vertices.length - 1;
-              for (let j = 0; j < len; j++) {
-                results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                if (results.onLine1 && results.onLine2) {
-                  const dx = v1.x - results.x;
-                  const dy = v1.y - results.y;
-                  const dist2 = dx * dx + dy * dy;
-                  if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                    best = {
-                      x: results.x,
-                      y: results.y,
-                      dist2: dist2,
-                      who: domain[i],
-                      v1: vertices[j],
-                      v2: vertices[j + 1]
-                    };
-                  }
-                }
-              }
-              results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-              if (results.onLine1 && results.onLine2) {
-                const dx = v1.x - results.x;
-                const dy = v1.y - results.y;
-                const dist2 = dx * dx + dy * dy;
-                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                  best = {
-                    x: results.x,
-                    y: results.y,
-                    dist2: dist2,
-                    who: domain[i],
-                    v1: vertices[0],
-                    v2: vertices[len]
-                  };
-                }
-              }
-            }
-          };
-
-          const checkForCollisions = function () {
-            best = {
-              x: null,
-              y: null,
-              dist2: Infinity,
-              who: null,
-              v1: null,
-              v2: null
-            };
-            vertexCollision(path[path.length - 2], path[path.length - 1], mob);
-            vertexCollision(path[path.length - 2], path[path.length - 1], map);
-            vertexCollision(path[path.length - 2], path[path.length - 1], body);
-          };
-          const laserHitMob = function () {
-            if (best.who.alive) {
-              best.who.damage(damage);
-              best.who.locatePlayer();
-              ctx.fillStyle = color; //draw mob damage circle
-              ctx.beginPath();
-              ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(damage) * 100, 0, 2 * Math.PI);
-              ctx.fill();
-            }
-          };
-          const reflection = function () { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-            const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
-            const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
-            const nn = Vector.mult(n, 2 * Vector.dot(d, n));
-            const r = Vector.normalise(Vector.sub(d, nn));
-            path[path.length] = Vector.add(Vector.mult(r, range), path[path.length - 1]);
-          };
-
-          checkForCollisions();
-          let lastBestOdd
-          let lastBestEven = best.who //used in hack below
-          if (best.dist2 !== Infinity) {
-            //if hitting something
-            path[path.length - 1] = {
-              x: best.x,
-              y: best.y
-            };
-            laserHitMob();
-            for (let i = 0; i < mod.laserReflections; i++) {
-              reflection();
-              checkForCollisions();
-              if (best.dist2 !== Infinity) { //if hitting something
-                lastReflection = best
-
-                path[path.length - 1] = {
-                  x: best.x,
-                  y: best.y
-                };
-                damage *= reflectivity
-                laserHitMob();
-                //I'm not clear on how this works, but it gets ride of a bug where the laser reflects inside a block, often vertically.
-                //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
-                if (i % 2) {
-                  if (lastBestOdd === best.who) break
-                } else {
-                  lastBestOdd = best.who
-                  if (lastBestEven === best.who) break
-                }
-              } else {
-                break
-              }
-            }
+            // ctx.lineCap = 'round';
+          } else {
+            b.laser()
           }
-
-          ctx.fillStyle = color;
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 2 * this.holdDamage;
-          ctx.lineDashOffset = 300 * Math.random()
-          ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
-          for (let i = 1, len = path.length; i < len; ++i) {
-            ctx.beginPath();
-            ctx.moveTo(path[i - 1].x, path[i - 1].y);
-            ctx.lineTo(path[i].x, path[i].y);
-            ctx.stroke();
-            ctx.globalAlpha *= reflectivity; //reflections are less intense
-          }
-          ctx.setLineDash([0, 0]);
-          ctx.globalAlpha = 1;
         }
       }
     },

@@ -17,9 +17,9 @@ const level = {
       // mech.isCloak = true;
       // mech.setField("metamaterial cloaking")
       // b.giveGuns("laser")
-      for (let i = 0; i < 1; i++) {
-        mod.giveMod("orbital-bot");
-      }
+      // for (let i = 0; i < 1; i++) {
+      // mod.giveMod("diffuse beam");
+      // }
       // mod.giveMod("orbit-bot upgrade")
 
 
@@ -80,7 +80,10 @@ const level = {
   //******************************************************************************************************************
   //******************************************************************************************************************
   testing() {
+    const button = level.button(200, -700)
     level.custom = () => {
+      button.query();
+      button.draw();
       level.playerExitCheck();
     };
     level.customTopLayer = () => {};
@@ -147,7 +150,7 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    spawn.starter(1600, -500, 60)
+    spawn.starter(1600, -500, 160)
     // spawn.powerUpBoss(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
@@ -4206,18 +4209,24 @@ const level = {
       width: width,
       height: 20,
       query() {
-        // if (Matter.Query.collides(buttonSensor, body).length === 0 && Matter.Query.collides(buttonSensor, [player]).length === 0) {
         if (Matter.Query.region(body, this).length === 0 && Matter.Query.region([player], this).length === 0) {
           this.isUp = true;
         } else {
-          this.isUp = false;
-          // const list = Matter.Query.collides(buttonSensor, body)
-          // if (list.length > 0) {
-          //   Matter.Body.setVelocity(list[0].bodyB, {
-          //     x: 0,
-          //     y: 0
-          //   });
+          // if (this.isUp === true) {
+          //   const list = Matter.Query.region(body, this)
+          //   console.log(list)
+          //   if (list.length > 0) {
+          //     Matter.Body.setPosition(list[0], {
+          //       x: this.min.x + width / 2,
+          //       y: list[0].position.y
+          //     })
+          //     Matter.Body.setVelocity(list[0], {
+          //       x: 0,
+          //       y: 0
+          //     });
+          //   }
           // }
+          this.isUp = false;
         }
       },
       draw() {

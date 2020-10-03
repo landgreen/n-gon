@@ -1,15 +1,20 @@
-mod: orbital-bot - back to just 1 bot, but the bot can stun and hit mobs from a larger range
-
+mod: stimulated emission - 8% chance to duplicate power ups
+laser mod: diffuse beam - laser is wide but doesn't reflect, 150% damage and energy drain
 
 ************** TODO - n-gon **************
 
-Ψ(t) collapse doesn't seem to work properly on custom links
+write a function that returns collisions
+mod: laser gets increased damage with each reflection
+mod: laser is 3 thick beams that look like one, but can separate into three at corners
+
+mod set a max speed cap based on distance from player while field is active
+  mod for a field, or bot?
+  name: something about speed of light being the top speed
+
+vacuum bomb applies status effect to mobs that makes blocks attracted to them
 
 mod: take less harm if you are moving fast
   require squirrel cage rotor
-
-mod: laser gets increased damage with each reflection
-mod: laser is 3 thick beams that look like one, but can separate into three at corners
 
 getting stuck above a mob can immobilize player
   just allow player to jump on mobs again?
@@ -54,8 +59,6 @@ a bot that eats up health and ammo, but poops a reroll after picking up 2 power 
     the mods that do those effects could be required before you see this bot
   disable crystalized armor?
   could convert rerolls, ammo, and health into mods instead
-
-
 
 mod: radiation effects can spread to nearby mobs
 

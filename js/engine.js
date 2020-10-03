@@ -153,8 +153,8 @@ function collisionChecks(event) {
               const choose = have[Math.floor(Math.random() * have.length)]
               game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 600) //message about what mod was lost
               for (let i = 0; i < mod.mods[choose].count; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-              mod.mods[choose].count = 0;
               mod.mods[choose].remove(); // remove a random mod form the list of mods you have
+              mod.mods[choose].count = 0;
               mod.mods[choose].isLost = true;
               game.updateModHUD();
               mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected mod

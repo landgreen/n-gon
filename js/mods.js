@@ -261,7 +261,7 @@ const mod = {
         },
         {
             name: "Ψ(t) collapse",
-            description: "<strong>50%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            description: "<strong>60%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -270,7 +270,7 @@ const mod = {
             requires: "no rerolls",
             effect() {
                 mod.isRerollHaste = true;
-                mod.rerollHaste = 0.5;
+                mod.rerollHaste = 0.4;
                 b.setFireCD();
             },
             remove() {
@@ -298,7 +298,7 @@ const mod = {
         },
         {
             name: "auto-loading heuristics",
-            description: "<strong>25%</strong> decreased <strong>delay</strong> after firing",
+            description: "<strong>30%</strong> decreased <strong>delay</strong> after firing",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -306,7 +306,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.fireRate *= 0.75
+                mod.fireRate *= 0.7
                 b.setFireCD();
             },
             remove() {
@@ -642,7 +642,7 @@ const mod = {
         },
         {
             name: "orbital-bot",
-            description: "a bot is locked in <strong>orbit</strong> around you<br><strong class='color-d'>damages</strong> and <strong>stuns</strong> mobs on <strong>contact</strong>",
+            description: "a bot is locked in <strong>orbit</strong> around you<br><strong>stuns</strong> and <strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -659,7 +659,7 @@ const mod = {
         },
         {
             name: "orbital-bot upgrade",
-            description: "<strong>125%</strong> increased <strong class='color-d'>damage</strong> and <strong>stun</strong> duration<br><em>applies to all current and future orbit-bots</em>",
+            description: "<strong>125%</strong> increased <strong class='color-d'>damage</strong><br><em>applies to all current and future orbit-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -897,7 +897,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun
+                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -1201,48 +1201,37 @@ const mod = {
             requires: "",
             effect: () => {
                 mod.isBayesian = true
-                //change power up draw
-                game.draw.powerUp = function () {
-                    for (let i = 0, len = powerUp.length; i < len; ++i) {
-                        ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
-                        for (let i = 0, len = powerUp.length; i < len; ++i) {
-                            ctx.beginPath();
-                            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-                            ctx.fillStyle = powerUp[i].color;
-                            ctx.fill();
-                        }
-                        ctx.globalAlpha = 1;
-
-                        if (powerUp[i].isBayesian && Math.random() < 0.1) {
-                            //draw electricity
-                            const mag = 5 + powerUp[i].size / 5
-                            let unit = Vector.rotate({
-                                x: mag,
-                                y: mag
-                            }, 2 * Math.PI * Math.random())
-                            let path = {
-                                x: powerUp[i].position.x + unit.x,
-                                y: powerUp[i].position.y + unit.y
-                            }
-                            ctx.beginPath();
-                            ctx.moveTo(path.x, path.y);
-                            for (let i = 0; i < 6; i++) {
-                                unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
-                                path = Vector.add(path, unit)
-                                ctx.lineTo(path.x, path.y);
-                            }
-                            ctx.lineWidth = 0.5 + 2 * Math.random();
-                            ctx.strokeStyle = "#000"
-                            ctx.stroke();
-                        }
-                    }
-                    // ctx.globalAlpha = 1;
-                }
+                mod.duplicateChance += 0.17
+                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
 
             },
             remove() {
+                if (mod.isBayesian) {
+                    mod.duplicateChance -= 0.17
+                    if (mod.duplicateChance < 0) mod.duplicateChance = 0
+                }
                 mod.isBayesian = false
-                game.draw.powerUp = game.draw.powerUpNormal
+                if (mod.duplicateChance)
+                    if (!mod.duplicateChance) game.draw.powerUp = game.draw.powerUpNormal
+            }
+        },
+        {
+            name: "stimulated emission",
+            description: "<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                mod.duplicateChance += 0.08
+                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
+
+            },
+            remove() {
+                mod.duplicateChance -= 0.08 * this.count
+                if (!mod.duplicateChance) game.draw.powerUp = game.draw.powerUpNormal
             }
         },
         {
@@ -2345,22 +2334,40 @@ const mod = {
         },
         {
             name: "specular reflection",
-            description: "<strong>laser</strong> beams gain <strong>1</strong> reflection<br><strong>50%</strong> laser <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+            description: "<strong>laser</strong> beams gain <strong>1</strong> reflection<br>increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser")
+                return mod.haveGunCheck("laser") && !mod.isWideLaser
             },
-            requires: "laser",
+            requires: "laser, not wide beam",
             effect() {
                 mod.laserReflections++;
-                mod.laserDamage += 0.06; //base is 0.12
-                mod.laserFieldDrain += 0.0008 //base is 0.002
+                mod.laserDamage += 0.08; //base is 0.12
+                mod.laserFieldDrain += 0.0006 //base is 0.002
             },
             remove() {
                 mod.laserReflections = 2;
-                mod.laserDamage = 0.12;
-                mod.laserFieldDrain = 0.0016;
+                mod.laserDamage = 0.16;
+                mod.laserFieldDrain = 0.0012;
+            }
+        },
+        {
+            name: "diffuse beam",
+            description: "<strong>laser</strong> beam is <strong>wider</strong> but doesn't <strong>reflect</strong><br>increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>150%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3
+            },
+            requires: "laser, not specular reflection",
+            effect() {
+                mod.isWideLaser = true
+                mod.laserFieldDrain = 0.0012 * 2.5 //base is 0.002
+            },
+            remove() {
+                mod.isWideLaser = false
+                mod.laserFieldDrain = 0.0012;
             }
         },
         // {
@@ -2438,7 +2445,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.oneSuperBall || mod.isCloakStun
+                return mod.isStunField || mod.oneSuperBall || mod.isCloakStun || mod.orbitBotCount > 1
             },
             requires: "flux pinning or super ball<br>or flashbang",
             effect() {
@@ -2965,5 +2972,6 @@ const mod = {
     healMaxEnergyBonus: null,
     aimDamage: null,
     isNoFireDefense: null,
-    isNoFireDamage: null
+    isNoFireDamage: null,
+    duplicateChance: null
 }

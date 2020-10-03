@@ -62,6 +62,7 @@ window.addEventListener('load', (event) => {
     for (const property in set) {
       // console.log(set[property], property);
       set[property] = set[property].replace(/%20/g, " ")
+      set[property] = set[property].replace(/%CE%A8/g, "Ψ")
 
       if (property === "field") {
         let found = false
