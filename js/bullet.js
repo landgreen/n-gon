@@ -3230,8 +3230,7 @@ const b = {
           mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
           if (mod.isWideLaser) {
             const off = 8
-            const dmg = 0.6 * mod.laserDamage //  5 * 0.4 = 200% more damage
-            // ctx.lineCap = 'butt';
+            const dmg = 0.4 * mod.laserDamage //  5 * 0.4 = 200% more damage
             b.laser({
               x: mech.pos.x + 20 * Math.cos(mech.angle),
               y: mech.pos.y + 20 * Math.sin(mech.angle)
@@ -3252,7 +3251,18 @@ const b = {
                 y: i * off * Math.sin(mech.angle - Math.PI / 2)
               }), mech.angle, dmg, 0, true)
             }
-            // ctx.lineCap = 'round';
+          } else if (mod.beamSplitter) {
+            let dmg = mod.laserDamage * 0.9
+            const where = {
+              x: mech.pos.x + 20 * Math.cos(mech.angle),
+              y: mech.pos.y + 20 * Math.sin(mech.angle)
+            }
+            b.laser(where, mech.angle, dmg)
+            for (let i = 1; i < 1 + mod.beamSplitter; i++) {
+              b.laser(where, mech.angle + i * 0.2, dmg)
+              b.laser(where, mech.angle - i * 0.2, dmg)
+              dmg *= 0.9
+            }
           } else {
             b.laser()
           }

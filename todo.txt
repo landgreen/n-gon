@@ -1,11 +1,11 @@
-mod: stimulated emission - 8% chance to duplicate power ups
-laser mod: diffuse beam - laser is wide but doesn't reflect, 150% damage and energy drain
+laser mod: beam splitter - laser is split into diverging beams, but does 10% less damage
 
 ************** TODO - n-gon **************
 
-write a function that returns collisions
-mod: laser gets increased damage with each reflection
-mod: laser is 3 thick beams that look like one, but can separate into three at corners
+laser mod, increase damage, but ass some angular spread to 5 laser beam 
+  require diffuse
+
+use the b.laser() function
 
 mod set a max speed cap based on distance from player while field is active
   mod for a field, or bot?

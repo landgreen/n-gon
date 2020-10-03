@@ -2353,23 +2353,38 @@ const mod = {
             }
         },
         {
+            name: "beam splitter",
+            description: `your <strong>laser</strong> is <strong>split</strong> into diverging beams<br>decrease <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("laser") && !mod.isWideLaser
+            },
+            requires: "laser, not specular reflection",
+            effect() {
+                mod.beamSplitter++
+            },
+            remove() {
+                mod.beamSplitter = 0
+            }
+        },
+        {
             name: "diffuse beam",
-            description: "<strong>laser</strong> beam is <strong>wider</strong> but doesn't <strong>reflect</strong><br>increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>150%</strong>",
+            description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter
             },
             requires: "laser, not specular reflection",
             effect() {
                 mod.isWideLaser = true
-                mod.laserFieldDrain = 0.0012 * 2.5 //base is 0.002
             },
             remove() {
                 mod.isWideLaser = false
-                mod.laserFieldDrain = 0.0012;
             }
         },
+
         // {
         //     name: "waste heat recovery",
         //     description: "<strong>laser</strong> <strong class='color-d'>damage</strong> grows by <strong>400%</strong> as you fire<br>but you periodically <strong>eject</strong> your <strong class='color-h'>health</strong>",
@@ -2973,5 +2988,6 @@ const mod = {
     aimDamage: null,
     isNoFireDefense: null,
     isNoFireDamage: null,
-    duplicateChance: null
+    duplicateChance: null,
+    beamSplitter: null
 }
