@@ -1303,20 +1303,6 @@ const mech = {
         // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         // mech.calculateFieldThreshold();
         mech.hold = function () {
-
-          //cap mob speed based on distance
-          for (let i = 0; i < mob.length; i++) {
-            const distance = Vector.magnitude(Vector.sub(mech.pos, mob[i].position))
-            const range = 1000
-            if (distance < range) {
-              const cap = Math.max(0.01 * distance, 4)
-              if (mob[i].speed > cap) {
-                Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(mob[i].velocity), cap)); //set velocity to cap, but keep the direction
-              }
-            }
-          }
-
-
           const wave = Math.sin(mech.cycle * 0.022);
           mech.fieldRange = 170 + 12 * wave
           mech.fieldArc = 0.33 + 0.045 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -1361,6 +1347,23 @@ const mech = {
             mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
           }
           mech.drawFieldMeter()
+
+          if (mod.isPerfectBrake) { //cap mob speed around player
+            const range = 400 + 120 * wave
+            for (let i = 0; i < mob.length; i++) {
+              const distance = Vector.magnitude(Vector.sub(mech.pos, mob[i].position))
+              if (distance < range) {
+                const cap = mob[i].isShielded ? 7 : 3.5
+                if (mob[i].speed > cap && Vector.dot(mob[i].velocity, Vector.sub(mech.pos, mob[i].position)) > 0) { // if velocity is directed towards player
+                  Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(mob[i].velocity), cap)); //set velocity to cap, but keep the direction
+                }
+              }
+            }
+            ctx.beginPath();
+            ctx.arc(mech.pos.x, mech.pos.y, range, 0, 2 * Math.PI);
+            ctx.fillStyle = "hsla(200,50%,61%,0.08)";
+            ctx.fill();
+          }
         }
       }
     },

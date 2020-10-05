@@ -1440,9 +1440,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isSuperDeterminism && !mod.isRerollHaste
+                return powerUps.reroll.rerolls < 3 && !mod.isSuperDeterminism && !mod.isRerollHaste
             },
-            requires: "not superdeterminism or Ψ(t) collapse",
+            requires: "not superdeterminism or Ψ(t) collapse<br>fewer than 3 rerolls",
             effect: () => {
                 mod.manyWorlds = true;
             },
@@ -1456,9 +1456,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isSuperDeterminism && !mod.isRerollHaste
+                return (powerUps.reroll.rerolls > 1 || build.isCustomSelection) && !mod.isSuperDeterminism && !mod.isRerollHaste
             },
-            requires: "not superdeterminism or Ψ(t) collapse",
+            requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 rerolls",
             effect() {
                 mod.renormalization = true;
             },
@@ -2471,6 +2471,22 @@ const mod = {
             }
         },
         {
+            name: "eddy current brake",
+            description: "you are <strong>surrounded</strong> by a field that<br>limits the <strong>top speed</strong> of mobs",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism"
+            },
+            requires: "perfect diamagnetism",
+            effect() {
+                mod.isPerfectBrake = true;
+            },
+            remove() {
+                mod.isPerfectBrake = false;
+            }
+        },
+        {
             name: "fracture analysis",
             description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
             maxCount: 1,
@@ -3006,5 +3022,6 @@ const mod = {
     isNoFireDamage: null,
     duplicateChance: null,
     beamSplitter: null,
-    iceEnergy: null
+    iceEnergy: null,
+    isPerfectBrake: null
 }

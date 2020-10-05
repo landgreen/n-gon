@@ -1,10 +1,6 @@
-laser bots now use the same laser code as the player
-mod: thermoelectric effect - ice IX bullets give you 7% energy after they collides with mobs
+mod perfect diamagnetism: eddy current brake - mobs have a speed limit when they are near you
 
 ************** TODO - n-gon **************
-
-a gun that gives back energy
-  if your energy is below 90% your drones stay near you and give energy regen
 
 buff neutron bomb?
   less fire CD?
