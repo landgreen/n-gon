@@ -603,7 +603,7 @@ const mod = {
         },
         {
             name: "laser-bot",
-            description: "a bot <strong>defends</strong> the space around you<br>uses a <strong>short range</strong> laser that drains <strong class='color-f'>energy</strong>",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit a <strong>laser</strong><br>targeting nearby mobs",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -816,9 +816,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mod.totalBots() > 1 || mod.haveGunCheck("drone") || mod.haveGunCheck("mine") || mod.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
             },
-            requires: "",
+            requires: "drones, spores, mines, or bots",
             effect() {
                 mod.isNoFireDefense = true
             },
@@ -2208,7 +2208,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("ice IX") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && mod.isIceField)
+                return mod.haveGunCheck("ice IX") || mod.isIceField
             },
             requires: "ice IX",
             effect() {
@@ -2216,6 +2216,22 @@ const mod = {
             },
             remove() {
                 mod.isHeavyWater = false;
+            }
+        },
+        {
+            name: "thermoelectric effect",
+            description: "<strong>ice IX</strong> bullets give you <strong>7%</strong> <strong class='color-f'>energy</strong><br>after they <strong>collide</strong> with mobs",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("ice IX") || mod.isIceField
+            },
+            requires: "ice IX",
+            effect() {
+                mod.iceEnergy += 0.07
+            },
+            remove() {
+                mod.iceEnergy = 0;
             }
         },
         {
@@ -2354,7 +2370,7 @@ const mod = {
         },
         {
             name: "beam splitter",
-            description: `your <strong>laser</strong> is <strong>split</strong> into diverging beams<br>decrease <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
+            description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease laser <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2370,7 +2386,7 @@ const mod = {
         },
         {
             name: "diffuse beam",
-            description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+            description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase laser <strong class='color-d'>damage</strong> by <strong>100%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2989,5 +3005,6 @@ const mod = {
     isNoFireDefense: null,
     isNoFireDamage: null,
     duplicateChance: null,
-    beamSplitter: null
+    beamSplitter: null,
+    iceEnergy: null
 }

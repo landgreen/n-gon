@@ -152,8 +152,7 @@ const powerUps = {
       //give ammo to all guns in inventory
       if (mod.isAmmoForGun) {
         const target = b.guns[b.activeGun]
-        target.ammo += Math.ceil(Math.random() * target.ammoPack)
-        target.ammo += Math.ceil(Math.random() * target.ammoPack)
+        target.ammo += Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
       } else {
         for (let i = 0, len = b.inventory.length; i < len; i++) {
           const target = b.guns[b.inventory[i]]

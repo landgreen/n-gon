@@ -1,15 +1,19 @@
-laser mod: beam splitter - laser is split into diverging beams, but does 10% less damage
+laser bots now use the same laser code as the player
+mod: thermoelectric effect - ice IX bullets give you 7% energy after they collides with mobs
 
 ************** TODO - n-gon **************
 
-laser mod, increase damage, but ass some angular spread to 5 laser beam 
-  require diffuse
+a gun that gives back energy
+  if your energy is below 90% your drones stay near you and give energy regen
 
-use the b.laser() function
+buff neutron bomb?
+  less fire CD?
 
 mod set a max speed cap based on distance from player while field is active
-  mod for a field, or bot?
-  name: something about speed of light being the top speed
+  name: eddy current brake
+  who runs the code?
+    new bot
+    perfect diamagnetism
 
 vacuum bomb applies status effect to mobs that makes blocks attracted to them
 

@@ -1303,6 +1303,20 @@ const mech = {
         // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         // mech.calculateFieldThreshold();
         mech.hold = function () {
+
+          //cap mob speed based on distance
+          for (let i = 0; i < mob.length; i++) {
+            const distance = Vector.magnitude(Vector.sub(mech.pos, mob[i].position))
+            const range = 1000
+            if (distance < range) {
+              const cap = Math.max(0.01 * distance, 4)
+              if (mob[i].speed > cap) {
+                Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(mob[i].velocity), cap)); //set velocity to cap, but keep the direction
+              }
+            }
+          }
+
+
           const wave = Math.sin(mech.cycle * 0.022);
           mech.fieldRange = 170 + 12 * wave
           mech.fieldArc = 0.33 + 0.045 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)

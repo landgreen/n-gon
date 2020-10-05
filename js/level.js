@@ -15,10 +15,10 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isCloak = true;
-      // mech.setField("metamaterial cloaking")
+      // mech.setField("perfect diamagnetism")
       // b.giveGuns("laser")
-      // for (let i = 0; i < 1; i++) {
-      // mod.giveMod("diffuse beam");
+      // for (let i = 0; i < 10; i++) {
+      // mod.giveMod("laser-bot");
       // }
       // mod.giveMod("orbit-bot upgrade")
 
@@ -118,7 +118,7 @@ const level = {
     spawn.mapRect(-950, -1800, 8200, 800); //roof
     spawn.mapRect(-250, -700, 1000, 900); // shelf
     spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
-    powerUps.spawnStartingPowerUps(600, -800);
+    // powerUps.spawnStartingPowerUps(600, -800);
     powerUps.spawn(550, -800, "reroll", false);
 
     function blockDoor(x, y, blockSize = 58) {
@@ -150,7 +150,7 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    spawn.starter(1600, -500, 160)
+    spawn.starter(1600, -500)
     // spawn.powerUpBoss(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 

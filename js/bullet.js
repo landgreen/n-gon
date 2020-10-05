@@ -379,7 +379,10 @@ const b = {
   laser(where = {
     x: mech.pos.x + 20 * Math.cos(mech.angle),
     y: mech.pos.y + 20 * Math.sin(mech.angle)
-  }, angle = mech.angle, dmg = mod.laserDamage, reflections = mod.laserReflections, isThickBeam = false) {
+  }, whereEnd = {
+    x: where.x + 3000 * Math.cos(mech.angle),
+    y: where.y + 3000 * Math.sin(mech.angle)
+  }, dmg = mod.laserDamage, reflections = mod.laserReflections, isThickBeam = false) {
     const reflectivity = 1 - 1 / (reflections * 1.5)
     let damage = b.dmgScale * dmg
     let best = {
@@ -391,14 +394,13 @@ const b = {
       v2: null
     };
     const color = "#f00";
-    const range = 3000;
     const path = [{
         x: where.x,
         y: where.y
       },
       {
-        x: where.x + range * Math.cos(angle),
-        y: where.y + range * Math.sin(angle)
+        x: whereEnd.x,
+        y: whereEnd.y
       }
     ];
     const vertexCollision = function (v1, v1End, domain) {
@@ -470,7 +472,7 @@ const b = {
       const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
       const nn = Vector.mult(n, 2 * Vector.dot(d, n));
       const r = Vector.normalise(Vector.sub(d, nn));
-      path[path.length] = Vector.add(Vector.mult(r, range), path[path.length - 1]);
+      path[path.length] = Vector.add(Vector.mult(r, 3000), path[path.length - 1]);
     };
 
     checkForCollisions();
@@ -802,6 +804,7 @@ const b = {
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
         if (mod.isHeavyWater) mobs.statusDoT(who, 0.1, 300)
+        if (mod.iceEnergy && !who.shield) mech.energy += mod.iceEnergy //&& mech.energy < mech.maxEnergy
       },
       onEnd() {},
       do() {
@@ -1323,7 +1326,7 @@ const b = {
       minDmgSpeed: 2,
       lookFrequency: 40 + Math.floor(7 * Math.random()),
       acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-      range: 500 * (1 + 0.2 * Math.random()) + 150 * mod.isLaserBotUpgrade,
+      range: 700 * (1 + 0.1 * Math.random()) + 250 * mod.isLaserBotUpgrade,
       followRange: 150 + Math.floor(30 * Math.random()),
       offPlayer: {
         x: 0,
@@ -1351,17 +1354,19 @@ const b = {
           y: this.velocity.y * 0.95
         });
         //find targets
-        if (!(game.cycle % this.lookFrequency) && !mech.isCloak) {
+        if (!(game.cycle % this.lookFrequency)) {
           this.lockedOn = null;
-          let closeDist = this.range;
-          for (let i = 0, len = mob.length; i < len; ++i) {
-            const DIST = Vector.magnitude(Vector.sub(this.vertices[0], mob[i].position));
-            if (DIST - mob[i].radius < closeDist &&
-              !mob[i].isShielded &&
-              Matter.Query.ray(map, this.vertices[0], mob[i].position).length === 0 &&
-              Matter.Query.ray(body, this.vertices[0], mob[i].position).length === 0) {
-              closeDist = DIST;
-              this.lockedOn = mob[i]
+          if (!mech.isCloak) {
+            let closeDist = this.range;
+            for (let i = 0, len = mob.length; i < len; ++i) {
+              const DIST = Vector.magnitude(Vector.sub(this.vertices[0], mob[i].position));
+              if (DIST - mob[i].radius < closeDist &&
+                !mob[i].isShielded &&
+                Matter.Query.ray(map, this.vertices[0], mob[i].position).length === 0 &&
+                Matter.Query.ray(body, this.vertices[0], mob[i].position).length === 0) {
+                closeDist = DIST;
+                this.lockedOn = mob[i]
+              }
             }
           }
           //randomize position relative to player
@@ -1374,42 +1379,46 @@ const b = {
         }
         //hit target with laser
         if (this.lockedOn && this.lockedOn.alive && mech.energy > 0.15) {
-          mech.energy -= 0.0014 * mod.isLaserDiode
-          //make sure you can still see vertex
-          const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
-          if (DIST - this.lockedOn.radius < this.range + 150 &&
-            Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
-            Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
-            //move towards the target
-            this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.0013))
-            //find the closest vertex
-            let bestVertexDistance = Infinity
-            let bestVertex = null
-            for (let i = 0; i < this.lockedOn.vertices.length; i++) {
-              const dist = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.vertices[i]));
-              if (dist < bestVertexDistance) {
-                bestVertex = i
-                bestVertexDistance = dist
-              }
-            }
-            const dmg = b.dmgScale * (0.06 + 0.08 * this.isUpgraded);
-            this.lockedOn.damage(dmg);
-            this.lockedOn.locatePlayer();
+          mech.energy -= 0.0012 * mod.isLaserDiode
+          // const sub = Vector.sub(this.lockedOn.position, this.vertices[0])
+          // const angle = Math.atan2(sub.y, sub.x);
+          b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.06 + 0.08 * this.isUpgraded))
 
-            ctx.beginPath(); //draw laser
-            ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
-            ctx.lineTo(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y);
-            ctx.strokeStyle = "#f00";
-            ctx.lineWidth = "2"
-            ctx.lineDashOffset = 300 * Math.random()
-            ctx.setLineDash([50 + 100 * Math.random(), 100 * Math.random()]);
-            ctx.stroke();
-            ctx.setLineDash([0, 0]);
-            ctx.beginPath();
-            ctx.arc(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
-            ctx.fillStyle = "#f00";
-            ctx.fill();
-          }
+          // //make sure you can still see vertex
+          // const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
+          // if (DIST - this.lockedOn.radius < this.range + 150 &&
+          //   Matter.Query.ray(map, this.vertices[0], this.lockedOn.position).length === 0 &&
+          //   Matter.Query.ray(body, this.vertices[0], this.lockedOn.position).length === 0) {
+          //   //move towards the target
+          //   this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.0013))
+          //   //find the closest vertex
+          //   let bestVertexDistance = Infinity
+          //   let bestVertex = null
+          //   for (let i = 0; i < this.lockedOn.vertices.length; i++) {
+          //     const dist = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.vertices[i]));
+          //     if (dist < bestVertexDistance) {
+          //       bestVertex = i
+          //       bestVertexDistance = dist
+          //     }
+          //   }
+          //   const dmg = b.dmgScale * (0.06 + 0.08 * this.isUpgraded);
+          //   this.lockedOn.damage(dmg);
+          //   this.lockedOn.locatePlayer();
+
+          //   ctx.beginPath(); //draw laser
+          //   ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+          //   ctx.lineTo(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y);
+          //   ctx.strokeStyle = "#f00";
+          //   ctx.lineWidth = "2"
+          //   ctx.lineDashOffset = 300 * Math.random()
+          //   ctx.setLineDash([50 + 100 * Math.random(), 100 * Math.random()]);
+          //   ctx.stroke();
+          //   ctx.setLineDash([0, 0]);
+          //   ctx.beginPath();
+          //   ctx.arc(this.lockedOn.vertices[bestVertex].x, this.lockedOn.vertices[bestVertex].y, Math.sqrt(dmg) * 100, 0, 2 * Math.PI);
+          //   ctx.fillStyle = "#f00";
+          //   ctx.fill();
+          // }
         }
       }
     })
@@ -3231,25 +3240,31 @@ const b = {
           if (mod.isWideLaser) {
             const off = 8
             const dmg = 0.4 * mod.laserDamage //  5 * 0.4 = 200% more damage
-            b.laser({
+            const where = {
               x: mech.pos.x + 20 * Math.cos(mech.angle),
               y: mech.pos.y + 20 * Math.sin(mech.angle)
-            }, mech.angle, dmg, 0, true)
+            }
+            b.laser(where, {
+              x: where.x + 3000 * Math.cos(mech.angle),
+              y: where.y + 3000 * Math.sin(mech.angle)
+            }, dmg, 0, true)
             for (let i = 1; i < 3; i++) {
-              b.laser(Vector.add({
-                x: mech.pos.x + 20 * Math.cos(mech.angle),
-                y: mech.pos.y + 20 * Math.sin(mech.angle)
-              }, {
+              let whereOff = Vector.add(where, {
                 x: i * off * Math.cos(mech.angle + Math.PI / 2),
                 y: i * off * Math.sin(mech.angle + Math.PI / 2)
-              }), mech.angle, dmg, 0, true)
-              b.laser(Vector.add({
-                x: mech.pos.x + 20 * Math.cos(mech.angle),
-                y: mech.pos.y + 20 * Math.sin(mech.angle)
-              }, {
+              })
+              b.laser(whereOff, {
+                x: whereOff.x + 3000 * Math.cos(mech.angle),
+                y: whereOff.y + 3000 * Math.sin(mech.angle)
+              }, dmg, 0, true)
+              whereOff = Vector.add(where, {
                 x: i * off * Math.cos(mech.angle - Math.PI / 2),
                 y: i * off * Math.sin(mech.angle - Math.PI / 2)
-              }), mech.angle, dmg, 0, true)
+              })
+              b.laser(whereOff, {
+                x: whereOff.x + 3000 * Math.cos(mech.angle),
+                y: whereOff.y + 3000 * Math.sin(mech.angle)
+              }, dmg, 0, true)
             }
           } else if (mod.beamSplitter) {
             let dmg = mod.laserDamage * 0.9
@@ -3257,10 +3272,19 @@ const b = {
               x: mech.pos.x + 20 * Math.cos(mech.angle),
               y: mech.pos.y + 20 * Math.sin(mech.angle)
             }
-            b.laser(where, mech.angle, dmg)
+            b.laser(where, {
+              x: where.x + 3000 * Math.cos(mech.angle),
+              y: where.y + 3000 * Math.sin(mech.angle)
+            }, dmg)
             for (let i = 1; i < 1 + mod.beamSplitter; i++) {
-              b.laser(where, mech.angle + i * 0.2, dmg)
-              b.laser(where, mech.angle - i * 0.2, dmg)
+              b.laser(where, {
+                x: where.x + 3000 * Math.cos(mech.angle + i * 0.2),
+                y: where.y + 3000 * Math.sin(mech.angle + i * 0.2)
+              }, dmg)
+              b.laser(where, {
+                x: where.x + 3000 * Math.cos(mech.angle - i * 0.2),
+                y: where.y + 3000 * Math.sin(mech.angle - i * 0.2)
+              }, dmg)
               dmg *= 0.9
             }
           } else {
