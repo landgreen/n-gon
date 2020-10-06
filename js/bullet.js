@@ -1837,6 +1837,84 @@ const b = {
         }
         mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
 
+
+        // const range = 2000
+        // const totalBullets = 6
+        // const angleStep = (mech.crouch ? 0.06 : 0.25) / totalBullets
+        // let dir = mech.angle - angleStep * totalBullets / 2;
+        // for (let i = 0; i < totalBullets; i++) {
+        //   dir += angleStep
+        //   const vertexCollision = function (v1, v1End, domain) {
+        //     for (let i = 0; i < domain.length; ++i) {
+        //       let vertices = domain[i].vertices;
+        //       const len = vertices.length - 1;
+        //       for (let j = 0; j < len; j++) {
+        //         results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+        //         if (results.onLine1 && results.onLine2) {
+        //           const dx = v1.x - results.x;
+        //           const dy = v1.y - results.y;
+        //           const dist2 = dx * dx + dy * dy;
+        //           if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+        //             best = {
+        //               x: results.x,
+        //               y: results.y,
+        //               dist2: dist2,
+        //               who: domain[i],
+        //               v1: vertices[j],
+        //               v2: vertices[j + 1]
+        //             };
+        //           }
+        //         }
+        //       }
+        //       results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+        //       if (results.onLine1 && results.onLine2) {
+        //         const dx = v1.x - results.x;
+        //         const dy = v1.y - results.y;
+        //         const dist2 = dx * dx + dy * dy;
+        //         if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+        //           best = {
+        //             x: results.x,
+        //             y: results.y,
+        //             dist2: dist2,
+        //             who: domain[i],
+        //             v1: vertices[0],
+        //             v2: vertices[len]
+        //           };
+        //         }
+        //       }
+        //     }
+        //   };
+        //   const path = [{
+        //       x: mech.pos.x,
+        //       y: mech.pos.y
+        //     },
+        //     {
+        //       x: mech.pos.x + range * Math.cos(dir),
+        //       y: mech.pos.y + range * Math.sin(dir)
+        //     }
+        //   ];
+        //   let best = {
+        //     x: null,
+        //     y: null,
+        //     dist2: Infinity,
+        //     who: null,
+        //     v1: null,
+        //     v2: null
+        //   };
+        //   vertexCollision(path[path.length - 2], path[path.length - 1], mob);
+        //   vertexCollision(path[path.length - 2], path[path.length - 1], map);
+        //   vertexCollision(path[path.length - 2], path[path.length - 1], body);
+
+        //   if (best.dist2 !== Infinity) { //if hitting something
+        //     b.explosion({
+        //       x: best.x,
+        //       y: best.y
+        //     }, (mech.crouch ? 95 : 75) + (Math.random() - 0.5) * 50);
+        //   } else {
+        //     b.explosion(path[path.length - 1], (mech.crouch ? 95 : 75) + (Math.random() - 0.5) * 50);
+        //   }
+        // }
+
         const speed = 30 + 6 * Math.random() + 9 * mod.nailInstantFireRate
         const angle = mech.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (mech.crouch ? 1.35 : 3.2) / CD
         const dmg = 0.9
@@ -1856,35 +1934,6 @@ const b = {
           mech.energy -= mech.fieldRegen + 0.008
           if (mech.energy < 0.02) mech.fireCDcycle = mech.cycle + 60; // cool down
         }
-
-
-
-        // } else {
-        //   if (this.nextFireCycle + 1 < mech.cycle) this.startingHoldCycle = mech.cycle //reset if not constantly firing
-        //   const CD = Math.max(11 - 0.06 * (mech.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
-        //   this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
-
-        //   const me = bullet.length;
-        //   const dir = mech.angle + (Math.random() - 0.5) * ((mech.crouch) ? 0.01 : 0.1);
-        //   bullet[me] = Bodies.rectangle(pos.x, pos.y, 20 * mod.bulletSize, 6 * mod.bulletSize, b.fireAttributes(dir));
-        //   b.fireProps(CD, mech.crouch ? 38 : 34, dir, me); //cd , speed
-
-        //   bullet[me].endCycle = game.cycle + 70;
-        //   bullet[me].dmg = 0.25;
-        //   bullet[me].frictionAir = mech.crouch ? 0.001 : 0.003;
-        //   if (mod.isIceCrystals) {
-        //     bullet[me].onDmg = function (who) {
-        //       mobs.statusSlow(who, 30)
-        //     };
-        //     mech.energy -= mech.fieldRegen + 0.0075
-        //     if (mech.energy < 0.02) {
-        //       mech.fireCDcycle = mech.cycle + 60; // cool down
-        //     }
-        //   }
-        //   bullet[me].do = function () {
-        //     this.force.y += this.mass * 0.0003;
-        //   };
-        // }
       }
     },
     {
@@ -2321,7 +2370,6 @@ const b = {
         const totalBullets = 6
         const angleStep = (mech.crouch ? 0.06 : 0.25) / totalBullets
         let dir = mech.angle - angleStep * totalBullets / 2;
-
         for (let i = 0; i < totalBullets; i++) { //5 -> 7
           dir += angleStep
           const me = bullet.length;
@@ -2331,7 +2379,6 @@ const b = {
             x: (SPEED + 15 * Math.random() - 2 * i) * Math.cos(dir),
             y: (SPEED + 15 * Math.random() - 2 * i) * Math.sin(dir)
           });
-
           bullet[me].endCycle = 2 * i + game.cycle + END
           bullet[me].restitution = 0;
           bullet[me].friction = 1;
@@ -2343,7 +2390,7 @@ const b = {
             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
           };
           bullet[me].do = function () {
-            this.force.y += this.mass * 0.0004;
+            // this.force.y += this.mass * 0.0004;
           }
         }
       }
@@ -2651,7 +2698,7 @@ const b = {
               //aoe damage to mobs
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                  let dmg = b.dmgScale * 0.023
+                  let dmg = b.dmgScale * 0.025
                   if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
                   if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
                   mob[i].damage(dmg);
@@ -2830,10 +2877,10 @@ const b = {
       fire() {
         if (mech.crouch) {
           b.drone(45)
-          mech.fireCDcycle = mech.cycle + Math.floor(17 * b.fireCD); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(13 * b.fireCD); // cool down
         } else {
           b.drone(1)
-          mech.fireCDcycle = mech.cycle + Math.floor(10 * b.fireCD); // cool down
+          mech.fireCDcycle = mech.cycle + Math.floor(6 * b.fireCD); // cool down
         }
       }
     },
@@ -3239,7 +3286,7 @@ const b = {
           mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
           if (mod.isWideLaser) {
             const off = 8
-            const dmg = 0.4 * mod.laserDamage //  5 * 0.4 = 200% more damage
+            const dmg = 0.55 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
             const where = {
               x: mech.pos.x + 20 * Math.cos(mech.angle),
               y: mech.pos.y + 20 * Math.sin(mech.angle)

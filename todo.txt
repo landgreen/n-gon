@@ -1,4 +1,3 @@
-mod perfect diamagnetism: eddy current brake - mobs have a speed limit when they are near you
 
 ************** TODO - n-gon **************
 

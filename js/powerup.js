@@ -506,7 +506,7 @@ const powerUps = {
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
     if (level.levelsCleared < 4) { //runs 4 times on all difficulty levels
-      if (game.difficultyMode === 4 && level.levelsCleared > 1) powerUps.spawn(x, y, "mod")
+      if (game.difficultyMode > 1 && level.levelsCleared > 1) powerUps.spawn(x, y, "mod")
 
       //bonus power ups for clearing runs in the last game
       if (level.levelsCleared === 0 && !game.isCheating) {

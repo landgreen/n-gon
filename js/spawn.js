@@ -1984,12 +1984,11 @@ const spawn = {
       this.attraction();
     };
   },
-  snakeBoss(x, y, radius = 80) {
-    //snake boss with a laser head
+  snakeBoss(x, y, radius = 75) { //snake boss with a laser head
     mobs.spawn(x, y, 8, radius, "rgb(255,50,130)");
     let me = mob[mob.length - 1];
     me.isBoss = true;
-    me.accelMag = 0.0012 * game.accelScale;
+    me.accelMag = 0.0011 * game.accelScale;
     me.memory = 200;
     me.laserRange = 500;
     Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
