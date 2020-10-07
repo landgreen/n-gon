@@ -23,8 +23,8 @@ const level = {
       // mod.giveMod("eddy current brake")
 
 
-      // level.intro(); //starting level
-      level.testing(); //not in rotation
+      level.intro(); //starting level
+      // level.testing(); //not in rotation
       // level.template() //not in rotation
       // level.testChamber() //less mobs, more puzzle
       // level.sewers();
@@ -141,6 +141,7 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
     // spawn.boost(1500, 0, 900);
 
+    spawn.starter(1600, -500)
     // spawn.bomberBoss(2900, -500)
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
@@ -150,12 +151,11 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    // spawn.starter(1600, -500)
     // spawn.powerUpBoss(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "launcher")
-    spawn.snakeBoss(1200, -500)
+    // spawn.snakeBoss(1200, -500)
     // spawn.timeSkipBoss(2900, -500)
     // spawn.randomMob(1600, -500)
   },

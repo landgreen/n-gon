@@ -2208,7 +2208,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("ice IX") || mod.isIceField
+                return (mod.haveGunCheck("ice IX") || mod.isIceField) && !mod.iceEnergy
             },
             requires: "ice IX",
             effect() {
@@ -2220,15 +2220,15 @@ const mod = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>ice IX</strong> bullets give you <strong>7%</strong> <strong class='color-f'>energy</strong><br>after they <strong>collide</strong> with mobs",
-            maxCount: 9,
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>3%</strong> <strong class='color-h'>health</strong><br>and overfills your <strong class='color-f'>energy</strong> by <strong>66%</strong>",
+            maxCount: 3,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("ice IX") || mod.isIceField
+                return (mod.haveGunCheck("ice IX") || mod.isIceField) && !mod.isHeavyWater
             },
             requires: "ice IX",
             effect() {
-                mod.iceEnergy += 0.07
+                mod.iceEnergy++
             },
             remove() {
                 mod.iceEnergy = 0;

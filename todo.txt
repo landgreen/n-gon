@@ -1,14 +1,8 @@
+ice IX mod: thermoelectric effect - when ice IX kills a mob heal 3% and regen 66% energy
 
 ************** TODO - n-gon **************
 
-buff neutron bomb?
-  less fire CD?
-
-mod set a max speed cap based on distance from player while field is active
-  name: eddy current brake
-  who runs the code?
-    new bot
-    perfect diamagnetism
+all explosions based guns seem weak, buff damage?
 
 vacuum bomb applies status effect to mobs that makes blocks attracted to them
 
@@ -34,7 +28,6 @@ add a flag to some bullets to indicate that mobs can't learn the player position
     1. bullet spawned from player
     2. bullet is less than 4 seconds old
     3. damage is nearby player or in line of sight of player
-
 
 add some more computer / AI stuff to the level lore text
 
@@ -77,18 +70,6 @@ standing wave harmonics mod - push things away
   push when using field key
   or push away at the peak of an oscillation
   or always push
-
-hit scan bullets -> nails
-
-new gun or field - fire 3+ balls in arc
-  name: something about energy
-  does damage in area, like neutron bomb
-  ends on contact with wall, doesn't stick or bounce
-  hold fire to charge: increases the size of the balls
-  mod: balls are attracted to mobs
-
-rework perfect diamagnetism
-  let the shield also do bremsstrahlung radiation
 
 map element - player rotates a rotor that makes a platform go up or down
 

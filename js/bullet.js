@@ -801,10 +801,14 @@ const b = {
       lockedOn: null,
       isFollowMouse: true,
       onDmg(who) {
+        console.log(who.alive)
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
-        if (mod.isHeavyWater) mobs.statusDoT(who, 0.1, 300)
-        if (mod.iceEnergy && !who.shield) mech.energy += mod.iceEnergy //&& mech.energy < mech.maxEnergy
+        if (mod.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
+        if (mod.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && !who.alive) {
+          mech.energy += mod.iceEnergy * 0.66
+          mech.addHealth(mod.iceEnergy * 0.03)
+        }
       },
       onEnd() {},
       do() {
@@ -1836,85 +1840,6 @@ const b = {
           this.nextFireCycle = mech.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
         }
         mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
-
-
-        // const range = 2000
-        // const totalBullets = 6
-        // const angleStep = (mech.crouch ? 0.06 : 0.25) / totalBullets
-        // let dir = mech.angle - angleStep * totalBullets / 2;
-        // for (let i = 0; i < totalBullets; i++) {
-        //   dir += angleStep
-        //   const vertexCollision = function (v1, v1End, domain) {
-        //     for (let i = 0; i < domain.length; ++i) {
-        //       let vertices = domain[i].vertices;
-        //       const len = vertices.length - 1;
-        //       for (let j = 0; j < len; j++) {
-        //         results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-        //         if (results.onLine1 && results.onLine2) {
-        //           const dx = v1.x - results.x;
-        //           const dy = v1.y - results.y;
-        //           const dist2 = dx * dx + dy * dy;
-        //           if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-        //             best = {
-        //               x: results.x,
-        //               y: results.y,
-        //               dist2: dist2,
-        //               who: domain[i],
-        //               v1: vertices[j],
-        //               v2: vertices[j + 1]
-        //             };
-        //           }
-        //         }
-        //       }
-        //       results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-        //       if (results.onLine1 && results.onLine2) {
-        //         const dx = v1.x - results.x;
-        //         const dy = v1.y - results.y;
-        //         const dist2 = dx * dx + dy * dy;
-        //         if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-        //           best = {
-        //             x: results.x,
-        //             y: results.y,
-        //             dist2: dist2,
-        //             who: domain[i],
-        //             v1: vertices[0],
-        //             v2: vertices[len]
-        //           };
-        //         }
-        //       }
-        //     }
-        //   };
-        //   const path = [{
-        //       x: mech.pos.x,
-        //       y: mech.pos.y
-        //     },
-        //     {
-        //       x: mech.pos.x + range * Math.cos(dir),
-        //       y: mech.pos.y + range * Math.sin(dir)
-        //     }
-        //   ];
-        //   let best = {
-        //     x: null,
-        //     y: null,
-        //     dist2: Infinity,
-        //     who: null,
-        //     v1: null,
-        //     v2: null
-        //   };
-        //   vertexCollision(path[path.length - 2], path[path.length - 1], mob);
-        //   vertexCollision(path[path.length - 2], path[path.length - 1], map);
-        //   vertexCollision(path[path.length - 2], path[path.length - 1], body);
-
-        //   if (best.dist2 !== Infinity) { //if hitting something
-        //     b.explosion({
-        //       x: best.x,
-        //       y: best.y
-        //     }, (mech.crouch ? 95 : 75) + (Math.random() - 0.5) * 50);
-        //   } else {
-        //     b.explosion(path[path.length - 1], (mech.crouch ? 95 : 75) + (Math.random() - 0.5) * 50);
-        //   }
-        // }
-
         const speed = 30 + 6 * Math.random() + 9 * mod.nailInstantFireRate
         const angle = mech.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (mech.crouch ? 1.35 : 3.2) / CD
         const dmg = 0.9
@@ -1925,7 +1850,6 @@ const b = {
           x: mech.Vx / 2 + speed * Math.cos(angle),
           y: mech.Vy / 2 + speed * Math.sin(angle)
         }, dmg) //position, velocity, damage
-
         if (mod.isIceCrystals) {
           bullet[bullet.length - 1].onDmg = function (who) {
             mobs.statusSlow(who, 30)
