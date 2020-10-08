@@ -83,7 +83,7 @@ const mod = {
     damageFromMods() {
         let dmg = mech.fieldDamage
         // if (mod.aimDamage>1) 
-        if (mod.isEnergyNoAmmo) dmg *= 1.4
+        if (mod.isEnergyNoAmmo) dmg *= 1.5
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
@@ -133,7 +133,7 @@ const mod = {
         },
         {
             name: "exciton-lattice",
-            description: `increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
+            description: `increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -420,7 +420,7 @@ const mod = {
         },
         {
             name: "ammonium nitrate",
-            description: "increase <strong class='color-e'>explosive</strong> <strong>area</strong> by <strong>60%</strong>, but<br>you take <strong>300%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+            description: "increase <strong class='color-e'>explosive</strong> <strong>area</strong> by <strong>100%</strong>, but<br>you take <strong>400%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1217,7 +1217,7 @@ const mod = {
         },
         {
             name: "stimulated emission",
-            description: "<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
+            description: "<strong>9%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1225,12 +1225,12 @@ const mod = {
             },
             requires: "",
             effect: () => {
-                mod.duplicateChance += 0.08
+                mod.duplicateChance += 0.09
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
 
             },
             remove() {
-                mod.duplicateChance -= 0.08 * this.count
+                mod.duplicateChance -= 0.09 * this.count
                 if (!mod.duplicateChance) game.draw.powerUp = game.draw.powerUpNormal
             }
         },
@@ -2220,8 +2220,8 @@ const mod = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>3%</strong> <strong class='color-h'>health</strong><br>and overfills your <strong class='color-f'>energy</strong> by <strong>66%</strong>",
-            maxCount: 3,
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4%</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>100%</strong> of your max",
+            maxCount: 9,
             count: 0,
             allowed() {
                 return (mod.haveGunCheck("ice IX") || mod.isIceField) && !mod.isHeavyWater
@@ -2660,7 +2660,7 @@ const mod = {
         },
         {
             name: "pair production",
-            description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong><br>temporarily gain <strong>3x</strong> your maximum <strong class='color-f'>energy</strong>",
+            description: "<strong>power ups</strong> overload your <strong class='color-f'>energy</strong><br>by <strong>300%</strong> of your maximum <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {

@@ -584,6 +584,7 @@ document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting s
 //keyboard input
 const keys = [];
 document.body.addEventListener("keydown", (e) => {
+  console.log(e.keyCode)
   keys[e.keyCode] = true;
   if (mech.alive) game.keyPress();
 });

@@ -3842,25 +3842,25 @@ const level = {
     for (let i = 0; i < num; i++) {
       game.difficulty++
       game.dmgScale += 0.37; //damage done by mobs increases each level
-      b.dmgScale *= 0.92; //damage done by player decreases each level
-      if (game.accelScale < 5) game.accelScale *= 1.027 //mob acceleration increases each level
-      if (game.lookFreqScale > 0.2) game.lookFreqScale *= 0.975 //mob cycles between looks decreases each level
-      if (game.CDScale > 0.2) game.CDScale *= 0.966 //mob CD time decreases each level
+      b.dmgScale *= 0.93; //damage done by player decreases each level
+      if (game.accelScale < 5) game.accelScale *= 1.02 //mob acceleration increases each level
+      if (game.lookFreqScale > 0.2) game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
+      if (game.CDScale > 0.2) game.CDScale *= 0.97 //mob CD time decreases each level
     }
-    game.healScale = 1 / (1 + game.difficulty * 0.07) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
+    game.healScale = 1 / (1 + game.difficulty * 0.06) //a higher denominator makes for lower heals // mech.health += heal * game.healScale;
   },
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
       game.dmgScale -= 0.37; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
-      b.dmgScale /= 0.92; //damage done by player decreases each level
-      if (game.accelScale > 0.2) game.accelScale /= 1.027 //mob acceleration increases each level
-      if (game.lookFreqScale < 5) game.lookFreqScale /= 0.975 //mob cycles between looks decreases each level
-      if (game.CDScale < 5) game.CDScale /= 0.966 //mob CD time decreases each level
+      b.dmgScale /= 0.93; //damage done by player decreases each level
+      if (game.accelScale > 0.2) game.accelScale /= 1.02 //mob acceleration increases each level
+      if (game.lookFreqScale < 5) game.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
+      if (game.CDScale < 5) game.CDScale /= 0.97 //mob CD time decreases each level
     }
     if (game.difficulty < 1) game.difficulty = 0;
-    game.healScale = 1 / (1 + game.difficulty * 0.07)
+    game.healScale = 1 / (1 + game.difficulty * 0.06)
   },
   difficultyText(mode = document.getElementById("difficulty-select").value) {
     if (mode === "0") {

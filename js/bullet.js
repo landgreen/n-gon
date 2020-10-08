@@ -166,8 +166,8 @@ const b = {
   },
   explosion(where, radius) { // typically explode is used for some bullets with .onEnd
     let dist, sub, knock;
-    let dmg = radius * 0.01;
-    if (mod.isExplosionHarm) radius *= 1.35
+    let dmg = radius * 0.013;
+    if (mod.isExplosionHarm) radius *= 1.43 // sqrt(2)radius  for 2x more area
     if (mod.isSmallExplosion) {
       radius *= 0.5
       dmg *= 1.5
@@ -198,11 +198,10 @@ const b = {
 
       if (mod.isImmuneExplosion) {
         const mitigate = Math.min(1, Math.max(1 - mech.energy * 0.6, 0))
-        mech.damage(mitigate * radius * (mod.isExplosionHarm) ? 0.0004 : 0.0001);
+        mech.damage(mitigate * radius * (mod.isExplosionHarm ? 0.0004 : 0.0001));
       } else {
-        mech.damage(radius * (mod.isExplosionHarm) ? 0.0004 : 0.0001);
+        mech.damage(radius * (mod.isExplosionHarm ? 0.0004 : 0.0001));
       }
-
 
       // if (!(mod.isImmuneExplosion && mech.energy > 0.97)) {
       //   if (mod.isExplosionHarm) {
@@ -806,8 +805,8 @@ const b = {
         this.endCycle = game.cycle
         if (mod.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
         if (mod.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && !who.alive) {
-          mech.energy += mod.iceEnergy * 0.66
-          mech.addHealth(mod.iceEnergy * 0.03)
+          mech.energy += mod.iceEnergy * 0.66 * mech.maxEnergy
+          mech.addHealth(mod.iceEnergy * 0.04)
         }
       },
       onEnd() {},
@@ -1990,8 +1989,8 @@ const b = {
       name: "flechettes",
       description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
       ammo: 0,
-      ammoPack: 45,
-      defaultAmmoPack: 45,
+      ammoPack: 55,
+      defaultAmmoPack: 55,
       have: false,
       count: 0, //used to track how many shots are in a volley before a big CD
       lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -2018,9 +2017,9 @@ const b = {
                     this.immuneList.push(who.id)
                     who.foundPlayer();
                     if (mod.isFastDot) {
-                      mobs.statusDoT(who, 3.9, 30)
+                      mobs.statusDoT(who, 4, 30)
                     } else {
-                      mobs.statusDoT(who, 0.65, mod.isSlowDot ? 360 : 180)
+                      mobs.statusDoT(who, 0.66, mod.isSlowDot ? 360 : 180)
                     }
                     game.drawList.push({ //add dmg to draw queue
                       x: this.position.x,
@@ -2072,7 +2071,7 @@ const b = {
           makeFlechette(mech.angle - 0.02 - 0.005 * Math.random())
         }
 
-        const CD = (mech.crouch) ? 68 : 35
+        const CD = (mech.crouch) ? 60 : 30
         if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
         this.lastFireCycle = mech.cycle
         if (this.count > ((mech.crouch) ? 7 : 1)) {
