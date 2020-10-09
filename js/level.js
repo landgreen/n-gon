@@ -20,7 +20,7 @@ const level = {
       // for (let i = 0; i < 10; i++) {
       // mod.giveMod("laser-bot");
       // }
-      // mod.giveMod("eddy current brake")
+      // mod.giveMod("bot fabrication")
 
 
       level.intro(); //starting level

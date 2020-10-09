@@ -7,7 +7,7 @@ const b = {
   inventoryGun: 0,
   inventory: [], //list of what guns player has  // 0 starts with basic gun
   fire() {
-    if (game.mouseDown && mech.fireCDcycle < mech.cycle && (!(keys[32] || game.mouseDownRight) || mech.fieldFire) && b.inventory.length) {
+    if (input.fire && mech.fireCDcycle < mech.cycle && (!(input.space || input.fireRight) || mech.fieldFire) && b.inventory.length) {
       if (b.guns[b.activeGun].ammo > 0) {
         b.guns[b.activeGun].fire();
         if (mod.isCrouchAmmo && mech.crouch) {
@@ -2412,9 +2412,9 @@ const b = {
           this.force.y += this.mass * 0.0022;
 
           //set armed and sucking status
-          if (!this.isArmed && !game.mouseDown) {
+          if (!this.isArmed && !input.fire) {
             this.isArmed = true
-          } else if (this.isArmed && game.mouseDown && !this.isSucking) {
+          } else if (this.isArmed && input.fire && !this.isSucking) {
             this.isSucking = true;
             this.endCycle = game.cycle + 50;
           }
@@ -3013,7 +3013,7 @@ const b = {
               return
             }
 
-            if ((!game.mouseDown && this.charge > 0.6)) { //fire on mouse release or on low energy
+            if ((!input.fire && this.charge > 0.6)) { //fire on mouse release or on low energy
               mech.fireCDcycle = mech.cycle + 2; // set fire cool down
               //normal bullet behavior occurs after firing, overwrites this function
               this.do = function () {

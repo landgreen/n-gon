@@ -2,11 +2,16 @@
 
 ice IX thermoelectric energy 66% -> 100%,   heal 3%->4%
 
+new key press detection system
+  I rewrote some fundamental systems so there may be some bugs
+  testing mode death is now shift X (was x+z)
 
 ************** TODO - n-gon **************
 
 redo key press around e.key
   https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+
+  mouse event e.which is deprecated
 
 time dilation mod rework brain storm
   take no damage

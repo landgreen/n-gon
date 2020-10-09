@@ -110,6 +110,39 @@ window.addEventListener('load', (event) => {
   }
 });
 
+
+
+//set up canvas
+var canvas = document.getElementById("canvas");
+//using "const" causes problems in safari when an ID shares the same name.
+const ctx = canvas.getContext("2d");
+document.body.style.backgroundColor = "#fff";
+
+//disable pop up menu on right click
+document.oncontextmenu = function () {
+  return false;
+}
+
+function setupCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.width2 = canvas.width / 2; //precalculated because I use this often (in mouse look)
+  canvas.height2 = canvas.height / 2;
+  canvas.diagonal = Math.sqrt(canvas.width2 * canvas.width2 + canvas.height2 * canvas.height2);
+  // ctx.font = "18px Arial";
+  // ctx.textAlign = "center";
+  ctx.font = "25px Arial";
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  // ctx.lineCap='square';
+  game.setZoom();
+}
+setupCanvas();
+window.onresize = () => {
+  setupCanvas();
+};
+
+
 //build build grid display
 const build = {
   onLoadPowerUps() {
@@ -493,117 +526,9 @@ if (localSettings) {
   document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }
 
-//set up canvas
-var canvas = document.getElementById("canvas");
-//using "const" causes problems in safari when an ID shares the same name.
-const ctx = canvas.getContext("2d");
-document.body.style.backgroundColor = "#fff";
-
-//disable pop up menu on right click
-document.oncontextmenu = function () {
-  return false;
-}
-
-function setupCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  canvas.width2 = canvas.width / 2; //precalculated because I use this often (in mouse look)
-  canvas.height2 = canvas.height / 2;
-  canvas.diagonal = Math.sqrt(canvas.width2 * canvas.width2 + canvas.height2 * canvas.height2);
-  // ctx.font = "18px Arial";
-  // ctx.textAlign = "center";
-  ctx.font = "25px Arial";
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
-  // ctx.lineCap='square';
-  game.setZoom();
-}
-setupCanvas();
-window.onresize = () => {
-  setupCanvas();
-};
-
-//mouse move input
-document.body.addEventListener("mousemove", (e) => {
-  game.mouse.x = e.clientX;
-  game.mouse.y = e.clientY;
-});
-
-document.body.addEventListener("mouseup", (e) => {
-  // game.buildingUp(e); //uncomment when building levels
-  // game.mouseDown = false;
-  // console.log(e)
-  if (e.which === 3) {
-    game.mouseDownRight = false;
-  } else {
-    game.mouseDown = false;
-  }
-});
-
-document.body.addEventListener("mousedown", (e) => {
-  if (e.which === 3) {
-    game.mouseDownRight = true;
-  } else {
-    game.mouseDown = true;
-  }
-});
-
-document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting stuck when leaving the window
-  // game.mouseDown = false;
-  // game.mouseDownRight = false;
-
-  if (e.button === 1) {
-    game.mouseDown = true;
-  } else {
-    game.mouseDown = false;
-  }
-
-  if (e.button === 3) {
-    game.mouseDownRight = true;
-  } else {
-    game.mouseDownRight = false;
-  }
-});
-document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting stuck when leaving the window
-  // game.mouseDown = false;
-  // game.mouseDownRight = false;
-  // console.log(e)
-  if (e.button === 1) {
-    game.mouseDown = true;
-  } else {
-    game.mouseDown = false;
-  }
-
-  if (e.button === 3) {
-    game.mouseDownRight = true;
-  } else {
-    game.mouseDownRight = false;
-  }
-});
-
-//keyboard input
-const keys = [];
-document.body.addEventListener("keydown", (e) => {
-  console.log(e.keyCode)
-  keys[e.keyCode] = true;
-  if (mech.alive) game.keyPress();
-});
-
-document.body.addEventListener("keyup", (e) => {
-  keys[e.keyCode] = false;
-});
-
-document.body.addEventListener("wheel", (e) => {
-  if (!game.paused) {
-    if (e.deltaY > 0) {
-      game.nextGun();
-    } else {
-      game.previousGun();
-    }
-  }
-}, {
-  passive: true
-});
+//**********************************************************************
+// settings 
+//**********************************************************************
 
 document.getElementById("fps-select").addEventListener("input", () => {
   let value = document.getElementById("fps-select").value
@@ -630,7 +555,262 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
   localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
-//main loop ************************************************************
+// ************************************************************************************************
+// ************************************************************************************************
+// inputs
+// ************************************************************************************************
+// ************************************************************************************************
+
+const input = {
+  up: false, // jump
+  down: false, // crouch
+  left: false,
+  right: false,
+  field: false, // right mouse
+  fire: false, // left mouse
+  isPauseKeyReady: true,
+}
+//mouse move input
+document.body.addEventListener("mousemove", (e) => {
+  game.mouse.x = e.clientX;
+  game.mouse.y = e.clientY;
+});
+
+document.body.addEventListener("mouseup", (e) => {
+  // input.fire = false;
+  // console.log(e)
+  if (e.which === 3) {
+    input.field = false;
+  } else {
+    input.fire = false;
+  }
+});
+
+document.body.addEventListener("mousedown", (e) => {
+  if (e.which === 3) {
+    input.field = true;
+  } else {
+    input.fire = true;
+  }
+});
+
+document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting stuck when leaving the window
+  if (e.button === 1) {
+    input.fire = true;
+  } else {
+    input.fire = false;
+  }
+
+  if (e.button === 3) {
+    input.field = true;
+  } else {
+    input.field = false;
+  }
+});
+document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting stuck when leaving the window
+  if (e.button === 1) {
+    input.fire = true;
+  } else {
+    input.fire = false;
+  }
+
+  if (e.button === 3) {
+    input.field = true;
+  } else {
+    input.field = false;
+  }
+});
+
+document.body.addEventListener("wheel", (e) => {
+  if (!game.paused) {
+    if (e.deltaY > 0) {
+      game.nextGun();
+    } else {
+      game.previousGun();
+    }
+  }
+}, {
+  passive: true
+});
+
+window.addEventListener("keydown", function (event) {
+  // if (event.defaultPrevented) {
+  //   return; // Do nothing if the event was already processed
+  // }
+  switch (event.key) {
+    case "d":
+    case "ArrowRight":
+      input.right = true
+      break;
+    case "a":
+    case "ArrowLeft":
+      input.left = true
+      break;
+    case "w":
+    case "ArrowUp":
+      input.up = true
+      break;
+    case "s":
+    case "ArrowDown":
+      input.down = true
+      break;
+    case "e":
+      game.nextGun();
+      break
+    case "q":
+      game.previousGun();
+      break
+    case "p":
+      if (!game.isChoosing && input.isPauseKeyReady) {
+        input.isPauseKeyReady = false
+        setTimeout(function () {
+          input.isPauseKeyReady = true
+        }, 300);
+        if (game.paused) {
+          build.unPauseGrid()
+          game.paused = false;
+          level.levelAnnounce();
+          document.body.style.cursor = "none";
+          requestAnimationFrame(cycle);
+        } else {
+          game.paused = true;
+          game.replaceTextLog = true;
+          build.pauseGrid()
+          document.body.style.cursor = "auto";
+        }
+      }
+      break
+    case "t":
+      if (game.testing) {
+        game.testing = false;
+        game.loop = game.normalLoop
+        if (game.isConstructionMode) {
+          document.getElementById("construct").style.display = 'none'
+        }
+      } else { //if (keys[191])
+        game.testing = true;
+        game.isCheating = true;
+        if (game.isConstructionMode) {
+          document.getElementById("construct").style.display = 'inline'
+        }
+        game.loop = game.testingLoop
+      }
+      break
+  }
+  if (game.testing) {
+    switch (event.key) {
+      case "o":
+        game.isAutoZoom = false;
+        game.zoomScale /= 0.9;
+        game.setZoom();
+        break;
+      case "i":
+        game.isAutoZoom = false;
+        game.zoomScale *= 0.9;
+        game.setZoom();
+        break
+      case "`":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
+        break
+      case "1":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+        break
+      case "2":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
+        break
+      case "3":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        break
+      case "4":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+        break
+      case "5":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
+        break
+      case "6":
+        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+        spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
+        break
+      case "7":
+        const index = body.length
+        spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
+        body[index].collisionFilter.category = cat.body;
+        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        body[index].classType = "body";
+        World.add(engine.world, body[index]); //add to world
+        break
+      case "f":
+        const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
+        mech.setField(mode)
+        break
+      case "g":
+        b.giveGuns("all", 1000)
+        break
+      case "h":
+        mech.addHealth(Infinity)
+        mech.energy = mech.maxEnergy;
+        break
+      case "y":
+        mod.giveMod()
+        break
+      case "r":
+        Matter.Body.setPosition(player, game.mouseInGame);
+        Matter.Body.setVelocity(player, {
+          x: 0,
+          y: 0
+        });
+        // move bots to follow player
+        for (let i = 0; i < bullet.length; i++) {
+          if (bullet[i].botType) {
+            Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+              x: 250 * (Math.random() - 0.5),
+              y: 250 * (Math.random() - 0.5)
+            }));
+            Matter.Body.setVelocity(bullet[i], {
+              x: 0,
+              y: 0
+            });
+          }
+        }
+        break
+      case "u":
+        level.nextLevel();
+        break
+      case "X": //capital X to make it hard to die
+        mech.death();
+        break
+    }
+  }
+  // event.preventDefault(); // Cancel the default action to avoid it being handled twice
+}, true);
+
+window.addEventListener("keyup", function (event) {
+  // if (event.defaultPrevented) {
+  //   return; // Do nothing if the event was already processed
+  // }
+  switch (event.key) {
+    case "d":
+    case "ArrowRight":
+      input.right = false
+      break;
+    case "a":
+    case "ArrowLeft":
+      input.left = false
+      break;
+    case "w":
+    case "ArrowUp":
+      input.up = false
+      break;
+    case "s":
+    case "ArrowDown":
+      input.down = false
+      break;
+  }
+  // event.preventDefault(); // Cancel the default action to avoid it being handled twice
+}, true);
+
+//**********************************************************************
+// main loop 
 //**********************************************************************
 game.loop = game.normalLoop;
 

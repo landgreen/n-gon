@@ -136,7 +136,6 @@ const game = {
   accelScale: null, //set in levels.setDifficulty
   CDScale: null, //set in levels.setDifficulty
   lookFreqScale: null, //set in levels.setDifficulty
-  mouseDown: false,
   // dropFPS(cap = 40, time = 15) {
   //   game.fpsCap = cap
   //   game.fpsInterval = 1000 / game.fpsCap;
@@ -366,167 +365,6 @@ const game = {
     game.updateGunHUD();
     game.boldActiveGunHUD();
     // mech.drop();
-  },
-  isPauseKeyReady: true,
-  keyPress() { //runs on key down event
-    //full screen toggle
-    // if (keys[13]) {
-    //   //enter key
-    //   var doc = window.document;
-    //   var docEl = doc.documentElement;
-
-    //   var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-    //   var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-    //   if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-    //     requestFullScreen.call(docEl);
-    //   } else {
-    //     cancelFullScreen.call(doc);
-    //   }
-    //   setupCanvas();
-    // }
-
-    //color testing
-    // if (keys[49]) {
-    //   mech.color.hue--
-    //   mech.setFillColors();
-    // } else if (keys[50]) {
-    //   mech.color.hue++
-    //   mech.setFillColors();
-    // } else if (keys[51]) {
-    //   mech.color.sat--
-    //   mech.setFillColors();
-    // } else if (keys[52]) {
-    //   mech.color.sat++
-    //   mech.setFillColors();
-    // } else if (keys[53]) {
-    //   mech.color.light--
-    //   mech.setFillColors();
-    // } else if (keys[54]) {
-    //   mech.color.light++
-    //   mech.setFillColors();
-    // }
-
-    if (keys[69]) { // e    swap to next active gun
-      game.nextGun();
-    } else if (keys[81]) { //q    swap to previous active gun
-      game.previousGun();
-    }
-    if (keys[80] && !game.isChoosing && game.isPauseKeyReady) { //p  for pause
-
-      game.isPauseKeyReady = false
-      setTimeout(function () {
-        game.isPauseKeyReady = true
-      }, 300);
-
-      if (game.paused) {
-        build.unPauseGrid()
-        game.paused = false;
-        level.levelAnnounce();
-        document.body.style.cursor = "none";
-        requestAnimationFrame(cycle);
-      } else {
-        game.paused = true;
-        game.replaceTextLog = true;
-        // game.makeTextLog("<h1>PAUSED</h1>", 1);
-        //display grid
-        // document.title = "PAUSED: press P to resume";
-        build.pauseGrid()
-        document.body.style.cursor = "auto";
-      }
-    }
-
-    //toggle testing mode
-    if (keys[84]) {
-      // 84 = t
-      if (game.testing) {
-        game.testing = false;
-        game.loop = game.normalLoop
-        if (game.isConstructionMode) {
-          document.getElementById("construct").style.display = 'none'
-        }
-      } else { //if (keys[191])
-        game.testing = true;
-        game.isCheating = true;
-        if (game.isConstructionMode) {
-          document.getElementById("construct").style.display = 'inline'
-        }
-        game.loop = game.testingLoop
-      }
-    }
-    //in testing mode
-    if (game.testing) {
-
-      if (keys[79]) {
-        // - key
-        game.isAutoZoom = false;
-        game.zoomScale /= 0.9;
-        game.setZoom();
-      } else if (keys[73]) {
-        // = key
-        game.isAutoZoom = false;
-        game.zoomScale *= 0.9;
-        game.setZoom();
-      }
-
-      if (keys[192]) { // `
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
-      } else if (keys[49]) { // give power ups with 1
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
-      } else if (keys[50]) { // 2
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
-      } else if (keys[51]) { // 3
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
-      } else if (keys[52]) { // 4
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "field");
-      } else if (keys[53]) { // 5
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
-      } else if (keys[54]) { // 6  spawn mob
-        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-        spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
-      } else if (keys[55]) { // 7  spawn body
-        index = body.length
-        spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
-        body[index].collisionFilter.category = cat.body;
-        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-        body[index].classType = "body";
-        World.add(engine.world, body[index]); //add to world
-      } else if (keys[70]) { //cycle fields with F
-        const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
-        mech.setField(mode)
-      } else if (keys[71]) { // give all guns with G
-        b.giveGuns("all", 1000)
-      } else if (keys[72]) { // heal with H
-        mech.addHealth(Infinity)
-        mech.energy = mech.maxEnergy;
-      } else if (keys[89]) { //add mods with y
-        mod.giveMod()
-      } else if (keys[82]) { // teleport to mouse with R
-        Matter.Body.setPosition(player, game.mouseInGame);
-        Matter.Body.setVelocity(player, {
-          x: 0,
-          y: 0
-        });
-        // move bots to follow player
-        for (let i = 0; i < bullet.length; i++) {
-          if (bullet[i].botType) {
-            Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-              x: 250 * (Math.random() - 0.5),
-              y: 250 * (Math.random() - 0.5)
-            }));
-            Matter.Body.setVelocity(bullet[i], {
-              x: 0,
-              y: 0
-            });
-          }
-        }
-        // game.noCameraScroll()
-      } else if (keys[85]) { // next level with U
-        level.nextLevel();
-      } else if (keys[88] && keys[90]) {
-        mech.death();
-      }
-    }
   },
   zoom: null,
   zoomScale: 1000,
@@ -811,35 +649,35 @@ const game = {
     game.fpsCap = game.fpsCapDefault
     game.fpsInterval = 1000 / game.fpsCap;
   },
-  getCoords: {
-    //used when building maps, outputs a draw rect command to console, only works in testing mode
-    pos1: {
-      x: 0,
-      y: 0
-    },
-    pos2: {
-      x: 0,
-      y: 0
-    },
-    out() {
-      if (keys[49]) {
-        game.getCoords.pos1.x = Math.round(game.mouseInGame.x / 25) * 25;
-        game.getCoords.pos1.y = Math.round(game.mouseInGame.y / 25) * 25;
-      }
-      if (keys[50]) {
-        //press 1 in the top left; press 2 in the bottom right;copy command from console
-        game.getCoords.pos2.x = Math.round(game.mouseInGame.x / 25) * 25;
-        game.getCoords.pos2.y = Math.round(game.mouseInGame.y / 25) * 25;
-        window.getSelection().removeAllRanges();
-        var range = document.createRange();
-        range.selectNode(document.getElementById("test"));
-        window.getSelection().addRange(range);
-        document.execCommand("copy");
-        window.getSelection().removeAllRanges();
-        console.log(`spawn.mapRect(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2.y - game.getCoords.pos1.y}); //`);
-      }
-    }
-  },
+  // getCoords: {
+  //   //used when building maps, outputs a draw rect command to console, only works in testing mode
+  //   pos1: {
+  //     x: 0,
+  //     y: 0
+  //   },
+  //   pos2: {
+  //     x: 0,
+  //     y: 0
+  //   },
+  //   out() {
+  //     if (keys[49]) {
+  //       game.getCoords.pos1.x = Math.round(game.mouseInGame.x / 25) * 25;
+  //       game.getCoords.pos1.y = Math.round(game.mouseInGame.y / 25) * 25;
+  //     }
+  //     if (keys[50]) {
+  //       //press 1 in the top left; press 2 in the bottom right;copy command from console
+  //       game.getCoords.pos2.x = Math.round(game.mouseInGame.x / 25) * 25;
+  //       game.getCoords.pos2.y = Math.round(game.mouseInGame.y / 25) * 25;
+  //       window.getSelection().removeAllRanges();
+  //       var range = document.createRange();
+  //       range.selectNode(document.getElementById("test"));
+  //       window.getSelection().addRange(range);
+  //       document.execCommand("copy");
+  //       window.getSelection().removeAllRanges();
+  //       console.log(`spawn.mapRect(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2.y - game.getCoords.pos1.y}); //`);
+  //     }
+  //   }
+  // },
   checks() {
     if (!(mech.cycle % 60)) { //once a second
 

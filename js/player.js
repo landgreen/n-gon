@@ -223,10 +223,10 @@ const mech = {
   buttonCD_jump: 0, //cool down for player buttons
   groundControl() {
     if (mech.crouch) {
-      if (!(keys[83] || keys[40]) && mech.checkHeadClear() && mech.hardLandCD < mech.cycle) mech.undoCrouch();
-    } else if (keys[83] || keys[40] || mech.hardLandCD > mech.cycle) {
+      if (!(input.down) && mech.checkHeadClear() && mech.hardLandCD < mech.cycle) mech.undoCrouch();
+    } else if (input.down || mech.hardLandCD > mech.cycle) {
       mech.doCrouch(); //on ground && not crouched and pressing s or down
-    } else if ((keys[87] || keys[38]) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
+    } else if ((input.up) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
       mech.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
 
       //apply a fraction of the jump force to the body the player is jumping off of
@@ -242,7 +242,7 @@ const mech = {
       });
     }
 
-    if (keys[65] || keys[37]) { //left / a
+    if (input.left) {
       // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
       //   blink(-1)
       // } else {
@@ -252,7 +252,7 @@ const mech = {
         player.force.x -= mech.Fx
       }
       // }
-    } else if (keys[68] || keys[39]) { //right / d
+    } else if (input.right) {
       // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
       //   blink(1)
       // } else {
@@ -280,7 +280,7 @@ const mech = {
   },
   airControl() {
     //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
-    if (mech.buttonCD_jump + 60 > mech.cycle && !(keys[87] || keys[38]) && mech.Vy < 0) {
+    if (mech.buttonCD_jump + 60 > mech.cycle && !(input.up) && mech.Vy < 0) {
       Matter.Body.setVelocity(player, {
         //reduce player y-velocity every cycle
         x: player.velocity.x,
@@ -288,9 +288,9 @@ const mech = {
       });
     }
 
-    if (keys[65] || keys[37]) {
+    if (input.left) {
       if (player.velocity.x > -mech.airSpeedLimit / player.mass / player.mass) player.force.x -= mech.FxAir; // move player   left / a
-    } else if (keys[68] || keys[39]) {
+    } else if (input.right) {
       if (player.velocity.x < mech.airSpeedLimit / player.mass / player.mass) player.force.x += mech.FxAir; //move player  right / d
     }
   },
@@ -860,7 +860,7 @@ const mech = {
   },
   throwBlock() {
     if (mech.holdingTarget) {
-      if (keys[32] || game.mouseDownRight) {
+      if (input.field) {
         if (mech.energy > 0.001) {
           if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
           mech.energy -= 0.001 / mod.throwChargeRate;
@@ -1234,7 +1234,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+          } else if ((input.field && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
             if (mech.energy > 0.05) {
@@ -1261,7 +1261,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
+          } else if ((input.field) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
@@ -1311,7 +1311,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+          } else if ((input.field && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
             if (mech.energy > 0.05) {
@@ -1405,7 +1405,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+          } else if ((input.field && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
             if (mech.energy > 0.05) {
@@ -1441,7 +1441,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //push away
+          } else if (input.field && mech.fieldCDcycle < mech.cycle) { //push away
             mech.grabPowerUp();
             mech.lookForPickUp();
             const DRAIN = 0.00035
@@ -1474,12 +1474,12 @@ const mech = {
               // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
               // zeroG(mob);  //mobs are too irregular to make this work?
 
-              if (keys[83] || keys[40]) { //down
+              if (input.down) { //down
                 player.force.y -= 0.5 * player.mass * game.g;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 400 * 0.03;
                 zeroG(powerUp, this.fieldDrawRadius, 0.7);
                 zeroG(body, this.fieldDrawRadius, 0.7);
-              } else if (keys[87] || keys[38]) { //up
+              } else if (input.up) { //up
                 mech.energy -= 5 * DRAIN;
                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
                 player.force.y -= 1.45 * player.mass * game.g;
@@ -1497,7 +1497,7 @@ const mech = {
                 mech.energy = 0;
               }
               //add extra friction for horizontal motion
-              if (keys[65] || keys[68] || keys[37] || keys[39]) {
+              if (input.down || input.up || input.left || input.right) {
                 Matter.Body.setVelocity(player, {
                   x: player.velocity.x * 0.99,
                   y: player.velocity.y * 0.98
@@ -1552,7 +1552,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
+          } else if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
             const DRAIN = 0.002
@@ -1710,7 +1710,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight) && mech.fieldCDcycle < mech.cycle) {
+          } else if (input.field && mech.fieldCDcycle < mech.cycle) {
             mech.grabPowerUp();
             mech.lookForPickUp(180);
 
@@ -1807,7 +1807,7 @@ const mech = {
             mech.drawHold(mech.holdingTarget);
             mech.holding();
             mech.throwBlock();
-          } else if ((keys[32] || game.mouseDownRight && mech.fieldCDcycle < mech.cycle)) { //not hold and field button is pressed
+          } else if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold and field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding target exists, and field button is not pressed
@@ -1869,7 +1869,7 @@ const mech = {
             const wiggle = 0.15 * Math.sin(mech.fieldPhase * 0.5)
             ctx.beginPath();
             ctx.ellipse(mech.pos.x, mech.pos.y, mech.fieldDrawRadius * (1 - wiggle), mech.fieldDrawRadius * (1 + wiggle), mech.fieldPhase, 0, 2 * Math.PI);
-            if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
+            if (mech.fireCDcycle > mech.cycle && (input.field)) {
               ctx.lineWidth = 5;
               ctx.strokeStyle = `rgba(0, 204, 255,1)`
               ctx.stroke()
@@ -1947,7 +1947,7 @@ const mech = {
     //         const off2 = 1 - 0.06 * Math.sin(mech.fieldPhase);
     //         ctx.beginPath();
     //         ctx.ellipse(mech.pos.x, mech.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
-    //         if (mech.fireCDcycle > mech.cycle && (keys[32] || game.mouseDownRight)) {
+    //         if (mech.fireCDcycle > mech.cycle && (input.field)) {
     //           ctx.lineWidth = 5;
     //           ctx.strokeStyle = `rgba(0, 204, 255,1)`
     //           ctx.stroke()
@@ -1969,7 +1969,7 @@ const mech = {
     //         mech.drawHold(mech.holdingTarget);
     //         mech.holding();
     //         mech.throwBlock();
-    //       } else if (keys[32] || game.mouseDownRight) {
+    //       } else if (input.field) {
     //         mech.grabPowerUp();
     //         mech.lookForPickUp();
 
@@ -2083,7 +2083,7 @@ const mech = {
         mech.fieldRadius = 0;
         mech.drop();
         mech.hold = function () {
-          if (keys[32] || game.mouseDownRight) {
+          if (input.field) {
             if (mech.fieldCDcycle < mech.cycle) {
               const scale = 25
               const bounds = {
