@@ -569,6 +569,18 @@ const input = {
   field: false, // right mouse
   fire: false, // left mouse
   isPauseKeyReady: true,
+  key: {
+    up: "KeyW", // jump
+    down: "KeyS", // crouch
+    left: "KeyA",
+    right: "KeyD",
+    field: "Space",
+    // fire: "ShiftLeft",
+    pause: "KeyP",
+    nextGun: "KeyE",
+    previousGun: "KeyQ",
+    testing: "KeyT"
+  }
 }
 //mouse move input
 document.body.addEventListener("mousemove", (e) => {
@@ -633,34 +645,58 @@ document.body.addEventListener("wheel", (e) => {
   passive: true
 });
 
+window.addEventListener("keyup", function (event) {
+  switch (event.code) {
+    case input.key.right:
+    case "ArrowRight":
+      input.right = false
+      break;
+    case input.key.left:
+    case "ArrowLeft":
+      input.left = false
+      break;
+    case input.key.up:
+    case "ArrowUp":
+      input.up = false
+      break;
+    case input.key.down:
+    case "ArrowDown":
+      input.down = false
+      break;
+    case input.key.field:
+      input.field = false
+      break
+  }
+}, true);
+
 window.addEventListener("keydown", function (event) {
-  // if (event.defaultPrevented) {
-  //   return; // Do nothing if the event was already processed
-  // }
-  switch (event.key) {
-    case "d":
+  switch (event.code) {
+    case input.key.right:
     case "ArrowRight":
       input.right = true
       break;
-    case "a":
+    case input.key.left:
     case "ArrowLeft":
       input.left = true
       break;
-    case "w":
+    case input.key.up:
     case "ArrowUp":
       input.up = true
       break;
-    case "s":
+    case input.key.down:
     case "ArrowDown":
       input.down = true
       break;
-    case "e":
+    case input.key.field:
+      input.field = true
+      break
+    case input.key.nextGun:
       game.nextGun();
       break
-    case "q":
+    case input.key.previousGun:
       game.previousGun();
       break
-    case "p":
+    case input.key.pause:
       if (!game.isChoosing && input.isPauseKeyReady) {
         input.isPauseKeyReady = false
         setTimeout(function () {
@@ -680,7 +716,7 @@ window.addEventListener("keydown", function (event) {
         }
       }
       break
-    case "t":
+    case input.key.testing:
       if (game.testing) {
         game.testing = false;
         game.loop = game.normalLoop
@@ -781,32 +817,6 @@ window.addEventListener("keydown", function (event) {
         break
     }
   }
-  // event.preventDefault(); // Cancel the default action to avoid it being handled twice
-}, true);
-
-window.addEventListener("keyup", function (event) {
-  // if (event.defaultPrevented) {
-  //   return; // Do nothing if the event was already processed
-  // }
-  switch (event.key) {
-    case "d":
-    case "ArrowRight":
-      input.right = false
-      break;
-    case "a":
-    case "ArrowLeft":
-      input.left = false
-      break;
-    case "w":
-    case "ArrowUp":
-      input.up = false
-      break;
-    case "s":
-    case "ArrowDown":
-      input.down = false
-      break;
-  }
-  // event.preventDefault(); // Cancel the default action to avoid it being handled twice
 }, true);
 
 //**********************************************************************

@@ -795,7 +795,7 @@ const mod = {
         },
         {
             name: "Pauli exclusion",
-            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second<br>after receiving <strong class='color-harm'>harm</strong> from a collision`,
+            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>0.5</strong> seconds longer<br>after receiving <strong class='color-harm'>harm</strong> from a collision`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -803,7 +803,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.collisionImmuneCycles += 55;
+                mod.collisionImmuneCycles += 30;
                 mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             },
             remove() {
@@ -2660,7 +2660,7 @@ const mod = {
         },
         {
             name: "pair production",
-            description: "<strong>power ups</strong> overload your <strong class='color-f'>energy</strong><br>by <strong>300%</strong> of your maximum <strong class='color-f'>energy</strong>",
+            description: "<strong>power ups</strong> overload your <strong class='color-f'>energy</strong><br>by <strong>250%</strong> of your maximum <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2669,7 +2669,7 @@ const mod = {
             requires: "nano-scale manufacturing",
             effect: () => {
                 mod.isMassEnergy = true // used in mech.grabPowerUp
-                mech.energy = mech.maxEnergy * 3
+                mech.energy = mech.maxEnergy * 2.5
             },
             remove() {
                 mod.isMassEnergy = false;

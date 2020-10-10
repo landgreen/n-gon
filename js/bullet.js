@@ -7,7 +7,7 @@ const b = {
   inventoryGun: 0,
   inventory: [], //list of what guns player has  // 0 starts with basic gun
   fire() {
-    if (input.fire && mech.fireCDcycle < mech.cycle && (!(input.space || input.fireRight) || mech.fieldFire) && b.inventory.length) {
+    if (input.fire && mech.fireCDcycle < mech.cycle && (!input.field || mech.fieldFire) && b.inventory.length) {
       if (b.guns[b.activeGun].ammo > 0) {
         b.guns[b.activeGun].fire();
         if (mod.isCrouchAmmo && mech.crouch) {

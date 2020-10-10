@@ -8,18 +8,18 @@ new key press detection system
 
 ************** TODO - n-gon **************
 
-redo key press around e.key
-  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+add custom key settings
+  put in local storage 
 
-  mouse event e.which is deprecated
+give the power up boss the ability to eject your mobs if it hits you
+
+mouse event e.which is deprecated
 
 time dilation mod rework brain storm
   take no damage
   can fire
   2x move jump fire while field is active
   33% move jump fire always
-
-
 
 vacuum bomb applies status effect to mobs that makes blocks attracted to them
 
@@ -93,8 +93,6 @@ map element - player rotates a rotor that makes a platform go up or down
 use mac automator to speed up your n-gon -> git sync
 
 fix door.isOpen actually meaning isClosed
-
-mod - laser fires 3 beams
 
 give missiles a suck and delay explosion, like vacuum bomb
 

@@ -412,7 +412,7 @@ const powerUps = {
     }
   },
   onPickUp(where) {
-    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 3;
+    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 2.5;
     if (mod.isMineDrop) b.mine({
       x: where.x,
       y: where.y
