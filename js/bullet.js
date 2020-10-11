@@ -672,7 +672,7 @@ const b = {
       friction: 0,
       frictionAir: 0.025,
       thrust: (mod.isFastSpores ? 0.001 : 0.0004) * (1 + 0.3 * (Math.random() - 0.5)),
-      dmg: mod.isMutualism ? 5.6 : 2.8, //2x bonus damage from mod.isMutualism
+      dmg: mod.isMutualism ? 6 : 3, //2x bonus damage from mod.isMutualism
       lookFrequency: 97 + Math.floor(117 * Math.random()),
       classType: "bullet",
       collisionFilter: {
@@ -2680,7 +2680,7 @@ const b = {
         bullet[me].maxRadius = 30;
         bullet[me].restitution = 0.3;
         bullet[me].minDmgSpeed = 0;
-        bullet[me].totalSpores = 9 + 2 * mod.isFastSpores + 2 * mod.isSporeFreeze
+        bullet[me].totalSpores = 8 + 2 * mod.isFastSpores + 2 * mod.isSporeFreeze
         bullet[me].stuck = function () {};
         bullet[me].onDmg = function () {};
         bullet[me].do = function () {

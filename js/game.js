@@ -461,6 +461,7 @@ const game = {
     player.force.y += player.mass * game.g;
   },
   reset() { //run on first run, and each later run after you die
+    input.endKeySensing();
     b.removeAllGuns();
     mod.setupAllMods(); //sets mods to default values
     b.setFireCD();

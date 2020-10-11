@@ -36,6 +36,11 @@ if (screen.height < 800) {
   if (screen.height < 600) document.getElementById("choose-grid").style.fontSize = "0.8em"; //1.3em is normal
 }
 
+
+//**********************************************************************
+// check for URL parameters to load a custom game
+//**********************************************************************
+
 //example  https://landgreen.github.io/sidescroller/index.html?
 //          &gun1=minigun&gun2=laser
 //          &mod1=laser-bot&mod2=mass%20driver&mod3=overcharge&mod4=laser-bot&mod5=laser-bot&field=phase%20decoherence%20field&difficulty=2
@@ -56,14 +61,11 @@ function getUrlVars() {
 window.addEventListener('load', (event) => {
   const set = getUrlVars()
   if (Object.keys(set).length !== 0) {
-    // game.startGame()
     openCustomBuildMenu();
     //add custom selections based on url
     for (const property in set) {
-      // console.log(set[property], property);
       set[property] = set[property].replace(/%20/g, " ")
       set[property] = set[property].replace(/%CE%A8/g, "Ψ")
-
       if (property === "field") {
         let found = false
         let index
@@ -76,7 +78,6 @@ window.addEventListener('load', (event) => {
         }
         if (found) build.choosePowerUp(document.getElementById(`field-${index}`), index, 'field')
       }
-
       if (property.substring(0, 3) === "gun") {
         let found = false
         let index
@@ -89,7 +90,6 @@ window.addEventListener('load', (event) => {
         }
         if (found) build.choosePowerUp(document.getElementById(`gun-${index}`), index, 'gun')
       }
-
       if (property.substring(0, 3) === "mod") {
         for (let i = 0; i < mod.mods.length; i++) {
           if (set[property] === mod.mods[i].name) {
@@ -98,7 +98,6 @@ window.addEventListener('load', (event) => {
           }
         }
       }
-
       if (property === "difficulty") {
         game.difficultyMode = Number(set[property])
         document.getElementById("difficulty-select-custom").value = Number(set[property])
@@ -111,8 +110,9 @@ window.addEventListener('load', (event) => {
 });
 
 
-
+//**********************************************************************
 //set up canvas
+//**********************************************************************
 var canvas = document.getElementById("canvas");
 //using "const" causes problems in safari when an ID shares the same name.
 const ctx = canvas.getContext("2d");
@@ -142,14 +142,14 @@ window.onresize = () => {
   setupCanvas();
 };
 
-
-//build build grid display
+//**********************************************************************
+// custom build grid display and pause
+//**********************************************************************
 const build = {
   onLoadPowerUps() {
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
       for (const property in set) {
-        // console.log(`${property}: ${give[property]}`);
         set[property] = set[property].replace(/%20/g, " ")
         if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
         if (property.substring(0, 3) === "mod") mod.giveMod(set[property])
@@ -165,7 +165,6 @@ const build = {
           level.onLevel++
         }
       }
-
       for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
       bullet = []; //remove any bullets that might have spawned from mods
       if (b.inventory.length > 0) {
@@ -206,7 +205,6 @@ const build = {
     let el = document.getElementById("pause-grid-left")
     el.style.display = "grid"
     el.innerHTML = text
-
     text = "";
     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
     for (let i = 0, len = mod.mods.length; i < len; i++) {
@@ -265,10 +263,8 @@ const build = {
       if (mod.mods[index].count < mod.mods[index].maxCount) {
         if (!who.classList.contains("build-mod-selected")) who.classList.add("build-mod-selected");
         mod.giveMod(index)
-        // if (mod.mods[index].count > 1) who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[index].name} (${mod.mods[index].count}x)</div> ${mod.mods[index].description}`
       } else {
         mod.removeMod(index);
-        // who.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[index].name}</div> ${mod.mods[index].description}`
         who.classList.remove("build-mod-selected");
       }
     }
@@ -406,14 +402,11 @@ const build = {
       b.activeGun = b.inventory[0] //set first gun to active gun
       game.makeGunHUD();
     }
-
     for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
     bullet = []; //remove any bullets that might have spawned from mods
-
     const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value))
     level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
     level.levelsCleared += levelsCleared;
-
     document.body.style.cursor = "none";
     document.body.style.overflow = "hidden"
     document.getElementById("build-grid").style.display = "none"
@@ -430,15 +423,14 @@ function openCustomBuildMenu() {
   document.body.style.overflowY = "scroll";
   document.body.style.overflowX = "hidden";
   document.getElementById("info").style.display = 'none'
-
   game.startGame(true); //starts game, but pauses it
   build.isCustomSelection = true;
   game.paused = true;
   build.reset();
 }
 
+//record settings so they can be reproduced in the custom menu
 document.getElementById("build-button").addEventListener("click", () => { //setup build run
-  //record settings so they can be reproduced in the custom menu
   let field = 0;
   let inventory = [];
   let modList = [];
@@ -449,11 +441,8 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
       modList.push(mod.mods[i].count)
     }
   }
-
   openCustomBuildMenu();
-
   if (!game.firstRun) { //if player has already died once load that previous build
-    // console.log(modList)
     build.choosePowerUp(document.getElementById(`field-${field}`), field, 'field')
     for (let i = 0; i < inventory.length; i++) {
       build.choosePowerUp(document.getElementById(`gun-${inventory[i]}`), inventory[i], 'gun')
@@ -483,105 +472,337 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
             modID.classList.add("build-grid-disabled");
             modID.onclick = null
           }
-          // if (mod.mods[i].count > 0) mod.removeMod(i)
-          // if (modID.classList.contains("build-mod-selected")) modID.classList.remove("build-mod-selected");
         }
       }
     }
   }
 });
 
-
-//  local storage
-let localSettings = JSON.parse(localStorage.getItem("localSettings"));
-// console.log(localSettings)
-if (localSettings) {
-  // game.isBodyDamage = localSettings.isBodyDamage
-  // document.getElementById("body-damage").checked = localSettings.isBodyDamage
-
-  game.isCommunityMaps = localSettings.isCommunityMaps
-  document.getElementById("community-maps").checked = localSettings.isCommunityMaps
-
-  game.difficultyMode = localSettings.difficultyMode
-  document.getElementById("difficulty-select").value = localSettings.difficultyMode
-
-  if (localSettings.fpsCapDefault === 'max') {
-    game.fpsCapDefault = 999999999;
-  } else {
-    game.fpsCapDefault = Number(localSettings.fpsCapDefault)
-  }
-  document.getElementById("fps-select").value = localSettings.fpsCapDefault
-} else {
-  localSettings = {
-    isCommunityMaps: false,
-    difficultyMode: '1',
-    fpsCapDefault: 'max',
-    runCount: 0,
-    levelsClearedLastGame: 0
-  };
-  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-  document.getElementById("community-maps").checked = localSettings.isCommunityMaps
-  game.isCommunityMaps = localSettings.isCommunityMaps
-  document.getElementById("difficulty-select").value = localSettings.difficultyMode
-  document.getElementById("fps-select").value = localSettings.fpsCapDefault
-}
-
-//**********************************************************************
-// settings 
-//**********************************************************************
-
-document.getElementById("fps-select").addEventListener("input", () => {
-  let value = document.getElementById("fps-select").value
-  if (value === 'max') {
-    game.fpsCapDefault = 999999999;
-  } else {
-    game.fpsCapDefault = Number(value)
-  }
-  localSettings.fpsCapDefault = value
-  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-});
-
-document.getElementById("community-maps").addEventListener("input", () => {
-  game.isCommunityMaps = document.getElementById("community-maps").checked
-  localSettings.isCommunityMaps = game.isCommunityMaps
-  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-});
-
-// difficulty-select-custom event listener is set in build.makeGrid
-document.getElementById("difficulty-select").addEventListener("input", () => {
-  game.difficultyMode = Number(document.getElementById("difficulty-select").value)
-  localSettings.difficultyMode = game.difficultyMode
-  localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
-  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-});
-
-// ************************************************************************************************
 // ************************************************************************************************
 // inputs
 // ************************************************************************************************
-// ************************************************************************************************
-
 const input = {
+  fire: false, // left mouse
+  field: false, // right mouse
   up: false, // jump
   down: false, // crouch
   left: false,
   right: false,
-  field: false, // right mouse
-  fire: false, // left mouse
   isPauseKeyReady: true,
   key: {
+    // fire: "ShiftLeft",
+    field: "Space",
     up: "KeyW", // jump
     down: "KeyS", // crouch
     left: "KeyA",
     right: "KeyD",
-    field: "Space",
-    // fire: "ShiftLeft",
     pause: "KeyP",
     nextGun: "KeyE",
     previousGun: "KeyQ",
     testing: "KeyT"
+  },
+  setDefault() {
+    input.key = {
+      // fire: "ShiftLeft",
+      field: "Space",
+      up: "KeyW", // jump
+      down: "KeyS", // crouch
+      left: "KeyA",
+      right: "KeyD",
+      pause: "KeyP",
+      nextGun: "KeyE",
+      previousGun: "KeyQ",
+      testing: "KeyT"
+    }
+    input.controlTextUpdate()
+  },
+  controlTextUpdate() {
+    function cleanText(text) {
+      return text.replace('Key', '').replace('Digit', '')
+    }
+    document.getElementById("key-field").innerHTML = cleanText(input.key.field)
+    document.getElementById("key-up").innerHTML = cleanText(input.key.up)
+    document.getElementById("key-down").innerHTML = cleanText(input.key.down)
+    document.getElementById("key-left").innerHTML = cleanText(input.key.left)
+    document.getElementById("key-right").innerHTML = cleanText(input.key.right)
+    document.getElementById("key-pause").innerHTML = cleanText(input.key.pause)
+    document.getElementById("key-next-gun").innerHTML = cleanText(input.key.nextGun)
+    document.getElementById("key-previous-gun").innerHTML = cleanText(input.key.previousGun)
+    document.getElementById("key-testing").innerHTML = cleanText(input.key.testing)
+
+    document.getElementById("splash-up").innerHTML = cleanText(input.key.up)[0]
+    document.getElementById("splash-down").innerHTML = cleanText(input.key.down)[0]
+    document.getElementById("splash-left").innerHTML = cleanText(input.key.left)[0]
+    document.getElementById("splash-right").innerHTML = cleanText(input.key.right)[0]
+    document.getElementById("splash-next-gun").innerHTML = cleanText(input.key.nextGun)[0]
+    document.getElementById("splash-previous-gun").innerHTML = cleanText(input.key.previousGun)[0]
+
+    localSettings.key = input.key
+    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+  },
+  focus: null,
+  setTextFocus() {
+    const backgroundColor = "#fff"
+    document.getElementById("key-field").style.background = backgroundColor
+    document.getElementById("key-up").style.background = backgroundColor
+    document.getElementById("key-down").style.background = backgroundColor
+    document.getElementById("key-left").style.background = backgroundColor
+    document.getElementById("key-right").style.background = backgroundColor
+    document.getElementById("key-pause").style.background = backgroundColor
+    document.getElementById("key-next-gun").style.background = backgroundColor
+    document.getElementById("key-previous-gun").style.background = backgroundColor
+    document.getElementById("key-testing").style.background = backgroundColor
+    if (input.focus) input.focus.style.background = 'rgb(0, 200, 255)';
+  },
+  setKeys(event) {
+    //check for duplicate keys
+    if (event.code && !(
+        event.code === "ArrowRight" ||
+        event.code === "ArrowLeft" ||
+        event.code === "ArrowUp" ||
+        event.code === "ArrowDown" ||
+        event.code === input.key.field ||
+        event.code === input.key.up ||
+        event.code === input.key.down ||
+        event.code === input.key.left ||
+        event.code === input.key.right ||
+        event.code === input.key.pause ||
+        event.code === input.key.nextGun ||
+        event.code === input.key.previousGun ||
+        event.code === input.key.testing
+      )) {
+      switch (input.focus.id) {
+        case "key-field":
+          input.key.field = event.code
+          break;
+        case "key-up":
+          input.key.up = event.code
+          break;
+        case "key-down":
+          input.key.down = event.code
+          break;
+        case "key-left":
+          input.key.left = event.code
+          break;
+        case "key-right":
+          input.key.right = event.code
+          break;
+        case "key-pause":
+          input.key.pause = event.code
+          break;
+        case "key-next-gun":
+          input.key.nextGun = event.code
+          break;
+        case "key-previous-gun":
+          input.key.previousGun = event.code
+          break;
+        case "key-testing":
+          input.key.testing = event.code
+          break;
+      }
+    }
+    input.controlTextUpdate()
+    input.endKeySensing()
+  },
+  endKeySensing() {
+    window.removeEventListener("keydown", input.setKeys);
+    input.focus = null
+    input.setTextFocus()
   }
 }
+
+document.getElementById("control-table").addEventListener('click', (event) => {
+  if (event.target.className === 'key-input') {
+    input.focus = event.target
+    input.setTextFocus()
+    window.addEventListener("keydown", input.setKeys);
+  }
+});
+document.getElementById("control-details").addEventListener("toggle", function () {
+  input.controlTextUpdate()
+  input.endKeySensing();
+})
+
+document.getElementById("control-reset").addEventListener('click', input.setDefault);
+
+window.addEventListener("keyup", function (event) {
+  switch (event.code) {
+    case input.key.right:
+    case "ArrowRight":
+      input.right = false
+      break;
+    case input.key.left:
+    case "ArrowLeft":
+      input.left = false
+      break;
+    case input.key.up:
+    case "ArrowUp":
+      input.up = false
+      break;
+    case input.key.down:
+    case "ArrowDown":
+      input.down = false
+      break;
+    case input.key.field:
+      input.field = false
+      break
+  }
+});
+
+window.addEventListener("keydown", function (event) {
+  switch (event.code) {
+    case input.key.right:
+    case "ArrowRight":
+      input.right = true
+      break;
+    case input.key.left:
+    case "ArrowLeft":
+      input.left = true
+      break;
+    case input.key.up:
+    case "ArrowUp":
+      input.up = true
+      break;
+    case input.key.down:
+    case "ArrowDown":
+      input.down = true
+      break;
+    case input.key.field:
+      input.field = true
+      break
+    case input.key.nextGun:
+      game.nextGun();
+      break
+    case input.key.previousGun:
+      game.previousGun();
+      break
+    case input.key.pause:
+      if (!game.isChoosing && input.isPauseKeyReady && mech.alive) {
+        input.isPauseKeyReady = false
+        setTimeout(function () {
+          input.isPauseKeyReady = true
+        }, 300);
+        if (game.paused) {
+          build.unPauseGrid()
+          game.paused = false;
+          level.levelAnnounce();
+          document.body.style.cursor = "none";
+          requestAnimationFrame(cycle);
+        } else {
+          game.paused = true;
+          game.replaceTextLog = true;
+          build.pauseGrid()
+          document.body.style.cursor = "auto";
+        }
+      }
+      break
+    case input.key.testing:
+      if (mech.alive) {
+        if (game.testing) {
+          game.testing = false;
+          game.loop = game.normalLoop
+          if (game.isConstructionMode) {
+            document.getElementById("construct").style.display = 'none'
+          }
+        } else { //if (keys[191])
+          game.testing = true;
+          game.isCheating = true;
+          if (game.isConstructionMode) {
+            document.getElementById("construct").style.display = 'inline'
+          }
+          game.loop = game.testingLoop
+        }
+      }
+      break
+  }
+  if (game.testing) {
+    switch (event.key) {
+      case "o":
+        game.isAutoZoom = false;
+        game.zoomScale /= 0.9;
+        game.setZoom();
+        break;
+      case "i":
+        game.isAutoZoom = false;
+        game.zoomScale *= 0.9;
+        game.setZoom();
+        break
+      case "`":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
+        break
+      case "1":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+        break
+      case "2":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
+        break
+      case "3":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+        break
+      case "4":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+        break
+      case "5":
+        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
+        break
+      case "6":
+        const index = body.length
+        spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
+        body[index].collisionFilter.category = cat.body;
+        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        body[index].classType = "body";
+        World.add(engine.world, body[index]); //add to world
+        break
+      case "7":
+        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+        spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
+        break
+      case "8":
+        spawn.randomLevelBoss(game.mouseInGame.x, game.mouseInGame.y);
+        break
+      case "f":
+        const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
+        mech.setField(mode)
+        break
+      case "g":
+        b.giveGuns("all", 1000)
+        break
+      case "h":
+        mech.addHealth(Infinity)
+        mech.energy = mech.maxEnergy;
+        break
+      case "y":
+        mod.giveMod()
+        break
+      case "r":
+        Matter.Body.setPosition(player, game.mouseInGame);
+        Matter.Body.setVelocity(player, {
+          x: 0,
+          y: 0
+        });
+        // move bots to follow player
+        for (let i = 0; i < bullet.length; i++) {
+          if (bullet[i].botType) {
+            Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+              x: 250 * (Math.random() - 0.5),
+              y: 250 * (Math.random() - 0.5)
+            }));
+            Matter.Body.setVelocity(bullet[i], {
+              x: 0,
+              y: 0
+            });
+          }
+        }
+        break
+      case "u":
+        level.nextLevel();
+        break
+      case "X": //capital X to make it hard to die
+        mech.death();
+        break
+    }
+  }
+});
 //mouse move input
 document.body.addEventListener("mousemove", (e) => {
   game.mouse.x = e.clientX;
@@ -645,179 +866,67 @@ document.body.addEventListener("wheel", (e) => {
   passive: true
 });
 
-window.addEventListener("keyup", function (event) {
-  switch (event.code) {
-    case input.key.right:
-    case "ArrowRight":
-      input.right = false
-      break;
-    case input.key.left:
-    case "ArrowLeft":
-      input.left = false
-      break;
-    case input.key.up:
-    case "ArrowUp":
-      input.up = false
-      break;
-    case input.key.down:
-    case "ArrowDown":
-      input.down = false
-      break;
-    case input.key.field:
-      input.field = false
-      break
+//**********************************************************************
+//  local storage
+//**********************************************************************
+let localSettings = JSON.parse(localStorage.getItem("localSettings"));
+if (localSettings) {
+  input.key = localSettings.key
+  game.isCommunityMaps = localSettings.isCommunityMaps
+  document.getElementById("community-maps").checked = localSettings.isCommunityMaps
+  game.difficultyMode = localSettings.difficultyMode
+  document.getElementById("difficulty-select").value = localSettings.difficultyMode
+  if (localSettings.fpsCapDefault === 'max') {
+    game.fpsCapDefault = 999999999;
+  } else {
+    game.fpsCapDefault = Number(localSettings.fpsCapDefault)
   }
-}, true);
+  document.getElementById("fps-select").value = localSettings.fpsCapDefault
+} else {
+  input.setDefault()
+  localSettings = {
+    isCommunityMaps: false,
+    difficultyMode: '1',
+    fpsCapDefault: 'max',
+    runCount: 0,
+    levelsClearedLastGame: 0,
+    key: input.key
+  };
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+  document.getElementById("community-maps").checked = localSettings.isCommunityMaps
+  game.isCommunityMaps = localSettings.isCommunityMaps
+  document.getElementById("difficulty-select").value = localSettings.difficultyMode
+  document.getElementById("fps-select").value = localSettings.fpsCapDefault
+}
+input.controlTextUpdate()
 
-window.addEventListener("keydown", function (event) {
-  switch (event.code) {
-    case input.key.right:
-    case "ArrowRight":
-      input.right = true
-      break;
-    case input.key.left:
-    case "ArrowLeft":
-      input.left = true
-      break;
-    case input.key.up:
-    case "ArrowUp":
-      input.up = true
-      break;
-    case input.key.down:
-    case "ArrowDown":
-      input.down = true
-      break;
-    case input.key.field:
-      input.field = true
-      break
-    case input.key.nextGun:
-      game.nextGun();
-      break
-    case input.key.previousGun:
-      game.previousGun();
-      break
-    case input.key.pause:
-      if (!game.isChoosing && input.isPauseKeyReady) {
-        input.isPauseKeyReady = false
-        setTimeout(function () {
-          input.isPauseKeyReady = true
-        }, 300);
-        if (game.paused) {
-          build.unPauseGrid()
-          game.paused = false;
-          level.levelAnnounce();
-          document.body.style.cursor = "none";
-          requestAnimationFrame(cycle);
-        } else {
-          game.paused = true;
-          game.replaceTextLog = true;
-          build.pauseGrid()
-          document.body.style.cursor = "auto";
-        }
-      }
-      break
-    case input.key.testing:
-      if (game.testing) {
-        game.testing = false;
-        game.loop = game.normalLoop
-        if (game.isConstructionMode) {
-          document.getElementById("construct").style.display = 'none'
-        }
-      } else { //if (keys[191])
-        game.testing = true;
-        game.isCheating = true;
-        if (game.isConstructionMode) {
-          document.getElementById("construct").style.display = 'inline'
-        }
-        game.loop = game.testingLoop
-      }
-      break
+//**********************************************************************
+// settings 
+//**********************************************************************
+document.getElementById("fps-select").addEventListener("input", () => {
+  let value = document.getElementById("fps-select").value
+  if (value === 'max') {
+    game.fpsCapDefault = 999999999;
+  } else {
+    game.fpsCapDefault = Number(value)
   }
-  if (game.testing) {
-    switch (event.key) {
-      case "o":
-        game.isAutoZoom = false;
-        game.zoomScale /= 0.9;
-        game.setZoom();
-        break;
-      case "i":
-        game.isAutoZoom = false;
-        game.zoomScale *= 0.9;
-        game.setZoom();
-        break
-      case "`":
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
-        break
-      case "1":
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
-        break
-      case "2":
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
-        break
-      case "3":
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
-        break
-      case "4":
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "field");
-        break
-      case "5":
-        powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
-        break
-      case "6":
-        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-        spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
-        break
-      case "7":
-        const index = body.length
-        spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
-        body[index].collisionFilter.category = cat.body;
-        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-        body[index].classType = "body";
-        World.add(engine.world, body[index]); //add to world
-        break
-      case "f":
-        const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
-        mech.setField(mode)
-        break
-      case "g":
-        b.giveGuns("all", 1000)
-        break
-      case "h":
-        mech.addHealth(Infinity)
-        mech.energy = mech.maxEnergy;
-        break
-      case "y":
-        mod.giveMod()
-        break
-      case "r":
-        Matter.Body.setPosition(player, game.mouseInGame);
-        Matter.Body.setVelocity(player, {
-          x: 0,
-          y: 0
-        });
-        // move bots to follow player
-        for (let i = 0; i < bullet.length; i++) {
-          if (bullet[i].botType) {
-            Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-              x: 250 * (Math.random() - 0.5),
-              y: 250 * (Math.random() - 0.5)
-            }));
-            Matter.Body.setVelocity(bullet[i], {
-              x: 0,
-              y: 0
-            });
-          }
-        }
-        break
-      case "u":
-        level.nextLevel();
-        break
-      case "X": //capital X to make it hard to die
-        mech.death();
-        break
-    }
-  }
-}, true);
+  localSettings.fpsCapDefault = value
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+document.getElementById("community-maps").addEventListener("input", () => {
+  game.isCommunityMaps = document.getElementById("community-maps").checked
+  localSettings.isCommunityMaps = game.isCommunityMaps
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+// difficulty-select-custom event listener is set in build.makeGrid
+document.getElementById("difficulty-select").addEventListener("input", () => {
+  game.difficultyMode = Number(document.getElementById("difficulty-select").value)
+  localSettings.difficultyMode = game.difficultyMode
+  localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
+  localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
 
 //**********************************************************************
 // main loop 

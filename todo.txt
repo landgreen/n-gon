@@ -6,10 +6,21 @@ new key press detection system
   I rewrote some fundamental systems so there may be some bugs
   testing mode death is now shift X (was x+z)
 
+you can now change your keys with the controls settings
+  this is probably buggy too
+
 ************** TODO - n-gon **************
 
-add custom key settings
-  put in local storage 
+laser portal field
+  teleport to blocks and map elements in line of sight (like the how the laser works)
+    do damage to mobs in the path of your teleportation
+    go immune to damage for 1 second after teleportation
+    after jumping into the portal you can send things back to your old location, like bullets and blocks, and mobs
+
+add testing key for spawn boss mob
+
+look for mods that could update description text with count and mod.is  information
+  this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
 
 give the power up boss the ability to eject your mobs if it hits you
 

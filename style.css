@@ -63,8 +63,26 @@ table {
   /* background-color: #ddd; */
 }
 
-th {
+tr {
+  padding: 10px;
   text-align: left;
+}
+
+td {
+  padding-left: 10px;
+}
+
+.key-input {
+  padding: 3px 8px;
+  border: 2px solid #333;
+  /* border-radius: 50px; */
+  background-color: #fff;
+  text-align: center;
+}
+
+.key-used {
+  color: #777;
+  font-size: 80%;
 }
 
 summary {

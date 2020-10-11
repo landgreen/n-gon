@@ -362,7 +362,7 @@ const mod = {
             requires: "",
             effect() {
                 mod.sporesOnDeath += 0.09;
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 8; i++) {
                     b.spore(mech.pos)
                 }
             },
@@ -1211,27 +1211,27 @@ const mod = {
                     if (mod.duplicateChance < 0) mod.duplicateChance = 0
                 }
                 mod.isBayesian = false
-                if (mod.duplicateChance)
-                    if (!mod.duplicateChance) game.draw.powerUp = game.draw.powerUpNormal
+                if (mod.duplicateChance === 0) game.draw.powerUp = game.draw.powerUpNormal
             }
         },
         {
             name: "stimulated emission",
-            description: "<strong>9%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
+            description: "<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
                 return true
             },
             requires: "",
-            effect: () => {
-                mod.duplicateChance += 0.09
+            effect() {
+                mod.duplicateChance += 0.08
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
-
+                this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
             },
             remove() {
-                mod.duplicateChance -= 0.09 * this.count
-                if (!mod.duplicateChance) game.draw.powerUp = game.draw.powerUpNormal
+                mod.duplicateChance -= 0.08 * this.count
+                if (mod.duplicateChance === 0) game.draw.powerUp = game.draw.powerUpNormal
+                this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
             }
         },
         {

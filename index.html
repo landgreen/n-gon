@@ -133,40 +133,66 @@
 			</details>
 		</div>
 		<div id="controls">
-			<details>
+			<details id="control-details">
 				<summary>controls</summary>
 				<div id="details-div">
-					<table>
+					To change controls click a box<br>
+					and press an unused key.
+					<br><br>
+					<table id="control-table">
 						<tr>
 							<th>FIRE</th>
-							<td>left mouse</td>
+							<td></td>
+							<td class='key-used'>MouseLeft</td>
 							<td></td>
 						</tr>
 						<tr>
 							<th>FIELD</th>
-							<td>right mouse / spacebar</td>
+							<td id='key-field' class='key-input'>SPACE</td>
+							<td class='key-used'>MouseRight</td>
 						</tr>
 						<tr>
-							<th>MOVE</th>
-							<td>WASD / arrows</td>
+							<th>JUMP</th>
+							<td id='key-up' class='key-input'>W</td>
+							<td class='key-used'>ArrowUp</td>
 						</tr>
 						<tr>
-							<th>GUNS</th>
-							<td>Q / E / mouse wheel</td>
+							<th>CROUCH&nbsp;</th>
+							<td id='key-down' class='key-input'>S</td>
+							<td class='key-used'>ArrowDown</td>
 						</tr>
-						<!-- <tr>
-							<th>ZOOM</th>
-							<td>- / + or i / o</td>
-						</tr> -->
+						<tr>
+							<th>LEFT</th>
+							<td id='key-left' class='key-input'>A</td>
+							<td class='key-used'>ArrowLeft</td>
+						</tr>
+						<tr>
+							<th>RIGHT</th>
+							<td id='key-right' class='key-input'>D</td>
+							<td class='key-used'>ArrowRight</td>
+						</tr>
+						<tr>
+							<th>GUN → </th>
+							<td id='key-next-gun' class='key-input'>Q</td>
+							<td class='key-used'>MouseWheel</td>
+						</tr>
+						<tr>
+							<th>GUN ← </th>
+							<td id='key-previous-gun' class='key-input'>E</td>
+							<td class='key-used'>MouseWheel</td>
+						</tr>
 						<tr>
 							<th>PAUSE</th>
-							<td>P</td>
+							<td id='key-pause' class='key-input'>P</td>
+							<td></td>
 						</tr>
-						<!-- <tr>
-					<td>FULL SCREEN</td>
-					<td>enter</td>
-				</tr> -->
+						<tr>
+							<th>TESTING</th>
+							<td id='key-testing' class='key-input'>T</td>
+							<td></td>
+						</tr>
 					</table>
+					<button id="control-reset" type="button">reset</button><span style="font-size: 60%;"> to default keys</span>
 				</div>
 			</details>
 		</div>
@@ -354,12 +380,12 @@
 			<g class="draw-lines4" text-anchor="middle" stroke='#000' fill='none' stroke-width="2" font-size="38px" font-family="Arial Black, sans-serif">
 				<!-- <text class="fade-in" fill='#aaa' stroke="none" x="30" y="45">Q</text>
 				<text class="fade-in" fill='#aaa' stroke="none" x="170" y="45">E</text> -->
-				<text x="30" y="45" stroke-width="2">Q</text>
-				<text x="170" y="45" stroke-width="2">E</text>
-				<text x="100" y="45">W</text>
-				<text x="100" y="113">S</text>
-				<text x="170" y="113">D</text>
-				<text x="30" y="113">A</text>
+				<text x="30" y="45" id="splash-previous-gun" stroke-width="2">Q</text>
+				<text x="170" y="45" id="splash-next-gun" stroke-width="2">E</text>
+				<text x="100" y="45" id="splash-up">W</text>
+				<text x="100" y="113" id="splash-down">S</text>
+				<text x="30" y="113" id="splash-left">A</text>
+				<text x="170" y="113" id="splash-right">D</text>
 				<!-- <text class="fade-in" fill='#999' x="100" y="45">W</text>
 				<text class="fade-in" fill='#999' x="100" y="113">S</text>
 				<text class="fade-in" fill='#999' x="170" y="113">D</text>

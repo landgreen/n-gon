@@ -1376,7 +1376,7 @@ const mech = {
             if (mod.isSporeField) {
               // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
               const len = Math.floor(6 + 4 * Math.random())
-              mech.energy -= len * 0.07;
+              mech.energy -= len * 0.09;
               for (let i = 0; i < len; i++) {
                 b.spore(mech.pos)
               }

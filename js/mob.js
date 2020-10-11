@@ -1038,7 +1038,7 @@ const mobs = {
           powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
           mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in game.checks()
           if (Math.random() < mod.sporesOnDeath) {
-            const len = Math.min(30, Math.floor(4 + this.mass * Math.random()))
+            const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))
             for (let i = 0; i < len; i++) {
               b.spore(this.position)
             }
