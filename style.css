@@ -488,13 +488,17 @@ em {
 }
 
 .color-plasma {
-  /* opacity: 0.5; */
   color: #c0e;
-  /* color: #000; */
   letter-spacing: 1px;
   background-color: rgba(132, 0, 255, 0.04);
   padding: 2px;
   border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+.color-worm {
+  color: #fff;
+  text-shadow: 0px 0px 3px #357;
   letter-spacing: 1px;
 }
 

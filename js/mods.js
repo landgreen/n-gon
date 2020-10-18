@@ -403,8 +403,24 @@ const mod = {
             }
         },
         {
-            name: "trinitrotoluene",
-            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>50%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>area</strong> by <strong>71%</strong>",
+            name: "ammonium nitrate",
+            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>20%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>20%</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1;
+            },
+            requires: "an explosive damage source",
+            effect: () => {
+                mod.explosiveRadius += 0.2;
+            },
+            remove() {
+                mod.explosiveRadius = 1;
+            }
+        },
+        {
+            name: "nitroglycerin",
+            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>60%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>20%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -419,8 +435,8 @@ const mod = {
             }
         },
         {
-            name: "ammonium nitrate",
-            description: "increase <strong class='color-e'>explosive</strong> <strong>area</strong> by <strong>100%</strong>, but<br>you take <strong>400%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+            name: "acetone peroxide",
+            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>400%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -437,7 +453,7 @@ const mod = {
         {
             name: "electric reactive armor",
             // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-            description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>6%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
+            description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>7%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1192,7 +1208,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>17%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>20%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1201,13 +1217,13 @@ const mod = {
             requires: "",
             effect: () => {
                 mod.isBayesian = true
-                mod.duplicateChance += 0.17
+                mod.duplicateChance += 0.2
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
 
             },
             remove() {
                 if (mod.isBayesian) {
-                    mod.duplicateChance -= 0.17
+                    mod.duplicateChance -= 0.2
                     if (mod.duplicateChance < 0) mod.duplicateChance = 0
                 }
                 mod.isBayesian = false
@@ -1226,12 +1242,12 @@ const mod = {
             effect() {
                 mod.duplicateChance += 0.08
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
-                this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
+                // this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
             },
             remove() {
                 mod.duplicateChance -= 0.08 * this.count
                 if (mod.duplicateChance === 0) game.draw.powerUp = game.draw.powerUpNormal
-                this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
+                // this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
             }
         },
         {
@@ -1604,7 +1620,7 @@ const mod = {
             allowed() {
                 return mod.haveGunCheck("nail gun") && mod.nailFireRate && !mod.isIceCrystals
             },
-            requires: "nail gun",
+            requires: "nail gun and pneumatic actuator",
             effect() {
                 mod.nailInstantFireRate = true
             },
@@ -3023,5 +3039,6 @@ const mod = {
     duplicateChance: null,
     beamSplitter: null,
     iceEnergy: null,
-    isPerfectBrake: null
+    isPerfectBrake: null,
+    explosiveRadius: null
 }

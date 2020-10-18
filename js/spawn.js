@@ -231,13 +231,13 @@ const spawn = {
     mobs.spawn(x, y, vertices, radius, "transparent");
     let me = mob[mob.length - 1];
     me.isBoss = true;
-    me.frictionAir = 0.025
+    me.frictionAir = 0.01
     me.seeAtDistance2 = 9000000;
-    me.accelMag = 0.0005 * game.accelScale;
-    Matter.Body.setDensity(me, 0.002); //normal is 0.001
+    me.accelMag = 0.00062 * game.accelScale;
+    Matter.Body.setDensity(me, 0.001); //normal is 0.001
     me.collisionFilter.mask = cat.bullet | cat.player
     me.memory = Infinity;
-    me.seePlayerFreq = 85 + Math.floor(10 * Math.random())
+    me.seePlayerFreq = 60
 
     me.lockedOn = null;
     if (vertices === 9) {
@@ -248,7 +248,11 @@ const spawn = {
     } else if (!mech.isCloak) {
       me.foundPlayer();
     }
-
+    me.onHit = function () { //run this function on hitting player
+      powerUps.ejectMod()
+      powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+      powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+    };
     me.onDeath = function () {
       this.leaveBody = false;
       this.dropPowerUp = false;
@@ -276,6 +280,55 @@ const spawn = {
       this.checkStatus();
     };
   },
+  // powerUpBoss(x, y, vertices = 9, radius = 130) {
+  //   mobs.spawn(x, y, vertices, radius, "transparent");
+  //   let me = mob[mob.length - 1];
+  //   me.isBoss = true;
+  //   me.frictionAir = 0.025
+  //   me.seeAtDistance2 = 9000000;
+  //   me.accelMag = 0.0005 * game.accelScale;
+  //   Matter.Body.setDensity(me, 0.002); //normal is 0.001
+  //   me.collisionFilter.mask = cat.bullet | cat.player
+  //   me.memory = Infinity;
+  //   me.seePlayerFreq = 85 + Math.floor(10 * Math.random())
+
+  //   me.lockedOn = null;
+  //   if (vertices === 9) {
+  //     //on primary spawn
+  //     powerUps.spawnBossPowerUp(me.position.x, me.position.y)
+  //     powerUps.spawn(me.position.x, me.position.y, "heal");
+  //     powerUps.spawn(me.position.x, me.position.y, "ammo");
+  //   } else if (!mech.isCloak) {
+  //     me.foundPlayer();
+  //   }
+
+  //   me.onDeath = function () {
+  //     this.leaveBody = false;
+  //     this.dropPowerUp = false;
+
+  //     if (vertices > 3) spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
+  //     for (let i = 0; i < powerUp.length; i++) {
+  //       powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
+  //     }
+  //   };
+  //   me.do = function () {
+  //     this.stroke = `hsl(0,0%,${80+25*Math.sin(game.cycle*0.01)}%)`
+
+  //     //steal all power ups
+  //     for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
+  //       powerUp[i].collisionFilter.mask = 0
+  //       Matter.Body.setPosition(powerUp[i], this.vertices[i])
+  //       Matter.Body.setVelocity(powerUp[i], {
+  //         x: 0,
+  //         y: 0
+  //       })
+  //     }
+
+  //     this.seePlayerCheckByDistance();
+  //     this.attraction();
+  //     this.checkStatus();
+  //   };
+  // },
   // healer(x, y, radius = 20) {
   //   mobs.spawn(x, y, 3, radius, "rgba(50,255,200,0.4)");
   //   let me = mob[mob.length - 1];
@@ -1654,7 +1707,7 @@ const spawn = {
       this.explode(this.mass * 10);
     };
     me.onDeath = function () {
-      if (game.difficulty > 7) {
+      if (game.difficulty > 4) {
         spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
         spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
         spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);

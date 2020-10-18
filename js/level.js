@@ -15,7 +15,7 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isCloak = true;
-      // mech.setField("perfect diamagnetism")
+      mech.setField("wormhole")
       // b.giveGuns("nail gun")
       // for (let i = 0; i < 10; i++) {
       // mod.giveMod("laser-bot");
@@ -37,7 +37,7 @@ const level = {
       // level.office();
       // level.bosses(); //only fighting, very simple map
       // level.house() //fan level
-      // level.newLevel() //fan level
+      // level.detours() //fan level
       // level.basement(); //fan level
       // level.stronghold() //fan level
     } else {
@@ -141,7 +141,7 @@ const level = {
     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
     // spawn.boost(1500, 0, 900);
 
-    spawn.starter(1600, -500)
+    // spawn.starter(1600, -500)
     // spawn.bomberBoss(2900, -500)
     // spawn.launcherBoss(1200, -500)
     // spawn.laserTargetingBoss(1600, -400)
@@ -151,7 +151,7 @@ const level = {
     // spawn.sniper(1800, -120)
     // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    // spawn.powerUpBoss(1600, -500)
+    spawn.powerUpBoss(1600, -500)
     // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "launcher")
@@ -2821,7 +2821,7 @@ const level = {
     powerUps.spawn(3010, 1630, "mod");
     powerUps.spawn(3100, 1630, "heal");
   },
-  newLevel() {
+  detours() {
     level.setPosToSpawn(0, 0); //lower start
     level.exit.y = 150;
     spawn.mapRect(level.enter.x, 45, 100, 20);
@@ -4365,33 +4365,33 @@ const level = {
           }
         }
       }
-      if (body.length) {
-        for (let i = 0, len = body.length; i < len; i++) {
-          if (body[i] !== mech.holdingTarget) {
-            // body[i].bounds.max.x - body[i].bounds.min.x < 100 && body[i].bounds.max.y - body[i].bounds.min.y < 100
-            if (Matter.Query.collides(this, [body[i]]).length === 0) {
-              if (body[i].isInPortal === this) body[i].isInPortal = null
-            } else if (body[i].isInPortal !== this) {
-              body[i].isInPortal = this.portalPair
-              //teleport
-              if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
-                Matter.Body.setPosition(body[i], this.portalPair.portal.position);
-              } else { //if at some odd angle
-                Matter.Body.setPosition(body[i], this.portalPair.position);
-              }
-              //rotate velocity
-              let mag
-              if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
-                mag = Math.max(10, Math.min(50, body[i].velocity.y * 0.8)) + 11
-              } else {
-                mag = Math.max(6, Math.min(50, Vector.magnitude(body[i].velocity)))
-              }
-              let v = Vector.mult(this.portalPair.unit, mag)
-              Matter.Body.setVelocity(body[i], v);
+      // if (body.length) {
+      for (let i = 0, len = body.length; i < len; i++) {
+        if (body[i] !== mech.holdingTarget) {
+          // body[i].bounds.max.x - body[i].bounds.min.x < 100 && body[i].bounds.max.y - body[i].bounds.min.y < 100
+          if (Matter.Query.collides(this, [body[i]]).length === 0) {
+            if (body[i].isInPortal === this) body[i].isInPortal = null
+          } else if (body[i].isInPortal !== this) {
+            body[i].isInPortal = this.portalPair
+            //teleport
+            if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
+              Matter.Body.setPosition(body[i], this.portalPair.portal.position);
+            } else { //if at some odd angle
+              Matter.Body.setPosition(body[i], this.portalPair.position);
             }
+            //rotate velocity
+            let mag
+            if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
+              mag = Math.max(10, Math.min(50, body[i].velocity.y * 0.8)) + 11
+            } else {
+              mag = Math.max(6, Math.min(50, Vector.magnitude(body[i].velocity)))
+            }
+            let v = Vector.mult(this.portalPair.unit, mag)
+            Matter.Body.setVelocity(body[i], v);
           }
         }
       }
+      // }
 
       //remove block if touching
       // if (body.length) {

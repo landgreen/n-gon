@@ -126,7 +126,6 @@ const game = {
   lastTimeStamp: 0, //tracks time stamps for measuring delta
   delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
   buttonCD: 0,
-  isBodyDamage: true,
   levelsCleared: 0,
   difficultyMode: 1,
   isEasyMode: false,
@@ -472,6 +471,7 @@ const game = {
     mech.maxHealth = 1
     mech.maxEnergy = 1
     mech.energy = 1
+    mech.hole.isOn = false
     game.paused = false;
     engine.timing.timeScale = 1;
     game.fpsCap = game.fpsCapDefault;
@@ -559,7 +559,7 @@ const game = {
       if (game.isCommunityMaps) {
         level.levels.push("stronghold");
         level.levels.push("basement");
-        level.levels.push("newLevel");
+        level.levels.push("detours");
         level.levels.push("house");
       }
       level.levels = shuffle(level.levels); //shuffles order of maps
@@ -607,6 +607,7 @@ const game = {
 
     mech.fireCDcycle = 0
     mech.drop();
+    mech.hole.isOn = false;
     level.fill = [];
     level.fillBG = [];
     level.zones = [];

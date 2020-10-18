@@ -85,16 +85,6 @@ function collisionChecks(event) {
     //   if (obj.onWallHit) obj.onWallHit();
     // }
 
-
-    //body + player collision
-    // if (game.isBodyDamage) {
-    //   if (pairs[i].bodyA === playerBody || pairs[i].bodyA === playerHead) {
-    //     collidePlayer(pairs[i].bodyB)
-    //   } else if (pairs[i].bodyB === playerBody || pairs[i].bodyB === playerHead) {
-    //     collidePlayer(pairs[i].bodyA)
-    //   }
-    // }
-
     // function collidePlayer(obj) {
     //   //player dmg from hitting a body
     //   if (obj.classType === "body" && obj.speed > 10 && mech.immuneCycle < mech.cycle) {
@@ -145,22 +135,8 @@ function collisionChecks(event) {
             let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
             if (mod.isPiezo) mech.energy = mech.maxEnergy;
             mech.damage(dmg);
-            if (mod.isBayesian) {
-              const have = [] //find which mods you have
-              for (let i = 0; i < mod.mods.length; i++) {
-                if (mod.mods[i].count > 0) have.push(i)
-              }
-              const choose = have[Math.floor(Math.random() * have.length)]
-              game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 600) //message about what mod was lost
-              for (let i = 0; i < mod.mods[choose].count; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-              mod.mods[choose].remove(); // remove a random mod form the list of mods you have
-              mod.mods[choose].count = 0;
-              mod.mods[choose].isLost = true;
-              game.updateModHUD();
-              mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected mod
-            }
+            if (mod.isBayesian) powerUps.ejectMod()
             if (mob[k].onHit) mob[k].onHit(k);
-
             //extra kick between player and mob              //this section would be better with forces but they don't work...
             let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
             Matter.Body.setVelocity(player, {

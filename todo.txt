@@ -1,32 +1,48 @@
 
+mods ejected from Bayesian statistics can't duplicate
 
-ice IX thermoelectric energy 66% -> 100%,   heal 3%->4%
+the power up boss moves faster, has less health,
+  it will eject one of your mods after a collision
+  and two health power ups
 
-new key press detection system
-  I rewrote some fundamental systems so there may be some bugs
-  testing mode death is now shift X (was x+z)
+mod ammonium nitrate: increase explosion damage and area by 25%
+  also other explosion mods have been rebalanced (damage buffed, but self damage is also higher)
 
-you can now change your keys with the controls settings
-  this is probably buggy too
+field: wormhole - teleport around, bullets teleport too, blocks and power ups get sucked in
+  mobs don't do much in worm hole yet, but that is coming with future mods
 
 ************** TODO - n-gon **************
 
-laser portal field
-  teleport to blocks and map elements in line of sight (like the how the laser works)
-    do damage to mobs in the path of your teleportation
-    go immune to damage for 1 second after teleportation
-    after jumping into the portal you can send things back to your old location, like bullets and blocks, and mobs
+add an ending to the game
+  revamp the boss level, or add a new final level
+    final level requires you to kill something, not skip content
+  around level 15
+  game never ends if you have used cheats
 
-add testing key for spawn boss mob
+field wormhole
+  mobs are protected from bullets when stuck in a hole
+    mobs should destabilize holes, or take damage
+  store constant info about the holes: unit, angle to save processing
+  maybe bullets should be able to enter and exit multiple times
+    or bullets shouldn't get stuck at all?
+  maybe give bullets an attraction to holes
+  player: drain energy when near a hole, does damage if no energy
+  mod: Hawking radiation: do damage, to mobs that get near the end points
+    this is good because it explains why mobs don't teleport
+  mod: cosmic string: do damage, like a laser for any mob that passes between the two portals, near the bezier curves
+  mod: extend immunity cycle after a teleport  //mech.immuneCycle = mech.cycle + 15;
+  mod: reduce energy cost of teleportation
 
 look for mods that could update description text with count and mod.is  information
+  can only use variables that change in effect() and remove()
   this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
 
-give the power up boss the ability to eject your mobs if it hits you
+mod (drones or spores) explode after 10 seconds
 
 mouse event e.which is deprecated
 
-time dilation mod rework brain storm
+time dilation mod rework (time dilation is cool, but it can feel like a chore)
+  redistribute effects
   take no damage
   can fire
   2x move jump fire while field is active
@@ -36,12 +52,6 @@ vacuum bomb applies status effect to mobs that makes blocks attracted to them
 
 mod: take less harm if you are moving fast
   require squirrel cage rotor
-
-getting stuck above a mob can immobilize player
-  just allow player to jump on mobs again?
-  occurs with Pauli exclusion, and time dilation field immunity - mod time-like world line
-    add a knock to player mob collisions even while player is immune to damage
-      keep the knock very small
 
 bug - mine spawned one new mine every second
   after sticking to the top right corner of a wall

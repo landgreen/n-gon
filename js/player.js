@@ -107,7 +107,6 @@ const mech = {
   Sy: 0, //adds a smoothing effect to vertical only
   Vx: 0,
   Vy: 0,
-
   friction: {
     ground: 0.01,
     air: 0.0025
@@ -222,19 +221,18 @@ const mech = {
   },
   buttonCD_jump: 0, //cool down for player buttons
   groundControl() {
+    //check for crouch or jump
     if (mech.crouch) {
       if (!(input.down) && mech.checkHeadClear() && mech.hardLandCD < mech.cycle) mech.undoCrouch();
     } else if (input.down || mech.hardLandCD > mech.cycle) {
       mech.doCrouch(); //on ground && not crouched and pressing s or down
     } else if ((input.up) && mech.buttonCD_jump + 20 < mech.cycle && mech.yOffWhen.stand > 23) {
       mech.buttonCD_jump = mech.cycle; //can't jump again until 20 cycles pass
-
       //apply a fraction of the jump force to the body the player is jumping off of
       Matter.Body.applyForce(mech.standingOn, mech.pos, {
         x: 0,
         y: mech.jumpForce * 0.12 * Math.min(mech.standingOn.mass, 5)
       });
-
       player.force.y = -mech.jumpForce; //player jump force
       Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
         x: player.velocity.x,
@@ -243,9 +241,6 @@ const mech = {
     }
 
     if (input.left) {
-      // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
-      //   blink(-1)
-      // } else {
       if (player.velocity.x > -2) {
         player.force.x -= mech.Fx * 1.5
       } else {
@@ -253,15 +248,11 @@ const mech = {
       }
       // }
     } else if (input.right) {
-      // if (game.mouseDownRight && mech.fieldCDcycle < mech.cycle && !mech.crouch) {
-      //   blink(1)
-      // } else {
       if (player.velocity.x < 2) {
         player.force.x += mech.Fx * 1.5
       } else {
         player.force.x += mech.Fx
       }
-      // }
     } else {
       const stoppingFriction = 0.92;
       Matter.Body.setVelocity(player, {
@@ -728,6 +719,18 @@ const mech = {
   fieldFire: false,
   fieldHarmReduction: 1,
   holdingMassScale: 0,
+  hole: {
+    isOn: false,
+    isReady: true,
+    pos1: {
+      x: 0,
+      y: 0
+    },
+    pos2: {
+      x: 0,
+      y: 0
+    },
+  },
   fieldArc: 0,
   fieldThreshold: 0,
   calculateFieldThreshold() {
@@ -739,7 +742,6 @@ const mech = {
     mech.fieldMeterColor = "#0cf"
     mech.fieldShieldingScale = 1;
     mech.fieldBlockCD = 10;
-    game.isBodyDamage = true;
     mech.fieldHarmReduction = 1;
     mech.fieldDamage = 1
     mech.grabPowerUpRange2 = 156000;
@@ -757,6 +759,18 @@ const mech = {
     mech.isBodiesAsleep = true;
     mech.wakeCheck();
     mech.setMaxEnergy();
+    mech.hole = {
+      isOn: false,
+      isReady: true,
+      pos1: {
+        x: 0,
+        y: 0
+      },
+      pos2: {
+        x: 0,
+        y: 0
+      },
+    }
   },
   setMaxEnergy() {
     mech.maxEnergy = 1 + mod.bonusEnergy + mod.healMaxEnergyBonus
@@ -996,8 +1010,8 @@ const mech = {
         if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
           powerUps.onPickUp(mech.pos);
           Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
-            x: player.velocity.x + ((powerUp[i].velocity.x * powerUp[i].mass) / player.mass) * 0.3,
-            y: player.velocity.y + ((powerUp[i].velocity.y * powerUp[i].mass) / player.mass) * 0.3
+            x: player.velocity.x + powerUp[i].velocity.x / player.mass * 5,
+            y: player.velocity.y + powerUp[i].velocity.y / player.mass * 5
           });
           powerUp[i].effect();
           Matter.World.remove(engine.world, powerUp[i]);
@@ -1544,7 +1558,7 @@ const mech = {
     },
     {
       name: "plasma torch",
-      description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> mobs<br><strong>pushes</strong> mobs and blocks away",
+      description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
       effect() {
         mech.fieldMeterColor = "#f0f"
         mech.hold = function () {
@@ -2069,7 +2083,6 @@ const mech = {
       description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
       effect: () => {
         game.replaceTextLog = true; //allow text over write
-        game.isBodyDamage = false;
         mech.fieldPhase = 0;
         mech.fieldPosition = {
           x: game.mouseInGame.x,
@@ -2220,6 +2233,221 @@ const mech = {
           } else {
             mech.fieldOn = false
             mech.fieldRadius = 0
+          }
+          mech.drawFieldMeter()
+        }
+      }
+    },
+    {
+      name: "wormhole",
+      description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br>bullets may also traverse the <strong class='color-worm'>wormholes</strong><br>blocks and power ups can't exit it",
+      effect: () => {
+        game.replaceTextLog = true; //allow text over write
+        mech.drop();
+        // mech.hole = {  //this is reset with each new field, but I'm leaving it here for reference
+        //   isOn: false,
+        //   isReady: true,
+        //   pos1: {
+        //     x: 0,
+        //     y: 0
+        //   },
+        //   pos2: {
+        //     x: 0,
+        //     y: 0
+        //   },
+        // }
+        mech.hold = function () {
+
+          if (mech.hole.isOn) {
+            // draw holes
+            mech.fieldRange = 0.97 * mech.fieldRange + 0.03 * (50 + 10 * Math.sin(game.cycle * 0.025))
+
+            //draw bezier curves between the portals
+            const semiMajorAxis = mech.fieldRange + 30
+            const sub = Vector.sub(mech.hole.pos1, mech.hole.pos2)
+            const unit = Vector.perp(Vector.normalise(sub))
+            const edge1a = Vector.add(Vector.mult(unit, semiMajorAxis), mech.hole.pos1)
+            const edge1b = Vector.add(Vector.mult(unit, -semiMajorAxis), mech.hole.pos1)
+            const edge2a = Vector.add(Vector.mult(unit, semiMajorAxis), mech.hole.pos2)
+            const edge2b = Vector.add(Vector.mult(unit, -semiMajorAxis), mech.hole.pos2)
+            const opacity = 200 / mech.fieldRange / mech.fieldRange
+            ctx.beginPath();
+            ctx.moveTo(edge1a.x, edge1a.y)
+            ctx.bezierCurveTo(mech.hole.pos1.x, mech.hole.pos1.y, mech.hole.pos2.x, mech.hole.pos2.y, edge2a.x, edge2a.y);
+            ctx.lineTo(edge2b.x, edge2b.y)
+            ctx.bezierCurveTo(mech.hole.pos2.x, mech.hole.pos2.y, mech.hole.pos1.x, mech.hole.pos1.y, edge1b.x, edge1b.y);
+            ctx.fillStyle = `rgba(255,255,255,${200 / mech.fieldRange / mech.fieldRange})` //"rgba(0,0,0,0.1)"
+            ctx.fill();
+            const angle = Math.atan2(sub.y, sub.x)
+            ctx.beginPath();
+            ctx.ellipse(mech.hole.pos1.x, mech.hole.pos1.y, mech.fieldRange, semiMajorAxis, angle, 0, 2 * Math.PI)
+            ctx.ellipse(mech.hole.pos2.x, mech.hole.pos2.y, mech.fieldRange, semiMajorAxis, angle, 0, 2 * Math.PI)
+            ctx.fillStyle = `rgba(255,255,255,${32 / mech.fieldRange})`
+            ctx.fill();
+
+            //suck power ups
+            for (let i = 0, len = powerUp.length; i < len; ++i) {
+              //which hole is closer
+              const dxP1 = mech.hole.pos1.x - powerUp[i].position.x;
+              const dyP1 = mech.hole.pos1.y - powerUp[i].position.y;
+              const dxP2 = mech.hole.pos2.x - powerUp[i].position.x;
+              const dyP2 = mech.hole.pos2.y - powerUp[i].position.y;
+              let dxP, dyP, dist2
+              if (dxP1 * dxP1 + dyP1 * dyP1 < dxP2 * dxP2 + dyP2 * dyP2) {
+                dxP = dxP1
+                dyP = dyP1
+              } else {
+                dxP = dxP2
+                dyP = dyP2
+              }
+              dist2 = dxP * dxP + dyP * dyP;
+              if (dist2 < 600000 && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
+                powerUp[i].force.x += 4 * (dxP / dist2) * powerUp[i].mass; // float towards hole
+                powerUp[i].force.y += 4 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+                Matter.Body.setVelocity(powerUp[i], { //extra friction
+                  x: powerUp[i].velocity.x * 0.05,
+                  y: powerUp[i].velocity.y * 0.05
+                });
+                if (dist2 < 1000 && !game.isChoosing) { //use power up if it is close enough
+                  mech.fieldRange *= 0.8
+                  powerUps.onPickUp(powerUp[i].position);
+                  powerUp[i].effect();
+                  Matter.World.remove(engine.world, powerUp[i]);
+                  powerUp.splice(i, 1);
+                  break; //because the array order is messed up after splice
+                }
+              }
+            }
+            //teleport bullets
+            for (let i = 0, len = bullet.length; i < len; ++i) { //teleport bullets from hole1 to hole2
+              if (!bullet[i].botType && !bullet[i].isInHole) { //don't teleport bots
+                if (Vector.magnitude(Vector.sub(mech.hole.pos1, bullet[i].position)) < mech.fieldRange) { //find if bullet is touching hole1
+                  Matter.Body.setPosition(bullet[i], Vector.add(mech.hole.pos2, Vector.sub(mech.hole.pos1, bullet[i].position)));
+                  mech.fieldRange += 5
+                  bullet[i].isInHole = true
+                } else if (Vector.magnitude(Vector.sub(mech.hole.pos2, bullet[i].position)) < mech.fieldRange) { //find if bullet is touching hole1
+                  Matter.Body.setPosition(bullet[i], Vector.add(mech.hole.pos1, Vector.sub(mech.hole.pos2, bullet[i].position)));
+                  mech.fieldRange += 5
+                  bullet[i].isInHole = true
+                }
+              }
+            }
+            //suck and shrink blocks
+            const suckRange = 500
+            const shrinkRange = 100
+            const shrinkScale = 0.97;
+            const slowScale = 0.9
+            for (let i = 0, len = body.length; i < len; i++) {
+              if (!body[i].isNotHoldable) {
+                const dist1 = Vector.magnitude(Vector.sub(mech.hole.pos1, body[i].position))
+                const dist2 = Vector.magnitude(Vector.sub(mech.hole.pos2, body[i].position))
+                if (dist1 < dist2) {
+                  if (dist1 < suckRange) {
+                    const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos1, body[i].position)), 1)
+                    const slow = Vector.mult(body[i].velocity, slowScale)
+                    Matter.Body.setVelocity(body[i], Vector.add(slow, pull));
+                    //shrink
+                    if (Vector.magnitude(Vector.sub(mech.hole.pos1, body[i].position)) < shrinkRange) {
+                      Matter.Body.scale(body[i], shrinkScale, shrinkScale);
+                      if (body[i].mass < 0.05) {
+                        Matter.World.remove(engine.world, body[i]);
+                        body.splice(i, 1);
+                        mech.fieldRange *= 0.8
+                        break
+                      }
+                    }
+                  }
+                } else if (dist2 < suckRange) {
+                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos2, body[i].position)), 1)
+                  const slow = Vector.mult(body[i].velocity, slowScale)
+                  Matter.Body.setVelocity(body[i], Vector.add(slow, pull));
+                  //shrink
+                  if (Vector.magnitude(Vector.sub(mech.hole.pos2, body[i].position)) < shrinkRange) {
+                    Matter.Body.scale(body[i], shrinkScale, shrinkScale);
+                    if (body[i].mass < 0.05) {
+                      Matter.World.remove(engine.world, body[i]);
+                      body.splice(i, 1);
+                      mech.fieldRange *= 0.8
+                      break
+                    }
+                  }
+                }
+              }
+            }
+            //mobs get sucked in
+            for (let i = 0, len = mob.length; i < len; i++) {
+              if (!mob[i].shield && !mob[i].isShielded) {
+                if (Vector.magnitude(Vector.sub(mech.hole.pos1, mob[i].position)) < suckRange) {
+                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos1, mob[i].position)), 0.05)
+                  const slow = Vector.mult(mob[i].velocity, 0.99)
+                  Matter.Body.setVelocity(mob[i], Vector.add(slow, pull));
+                }
+                if (Vector.magnitude(Vector.sub(mech.hole.pos2, mob[i].position)) < suckRange) {
+                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos2, mob[i].position)), 0.05)
+                  const slow = Vector.mult(mob[i].velocity, 0.99)
+                  Matter.Body.setVelocity(mob[i], Vector.add(slow, pull));
+                }
+              }
+            }
+          }
+
+          if (mech.isHolding) {
+            mech.drawHold(mech.holdingTarget);
+            mech.holding();
+            mech.throwBlock();
+          } else if ((input.field && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
+            // Matter.Query.ray(map, jumpSensor.position, game.mouseInGame).length === 0 ||
+            if (
+              mech.hole.isReady && !mech.holdingTarget &&
+              (Matter.Query.ray(map, player.position, game.mouseInGame).length === 0 && Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0)
+            ) {
+              const sub = Vector.sub(game.mouseInGame, mech.pos)
+              const mag = Vector.magnitude(sub)
+              const drain = 0.005 * Math.sqrt(mag)
+              if (mech.energy > drain && mag > 150) {
+                mech.energy -= drain
+                mech.hole.isReady = false;
+                mech.fieldRange = 0
+                Matter.Body.setPosition(player, game.mouseInGame);
+                const velocity = Vector.mult(Vector.normalise(sub), 18)
+                Matter.Body.setVelocity(player, {
+                  x: velocity.x,
+                  y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
+                });
+                mech.immuneCycle = mech.cycle + 15; //player is immune to collision damage for 30 cycles
+                // move bots to follow player
+                for (let i = 0; i < bullet.length; i++) {
+                  if (bullet[i].botType) {
+                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                      x: 250 * (Math.random() - 0.5),
+                      y: 250 * (Math.random() - 0.5)
+                    }));
+                    Matter.Body.setVelocity(bullet[i], {
+                      x: 0,
+                      y: 0
+                    });
+                  }
+                }
+
+                //set holes
+                mech.hole.isOn = true;
+                mech.hole.pos1.x = mech.pos.x
+                mech.hole.pos1.y = mech.pos.y
+                mech.hole.pos2.x = player.position.x
+                mech.hole.pos2.y = player.position.y
+              }
+            }
+            // mech.grabPowerUp();
+            // mech.lookForPickUp();  can't pick things up with this field
+            // if (mech.energy > 0.05) { //can't use shield
+            //   mech.drawField();
+            //   mech.pushMobsFacing();
+            // }
+          } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
+            mech.pickUp();
+          } else {
+            mech.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+            mech.hole.isReady = true;
           }
           mech.drawFieldMeter()
         }

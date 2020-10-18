@@ -541,6 +541,27 @@ const powerUps = {
       powerUps.spawnRandomPowerUp(x, y);
     }
   },
+  ejectMod() {
+    //find which mods you have
+    const have = []
+    for (let i = 0; i < mod.mods.length; i++) {
+      if (mod.mods[i].count > 0) have.push(i)
+    }
+    if (have.length) {
+      const choose = have[Math.floor(Math.random() * have.length)]
+      game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 600) //message about what mod was lost
+      for (let i = 0; i < mod.mods[choose].count; i++) {
+        powerUps.directSpawn(mech.pos.x, mech.pos.y, "mod");
+        powerUp[powerUp.length - 1].isBonus = true
+      }
+      // remove a random mod from the list of mods you have
+      mod.mods[choose].remove();
+      mod.mods[choose].count = 0;
+      mod.mods[choose].isLost = true;
+      game.updateModHUD();
+      mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected mod
+    }
+  },
   directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
     let index = powerUp.length;
     target = powerUps[target];

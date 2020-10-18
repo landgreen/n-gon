@@ -165,12 +165,13 @@ const b = {
     }
   },
   explosion(where, radius) { // typically explode is used for some bullets with .onEnd
+    radius *= mod.explosiveRadius
     let dist, sub, knock;
     let dmg = radius * 0.013;
-    if (mod.isExplosionHarm) radius *= 1.43 // sqrt(2)radius  for 2x more area
+    if (mod.isExplosionHarm) radius *= 1.8 //    1/sqrt(2) radius -> area
     if (mod.isSmallExplosion) {
-      radius *= 0.5
-      dmg *= 1.5
+      radius *= 0.8
+      dmg *= 1.6
     }
 
     game.drawList.push({ //add dmg to draw queue
@@ -197,7 +198,7 @@ const b = {
     if (dist < radius) {
 
       if (mod.isImmuneExplosion) {
-        const mitigate = Math.min(1, Math.max(1 - mech.energy * 0.6, 0))
+        const mitigate = Math.min(1, Math.max(1 - mech.energy * 0.7, 0))
         mech.damage(mitigate * radius * (mod.isExplosionHarm ? 0.0004 : 0.0001));
       } else {
         mech.damage(radius * (mod.isExplosionHarm ? 0.0004 : 0.0001));
@@ -800,7 +801,6 @@ const b = {
       lockedOn: null,
       isFollowMouse: true,
       onDmg(who) {
-        console.log(who.alive)
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
         if (mod.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
