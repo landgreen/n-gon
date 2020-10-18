@@ -490,16 +490,16 @@ em {
 .color-plasma {
   color: #c0e;
   letter-spacing: 1px;
-  background-color: rgba(132, 0, 255, 0.04);
+  background-color: rgba(132, 0, 255, 0.06);
   padding: 2px;
-  border-radius: 4px;
+  border-radius: 9px;
   letter-spacing: 1px;
 }
 
 .color-worm {
   color: #fff;
-  text-shadow: 0px 0px 3px #357;
-  letter-spacing: 1px;
+  text-shadow: 1px 0px 2px #234;
+  /* letter-spacing: 2px; */
 }
 
 .color-harm {

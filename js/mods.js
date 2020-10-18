@@ -1208,7 +1208,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>20%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>18%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1217,13 +1217,13 @@ const mod = {
             requires: "",
             effect: () => {
                 mod.isBayesian = true
-                mod.duplicateChance += 0.2
+                mod.duplicateChance += 0.18
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
 
             },
             remove() {
                 if (mod.isBayesian) {
-                    mod.duplicateChance -= 0.2
+                    mod.duplicateChance -= 0.18
                     if (mod.duplicateChance < 0) mod.duplicateChance = 0
                 }
                 mod.isBayesian = false
@@ -1232,7 +1232,7 @@ const mod = {
         },
         {
             name: "stimulated emission",
-            description: "<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
+            description: "<strong>7%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1240,7 +1240,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.duplicateChance += 0.08
+                mod.duplicateChance += 0.07
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
                 // this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
             },
@@ -2676,7 +2676,7 @@ const mod = {
         },
         {
             name: "pair production",
-            description: "<strong>power ups</strong> overload your <strong class='color-f'>energy</strong><br>by <strong>250%</strong> of your maximum <strong class='color-f'>energy</strong>",
+            description: "<strong>power ups</strong> overload your <strong class='color-f'>energy</strong><br>to <strong>250%</strong> of your maximum <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2685,7 +2685,7 @@ const mod = {
             requires: "nano-scale manufacturing",
             effect: () => {
                 mod.isMassEnergy = true // used in mech.grabPowerUp
-                mech.energy = mech.maxEnergy * 2.5
+                if (mech.energy < mech.maxEnergy * 2.5) mech.energy = mech.maxEnergy * 2.5
             },
             remove() {
                 mod.isMassEnergy = false;
@@ -2803,6 +2803,38 @@ const mod = {
             },
             remove() {
                 mod.isPilotFreeze = false
+            }
+        },
+        {
+            name: "cosmic string",
+            description: "when you <strong> tunnel</strong>  through a <strong class='color-worm'>wormhole</strong><br><strong class='color-d'>damage</strong> mobs between the <strong>endpoints</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "wormhole"
+            },
+            requires: "wormhole",
+            effect() {
+                mod.isWormholeDamage = true
+            },
+            remove() {
+                mod.isWormholeDamage = false
+            }
+        },
+        {
+            name: "Penrose process",
+            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>overfill your <strong class='color-f'>energy</strong> to <strong>300%</strong> of your maximum<br> ",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "wormhole"
+            },
+            requires: "wormhole",
+            effect() {
+                mod.isWormholeEnergy = true
+            },
+            remove() {
+                mod.isWormholeEnergy = false
             }
         },
         {
@@ -3040,5 +3072,7 @@ const mod = {
     beamSplitter: null,
     iceEnergy: null,
     isPerfectBrake: null,
-    explosiveRadius: null
+    explosiveRadius: null,
+    isWormholeEnergy: null,
+    isWormholeDamage: null
 }

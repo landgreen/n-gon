@@ -1,17 +1,11 @@
+some wormhole bug fixes
+wormhole mod: cosmic string - damage mobs when you teleport through them
+wormhole mod: Penrose process - overfill energy to 300% of max, with a block gets sucked into a hole
 
-mods ejected from Bayesian statistics can't duplicate
-
-the power up boss moves faster, has less health,
-  it will eject one of your mods after a collision
-  and two health power ups
-
-mod ammonium nitrate: increase explosion damage and area by 25%
-  also other explosion mods have been rebalanced (damage buffed, but self damage is also higher)
-
-field: wormhole - teleport around, bullets teleport too, blocks and power ups get sucked in
-  mobs don't do much in worm hole yet, but that is coming with future mods
 
 ************** TODO - n-gon **************
+
+set mouse 4 and 5 for gun switch
 
 add an ending to the game
   revamp the boss level, or add a new final level
@@ -20,8 +14,6 @@ add an ending to the game
   game never ends if you have used cheats
 
 field wormhole
-  mobs are protected from bullets when stuck in a hole
-    mobs should destabilize holes, or take damage
   store constant info about the holes: unit, angle to save processing
   maybe bullets should be able to enter and exit multiple times
     or bullets shouldn't get stuck at all?
@@ -29,9 +21,7 @@ field wormhole
   player: drain energy when near a hole, does damage if no energy
   mod: Hawking radiation: do damage, to mobs that get near the end points
     this is good because it explains why mobs don't teleport
-  mod: cosmic string: do damage, like a laser for any mob that passes between the two portals, near the bezier curves
   mod: extend immunity cycle after a teleport  //mech.immuneCycle = mech.cycle + 15;
-  mod: reduce energy cost of teleportation
 
 look for mods that could update description text with count and mod.is  information
   can only use variables that change in effect() and remove()

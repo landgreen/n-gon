@@ -412,7 +412,7 @@ const powerUps = {
     }
   },
   onPickUp(where) {
-    if (mod.isMassEnergy) mech.energy = mech.maxEnergy * 2.5;
+    if (mod.isMassEnergy && mech.energy < mech.maxEnergy * 2.5) mech.energy = mech.maxEnergy * 2.5;
     if (mod.isMineDrop) b.mine({
       x: where.x,
       y: where.y
@@ -549,7 +549,7 @@ const powerUps = {
     }
     if (have.length) {
       const choose = have[Math.floor(Math.random() * have.length)]
-      game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> ejected by Bayesian statistics`, 600) //message about what mod was lost
+      game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> was ejected`, 600) //message about what mod was lost
       for (let i = 0; i < mod.mods[choose].count; i++) {
         powerUps.directSpawn(mech.pos.x, mech.pos.y, "mod");
         powerUp[powerUp.length - 1].isBonus = true

@@ -20,7 +20,7 @@ const level = {
       // for (let i = 0; i < 10; i++) {
       // mod.giveMod("laser-bot");
       // }
-      // mod.giveMod("bot fabrication")
+      mod.giveMod("cosmic string")
 
 
       level.intro(); //starting level
@@ -1416,7 +1416,7 @@ const level = {
     }
 
     // starting room
-    spawn.mapRect(-300, -1000, 600, 50);
+    spawn.mapRect(-300, -1000, 600, 100);
     spawn.mapRect(-300, -1300, 450, 50);
     spawn.mapRect(-300, -1300, 50, 350);
     if (!backwards && game.difficulty > 1) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
@@ -1424,8 +1424,8 @@ const level = {
     spawn.mapRect(-100, -975, 100, 975);
     spawn.mapRect(-500, 100, 1950, 400);
     spawn.boost(-425, 100, 1400);
-    spawn.mapRect(600, -1000, 750, 50);
-    spawn.mapRect(900, -500, 550, 50);
+    spawn.mapRect(600, -1000, 750, 100);
+    spawn.mapRect(900, -500, 550, 100);
     spawn.mapRect(1250, -975, 100, 375);
     spawn.bodyRect(1250, -600, 100, 100, 0.7);
     spawn.mapRect(1250, -450, 100, 450);

@@ -1713,7 +1713,7 @@ const mech = {
     },
     {
       name: "time dilation field",
-      description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br><strong>touching</strong> mobs still does <strong class='color-harm'>harm</strong>",
+      description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped",
       effect: () => {
         // mech.fieldMeterColor = "#000"
         mech.fieldFire = true;
@@ -2240,7 +2240,7 @@ const mech = {
     },
     {
       name: "wormhole",
-      description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br>bullets may also traverse the <strong class='color-worm'>wormholes</strong><br>blocks and power ups can't exit it",
+      description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br>bullets may also traverse <strong class='color-worm'>wormholes</strong><br>blocks and power ups can't <strong>exit</strong>",
       effect: () => {
         game.replaceTextLog = true; //allow text over write
         mech.drop();
@@ -2270,7 +2270,7 @@ const mech = {
             const edge1b = Vector.add(Vector.mult(unit, -semiMajorAxis), mech.hole.pos1)
             const edge2a = Vector.add(Vector.mult(unit, semiMajorAxis), mech.hole.pos2)
             const edge2b = Vector.add(Vector.mult(unit, -semiMajorAxis), mech.hole.pos2)
-            const opacity = 200 / mech.fieldRange / mech.fieldRange
+            // const opacity = 200 / mech.fieldRange / mech.fieldRange
             ctx.beginPath();
             ctx.moveTo(edge1a.x, edge1a.y)
             ctx.bezierCurveTo(mech.hole.pos1.x, mech.hole.pos1.y, mech.hole.pos2.x, mech.hole.pos2.y, edge2a.x, edge2a.y);
@@ -2353,6 +2353,7 @@ const mech = {
                         Matter.World.remove(engine.world, body[i]);
                         body.splice(i, 1);
                         mech.fieldRange *= 0.8
+                        if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
                         break
                       }
                     }
@@ -2368,26 +2369,25 @@ const mech = {
                       Matter.World.remove(engine.world, body[i]);
                       body.splice(i, 1);
                       mech.fieldRange *= 0.8
+                      if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
                       break
                     }
                   }
                 }
               }
             }
-            //mobs get sucked in
+            //mobs get pushed away
             for (let i = 0, len = mob.length; i < len; i++) {
-              if (!mob[i].shield && !mob[i].isShielded) {
-                if (Vector.magnitude(Vector.sub(mech.hole.pos1, mob[i].position)) < suckRange) {
-                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos1, mob[i].position)), 0.05)
-                  const slow = Vector.mult(mob[i].velocity, 0.99)
-                  Matter.Body.setVelocity(mob[i], Vector.add(slow, pull));
-                }
-                if (Vector.magnitude(Vector.sub(mech.hole.pos2, mob[i].position)) < suckRange) {
-                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos2, mob[i].position)), 0.05)
-                  const slow = Vector.mult(mob[i].velocity, 0.99)
-                  Matter.Body.setVelocity(mob[i], Vector.add(slow, pull));
-                }
+              // if (!mob[i].shield && !mob[i].isShielded) {
+              if (Vector.magnitude(Vector.sub(mech.hole.pos1, mob[i].position)) < 200) {
+                const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos1, mob[i].position)), -0.07)
+                Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, pull));
               }
+              if (Vector.magnitude(Vector.sub(mech.hole.pos2, mob[i].position)) < 200) {
+                const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos2, mob[i].position)), -0.07)
+                Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, pull));
+              }
+              // }
             }
           }
 
@@ -2399,11 +2399,15 @@ const mech = {
             // Matter.Query.ray(map, jumpSensor.position, game.mouseInGame).length === 0 ||
             if (
               mech.hole.isReady && !mech.holdingTarget &&
-              (Matter.Query.ray(map, player.position, game.mouseInGame).length === 0 && Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0)
+              (
+                // Matter.Query.ray(map, player.position, game.mouseInGame).length === 0 &&
+                Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0 &&
+                Matter.Query.ray(map, mech.pos, Vector.add(Vector.mult(Vector.normalise(Vector.sub(game.mouseInGame, mech.pos)), 50), game.mouseInGame)).length === 0
+              )
             ) {
               const sub = Vector.sub(game.mouseInGame, mech.pos)
               const mag = Vector.magnitude(sub)
-              const drain = 0.005 * Math.sqrt(mag)
+              const drain = 0.06 + 0.007 * Math.sqrt(mag)
               if (mech.energy > drain && mag > 150) {
                 mech.energy -= drain
                 mech.hole.isReady = false;
@@ -2435,6 +2439,24 @@ const mech = {
                 mech.hole.pos1.y = mech.pos.y
                 mech.hole.pos2.x = player.position.x
                 mech.hole.pos2.y = player.position.y
+
+                if (mod.isWormholeDamage) {
+                  who = Matter.Query.ray(mob, mech.pos, game.mouseInGame, 60)
+                  for (let i = 0; i < who.length; i++) {
+                    if (who[i].body.alive) {
+                      const dmg = b.dmgScale * 6
+                      who[i].body.damage(dmg);
+                      who[i].body.locatePlayer();
+                      game.drawList.push({ //add dmg to draw queue
+                        x: who[i].body.position.x,
+                        y: who[i].body.position.y,
+                        radius: Math.log(2 * dmg + 1.1) * 40,
+                        color: game.playerDmgColor,
+                        time: game.drawTime
+                      });
+                    }
+                  }
+                }
               }
             }
             // mech.grabPowerUp();

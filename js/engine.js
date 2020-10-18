@@ -152,8 +152,7 @@ function collisionChecks(event) {
               mech.energy -= 0.33 * mech.maxEnergy
               mech.immuneCycle = 0; //player doesn't go immune to collision damage
               mob[k].death();
-              game.drawList.push({
-                //add dmg to draw queue
+              game.drawList.push({ //add dmg to draw queue
                 x: pairs[i].activeContacts[0].vertex.x,
                 y: pairs[i].activeContacts[0].vertex.y,
                 radius: dmg * 2000,
@@ -161,8 +160,7 @@ function collisionChecks(event) {
                 time: game.drawTime
               });
             } else {
-              game.drawList.push({
-                //add dmg to draw queue
+              game.drawList.push({ //add dmg to draw queue
                 x: pairs[i].activeContacts[0].vertex.x,
                 y: pairs[i].activeContacts[0].vertex.y,
                 radius: dmg * 500,
