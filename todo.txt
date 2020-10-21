@@ -1,33 +1,30 @@
-some wormhole bug fixes
-wormhole mod: cosmic string - damage mobs when you teleport through them
-wormhole mod: Penrose process - overfill energy to 300% of max, with a block gets sucked into a hole
 
+mod: critical bifurcation - nail gun does 400% more damage if it hits very close to the center of a mob
+mod: supercritical fission - flechettes explode if they hit very close to the center of a mob
+
+mod: transdimensional spores - after wormholes eat blocks, they disturb spores
+mod: traversable geodesics - your bullets can go through worm holes
+
+scrap bots now only last only 30 seconds, but they have a 20% chance to spawn from a kill (was 11%)
+the difficulty should feel a bit harder after clearing the boss level
+  (a bit more more damage taken, and fewer mod drops)
 
 ************** TODO - n-gon **************
 
-set mouse 4 and 5 for gun switch
+mod - after a mob or shield dies, remaining dots look for a new nearby host
 
 add an ending to the game
   revamp the boss level, or add a new final level
-    final level requires you to kill something, not skip content
+    final level requires you to kill something
+      so skipping content is only smart if you are strong enough to beat the final boss
   around level 15
   game never ends if you have used cheats
-
-field wormhole
-  store constant info about the holes: unit, angle to save processing
-  maybe bullets should be able to enter and exit multiple times
-    or bullets shouldn't get stuck at all?
-  maybe give bullets an attraction to holes
-  player: drain energy when near a hole, does damage if no energy
-  mod: Hawking radiation: do damage, to mobs that get near the end points
-    this is good because it explains why mobs don't teleport
-  mod: extend immunity cycle after a teleport  //mech.immuneCycle = mech.cycle + 15;
 
 look for mods that could update description text with count and mod.is  information
   can only use variables that change in effect() and remove()
   this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
 
-mod (drones or spores) explode after 10 seconds
+mod self destruct - drones explode when they die, but they last 1/2 as long
 
 mouse event e.which is deprecated
 

@@ -461,14 +461,24 @@ const powerUps = {
   },
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
+    // if (game.difficultyMode === 4) powerUps.spawn(x, y, "mod") //why mode gets a free mod
     powerUps.randomPowerUpCounter++;
-    if (game.difficultyMode === 4) powerUps.spawn(x, y, "mod") //why mode gets a free mod
     const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
     if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
       powerUps.randomPowerUpCounter = 0;
       spawnPowerUps()
     } else {
       spawnHealthAmmo()
+    }
+    if (game.difficultyMode === 4) {
+      powerUps.randomPowerUpCounter++;
+      const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
+      if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
+        powerUps.randomPowerUpCounter = 0;
+        spawnPowerUps()
+      } else {
+        spawnHealthAmmo()
+      }
     }
 
     function spawnHealthAmmo() {
@@ -511,7 +521,7 @@ const powerUps = {
       //bonus power ups for clearing runs in the last game
       if (level.levelsCleared === 0 && !game.isCheating) {
         for (let i = 0; i < localSettings.levelsClearedLastGame / 4 - 1; i++) {
-          powerUps.spawn(mech.pos.x, mech.pos.y, "mod", false); //spawn a mod for every 5 levels cleared in last game
+          powerUps.spawn(mech.pos.x, mech.pos.y, "mod", false); //spawn a mod for levels cleared in last game
         }
         localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

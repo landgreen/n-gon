@@ -2240,37 +2240,27 @@ const mech = {
     },
     {
       name: "wormhole",
-      description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br>bullets may also traverse <strong class='color-worm'>wormholes</strong><br>blocks and power ups can't <strong>exit</strong>",
+      description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
       effect: () => {
         game.replaceTextLog = true; //allow text over write
         mech.drop();
         // mech.hole = {  //this is reset with each new field, but I'm leaving it here for reference
         //   isOn: false,
         //   isReady: true,
-        //   pos1: {
-        //     x: 0,
-        //     y: 0
-        //   },
-        //   pos2: {
-        //     x: 0,
-        //     y: 0
-        //   },
+        //   pos1: {x: 0,y: 0},
+        //   pos2: {x: 0,y: 0},
+        //   angle: 0,
+        //   unit:{x:0,y:0},
         // }
         mech.hold = function () {
-
           if (mech.hole.isOn) {
             // draw holes
             mech.fieldRange = 0.97 * mech.fieldRange + 0.03 * (50 + 10 * Math.sin(game.cycle * 0.025))
-
-            //draw bezier curves between the portals
             const semiMajorAxis = mech.fieldRange + 30
-            const sub = Vector.sub(mech.hole.pos1, mech.hole.pos2)
-            const unit = Vector.perp(Vector.normalise(sub))
-            const edge1a = Vector.add(Vector.mult(unit, semiMajorAxis), mech.hole.pos1)
-            const edge1b = Vector.add(Vector.mult(unit, -semiMajorAxis), mech.hole.pos1)
-            const edge2a = Vector.add(Vector.mult(unit, semiMajorAxis), mech.hole.pos2)
-            const edge2b = Vector.add(Vector.mult(unit, -semiMajorAxis), mech.hole.pos2)
-            // const opacity = 200 / mech.fieldRange / mech.fieldRange
+            const edge1a = Vector.add(Vector.mult(mech.hole.unit, semiMajorAxis), mech.hole.pos1)
+            const edge1b = Vector.add(Vector.mult(mech.hole.unit, -semiMajorAxis), mech.hole.pos1)
+            const edge2a = Vector.add(Vector.mult(mech.hole.unit, semiMajorAxis), mech.hole.pos2)
+            const edge2b = Vector.add(Vector.mult(mech.hole.unit, -semiMajorAxis), mech.hole.pos2)
             ctx.beginPath();
             ctx.moveTo(edge1a.x, edge1a.y)
             ctx.bezierCurveTo(mech.hole.pos1.x, mech.hole.pos1.y, mech.hole.pos2.x, mech.hole.pos2.y, edge2a.x, edge2a.y);
@@ -2278,10 +2268,9 @@ const mech = {
             ctx.bezierCurveTo(mech.hole.pos2.x, mech.hole.pos2.y, mech.hole.pos1.x, mech.hole.pos1.y, edge1b.x, edge1b.y);
             ctx.fillStyle = `rgba(255,255,255,${200 / mech.fieldRange / mech.fieldRange})` //"rgba(0,0,0,0.1)"
             ctx.fill();
-            const angle = Math.atan2(sub.y, sub.x)
             ctx.beginPath();
-            ctx.ellipse(mech.hole.pos1.x, mech.hole.pos1.y, mech.fieldRange, semiMajorAxis, angle, 0, 2 * Math.PI)
-            ctx.ellipse(mech.hole.pos2.x, mech.hole.pos2.y, mech.fieldRange, semiMajorAxis, angle, 0, 2 * Math.PI)
+            ctx.ellipse(mech.hole.pos1.x, mech.hole.pos1.y, mech.fieldRange, semiMajorAxis, mech.hole.angle, 0, 2 * Math.PI)
+            ctx.ellipse(mech.hole.pos2.x, mech.hole.pos2.y, mech.fieldRange, semiMajorAxis, mech.hole.angle, 0, 2 * Math.PI)
             ctx.fillStyle = `rgba(255,255,255,${32 / mech.fieldRange})`
             ctx.fill();
 
@@ -2318,20 +2307,6 @@ const mech = {
                 }
               }
             }
-            //teleport bullets
-            for (let i = 0, len = bullet.length; i < len; ++i) { //teleport bullets from hole1 to hole2
-              if (!bullet[i].botType && !bullet[i].isInHole) { //don't teleport bots
-                if (Vector.magnitude(Vector.sub(mech.hole.pos1, bullet[i].position)) < mech.fieldRange) { //find if bullet is touching hole1
-                  Matter.Body.setPosition(bullet[i], Vector.add(mech.hole.pos2, Vector.sub(mech.hole.pos1, bullet[i].position)));
-                  mech.fieldRange += 5
-                  bullet[i].isInHole = true
-                } else if (Vector.magnitude(Vector.sub(mech.hole.pos2, bullet[i].position)) < mech.fieldRange) { //find if bullet is touching hole1
-                  Matter.Body.setPosition(bullet[i], Vector.add(mech.hole.pos1, Vector.sub(mech.hole.pos2, bullet[i].position)));
-                  mech.fieldRange += 5
-                  bullet[i].isInHole = true
-                }
-              }
-            }
             //suck and shrink blocks
             const suckRange = 500
             const shrinkRange = 100
@@ -2354,6 +2329,13 @@ const mech = {
                         body.splice(i, 1);
                         mech.fieldRange *= 0.8
                         if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
+                        if (mod.isWormSpores) { //pandimensionalspermia
+                          b.spore(Vector.add(mech.hole.pos2, Vector.rotate({
+                            x: mech.fieldRange,
+                            y: 0
+                          }, 2 * Math.PI * Math.random())))
+                          Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, -Math.PI / 2), 15));
+                        }
                         break
                       }
                     }
@@ -2370,45 +2352,58 @@ const mech = {
                       body.splice(i, 1);
                       mech.fieldRange *= 0.8
                       if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
+                      if (mod.isWormSpores) { //pandimensionalspermia
+                        b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
+                          x: mech.fieldRange,
+                          y: 0
+                        }, 2 * Math.PI * Math.random())))
+                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), 15));
+
+                      }
                       break
                     }
                   }
                 }
               }
             }
-            //mobs get pushed away
-            for (let i = 0, len = mob.length; i < len; i++) {
-              // if (!mob[i].shield && !mob[i].isShielded) {
-              if (Vector.magnitude(Vector.sub(mech.hole.pos1, mob[i].position)) < 200) {
-                const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos1, mob[i].position)), -0.07)
-                Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, pull));
+            if (mod.isWormBullets) {
+              //teleport bullets
+              for (let i = 0, len = bullet.length; i < len; ++i) { //teleport bullets from hole1 to hole2
+                if (!bullet[i].botType && !bullet[i].isInHole) { //don't teleport bots
+                  if (Vector.magnitude(Vector.sub(mech.hole.pos1, bullet[i].position)) < mech.fieldRange) { //find if bullet is touching hole1
+                    Matter.Body.setPosition(bullet[i], Vector.add(mech.hole.pos2, Vector.sub(mech.hole.pos1, bullet[i].position)));
+                    mech.fieldRange += 5
+                    bullet[i].isInHole = true
+                  } else if (Vector.magnitude(Vector.sub(mech.hole.pos2, bullet[i].position)) < mech.fieldRange) { //find if bullet is touching hole1
+                    Matter.Body.setPosition(bullet[i], Vector.add(mech.hole.pos1, Vector.sub(mech.hole.pos2, bullet[i].position)));
+                    mech.fieldRange += 5
+                    bullet[i].isInHole = true
+                  }
+                }
               }
-              if (Vector.magnitude(Vector.sub(mech.hole.pos2, mob[i].position)) < 200) {
-                const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos2, mob[i].position)), -0.07)
-                Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, pull));
+              // mobs get pushed away
+              for (let i = 0, len = mob.length; i < len; i++) {
+                if (Vector.magnitude(Vector.sub(mech.hole.pos1, mob[i].position)) < 200) {
+                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos1, mob[i].position)), -0.07)
+                  Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, pull));
+                }
+                if (Vector.magnitude(Vector.sub(mech.hole.pos2, mob[i].position)) < 200) {
+                  const pull = Vector.mult(Vector.normalise(Vector.sub(mech.hole.pos2, mob[i].position)), -0.07)
+                  Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, pull));
+                }
               }
-              // }
             }
           }
 
-          if (mech.isHolding) {
-            mech.drawHold(mech.holdingTarget);
-            mech.holding();
-            mech.throwBlock();
-          } else if ((input.field && mech.fieldCDcycle < mech.cycle)) { //not hold but field button is pressed
-            // Matter.Query.ray(map, jumpSensor.position, game.mouseInGame).length === 0 ||
-            if (
-              mech.hole.isReady && !mech.holdingTarget &&
-              (
-                // Matter.Query.ray(map, player.position, game.mouseInGame).length === 0 &&
-                Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0 &&
-                Matter.Query.ray(map, mech.pos, Vector.add(Vector.mult(Vector.normalise(Vector.sub(game.mouseInGame, mech.pos)), 50), game.mouseInGame)).length === 0
-              )
+          if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
+            if (mech.hole.isReady &&
+              (Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0 &&
+                Matter.Query.ray(map, mech.pos, Vector.add(Vector.mult(Vector.normalise(Vector.sub(game.mouseInGame, mech.pos)), 50), game.mouseInGame)).length === 0)
             ) {
               const sub = Vector.sub(game.mouseInGame, mech.pos)
               const mag = Vector.magnitude(sub)
               const drain = 0.06 + 0.007 * Math.sqrt(mag)
-              if (mech.energy > drain && mag > 150) {
+              if (mech.energy > drain && mag > 300) {
                 mech.energy -= drain
                 mech.hole.isReady = false;
                 mech.fieldRange = 0
@@ -2439,6 +2434,8 @@ const mech = {
                 mech.hole.pos1.y = mech.pos.y
                 mech.hole.pos2.x = player.position.x
                 mech.hole.pos2.y = player.position.y
+                mech.hole.angle = Math.atan2(sub.y, sub.x)
+                mech.hole.unit = Vector.perp(Vector.normalise(sub))
 
                 if (mod.isWormholeDamage) {
                   who = Matter.Query.ray(mob, mech.pos, game.mouseInGame, 60)
@@ -2457,14 +2454,12 @@ const mech = {
                     }
                   }
                 }
+              } else {
+                mech.grabPowerUp();
               }
+            } else {
+              mech.grabPowerUp();
             }
-            // mech.grabPowerUp();
-            // mech.lookForPickUp();  can't pick things up with this field
-            // if (mech.energy > 0.05) { //can't use shield
-            //   mech.drawField();
-            //   mech.pushMobsFacing();
-            // }
           } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
             mech.pickUp();
           } else {

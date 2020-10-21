@@ -108,7 +108,7 @@ const b = {
           mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
         },
         minDmgSpeed: 10,
-        onDmg() {}, //this.endCycle = 0  //triggers despawn
+        beforeDmg() {}, //this.endCycle = 0  //triggers despawn
         onEnd() {}
       };
     } else {
@@ -125,7 +125,7 @@ const b = {
           mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
         },
         minDmgSpeed: 10,
-        onDmg() {}, //this.endCycle = 0  //triggers despawn
+        beforeDmg() {}, //this.endCycle = 0  //triggers despawn
         onEnd() {}
       };
     }
@@ -276,13 +276,13 @@ const b = {
       }
     }
   },
-  missile(where, dir, speed, size = 1, spawn = 0) {
+  missile(where, angle, speed, size = 1, spawn = 0) {
     const me = bullet.length;
-    bullet[me] = Bodies.rectangle(where.x, where.y, 30 * size, 4 * size, b.fireAttributes(dir));
+    bullet[me] = Bodies.rectangle(where.x, where.y, 30 * size, 4 * size, b.fireAttributes(angle));
     const thrust = 0.00417 * bullet[me].mass;
     Matter.Body.setVelocity(bullet[me], {
-      x: mech.Vx / 2 + speed * Math.cos(dir),
-      y: mech.Vy / 2 + speed * Math.sin(dir)
+      x: mech.Vx / 2 + speed * Math.cos(angle),
+      y: mech.Vy / 2 + speed * Math.sin(angle)
     });
     World.add(engine.world, bullet[me]); //add bullet to world
     bullet[me].frictionAir = 0.023
@@ -300,7 +300,7 @@ const b = {
         }
       }
     }
-    bullet[me].onDmg = function () {
+    bullet[me].beforeDmg = function () {
       this.tryToLockOn();
       this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
     };
@@ -557,7 +557,7 @@ const b = {
       endCycle: Infinity,
       lookFrequency: 0,
       range: 700,
-      onDmg() {},
+      beforeDmg() {},
       do() {
         this.force.y += this.mass * 0.002; //extra gravity
         let collide = Matter.Query.collides(this, map) //check if collides with map
@@ -686,7 +686,7 @@ const b = {
         x: 100 * (Math.random() - 0.5),
         y: 100 * (Math.random() - 0.5)
       },
-      onDmg(who) {
+      beforeDmg(who) {
         this.endCycle = 0; //bullet ends cycle after doing damage 
         if (this.isFreeze) mobs.statusSlow(who, 60)
       },
@@ -800,7 +800,7 @@ const b = {
       minDmgSpeed: 0,
       lockedOn: null,
       isFollowMouse: true,
-      onDmg(who) {
+      beforeDmg(who) {
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
         if (mod.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
@@ -877,7 +877,7 @@ const b = {
       isFollowMouse: true,
       deathCycles: 110 + RADIUS * 5,
       isImproved: false,
-      onDmg(who) {
+      beforeDmg(who) {
         //move away from target after hitting
         const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20)
         Matter.Body.setVelocity(this, {
@@ -1002,7 +1002,7 @@ const b = {
       target: null,
       targetVertex: null,
       targetRelativePosition: null,
-      onDmg(who) {
+      beforeDmg(who) {
         if (!this.target && who.alive) {
           this.target = who;
           if (who.radius < 20) {
@@ -1154,15 +1154,14 @@ const b = {
   },
   nail(pos, velocity, dmg = 0) {
     const me = bullet.length;
-    // bullet[me] = Bodies.rectangle(pos.x, pos.y, 25, 2, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
     bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * mod.biggerNails, 2 * mod.biggerNails, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
-
     Matter.Body.setVelocity(bullet[me], velocity);
     World.add(engine.world, bullet[me]); //add bullet to world
     bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
     bullet[me].dmg = dmg
-    bullet[me].onDmg = function (who) {
+    bullet[me].beforeDmg = function (who) {
       if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
+      if (mod.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.99) this.dmg *= 5 //crit if hit near center
     };
     bullet[me].do = function () {};
   },
@@ -1227,7 +1226,7 @@ const b = {
         mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
       },
       lockedOn: null,
-      onDmg() {
+      beforeDmg() {
         this.lockedOn = null
       },
       onEnd() {},
@@ -1283,7 +1282,7 @@ const b = {
         mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
       },
       lockedOn: null,
-      onDmg() {
+      beforeDmg() {
         this.lockedOn = null
       },
       onEnd() {},
@@ -1342,7 +1341,7 @@ const b = {
         mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
       },
       lockedOn: null,
-      onDmg() {
+      beforeDmg() {
         this.lockedOn = null
       },
       onEnd() {},
@@ -1452,7 +1451,7 @@ const b = {
       },
       lockedOn: null,
       explode: 0,
-      onDmg() {
+      beforeDmg() {
         if (this.lockedOn) {
           const explosionRadius = Math.min(170 + 140 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
           if (explosionRadius > 60) {
@@ -1528,7 +1527,7 @@ const b = {
         mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
       },
       lockedOn: null,
-      onDmg() {
+      beforeDmg() {
         this.lockedOn = null
       },
       onEnd() {},
@@ -1706,7 +1705,7 @@ const b = {
         category: cat.bullet,
         mask: 0 //cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
       },
-      onDmg() {},
+      beforeDmg() {},
       onEnd() {},
       range: 190 + 50 * mod.isOrbitBotUpgrade, //range is set in bot upgrade too! //150 + (80 + 100 * mod.isOrbitBotUpgrade) * Math.random(), // + 5 * mod.orbitBotCount,
       orbitalSpeed: 0,
@@ -1850,7 +1849,7 @@ const b = {
           y: mech.Vy / 2 + speed * Math.sin(angle)
         }, dmg) //position, velocity, damage
         if (mod.isIceCrystals) {
-          bullet[bullet.length - 1].onDmg = function (who) {
+          bullet[bullet.length - 1].beforeDmg = function (who) {
             mobs.statusSlow(who, 30)
             if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
           };
@@ -1957,7 +1956,7 @@ const b = {
           bullet[me].do = function () {
             this.force.y += this.mass * 0.001;
           };
-          bullet[me].onDmg = function (who) {
+          bullet[me].beforeDmg = function (who) {
             mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
           };
         } else {
@@ -2031,6 +2030,11 @@ const b = {
                   }
                 } else {
                   this.endCycle = 0;
+                  if (mod.isFlechetteExplode && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.98) {
+                    // mobs.statusStun(who, 120)
+                    this.explodeRad = 250 + 30 * Math.random();
+                    b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+                  }
                   who.foundPlayer();
                   if (mod.isFastDot) {
                     mobs.statusDoT(who, 3.78, 30)
@@ -2120,7 +2124,7 @@ const b = {
               category: 0,
               mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
             },
-            onDmg() {},
+            beforeDmg() {},
             onEnd() {},
             do() {
               if (!mech.isBodiesAsleep) {
@@ -2309,7 +2313,7 @@ const b = {
           bullet[me].onEnd = function () {
             b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
           }
-          bullet[me].onDmg = function () {
+          bullet[me].beforeDmg = function () {
             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
           };
           bullet[me].do = function () {
@@ -2335,7 +2339,7 @@ const b = {
           if (mod.grenadeFragments) b.targetedNail(this.position, mod.grenadeFragments)
         }
         bullet[me].minDmgSpeed = 1;
-        bullet[me].onDmg = function () {
+        bullet[me].beforeDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
         };
 
@@ -2401,7 +2405,7 @@ const b = {
             if (dist < this.explodeRad) mech.energy = 0 //remove player energy
           }
         }
-        bullet[me].onDmg = function () {
+        bullet[me].beforeDmg = function () {
           // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
         };
         bullet[me].radius = 22; //used from drawing timer
@@ -2510,7 +2514,7 @@ const b = {
         bullet[me].maxDamageRadius = (435 + 150 * Math.random()) * (mod.isNeutronImmune ? 1.2 : 1)
         bullet[me].stuckTo = null;
         bullet[me].stuckToRelativePosition = null;
-        bullet[me].onDmg = function () {};
+        bullet[me].beforeDmg = function () {};
         bullet[me].stuck = function () {};
         bullet[me].do = function () {
           function onCollide(that) {
@@ -2682,7 +2686,7 @@ const b = {
         bullet[me].minDmgSpeed = 0;
         bullet[me].totalSpores = 8 + 2 * mod.isFastSpores + 2 * mod.isSporeFreeze
         bullet[me].stuck = function () {};
-        bullet[me].onDmg = function () {};
+        bullet[me].beforeDmg = function () {};
         bullet[me].do = function () {
           function onCollide(that) {
             that.collisionFilter.mask = 0; //non collide with everything
@@ -2850,7 +2854,7 @@ const b = {
       name: "rail gun",
       description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
       ammo: 0,
-      ammoPack: 3,
+      ammoPack: 3.5,
       have: false,
       fire() {
         if (mod.isCapacitor) {
@@ -2871,7 +2875,7 @@ const b = {
               },
               minDmgSpeed: 5,
               endCycle: game.cycle + 140,
-              onDmg(who) {
+              beforeDmg(who) {
                 if (who.shield) {
                   for (let i = 0, len = mob.length; i < len; i++) {
                     if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
@@ -2880,10 +2884,10 @@ const b = {
                     }
                   }
                   Matter.Body.setVelocity(this, {
-                    x: -0.1 * this.velocity.x,
-                    y: -0.1 * this.velocity.y
+                    x: -0.5 * this.velocity.x,
+                    y: -0.5 * this.velocity.y
                   });
-                  Matter.Body.setDensity(this, 0.001);
+                  // Matter.Body.setDensity(this, 0.001);
                 }
                 if (mod.isRailNails && this.speed > 10) {
                   b.targetedNail(this.position, (Math.min(40, this.speed) - 10) * 0.6) // 0.6 as many nails as the normal rail gun
@@ -2980,7 +2984,7 @@ const b = {
               mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
             },
             minDmgSpeed: 5,
-            onDmg(who) {
+            beforeDmg(who) {
               if (who.shield) {
                 for (let i = 0, len = mob.length; i < len; i++) {
                   if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
@@ -3472,7 +3476,7 @@ const b = {
     //       },
     //       minDmgSpeed: 5,
     //       range: 0,
-    //       onDmg() {
+    //       beforeDmg() {
     //         this.endCycle = 0;
     //       }, //this.endCycle = 0  //triggers despawn
     //       onEnd() {},

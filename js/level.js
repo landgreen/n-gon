@@ -15,12 +15,12 @@ const level = {
       // game.zoomScale = 1000;
       // game.setZoom();
       // mech.isCloak = true;
-      mech.setField("wormhole")
-      // b.giveGuns("nail gun")
+      // mech.setField("wormhole")
+      // b.giveGuns("flechettes")
       // for (let i = 0; i < 10; i++) {
       // mod.giveMod("laser-bot");
       // }
-      mod.giveMod("cosmic string")
+      // mod.giveMod("supercritical fission")
 
 
       level.intro(); //starting level
@@ -149,10 +149,10 @@ const level = {
     // spawn.sniper(1700, -120, 50)
     // spawn.bomberBoss(1400, -500)
     // spawn.sniper(1800, -120)
-    // spawn.sniper(2200, -120)
     // spawn.cellBossCulture(1600, -500)
-    spawn.powerUpBoss(1600, -500)
-    // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
+    // spawn.powerUpBoss(1600, -500)
+    spawn.sniper(1200, -500)
+    spawn.shield(mob[mob.length - 1], 1200, -500, 1);
 
     // spawn.nodeBoss(1200, -500, "launcher")
     // spawn.snakeBoss(1200, -500)
@@ -3841,7 +3841,7 @@ const level = {
   difficultyIncrease(num = 1) {
     for (let i = 0; i < num; i++) {
       game.difficulty++
-      game.dmgScale += 0.37; //damage done by mobs increases each level
+      game.dmgScale += 0.38; //damage done by mobs increases each level
       b.dmgScale *= 0.93; //damage done by player decreases each level
       if (game.accelScale < 5) game.accelScale *= 1.02 //mob acceleration increases each level
       if (game.lookFreqScale > 0.2) game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
@@ -3852,7 +3852,7 @@ const level = {
   difficultyDecrease(num = 1) { //used in easy mode for game.reset()
     for (let i = 0; i < num; i++) {
       game.difficulty--
-      game.dmgScale -= 0.37; //damage done by mobs increases each level
+      game.dmgScale -= 0.38; //damage done by mobs increases each level
       if (game.dmgScale < 0.1) game.dmgScale = 0.1;
       b.dmgScale /= 0.93; //damage done by player decreases each level
       if (game.accelScale > 0.2) game.accelScale /= 1.02 //mob acceleration increases each level
@@ -3887,6 +3887,7 @@ const level = {
     if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
     level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
     if (level.levelsCleared > level.levels.length) level.difficultyIncrease(game.difficultyMode)
+    if (level.levelsCleared > level.levels.length * 1.25) level.difficultyIncrease(game.difficultyMode)
     if (level.levelsCleared > level.levels.length * 1.5) level.difficultyIncrease(game.difficultyMode)
     if (level.levelsCleared > level.levels.length * 2) level.difficultyIncrease(game.difficultyMode)
     if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);

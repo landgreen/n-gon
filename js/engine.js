@@ -173,11 +173,11 @@ function collisionChecks(event) {
           }
           //mob + bullet collisions
           if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
+            obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
             let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
             if (mod.isCrit && mob[k].isStunned) dmg *= 4
             mob[k].foundPlayer();
             mob[k].damage(dmg);
-            obj.onDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
             game.drawList.push({ //add dmg to draw queue
               x: pairs[i].activeContacts[0].vertex.x,
               y: pairs[i].activeContacts[0].vertex.y,

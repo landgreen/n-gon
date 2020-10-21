@@ -408,7 +408,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1;
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -424,7 +424,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1;
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -440,7 +440,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -457,7 +457,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -469,15 +469,15 @@ const mod = {
         },
         {
             name: "scrap bots",
-            description: "<strong>11%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot only functions until the end of the level",
-            maxCount: 6,
+            description: "<strong>19%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot last for about <strong>30</strong> seconds",
+            maxCount: 3,
             count: 0,
             allowed() {
                 return mod.totalBots() > 0
             },
             requires: "a bot",
             effect() {
-                mod.isBotSpawner += 0.11;
+                mod.isBotSpawner += 0.19;
             },
             remove() {
                 mod.isBotSpawner = 0;
@@ -1597,6 +1597,22 @@ const mod = {
             }
         },
         {
+            name: "critical bifurcation",
+            description: "<strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("nail gun")
+            },
+            requires: "nail gun",
+            effect() {
+                mod.isNailCrit = true
+            },
+            remove() {
+                mod.isNailCrit = false
+            }
+        },
+        {
             name: "pneumatic actuator",
             description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong>delay</strong> after firing",
             maxCount: 1,
@@ -1844,14 +1860,30 @@ const mod = {
             }
         },
         {
+            name: "supercritical fission",
+            description: "<strong>flechettes</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("flechettes") && !mod.pierce
+            },
+            requires: "flechettes and not piercing needles",
+            effect() {
+                mod.isFlechetteExplode = true
+            },
+            remove() {
+                mod.isFlechetteExplode = false
+            }
+        },
+        {
             name: "piercing needles",
             description: "<strong>needles</strong> penetrate <strong>mobs</strong> and <strong>blocks</strong><br>potentially hitting <strong>multiple</strong> targets",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes")
+                return mod.haveGunCheck("flechettes") && !mod.isFlechetteExplode
             },
-            requires: "flechettes",
+            requires: "flechettes and not supercritical fission",
             effect() {
                 mod.pierce = true;
             },
@@ -2807,7 +2839,7 @@ const mod = {
         },
         {
             name: "cosmic string",
-            description: "when you <strong> tunnel</strong>  through a <strong class='color-worm'>wormhole</strong><br><strong class='color-d'>damage</strong> mobs between the <strong>endpoints</strong>",
+            description: "when you <strong> tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br>mobs between the <strong>endpoints</strong> take <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2823,7 +2855,7 @@ const mod = {
         },
         {
             name: "Penrose process",
-            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>overfill your <strong class='color-f'>energy</strong> to <strong>300%</strong> of your maximum<br> ",
+            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills to <strong>300%</strong> of the maximum",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2835,6 +2867,39 @@ const mod = {
             },
             remove() {
                 mod.isWormholeEnergy = false
+            }
+        },
+        {
+            name: "transdimensional spores",
+            description: "when <strong>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "wormhole"
+            },
+            requires: "wormhole",
+            effect() {
+                mod.isWormSpores = true
+            },
+            remove() {
+                mod.isWormSpores = false
+            }
+        },
+        {
+            name: "traversable geodesics",
+            description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> power up",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "wormhole"
+            },
+            requires: "wormhole",
+            effect() {
+                mod.isWormBullets = true
+                powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+            },
+            remove() {
+                mod.isWormBullets = false
             }
         },
         {
@@ -3074,5 +3139,9 @@ const mod = {
     isPerfectBrake: null,
     explosiveRadius: null,
     isWormholeEnergy: null,
-    isWormholeDamage: null
+    isWormholeDamage: null,
+    isNailCrit: null,
+    isFlechetteExplode: null,
+    isWormSpores: null,
+    isWormBullets: null
 }

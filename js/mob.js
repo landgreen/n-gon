@@ -1043,7 +1043,10 @@ const mobs = {
               b.spore(this.position)
             }
           }
-          if (Math.random() < mod.isBotSpawner) b.randomBot(this.position, false)
+          if (Math.random() < mod.isBotSpawner) {
+            b.randomBot(this.position, false)
+            bullet[bullet.length - 1].endCycle = game.cycle + 1500 + Math.floor(600 * Math.random())
+          }
           if (mod.isExplodeMob) b.explosion(this.position, Math.min(550, Math.sqrt(this.mass + 2.5) * 50))
           if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob, 40 + 7 * Math.random())
         } else if (mod.isShieldAmmo && this.shield) {
