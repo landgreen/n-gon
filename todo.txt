@@ -1,15 +1,19 @@
 
-mod: critical bifurcation - nail gun does 400% more damage if it hits very close to the center of a mob
-mod: supercritical fission - flechettes explode if they hit very close to the center of a mob
-
-mod: transdimensional spores - after wormholes eat blocks, they disturb spores
-mod: traversable geodesics - your bullets can go through worm holes
-
-scrap bots now only last only 30 seconds, but they have a 20% chance to spawn from a kill (was 11%)
-the difficulty should feel a bit harder after clearing the boss level
-  (a bit more more damage taken, and fewer mod drops)
 
 ************** TODO - n-gon **************
+
+foam bullet on dmg shrink effect
+    it might mess with the foam position of other bullets on the mob
+    shrink when foam bullets end while attached, or shrink on collision?
+
+effect - shrink or grow things
+
+time dilation mod rework / buff (time dilation is cool, but it can feel like a chore)
+  redistribute effects
+  take no damage
+  can fire
+  2x move jump fire while field is active
+  33% move jump fire always
 
 mod - after a mob or shield dies, remaining dots look for a new nearby host
 
@@ -27,13 +31,6 @@ look for mods that could update description text with count and mod.is  informat
 mod self destruct - drones explode when they die, but they last 1/2 as long
 
 mouse event e.which is deprecated
-
-time dilation mod rework (time dilation is cool, but it can feel like a chore)
-  redistribute effects
-  take no damage
-  can fire
-  2x move jump fire while field is active
-  33% move jump fire always
 
 vacuum bomb applies status effect to mobs that makes blocks attracted to them
 

@@ -791,7 +791,7 @@ const mod = {
         },
         {
             name: "squirrel-cage rotor",
-            description: "<strong>jump</strong> higher and <strong>move</strong> faster",
+            description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1208,7 +1208,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>18%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>16%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1217,13 +1217,13 @@ const mod = {
             requires: "",
             effect: () => {
                 mod.isBayesian = true
-                mod.duplicateChance += 0.18
+                mod.duplicateChance += 0.16
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
 
             },
             remove() {
                 if (mod.isBayesian) {
-                    mod.duplicateChance -= 0.18
+                    mod.duplicateChance -= 0.16
                     if (mod.duplicateChance < 0) mod.duplicateChance = 0
                 }
                 mod.isBayesian = false
@@ -1597,6 +1597,39 @@ const mod = {
             }
         },
         {
+            name: "ice crystal nucleation",
+            description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("nail gun") && !mod.nailInstantFireRate
+            },
+            requires: "nail gun",
+            effect() {
+                mod.isIceCrystals = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "nail gun") {
+                        b.guns[i].ammoPack = Infinity
+                        b.guns[i].recordedAmmo = b.guns[i].ammo
+                        b.guns[i].ammo = Infinity
+                        game.updateGunHUD();
+                        break;
+                    }
+                }
+            },
+            remove() {
+                mod.isIceCrystals = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "nail gun") {
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                        b.guns[i].ammo = b.guns[i].recordedAmmo
+                        game.updateGunHUD();
+                        break;
+                    }
+                }
+            }
+        },
+        {
             name: "critical bifurcation",
             description: "<strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
             maxCount: 1,
@@ -1642,39 +1675,6 @@ const mod = {
             },
             remove() {
                 mod.nailInstantFireRate = false
-            }
-        },
-        {
-            name: "ice crystal nucleation",
-            description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("nail gun") && !mod.nailInstantFireRate
-            },
-            requires: "nail gun",
-            effect() {
-                mod.isIceCrystals = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "nail gun") {
-                        b.guns[i].ammoPack = Infinity
-                        b.guns[i].recordedAmmo = b.guns[i].ammo
-                        b.guns[i].ammo = Infinity
-                        game.updateGunHUD();
-                        break;
-                    }
-                }
-            },
-            remove() {
-                mod.isIceCrystals = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "nail gun") {
-                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-                        b.guns[i].ammo = b.guns[i].recordedAmmo
-                        game.updateGunHUD();
-                        break;
-                    }
-                }
             }
         },
         {
@@ -2570,7 +2570,7 @@ const mod = {
         },
         {
             name: "Lorentz transformation",
-            description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>33%</strong> faster",
+            description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2578,8 +2578,8 @@ const mod = {
             },
             requires: "time dilation field",
             effect() {
-                mod.fastTime = 1.33;
-                mod.fastTimeJump = 1.09;
+                mod.fastTime = 1.40;
+                mod.fastTimeJump = 1.11;
                 mech.setMovement();
                 b.setFireCD();
             },

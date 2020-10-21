@@ -1159,7 +1159,7 @@ const b = {
     World.add(engine.world, bullet[me]); //add bullet to world
     bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
     bullet[me].dmg = dmg
-    bullet[me].beforeDmg = function (who) {
+    bullet[me].beforeDmg = function (who) { //beforeDmg is rewritten with ice crystal mod
       if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
       if (mod.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.99) this.dmg *= 5 //crit if hit near center
     };
@@ -1852,6 +1852,7 @@ const b = {
           bullet[bullet.length - 1].beforeDmg = function (who) {
             mobs.statusSlow(who, 30)
             if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
+            if (mod.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.99) this.dmg *= 5 //crit if hit near center
           };
           mech.energy -= mech.fieldRegen + 0.008
           if (mech.energy < 0.02) mech.fireCDcycle = mech.cycle + 60; // cool down

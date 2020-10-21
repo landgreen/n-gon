@@ -1728,7 +1728,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp(180);
 
-            const DRAIN = 0.0008
+            const DRAIN = 0.0007
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < DRAIN) {
@@ -2413,7 +2413,7 @@ const mech = {
                   x: velocity.x,
                   y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
                 });
-                mech.immuneCycle = mech.cycle + 15; //player is immune to collision damage for 30 cycles
+                mech.immuneCycle = mech.cycle + 15; //player is immune to collision damage 
                 // move bots to follow player
                 for (let i = 0; i < bullet.length; i++) {
                   if (bullet[i].botType) {
