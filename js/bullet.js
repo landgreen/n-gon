@@ -461,11 +461,18 @@ const b = {
       if (best.who.alive) {
         best.who.damage(damage);
         best.who.locatePlayer();
-        ctx.fillStyle = color; //draw mob damage circle
-        ctx.beginPath();
-        ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(damage) * 100, 0, 2 * Math.PI);
-        ctx.fill();
+        game.drawList.push({ //add dmg to draw queue
+          x: path[path.length - 1].x,
+          y: path[path.length - 1].y,
+          radius: Math.sqrt(damage) * 100,
+          color: "rgba(255,0,0,0.5)",
+          time: game.drawTime
+        });
       }
+      // ctx.fillStyle = color; //draw mob damage circle
+      // ctx.beginPath();
+      // ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(damage) * 100, 0, 2 * Math.PI);
+      // ctx.fill();
     };
     const reflection = function () { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
       const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
@@ -510,16 +517,10 @@ const b = {
       }
     }
     if (isThickBeam) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 8
-      ctx.globalAlpha = 0.5;
       for (let i = 1, len = path.length; i < len; ++i) {
-        ctx.beginPath();
         ctx.moveTo(path[i - 1].x, path[i - 1].y);
         ctx.lineTo(path[i].x, path[i].y);
-        ctx.stroke();
       }
-      ctx.globalAlpha = 1;
     } else {
       ctx.strokeStyle = color;
       ctx.lineWidth = 2
@@ -804,9 +805,13 @@ const b = {
         mobs.statusSlow(who, 60)
         this.endCycle = game.cycle
         if (mod.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
-        if (mod.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && !who.alive) {
-          mech.energy += mod.iceEnergy * 0.66 * mech.maxEnergy
-          mech.addHealth(mod.iceEnergy * 0.04)
+        if (mod.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && who.alive) {
+          setTimeout(function () {
+            if (!who.alive) {
+              mech.energy += mod.iceEnergy * 0.66 * mech.maxEnergy
+              mech.addHealth(mod.iceEnergy * 0.04)
+            }
+          }, 10);
         }
       },
       onEnd() {},
@@ -2330,6 +2335,9 @@ const b = {
       ammoPack: 5,
       have: false,
       fire() {
+
+      },
+      fireNormal() {
         const me = bullet.length;
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir, false));
@@ -2343,7 +2351,6 @@ const b = {
         bullet[me].beforeDmg = function () {
           this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
         };
-
         if (mod.isRPG) {
           b.fireProps(35, mech.crouch ? 60 : -15, dir, me); //cd , speed
           bullet[me].endCycle = game.cycle + 70;
@@ -2364,133 +2371,73 @@ const b = {
           b.fireProps(mech.crouch ? 40 : 30, mech.crouch ? 43 : 32, dir, me); //cd , speed
           bullet[me].endCycle = game.cycle + Math.floor(mech.crouch ? 120 : 80);
           bullet[me].restitution = 0.4;
-          bullet[me].explodeRad = 275;
           bullet[me].do = function () {
-            //extra gravity for harder arcs
-            this.force.y += this.mass * 0.0025;
+            this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
           };
         }
-
-
-      }
-    },
-    {
-      name: "vacuum bomb",
-      description: "fire a bomb that <strong>sucks</strong> before <strong class='color-e'>exploding</strong><br><strong>click</strong> left mouse again to <strong>detonate</strong>",
-      ammo: 0,
-      ammoPack: 2,
-      have: false,
-      fire() {
+      },
+      fireVacuum() {
         const me = bullet.length;
-        const dir = mech.angle;
-        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 35, b.fireAttributes(dir, false));
-        b.fireProps(10, mech.crouch ? 42 : 28, dir, me); //cd , speed
-
-        Matter.Body.setDensity(bullet[me], 0.0002);
-        bullet[me].restitution = 0.2;
-        bullet[me].friction = 0.3;
-        bullet[me].endCycle = Infinity
-        bullet[me].explodeRad = 450 + Math.floor(Math.random() * 50);
+        const dir = mech.angle; // + Math.random() * 0.05;
+        bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir, false));
+        Matter.Body.setDensity(bullet[me], 0.0003);
+        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 50);;
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-
-          //also damage all mobs
-          if (mod.isVacuumShield) {
-            for (let i = 0, len = mob.length; i < len; ++i) {
-              if (mob[i].shield) {
-                const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
-                if (dist < this.explodeRad) mob[i].health *= 0.2
-              }
-            }
-            const dist = Vector.magnitude(Vector.sub(this.position, player.position))
-            if (dist < this.explodeRad) mech.energy = 0 //remove player energy
-          }
+          if (mod.grenadeFragments) b.targetedNail(this.position, mod.grenadeFragments)
         }
-        bullet[me].beforeDmg = function () {
-          // this.endCycle = 0; //bullet ends cycle after doing damage  //this triggers explosion
-        };
-        bullet[me].radius = 22; //used from drawing timer
-        bullet[me].isArmed = false;
-        bullet[me].isSucking = false;
+        bullet[me].beforeDmg = function () {};
+        const cd = mech.crouch ? 90 : 75
+        b.fireProps(cd, mech.crouch ? 46 : 35, dir, me); //cd , speed
+        bullet[me].endCycle = game.cycle + cd;
+        bullet[me].restitution = 0.4;
         bullet[me].do = function () {
-          //extra gravity for harder arcs
-          this.force.y += this.mass * 0.0022;
+          this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
 
-          //set armed and sucking status
-          if (!this.isArmed && !input.fire) {
-            this.isArmed = true
-          } else if (this.isArmed && input.fire && !this.isSucking) {
-            this.isSucking = true;
-            this.endCycle = game.cycle + 50;
-          }
+          const suckCycles = 40
+          if (game.cycle > this.endCycle - suckCycles) { //suck
+            const that = this
 
-          if (this.isSucking) {
-            if (!mech.isBodiesAsleep) {
-              const that = this
-              let mag = 0.1
-
-              function suck(who, radius = that.explodeRad * 3.5) {
-                for (i = 0, len = who.length; i < len; i++) {
-                  const sub = Vector.sub(that.position, who[i].position);
-                  const dist = Vector.magnitude(sub);
-                  if (dist < radius && dist > 150) {
-                    knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
-                    who[i].force.x += knock.x;
-                    who[i].force.y += knock.y;
-                  }
+            function suck(who, radius = that.explodeRad * 3.2) {
+              for (i = 0, len = who.length; i < len; i++) {
+                const sub = Vector.sub(that.position, who[i].position);
+                const dist = Vector.magnitude(sub);
+                if (dist < radius && dist > 150) {
+                  knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
+                  who[i].force.x += knock.x;
+                  who[i].force.y += knock.y;
                 }
               }
-              if (game.cycle > this.endCycle - 5) {
-                mag = -0.22
-                suck(mob, this.explodeRad * 3)
-                suck(body, this.explodeRad * 2)
-                suck(powerUp, this.explodeRad * 1.5)
-                suck(bullet, this.explodeRad * 1.5)
-                suck([player], this.explodeRad * 1.3)
-              } else {
-                mag = 0.1
-                suck(mob, this.explodeRad * 3)
-                suck(body, this.explodeRad * 2)
-                suck(powerUp, this.explodeRad * 1.5)
-                suck(bullet, this.explodeRad * 1.5)
-                suck([player], this.explodeRad * 1.3)
-              }
-              //keep bomb in place
-              Matter.Body.setVelocity(this, {
-                x: 0,
-                y: 0
-              });
-              //draw suck
-              const radius = 3 * this.explodeRad * (this.endCycle - game.cycle) / 50
-              ctx.fillStyle = "rgba(0,0,0,0.1)";
-              ctx.beginPath();
-              ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
-              ctx.fill();
             }
-          } else {
-            mech.fireCDcycle = mech.cycle + 10 //can't fire until after the explosion
-
-            // flashing lights to show armed
-            if (!(game.cycle % 10)) {
-              if (this.isFlashOn) {
-                this.isFlashOn = false;
-              } else {
-                this.isFlashOn = true;
-              }
+            let mag = 0.1
+            if (game.cycle > this.endCycle - 5) {
+              mag = -0.22
+              suck(mob, this.explodeRad * 3)
+              suck(body, this.explodeRad * 2)
+              suck(powerUp, this.explodeRad * 1.5)
+              suck(bullet, this.explodeRad * 1.5)
+              suck([player], this.explodeRad * 1.3)
+            } else {
+              mag = 0.11
+              suck(mob, this.explodeRad * 3)
+              suck(body, this.explodeRad * 2)
+              suck(powerUp, this.explodeRad * 1.5)
+              suck(bullet, this.explodeRad * 1.5)
+              suck([player], this.explodeRad * 1.3)
             }
-            if (this.isFlashOn) {
-              ctx.fillStyle = "#000";
-              ctx.beginPath();
-              ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-              ctx.fill();
-              //draw clock on timer
-              ctx.fillStyle = "#f04";
-              ctx.beginPath();
-              ctx.arc(this.position.x, this.position.y, this.radius * 0.7, 0, 2 * Math.PI);
-              ctx.fill();
-            }
+            //keep bomb in place
+            Matter.Body.setVelocity(this, {
+              x: 0,
+              y: 0
+            });
+            //draw suck
+            const radius = 2.75 * this.explodeRad * (this.endCycle - game.cycle) / suckCycles
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
+            ctx.fill();
           }
-        }
+        };
       }
     },
     {
@@ -2994,10 +2941,10 @@ const b = {
                   }
                 }
                 Matter.Body.setVelocity(this, {
-                  x: -0.1 * this.velocity.x,
-                  y: -0.1 * this.velocity.y
+                  x: -0.5 * this.velocity.x,
+                  y: -0.5 * this.velocity.y
                 });
-                Matter.Body.setDensity(this, 0.001);
+                // Matter.Body.setDensity(this, 0.001);
               }
               if (mod.isRailNails && this.speed > 10) {
                 b.targetedNail(this.position, Math.min(40, this.speed) - 10)
@@ -3212,8 +3159,13 @@ const b = {
         } else {
           mech.fireCDcycle = mech.cycle
           mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
-          if (mod.isWideLaser) {
-            const off = 8
+          if (mod.wideLaser) {
+            ctx.strokeStyle = "#f00";
+            ctx.lineWidth = 8
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+
+            const off = 7.5
             const dmg = 0.55 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
             const where = {
               x: mech.pos.x + 20 * Math.cos(mech.angle),
@@ -3223,7 +3175,7 @@ const b = {
               x: where.x + 3000 * Math.cos(mech.angle),
               y: where.y + 3000 * Math.sin(mech.angle)
             }, dmg, 0, true)
-            for (let i = 1; i < 3; i++) {
+            for (let i = 1; i < mod.wideLaser; i++) {
               let whereOff = Vector.add(where, {
                 x: i * off * Math.cos(mech.angle + Math.PI / 2),
                 y: i * off * Math.sin(mech.angle + Math.PI / 2)
@@ -3241,6 +3193,8 @@ const b = {
                 y: whereOff.y + 3000 * Math.sin(mech.angle)
               }, dmg, 0, true)
             }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
           } else if (mod.beamSplitter) {
             let dmg = mod.laserDamage * 0.9
             const where = {

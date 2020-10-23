@@ -320,9 +320,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mech.fieldUpgrades[mech.fieldMode].name !== "wormhole"
             },
-            requires: "",
+            requires: "not wormhole",
             effect() {
                 mod.throwChargeRate = 2
             },
@@ -832,7 +832,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.totalBots() > 1 || mod.haveGunCheck("drone") || mod.haveGunCheck("mine") || mod.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
+                return (mod.totalBots() > 1 || mod.haveGunCheck("drone") || mod.haveGunCheck("mine") || mod.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") && !mod.isEnergyHealth
             },
             requires: "drones, spores, mines, or bots",
             effect() {
@@ -850,7 +850,7 @@ const mod = {
             allowed() {
                 return mod.isNoFireDefense
             },
-            requires: "full annealing",
+            requires: "decorrelation",
             effect() {
                 mod.isNoFireDamage = true
             },
@@ -2015,9 +2015,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades")
+                return mod.haveGunCheck("grenades") && !mod.isVacuumBomb
             },
-            requires: "grenades",
+            requires: "grenades, not vacuum bomb",
             effect() {
                 mod.isRPG = true;
             },
@@ -2026,21 +2026,43 @@ const mod = {
             }
         },
         {
-            name: "electromagnetic pulse",
-            description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> removes<br><strong>80%</strong> of <strong>shields</strong> and <strong>100%</strong> of <strong class='color-f'>energy</strong>",
+            name: "vacuum bomb",
+            description: "<strong>grenades</strong> fire slower, <strong class='color-e'>explode</strong> bigger<br> and, <strong>suck</strong> everything towards them",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("vacuum bomb")
+                return mod.haveGunCheck("grenades") && !mod.isRPG
             },
-            requires: "vacuum bomb",
+            requires: "grenades, not rocket-propelled",
             effect() {
-                mod.isVacuumShield = true;
+                mod.isVacuumBomb = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireVacuum
+                }
             },
             remove() {
-                mod.isVacuumShield = false;
+                mod.isVacuumBomb = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireNormal
+                }
             }
         },
+        // {
+        //     name: "electromagnetic pulse",
+        //     description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> removes<br><strong>80%</strong> of <strong>shields</strong> and <strong>100%</strong> of <strong class='color-f'>energy</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mod.haveGunCheck("vacuum bomb")
+        //     },
+        //     requires: "vacuum bomb",
+        //     effect() {
+        //         mod.isVacuumShield = true;
+        //     },
+        //     remove() {
+        //         mod.isVacuumShield = false;
+        //     }
+        // },
         {
             name: "water shielding",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
@@ -2268,7 +2290,7 @@ const mod = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4%</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>100%</strong> of your max",
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4%</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>166%</strong> of your max",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2442,13 +2464,34 @@ const mod = {
             },
             requires: "laser, not specular reflection",
             effect() {
-                mod.isWideLaser = true
+                if (mod.wideLaser === 0) mod.wideLaser = 3
+                mod.isWideLaser = true;
             },
             remove() {
-                mod.isWideLaser = false
+                mod.wideLaser = 0
+                mod.isWideLaser = false;
             }
         },
-
+        {
+            name: "output coupler",
+            description: "diffuse <strong>laser</strong> beam is <strong>30%</strong> <strong>wider</strong><br> and the full beam does <strong>30%</strong> more <strong class='color-d'>damage</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("laser") && mod.isWideLaser
+            },
+            requires: "laser, not specular reflection",
+            effect() {
+                mod.wideLaser = 4
+            },
+            remove() {
+                if (mod.isWideLaser) {
+                    mod.wideLaser = 3
+                } else {
+                    mod.wideLaser = 0
+                }
+            }
+        },
         // {
         //     name: "waste heat recovery",
         //     description: "<strong>laser</strong> <strong class='color-d'>damage</strong> grows by <strong>400%</strong> as you fire<br>but you periodically <strong>eject</strong> your <strong class='color-h'>health</strong>",
@@ -2855,7 +2898,7 @@ const mod = {
         },
         {
             name: "Penrose process",
-            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills to <strong>300%</strong> of the maximum",
+            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills to <strong>200%</strong> of the maximum",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3057,7 +3100,7 @@ const mod = {
     isHarmDamage: null,
     isHeavyWater: null,
     energyRegen: null,
-    isVacuumShield: null,
+    isVacuumBomb: null,
     renormalization: null,
     grenadeFragments: null,
     isEnergyDamage: null,
@@ -3143,5 +3186,7 @@ const mod = {
     isNailCrit: null,
     isFlechetteExplode: null,
     isWormSpores: null,
-    isWormBullets: null
+    isWormBullets: null,
+    isWideLaser: null,
+    wideLaser: null
 }

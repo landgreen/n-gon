@@ -461,6 +461,7 @@ const powerUps = {
   },
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
+    level.bossKilled = true;
     // if (game.difficultyMode === 4) powerUps.spawn(x, y, "mod") //why mode gets a free mod
     powerUps.randomPowerUpCounter++;
     const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
@@ -471,8 +472,8 @@ const powerUps = {
       spawnHealthAmmo()
     }
     if (game.difficultyMode === 4) {
-      powerUps.randomPowerUpCounter++;
-      const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
+      powerUps.randomPowerUpCounter + 0.6;
+      const chanceToFail = Math.max(level.levelsCleared, 6) * 0.1 //1 until level 8
       if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
         powerUps.randomPowerUpCounter = 0;
         spawnPowerUps()

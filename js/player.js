@@ -785,8 +785,15 @@ const mech = {
       ctx.fillRect(xOff, yOff, range * mech.maxEnergy, 10);
       ctx.fillStyle = mech.fieldMeterColor;
       ctx.fillRect(xOff, yOff, range * mech.energy, 10);
+      if (mech.energy < 0) mech.energy = 0
+    } else if (mech.energy > mech.maxEnergy + 0.05) {
+      ctx.fillStyle = bgColor;
+      const xOff = mech.pos.x - mech.radius * mech.energy
+      const yOff = mech.pos.y - 50
+      // ctx.fillRect(xOff, yOff, range * mech.maxEnergy, 10);
+      ctx.fillStyle = mech.fieldMeterColor;
+      ctx.fillRect(xOff, yOff, range * mech.energy, 10);
     }
-    if (mech.energy < 0) mech.energy = 0
     // else {
     //   mech.energy = mech.maxEnergy
     // }
@@ -2328,7 +2335,7 @@ const mech = {
                         Matter.World.remove(engine.world, body[i]);
                         body.splice(i, 1);
                         mech.fieldRange *= 0.8
-                        if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
+                        if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
                         if (mod.isWormSpores) { //pandimensionalspermia
                           b.spore(Vector.add(mech.hole.pos2, Vector.rotate({
                             x: mech.fieldRange,
@@ -2351,7 +2358,7 @@ const mech = {
                       Matter.World.remove(engine.world, body[i]);
                       body.splice(i, 1);
                       mech.fieldRange *= 0.8
-                      if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
+                      if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
                       if (mod.isWormSpores) { //pandimensionalspermia
                         b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
                           x: mech.fieldRange,
@@ -2396,13 +2403,30 @@ const mech = {
           }
 
           if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
+            const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(game.mouseInGame, mech.pos)), 50), game.mouseInGame)
+            const scale = 60
+            // console.log(Matter.Query.region(map, bounds))
             if (mech.hole.isReady &&
-              (Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0 &&
-                Matter.Query.ray(map, mech.pos, Vector.add(Vector.mult(Vector.normalise(Vector.sub(game.mouseInGame, mech.pos)), 50), game.mouseInGame)).length === 0)
+              (
+                Matter.Query.region(map, {
+                  min: {
+                    x: game.mouseInGame.x - scale,
+                    y: game.mouseInGame.y - scale
+                  },
+                  max: {
+                    x: game.mouseInGame.x + scale,
+                    y: game.mouseInGame.y + scale
+                  }
+                }).length === 0 &&
+                Matter.Query.ray(map, mech.pos, justPastMouse).length === 0
+                // Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0 &&
+                // Matter.Query.ray(map, player.position, game.mouseInGame).length === 0 &&
+                // Matter.Query.ray(map, player.position, justPastMouse).length === 0
+              )
             ) {
               const sub = Vector.sub(game.mouseInGame, mech.pos)
               const mag = Vector.magnitude(sub)
-              const drain = 0.06 + 0.007 * Math.sqrt(mag)
+              const drain = 0.07 + 0.008 * Math.sqrt(mag)
               if (mech.energy > drain && mag > 300) {
                 mech.energy -= drain
                 mech.hole.isReady = false;

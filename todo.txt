@@ -1,12 +1,28 @@
 
+gun: vacuum bomb is removed
+mod: vacuum bomb - grenades fire slower, explode bigger and, suck everything towards them
+
+laser and diffuse laser graphics are better
+mod: output coupler - diffuse laser beam is 30% wider and does 30% more damage
+      requires diffuse beam
+
+level number doesn't increase if you skip the boss (in the late game)
 
 ************** TODO - n-gon **************
 
-foam bullet on dmg shrink effect
+add an ending to the game
+  revamp the boss level, or add a new final level
+    final level requires you to kill something
+      so skipping content is only smart if you are strong enough to beat the final boss
+  around level 15
+  game never ends if you have used cheats
+
+new status effect - apply status effect to mobs that makes blocks attracted to them
+  only lasts a few cycles
+
+foam or spore bullet on dmg shrink effect
     it might mess with the foam position of other bullets on the mob
     shrink when foam bullets end while attached, or shrink on collision?
-
-effect - shrink or grow things
 
 time dilation mod rework / buff (time dilation is cool, but it can feel like a chore)
   redistribute effects
@@ -16,13 +32,7 @@ time dilation mod rework / buff (time dilation is cool, but it can feel like a c
   33% move jump fire always
 
 mod - after a mob or shield dies, remaining dots look for a new nearby host
-
-add an ending to the game
-  revamp the boss level, or add a new final level
-    final level requires you to kill something
-      so skipping content is only smart if you are strong enough to beat the final boss
-  around level 15
-  game never ends if you have used cheats
+  or mod: radiation effects can spread to nearby mobs
 
 look for mods that could update description text with count and mod.is  information
   can only use variables that change in effect() and remove()
@@ -31,8 +41,6 @@ look for mods that could update description text with count and mod.is  informat
 mod self destruct - drones explode when they die, but they last 1/2 as long
 
 mouse event e.which is deprecated
-
-vacuum bomb applies status effect to mobs that makes blocks attracted to them
 
 mod: take less harm if you are moving fast
   require squirrel cage rotor
@@ -73,8 +81,6 @@ a bot that eats up health and ammo, but poops a reroll after picking up 2 power 
     the mods that do those effects could be required before you see this bot
   disable crystalized armor?
   could convert rerolls, ammo, and health into mods instead
-
-mod: radiation effects can spread to nearby mobs
 
 mod: foam is attracted to mobs
   use a gravitational attraction model?
@@ -229,17 +235,7 @@ an effect when canceling a power up
 add player Scent Trails for mob navigation
   https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
 
-settings - custom keys binding
-
 css transition for pause menu
-
-gun:  Spirit Bomb (singularity)
-  use charge up like rail gun
-  electricity graphics like plasma torch
-  suck in nearby mobs, power ups?, blocks?
-    sucked in stuff increase size
-  uses energy
-  hold above the player's head
 
 animate new level spawn by having the map aspects randomly fly into place
     

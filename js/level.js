@@ -7,6 +7,7 @@ const level = {
   defaultZoom: 1400,
   onLevel: 0,
   levelsCleared: 0,
+  bossKilled: false,
   levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
   start() {
     if (level.levelsCleared === 0) { //this code only runs on the first level
@@ -16,11 +17,11 @@ const level = {
       // game.setZoom();
       // mech.isCloak = true;
       // mech.setField("wormhole")
-      // b.giveGuns("flechettes")
+      // b.giveGuns("grenades")
       // for (let i = 0; i < 10; i++) {
       // mod.giveMod("laser-bot");
       // }
-      // mod.giveMod("supercritical fission")
+      // mod.giveMod("vacuum bomb")
 
 
       level.intro(); //starting level
@@ -544,7 +545,7 @@ const level = {
     spawn.bodyRect(6800, 2490, 50, 50);
     spawn.bodyRect(6800, 2540, 50, 50);
     spawn.bodyRect(6800, 2590, 50, 50);
-    spawn.bodyRect(8225, 2225, 50, 375);
+    spawn.bodyRect(8225, 2225, 100, 100);
     spawn.mapRect(6250, 1875, 700, 150);
     spawn.mapRect(8000, 1875, 600, 150);
 
@@ -578,6 +579,7 @@ const level = {
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   bosses() {
+    level.bossKilled = true; //if there is no boss this needs to be true to increase levels
     level.custom = () => {
       level.playerExitCheck();
     };
@@ -639,6 +641,7 @@ const level = {
     powerUps.addRerollToLevel() //needs to run after mobs are spawned
   },
   intro() {
+    level.bossKilled = true; //if there is no boss this needs to be true to increase levels
     level.custom = () => {
       level.playerExitCheck();
     };
@@ -1477,7 +1480,7 @@ const level = {
     spawn.randomMob(3600, -500, 0.8);
     spawn.randomMob(3400, -200, 0.8);
     spawn.randomMob(1650, -1300, 0.7)
-    spawn.randomMob(-4100, -50, 0.7);
+    spawn.randomMob(4100, -50, 0.7);
     spawn.randomMob(4100, -50, 0.5);
     spawn.randomMob(1700, -50, 0.3)
     spawn.randomMob(2350, -900, 0.3)
@@ -3882,15 +3885,18 @@ const level = {
   },
   custom() {}, //each level runs it's own custom code (level exits, ...)
   nextLevel() {
-    level.levelsCleared++;
-    level.onLevel++; //cycles map to next level
-    if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
+    if (level.bossKilled || level.levelsCleared < level.levels.length) {
+      level.levelsCleared++;
+      level.onLevel++; //cycles map to next level
+      if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
+    }
     level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
     if (level.levelsCleared > level.levels.length) level.difficultyIncrease(game.difficultyMode)
     if (level.levelsCleared > level.levels.length * 1.25) level.difficultyIncrease(game.difficultyMode)
     if (level.levelsCleared > level.levels.length * 1.5) level.difficultyIncrease(game.difficultyMode)
     if (level.levelsCleared > level.levels.length * 2) level.difficultyIncrease(game.difficultyMode)
     if (game.isEasyMode && level.levelsCleared % 2) level.difficultyDecrease(1);
+    level.bossKilled = false;
     //reset lost mod display
     for (let i = 0; i < mod.mods.length; i++) {
       if (mod.mods[i].isLost) mod.mods[i].isLost = false;
