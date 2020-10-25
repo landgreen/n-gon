@@ -2428,7 +2428,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseLaser
+                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseAim
             },
             requires: "laser, not specular reflection",
             effect() {
@@ -2482,7 +2482,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isWideLaser
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.isWideLaser
             },
             requires: "laser, not specular reflection<br>not beam splitter, not diffuse",
             effect() {
@@ -2520,7 +2520,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPulseLaser
+                return mod.isPulseLaser && !mod.beamSplitter
             },
             requires: "pulse",
             effect() {

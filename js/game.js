@@ -127,8 +127,7 @@ const game = {
   delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
   buttonCD: 0,
   levelsCleared: 0,
-  difficultyMode: 1,
-  isEasyMode: false,
+  difficultyMode: 2, //normal difficulty is 2
   difficulty: 0,
   dmgScale: null, //set in levels.setDifficulty
   healScale: 1,
@@ -485,20 +484,18 @@ const game = {
     level.levelsCleared = 0;
 
     //resetting difficulty
-    game.dmgScale = 1;
-    b.dmgScale = 0.7;
+    game.dmgScale = 0; //increases in level.difficultyIncrease
+    b.dmgScale = 1; //decreases in level.difficultyIncrease
     game.accelScale = 1;
     game.lookFreqScale = 1;
     game.CDScale = 1;
     game.difficulty = 0;
     game.difficultyMode = Number(document.getElementById("difficulty-select").value)
     build.isCustomSelection = false;
-    if (game.difficultyMode === 0) {
-      game.isEasyMode = true;
-      game.difficultyMode = 1
-      level.difficultyDecrease(6); //if this stops being -6  change in build.calculateCustomDifficulty()
-    }
-    if (game.difficultyMode > 1) level.difficultyIncrease(3)
+    // if (game.difficultyMode > 2) {
+    //   level.difficultyIncrease(game.difficultyMode)
+    //   level.difficultyIncrease(game.difficultyMode)
+    // }
 
     game.clearNow = true;
     document.getElementById("text-log").style.opacity = 0;
@@ -687,7 +684,7 @@ const game = {
       if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy + (mech.energy - mech.maxEnergy) * 0.75
 
       if (mech.pos.y > game.fallHeight) { // if 4000px deep
-        if (game.difficultyMode > 2) {
+        if (game.difficultyMode > 4) {
           mech.death();
         } else {
 
@@ -726,8 +723,7 @@ const game = {
               });
             }
           }
-          if (game.difficultyMode === 2) mech.damage(0.25);
-          if (game.difficultyMode === 1) mech.damage(0.1);
+          mech.damage(0.1 * game.difficultyMode);
           mech.energy = 0.01;
         }
       }
@@ -753,7 +749,7 @@ const game = {
           let i = who.length;
           while (i--) {
             if (who[i].position.y > game.fallHeight) {
-              if (save && game.difficultyMode < 3) {
+              if (save && game.difficultyMode < 5) {
                 Matter.Body.setVelocity(who[i], {
                   x: 0,
                   y: 0

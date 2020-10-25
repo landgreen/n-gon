@@ -188,7 +188,7 @@ const build = {
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
       <br>mouse: (${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
       <br>
-      <br>level: ${level.levelsCleared} - ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${mech.cycle} cycles
+      <br>level: ${level.levelsCleared} - ${level.levelsCleared===0?"intro":level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${mech.cycle} cycles
       <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups      
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
       <br>harm difficulty scale: ${(game.dmgScale*100).toFixed(0)}%
@@ -318,10 +318,10 @@ const build = {
     <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
     <select name="difficulty-select" id="difficulty-select-custom">
-      <option value="0">easy</option>
-      <option value="1" selected>normal</option>
-      <option value="2">hard</option>
-      <option value="4">why...</option>
+      <option value="1">easy</option>
+      <option value="2" selected>normal</option>
+      <option value="4">hard</option>
+      <option value="6">why?</option>
     </select>
   </div>`
     for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
@@ -891,7 +891,7 @@ if (localSettings) {
 } else {
   localSettings = {
     isCommunityMaps: false,
-    difficultyMode: '1',
+    difficultyMode: '2',
     fpsCapDefault: 'max',
     runCount: 0,
     levelsClearedLastGame: 0,

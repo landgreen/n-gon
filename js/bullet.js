@@ -3227,153 +3227,148 @@ const b = {
         }
       },
       firePulse() {
-        //calculate laser collision
-        let best, energy, explosionRange;
-        let range = 3000
-        const path = [{
-            x: mech.pos.x + 20 * Math.cos(mech.angle),
-            y: mech.pos.y + 20 * Math.sin(mech.angle)
-          },
-          {
-            x: mech.pos.x + range * Math.cos(mech.angle),
-            y: mech.pos.y + range * Math.sin(mech.angle)
-          }
-        ];
-        const vertexCollision = function (v1, v1End, domain) {
-          for (let i = 0; i < domain.length; ++i) {
-            let vertices = domain[i].vertices;
-            const len = vertices.length - 1;
-            for (let j = 0; j < len; j++) {
-              results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-              if (results.onLine1 && results.onLine2) {
-                const dx = v1.x - results.x;
-                const dy = v1.y - results.y;
-                const dist2 = dx * dx + dy * dy;
-                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                  best = {
-                    x: results.x,
-                    y: results.y,
-                    dist2: dist2,
-                    who: domain[i],
-                    v1: vertices[j],
-                    v2: vertices[j + 1]
-                  };
-                }
-              }
-            }
-            results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-            if (results.onLine1 && results.onLine2) {
-              const dx = v1.x - results.x;
-              const dy = v1.y - results.y;
-              const dist2 = dx * dx + dy * dy;
-              if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                best = {
-                  x: results.x,
-                  y: results.y,
-                  dist2: dist2,
-                  who: domain[i],
-                  v1: vertices[0],
-                  v2: vertices[len]
-                };
-              }
-            }
-          }
-        };
-        //check for collisions
-        best = {
-          x: null,
-          y: null,
-          dist2: Infinity,
-          who: null,
-          v1: null,
-          v2: null
-        };
-        if (mod.isPulseAim) { //find mobs in line of sight
-          let dist = 2200
-          energy = 0.23 * Math.min(mech.energy, 1.5)
-          explosionRange = 1680 * energy
-          for (let i = 0, len = mob.length; i < len; i++) {
-            const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
-            if (explosionRange < newDist &&
-              newDist < dist &&
-              Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
-              Matter.Query.ray(body, path[0], mob[i].position).length === 0) {
-              dist = newDist
-              best.who = mob[i]
-              path[path.length - 1] = mob[i].position
-            }
-          }
-        }
-        if (!best.who) {
-          vertexCollision(path[0], path[1], mob);
-          vertexCollision(path[0], path[1], map);
-          vertexCollision(path[0], path[1], body);
-          if (best.dist2 != Infinity) { //if hitting something
-            path[path.length - 1] = {
-              x: best.x,
-              y: best.y
-            };
-          }
-        }
-        if (mod.isPulseAim) {
-          mech.energy -= energy * mod.isLaserDiode
-          if (best.who) b.explosion(path[1], explosionRange, true)
-          mech.fireCDcycle = mech.cycle + Math.floor(25 * b.fireCD); // cool down
-        } else {
-          energy = 0.27 * Math.min(mech.energy, 1.5)
-          mech.energy -= energy * mod.isLaserDiode
-          explosionRange = 1560 * energy
-          if (best.who) b.explosion(path[1], explosionRange, true)
-          mech.fireCDcycle = mech.cycle + Math.floor(50 * b.fireCD); // cool down
-        }
-        if (mod.isPulseStun) {
-          const range = 100 + 2000 * energy
-          for (let i = 0, len = mob.length; i < len; ++i) {
-            if (mob[i].alive && !mob[i].isShielded) {
-              dist = Vector.magnitude(Vector.sub(path[1], mob[i].position)) - mob[i].radius;
-              if (dist < range) mobs.statusStun(mob[i], 30 + Math.floor(energy * 60))
-            }
-          }
-        }
-        //draw laser beam
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        ctx.lineTo(path[1].x, path[1].y);
-        ctx.strokeStyle = "rgba(255,0,0,0.13)"
-        ctx.lineWidth = 60 * energy / 0.2
-        ctx.stroke();
-        ctx.strokeStyle = "rgba(255,0,0,0.2)"
-        ctx.lineWidth = 18
-        ctx.stroke();
-        ctx.strokeStyle = "#f00";
-        ctx.lineWidth = 4
-        ctx.stroke();
+        mech.fireCDcycle = mech.cycle + Math.floor((mod.isPulseAim ? 25 : 50) * b.fireCD); // cool down
+        let energy = 0.27 * Math.min(mech.energy, 1.5)
+        mech.energy -= energy * mod.isLaserDiode
 
-        //draw little dots along the laser path
-        const sub = Vector.sub(path[1], path[0])
-        const mag = Vector.magnitude(sub)
-        for (let i = 0, len = Math.floor(mag * 0.03 * energy / 0.2); i < len; i++) {
-          const dist = Math.random()
-          game.drawList.push({
-            x: path[0].x + sub.x * dist + 13 * (Math.random() - 0.5),
-            y: path[0].y + sub.y * dist + 13 * (Math.random() - 0.5),
-            radius: 1 + 4 * Math.random(),
-            color: "rgba(255,0,0,0.5)",
-            time: Math.floor(2 + 33 * Math.random() * Math.random())
-          });
+        if (mod.beamSplitter) {
+          energy *= 0.7
+          b.pulse(energy, mech.angle)
+          for (let i = 1; i < 1 + mod.beamSplitter; i++) {
+            energy *= 0.9
+            b.pulse(energy, mech.angle - i * 0.35)
+            b.pulse(energy, mech.angle + i * 0.35)
+          }
+        } else {
+          b.pulse(energy, mech.angle)
         }
       },
     },
+  ],
+  pulse(energy, angle = mech.angle) {
+    let best;
+    let explosionRange = 1560 * energy
+    let range = 3000
+    const path = [{
+        x: mech.pos.x + 20 * Math.cos(angle),
+        y: mech.pos.y + 20 * Math.sin(angle)
+      },
+      {
+        x: mech.pos.x + range * Math.cos(angle),
+        y: mech.pos.y + range * Math.sin(angle)
+      }
+    ];
+    const vertexCollision = function (v1, v1End, domain) {
+      for (let i = 0; i < domain.length; ++i) {
+        let vertices = domain[i].vertices;
+        const len = vertices.length - 1;
+        for (let j = 0; j < len; j++) {
+          results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+          if (results.onLine1 && results.onLine2) {
+            const dx = v1.x - results.x;
+            const dy = v1.y - results.y;
+            const dist2 = dx * dx + dy * dy;
+            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+              best = {
+                x: results.x,
+                y: results.y,
+                dist2: dist2,
+                who: domain[i],
+                v1: vertices[j],
+                v2: vertices[j + 1]
+              };
+            }
+          }
+        }
+        results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+        if (results.onLine1 && results.onLine2) {
+          const dx = v1.x - results.x;
+          const dy = v1.y - results.y;
+          const dist2 = dx * dx + dy * dy;
+          if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+            best = {
+              x: results.x,
+              y: results.y,
+              dist2: dist2,
+              who: domain[i],
+              v1: vertices[0],
+              v2: vertices[len]
+            };
+          }
+        }
+      }
+    };
+    //check for collisions
+    best = {
+      x: null,
+      y: null,
+      dist2: Infinity,
+      who: null,
+      v1: null,
+      v2: null
+    };
+    if (mod.isPulseAim) { //find mobs in line of sight
+      let dist = 2200
+      for (let i = 0, len = mob.length; i < len; i++) {
+        const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
+        if (explosionRange < newDist &&
+          newDist < dist &&
+          Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
+          Matter.Query.ray(body, path[0], mob[i].position).length === 0) {
+          dist = newDist
+          best.who = mob[i]
+          path[path.length - 1] = mob[i].position
+        }
+      }
+    }
+    if (!best.who) {
+      vertexCollision(path[0], path[1], mob);
+      vertexCollision(path[0], path[1], map);
+      vertexCollision(path[0], path[1], body);
+      if (best.dist2 != Infinity) { //if hitting something
+        path[path.length - 1] = {
+          x: best.x,
+          y: best.y
+        };
+      }
+    }
+    if (best.who) b.explosion(path[1], explosionRange, true)
 
-    // {
-    //   name: "pulse",
-    //   description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
-    //   ammo: 0,
-    //   ammoPack: Infinity,
-    //   have: false,
-    //   fire() {
+    if (mod.isPulseStun) {
+      const range = 100 + 2000 * energy
+      for (let i = 0, len = mob.length; i < len; ++i) {
+        if (mob[i].alive && !mob[i].isShielded) {
+          dist = Vector.magnitude(Vector.sub(path[1], mob[i].position)) - mob[i].radius;
+          if (dist < range) mobs.statusStun(mob[i], 30 + Math.floor(energy * 60))
+        }
+      }
+    }
+    //draw laser beam
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    ctx.lineTo(path[1].x, path[1].y);
+    ctx.strokeStyle = "rgba(255,0,0,0.13)"
+    ctx.lineWidth = 60 * energy / 0.2
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(255,0,0,0.2)"
+    ctx.lineWidth = 18
+    ctx.stroke();
+    ctx.strokeStyle = "#f00";
+    ctx.lineWidth = 4
+    ctx.stroke();
 
-    //   }
-    // },
-  ]
+    //draw little dots along the laser path
+    const sub = Vector.sub(path[1], path[0])
+    const mag = Vector.magnitude(sub)
+    for (let i = 0, len = Math.floor(mag * 0.03 * energy / 0.2); i < len; i++) {
+      const dist = Math.random()
+      game.drawList.push({
+        x: path[0].x + sub.x * dist + 13 * (Math.random() - 0.5),
+        y: path[0].y + sub.y * dist + 13 * (Math.random() - 0.5),
+        radius: 1 + 4 * Math.random(),
+        color: "rgba(255,0,0,0.5)",
+        time: Math.floor(2 + 33 * Math.random() * Math.random())
+      });
+    }
+  }
 };

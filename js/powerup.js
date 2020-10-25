@@ -434,7 +434,7 @@ const powerUps = {
     }
   },
   spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
-    if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !mod.isEnergyHealth) || Math.random() < 0.035) { //spawn heal chance is higher at low health
+    if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !mod.isEnergyHealth) || Math.random() < 0.04) { //spawn heal chance is higher at low health
       powerUps.spawn(x, y, "heal");
       return;
     }
@@ -446,7 +446,7 @@ const powerUps = {
       powerUps.spawn(x, y, "gun");
       return;
     }
-    if (Math.random() < 0.0027 * (26 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
+    if (Math.random() < 0.0027 * (25 - mod.totalCount)) { //a new mod has a low chance for each not acquired mod up to 15
       powerUps.spawn(x, y, "mod");
       return;
     }
@@ -462,43 +462,30 @@ const powerUps = {
   randomPowerUpCounter: 0,
   spawnBossPowerUp(x, y) { //boss spawns field and gun mod upgrades
     level.bossKilled = true;
-    // if (game.difficultyMode === 4) powerUps.spawn(x, y, "mod") //why mode gets a free mod
+
     powerUps.randomPowerUpCounter++;
-    const chanceToFail = Math.max(level.levelsCleared, 10) * 0.1 //1 until level 10, then 1.1, 1.2, 1.3, ...
-    if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
-      powerUps.randomPowerUpCounter = 0;
-      spawnPowerUps()
-    } else {
-      spawnHealthAmmo()
-    }
-    if (game.difficultyMode === 4) {
-      powerUps.randomPowerUpCounter + 0.6;
-      const chanceToFail = Math.max(level.levelsCleared, 6) * 0.1 //1 until level 8
+    powerUpChance(Math.max(level.levelsCleared, 10) * 0.1)
+    powerUps.randomPowerUpCounter += 0.6;
+    powerUpChance(Math.max(level.levelsCleared, 6) * 0.1)
+
+    function powerUpChance(chanceToFail) {
       if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
         powerUps.randomPowerUpCounter = 0;
-        spawnPowerUps()
+        if (mech.fieldMode === 0) {
+          powerUps.spawn(x, y, "field")
+        } else if (Math.random() < 0.95) {
+          powerUps.spawn(x, y, "mod")
+        } else {
+          powerUps.spawn(x, y, "gun")
+        }
       } else {
-        spawnHealthAmmo()
-      }
-    }
-
-    function spawnHealthAmmo() {
-      if (mech.health < 0.65 && !mod.isEnergyHealth) {
-        powerUps.spawn(x, y, "heal");
-        powerUps.spawn(x, y, "heal");
-      } else {
-        powerUps.spawn(x, y, "ammo");
-        powerUps.spawn(x, y, "ammo");
-      }
-    }
-
-    function spawnPowerUps() {
-      if (mech.fieldMode === 0) {
-        powerUps.spawn(x, y, "field")
-      } else if (Math.random() < 0.95) {
-        powerUps.spawn(x, y, "mod")
-      } else {
-        powerUps.spawn(x, y, "gun")
+        if (mech.health < 0.65 && !mod.isEnergyHealth) {
+          powerUps.spawn(x, y, "heal");
+          powerUps.spawn(x, y, "heal");
+        } else {
+          powerUps.spawn(x, y, "ammo");
+          powerUps.spawn(x, y, "ammo");
+        }
       }
     }
   },
@@ -517,7 +504,7 @@ const powerUps = {
   },
   spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
     if (level.levelsCleared < 4) { //runs 4 times on all difficulty levels
-      if (game.difficultyMode > 1 && level.levelsCleared > 1) powerUps.spawn(x, y, "mod")
+      if (level.levelsCleared > 1) powerUps.spawn(x, y, "mod")
 
       //bonus power ups for clearing runs in the last game
       if (level.levelsCleared === 0 && !game.isCheating) {
