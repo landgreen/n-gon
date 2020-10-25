@@ -137,7 +137,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("nail gun") && mod.isIceCrystals) || mod.haveGunCheck("laser") || mod.haveGunCheck("pulse") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+                return (mod.haveGunCheck("nail gun") && mod.isIceCrystals) || mod.haveGunCheck("laser") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
             },
             requires: "energy based damage",
             effect() {
@@ -408,7 +408,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -424,7 +424,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -440,7 +440,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.haveGunCheck("pulse") || mod.isMissileField || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -457,7 +457,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.haveGunCheck("flak") || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob || mod.isFlechetteExplode || mod.isPulseLaser
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -469,7 +469,7 @@ const mod = {
         },
         {
             name: "scrap bots",
-            description: "<strong>19%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot last for about <strong>30</strong> seconds",
+            description: "<strong>20%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot last for about <strong>20</strong> seconds",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -477,7 +477,7 @@ const mod = {
             },
             requires: "a bot",
             effect() {
-                mod.isBotSpawner += 0.19;
+                mod.isBotSpawner += 0.20;
             },
             remove() {
                 mod.isBotSpawner = 0;
@@ -2047,22 +2047,6 @@ const mod = {
                 }
             }
         },
-        // {
-        //     name: "electromagnetic pulse",
-        //     description: "<strong>vacuum bomb's </strong> <strong class='color-e'>explosion</strong> removes<br><strong>80%</strong> of <strong>shields</strong> and <strong>100%</strong> of <strong class='color-f'>energy</strong>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     allowed() {
-        //         return mod.haveGunCheck("vacuum bomb")
-        //     },
-        //     requires: "vacuum bomb",
-        //     effect() {
-        //         mod.isVacuumShield = true;
-        //     },
-        //     remove() {
-        //         mod.isVacuumShield = false;
-        //     }
-        // },
         {
             name: "water shielding",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
@@ -2404,11 +2388,11 @@ const mod = {
         },
         {
             name: "laser diodes",
-            description: "<strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser gun, pulse gun, and laser-bot</em>",
+            description: "<strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun and laser-bot</em>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("pulse") || mod.haveGunCheck("laser") || mod.laserBotCount > 1
+                return mod.haveGunCheck("laser") || mod.laserBotCount > 1
             },
             requires: "laser",
             effect() {
@@ -2424,7 +2408,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser
+                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseLaser
             },
             requires: "laser, not wide beam",
             effect() {
@@ -2444,7 +2428,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser
+                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseLaser
             },
             requires: "laser, not specular reflection",
             effect() {
@@ -2456,13 +2440,13 @@ const mod = {
         },
         {
             name: "diffuse beam",
-            description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase laser <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+            description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>175%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isPulseLaser
             },
-            requires: "laser, not specular reflection",
+            requires: "laser, not specular reflection<br>not beam splitter",
             effect() {
                 if (mod.wideLaser === 0) mod.wideLaser = 3
                 mod.isWideLaser = true;
@@ -2474,13 +2458,13 @@ const mod = {
         },
         {
             name: "output coupler",
-            description: "diffuse <strong>laser</strong> beam is <strong>30%</strong> <strong>wider</strong><br> and the full beam does <strong>30%</strong> more <strong class='color-d'>damage</strong>",
+            description: "<strong>widen</strong> diffuse <strong>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
                 return mod.haveGunCheck("laser") && mod.isWideLaser
             },
-            requires: "laser, not specular reflection",
+            requires: "laser, not specular reflection<br>not beam splitter",
             effect() {
                 mod.wideLaser = 4
             },
@@ -2492,29 +2476,35 @@ const mod = {
                 }
             }
         },
-        // {
-        //     name: "waste heat recovery",
-        //     description: "<strong>laser</strong> <strong class='color-d'>damage</strong> grows by <strong>400%</strong> as you fire<br>but you periodically <strong>eject</strong> your <strong class='color-h'>health</strong>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     allowed() {
-        //         return mod.haveGunCheck("laser") && !mod.isEnergyHealth
-        //     },
-        //     requires: "laser<br>not mass-energy equivalence",
-        //     effect() {
-        //         mod.isLaserHealth = true;
-        //     },
-        //     remove() {
-        //         mod.isLaserHealth = false
-        //     }
-        // },
+        {
+            name: "pulse",
+            description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isWideLaser
+            },
+            requires: "laser, not specular reflection<br>not beam splitter, not diffuse",
+            effect() {
+                mod.isPulseLaser = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].fire = b.guns[i].firePulse
+                }
+            },
+            remove() {
+                mod.isPulseLaser = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].fire = b.guns[i].fireLaser
+                }
+            }
+        },
         {
             name: "shock wave",
             description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("pulse")
+                return mod.isPulseLaser
             },
             requires: "pulse",
             effect() {
@@ -2524,14 +2514,13 @@ const mod = {
                 mod.isPulseStun = false;
             }
         },
-
         {
             name: "neocognitron",
             description: "<strong>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong>delay</strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("pulse")
+                return mod.isPulseLaser
             },
             requires: "pulse",
             effect() {
@@ -2725,7 +2714,7 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mod.blockDmg += 0.66 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+                mod.blockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
             },
             remove() {
                 mod.blockDmg = 0;
@@ -3188,5 +3177,6 @@ const mod = {
     isWormSpores: null,
     isWormBullets: null,
     isWideLaser: null,
-    wideLaser: null
+    wideLaser: null,
+    isPulseLaser: null
 }

@@ -234,7 +234,7 @@ const spawn = {
     me.frictionAir = 0.01
     me.seeAtDistance2 = 9000000;
     me.accelMag = 0.00062 * game.accelScale;
-    Matter.Body.setDensity(me, 0.001); //normal is 0.001
+    Matter.Body.setDensity(me, 0.0006); //normal is 0.001
     me.collisionFilter.mask = cat.bullet | cat.player
     me.memory = Infinity;
     me.seePlayerFreq = 60

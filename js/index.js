@@ -407,6 +407,7 @@ const build = {
     const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value))
     level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
     level.levelsCleared += levelsCleared;
+    game.isCheating = true;
     document.body.style.cursor = "none";
     document.body.style.overflow = "hidden"
     document.getElementById("build-grid").style.display = "none"
@@ -416,7 +417,6 @@ const build = {
 }
 
 function openCustomBuildMenu() {
-  game.isCheating = true;
   document.getElementById("build-button").style.display = "none";
   const el = document.getElementById("build-grid")
   el.style.display = "grid"

@@ -1,14 +1,32 @@
 
-gun: vacuum bomb is removed
-mod: vacuum bomb - grenades fire slower, explode bigger and, suck everything towards them
-
-laser and diffuse laser graphics are better
-mod: output coupler - diffuse laser beam is 30% wider and does 30% more damage
-      requires diffuse beam
-
-level number doesn't increase if you skip the boss (in the late game)
+gun: pulse is now a mod for laser
 
 ************** TODO - n-gon **************
+
+optional setting for people with desktops that want double mobs
+
+hard mode should match the pace of why, but with less difficulty
+  2x power up chances, same as why for all difficulties
+  adjust difficulty levels
+  easy: 1
+  normal: 2
+  hard: 3
+  why: 4
+
+combine more stuff?
+  ____ mod for ____
+  flak -> missiles
+  neutron bomb -> mines
+  iceIX -> foam
+  flechettes -> nail gun
+
+
+let beam splitter work with pulse
+
+neutron bomb as a mod for mines
+
+mod: stealth field - mark a mob, it you next kill is that mob get a bonus power up
+  run only at the start of a new level
 
 add an ending to the game
   revamp the boss level, or add a new final level
@@ -29,7 +47,7 @@ time dilation mod rework / buff (time dilation is cool, but it can feel like a c
   take no damage
   can fire
   2x move jump fire while field is active
-  33% move jump fire always
+  40% move jump fire always
 
 mod - after a mob or shield dies, remaining dots look for a new nearby host
   or mod: radiation effects can spread to nearby mobs

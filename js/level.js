@@ -704,21 +704,15 @@ const level = {
       });
       xLetter += 10 + width
     }
-
-
     level.setPosToSpawn(460, -100); //normal spawn
     level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
     level.exit.x = 2800;
     level.exit.y = -335;
     spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
-
     game.zoomScale = 1000 //1400 is normal
     level.defaultZoom = 1600
     game.zoomTransition(level.defaultZoom, 1)
-
-
     document.body.style.backgroundColor = "#ddd";
-
     level.fill.push({
       x: 2600,
       y: -600,
@@ -733,7 +727,6 @@ const level = {
       height: 500,
       color: "#fff"
     });
-
     const lineColor = "#ccc"
     level.fillBG.push({
       x: 1600,
@@ -742,7 +735,6 @@ const level = {
       height: 100,
       color: lineColor
     });
-
     level.fillBG.push({
       x: -55,
       y: -283,

@@ -1273,9 +1273,9 @@ const mech = {
     },
     {
       name: "standing wave harmonics",
-      description: "three oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> has no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>",
+      description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>cool down</strong>",
       effect: () => {
-        mech.fieldHarmReduction = 0.80;
+        // mech.fieldHarmReduction = 0.80;
         mech.fieldBlockCD = 0;
         mech.hold = function () {
           if (mech.isHolding) {
@@ -1390,7 +1390,7 @@ const mech = {
     },
     {
       name: "nano-scale manufacturing",
-      description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>increase <strong class='color-f'>energy</strong> regeneration by <strong>100%</strong>",
+      description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>increase <strong class='color-f'>energy</strong> regeneration by <strong>100%</strong>",
       effect: () => {
         mech.hold = function () {
           if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle) {
@@ -1420,7 +1420,6 @@ const mech = {
               mech.energy -= 0.33;
               b.drone(1)
             }
-
           }
           if (mech.isHolding) {
             mech.drawHold(mech.holdingTarget);
@@ -1445,13 +1444,13 @@ const mech = {
     },
     {
       name: "negative mass field",
-      description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>45%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
+      description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
       fieldDrawRadius: 0,
       effect: () => {
         mech.fieldFire = true;
         mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
         mech.fieldMeterColor = "#000"
-        mech.fieldHarmReduction = 0.55;
+        mech.fieldHarmReduction = 0.6;
         mech.fieldDrawRadius = 0;
 
         mech.hold = function () {
