@@ -1563,7 +1563,7 @@ const b = {
           const sub = Vector.sub(this.lockedOn.position, this.position)
           const DIST = Vector.magnitude(sub);
           const unit = Vector.normalise(sub)
-          const DRAIN = 0.002
+          const DRAIN = 0.0012
           if (DIST < mod.isPlasmaRange * 450 && mech.energy > DRAIN) {
             mech.energy -= DRAIN;
             if (mech.energy < 0) {

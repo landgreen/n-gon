@@ -1,10 +1,9 @@
 neutron bomb does 60% more damage
 powerUpBoss has a shorter vision range, and accelerates slower
 custom mode has the option to disable mod, guns, and fields
+several changes to community maps (by Francois 👑)
 
 ************** TODO - n-gon **************
-
-add setting to disable power ups spawns for custom mode
 
 mod - explosions apply radiation damage over time
   or spawn a neutron bomb with a short timer

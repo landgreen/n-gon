@@ -2188,30 +2188,30 @@ const spawn = {
   },
   //fan made mobs  *****************************************************************************************
   //*******************************************************************************************************
-  mobBloc(x, y, radius, color) {
-    mobs.spawn(x, y, 4, radius, color);
-    let me = mob[mob.length - 1];
-    me.stroke = "transparent";
-    me.startingPosition = {
-      x: x,
-      y: y
-    }
-    Matter.Body.setDensity(me, 0.002);
-    me.leaveBody = false;
-    me.isStatic = true;
-    me.showHealthBar = false;
-    me.collisionFilter.category = cat.map;
-    me.collisionFilter.mask = cat.powerUp | cat.map | cat.player | cat.bullet | cat.body
-    me.rotateVelocity = 0
-    me.do = function () {
-      Matter.Body.setVelocity(this, {
-        x: 0,
-        y: 0
-      });
-      Matter.Body.setPosition(this, this.startingPosition);
-      this.checkStatus();
-    };
-  },
+  // mobBloc(x, y, radius, color) {
+  //   mobs.spawn(x, y, 4, radius, color);
+  //   let me = mob[mob.length - 1];
+  //   me.stroke = "transparent";
+  //   me.startingPosition = {
+  //     x: x,
+  //     y: y
+  //   }
+  //   Matter.Body.setDensity(me, 0.002);
+  //   me.leaveBody = false;
+  //   me.isStatic = true;
+  //   me.showHealthBar = false;
+  //   me.collisionFilter.category = cat.map;
+  //   me.collisionFilter.mask = cat.powerUp | cat.map | cat.player | cat.bullet | cat.body
+  //   me.rotateVelocity = 0
+  //   me.do = function () {
+  //     Matter.Body.setVelocity(this, {
+  //       x: 0,
+  //       y: 0
+  //     });
+  //     Matter.Body.setPosition(this, this.startingPosition);
+  //     this.checkStatus();
+  //   };
+  // },
   //complex constrained mob templates**********************************************************************
   //*******************************************************************************************************
   allowShields: true,

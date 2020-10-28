@@ -1575,7 +1575,7 @@ const mech = {
           } else if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
             mech.grabPowerUp();
             mech.lookForPickUp();
-            const DRAIN = 0.002
+            const DRAIN = 0.0012
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < 0) {
