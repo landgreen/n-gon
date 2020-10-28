@@ -232,8 +232,8 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.isBoss = true;
     me.frictionAir = 0.01
-    me.seeAtDistance2 = 9000000;
-    me.accelMag = 0.00065 * game.accelScale;
+    me.seeAtDistance2 = 1000000;
+    me.accelMag = 0.0005 * game.accelScale;
     Matter.Body.setDensity(me, 0.0006); //normal is 0.001
     me.collisionFilter.mask = cat.bullet | cat.player
     me.memory = Infinity;
@@ -1682,9 +1682,9 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
-      this.explode(this.mass * 10);
+      this.explode(this.mass * 20);
     };
-    Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+    Matter.Body.setDensity(me, 0.00005); //normal is 0.001
     me.timeLeft = 200;
     me.g = 0.001; //required if using 'gravity'
     me.frictionAir = 0;
@@ -1704,7 +1704,7 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
-      this.explode(this.mass * 10);
+      this.explode(this.mass * 120);
     };
     me.onDeath = function () {
       if (game.difficulty > 4) {
@@ -1736,7 +1736,7 @@ const spawn = {
         });
       }
     }
-    Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+    Matter.Body.setDensity(me, 0.00005); //normal is 0.001
     me.timeLeft = 140 + Math.floor(Math.random() * 30);
     me.g = 0.001; //required if using 'gravity'
     me.frictionAir = 0;
@@ -1867,9 +1867,9 @@ const spawn = {
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
-      this.explode(this.mass * 10);
+      this.explode(this.mass * 20);
     };
-    Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+    Matter.Body.setDensity(me, 0.00005); //normal is 0.001
     me.timeLeft = 240;
     me.g = 0.001; //required if using 'gravity'
     me.frictionAir = 0;
@@ -1956,13 +1956,13 @@ const spawn = {
   },
   seeker(x, y, radius = 5, sides = 0) {
     //bullets
-    mobs.spawn(x, y, sides, radius, "rgb(100,100,255)");
+    mobs.spawn(x, y, sides, radius, "rgb(150,150,255)");
     let me = mob[mob.length - 1];
     me.stroke = "transparent";
     me.onHit = function () {
-      this.explode(this.mass * 10);
+      this.explode(this.mass * 20);
     };
-    Matter.Body.setDensity(me, 0.00005); //normal is 0.001
+    Matter.Body.setDensity(me, 0.00002); //normal is 0.001
     me.timeLeft = 420 * (0.8 + 0.4 * Math.random());
     me.accelMag = 0.00017 * (0.8 + 0.4 * Math.random()) * game.accelScale;
     me.frictionAir = 0.01 * (0.8 + 0.4 * Math.random());

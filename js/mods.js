@@ -519,7 +519,7 @@ const mod = {
         },
         {
             name: "nail-bot upgrade",
-            description: "<strong>125%</strong> increased <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
+            description: "<strong>300%</strong> increased <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -558,7 +558,7 @@ const mod = {
         },
         {
             name: "foam-bot upgrade",
-            description: "<strong>125%</strong> increased <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
+            description: "<strong>200%</strong> increased <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -597,7 +597,7 @@ const mod = {
         },
         {
             name: "boom-bot upgrade",
-            description: "<strong>125%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size<br><em>applies to all current and future boom-bots</em>",
+            description: "<strong>200%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size<br><em>applies to all current and future boom-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -636,7 +636,7 @@ const mod = {
         },
         {
             name: "laser-bot upgrade",
-            description: "<strong>125%</strong> increased laser <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
+            description: "<strong>200%</strong> increased laser <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {

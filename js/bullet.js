@@ -1237,7 +1237,7 @@ const b = {
       onEnd() {},
       do() {
         if (this.lastLookCycle < game.cycle && !mech.isCloak) {
-          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 55
+          this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 65
           let target
           for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1302,7 +1302,7 @@ const b = {
               const radius = 6 + 7 * Math.random()
               const SPEED = 29 - radius * 0.5; //(mech.crouch ? 32 : 20) - radius * 0.7;
               const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-              b.foam(this.position, velocity, radius + 11 * this.isUpgraded)
+              b.foam(this.position, velocity, radius + 14 * this.isUpgraded)
               break;
             }
           }
@@ -1389,7 +1389,7 @@ const b = {
           mech.energy -= 0.0012 * mod.isLaserDiode
           // const sub = Vector.sub(this.lockedOn.position, this.vertices[0])
           // const angle = Math.atan2(sub.y, sub.x);
-          b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.06 + 0.08 * this.isUpgraded))
+          b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.06 + 0.1 * this.isUpgraded))
 
           // //make sure you can still see vertex
           // const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
@@ -1458,7 +1458,7 @@ const b = {
       explode: 0,
       beforeDmg() {
         if (this.lockedOn) {
-          const explosionRadius = Math.min(170 + 140 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
+          const explosionRadius = Math.min(170 + 170 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
           if (explosionRadius > 60) {
             this.explode = explosionRadius
             // 
@@ -1564,7 +1564,7 @@ const b = {
           const DIST = Vector.magnitude(sub);
           const unit = Vector.normalise(sub)
           const DRAIN = 0.002
-          if (DIST < mod.isPlasmaRange * 500 && mech.energy > DRAIN) {
+          if (DIST < mod.isPlasmaRange * 450 && mech.energy > DRAIN) {
             mech.energy -= DRAIN;
             if (mech.energy < 0) {
               mech.fieldCDcycle = mech.cycle + 120;
@@ -2038,9 +2038,9 @@ const b = {
                   }
                 } else {
                   this.endCycle = 0;
-                  if (mod.isFlechetteExplode && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.98) {
+                  if (mod.isFlechetteExplode && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                     // mobs.statusStun(who, 120)
-                    this.explodeRad = 250 + 30 * Math.random();
+                    this.explodeRad = 300 + 60 * Math.random();
                     b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                   }
                   who.foundPlayer();
@@ -2383,7 +2383,7 @@ const b = {
         const dir = mech.angle; // + Math.random() * 0.05;
         bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir, false));
         Matter.Body.setDensity(bullet[me], 0.0003);
-        bullet[me].explodeRad = 400 + Math.floor(Math.random() * 50);;
+        bullet[me].explodeRad = 350 + Math.floor(Math.random() * 50);;
         bullet[me].onEnd = function () {
           b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
           if (mod.grenadeFragments) b.targetedNail(this.position, mod.grenadeFragments)
@@ -2554,7 +2554,6 @@ const b = {
         }
         bullet[me].radiationMode = function () {
           this.stuck(); //runs different code based on what the bullet is stuck to
-
           if (!mech.isBodiesAsleep) {
             this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
             this.maxDamageRadius -= 0.8 / mod.isBulletsLastLonger //+ 0.5 * Math.sin(game.cycle * 0.1) //slowly shrink max radius
@@ -2575,8 +2574,8 @@ const b = {
               //aoe damage to mobs
               for (let i = 0, len = mob.length; i < len; i++) {
                 if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                  let dmg = b.dmgScale * 0.025
-                  if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
+                  let dmg = b.dmgScale * 0.035
+                  if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.3 //reduce damage if a wall is in the way
                   if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
                   mob[i].damage(dmg);
                   mob[i].locatePlayer();
@@ -3232,12 +3231,12 @@ const b = {
         mech.energy -= energy * mod.isLaserDiode
 
         if (mod.beamSplitter) {
-          energy *= 0.7
+          energy *= 0.66
           b.pulse(energy, mech.angle)
           for (let i = 1; i < 1 + mod.beamSplitter; i++) {
             energy *= 0.9
-            b.pulse(energy, mech.angle - i * 0.35)
-            b.pulse(energy, mech.angle + i * 0.35)
+            b.pulse(energy, mech.angle - i * 0.27)
+            b.pulse(energy, mech.angle + i * 0.27)
           }
         } else {
           b.pulse(energy, mech.angle)

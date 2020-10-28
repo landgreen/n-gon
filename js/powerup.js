@@ -22,8 +22,10 @@ const powerUps = {
     powerUps.endDraft();
   },
   showDraft() {
+    // document.getElementById("choose-grid").style.gridTemplateColumns = "repeat(2, minmax(370px, 1fr))"
     document.getElementById("choose-grid").style.display = "grid"
     document.getElementById("choose-background").style.display = "inline"
+
     document.body.style.cursor = "auto";
     if (mod.isExtraChoice) {
       document.body.style.overflowY = "scroll";
@@ -591,8 +593,9 @@ const powerUps = {
   },
   spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
     if (
-      !(mod.isSuperDeterminism && (target === 'gun' || target === 'field' || target === 'reroll')) &&
-      !(mod.isEnergyNoAmmo && target === 'ammo')
+      (!mod.isSuperDeterminism || (target === 'mod' || target === 'heal' || target === 'ammo')) &&
+      !(mod.isEnergyNoAmmo && target === 'ammo') &&
+      (!game.isNoPowerUps || (target === 'reroll' || target === 'heal' || target === 'ammo'))
     ) {
       powerUps.directSpawn(x, y, target, moving, mode, size)
       if (mod.duplicateChance && Math.random() < mod.duplicateChance) {

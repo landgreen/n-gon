@@ -105,6 +105,9 @@ window.addEventListener('load', (event) => {
       if (property === "level") {
         document.getElementById("starting-level").value = Number(set[property])
       }
+      if (property === "noPower") {
+        document.getElementById("no-power-ups").checked = Number(set[property])
+      }
     }
   }
 });
@@ -314,15 +317,21 @@ const build = {
       </g>
     </svg>
   </div>
-  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 220%;background-color:var(--build-bg-color);">
+  <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 190%;background-color:var(--build-bg-color);">
     <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
+    <div>
     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-    <select name="difficulty-select" id="difficulty-select-custom">
-      <option value="1">easy</option>
-      <option value="2" selected>normal</option>
-      <option value="4">hard</option>
-      <option value="6">why?</option>
-    </select>
+      <select name="difficulty-select" id="difficulty-select-custom">
+        <option value="1">easy</option>
+        <option value="2" selected>normal</option>
+        <option value="4">hard</option>
+        <option value="6">why?</option>
+      </select>
+    </div>
+    <div>
+      <label for="no-power-ups" title="no mods, fields, or guns will spawn during the game">no power ups:</label>
+      <input type="checkbox" id="no-power-ups" name="no-power-ups" style="width:17px; height:17px;">
+    </div>
   </div>`
     for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
       text += `<div id ="field-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
@@ -390,6 +399,7 @@ const build = {
     url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
     url += `&difficulty=${game.difficultyMode}`
     url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
+    url += `&noPower=${Number(document.getElementById("no-power-ups").checked)}`
     console.log(url)
     game.copyToClipBoard(url)
     alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
@@ -407,6 +417,20 @@ const build = {
     const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value))
     level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
     level.levelsCleared += levelsCleared;
+    game.isNoPowerUps = document.getElementById("no-power-ups").checked
+    if (game.isNoPowerUps) { //remove mods, guns, and fields
+      function removeOne() { //recursive remove one at a time to avoid array problems
+        for (let i = 0; i < powerUp.length; i++) {
+          if (powerUp[i].name === "mod" || powerUp[i].name === "gun" || powerUp[i].name === "field") {
+            Matter.World.remove(engine.world, powerUp[i]);
+            powerUp.splice(i, 1);
+            removeOne();
+            break
+          }
+        }
+      }
+      removeOne();
+    }
     game.isCheating = true;
     document.body.style.cursor = "none";
     document.body.style.overflow = "hidden"
@@ -795,6 +819,7 @@ window.addEventListener("keydown", function (event) {
         }
         break
       case "u":
+        level.bossKilled = true; //if there is no boss this needs to be true to increase levels
         level.nextLevel();
         break
       case "X": //capital X to make it hard to die

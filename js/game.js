@@ -134,6 +134,7 @@ const game = {
   accelScale: null, //set in levels.setDifficulty
   CDScale: null, //set in levels.setDifficulty
   lookFreqScale: null, //set in levels.setDifficulty
+  isNoPowerUps: false,
   // dropFPS(cap = 40, time = 15) {
   //   game.fpsCap = cap
   //   game.fpsInterval = 1000 / game.fpsCap;
@@ -461,6 +462,7 @@ const game = {
   reset() { //run on first run, and each later run after you die
     input.endKeySensing();
     b.removeAllGuns();
+    game.isNoPowerUps = false;
     mod.setupAllMods(); //sets mods to default values
     b.setFireCD();
     game.updateModHUD();
@@ -684,48 +686,45 @@ const game = {
       if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy + (mech.energy - mech.maxEnergy) * 0.75
 
       if (mech.pos.y > game.fallHeight) { // if 4000px deep
-        if (game.difficultyMode > 4) {
-          mech.death();
-        } else {
 
-          // Matter.Body.setPosition(player, {
-          //   x: player.position.x,
-          //   y: level.enter.y - 5000
-          // });
 
-          // mech.pos.x = player.position.x;
-          // mech.pos.y = playerBody.position.y - mech.yOff;
-          // const scale = 0.8;
-          // const velocityScale = 12
-          // mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale + player.velocity.x * velocityScale;
-          // mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale + player.velocity.y * velocityScale;
-          // mech.transX += (mech.transSmoothX - mech.transX) * 1;
-          // mech.transY += (mech.transSmoothY - mech.transY) * 1;
+        // Matter.Body.setPosition(player, {
+        //   x: player.position.x,
+        //   y: level.enter.y - 5000
+        // });
 
-          Matter.Body.setVelocity(player, {
-            x: 0,
-            y: 0
-          });
-          Matter.Body.setPosition(player, {
-            x: level.enter.x + 50,
-            y: level.enter.y - 20
-          });
-          // move bots
-          for (let i = 0; i < bullet.length; i++) {
-            if (bullet[i].botType) {
-              Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-                x: 250 * (Math.random() - 0.5),
-                y: 250 * (Math.random() - 0.5)
-              }));
-              Matter.Body.setVelocity(bullet[i], {
-                x: 0,
-                y: 0
-              });
-            }
+        // mech.pos.x = player.position.x;
+        // mech.pos.y = playerBody.position.y - mech.yOff;
+        // const scale = 0.8;
+        // const velocityScale = 12
+        // mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale + player.velocity.x * velocityScale;
+        // mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale + player.velocity.y * velocityScale;
+        // mech.transX += (mech.transSmoothX - mech.transX) * 1;
+        // mech.transY += (mech.transSmoothY - mech.transY) * 1;
+
+        Matter.Body.setVelocity(player, {
+          x: 0,
+          y: 0
+        });
+        Matter.Body.setPosition(player, {
+          x: level.enter.x + 50,
+          y: level.enter.y - 20
+        });
+        // move bots
+        for (let i = 0; i < bullet.length; i++) {
+          if (bullet[i].botType) {
+            Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+              x: 250 * (Math.random() - 0.5),
+              y: 250 * (Math.random() - 0.5)
+            }));
+            Matter.Body.setVelocity(bullet[i], {
+              x: 0,
+              y: 0
+            });
           }
-          mech.damage(0.1 * game.difficultyMode);
-          mech.energy = 0.01;
         }
+        mech.damage(0.1 * game.difficultyMode);
+        mech.energy -= 0.1 * game.difficultyMode
       }
 
       // if (mod.isEnergyDamage) {
@@ -749,7 +748,7 @@ const game = {
           let i = who.length;
           while (i--) {
             if (who[i].position.y > game.fallHeight) {
-              if (save && game.difficultyMode < 5) {
+              if (save) {
                 Matter.Body.setVelocity(who[i], {
                   x: 0,
                   y: 0

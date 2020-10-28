@@ -1374,7 +1374,7 @@ const mech = {
             for (let i = 0; i < mob.length; i++) {
               const distance = Vector.magnitude(Vector.sub(mech.pos, mob[i].position))
               if (distance < range) {
-                const cap = mob[i].isShielded ? 7 : 3.5
+                const cap = mob[i].isShielded ? 8 : 4
                 if (mob[i].speed > cap && Vector.dot(mob[i].velocity, Vector.sub(mech.pos, mob[i].position)) > 0) { // if velocity is directed towards player
                   Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(mob[i].velocity), cap)); //set velocity to cap, but keep the direction
                 }
@@ -1734,7 +1734,7 @@ const mech = {
             mech.grabPowerUp();
             mech.lookForPickUp(180);
 
-            const DRAIN = 0.0007
+            const DRAIN = 0.0006
             if (mech.energy > DRAIN) {
               mech.energy -= DRAIN;
               if (mech.energy < DRAIN) {
@@ -2425,7 +2425,7 @@ const mech = {
             ) {
               const sub = Vector.sub(game.mouseInGame, mech.pos)
               const mag = Vector.magnitude(sub)
-              const drain = 0.07 + 0.008 * Math.sqrt(mag)
+              const drain = 0.04 + 0.007 * Math.sqrt(mag)
               if (mech.energy > drain && mag > 300) {
                 mech.energy -= drain
                 mech.hole.isReady = false;

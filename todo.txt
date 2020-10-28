@@ -1,38 +1,31 @@
-
-gun: pulse is now a mod for laser
-  mod: beam splitter applies to pulse
-
-difficulty balancing 
-  (this needs to be done as more mods are added to the game to prevent power creep)
-  all modes are a bit harder
-    if you used to play why, try the new hard
-    if you used to play hard try the new normal
-  power ups drop more often from bosses on all modes
+neutron bomb does 60% more damage
+powerUpBoss has a shorter vision range, and accelerates slower
+custom mode has the option to disable mod, guns, and fields
 
 ************** TODO - n-gon **************
 
+add setting to disable power ups spawns for custom mode
+
 mod - explosions apply radiation damage over time
-  or spawn a neutron bomb with a timer
+  or spawn a neutron bomb with a short timer
 
 mod self destruct - drones explode when they die
   drones lose extra time on collisions
 
-optional setting for people with desktops that want double mobs
-
-combine more stuff?
-  ____ mod for ____
-  flak -> missiles
-  neutron bomb -> mines
-  iceIX -> foam
-  flechettes -> nail gun
-
-mod: stealth field - mark a mob, it you next kill is that mob get a bonus power up
-  run only at the start of a new level
-
 add an ending to the game
-  revamp the boss level, or add a new final level
-    final level requires you to kill something
-      so skipping content is only smart if you are strong enough to beat the final boss
+  add a final boss battle level
+    final boss has elements of other bosses
+      alternate between black hole aura and laser beams
+      fire seeker bullets
+      drop bombs
+      tail of shielded mobs
+      shield
+  mirror ending (if no cheats)
+    level after final boss battle is the intro level, but flipped left right, with a fake player
+      damage the fake player to end the game?
+  no ending (if cheats)
+    game goes on forever
+  
   around level 15
   game never ends if you have used cheats
 
