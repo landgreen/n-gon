@@ -87,12 +87,12 @@ const mod = {
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
         if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
-        if (mod.isEnergyLoss) dmg *= 1.43;
+        if (mod.isEnergyLoss) dmg *= 1.5;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-        if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
+        if (mod.isRerollDamage) dmg *= 1 + 0.06 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
         return dmg * mod.slowFire * mod.aimDamage
@@ -149,7 +149,7 @@ const mod = {
         },
         {
             name: "acute stress response",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>43%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -245,7 +245,7 @@ const mod = {
         },
         {
             name: "perturbation theory",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -257,26 +257,6 @@ const mod = {
             },
             remove() {
                 mod.isRerollDamage = false;
-            }
-        },
-        {
-            name: "Ψ(t) collapse",
-            description: "<strong>60%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return powerUps.reroll.rerolls === 0 && !mod.manyWorlds
-            },
-            requires: "no rerolls",
-            effect() {
-                mod.isRerollHaste = true;
-                mod.rerollHaste = 0.4;
-                b.setFireCD();
-            },
-            remove() {
-                mod.isRerollHaste = false;
-                mod.rerollHaste = 1;
-                b.setFireCD();
             }
         },
         {
@@ -293,6 +273,26 @@ const mod = {
             },
             remove() {
                 mod.slowFire = 1;
+                b.setFireCD();
+            }
+        },
+        {
+            name: "Ψ(t) collapse",
+            description: "<strong>66%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls === 0 && !mod.manyWorlds
+            },
+            requires: "no rerolls",
+            effect() {
+                mod.isRerollHaste = true;
+                mod.rerollHaste = 0.33;
+                b.setFireCD();
+            },
+            remove() {
+                mod.isRerollHaste = false;
+                mod.rerollHaste = 1;
                 b.setFireCD();
             }
         },
@@ -558,7 +558,7 @@ const mod = {
         },
         {
             name: "foam-bot upgrade",
-            description: "<strong>200%</strong> increased <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
+            description: "<strong>150%</strong> increased <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -675,7 +675,7 @@ const mod = {
         },
         {
             name: "orbital-bot upgrade",
-            description: "<strong>125%</strong> increased <strong class='color-d'>damage</strong><br><em>applies to all current and future orbit-bots</em>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong> and <strong>radius</strong> by <strong>30%</strong><br><em>applies to all current and future orbit-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -684,15 +684,24 @@ const mod = {
             requires: "2 or more orbital bots",
             effect() {
                 mod.isOrbitBotUpgrade = true
+                const range = 190 + 60 * mod.isOrbitBotUpgrade
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType === 'orbit') bullet[i].isUpgraded = true
+                    if (bullet[i].botType === 'orbit') {
+                        bullet[i].isUpgraded = true
+                        bullet[i].range = range
+                        bullet[i].orbitalSpeed = Math.sqrt(0.25 / range)
+                    }
                 }
 
             },
             remove() {
                 mod.isOrbitBotUpgrade = false
+                const range = 190 + 60 * mod.isOrbitBotUpgrade
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType === 'orbit') bullet[i].isUpgraded = false
+                    if (bullet[i].botType === 'orbit') {
+                        bullet[i].range = range
+                        bullet[i].orbitalSpeed = Math.sqrt(0.25 / range)
+                    }
                 }
             }
         },
@@ -946,7 +955,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPiezo
+                return mod.isPiezo && !mod.timeEnergyRegen
             },
             requires: "piezoelectricity",
             effect: () => {
@@ -1169,7 +1178,7 @@ const mod = {
             name: "anthropic principle",
             nameInfo: "<span id = 'mod-anthropic'></span>",
             addNameInfo() {
-                setTimeout(function () {
+                setTimeout(function() {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
@@ -1182,7 +1191,7 @@ const mod = {
             requires: "at least 1 reroll",
             effect() {
                 mod.isDeathAvoid = true;
-                setTimeout(function () {
+                setTimeout(function() {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
@@ -1254,7 +1263,7 @@ const mod = {
             name: "entanglement",
             nameInfo: "<span id = 'mod-entanglement'></span>",
             addNameInfo() {
-                setTimeout(function () {
+                setTimeout(function() {
                     game.boldActiveGunHUD();
                 }, 1000);
             },
@@ -1267,7 +1276,7 @@ const mod = {
             requires: "at least 2 guns",
             effect() {
                 mod.isEntanglement = true
-                setTimeout(function () {
+                setTimeout(function() {
                     game.boldActiveGunHUD();
                 }, 1000);
 
@@ -1893,7 +1902,7 @@ const mod = {
         },
         {
             name: "wave packet",
-            description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>33%</strong>",
+            description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1943,7 +1952,7 @@ const mod = {
         },
         {
             name: "recursion",
-            description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong> they have a<br><strong>30%</strong> chance to launch a larger <strong>missile</strong>",
+            description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong> they have a<br><strong>20%</strong> chance to launch a larger <strong>missile</strong>",
             maxCount: 6,
             count: 0,
             allowed() {
@@ -2623,6 +2632,24 @@ const mod = {
             }
         },
         {
+            name: "time crystals",
+            description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
+            },
+            requires: "time dilation field",
+            effect: () => {
+                mod.energyRegen = 0.004;
+                mech.fieldRegen = mod.energyRegen;
+            },
+            remove() {
+                mod.energyRegen = 0.001;
+                mech.fieldRegen = mod.energyRegen;
+            }
+        },
+        {
             name: "plasma jet",
             description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
             maxCount: 9,
@@ -2871,7 +2898,7 @@ const mod = {
         },
         {
             name: "cosmic string",
-            description: "when you <strong> tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br>mobs between the <strong>endpoints</strong> take <strong class='color-d'>damage</strong>",
+            description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3178,5 +3205,6 @@ const mod = {
     isWormBullets: null,
     isWideLaser: null,
     wideLaser: null,
-    isPulseLaser: null
+    isPulseLaser: null,
+    timeEnergyRegen: null
 }

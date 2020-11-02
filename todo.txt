@@ -1,9 +1,45 @@
-neutron bomb does 60% more damage
-powerUpBoss has a shorter vision range, and accelerates slower
-custom mode has the option to disable mod, guns, and fields
-several changes to community maps (by Francois 👑)
+missile moves slightly differently
+  it used to slow when locked on to a target
+  now it slows when turning
+missiles explode when near any mob
+
+wormhole mod: cosmic string - now stuns mobs and applies radiation damage
+mod time dilation:  - quadruple your default energy regeneration
+
+added final boss level, it's still in progress so I'd love some feedback
+also the game loops back to the intro level after the boss
+  I'll be working on the ending in the next patch, so the intro level is just a placeholder
 
 ************** TODO - n-gon **************
+
+final boss has elements of other bosses
+  laser mode
+    if player is on left rotate counter clockwise
+    if player is on right rotate clockwise
+  start of laser mode
+    push block either left or right, not away
+  vibrating shape
+    grow and shrink
+    oscillate elliptical deformation (not sure how)
+
+a bot that eats ammo and converts them into rerolls
+  or 2 ammo power ups = 1 reroll
+
+been getting some fps slow down after playing for a few minutes
+
+new status effect: fear - push mob away from player for a time
+
+new status effect - apply status effect to mobs that makes blocks attracted to them
+  only lasts a few cycles
+
+in hard and why have some mobs spawn in later in the level
+  where
+    at defined points in array levelSpawns = [{x:0,y:0},{x:0,y:0}]
+      store the locations of mobs when the level starts to use as respawn points
+      remove the locations that are close to player
+  when?
+    after some mobs are dead
+    after the boss is killed
 
 mod - explosions apply radiation damage over time
   or spawn a neutron bomb with a short timer
@@ -13,25 +49,14 @@ mod self destruct - drones explode when they die
 
 add an ending to the game
   add a final boss battle level
-    final boss has elements of other bosses
-      alternate between black hole aura and laser beams
-      fire seeker bullets
-      drop bombs
-      tail of shielded mobs
-      shield
   mirror ending (if no cheats)
     level after final boss battle is the intro level, but flipped left right, with a fake player
-      damage the fake player to end the game?
+      damage the fake player to end the game
+      message about go outside
   no ending (if cheats)
     game goes on forever
-  
-  around level 15
+    also game goes on if player attacks, the fake player
   game never ends if you have used cheats
-
-new status effect - push mob away from player for a time
-
-new status effect - apply status effect to mobs that makes blocks attracted to them
-  only lasts a few cycles
 
 foam or spore bullet on dmg shrink effect
     it might mess with the foam position of other bullets on the mob
