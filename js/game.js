@@ -499,6 +499,7 @@ const game = {
 
         mech.spawn(); //spawns the player
 
+        level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
         if (game.isCommunityMaps) {
             level.levels.push("stronghold");
             level.levels.push("basement");
@@ -681,26 +682,10 @@ const game = {
     checks() {
         if (!(mech.cycle % 60)) { //once a second
 
-            //every second energy above max energy loses 25%
-            if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy + (mech.energy - mech.maxEnergy) * 0.75
+            //energy overfill 
+            if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy + (mech.energy - mech.maxEnergy) * 0.8 //every second energy above max energy loses 25%
 
             if (mech.pos.y > game.fallHeight) { // if 4000px deep
-
-
-                // Matter.Body.setPosition(player, {
-                //   x: player.position.x,
-                //   y: level.enter.y - 5000
-                // });
-
-                // mech.pos.x = player.position.x;
-                // mech.pos.y = playerBody.position.y - mech.yOff;
-                // const scale = 0.8;
-                // const velocityScale = 12
-                // mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale + player.velocity.x * velocityScale;
-                // mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale + player.velocity.y * velocityScale;
-                // mech.transX += (mech.transSmoothX - mech.transX) * 1;
-                // mech.transY += (mech.transSmoothY - mech.transY) * 1;
-
                 Matter.Body.setVelocity(player, {
                     x: 0,
                     y: 0
@@ -738,7 +723,7 @@ const game = {
             // }
 
             if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
-                if (mod.isEnergyRecovery && mech.energy < mech.maxEnergy) mech.energy += mech.maxEnergy * 0.06
+                if (mod.isEnergyRecovery) mech.energy += mech.maxEnergy * 0.05
                 if (mod.isHealthRecovery) mech.addHealth(0.01)
             }
 

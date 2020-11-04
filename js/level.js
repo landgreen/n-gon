@@ -8,7 +8,8 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     bossKilled: false,
-    levels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
+    playableLevels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
+    levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // level.difficultyIncrease(8)
@@ -17,7 +18,7 @@ const level = {
             // game.setZoom();
             // mech.isCloak = true;
             // mech.setField("wormhole")
-            // b.giveGuns("grenades")
+            // b.giveGuns("laser")
             // for (let i = 0; i < 10; i++) {
             // mod.giveMod("laser-bot");
             // }
@@ -3796,26 +3797,19 @@ const level = {
         }
     },
     nextLevel() {
-        if (level.bossKilled) {
-            level.levelsCleared++;
-            // level.levels.unshift("gauntlet"); //add bosses level to the end of the randomized levels list
-            // level.levels.unshift("finalBoss"); //add bosses level to the end of the randomized levels list
-        }
-
-
+        if (level.bossKilled) level.levelsCleared++;
         level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
         if (level.levelsCleared > level.levels.length) level.difficultyIncrease(game.difficultyMode)
         if (level.levelsCleared > level.levels.length * 1.25) level.difficultyIncrease(game.difficultyMode)
         if (level.levelsCleared > level.levels.length * 1.5) level.difficultyIncrease(game.difficultyMode)
         if (level.levelsCleared > level.levels.length * 2) level.difficultyIncrease(game.difficultyMode)
-
         level.onLevel++; //cycles map to next level
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
-
         //reset lost mod display
         for (let i = 0; i < mod.mods.length; i++) {
             if (mod.mods[i].isLost) mod.mods[i].isLost = false;
         }
+        mod.isDeathAvoidedThisLevel = false;
         game.updateModHUD();
         game.clearNow = true; //triggers in game.clearMap to remove all physics bodies and setup for new map
     },

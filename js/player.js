@@ -498,11 +498,15 @@ const mech = {
         if (mod.isEnergyHealth) {
             mech.energy -= dmg;
             if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
-                if (mod.isDeathAvoid && powerUps.reroll.rerolls) {
+                if (mod.isDeathAvoid && powerUps.reroll.rerolls && !mod.isDeathAvoidedThisLevel) {
+                    mod.isDeathAvoidedThisLevel = true
                     powerUps.reroll.changeRerolls(-1)
                     game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> left</span>`, 420)
+                    for (let i = 0; i < 6; i++) {
+                        powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
+                    }
                     mech.energy = mech.maxEnergy
-                    mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
+                    mech.immuneCycle = mech.cycle + 360 //disable this.immuneCycle bonus seconds
                     game.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -511,7 +515,7 @@ const mech = {
                         game.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
-                    }, 2000);
+                    }, 3000);
 
                     return;
                 } else { //death
@@ -525,14 +529,15 @@ const mech = {
             dmg *= mech.harmReduction()
             mech.health -= dmg;
             if (mech.health < 0 || isNaN(mech.health)) {
-                if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0) { //&& Math.random() < 0.5
+                if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0 && !mod.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
+                    mod.isDeathAvoidedThisLevel = true
                     mech.health = 0.05
                     powerUps.reroll.changeRerolls(-1)
                     game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> left</span>`, 420)
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
-                    mech.immuneCycle = mech.cycle + 120 //disable this.immuneCycle bonus seconds
+                    mech.immuneCycle = mech.cycle + 360 //disable this.immuneCycle bonus seconds
                     // game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
 
                     game.wipe = function() { //set wipe to have trails
@@ -543,7 +548,7 @@ const mech = {
                         game.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
-                    }, 2000);
+                    }, 3000);
                 } else {
                     mech.health = 0;
                     mech.death();
@@ -1038,7 +1043,7 @@ const mech = {
             if (mech.energy < 0) {
                 mech.energy = 0;
             }
-            if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
+            // if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
             if (mod.blockDmg) {
                 who.damage(mod.blockDmg * b.dmgScale)
@@ -1709,7 +1714,7 @@ const mech = {
                         mech.grabPowerUp();
                         mech.lookForPickUp(180);
 
-                        const DRAIN = 0.0008
+                        const DRAIN = 0.0011
                         if (mech.energy > DRAIN) {
                             mech.energy -= DRAIN;
                             if (mech.energy < DRAIN) {
@@ -1719,11 +1724,9 @@ const mech = {
                             }
                             //draw field everywhere
                             ctx.globalCompositeOperation = "saturation"
-                            // ctx.fillStyle = "rgba(100,200,230," + (0.25 + 0.06 * Math.random()) + ")";
                             ctx.fillStyle = "#ccc";
                             ctx.fillRect(-100000, -100000, 200000, 200000)
                             ctx.globalCompositeOperation = "source-over"
-
                             //stop time
                             mech.isBodiesAsleep = true;
 

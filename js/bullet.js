@@ -3223,6 +3223,7 @@ const b = {
                         ctx.stroke();
                         ctx.globalAlpha = 1;
                     } else if (mod.beamSplitter) {
+                        const divergence = mech.crouch ? 0.15 : 0.2
                         let dmg = mod.laserDamage * 0.9
                         const where = {
                             x: mech.pos.x + 20 * Math.cos(mech.angle),
@@ -3234,12 +3235,12 @@ const b = {
                         }, dmg)
                         for (let i = 1; i < 1 + mod.beamSplitter; i++) {
                             b.laser(where, {
-                                x: where.x + 3000 * Math.cos(mech.angle + i * 0.2),
-                                y: where.y + 3000 * Math.sin(mech.angle + i * 0.2)
+                                x: where.x + 3000 * Math.cos(mech.angle + i * divergence),
+                                y: where.y + 3000 * Math.sin(mech.angle + i * divergence)
                             }, dmg)
                             b.laser(where, {
-                                x: where.x + 3000 * Math.cos(mech.angle - i * 0.2),
-                                y: where.y + 3000 * Math.sin(mech.angle - i * 0.2)
+                                x: where.x + 3000 * Math.cos(mech.angle - i * divergence),
+                                y: where.y + 3000 * Math.sin(mech.angle - i * divergence)
                             }, dmg)
                             dmg *= 0.9
                         }

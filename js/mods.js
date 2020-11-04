@@ -92,7 +92,7 @@ const mod = {
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-        if (mod.isRerollDamage) dmg *= 1 + 0.06 * powerUps.reroll.rerolls
+        if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
         return dmg * mod.slowFire * mod.aimDamage
@@ -245,7 +245,7 @@ const mod = {
         },
         {
             name: "perturbation theory",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -934,7 +934,7 @@ const mod = {
         },
         {
             name: "piezoelectricity",
-            description: "<strong>colliding</strong> with mobs fills your <strong class='color-f'>energy</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
+            description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>300%</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -943,7 +943,7 @@ const mod = {
             requires: "not mass-energy equivalence",
             effect() {
                 mod.isPiezo = true;
-                mech.energy = mech.maxEnergy;
+                if (mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3;
             },
             remove() {
                 mod.isPiezo = false;
@@ -1042,7 +1042,7 @@ const mod = {
         },
         {
             name: "energy conservation",
-            description: "<strong>10%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
+            description: "<strong>7%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1050,7 +1050,7 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.energySiphon += 0.1;
+                mod.energySiphon += 0.07;
             },
             remove() {
                 mod.energySiphon = 0;
@@ -1058,7 +1058,7 @@ const mod = {
         },
         {
             name: "waste energy recovery",
-            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regen <strong>6%</strong> of max <strong class='color-f'>energy</strong> every second",
+            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regen <strong>5%</strong> of max <strong class='color-f'>energy</strong> every second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1182,7 +1182,7 @@ const mod = {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
-            description: "instead of <strong>dying</strong> consume a <strong class='color-r'>reroll</strong><br>and spawn <strong>4</strong> <strong class='color-h'>heal</strong> power ups",
+            description: "consume a <strong class='color-r'>reroll</strong> to avoid <strong>dying</strong> once a level <br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1191,6 +1191,7 @@ const mod = {
             requires: "at least 1 reroll",
             effect() {
                 mod.isDeathAvoid = true;
+                mod.isDeathAvoidedThisLevel = false;
                 setTimeout(function() {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
@@ -2432,7 +2433,7 @@ const mod = {
             }
         },
         {
-            name: "beam splitter",
+            name: "diffraction grating",
             description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease laser <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
             maxCount: 9,
             count: 0,
@@ -3098,6 +3099,7 @@ const mod = {
     isHealthRecovery: null,
     isEnergyLoss: null,
     isDeathAvoid: null,
+    isDeathAvoidedThisLevel: null,
     waveSpeedMap: null,
     waveSpeedBody: null,
     isSporeField: null,

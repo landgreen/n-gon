@@ -1,31 +1,34 @@
-missile moves slightly differently
-  it used to slow when locked on to a target
-  now it slows when turning
-missiles explode when near any mob
 
-wormhole mod: cosmic string - now stuns mobs and applies radiation damage
-mod time dilation:  - quadruple your default energy regeneration
+update to mod: anthropic principle - only works once per level
+  but gives 6 seconds of damage immunity and 2 extra heal power ups
 
-added final boss level, it's still in progress so I'd love some feedback
-also the game loops back to the intro level after the boss
-  I'll be working on the ending in the next patch, so the intro level is just a placeholder
+most energy regeneration effects now overfill energy above the max by default
+piezo electricity over fills energy by 300% (was 100%)
 
 ************** TODO - n-gon **************
 
-final boss has elements of other bosses
-  laser mode
-    if player is on left rotate counter clockwise
-    if player is on right rotate clockwise
-  start of laser mode
-    push block either left or right, not away
-  vibrating shape
-    grow and shrink
-    oscillate elliptical deformation (not sure how)
+add an ending to the game
+  maybe the game ending should ask you to open the console and type in some commands
+  mirror ending (if no cheats)
+    level after final boss battle is the intro level, but flipped left right, with a fake player
+      damage the fake player to end the game
+      message about go outside
+  no ending (if cheats)
+    game goes on forever
+    also game goes on if player attacks, the fake player
+  game never ends if you have used cheats
+
+laser mod - your laser beam fires from your last position, not your current position
+  or apply to all guns?
+
+mod: While in the air, time is slowed.
+  or something else while in air
 
 a bot that eats ammo and converts them into rerolls
   or 2 ammo power ups = 1 reroll
 
 been getting some fps slow down after playing for a few minutes
+  this seems to be caused by capping the fps at 60, but 60 fps shouldn't have any slowdown
 
 new status effect: fear - push mob away from player for a time
 
@@ -46,17 +49,6 @@ mod - explosions apply radiation damage over time
 
 mod self destruct - drones explode when they die
   drones lose extra time on collisions
-
-add an ending to the game
-  add a final boss battle level
-  mirror ending (if no cheats)
-    level after final boss battle is the intro level, but flipped left right, with a fake player
-      damage the fake player to end the game
-      message about go outside
-  no ending (if cheats)
-    game goes on forever
-    also game goes on if player attacks, the fake player
-  game never ends if you have used cheats
 
 foam or spore bullet on dmg shrink effect
     it might mess with the foam position of other bullets on the mob

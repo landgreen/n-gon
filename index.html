@@ -2,57 +2,57 @@
 <html>
 
 <head>
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-113454647-1"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-113454647-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-		function gtag() {
-			dataLayer.push(arguments);
-		}
-		gtag('js', new Date());
-		gtag('config', 'UA-113454647-1');
-	</script>
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', 'UA-113454647-1');
+    </script>
 
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<meta name="description" content="Browser-based side scrolling video game with the matter.js physics engine.">
-	<meta name="author" content="Ross Landgreen">
-	<meta property="og:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
-	<meta property="og:title" content="n-gon">
-	<meta name="twitter:title" content="n-gon">
-	<meta name="twitter:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Browser-based side scrolling video game with the matter.js physics engine.">
+    <meta name="author" content="Ross Landgreen">
+    <meta property="og:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
+    <meta property="og:title" content="n-gon">
+    <meta name="twitter:title" content="n-gon">
+    <meta name="twitter:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
 
-	<title>n-gon</title>
-	<link rel="stylesheet" href="style.css">
-	<link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
+    <title>n-gon</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
 </head>
 
 <body>
-	<!-- <body oncontextmenu="return false"> -->
-	<div id='guns'></div>
-	<div id='field'></div>
-	<div id='mods'></div>
-	<div id="text-log"></div>
-	<div id="fade-out"></div>
-	<div id="health-bg"></div>
-	<div id="health"></div>
-	<div id="dmg"></div>
-	<div id="choose-background"></div>
-	<div id='construct'></div>
-	<!-- contenteditable="true" -->
+    <!-- <body oncontextmenu="return false"> -->
+    <div id='guns'></div>
+    <div id='field'></div>
+    <div id='mods'></div>
+    <div id="text-log"></div>
+    <div id="fade-out"></div>
+    <div id="health-bg"></div>
+    <div id="health"></div>
+    <div id="dmg"></div>
+    <div id="choose-background"></div>
+    <div id='construct'></div>
+    <!-- contenteditable="true" -->
 
-	<!-- guns -->
-	<!-- <audio id="snare2" src="sounds\guns\snare2.ogg" preload="auto"></audio>
+    <!-- guns -->
+    <!-- <audio id="snare2" src="sounds\guns\snare2.ogg" preload="auto"></audio>
 	<audio id="airgun" src="sounds\guns\airgun.ogg" preload="auto"></audio>
 	<audio id="basssnaredrum" src="sounds\guns\basssnaredrum.ogg" preload="auto"></audio>
 	<audio id="sniper" src="sounds\guns\sniper.ogg" preload="auto"></audio>
 	<audio id="glock" src="sounds\guns\glock.ogg" preload="auto"></audio>
 	<audio id="launcher" src="sounds\guns\launcher2.ogg" preload="auto"></audio> -->
 
-	<!-- player walk -->
-	<!-- <audio id="walk1" src="sounds\mech\walk1.ogg" preload="auto"></audio>
+    <!-- player walk -->
+    <!-- <audio id="walk1" src="sounds\mech\walk1.ogg" preload="auto"></audio>
 	<audio id="walk2" src="sounds\mech\walk2.ogg" preload="auto"></audio>
 	<audio id="walk3" src="sounds\mech\walk3.ogg" preload="auto"></audio>
 	<audio id="walk4" src="sounds\mech\walk4.ogg" preload="auto"></audio>
@@ -63,265 +63,265 @@
 	<audio id="walk9" src="sounds\mech\walk9.ogg" preload="auto"></audio>
 	<audio id="walk10" src="sounds\mech\walk10.ogg" preload="auto"></audio> -->
 
-	<!-- player dmg -->
-	<!-- <audio id="dmg0" src="sounds\dmg\dmg0.ogg" preload="auto"></audio>
+    <!-- player dmg -->
+    <!-- <audio id="dmg0" src="sounds\dmg\dmg0.ogg" preload="auto"></audio>
 	<audio id="dmg1" src="sounds\dmg\dmg1.ogg" preload="auto"></audio>
 	<audio id="dmg2" src="sounds\dmg\dmg2.ogg" preload="auto"></audio>
 	<audio id="dmg3" src="sounds\dmg\dmg3.ogg" preload="auto"></audio> -->
 
-	<!-- other -->
-	<!-- <audio id="boom" src="sounds\boom.ogg" preload="auto"></audio>
+    <!-- other -->
+    <!-- <audio id="boom" src="sounds\boom.ogg" preload="auto"></audio>
 	<audio id="powerup" src="sounds\powerup4.ogg" preload="auto"></audio>
 	<audio id="no" src="sounds\no.ogg" preload="auto"></audio>
 	<audio id="click" src="sounds\click.ogg" preload="auto"></audio>
 	<audio id="ammo" src="sounds\ammo.ogg" preload="auto"></audio> -->
 
-	<canvas id="canvas"></canvas>
-	<!-- **********  intro page ***********************************************
+    <canvas id="canvas"></canvas>
+    <!-- **********  intro page ***********************************************
 ******************************************************************************* -->
-	<div id="choose-grid"></div>
-	<div id="build-grid"></div>
-	<div style="position: absolute; top:0;left:0;">
-		<div id="pause-grid-left" class="pause-grid"></div>
-	</div>
-	<div style="position: absolute; top:0;right:0;">
-		<div id="pause-grid-right" class="pause-grid"></div>
-	</div>
-	<svg class="SVG-button" id="build-button" width="110" height="40">
-		<g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Arial, sans-serif">
-			<text x="10" y="30">custom</text>
-		</g>
-	</svg>
-	<div id='info'>
-		<div id="settings">
-			<details>
-				<summary>settings</summary>
-				<div style="line-height: 150%;" id="details-div">
-					<label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
-					<select name="difficulty-select" id="difficulty-select">
-						<option value="1">easy</option>
-						<option value="2" selected>normal</option>
-						<option value="4">hard</option>
-						<option value="6">why?</option>
-					</select>
-					<br>
-					<label for="community-maps" title="adds in maps written by n-gon player: Francois">include community maps:</label>
-					<input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
-					<!-- <br>
+    <div id="choose-grid"></div>
+    <div id="build-grid"></div>
+    <div style="position: absolute; top:0;left:0;">
+        <div id="pause-grid-left" class="pause-grid"></div>
+    </div>
+    <div style="position: absolute; top:0;right:0;">
+        <div id="pause-grid-right" class="pause-grid"></div>
+    </div>
+    <svg class="SVG-button" id="build-button" width="110" height="40">
+        <g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Arial, sans-serif">
+            <text x="10" y="30">custom</text>
+        </g>
+    </svg>
+    <div id='info'>
+        <div id="settings">
+            <details>
+                <summary>settings</summary>
+                <div style="line-height: 150%;" id="details-div">
+                    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
+                    <select name="difficulty-select" id="difficulty-select">
+                        <option value="1">easy</option>
+                        <option value="2" selected>normal</option>
+                        <option value="4">hard</option>
+                        <option value="6">why?</option>
+                    </select>
+                    <br>
+                    <label for="community-maps" title="adds in maps written by n-gon player: Francois">include community maps:</label>
+                    <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
+                    <!-- <br>
 					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
 					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;"> -->
-					<br>
-					<label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
-					<select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
-						<option value="https://codepen.io/lilgreenland/full/ozXNWZ" selected>9-6-2016</option>
-						<option value="https://codepen.io/lilgreenland/full/wzARJY">10-2-2016</option>
-						<option value="classic/7-1-2017/">7-1-2017</option>
-						<option value="classic/1-4-2018/">1-4-2018</option>
-						<option value="classic/7-11-2019/">7-11-2019</option>
-						<option value="classic/9-8-2019/">9-8-2019</option>
-					</select>
-					<br>
-					<label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
-					<select name="fps-select" id="fps-select">
-						<option value="max" selected>no cap</option>
-						<option value="72">72 fps</option>
-						<option value="60">60 fps</option>
-						<option value="45">45 fps</option>
-						<option value="30">30 fps</option>
-					</select>
-				</div>
-			</details>
-		</div>
-		<div>
-			<details id="control-details">
-				<summary>controls</summary>
-				<div id="details-div">
-					To change controls click a box<br>
-					and press an unused key.
-					<br><br>
-					<table id="control-table">
-						<tr>
-							<th>FIRE</th>
-							<td></td>
-							<td class='key-used'>MouseLeft</td>
-							<td></td>
-						</tr>
-						<tr>
-							<th>FIELD</th>
-							<td id='key-field' class='key-input'>SPACE</td>
-							<td class='key-used'>MouseRight</td>
-						</tr>
-						<tr>
-							<th>JUMP</th>
-							<td id='key-up' class='key-input'>W</td>
-							<td class='key-used'>ArrowUp</td>
-						</tr>
-						<tr>
-							<th>CROUCH</th>
-							<td id='key-down' class='key-input'>S</td>
-							<td class='key-used'>ArrowDown</td>
-						</tr>
-						<tr>
-							<th>LEFT</th>
-							<td id='key-left' class='key-input'>A</td>
-							<td class='key-used'>ArrowLeft</td>
-						</tr>
-						<tr>
-							<th>RIGHT</th>
-							<td id='key-right' class='key-input'>D</td>
-							<td class='key-used'>ArrowRight</td>
-						</tr>
-						<tr>
-							<th>GUN →</th>
-							<td id='key-next-gun' class='key-input'>Q</td>
-							<td class='key-used'>MouseWheel</td>
-						</tr>
-						<tr>
-							<th>GUN ←</th>
-							<td id='key-previous-gun' class='key-input'>E</td>
-							<td class='key-used'>MouseWheel</td>
-						</tr>
-						<tr>
-							<th>PAUSE</th>
-							<td id='key-pause' class='key-input'>P</td>
-							<td></td>
-						</tr>
-						<tr>
-							<th>TESTING</th>
-							<td id='key-testing' class='key-input'>T</td>
-							<td></td>
-						</tr>
-					</table>
-					<button id="control-reset" type="button">reset</button><span style="font-size: 60%;"> to default keys</span>
-				</div>
-			</details>
-		</div>
-		<div>
-			<details>
-				<summary>about</summary>
-				<div id="details-div">
-					<!-- <p>
+                    <br>
+                    <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
+                    <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
+                        <option value="https://codepen.io/lilgreenland/full/ozXNWZ" selected>9-6-2016</option>
+                        <option value="https://codepen.io/lilgreenland/full/wzARJY">10-2-2016</option>
+                        <option value="classic/7-1-2017/">7-1-2017</option>
+                        <option value="classic/1-4-2018/">1-4-2018</option>
+                        <option value="classic/7-11-2019/">7-11-2019</option>
+                        <option value="classic/9-8-2019/">9-8-2019</option>
+                    </select>
+                    <br>
+                    <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
+                    <select name="fps-select" id="fps-select">
+                        <option value="max" selected>no cap</option>
+                        <option value="72">72 fps</option>
+                        <option value="60">60 fps</option>
+                        <option value="45">45 fps</option>
+                        <option value="30">30 fps</option>
+                    </select>
+                </div>
+            </details>
+        </div>
+        <div>
+            <details id="control-details">
+                <summary>controls</summary>
+                <div id="details-div">
+                    To change controls click a box<br>
+                    and press an unused key.
+                    <br><br>
+                    <table id="control-table">
+                        <tr>
+                            <th>FIRE</th>
+                            <td></td>
+                            <td class='key-used'>MouseLeft</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>FIELD</th>
+                            <td id='key-field' class='key-input'>SPACE</td>
+                            <td class='key-used'>MouseRight</td>
+                        </tr>
+                        <tr>
+                            <th>JUMP</th>
+                            <td id='key-up' class='key-input'>W</td>
+                            <td class='key-used'>ArrowUp</td>
+                        </tr>
+                        <tr>
+                            <th>CROUCH</th>
+                            <td id='key-down' class='key-input'>S</td>
+                            <td class='key-used'>ArrowDown</td>
+                        </tr>
+                        <tr>
+                            <th>LEFT</th>
+                            <td id='key-left' class='key-input'>A</td>
+                            <td class='key-used'>ArrowLeft</td>
+                        </tr>
+                        <tr>
+                            <th>RIGHT</th>
+                            <td id='key-right' class='key-input'>D</td>
+                            <td class='key-used'>ArrowRight</td>
+                        </tr>
+                        <tr>
+                            <th>GUN →</th>
+                            <td id='key-next-gun' class='key-input'>Q</td>
+                            <td class='key-used'>MouseWheel</td>
+                        </tr>
+                        <tr>
+                            <th>GUN ←</th>
+                            <td id='key-previous-gun' class='key-input'>E</td>
+                            <td class='key-used'>MouseWheel</td>
+                        </tr>
+                        <tr>
+                            <th>PAUSE</th>
+                            <td id='key-pause' class='key-input'>P</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>TESTING</th>
+                            <td id='key-testing' class='key-input'>T</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <button id="control-reset" type="button">reset</button><span style="font-size: 60%;"> to default keys</span>
+                </div>
+            </details>
+        </div>
+        <div>
+            <details>
+                <summary>about</summary>
+                <div id="details-div">
+                    <!-- <p>
 						n-gon is a 2-D physics platformer / shooter
 						<br>it has
 					</p> -->
-					<a href="https://discord.gg/2eC9pgJ">
-						<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 235">
-							<style>
-								.st0 {
-									fill: #1B1F23;
-								}
-							</style>
-							<path class="st0" d="M142.8 120.1c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11s-4.6-11-10.2-11zM106.3 120.1c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11 .1-6.1-4.5-11-10.2-11z" />
-							<path class="st0" d="M191.4 36.9h-134c-11.3 0-20.5 9.2-20.5 20.5v134c0 11.3 9.2 20.5 20.5 20.5h113.4l-5.3-18.3 12.8 11.8 12.1 11.1 21.6 18.7V57.4c-.1-11.3-9.3-20.5-20.6-20.5zm-38.6 129.5s-3.6-4.3-6.6-8c13.1-3.7 18.1-11.8 18.1-11.8-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.4-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.2-1.8-1-2.8-1.7-2.8-1.7s4.8 7.9 17.5 11.7c-3 3.8-6.7 8.2-6.7 8.2-22.1-.7-30.5-15.1-30.5-15.1 0-31.9 14.4-57.8 14.4-57.8 14.4-10.7 28-10.4 28-10.4l1 1.2c-18 5.1-26.2 13-26.2 13s2.2-1.2 5.9-2.8c10.7-4.7 19.2-5.9 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.5 0 0-7.9-7.5-24.9-12.6l1.4-1.6s13.7-.3 28 10.4c0 0 14.4 25.9 14.4 57.8 0-.1-8.4 14.3-30.5 15zM303.8 79.7h-33.2V117l22.1 19.9v-36.2h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1h33.2c17.8.1 34.5-8.8 34.5-29.2v-29.8c.1-20.8-16.6-29.9-34.4-29.9zm174 59.7v-30.6c0-11 19.8-13.5 25.8-2.5l18.3-7.4c-7.2-15.8-20.3-20.4-31.2-20.4-17.8 0-35.4 10.3-35.4 30.3v30.6c0 20.2 17.6 30.3 35 30.3 11.2 0 24.6-5.5 32-19.9l-19.6-9c-4.8 12.3-24.9 9.3-24.9-1.4zM417.3 113c-6.9-1.5-11.5-4-11.8-8.3.4-10.3 16.3-10.7 25.6-.8l14.7-11.3c-9.2-11.2-19.6-14.2-30.3-14.2-16.3 0-32.1 9.2-32.1 26.6 0 16.9 13 26 27.3 28.2 7.3 1 15.4 3.9 15.2 8.9-.6 9.5-20.2 9-29.1-1.8l-14.2 13.3c8.3 10.7 19.6 16.1 30.2 16.1 16.3 0 34.4-9.4 35.1-26.6 1-21.7-14.8-27.2-30.6-30.1zm-67 55.5h22.4V79.7h-22.4v88.8zM728 79.7h-33.2V117l22.1 19.9v-36.2h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1H728c17.8.1 34.5-8.8 34.5-29.2v-29.8c0-20.8-16.7-29.9-34.5-29.9zm-162.9-1.2c-18.4 0-36.7 10-36.7 30.5v30.3c0 20.3 18.4 30.5 36.9 30.5 18.4 0 36.7-10.2 36.7-30.5V109c0-20.4-18.5-30.5-36.9-30.5zm14.4 60.8c0 6.4-7.2 9.7-14.3 9.7-7.2 0-14.4-3.1-14.4-9.7V109c0-6.5 7-10 14-10 7.3 0 14.7 3.1 14.7 10v30.3zM682.4 109c-.5-20.8-14.7-29.2-33-29.2h-35.5v88.8h22.7v-28.2h4l20.6 28.2h28L665 138.1c10.7-3.4 17.4-12.7 17.4-29.1zm-32.6 12h-13.2v-20.3h13.2c14.1 0 14.1 20.3 0 20.3z" />
-						</svg>
-					</a>
-					Chat about n-gon in the <a href="https://discord.gg/2eC9pgJ">discord</a>.<br> Let me know about ideas,
-					or bugs.
-					<br>
-					<br>
-					<br>
-					<a href="https://github.com/landgreen/n-gon">
-						<svg viewBox="0 0 100 16" xmlns="http://www.w3.org/2000/svg" fill="#1B1F23">
-							<path d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" />
-							<g stroke='none' font-size="8px" font-family="Arial Black, sans-serif">
-								<text x="19" y="11">Github</text>
-							</g>
-						</svg>
-					</a>
-					<a href="https://github.com/landgreen/n-gon">Github</a> hosts the source code for n-gon.<br> It's
-					written in JavaScript, CSS, and HTML.
-					<!-- <br>
+                    <a href="https://discord.gg/2eC9pgJ">
+                        <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 235">
+                            <style>
+                                .st0 {
+                                    fill: #1B1F23;
+                                }
+                            </style>
+                            <path class="st0" d="M142.8 120.1c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11s-4.6-11-10.2-11zM106.3 120.1c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11 .1-6.1-4.5-11-10.2-11z" />
+                            <path class="st0" d="M191.4 36.9h-134c-11.3 0-20.5 9.2-20.5 20.5v134c0 11.3 9.2 20.5 20.5 20.5h113.4l-5.3-18.3 12.8 11.8 12.1 11.1 21.6 18.7V57.4c-.1-11.3-9.3-20.5-20.6-20.5zm-38.6 129.5s-3.6-4.3-6.6-8c13.1-3.7 18.1-11.8 18.1-11.8-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.4-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.2-1.8-1-2.8-1.7-2.8-1.7s4.8 7.9 17.5 11.7c-3 3.8-6.7 8.2-6.7 8.2-22.1-.7-30.5-15.1-30.5-15.1 0-31.9 14.4-57.8 14.4-57.8 14.4-10.7 28-10.4 28-10.4l1 1.2c-18 5.1-26.2 13-26.2 13s2.2-1.2 5.9-2.8c10.7-4.7 19.2-5.9 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.5 0 0-7.9-7.5-24.9-12.6l1.4-1.6s13.7-.3 28 10.4c0 0 14.4 25.9 14.4 57.8 0-.1-8.4 14.3-30.5 15zM303.8 79.7h-33.2V117l22.1 19.9v-36.2h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1h33.2c17.8.1 34.5-8.8 34.5-29.2v-29.8c.1-20.8-16.6-29.9-34.4-29.9zm174 59.7v-30.6c0-11 19.8-13.5 25.8-2.5l18.3-7.4c-7.2-15.8-20.3-20.4-31.2-20.4-17.8 0-35.4 10.3-35.4 30.3v30.6c0 20.2 17.6 30.3 35 30.3 11.2 0 24.6-5.5 32-19.9l-19.6-9c-4.8 12.3-24.9 9.3-24.9-1.4zM417.3 113c-6.9-1.5-11.5-4-11.8-8.3.4-10.3 16.3-10.7 25.6-.8l14.7-11.3c-9.2-11.2-19.6-14.2-30.3-14.2-16.3 0-32.1 9.2-32.1 26.6 0 16.9 13 26 27.3 28.2 7.3 1 15.4 3.9 15.2 8.9-.6 9.5-20.2 9-29.1-1.8l-14.2 13.3c8.3 10.7 19.6 16.1 30.2 16.1 16.3 0 34.4-9.4 35.1-26.6 1-21.7-14.8-27.2-30.6-30.1zm-67 55.5h22.4V79.7h-22.4v88.8zM728 79.7h-33.2V117l22.1 19.9v-36.2h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1H728c17.8.1 34.5-8.8 34.5-29.2v-29.8c0-20.8-16.7-29.9-34.5-29.9zm-162.9-1.2c-18.4 0-36.7 10-36.7 30.5v30.3c0 20.3 18.4 30.5 36.9 30.5 18.4 0 36.7-10.2 36.7-30.5V109c0-20.4-18.5-30.5-36.9-30.5zm14.4 60.8c0 6.4-7.2 9.7-14.3 9.7-7.2 0-14.4-3.1-14.4-9.7V109c0-6.5 7-10 14-10 7.3 0 14.7 3.1 14.7 10v30.3zM682.4 109c-.5-20.8-14.7-29.2-33-29.2h-35.5v88.8h22.7v-28.2h4l20.6 28.2h28L665 138.1c10.7-3.4 17.4-12.7 17.4-29.1zm-32.6 12h-13.2v-20.3h13.2c14.1 0 14.1 20.3 0 20.3z" />
+                        </svg>
+                    </a>
+                    Chat about n-gon in the <a href="https://discord.gg/2eC9pgJ">discord</a>.<br> Let me know about ideas,
+                    or bugs.
+                    <br>
+                    <br>
+                    <br>
+                    <a href="https://github.com/landgreen/n-gon">
+                        <svg viewBox="0 0 100 16" xmlns="http://www.w3.org/2000/svg" fill="#1B1F23">
+                            <path d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" />
+                            <g stroke='none' font-size="8px" font-family="Arial Black, sans-serif">
+                                <text x="19" y="11">Github</text>
+                            </g>
+                        </svg>
+                    </a>
+                    <a href="https://github.com/landgreen/n-gon">Github</a> hosts the source code for n-gon.<br> It's
+                    written in JavaScript, CSS, and HTML.
+                    <!-- <br>
 				<br>
 				n-gon is also hosted at <a href="https://lilgreenland.itch.io/n-gon">itch.io</a>.
 				<br>
 				<br> -->
-				</div>
-			</details>
-		</div>
-	</div>
+                </div>
+            </details>
+        </div>
+    </div>
 
-	<style>
-		.fade-in {
-			opacity: 0;
-			animation: 4s ease 3s normal forwards 1 fadein;
-		}
+    <style>
+        .fade-in {
+            opacity: 0;
+            animation: 4s ease 3s normal forwards 1 fadein;
+        }
 
-		@keyframes fadein {
-			0% {
-				opacity: 0;
-			}
+        @keyframes fadein {
+            0% {
+                opacity: 0;
+            }
 
-			100% {
-				opacity: 1;
-			}
-		}
+            100% {
+                opacity: 1;
+            }
+        }
 
-		@keyframes dash {
-			to {
-				stroke-dashoffset: 0;
-			}
-		}
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
 
-		.draw-lines {
-			stroke-dasharray: 20;
-			stroke-dashoffset: 20;
-			animation: dash 4.8s ease-in forwards;
-		}
+        .draw-lines {
+            stroke-dasharray: 20;
+            stroke-dashoffset: 20;
+            animation: dash 4.8s ease-in forwards;
+        }
 
-		.draw-lines-dash {
-			stroke-dasharray: 4;
-			stroke-dashoffset: 4;
-			animation: dash 4.8s ease-in forwards;
-		}
+        .draw-lines-dash {
+            stroke-dasharray: 4;
+            stroke-dashoffset: 4;
+            animation: dash 4.8s ease-in forwards;
+        }
 
-		.draw-lines-o {
-			stroke-dasharray: 11;
-			stroke-dashoffset: 11;
-			animation: dash 4.8s ease-in forwards;
-		}
+        .draw-lines-o {
+            stroke-dasharray: 11;
+            stroke-dashoffset: 11;
+            animation: dash 4.8s ease-in forwards;
+        }
 
-		.draw-lines-g {
-			stroke-dasharray: 17;
-			stroke-dashoffset: 17;
-			animation: dash 4.8s ease-in forwards;
-		}
+        .draw-lines-g {
+            stroke-dasharray: 17;
+            stroke-dashoffset: 17;
+            animation: dash 4.8s ease-in forwards;
+        }
 
-		.draw-lines-box-1 {
-			stroke-dasharray: 1000;
-			stroke-dashoffset: 1000;
-			animation: dash 10s ease-in forwards;
-			animation-delay: 0s;
-		}
+        .draw-lines-box-1 {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 10s ease-in forwards;
+            animation-delay: 0s;
+        }
 
-		.draw-lines-box-2 {
-			stroke-dasharray: 1000;
-			stroke-dashoffset: 1000;
-			animation: dash 5.2s ease-in forwards;
-			animation-delay: 2s;
-		}
+        .draw-lines-box-2 {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5.2s ease-in forwards;
+            animation-delay: 2s;
+        }
 
-		.draw-lines-box-3 {
-			stroke-dasharray: 1000;
-			stroke-dashoffset: 1000;
-			animation: dash 2.3s ease-in forwards;
-			animation-delay: 3.1s;
-		}
+        .draw-lines-box-3 {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2.3s ease-in forwards;
+            animation-delay: 3.1s;
+        }
 
-		.draw-lines3 {
-			stroke-dasharray: 3000;
-			stroke-dashoffset: 3000;
-			animation: dash 6.2s ease-in forwards;
-		}
+        .draw-lines3 {
+            stroke-dasharray: 3000;
+            stroke-dashoffset: 3000;
+            animation: dash 6.2s ease-in forwards;
+        }
 
-		.draw-lines4 {
-			stroke-dasharray: 300;
-			stroke-dashoffset: 300;
-			animation: dash 5s ease-in forwards;
-		}
-	</style>
-	<svg id='splash' class="intro" viewBox="0 0 800 800" onclick="game.startGame()">
-		<!-- title -->
-		<!-- <g class="fade-in" transform="translate(100,210) scale(34)" fill='#bbb' stroke='none'>
+        .draw-lines4 {
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+            animation: dash 5s ease-in forwards;
+        }
+    </style>
+    <svg id='splash' class="intro" viewBox="0 0 800 800" onclick="game.startGame()">
+        <!-- title -->
+        <!-- <g class="fade-in" transform="translate(100,210) scale(34)" fill='#bbb' stroke='none'>
 			<path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" fill="rgb(50,200,255)" />
 			<rect x="4" y="1.25" width="1" height="0.5" rx='0.03' />
 			<path transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z"
@@ -331,136 +331,136 @@
 			<path transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" fill='rgb(10,220,190)'
 			/>
 		</g> -->
-		<g class="fade-in" transform="translate(100,210) scale(34)" fill='#bbb' stroke='none'>
-			<path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
-			<rect x="4" y="1.25" width="1" height="0.5" rx='0.03' />
-			<path transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
-			<path transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
-			<path transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
-		</g>
-		<g transform="translate(100,210) scale(34)" fill='none' stroke='#222' stroke-linejoin="round" stroke-linecap="round">
-			<path class="draw-lines" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
-			<rect class="draw-lines-dash" x="4" y="1.25" width="1" height="0.5" stroke-width='0.0875' rx='0.03' />
-			<path class="draw-lines-g" transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
-			<path class="draw-lines-o" transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
-			<path class="draw-lines" transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
-		</g>
-		<!-- <g class="draw-lines" transform="translate(100,210) scale(34)" fill='none' stroke='#222' stroke-linejoin="round" stroke-linecap="round">
+        <g class="fade-in" transform="translate(100,210) scale(34)" fill='#bbb' stroke='none'>
+            <path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
+            <rect x="4" y="1.25" width="1" height="0.5" rx='0.03' />
+            <path transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
+            <path transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
+            <path transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
+        </g>
+        <g transform="translate(100,210) scale(34)" fill='none' stroke='#222' stroke-linejoin="round" stroke-linecap="round">
+            <path class="draw-lines" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
+            <rect class="draw-lines-dash" x="4" y="1.25" width="1" height="0.5" stroke-width='0.0875' rx='0.03' />
+            <path class="draw-lines-g" transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
+            <path class="draw-lines-o" transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
+            <path class="draw-lines" transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
+        </g>
+        <!-- <g class="draw-lines" transform="translate(100,210) scale(34)" fill='none' stroke='#222' stroke-linejoin="round" stroke-linecap="round">
 			<path d="M0 0  v3.1 h1 v-1.7 h1 v1.7 h1 v-2.6 l-0.3-0.3 h-1.7 v-0.2 h-1" stroke-width='0.0875' />
 			<rect x="4" y="1.25" width="1" height="0.5" stroke-width='0.0875' rx='0.03' />
 			<path transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
 			<path transform="translate(10.9,0) scale(1.25)" d="M0 0  l-0.7 0.7 v1 l0.7 0.7 h1 l0.7 -0.7 v-1 l-0.7 -0.7 h-1 Z" stroke-width='0.07' />
 			<path transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
 		</g> -->
-		<!-- mouse -->
-		<g class="draw-lines3" transform="translate(290,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round" stroke-width="10px" stroke="#222" fill="none">
-			<path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="rgb(0, 200, 255)" stroke="none" />
-			<!-- <path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
+        <!-- mouse -->
+        <g class="draw-lines3" transform="translate(290,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round" stroke-width="10px" stroke="#222" fill="none">
+            <path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="rgb(0, 200, 255)" stroke="none" />
+            <!-- <path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
 			<path class="fade-in" d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
-			<path d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
-			<path d="M657 317 h 340 h-170 v-207 s 21 -59, -5 -59 S 807 7, 807 7" />
-			<ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />
-		</g>
-		<!-- keys -->
-		<g transform="translate(195,480) scale(0.8)">
-			<g fill='none' stroke='#222' stroke-width="3.5" stroke-linejoin="round">
-				<path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
-				<path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
-				<path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
-				<path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
-				<path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
-				<path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
-				<!-- <rect x="0" y="0" width="60" height="60" rx='3' /> -->
-				<!-- <rect x="140" y="0" width="60" height="60" rx='3' /> -->
-				<!-- <rect x="0" y="70" width="60" height="60" rx='3' /> -->
-				<!-- <rect x="70" y="0" width="60" height="60" rx='3' /> -->
-				<!-- <rect x="70" y="70" width="60" height="60" rx='3' /> -->
-				<!-- <rect x="140" y="70" width="60" height="60" rx='3' /> -->
-			</g>
-			<g class="draw-lines4" text-anchor="middle" stroke='#000' fill='none' stroke-width="2" font-size="38px" font-family="Arial Black, sans-serif">
-				<!-- <text class="fade-in" fill='#aaa' stroke="none" x="30" y="45">Q</text>
+            <path d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
+            <path d="M657 317 h 340 h-170 v-207 s 21 -59, -5 -59 S 807 7, 807 7" />
+            <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />
+        </g>
+        <!-- keys -->
+        <g transform="translate(195,480) scale(0.8)">
+            <g fill='none' stroke='#222' stroke-width="3.5" stroke-linejoin="round">
+                <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
+                <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
+                <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
+                <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
+                <path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
+                <path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
+                <!-- <rect x="0" y="0" width="60" height="60" rx='3' /> -->
+                <!-- <rect x="140" y="0" width="60" height="60" rx='3' /> -->
+                <!-- <rect x="0" y="70" width="60" height="60" rx='3' /> -->
+                <!-- <rect x="70" y="0" width="60" height="60" rx='3' /> -->
+                <!-- <rect x="70" y="70" width="60" height="60" rx='3' /> -->
+                <!-- <rect x="140" y="70" width="60" height="60" rx='3' /> -->
+            </g>
+            <g class="draw-lines4" text-anchor="middle" stroke='#000' fill='none' stroke-width="2" font-size="38px" font-family="Arial Black, sans-serif">
+                <!-- <text class="fade-in" fill='#aaa' stroke="none" x="30" y="45">Q</text>
 				<text class="fade-in" fill='#aaa' stroke="none" x="170" y="45">E</text> -->
-				<text x="30" y="45" id="splash-previous-gun" stroke-width="2">Q</text>
-				<text x="170" y="45" id="splash-next-gun" stroke-width="2">E</text>
-				<text x="100" y="45" id="splash-up">W</text>
-				<text x="100" y="113" id="splash-down">S</text>
-				<text x="30" y="113" id="splash-left">A</text>
-				<text x="170" y="113" id="splash-right">D</text>
-				<!-- <text class="fade-in" fill='#999' x="100" y="45">W</text>
+                <text x="30" y="45" id="splash-previous-gun" stroke-width="2">Q</text>
+                <text x="170" y="45" id="splash-next-gun" stroke-width="2">E</text>
+                <text x="100" y="45" id="splash-up">W</text>
+                <text x="100" y="113" id="splash-down">S</text>
+                <text x="30" y="113" id="splash-left">A</text>
+                <text x="170" y="113" id="splash-right">D</text>
+                <!-- <text class="fade-in" fill='#999' x="100" y="45">W</text>
 				<text class="fade-in" fill='#999' x="100" y="113">S</text>
 				<text class="fade-in" fill='#999' x="170" y="113">D</text>
 				<text class="fade-in" fill='#999' x="30" y="113">A</text> -->
-			</g>
-		</g>
+            </g>
+        </g>
 
-		<g class="fade-in" fill="none" stroke="#aaa" stroke-width="1">
-			<path d="M 254 433.5 h-35.5 v40" />
-			<path d="M 295 433.5 h36.5 v40" />
+        <g class="fade-in" fill="none" stroke="#aaa" stroke-width="1">
+            <path d="M 254 433.5 h-35.5 v40" />
+            <path d="M 295 433.5 h36.5 v40" />
 
-			<path d="M 274 625 v-35" />
-			<path d="M 430.5 442 v50 h38" />
-			<path d="M 612.5 442 v50 h-38" />
-		</g>
-		<g class="fade-in" stroke="none" fill="#aaa" font-size="16px">
-			<text x="253" y="422">switch</text>
-			<text x="257" y="438">guns</text>
-			<text x="255" y="638">move</text>
-			<text x="420" y="438">fire</text>
-			<text x="599" y="438">field</text>
-		</g>
-		<g id="gamepad" transform="translate(700,700) scale(0.2)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
-			<path style="fill:#FB7686;" d="M122.578,86.897H68.276c-6.184,0-11.196,5.013-11.196,11.196v12.126h76.692V98.091
+            <path d="M 274 625 v-35" />
+            <path d="M 430.5 442 v50 h38" />
+            <path d="M 612.5 442 v50 h-38" />
+        </g>
+        <g class="fade-in" stroke="none" fill="#aaa" font-size="16px">
+            <text x="253" y="422">switch</text>
+            <text x="257" y="438">guns</text>
+            <text x="255" y="638">move</text>
+            <text x="420" y="438">fire</text>
+            <text x="599" y="438">field</text>
+        </g>
+        <g id="gamepad" transform="translate(700,700) scale(0.2)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
+            <path style="fill:#FB7686;" d="M122.578,86.897H68.276c-6.184,0-11.196,5.013-11.196,11.196v12.126h76.692V98.091
 				C133.772,91.908,128.76,86.897,122.578,86.897z" />
-			<rect x="57.08" y="100.766" style="opacity:0.4;fill:#FF4E64;enable-background:new    ;" width="76.69" height="9.453" />
-			<path style="fill:#FB7686;" d="M389.422,86.897h54.303c6.182,0,11.194,5.013,11.194,11.196v12.126h-76.693V98.091
+            <rect x="57.08" y="100.766" style="opacity:0.4;fill:#FF4E64;enable-background:new    ;" width="76.69" height="9.453" />
+            <path style="fill:#FB7686;" d="M389.422,86.897h54.303c6.182,0,11.194,5.013,11.194,11.196v12.126h-76.693V98.091
 				C378.228,91.908,383.241,86.897,389.422,86.897z" />
-			<rect x="378.229" y="100.766" style="opacity:0.4;fill:#FF4E64;enable-background:new    ;" width="76.69" height="9.453" />
-			<rect x="101.947" y="130.449" style="fill:#89BBE4;" width="308.094" height="144.099" />
-			<path style="opacity:0.1;fill:#145587;enable-background:new    ;" d="M336.726,130.443l-6.391,28.154
+            <rect x="378.229" y="100.766" style="opacity:0.4;fill:#FF4E64;enable-background:new    ;" width="76.69" height="9.453" />
+            <rect x="101.947" y="130.449" style="fill:#89BBE4;" width="308.094" height="144.099" />
+            <path style="opacity:0.1;fill:#145587;enable-background:new    ;" d="M336.726,130.443l-6.391,28.154
 				c-6.438,28.363-7.324,57.602-2.745,86.134H184.41c4.577-28.531,3.692-57.77-2.746-86.134l-6.39-28.154h-73.323v144.103h308.097
 				V130.443H336.726z" />
-			<g>
-				<path style="fill:#89BBE4;" d="M168.235,158.598l-6.39-28.154c-4.031-12.081-15.338-20.226-28.073-20.226H57.08
+            <g>
+                <path style="fill:#89BBE4;" d="M168.235,158.598l-6.39-28.154c-4.031-12.081-15.338-20.226-28.073-20.226H57.08
 					c-4.862,0-9.582,1.835-13.034,5.259c-9.65,9.571-15.848,22.071-17.629,35.539L0.612,346.264
 					c-5.519,41.762,26.979,78.838,69.103,78.838c31.406,0,58.935-21.004,67.23-51.296l27.18-99.262l0,0
 					C175.524,236.906,176.94,196.95,168.235,158.598z" />
-				<path style="fill:#89BBE4;" d="M511.387,346.264l-25.806-195.25c-1.78-13.468-7.978-25.967-17.629-35.539
+                <path style="fill:#89BBE4;" d="M511.387,346.264l-25.806-195.25c-1.78-13.468-7.978-25.967-17.629-35.539
 					c-3.452-3.424-8.172-5.259-13.034-5.259h-76.693c-12.734,0-24.041,8.146-28.072,20.226l-6.39,28.154
 					c-8.706,38.353-7.288,78.308,4.109,115.948l0,0l27.18,99.262c8.296,30.292,35.823,51.296,67.23,51.296
 					C484.408,425.102,516.908,388.026,511.387,346.264z" />
-			</g>
-			<circle style="fill:#ACDFEA;" cx="189.252" cy="285.582" r="52.611" />
-			<circle style="opacity:0.3;fill:#145587;enable-background:new    ;" cx="183.371" cy="293.273" r="25.611" />
-			<circle style="fill:#ACDFEA;" cx="322.747" cy="285.582" r="52.611" />
-			<circle style="opacity:0.3;fill:#145587;enable-background:new    ;" cx="316.866" cy="293.273" r="25.611" />
-			<circle style="fill:#384148;" cx="322.747" cy="285.582" r="25.611" />
-			<g>
-				<path style="fill:#1F84CE;" d="M108.027,142.799H86.073c-4.334,0-7.848,3.514-7.848,7.849v9.17c0,2.082,0.826,4.077,2.298,5.549
+            </g>
+            <circle style="fill:#ACDFEA;" cx="189.252" cy="285.582" r="52.611" />
+            <circle style="opacity:0.3;fill:#145587;enable-background:new    ;" cx="183.371" cy="293.273" r="25.611" />
+            <circle style="fill:#ACDFEA;" cx="322.747" cy="285.582" r="52.611" />
+            <circle style="opacity:0.3;fill:#145587;enable-background:new    ;" cx="316.866" cy="293.273" r="25.611" />
+            <circle style="fill:#384148;" cx="322.747" cy="285.582" r="25.611" />
+            <g>
+                <path style="fill:#1F84CE;" d="M108.027,142.799H86.073c-4.334,0-7.848,3.514-7.848,7.849v9.17c0,2.082,0.826,4.077,2.298,5.549
 					l11.3,11.3c3.064,3.065,8.034,3.065,11.1,0l10.653-10.652c1.471-1.472,2.298-3.469,2.298-5.549v-9.818
 					C115.875,146.314,112.361,142.799,108.027,142.799z" />
-				<path style="fill:#1F84CE;" d="M76.951,190.893l-10.653-10.652c-1.472-1.472-3.468-2.3-5.549-2.3h-9.818
+                <path style="fill:#1F84CE;" d="M76.951,190.893l-10.653-10.652c-1.472-1.472-3.468-2.3-5.549-2.3h-9.818
 					c-4.334,0-7.849,3.514-7.849,7.849v21.953c0,4.335,3.514,7.849,7.849,7.849h9.17c2.082,0,4.077-0.828,5.549-2.3l11.302-11.3
 					C80.016,198.929,80.016,193.96,76.951,190.893z" />
-				<path style="fill:#1F84CE;" d="M113.576,228.168l-11.3-11.3c-3.065-3.065-8.034-3.065-11.1,0l-10.653,10.652
+                <path style="fill:#1F84CE;" d="M113.576,228.168l-11.3-11.3c-3.065-3.065-8.034-3.065-11.1,0l-10.653,10.652
 					c-1.472,1.472-2.298,3.468-2.298,5.55v9.817c0,4.334,3.514,7.848,7.849,7.848h21.953c4.334,0,7.849-3.513,7.849-7.848v-9.171
 					C115.875,231.636,115.048,229.64,113.576,228.168z" />
-				<path style="fill:#1F84CE;" d="M143.169,177.943h-9.171c-2.081,0-4.077,0.826-5.549,2.298l-11.3,11.3
+                <path style="fill:#1F84CE;" d="M143.169,177.943h-9.171c-2.081,0-4.077,0.826-5.549,2.298l-11.3,11.3
 					c-3.064,3.064-3.064,8.034,0,11.1l10.653,10.653c1.472,1.471,3.468,2.298,5.55,2.298h9.818c4.334,0,7.848-3.513,7.848-7.848
 					v-21.953C151.018,181.457,147.504,177.943,143.169,177.943z" />
-				<circle style="fill:#1F84CE;" cx="414.952" cy="155.839" r="18.825" />
-			</g>
-			<circle style="fill:#F9C526;" cx="374.025" cy="196.766" r="18.825" />
-			<circle style="fill:#54B8AC;" cx="414.952" cy="237.693" r="18.825" />
-			<circle style="fill:#FFFFFF;" cx="455.879" cy="196.766" r="18.825" />
-			<circle style="fill:#384148;" cx="189.252" cy="285.582" r="25.611" />
-			<g>
-				<path style="fill:#FFFFFF;" d="M226.267,190.234h-23.773c-4.57,0-8.276-3.705-8.276-8.276s3.705-8.276,8.276-8.276h23.773
+                <circle style="fill:#1F84CE;" cx="414.952" cy="155.839" r="18.825" />
+            </g>
+            <circle style="fill:#F9C526;" cx="374.025" cy="196.766" r="18.825" />
+            <circle style="fill:#54B8AC;" cx="414.952" cy="237.693" r="18.825" />
+            <circle style="fill:#FFFFFF;" cx="455.879" cy="196.766" r="18.825" />
+            <circle style="fill:#384148;" cx="189.252" cy="285.582" r="25.611" />
+            <g>
+                <path style="fill:#FFFFFF;" d="M226.267,190.234h-23.773c-4.57,0-8.276-3.705-8.276-8.276s3.705-8.276,8.276-8.276h23.773
 					c4.57,0,8.276,3.705,8.276,8.276S230.838,190.234,226.267,190.234z" />
-				<path style="fill:#FFFFFF;" d="M309.506,190.234h-23.773c-4.572,0-8.276-3.705-8.276-8.276s3.704-8.276,8.276-8.276h23.773
+                <path style="fill:#FFFFFF;" d="M309.506,190.234h-23.773c-4.572,0-8.276-3.705-8.276-8.276s3.704-8.276,8.276-8.276h23.773
 					c4.572,0,8.276,3.705,8.276,8.276S314.077,190.234,309.506,190.234z" />
-			</g>
-		</g>
-		<!-- <g id="gamepad" transform="translate(640,640) scale(0.3)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
+            </g>
+        </g>
+        <!-- <g id="gamepad" transform="translate(640,640) scale(0.3)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
 			<path d="M115.824,187.891c-2.95,2.95-4.576,6.872-4.576,11.045c0,4.172,1.625,8.095,4.575,11.045l10.322,10.322
 				c2.95,2.949,6.872,4.573,11.042,4.573h9.511c8.612,0,15.619-7.007,15.619-15.619v-21.268c0-8.612-7.007-15.619-15.619-15.619
 				h-8.884c-4.171,0-8.093,1.625-11.044,4.575L115.824,187.891z M137.986,188.403h8.298v20.438h-8.926l-9.905-9.906L137.986,188.403
@@ -529,7 +529,7 @@
 				C399.76,153.343,404.345,148.758,409.979,148.758z" />
 		</g> -->
 
-		<!-- <g id="gamepad" transform="translate(640,640) scale(2)" style="display: none;">
+        <!-- <g id="gamepad" transform="translate(640,640) scale(2)" style="display: none;">
 			<path d="M44.3,49.8v-3.7c0-0.3-0.1-0.5-0.3-0.7s-0.4-0.3-0.7-0.3h-5.5v-5.5c0-0.3-0.1-0.5-0.3-0.7
 		s-0.4-0.3-0.7-0.3h-3.7c-0.3,0-0.5,0.1-0.7,0.3s-0.3,0.4-0.3,0.7v5.5h-5.5c-0.3,0-0.5,0.1-0.7,0.3S26,45.9,26,46.2v3.7
 		c0,0.3,0.1,0.5,0.3,0.7s0.4,0.3,0.7,0.3h5.5v5.5c0,0.3,0.1,0.5,0.3,0.7s0.4,0.3,0.7,0.3H37c0.3,0,0.5-0.1,0.7-0.3s0.3-0.4,0.3-0.7
@@ -540,22 +540,22 @@
 		c-2.9,2.9-6.3,4.3-10.4,4.3c-3.7,0-6.9-1.2-9.7-3.7h-6.3c-2.8,2.4-6,3.7-9.7,3.7c-4,0-7.5-1.4-10.4-4.3c-2.9-2.9-4.3-6.3-4.3-10.4
 		s1.4-7.5,4.3-10.4c2.9-2.9,6.3-4.3,10.4-4.3h25.7c4,0,7.5,1.4,10.4,4.3C74.1,40.5,75.5,44,75.5,48z" fill="#888" stroke="#222" />
 		</g> -->
-	</svg>
+    </svg>
 
-	<script src='lib/matter.min.js'></script>
-	<script src='lib/decomp.min.js'></script>
-	<script src='lib/randomColor.min.js'></script>
-	<script src="js/game.js"></script>
-	<script src="js/player.js"></script>
-	<script src="js/powerup.js"></script>
-	<script src="js/mods.js"></script>
-	<script src="js/bullet.js"></script>
-	<script src="js/mob.js"></script>
-	<script src="js/spawn.js"></script>
-	<script src="js/level.js"></script>
-	<script src="js/visibility.js"></script>
-	<script src="js/engine.js"></script>
-	<script src="js/index.js"></script>
+    <script src='lib/matter.min.js'></script>
+    <script src='lib/decomp.min.js'></script>
+    <script src='lib/randomColor.min.js'></script>
+    <script src="js/game.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/powerup.js"></script>
+    <script src="js/mods.js"></script>
+    <script src="js/bullet.js"></script>
+    <script src="js/mob.js"></script>
+    <script src="js/spawn.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/visibility.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/index.js"></script>
 </body>
 
 </html>

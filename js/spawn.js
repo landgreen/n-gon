@@ -94,17 +94,17 @@ const spawn = {
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.locatePlayer();
-        const density = 5
+        const density = 1
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
-        spawn.shield(me, x, y, 1);
+        // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             level.bossKilled = true;
             level.exit.x = 5500;
             level.exit.y = -330;
         };
         me.onDamage = function() {};
-        me.cycle = 300;
-        me.endCycle = 600;
+        me.cycle = 420;
+        me.endCycle = 720;
         me.mode = 0;
         me.do = function() {
             //hold position
@@ -118,56 +118,54 @@ const spawn = {
             });
             this.modeDo(); //this does different things based on the mode
             this.checkStatus();
-            if (!mech.isBodiesAsleep) {
-                this.cycle++; //switch modes
-                if (this.health > 0.33) {
-                    if (this.cycle > this.endCycle) {
-                        this.cycle = 0;
-                        this.mode++
-                        if (this.mode > 2) {
-                            this.mode = 0;
-                            this.fill = "#50f";
-                            this.rotateVelocity = Math.abs(this.rotateVelocity) * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
-                            this.modeDo = this.modeLasers
-                            //push blocks and player away, since this is the end of suck, and suck causes blocks to fall on the boss and stun it
-                            Matter.Body.scale(this, 10, 10);
-                            Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
-                            if (!this.isShielded) spawn.shield(this, x, y, 1); // regen shield to also prevent stun
-                            for (let i = 0, len = body.length; i < len; ++i) {
-                                if (body[i].position.x > this.position.x) {
-                                    body[i].force.x = 0.5
-                                } else {
-                                    body[i].force.x = -0.5
-                                }
-
+            this.cycle++; //switch modes÷
+            // if (!mech.isBodiesAsleep) {
+            if (this.health > 0.25) {
+                if (this.cycle > this.endCycle) {
+                    this.cycle = 0;
+                    this.mode++
+                    if (this.mode > 2) {
+                        this.mode = 0;
+                        this.fill = "#50f";
+                        this.rotateVelocity = Math.abs(this.rotateVelocity) * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
+                        this.modeDo = this.modeLasers
+                        //push blocks and player away, since this is the end of suck, and suck causes blocks to fall on the boss and stun it
+                        Matter.Body.scale(this, 10, 10);
+                        Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
+                        if (!this.isShielded) spawn.shield(this, x, y, 1); // regen shield to also prevent stun
+                        for (let i = 0, len = body.length; i < len; ++i) {
+                            if (body[i].position.x > this.position.x) {
+                                body[i].force.x = 0.5
+                            } else {
+                                body[i].force.x = -0.5
                             }
-                        } else if (this.mode === 1) {
-                            this.fill = "rgb(150,150,255)";
-                            this.endCycle = 360
-                            this.modeDo = this.modeSpawns
-                        } else if (this.mode === 2) {
-                            this.fill = "#000";
-                            this.endCycle = 720
-                            this.modeDo = this.modeSuck
-                            Matter.Body.scale(this, 0.1, 0.1);
-                            Matter.Body.setDensity(me, 100 * density); //extra dense //normal is 0.001 //makes effective life much larger
                         }
+                    } else if (this.mode === 1) {
+                        this.fill = "#50f"; // this.fill = "rgb(150,150,255)";
+                        this.modeDo = this.modeSpawns
+                    } else if (this.mode === 2) {
+                        this.fill = "#000";
+                        this.modeDo = this.modeSuck
+                        Matter.Body.scale(this, 0.1, 0.1);
+                        Matter.Body.setDensity(me, 100 * density); //extra dense //normal is 0.001 //makes effective life much larger
                     }
-                } else if (this.mode !== 3) { //all three modes at once
-                    Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
-                    if (this.mode === 2) {
-                        Matter.Body.scale(this, 5, 5);
-                    } else {
-                        Matter.Body.scale(this, 0.5, 0.5);
-                    }
-                    this.mode = 3
-                    this.fill = "#000";
-                    this.eventHorizon = 1200
-                    this.rotateVelocity = Math.abs(this.rotateVelocity) * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
-                    if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
-                    this.modeDo = this.modeAll
                 }
+            } else if (this.mode !== 3) { //all three modes at once
+                this.cycle = 0;
+                Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
+                if (this.mode === 2) {
+                    Matter.Body.scale(this, 5, 5);
+                } else {
+                    Matter.Body.scale(this, 0.5, 0.5);
+                }
+                this.mode = 3
+                this.fill = "#000";
+                this.eventHorizon = 1200
+                this.rotateVelocity = Math.abs(this.rotateVelocity) * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
+                if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
+                this.modeDo = this.modeAll
             }
+            // }
         };
         me.modeDo = function() {}
         me.modeAll = function() {
@@ -176,25 +174,32 @@ const spawn = {
             this.modeLasers()
         }
         me.modeSpawns = function() {
-            if (!(this.cycle % 320) && !mech.isBodiesAsleep && mob.length < 40) {
-                Matter.Body.setAngularVelocity(this, 0.11)
+            if ((this.cycle === 2 || this.cycle === 300) && !mech.isBodiesAsleep && mob.length < 40) {
+                Matter.Body.setAngularVelocity(this, 0.1)
                 //fire a bullet from each vertex
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
                     let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
                     spawn[whoSpawn](this.vertices[i].x, this.vertices[i].y);
                     //give the bullet a rotational velocity as if they were attached to a vertex
-                    const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -20)
+                    const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -18)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
                         x: this.velocity.x + velocity.x,
                         y: this.velocity.y + velocity.y
                     });
                 }
+                if (game.difficulty > 60) {
+                    spawn.randomLevelBoss(3000, -1100)
+                    if (game.difficulty > 100) {
+                        spawn.randomLevelBoss(3000, -1300)
+                    }
+                }
             }
         }
-        me.eventHorizon = 1400
+        me.eventHorizon = 1300
+        me.eventHorizonCycleRate = 4 * Math.PI / me.endCycle
         me.modeSuck = function() {
             //eventHorizon waves in and out
-            eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(game.cycle * 0.015))
+            if (!mech.isBodiesAsleep) eventHorizon = this.eventHorizon * (1 - 0.25 * Math.cos(this.cycle * this.eventHorizonCycleRate)) //0.014
             //draw darkness
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
@@ -242,57 +247,55 @@ const spawn = {
         me.rotateVelocity = 0.0025
         me.rotateCount = 0;
         me.modeLasers = function() {
-            if (!this.isStunned) {
-                if (!mech.isBodiesAsleep) {
-                    let slowed = false //check if slowed
-                    for (let i = 0; i < this.status.length; i++) {
-                        if (this.status[i].type === "slow") {
-                            slowed = true
-                            break
-                        }
-                    }
-                    if (!slowed) {
-                        this.rotateCount++
-                        Matter.Body.setAngle(this, this.rotateCount * this.rotateVelocity)
-                        Matter.Body.setAngularVelocity(this, 0)
-                        Matter
+            if (!mech.isBodiesAsleep && !this.isStunned) {
+                let slowed = false //check if slowed
+                for (let i = 0; i < this.status.length; i++) {
+                    if (this.status[i].type === "slow") {
+                        slowed = true
+                        break
                     }
                 }
-                if (this.cycle < 180) { //damage scales up over 2 seconds to give player time to move
-                    const scale = this.cycle / 180
-                    const dmg = 0.14 * game.dmgScale * scale
-                    ctx.beginPath();
-                    this.laser(this.vertices[0], this.angle + Math.PI / 6, dmg);
-                    this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6, dmg);
-                    this.laser(this.vertices[2], this.angle + 5 * Math.PI / 6, dmg);
-                    this.laser(this.vertices[3], this.angle + 7 * Math.PI / 6, dmg);
-                    this.laser(this.vertices[4], this.angle + 9 * Math.PI / 6, dmg);
-                    this.laser(this.vertices[5], this.angle + 11 * Math.PI / 6, dmg);
-                    ctx.strokeStyle = "#50f";
-                    ctx.lineWidth = 1.5 * scale;
-                    ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
-                    ctx.stroke(); // Draw it
-                    ctx.setLineDash([0, 0]);
-                    ctx.lineWidth = 20;
-                    ctx.strokeStyle = `rgba(80,0,255,${0.07*scale})`;
-                    ctx.stroke(); // Draw it
-                } else {
-                    ctx.beginPath();
-                    this.laser(this.vertices[0], this.angle + Math.PI / 6);
-                    this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6);
-                    this.laser(this.vertices[2], this.angle + 5 * Math.PI / 6);
-                    this.laser(this.vertices[3], this.angle + 7 * Math.PI / 6);
-                    this.laser(this.vertices[4], this.angle + 9 * Math.PI / 6);
-                    this.laser(this.vertices[5], this.angle + 11 * Math.PI / 6);
-                    ctx.strokeStyle = "#50f";
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
-                    ctx.stroke(); // Draw it
-                    ctx.setLineDash([0, 0]);
-                    ctx.lineWidth = 20;
-                    ctx.strokeStyle = "rgba(80,0,255,0.07)";
-                    ctx.stroke(); // Draw it
+                if (!slowed) {
+                    this.rotateCount++
+                    Matter.Body.setAngle(this, this.rotateCount * this.rotateVelocity)
+                    Matter.Body.setAngularVelocity(this, 0)
+                    Matter
                 }
+            }
+            if (this.cycle < 240) { //damage scales up over 2 seconds to give player time to move
+                const scale = this.cycle / 180
+                const dmg = 0.14 * game.dmgScale * scale
+                ctx.beginPath();
+                this.laser(this.vertices[0], this.angle + Math.PI / 6, dmg);
+                this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6, dmg);
+                this.laser(this.vertices[2], this.angle + 5 * Math.PI / 6, dmg);
+                this.laser(this.vertices[3], this.angle + 7 * Math.PI / 6, dmg);
+                this.laser(this.vertices[4], this.angle + 9 * Math.PI / 6, dmg);
+                this.laser(this.vertices[5], this.angle + 11 * Math.PI / 6, dmg);
+                ctx.strokeStyle = "#50f";
+                ctx.lineWidth = 1.5 * scale;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([0, 0]);
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = `rgba(80,0,255,${0.07*scale})`;
+                ctx.stroke(); // Draw it
+            } else {
+                ctx.beginPath();
+                this.laser(this.vertices[0], this.angle + Math.PI / 6);
+                this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6);
+                this.laser(this.vertices[2], this.angle + 5 * Math.PI / 6);
+                this.laser(this.vertices[3], this.angle + 7 * Math.PI / 6);
+                this.laser(this.vertices[4], this.angle + 9 * Math.PI / 6);
+                this.laser(this.vertices[5], this.angle + 11 * Math.PI / 6);
+                ctx.strokeStyle = "#50f";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([0, 0]);
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = "rgba(80,0,255,0.07)";
+                ctx.stroke(); // Draw it
             }
             me.laser = function(where, angle, dmg = 0.14 * game.dmgScale) {
                 const vertexCollision = function(v1, v1End, domain) {

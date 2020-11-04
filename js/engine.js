@@ -1,16 +1,16 @@
 //matter.js ***********************************************************
 // module aliases
 const Engine = Matter.Engine,
-  World = Matter.World,
-  Events = Matter.Events,
-  Composites = Matter.Composites,
-  Composite = Matter.Composite,
-  Constraint = Matter.Constraint,
-  Vertices = Matter.Vertices,
-  Query = Matter.Query,
-  Body = Matter.Body,
-  Bodies = Matter.Bodies,
-  Vector = Matter.Vector;
+    World = Matter.World,
+    Events = Matter.Events,
+    Composites = Matter.Composites,
+    Composite = Matter.Composite,
+    Constraint = Matter.Constraint,
+    Vertices = Matter.Vertices,
+    Query = Matter.Query,
+    Body = Matter.Body,
+    Bodies = Matter.Bodies,
+    Vector = Matter.Vector;
 
 // create an engine
 const engine = Engine.create();
@@ -21,38 +21,38 @@ engine.world.gravity.scale = 0; //turn off gravity (it's added back in later)
 
 // matter events
 function playerOnGroundCheck(event) {
-  //runs on collisions events
-  function enter() {
-    mech.numTouching++;
-    if (!mech.onGround) mech.enterLand();
-  }
-  const pairs = event.pairs;
-  for (let i = 0, j = pairs.length; i != j; ++i) {
-    let pair = pairs[i];
-    if (pair.bodyA === jumpSensor) {
-      mech.standingOn = pair.bodyB; //keeping track to correctly provide recoil on jump
-      if (mech.standingOn.alive !== true) enter();
-    } else if (pair.bodyB === jumpSensor) {
-      mech.standingOn = pair.bodyA; //keeping track to correctly provide recoil on jump
-      if (mech.standingOn.alive !== true) enter();
+    //runs on collisions events
+    function enter() {
+        mech.numTouching++;
+        if (!mech.onGround) mech.enterLand();
     }
-  }
-  mech.numTouching = 0;
+    const pairs = event.pairs;
+    for (let i = 0, j = pairs.length; i != j; ++i) {
+        let pair = pairs[i];
+        if (pair.bodyA === jumpSensor) {
+            mech.standingOn = pair.bodyB; //keeping track to correctly provide recoil on jump
+            if (mech.standingOn.alive !== true) enter();
+        } else if (pair.bodyB === jumpSensor) {
+            mech.standingOn = pair.bodyA; //keeping track to correctly provide recoil on jump
+            if (mech.standingOn.alive !== true) enter();
+        }
+    }
+    mech.numTouching = 0;
 }
 
 function playerOffGroundCheck(event) {
-  //runs on collisions events
-  function enter() {
-    if (mech.onGround && mech.numTouching === 0) mech.enterAir();
-  }
-  const pairs = event.pairs;
-  for (let i = 0, j = pairs.length; i != j; ++i) {
-    if (pairs[i].bodyA === jumpSensor) {
-      enter();
-    } else if (pairs[i].bodyB === jumpSensor) {
-      enter();
+    //runs on collisions events
+    function enter() {
+        if (mech.onGround && mech.numTouching === 0) mech.enterAir();
     }
-  }
+    const pairs = event.pairs;
+    for (let i = 0, j = pairs.length; i != j; ++i) {
+        if (pairs[i].bodyA === jumpSensor) {
+            enter();
+        } else if (pairs[i].bodyB === jumpSensor) {
+            enter();
+        }
+    }
 }
 
 // function playerHeadCheck(event) {
@@ -71,158 +71,158 @@ function playerOffGroundCheck(event) {
 // }
 
 function collisionChecks(event) {
-  const pairs = event.pairs;
-  for (let i = 0, j = pairs.length; i != j; i++) {
+    const pairs = event.pairs;
+    for (let i = 0, j = pairs.length; i != j; i++) {
 
-    // //map + bullet collisions
-    // if (pairs[i].bodyA.collisionFilter.category === cat.map && pairs[i].bodyB.collisionFilter.category === cat.bullet) {
-    //   collideBulletStatic(pairs[i].bodyB)
-    // } else if (pairs[i].bodyB.collisionFilter.category === cat.map && pairs[i].bodyA.collisionFilter.category === cat.bullet) {
-    //   collideBulletStatic(pairs[i].bodyA)
-    // }
-    // //triggers when the bullets hits something static
-    // function collideBulletStatic(obj, speedThreshold = 12, massThreshold = 2) {
-    //   if (obj.onWallHit) obj.onWallHit();
-    // }
+        // //map + bullet collisions
+        // if (pairs[i].bodyA.collisionFilter.category === cat.map && pairs[i].bodyB.collisionFilter.category === cat.bullet) {
+        //   collideBulletStatic(pairs[i].bodyB)
+        // } else if (pairs[i].bodyB.collisionFilter.category === cat.map && pairs[i].bodyA.collisionFilter.category === cat.bullet) {
+        //   collideBulletStatic(pairs[i].bodyA)
+        // }
+        // //triggers when the bullets hits something static
+        // function collideBulletStatic(obj, speedThreshold = 12, massThreshold = 2) {
+        //   if (obj.onWallHit) obj.onWallHit();
+        // }
 
-    // function collidePlayer(obj) {
-    //   //player dmg from hitting a body
-    //   if (obj.classType === "body" && obj.speed > 10 && mech.immuneCycle < mech.cycle) {
-    //     const velocityThreshold = 30 //keep this lines up with player.enterLand numbers  (130/5 = 26)
-    //     if (player.position.y > obj.position.y) { //block is above the player look at total momentum difference
-    //       const velocityDiffMag = Vector.magnitude(Vector.sub(player.velocity, obj.velocity))
-    //       if (velocityDiffMag > velocityThreshold) hit(velocityDiffMag - velocityThreshold)
-    //     } else { //block is below player only look at horizontal momentum difference
-    //       const velocityDiffMagX = Math.abs(obj.velocity.x - player.velocity.x)
-    //       if (velocityDiffMagX > velocityThreshold) hit(velocityDiffMagX - velocityThreshold)
-    //     }
+        // function collidePlayer(obj) {
+        //   //player dmg from hitting a body
+        //   if (obj.classType === "body" && obj.speed > 10 && mech.immuneCycle < mech.cycle) {
+        //     const velocityThreshold = 30 //keep this lines up with player.enterLand numbers  (130/5 = 26)
+        //     if (player.position.y > obj.position.y) { //block is above the player look at total momentum difference
+        //       const velocityDiffMag = Vector.magnitude(Vector.sub(player.velocity, obj.velocity))
+        //       if (velocityDiffMag > velocityThreshold) hit(velocityDiffMag - velocityThreshold)
+        //     } else { //block is below player only look at horizontal momentum difference
+        //       const velocityDiffMagX = Math.abs(obj.velocity.x - player.velocity.x)
+        //       if (velocityDiffMagX > velocityThreshold) hit(velocityDiffMagX - velocityThreshold)
+        //     }
 
-    //     function hit(dmg) {
-    //       mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
-    //       dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
-    //       mech.damage(dmg);
-    //       game.drawList.push({ //add dmg to draw queue
-    //         x: pairs[i].activeContacts[0].vertex.x,
-    //         y: pairs[i].activeContacts[0].vertex.y,
-    //         radius: dmg * 500,
-    //         color: game.mobDmgColor,
-    //         time: game.drawTime
-    //       });
-    //     }
-    //   }
-    // }
+        //     function hit(dmg) {
+        //       mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        //       dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
+        //       mech.damage(dmg);
+        //       game.drawList.push({ //add dmg to draw queue
+        //         x: pairs[i].activeContacts[0].vertex.x,
+        //         y: pairs[i].activeContacts[0].vertex.y,
+        //         radius: dmg * 500,
+        //         color: game.mobDmgColor,
+        //         time: game.drawTime
+        //       });
+        //     }
+        //   }
+        // }
 
-    //mob + (player,bullet,body) collisions
-    for (let k = 0; k < mob.length; k++) {
-      if (mob[k].alive && mech.alive) {
-        if (pairs[i].bodyA === mob[k]) {
-          collideMob(pairs[i].bodyB);
-          break;
-        } else if (pairs[i].bodyB === mob[k]) {
-          collideMob(pairs[i].bodyA);
-          break;
-        }
+        //mob + (player,bullet,body) collisions
+        for (let k = 0; k < mob.length; k++) {
+            if (mob[k].alive && mech.alive) {
+                if (pairs[i].bodyA === mob[k]) {
+                    collideMob(pairs[i].bodyB);
+                    break;
+                } else if (pairs[i].bodyB === mob[k]) {
+                    collideMob(pairs[i].bodyA);
+                    break;
+                }
 
-        function collideMob(obj) {
-          //player + mob collision
-          if (
-            mech.immuneCycle < mech.cycle &&
-            (obj === playerBody || obj === playerHead) &&
-            !(mod.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
-          ) {
-            mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
-            mob[k].foundPlayer();
-            let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-            if (mod.isPiezo) mech.energy = mech.maxEnergy;
-            mech.damage(dmg);
-            if (mod.isBayesian) powerUps.ejectMod()
-            if (mob[k].onHit) mob[k].onHit(k);
-            //extra kick between player and mob              //this section would be better with forces but they don't work...
-            let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
-            Matter.Body.setVelocity(player, {
-              x: player.velocity.x + 8 * Math.cos(angle),
-              y: player.velocity.y + 8 * Math.sin(angle)
-            });
-            Matter.Body.setVelocity(mob[k], {
-              x: mob[k].velocity.x - 8 * Math.cos(angle),
-              y: mob[k].velocity.y - 8 * Math.sin(angle)
-            });
+                function collideMob(obj) {
+                    //player + mob collision
+                    if (
+                        mech.immuneCycle < mech.cycle &&
+                        (obj === playerBody || obj === playerHead) &&
+                        !(mod.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
+                    ) {
+                        mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                        mob[k].foundPlayer();
+                        let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
+                        if (mod.isPiezo && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
+                        mech.damage(dmg);
+                        if (mod.isBayesian) powerUps.ejectMod()
+                        if (mob[k].onHit) mob[k].onHit(k);
+                        //extra kick between player and mob              //this section would be better with forces but they don't work...
+                        let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x + 8 * Math.cos(angle),
+                            y: player.velocity.y + 8 * Math.sin(angle)
+                        });
+                        Matter.Body.setVelocity(mob[k], {
+                            x: mob[k].velocity.x - 8 * Math.cos(angle),
+                            y: mob[k].velocity.y - 8 * Math.sin(angle)
+                        });
 
-            if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.34 * mech.maxEnergy) {
-              mech.energy -= 0.33 * mech.maxEnergy
-              mech.immuneCycle = 0; //player doesn't go immune to collision damage
-              mob[k].death();
-              game.drawList.push({ //add dmg to draw queue
-                x: pairs[i].activeContacts[0].vertex.x,
-                y: pairs[i].activeContacts[0].vertex.y,
-                radius: dmg * 2000,
-                color: "rgba(255,0,255,0.2)",
-                time: game.drawTime
-              });
-            } else {
-              game.drawList.push({ //add dmg to draw queue
-                x: pairs[i].activeContacts[0].vertex.x,
-                y: pairs[i].activeContacts[0].vertex.y,
-                radius: dmg * 500,
-                color: game.mobDmgColor,
-                time: game.drawTime
-              });
+                        if (mod.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.34 * mech.maxEnergy) {
+                            mech.energy -= 0.33 * mech.maxEnergy
+                            mech.immuneCycle = 0; //player doesn't go immune to collision damage
+                            mob[k].death();
+                            game.drawList.push({ //add dmg to draw queue
+                                x: pairs[i].activeContacts[0].vertex.x,
+                                y: pairs[i].activeContacts[0].vertex.y,
+                                radius: dmg * 2000,
+                                color: "rgba(255,0,255,0.2)",
+                                time: game.drawTime
+                            });
+                        } else {
+                            game.drawList.push({ //add dmg to draw queue
+                                x: pairs[i].activeContacts[0].vertex.x,
+                                y: pairs[i].activeContacts[0].vertex.y,
+                                radius: dmg * 500,
+                                color: game.mobDmgColor,
+                                time: game.drawTime
+                            });
+                        }
+                        return;
+                        // }
+                    }
+                    //mob + bullet collisions
+                    if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
+                        obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
+                        let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                        if (mod.isCrit && mob[k].isStunned) dmg *= 4
+                        mob[k].foundPlayer();
+                        mob[k].damage(dmg);
+                        game.drawList.push({ //add dmg to draw queue
+                            x: pairs[i].activeContacts[0].vertex.x,
+                            y: pairs[i].activeContacts[0].vertex.y,
+                            radius: Math.log(2 * dmg + 1.1) * 40,
+                            color: game.playerDmgColor,
+                            time: game.drawTime
+                        });
+                        return;
+                    }
+                    //mob + body collisions
+                    if (obj.classType === "body" && obj.speed > 6) {
+                        const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
+                        if (v > 9) {
+                            let dmg = 0.05 * b.dmgScale * v * obj.mass * mod.throwChargeRate;
+                            if (mob[k].isShielded) dmg *= 0.35
+                            mob[k].damage(dmg, true);
+                            const stunTime = dmg / Math.sqrt(obj.mass)
+                            if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
+                            if (mob[k].distanceToPlayer2() < 1000000 && !mech.isCloak) mob[k].foundPlayer();
+                            game.drawList.push({
+                                x: pairs[i].activeContacts[0].vertex.x,
+                                y: pairs[i].activeContacts[0].vertex.y,
+                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                color: game.playerDmgColor,
+                                time: game.drawTime
+                            });
+                            return;
+                        }
+                    }
+                }
             }
-            return;
-            // }
-          }
-          //mob + bullet collisions
-          if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
-            obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-            let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-            if (mod.isCrit && mob[k].isStunned) dmg *= 4
-            mob[k].foundPlayer();
-            mob[k].damage(dmg);
-            game.drawList.push({ //add dmg to draw queue
-              x: pairs[i].activeContacts[0].vertex.x,
-              y: pairs[i].activeContacts[0].vertex.y,
-              radius: Math.log(2 * dmg + 1.1) * 40,
-              color: game.playerDmgColor,
-              time: game.drawTime
-            });
-            return;
-          }
-          //mob + body collisions
-          if (obj.classType === "body" && obj.speed > 6) {
-            const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
-            if (v > 9) {
-              let dmg = 0.05 * b.dmgScale * v * obj.mass * mod.throwChargeRate;
-              if (mob[k].isShielded) dmg *= 0.35
-              mob[k].damage(dmg, true);
-              const stunTime = dmg / Math.sqrt(obj.mass)
-              if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
-              if (mob[k].distanceToPlayer2() < 1000000 && !mech.isCloak) mob[k].foundPlayer();
-              game.drawList.push({
-                x: pairs[i].activeContacts[0].vertex.x,
-                y: pairs[i].activeContacts[0].vertex.y,
-                radius: Math.log(2 * dmg + 1.1) * 40,
-                color: game.playerDmgColor,
-                time: game.drawTime
-              });
-              return;
-            }
-          }
         }
-      }
     }
-  }
 }
 
 //determine if player is on the ground
-Events.on(engine, "collisionStart", function (event) {
-  playerOnGroundCheck(event);
-  // playerHeadCheck(event);
-  collisionChecks(event);
+Events.on(engine, "collisionStart", function(event) {
+    playerOnGroundCheck(event);
+    // playerHeadCheck(event);
+    collisionChecks(event);
 });
-Events.on(engine, "collisionActive", function (event) {
-  playerOnGroundCheck(event);
-  // playerHeadCheck(event);
+Events.on(engine, "collisionActive", function(event) {
+    playerOnGroundCheck(event);
+    // playerHeadCheck(event);
 });
-Events.on(engine, "collisionEnd", function (event) {
-  playerOffGroundCheck(event);
+Events.on(engine, "collisionEnd", function(event) {
+    playerOffGroundCheck(event);
 });
