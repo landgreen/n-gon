@@ -94,7 +94,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.locatePlayer();
-        const density = 1
+        const density = 1.1
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -160,8 +160,9 @@ const spawn = {
                 }
                 this.mode = 3
                 this.fill = "#000";
-                this.eventHorizon = 1200
-                this.rotateVelocity = Math.abs(this.rotateVelocity) * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
+                this.eventHorizon = 700
+                this.spawnInterval = 600
+                this.rotateVelocity = 0.001 * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
                 if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
                 this.modeDo = this.modeAll
             }
@@ -173,12 +174,13 @@ const spawn = {
             this.modeSuck()
             this.modeLasers()
         }
+        me.spawnInterval = 302
         me.modeSpawns = function() {
-            if ((this.cycle === 2 || this.cycle === 300) && !mech.isBodiesAsleep && mob.length < 40) {
+            if (!(this.cycle % this.spawnInterval) && !mech.isBodiesAsleep && mob.length < 40) {
                 Matter.Body.setAngularVelocity(this, 0.1)
                 //fire a bullet from each vertex
+                let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
                     spawn[whoSpawn](this.vertices[i].x, this.vertices[i].y);
                     //give the bullet a rotational velocity as if they were attached to a vertex
                     const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -18)
@@ -737,16 +739,17 @@ const spawn = {
             }
         }
     },
-    sucker(x, y, radius = 30 + Math.ceil(Math.random() * 70)) {
+    sucker(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
         radius = 9 + radius / 8; //extra small
         mobs.spawn(x, y, 6, radius, "#000");
         let me = mob[mob.length - 1];
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = radius * 23; //required for blackhole
-        me.seeAtDistance2 = (me.eventHorizon + 500) * (me.eventHorizon + 500); //vision limit is event horizon
-        me.accelMag = 0.00009 * game.accelScale;
-        // me.frictionAir = 0.005;
-        me.memory = 600;
+        me.seeAtDistance2 = (me.eventHorizon + 200) * (me.eventHorizon + 200); //vision limit is event horizon
+        me.accelMag = 0.0001 * game.accelScale;
+        me.frictionAir = 0.025;
+        me.collisionFilter.mask = cat.player | cat.bullet
+        me.memory = Infinity;
         Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
         me.do = function() {
             //keep it slow, to stop issues from explosion knock backs
@@ -756,7 +759,8 @@ const spawn = {
                     y: this.velocity.y * 0.99
                 });
             }
-            this.seePlayerByDistOrLOS();
+            // this.seePlayerByDistOrLOS();
+            this.seePlayerCheckByDistance()
             this.checkStatus();
             if (this.seePlayer.recall) {
                 //eventHorizon waves in and out

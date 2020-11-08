@@ -92,7 +92,7 @@ const mod = {
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
         if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-        if (mod.isRerollDamage) dmg *= 1 + 0.05 * powerUps.reroll.rerolls
+        if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
         return dmg * mod.slowFire * mod.aimDamage
@@ -245,7 +245,7 @@ const mod = {
         },
         {
             name: "perturbation theory",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1886,6 +1886,22 @@ const mod = {
             }
         },
         {
+            name: "radioactive contamination",
+            description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("flechettes") || mod.isNailPoison || mod.isHeavyWater || mod.isWormholeDamage
+            },
+            requires: "radiation damage source",
+            effect() {
+                mod.isRadioactive = true
+            },
+            remove() {
+                mod.isRadioactive = false
+            }
+        },
+        {
             name: "piercing needles",
             description: "<strong>needles</strong> penetrate <strong>mobs</strong> and <strong>blocks</strong><br>potentially hitting <strong>multiple</strong> targets",
             maxCount: 1,
@@ -2095,14 +2111,30 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("mine")
+                return mod.haveGunCheck("mine") && !mod.isMineSentry
             },
-            requires: "mine",
+            requires: "mine, not sentry",
             effect() {
                 mod.isMineAmmoBack = true;
             },
             remove() {
                 mod.isMineAmmoBack = false;
+            }
+        },
+        {
+            name: "sentry",
+            description: "<strong>mines</strong> are modified to <strong>target</strong> mobs with nails<br>mines last about <strong>12</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("mine") && !mod.isMineAmmoBack
+            },
+            requires: "mine, not mine reclamation",
+            effect() {
+                mod.isMineSentry = true;
+            },
+            remove() {
+                mod.isMineSentry = false;
             }
         },
         {
@@ -2123,7 +2155,7 @@ const mod = {
         },
         {
             name: "railroad ties",
-            description: "<strong>nails</strong> are <strong>70%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
+            description: "<strong>nails</strong> are <strong>50%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2131,7 +2163,7 @@ const mod = {
             },
             requires: "nails",
             effect() {
-                mod.biggerNails += 0.7
+                mod.biggerNails += 0.5
             },
             remove() {
                 mod.biggerNails = 1
@@ -2346,22 +2378,38 @@ const mod = {
         //         mod.isLargeFoam = false;
         //     }
         // },
+        // {
+        //     name: "frame-dragging",
+        //     description: "<strong>slow time</strong> while charging the <strong>rail gun</strong><br>charging no longer drains <strong class='color-f'>energy</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS && !mod.isCapacitor
+        //     },
+        //     requires: "rail gun and FPS above 45",
+        //     effect() {
+        //         mod.isRailTimeSlow = true;
+        //     },
+        //     remove() {
+        //         mod.isRailTimeSlow = false;
+        //         game.fpsCap = game.fpsCapDefault
+        //         game.fpsInterval = 1000 / game.fpsCap;
+        //     }
+        // },
         {
-            name: "frame-dragging",
-            description: "<strong>slow time</strong> while charging the <strong>rail gun</strong><br>charging no longer drains <strong class='color-f'>energy</strong>",
+            name: "half-wave rectifier",
+            description: "charging the <strong>rail gun</strong> overfills your <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS && !mod.isCapacitor
+                return mod.haveGunCheck("rail gun") && !mod.isCapacitor
             },
-            requires: "rail gun and FPS above 45",
+            requires: "rail gun, not capacitor bank",
             effect() {
-                mod.isRailTimeSlow = true;
+                mod.isRailEnergyGain = true;
             },
             remove() {
-                mod.isRailTimeSlow = false;
-                game.fpsCap = game.fpsCapDefault
-                game.fpsInterval = 1000 / game.fpsCap;
+                mod.isRailEnergyGain = false;
             }
         },
         {
@@ -2370,9 +2418,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("rail gun") && !mod.isRailTimeSlow
+                return mod.haveGunCheck("rail gun") && !mod.isRailEnergyGain
             },
-            requires: "rail gun",
+            requires: "rail gun, not half-wave rectifier",
             effect() {
                 mod.isCapacitor = true;
             },
@@ -2456,7 +2504,7 @@ const mod = {
             allowed() {
                 return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isPulseLaser
             },
-            requires: "laser, not specular reflection<br>not beam splitter",
+            requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
                 if (mod.wideLaser === 0) mod.wideLaser = 3
                 mod.isWideLaser = true;
@@ -2474,7 +2522,7 @@ const mod = {
             allowed() {
                 return mod.haveGunCheck("laser") && mod.isWideLaser
             },
-            requires: "laser, not specular reflection<br>not beam splitter",
+            requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
                 mod.wideLaser = 4
             },
@@ -2494,7 +2542,7 @@ const mod = {
             allowed() {
                 return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.isWideLaser
             },
-            requires: "laser, not specular reflection<br>not beam splitter, not diffuse",
+            requires: "laser, not specular reflection, not diffuse",
             effect() {
                 mod.isPulseLaser = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3208,5 +3256,8 @@ const mod = {
     isWideLaser: null,
     wideLaser: null,
     isPulseLaser: null,
-    timeEnergyRegen: null
+    timeEnergyRegen: null,
+    isRadioactive: null,
+    isRailEnergyGain: null,
+    isMineSentry: null
 }

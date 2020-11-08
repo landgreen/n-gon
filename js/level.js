@@ -16,13 +16,9 @@ const level = {
             // game.enableConstructMode() //used to build maps in testing mode
             // game.zoomScale = 1000;
             // game.setZoom();
-            // mech.isCloak = true;
             // mech.setField("wormhole")
-            // b.giveGuns("laser")
-            // for (let i = 0; i < 10; i++) {
-            // mod.giveMod("laser-bot");
-            // }
-            // mod.giveMod("cardinality")
+            b.giveGuns("mine")
+            mod.giveMod("sentry")
 
 
             level.intro(); //starting level
@@ -152,11 +148,11 @@ const level = {
         // spawn.spawner(1600, -500)
         // spawn.sniper(1700, -120, 50)
         // spawn.bomberBoss(1400, -500)
-        spawn.launcher(1800, -120)
+        spawn.sucker(1800, -120)
         // spawn.cellBossCulture(1600, -500)
         // spawn.powerUpBoss(1600, -500)
         // spawn.sniper(1200, -500)
-        // spawn.shield(mob[mob.length - 1], 1200, -500, 1);
+        // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeBoss(1200, -500, "launcher")
         // spawn.snakeBoss(1200, -500)
@@ -220,16 +216,16 @@ const level = {
         document.body.style.backgroundColor = "#ccc";
 
         level.fill.push({
-            x: 6400,
+            x: 5400,
             y: -550,
             width: 300,
             height: 350,
             color: "rgba(0,255,255,0.1)"
         });
 
-        spawn.mapRect(-950, 0, 7200, 800); //ground
-        spawn.mapRect(-950, -1500, 800, 1900); //left wall
-        spawn.mapRect(-950, -2300, 7200, 800); //roof
+        spawn.mapRect(-1950, 0, 8200, 1800); //ground
+        spawn.mapRect(-1950, -1500, 1800, 1900); //left wall
+        spawn.mapRect(-1950, -3300, 8200, 1800); //roof
         spawn.mapRect(-250, -200, 1000, 300); // shelf
         spawn.mapRect(-250, -1700, 1000, 1250); // shelf roof
         spawn.blockDoor(710, -210);
@@ -238,7 +234,7 @@ const level = {
 
         spawn.mapRect(5400, -1700, 400, 1150); //right wall
         spawn.mapRect(5400, -300, 400, 400); //right wall
-        spawn.mapRect(5700, -2300, 800, 3100); //right wall
+        spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
     },

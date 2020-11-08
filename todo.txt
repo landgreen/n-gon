@@ -1,14 +1,86 @@
+*********** NEXT PATCH ***********
 
-update to mod: anthropic principle - only works once per level
-  but gives 6 seconds of damage immunity and 2 extra heal power ups
+mini black hole mobs travel through walls
 
-most energy regeneration effects now overfill energy above the max by default
-piezo electricity over fills energy by 300% (was 100%)
+mod: radioactive contamination - after a mob or shield dies, leftover radiation spreads to a nearby mob
 
-************** TODO - n-gon **************
+mod: half-wave rectifier - railgun overfills with energy when you charge instead of draining
+   removed rail gun mod - frame dragging
+bug fixed - rail gun bugs out when your charge speed gets very low
+
+mod: sentry - mines are modified to automatically fire nails at nearby targets for 12 seconds
+
+************** BUGS **************
+
+bug - crouch and worm hole? -> crouch locked in
+bug - getting locked into crouch on community levels, but showing the player as still standing
+
+bug - capping the fps causes random slow downs, that can be fixed with pause
+
+bug - mine spawned one new mine every second
+  after sticking to the top right corner of a wall
+  notes: had only gun mine, mod mine reclamation, field plasma,
+bug - mines spawn extra mines when fired at thin map wall while jumping
+
+************** MODS **************
+
+mod - self destruct - drones explode when they die
+  drones lose extra time on collisions, so they often explode after a collision
+
+mod - a bot that eats up health and ammo, but poops out a mod (10 power ups = 1 mod?)
+  or it poops a reroll after picking up 2 heal/ammo
+    requires the reroll -> bot mod
+    4 rerolls can convert to a bot,  also 1 rerolls can convert to 5% damage
+    the mods that do those effects could be required before you see this bot
+  it passes through walls
+  moves slower then the player so you can get to it before the bot if you hurry
+  disable crystalized armor?
+
+mod - rerolls give at least 1 mod that applies your field and gun if possible
+  give fields and guns a tag
+  also spawn a few rerolls for balance?
+
+mod: take less harm if you are in the air
+  require squirrel cage rotor
+
+mod - explosions apply radiation damage over time
+  or spawn a neutron bomb with a short timer
+
+mod - remove a random mod as a condition for picking up a really good mod
+
+mod - double the player's time rate (like you do with the time dilation mod)
+
+mod - do something for 2 seconds after firing
+  if (mech.fireCDcycle + 120)
+
+mod - do 50% more damage in close, but 50% less at a distance
+  code it like mod.isFarAwayDmg
+    have these mods disable each other
+
+mod - bot very slowly follows you and gives you a bonus when it's in range
+  it moves through walls
+  effect: damage bonus?, damage reduction?, push away mobs, limit top speed of mobs/blocks/player?
+
+mod - foam is attracted to mobs
+  use a gravitational attraction model?
+    could foam be attracted to other foam bullets too?
+      or foam is only attracted to foam bullets that are stuck to mobs
+    is this too computationally intense?
+  name - static cling
+  could also do bremsstrahlung radiation like damage on attachment
+
+************** TODO **************
+
+repeat map in vertical and horizontal space
+  or at least vertical space
+  camera looks strange when you teleport player with a high velocity
+
+sucker mobs do something when they touch blocks
+  heal
+  remove the blocks from the map
 
 add an ending to the game
-  maybe the game ending should ask you to open the console and type in some commands
+  maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
   mirror ending (if no cheats)
     level after final boss battle is the intro level, but flipped left right, with a fake player
       damage the fake player to end the game
@@ -18,24 +90,12 @@ add an ending to the game
     also game goes on if player attacks, the fake player
   game never ends if you have used cheats
 
-laser mod - your laser beam fires from your last position, not your current position
-  or apply to all guns?
-
-mod: While in the air, time is slowed.
-  or something else while in air
-
-a bot that eats ammo and converts them into rerolls
-  or 2 ammo power ups = 1 reroll
-
-been getting some fps slow down after playing for a few minutes
-  this seems to be caused by capping the fps at 60, but 60 fps shouldn't have any slowdown
-
 new status effect: fear - push mob away from player for a time
 
 new status effect - apply status effect to mobs that makes blocks attracted to them
   only lasts a few cycles
 
-in hard and why have some mobs spawn in later in the level
+have some mobs spawn in later in the level  (in hard and why modes)
   where
     at defined points in array levelSpawns = [{x:0,y:0},{x:0,y:0}]
       store the locations of mobs when the level starts to use as respawn points
@@ -44,39 +104,11 @@ in hard and why have some mobs spawn in later in the level
     after some mobs are dead
     after the boss is killed
 
-mod - explosions apply radiation damage over time
-  or spawn a neutron bomb with a short timer
-
-mod self destruct - drones explode when they die
-  drones lose extra time on collisions
-
-foam or spore bullet on dmg shrink effect
-    it might mess with the foam position of other bullets on the mob
-    shrink when foam bullets end while attached, or shrink on collision?
-
-time dilation mod rework / buff (time dilation is cool, but it can feel like a chore)
-  redistribute effects
-  take no damage
-  can fire
-  2x move jump fire while field is active
-  40% move jump fire always
-
-mod - after a mob or shield dies, remaining dots look for a new nearby host
-  or mod: radiation effects can spread to nearby mobs
-
 look for mods that could update description text with count and mod.is  information
   can only use variables that change in effect() and remove()
   this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
 
-
 mouse event e.which is deprecated
-
-mod: take less harm if you are moving fast
-  require squirrel cage rotor
-
-bug - mine spawned one new mine every second
-  after sticking to the top right corner of a wall
-  notes: had only gun mine, mod mine reclamation, field plasma, 
 
 add a flag to some bullets to indicate that mobs can't learn the player position from bullet damage in bullet-mob collisions
   if isNotRevealPlayerLocation flag is true have the mob still know player location if nearby player
@@ -90,34 +122,7 @@ add a flag to some bullets to indicate that mobs can't learn the player position
 
 add some more computer / AI stuff to the level lore text
 
-mod - mines stun targets nearby when they explode
-
-mod - do something for 2 seconds after firing
-  if (mech.fireCDcycle + 120)
-
-Health mod idea: health can go above max health. At the end of each level, the amount of health above max is halved.
-
 general idea: shrink mech.baseHealth in a mod or field
-
-mod: some drones(or spores) have a chance to spawn as a more power full version
-  do electric damage to nearby mobs
-    stun effect?
-
-a bot that eats up health and ammo, but poops a reroll after picking up 2 power ups
-  it passes through walls
-  moves slower then the player so you can get to it before the bot if you hurry
-  4 rerolls can convert to a bot,  also 1 rerolls can convert to 5% damage
-    the mods that do those effects could be required before you see this bot
-  disable crystalized armor?
-  could convert rerolls, ammo, and health into mods instead
-
-mod: foam is attracted to mobs
-  use a gravitational attraction model?
-    could foam be attracted to other foam bullets too?
-      or foam is only attracted to foam bullets that are stuck to mobs
-    is this too computationally intense?
-  name - static cling
-  could also do bremsstrahlung radiation like damage on attachment
 
 change player color based on harm reduction
 
@@ -133,8 +138,6 @@ map element - player rotates a rotor that makes a platform go up or down
 use mac automator to speed up your n-gon -> git sync
 
 fix door.isOpen actually meaning isClosed
-
-give missiles a suck and delay explosion, like vacuum bomb
 
 level Boss: fractal Sierpiński triangle
   https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
@@ -193,12 +196,6 @@ lore - a robot (the player) gains self awareness
     to overcome the (mobs, dangerous levels)
     to achieve a (technological singularity/positive technological feedback loop)
 
-new gun - deploy a turret that last for 20 seconds
-  fire nails at nearby targets once a second.
-  use mine code and bot code
-mod - mines become a turret that fires nails
-  it could float to the mouse location on fire
-
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
 
@@ -210,17 +207,6 @@ map: observatory
 map: prison
   doors linked to buttons
     mobs inside the doors?
-
-mod - do 50% more damage in close, but 50% less at a distance
-  code it like mod.isFarAwayDmg
-    have these mods disable each other
-
-mod harmonic shield: slow everything in range around shield (temporal shield)
-  set max speed?
-
-mod: bot very slowly follows you and gives you a bonus when it's in range
-  it moves through walls
-  effect: damage bonus?, damage reduction?, push away mobs, limit top speed of mobs/blocks/player?
 
 graphic idea:  bezier curve that moves smoothly from mob to mob
   loops around player
@@ -236,8 +222,6 @@ movement fluidity
   mod: wall jump
     wall grab?
   maybe remove falling damage and block damage?
-
-bug - mines spawn extra mines when fired at thin map wall while jumping
 
 redblobgames.com/articles/visibility
   https://github.com/Silverwolf90/2d-visibility/tree/master/src

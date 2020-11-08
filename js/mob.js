@@ -156,7 +156,7 @@ const mobs = {
             who.status.push({
                 effect() {
                     if ((game.cycle - this.startCycle) % 30 === 0) {
-                        let dmg = b.dmgScale * tickDamage
+                        let dmg = b.dmgScale * this.dmg
                         who.damage(dmg);
                         game.drawList.push({ //add dmg to draw queue
                             x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
@@ -172,7 +172,8 @@ const mobs = {
                     }
                 },
                 endEffect() {},
-                // type: "DoT",
+                dmg: tickDamage,
+                type: "dot",
                 endCycle: game.cycle + cycles,
                 startCycle: game.cycle
             })
@@ -1058,6 +1059,33 @@ const mobs = {
                     }
                     for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
                         powerUps.spawn(this.position.x, this.position.y, type);
+                    }
+                }
+                if (true) {
+                    //look for dots and spread them
+                    let dmgTotal = 0
+                    for (let i = 0, len = this.status.length; i < len; i++) {
+                        if (this.status[i].type === "dot") dmgTotal += this.status[i].dmg * (this.status[i].endCycle - game.cycle)
+                    }
+                    if (dmgTotal > 0) { //look for closest mob
+                        let closestRadius = 500;
+                        let closestIndex = null;
+                        for (let i = 0, len = mob.length; i < len; ++i) {
+                            const radius = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+                            if (mob[i].alive && !mob[i].isShielded && radius < closestRadius) {
+                                closestRadius = radius
+                                closestIndex = i
+                            }
+                        }
+                        if (closestIndex) mobs.statusDoT(mob[closestIndex], dmgTotal / 180, 180)
+                        //draw AOE
+                        // game.drawList.push({ //add dmg to draw queue
+                        //     x: this.position.x,
+                        //     y: this.position.y,
+                        //     radius: radius,
+                        //     color: "rgba(0,80,80,0.03)",
+                        //     time: 15
+                        // });
                     }
                 }
             },

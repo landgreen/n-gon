@@ -594,7 +594,11 @@ const b = {
                                         });
                                         Matter.Body.setAngularVelocity(this, 0)
                                     }
-                                    this.arm();
+                                    if (mod.isMineSentry) {
+                                        this.sentry();
+                                    } else {
+                                        this.arm();
+                                    }
 
                                     //sometimes the mine can't attach to map and it just needs to be reset
                                     const that = this
@@ -619,18 +623,47 @@ const b = {
                         this.stillCount++
                     }
                 }
-                if (this.stillCount > 25) this.arm();
+                if (this.stillCount > 25) {
+                    if (mod.isMineSentry) {
+                        this.sentry();
+                    } else {
+                        this.arm();
+                    }
+                }
+            },
+            sentry() {
+                this.lookFrequency = game.cycle + 60
+                this.endCycle = game.cycle + 720
+                this.do = function() { //overwrite the do method for this bullet
+                    this.force.y += this.mass * 0.002; //extra gravity
+                    if (game.cycle > this.lookFrequency) {
+                        this.lookFrequency = 14 + Math.floor(5 * Math.random())
+                        this.do = function() { //overwrite the do method for this bullet
+                            this.force.y += this.mass * 0.002; //extra gravity
+                            if (!(game.cycle % this.lookFrequency) && !mech.isBodiesAsleep) { //find mob targets
+                                b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, false)
+                                if (!(game.cycle % (this.lookFrequency * 6))) {
+                                    game.drawList.push({
+                                        x: this.position.x,
+                                        y: this.position.y,
+                                        radius: 8,
+                                        color: "#fe0",
+                                        time: 4
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
             },
             arm() {
                 this.lookFrequency = game.cycle + 60
                 this.do = function() { //overwrite the do method for this bullet
                     this.force.y += this.mass * 0.002; //extra gravity
-
                     if (game.cycle > this.lookFrequency) {
                         this.isArmed = true
                         this.lookFrequency = 50 + Math.floor(27 * Math.random())
                         game.drawList.push({
-                            //add dmg to draw queue
                             x: this.position.x,
                             y: this.position.y,
                             radius: 10,
@@ -1138,7 +1171,7 @@ const b = {
         World.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
     },
-    targetedNail(position, num = 1, speed = 50 + 10 * Math.random(), range = 1200) {
+    targetedNail(position, num = 1, speed = 50 + 10 * Math.random(), range = 1200, isRandomAim = true) {
         const targets = [] //target nearby mobs
         for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].dropPowerUp) {
@@ -1159,7 +1192,7 @@ const b = {
                     y: targets[index].y + SPREAD * (Math.random() - 0.5)
                 }
                 b.nail(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed), 1.1)
-            } else { // aim in random direction
+            } else if (isRandomAim) { // aim in random direction
                 const ANGLE = 2 * Math.PI * Math.random()
                 b.nail(position, {
                     x: speed * Math.cos(ANGLE),
@@ -2830,8 +2863,8 @@ const b = {
             have: false,
             fire() {
                 if (mod.isCapacitor) {
-                    if (mech.energy > 0.15) {
-                        mech.energy -= 0.15
+                    if (mech.energy > 0.16) {
+                        mech.energy -= 0.16
                         mech.fireCDcycle = mech.cycle + Math.floor(30 * b.fireCD);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 60, 14, {
@@ -2982,7 +3015,7 @@ const b = {
                     bullet[me].endCycle = Infinity
                     bullet[me].charge = 0;
                     bullet[me].do = function() {
-                        if (mech.energy < 0.005 && !mod.isRailTimeSlow) {
+                        if (mech.energy < 0.005 && !mod.isRailEnergyGain) {
                             mech.energy += 0.05 + this.charge * 0.3
                             mech.fireCDcycle = mech.cycle + 120; // cool down if out of energy
                             this.endCycle = 0;
@@ -2994,10 +3027,6 @@ const b = {
                             //normal bullet behavior occurs after firing, overwrites this function
                             this.do = function() {
                                 this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
-                            }
-                            if (mod.isRailTimeSlow) {
-                                game.fpsCap = game.fpsCapDefault
-                                game.fpsInterval = 1000 / game.fpsCap;
                             }
 
                             Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
@@ -3045,16 +3074,19 @@ const b = {
                             }
                         } else { // charging on mouse down
                             mech.fireCDcycle = Infinity //can't fire until mouse is released
-                            const lastCharge = this.charge
-                            let chargeRate = (mech.crouch) ? 0.98 : 0.984
-                            chargeRate *= Math.pow(b.fireCD, 0.03)
-                            this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
-                            if (mod.isRailTimeSlow) {
-                                game.fpsCap = 30 //new fps
-                                game.fpsInterval = 1000 / game.fpsCap;
+                            const previousCharge = this.charge
+                            let smoothRate = 0.98 * (mech.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCD) //small b.fireCD = faster shots, b.fireCD=1 = normal shot,  big b.fireCD = slower chot
+                            this.charge = this.charge * smoothRate + 1 * (1 - smoothRate)
+
+                            // let chargeRate = (mech.crouch) ? 0.98 : 0.984
+                            // chargeRate *= Math.pow(b.fireCD, 0.03)
+                            // this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
+                            if (mod.isRailEnergyGain) {
+                                mech.energy += (this.charge - previousCharge) * 1.66 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
                             } else {
-                                mech.energy -= (this.charge - lastCharge) * 0.28 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+                                mech.energy -= (this.charge - previousCharge) * 0.33 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
                             }
+
 
                             //draw targeting
                             let best;
