@@ -17,8 +17,8 @@ const level = {
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            b.giveGuns("mine")
-            mod.giveMod("sentry")
+            // b.giveGuns("mine")
+            // mod.giveMod("sentry")
 
 
             level.intro(); //starting level

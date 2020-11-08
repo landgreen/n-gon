@@ -1,14 +1,6 @@
 *********** NEXT PATCH ***********
 
-mini black hole mobs travel through walls
 
-mod: radioactive contamination - after a mob or shield dies, leftover radiation spreads to a nearby mob
-
-mod: half-wave rectifier - railgun overfills with energy when you charge instead of draining
-   removed rail gun mod - frame dragging
-bug fixed - rail gun bugs out when your charge speed gets very low
-
-mod: sentry - mines are modified to automatically fire nails at nearby targets for 12 seconds
 
 ************** BUGS **************
 

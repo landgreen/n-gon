@@ -2402,9 +2402,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("rail gun") && !mod.isCapacitor
+                return mod.haveGunCheck("rail gun")
             },
-            requires: "rail gun, not capacitor bank",
+            requires: "rail gun",
             effect() {
                 mod.isRailEnergyGain = true;
             },
@@ -2418,9 +2418,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("rail gun") && !mod.isRailEnergyGain
+                return mod.haveGunCheck("rail gun")
             },
-            requires: "rail gun, not half-wave rectifier",
+            requires: "rail gun",
             effect() {
                 mod.isCapacitor = true;
             },

@@ -2863,8 +2863,8 @@ const b = {
             have: false,
             fire() {
                 if (mod.isCapacitor) {
-                    if (mech.energy > 0.16) {
-                        mech.energy -= 0.16
+                    if (mech.energy > 0.16 || mod.isRailEnergyGain) {
+                        mech.energy += 0.16 * (mod.isRailEnergyGain ? 1 : -1)
                         mech.fireCDcycle = mech.cycle + Math.floor(30 * b.fireCD);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 60, 14, {
@@ -3077,17 +3077,11 @@ const b = {
                             const previousCharge = this.charge
                             let smoothRate = 0.98 * (mech.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCD) //small b.fireCD = faster shots, b.fireCD=1 = normal shot,  big b.fireCD = slower chot
                             this.charge = this.charge * smoothRate + 1 * (1 - smoothRate)
-
-                            // let chargeRate = (mech.crouch) ? 0.98 : 0.984
-                            // chargeRate *= Math.pow(b.fireCD, 0.03)
-                            // this.charge = this.charge * chargeRate + (1 - chargeRate) // this.charge converges to 1
                             if (mod.isRailEnergyGain) {
-                                mech.energy += (this.charge - previousCharge) * 1.66 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
+                                mech.energy += (this.charge - previousCharge) * 2 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
                             } else {
                                 mech.energy -= (this.charge - previousCharge) * 0.33 //energy drain is proportional to charge gained, but doesn't stop normal mech.fieldRegen
                             }
-
-
                             //draw targeting
                             let best;
                             let range = 3000

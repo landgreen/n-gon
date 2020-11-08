@@ -1061,7 +1061,7 @@ const mobs = {
                         powerUps.spawn(this.position.x, this.position.y, type);
                     }
                 }
-                if (true) {
+                if (mod.isRadioactive) {
                     //look for dots and spread them
                     let dmgTotal = 0
                     for (let i = 0, len = this.status.length; i < len; i++) {
@@ -1077,7 +1077,15 @@ const mobs = {
                                 closestIndex = i
                             }
                         }
-                        if (closestIndex) mobs.statusDoT(mob[closestIndex], dmgTotal / 180, 180)
+                        if (closestIndex) {
+                            mobs.statusDoT(mob[closestIndex], dmgTotal / 180, 180)
+                            ctx.beginPath();
+                            ctx.moveTo(this.position.x, this.position.y);
+                            ctx.lineTo(mob[closestIndex].position.x, mob[closestIndex].position.y);
+                            ctx.lineWidth = this.radius;
+                            ctx.strokeStyle = "rgba(0,80,80,1)";
+                            ctx.stroke();
+                        }
                         //draw AOE
                         // game.drawList.push({ //add dmg to draw queue
                         //     x: this.position.x,
