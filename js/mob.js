@@ -140,8 +140,6 @@ const mobs = {
                     ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
                     ctx.stroke();
                     ctx.fill();
-
-
                 },
                 endEffect() {
                     who.isStunned = false
@@ -1047,6 +1045,7 @@ const mobs = {
                     if (Math.random() < mod.isBotSpawner) {
                         b.randomBot(this.position, false)
                         bullet[bullet.length - 1].endCycle = game.cycle + 1000 + Math.floor(400 * Math.random())
+                        this.leaveBody = false; // no body since it turned into the bot
                     }
                     if (mod.isExplodeMob) b.explosion(this.position, Math.min(550, Math.sqrt(this.mass + 2.5) * 50))
                     if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob, 40 + 7 * Math.random())

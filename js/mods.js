@@ -922,7 +922,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1
+                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isWormholeDamage
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -934,7 +934,7 @@ const mod = {
         },
         {
             name: "piezoelectricity",
-            description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>300%</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
+            description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>200%</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -943,7 +943,7 @@ const mod = {
             requires: "not mass-energy equivalence",
             effect() {
                 mod.isPiezo = true;
-                if (mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3;
+                mech.energy += mech.maxEnergy * 2;
             },
             remove() {
                 mod.isPiezo = false;
@@ -2001,7 +2001,7 @@ const mod = {
         },
         {
             name: "optimized shell packing",
-            description: "<strong>flak</strong> <strong class='color-g'>ammo</strong> drops contain <strong>3x</strong> more shells",
+            description: "<strong>flak</strong> <strong class='color-g'>ammo</strong> drops contain <strong>2x</strong> more shells",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -2010,7 +2010,7 @@ const mod = {
             requires: "flak",
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (3 * (1 + this.count));
+                    if (b.guns[i].name === "flak") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * (2 * (1 + this.count));
                 }
             },
             remove() {
@@ -2472,12 +2472,12 @@ const mod = {
             effect() {
                 mod.laserReflections++;
                 mod.laserDamage += 0.08; //base is 0.12
-                mod.laserFieldDrain += 0.0006 //base is 0.002
+                mod.laserFieldDrain += 0.0007 //base is 0.002
             },
             remove() {
                 mod.laserReflections = 2;
                 mod.laserDamage = 0.16;
-                mod.laserFieldDrain = 0.0012;
+                mod.laserFieldDrain = 0.0014;
             }
         },
         {
@@ -2610,7 +2610,7 @@ const mod = {
         },
         {
             name: "eddy current brake",
-            description: "you are <strong>surrounded</strong> by a field that<br>limits the <strong>top speed</strong> of mobs",
+            description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2963,7 +2963,7 @@ const mod = {
         },
         {
             name: "Penrose process",
-            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills to <strong>200%</strong> of the maximum",
+            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills by <strong>50%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {

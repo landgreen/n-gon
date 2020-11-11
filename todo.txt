@@ -1,6 +1,13 @@
 *********** NEXT PATCH ***********
+you can view the patch notes for the last few commits from the game menu
+  this uses the github API, so it might have some delay
 
+overfill mods add energy instead of setting energy to a value 
 
+bug - blocks in vertical portals can get stuck inside the portals
+  fixed, but only for one portal... oh well
+
+mobs that make a scrap bot, don't leave a block body anymore
 
 ************** BUGS **************
 
@@ -15,6 +22,23 @@ bug - mine spawned one new mine every second
 bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ************** MODS **************
+
+mod - neutron bomb needs a method to "catch" mobs in it's field
+  apply stun status effect
+  too similar to the stun effect?
+
+mod - nano scale field could be a mod
+  excess energy is converted to bullets
+    run this code in the energy overfill code check
+  possible issues
+    worm hole, Penrose process - nerf a bit
+    pair production - nerf and give it to anyone
+    cloaking field - maybe just don't spawn bullets when cloaked
+
+mod - sentry fires other bullet types
+  laser or missile
+
+flak could be a mod for shotgun?
 
 mod - self destruct - drones explode when they die
   drones lose extra time on collisions, so they often explode after a collision
@@ -62,6 +86,14 @@ mod - foam is attracted to mobs
   could also do bremsstrahlung radiation like damage on attachment
 
 ************** TODO **************
+
+wormholes need to give feedback on where a portal can go
+  or automatically put portals in safe places
+
+field - You have a permanent neutron bomb oscillating on you. Energy regeneration and heal powerup effectiveness is halved.
+  neutron field could be a passive outwards push, replacing the defined, oscillating border of SWH with a less powerful, larger border
+
+find a way to automatically show patch information from github on n-gon main page
 
 repeat map in vertical and horizontal space
   or at least vertical space

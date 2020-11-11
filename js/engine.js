@@ -133,7 +133,7 @@ function collisionChecks(event) {
                         mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
                         mob[k].foundPlayer();
                         let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * game.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-                        if (mod.isPiezo && mech.energy < mech.maxEnergy * 3) mech.energy = mech.maxEnergy * 3
+                        if (mod.isPiezo) mech.energy += mech.maxEnergy * 2;
                         mech.damage(dmg);
                         if (mod.isBayesian) powerUps.ejectMod()
                         if (mob[k].onHit) mob[k].onHit(k);

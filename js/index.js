@@ -959,6 +959,48 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
+
+
+document.getElementById("updates").addEventListener("toggle", function() {
+
+
+    function loadJSON(path, success, error) { //generic function to get JSON
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    if (success)
+                        success(JSON.parse(xhr.responseText));
+                } else {
+                    if (error)
+                        error(xhr);
+                }
+            }
+        };
+        xhr.open("GET", path, true);
+        xhr.send();
+    }
+    let text = `<strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
+    document.getElementById("updates-div").innerHTML = text
+
+    ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
+    loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
+        function(data) {
+            // console.log(data)
+            for (let i = 0, len = 4; i < len; i++) {
+                text += data[i].commit.author.date.substr(0, 10) + ": "; //+ "<br>"
+                text += data[i].commit.message
+                if (i < len - 1) text += "<hr>"
+            }
+            document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
+            console.log(text)
+        },
+        function(xhr) {
+            console.error(xhr);
+        }
+    );
+})
+
 //**********************************************************************
 // main loop 
 //**********************************************************************

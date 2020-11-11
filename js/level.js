@@ -1720,7 +1720,7 @@ const level = {
         spawn.randomMob(-100, -900, -0.2);
         spawn.randomBoss(3700, -1500, 0.4);
         spawn.randomBoss(1700, -900, 0.4);
-        if (game.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
+        if (game.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
     },
     highrise() {
@@ -4283,7 +4283,7 @@ const level = {
                     // body[i].bounds.max.x - body[i].bounds.min.x < 100 && body[i].bounds.max.y - body[i].bounds.min.y < 100
                     if (Matter.Query.collides(this, [body[i]]).length === 0) {
                         if (body[i].isInPortal === this) body[i].isInPortal = null
-                    } else if (body[i].isInPortal !== this) {
+                    } else if (body[i].isInPortal !== this) { //touching this portal, but for the first time
                         body[i].isInPortal = this.portalPair
                         //teleport
                         if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
@@ -4300,6 +4300,10 @@ const level = {
                         }
                         let v = Vector.mult(this.portalPair.unit, mag)
                         Matter.Body.setVelocity(body[i], v);
+                    } else if (body[i].speed < 0.1) { //touching this portal and very slow
+                        Matter.World.remove(engine.world, body[i]);
+                        body.splice(i, 1);
+                        break
                     }
                 }
             }

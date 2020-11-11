@@ -1350,7 +1350,7 @@ const mech = {
                     mech.drawFieldMeter()
 
                     if (mod.isPerfectBrake) { //cap mob speed around player
-                        const range = 350 + 140 * wave
+                        const range = 160 + 140 * wave + 150 * mech.energy
                         for (let i = 0; i < mob.length; i++) {
                             const distance = Vector.magnitude(Vector.sub(mech.pos, mob[i].position))
                             if (distance < range) {
@@ -2312,7 +2312,7 @@ const mech = {
                                                 Matter.World.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 mech.fieldRange *= 0.8
-                                                if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
+                                                if (mod.isWormholeEnergy) mech.energy += 0.5
                                                 if (mod.isWormSpores) { //pandimensionalspermia
                                                     b.spore(Vector.add(mech.hole.pos2, Vector.rotate({
                                                         x: mech.fieldRange,
@@ -2335,7 +2335,8 @@ const mech = {
                                             Matter.World.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             mech.fieldRange *= 0.8
-                                            if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
+                                            // if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
+                                            if (mod.isWormholeEnergy) mech.energy += 0.5
                                             if (mod.isWormSpores) { //pandimensionalspermia
                                                 b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
                                                     x: mech.fieldRange,

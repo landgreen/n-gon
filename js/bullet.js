@@ -633,14 +633,15 @@ const b = {
             },
             sentry() {
                 this.lookFrequency = game.cycle + 60
-                this.endCycle = game.cycle + 720
+                this.endCycle = game.cycle + 1080
                 this.do = function() { //overwrite the do method for this bullet
                     this.force.y += this.mass * 0.002; //extra gravity
                     if (game.cycle > this.lookFrequency) {
-                        this.lookFrequency = 14 + Math.floor(5 * Math.random())
+                        this.lookFrequency = 10 + Math.floor(3 * Math.random())
                         this.do = function() { //overwrite the do method for this bullet
                             this.force.y += this.mass * 0.002; //extra gravity
                             if (!(game.cycle % this.lookFrequency) && !mech.isBodiesAsleep) { //find mob targets
+                                this.endCycle -= 10
                                 b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, false)
                                 if (!(game.cycle % (this.lookFrequency * 6))) {
                                     game.drawList.push({
@@ -1917,8 +1918,12 @@ const b = {
                         if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
                         if (mod.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.99) this.dmg *= 5 //crit if hit near center
                     };
-                    mech.energy -= mech.fieldRegen + 0.008
-                    if (mech.energy < 0.02) mech.fireCDcycle = mech.cycle + 60; // cool down
+
+                    if (mech.energy < 0.01) {
+                        mech.fireCDcycle = mech.cycle + 60; // cool down
+                    } else {
+                        mech.energy -= mech.fieldRegen + 0.009
+                    }
                 }
             }
         },
@@ -2508,7 +2513,7 @@ const b = {
                 const me = bullet.length;
                 const dir = mech.angle;
                 bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 4, b.fireAttributes(dir, false));
-                b.fireProps(mech.crouch ? 30 : 15, mech.crouch ? 28 : 18, dir, me); //cd , speed
+                b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 30 : 20, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
                 bullet[me].endCycle = Infinity;
                 bullet[me].frictionAir = 0;
@@ -2630,7 +2635,7 @@ const b = {
                             //aoe damage to mobs
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                                    let dmg = b.dmgScale * 0.035
+                                    let dmg = b.dmgScale * 0.05
                                     if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.3 //reduce damage if a wall is in the way
                                     if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
                                     mob[i].damage(dmg);
@@ -2864,7 +2869,7 @@ const b = {
             fire() {
                 if (mod.isCapacitor) {
                     if (mech.energy > 0.16 || mod.isRailEnergyGain) {
-                        mech.energy += 0.16 * (mod.isRailEnergyGain ? 1 : -1)
+                        mech.energy += 0.16 * (mod.isRailEnergyGain ? 6 : -1)
                         mech.fireCDcycle = mech.cycle + Math.floor(30 * b.fireCD);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(mech.pos.x + 50 * Math.cos(mech.angle), mech.pos.y + 50 * Math.sin(mech.angle), 60, 14, {
@@ -3250,7 +3255,7 @@ const b = {
                         ctx.globalAlpha = 1;
                     } else if (mod.beamSplitter) {
                         const divergence = mech.crouch ? 0.15 : 0.2
-                        let dmg = mod.laserDamage * 0.9
+                        let dmg = 0.1 + mod.laserDamage * Math.pow(0.9, mod.laserDamage)
                         const where = {
                             x: mech.pos.x + 20 * Math.cos(mech.angle),
                             y: mech.pos.y + 20 * Math.sin(mech.angle)
@@ -3268,7 +3273,7 @@ const b = {
                                 x: where.x + 3000 * Math.cos(mech.angle - i * divergence),
                                 y: where.y + 3000 * Math.sin(mech.angle - i * divergence)
                             }, dmg)
-                            dmg *= 0.9
+                            // dmg *= 0.9
                         }
                     } else {
                         b.laser()

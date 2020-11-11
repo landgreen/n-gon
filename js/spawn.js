@@ -94,7 +94,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.locatePlayer();
-        const density = 1.1
+        const density = 1
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -107,8 +107,7 @@ const spawn = {
         me.endCycle = 720;
         me.mode = 0;
         me.do = function() {
-            //hold position
-            Matter.Body.setPosition(this, {
+            Matter.Body.setPosition(this, { //hold position
                 x: x,
                 y: y
             });
@@ -177,7 +176,7 @@ const spawn = {
         me.spawnInterval = 302
         me.modeSpawns = function() {
             if (!(this.cycle % this.spawnInterval) && !mech.isBodiesAsleep && mob.length < 40) {
-                Matter.Body.setAngularVelocity(this, 0.1)
+                if (this.mode !== 3) Matter.Body.setAngularVelocity(this, 0.1)
                 //fire a bullet from each vertex
                 let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -265,7 +264,7 @@ const spawn = {
                 }
             }
             if (this.cycle < 240) { //damage scales up over 2 seconds to give player time to move
-                const scale = this.cycle / 180
+                const scale = this.cycle / 240
                 const dmg = 0.14 * game.dmgScale * scale
                 ctx.beginPath();
                 this.laser(this.vertices[0], this.angle + Math.PI / 6, dmg);
