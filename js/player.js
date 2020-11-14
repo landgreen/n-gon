@@ -186,39 +186,6 @@ const mech = {
             return true
         }
     },
-    enterAir() {
-        //triggered in engine.js on collision
-        mech.onGround = false;
-        mech.hardLandCD = 0 // disable hard landing
-        if (mech.checkHeadClear()) {
-            if (mech.crouch) {
-                mech.undoCrouch();
-            }
-            mech.yOffGoal = mech.yOffWhen.jump;
-        }
-    },
-    //triggered in engine.js on collision
-    enterLand() {
-        mech.onGround = true;
-        if (mech.crouch) {
-            if (mech.checkHeadClear()) {
-                mech.undoCrouch();
-            } else {
-                mech.yOffGoal = mech.yOffWhen.crouch;
-            }
-        } else {
-            //sets a hard land where player stays in a crouch for a bit and can't jump
-            //crouch is forced in groundControl below
-            const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
-            if (momentum > 130) {
-                mech.doCrouch();
-                mech.yOff = mech.yOffWhen.jump;
-                mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
-            } else {
-                mech.yOffGoal = mech.yOffWhen.stand;
-            }
-        }
-    },
     buttonCD_jump: 0, //cool down for player buttons
     groundControl() {
         //check for crouch or jump
@@ -516,7 +483,6 @@ const mech = {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
-
                     return;
                 } else { //death
                     mech.health = 0;
@@ -2410,6 +2376,7 @@ const mech = {
                                 mech.hole.isReady = false;
                                 mech.fieldRange = 0
                                 Matter.Body.setPosition(player, game.mouseInGame);
+                                mech.buttonCD_jump = 0 //this might fix a bug with jumping
                                 const velocity = Vector.mult(Vector.normalise(sub), 18)
                                 Matter.Body.setVelocity(player, {
                                     x: velocity.x,

@@ -12,20 +12,19 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // level.difficultyIncrease(8)
+            level.difficultyIncrease(8)
             // game.enableConstructMode() //used to build maps in testing mode
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            // b.giveGuns("mine")
-            // mod.giveMod("sentry")
+            // b.giveGuns("drones")
+            // mod.giveMod("incendiary ammunition")
 
 
-            level.intro(); //starting level
+            // level.intro(); //starting level
+            level.testing(); //not in rotation
             // level.finalBoss() //final boss level
             // level.gauntlet(); //before final boss level
-            // level.testing(); //not in rotation
-            // level.template() //not in rotation
             // level.testChamber() //less mobs, more puzzle
             // level.sewers();
             // level.satellite();
@@ -141,16 +140,16 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        // spawn.starter(1600, -500)
+        spawn.starter(1600, -500, 200)
         // spawn.bomberBoss(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.spawner(1600, -500)
         // spawn.sniper(1700, -120, 50)
         // spawn.bomberBoss(1400, -500)
-        spawn.sucker(1800, -120)
+        // spawn.sucker(1800, -120)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.powerUpBoss(1600, -500)
+        // spawn.spiderBoss(1600, -500)
         // spawn.sniper(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 

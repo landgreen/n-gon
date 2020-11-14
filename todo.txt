@@ -1,31 +1,55 @@
 *********** NEXT PATCH ***********
-you can view the patch notes for the last few commits from the game menu
-  this uses the github API, so it might have some delay
 
-overfill mods add energy instead of setting energy to a value 
+bug - spider boss move at full speed again (watch out)
+bots that uses energy stop when you hit 50% energy if you have mass-energy mod
 
-bug - blocks in vertical portals can get stuck inside the portals
-  fixed, but only for one portal... oh well
+you get a warning before you overwrite your current gun due to integrated armament
 
-mobs that make a scrap bot, don't leave a block body anymore
+gun - flak is removed
+mod: High-explosive incendiary, or incendiary rounds
+  shotgun: several large explosions
+  nail gun: rapid fire explosions
+  drones: drones explode on impact
+  super balls: explode on contact
 
 ************** BUGS **************
 
-bug - crouch and worm hole? -> crouch locked in
-bug - getting locked into crouch on community levels, but showing the player as still standing
+(4+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
+  players have extra gravity
+    might be from the short jump code
+      added a line to wormhole to reset possible short jump
 
-bug - capping the fps causes random slow downs, that can be fixed with pause
+(3 reports) bug - getting locked into crouch on community levels, but showing the player as still standing
+  maybe improper vertices for map bodies
 
-bug - mine spawned one new mine every second
+(intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
+
+(once) bug - mine spawned one new mine every second
   after sticking to the top right corner of a wall
   notes: had only gun mine, mod mine reclamation, field plasma,
-bug - mines spawn extra mines when fired at thin map wall while jumping
 
-************** MODS **************
+(repeatable almost everytime) bug - mines spawn extra mines when fired at thin map wall while jumping
+
+
+************** TODO **************
+
+
+
+rework super balls - start with more damage, ramp slower from mods
+  +1 ball per shot from mods
+  small scale size increased
+    or incendiary and no size increase
+
+mod - make neutron bomb a grenade mod
+
+mod - railgun's push effect is increased, and it does some damage to nearby mobs
+  maybe only triggers at max energy
 
 mod - neutron bomb needs a method to "catch" mobs in it's field
   apply stun status effect
   too similar to the stun effect?
+
+mod - a 4th mod selection option that is always a gun or field
 
 mod - nano scale field could be a mod
   excess energy is converted to bullets
@@ -35,10 +59,7 @@ mod - nano scale field could be a mod
     pair production - nerf and give it to anyone
     cloaking field - maybe just don't spawn bullets when cloaked
 
-mod - sentry fires other bullet types
-  laser or missile
-
-flak could be a mod for shotgun?
+Mod: "Solar Power": Energy regeneration is doubled while standing still
 
 mod - self destruct - drones explode when they die
   drones lose extra time on collisions, so they often explode after a collision
@@ -85,13 +106,14 @@ mod - foam is attracted to mobs
   name - static cling
   could also do bremsstrahlung radiation like damage on attachment
 
-************** TODO **************
+field - one block orbits you, it can protect you a bit and do collision damage
+    use field to fire and press field again to pull it back
+    mod - more blocks
+    mod - attach a permanent neutron bomb to the block
+      lowers energy regen, but it can damage mobs
 
 wormholes need to give feedback on where a portal can go
   or automatically put portals in safe places
-
-field - You have a permanent neutron bomb oscillating on you. Energy regeneration and heal powerup effectiveness is halved.
-  neutron field could be a passive outwards push, replacing the defined, oscillating border of SWH with a less powerful, larger border
 
 find a way to automatically show patch information from github on n-gon main page
 

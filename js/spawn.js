@@ -159,7 +159,7 @@ const spawn = {
                 }
                 this.mode = 3
                 this.fill = "#000";
-                this.eventHorizon = 700
+                this.eventHorizon = 750
                 this.spawnInterval = 600
                 this.rotateVelocity = 0.001 * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
                 if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
@@ -200,7 +200,7 @@ const spawn = {
         me.eventHorizonCycleRate = 4 * Math.PI / me.endCycle
         me.modeSuck = function() {
             //eventHorizon waves in and out
-            if (!mech.isBodiesAsleep) eventHorizon = this.eventHorizon * (1 - 0.25 * Math.cos(this.cycle * this.eventHorizonCycleRate)) //0.014
+            const eventHorizon = this.eventHorizon * (1 - 0.25 * Math.cos(game.cycle * this.eventHorizonCycleRate)) //0.014
             //draw darkness
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
@@ -763,7 +763,7 @@ const spawn = {
             this.checkStatus();
             if (this.seePlayer.recall) {
                 //eventHorizon waves in and out
-                eventHorizon = this.eventHorizon * (0.93 + 0.17 * Math.sin(game.cycle * 0.011))
+                const eventHorizon = this.eventHorizon * (0.93 + 0.17 * Math.sin(game.cycle * 0.011))
 
                 //accelerate towards the player
                 const forceMag = this.accelMag * this.mass;
@@ -860,7 +860,7 @@ const spawn = {
                 this.force.y += forceMag * dy / mag;
 
                 //eventHorizon waves in and out
-                eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(game.cycle * 0.008))
+                const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(game.cycle * 0.008))
                 //  zoom camera in and out with the event horizon
 
                 //draw darkness
@@ -910,7 +910,6 @@ const spawn = {
         }
     },
     spiderBoss(x, y, radius = 60 + Math.ceil(Math.random() * 10)) {
-        const isDaddyLongLegs = Math.random() < 0.25
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
@@ -919,10 +918,10 @@ const spawn = {
         me.friction = 0;
         me.frictionAir = 0.0065;
         me.lookTorque = 0.0000008; //controls spin while looking for player
-        me.g = 0.00025; //required if using 'gravity'
+        me.g = 0.0002; //required if using 'gravity'
         me.seePlayerFreq = Math.round((30 + 20 * Math.random()) * game.lookFreqScale);
-        const springStiffness = isDaddyLongLegs ? 0.0001 : 0.000065;
-        const springDampening = isDaddyLongLegs ? 0 : 0.0006;
+        const springStiffness = 0.00014;
+        const springDampening = 0.0005;
 
         me.springTarget = {
             x: me.position.x,
@@ -935,8 +934,8 @@ const spawn = {
             stiffness: springStiffness,
             damping: springDampening
         });
+        World.add(engine.world, cons[cons.length - 1]);
         cons[len].length = 100 + 1.5 * radius;
-
         me.cons = cons[len];
 
         me.springTarget2 = {
@@ -948,11 +947,12 @@ const spawn = {
             pointA: me.springTarget2,
             bodyB: me,
             stiffness: springStiffness,
-            damping: springDampening
+            damping: springDampening,
+            length: 0
         });
+        World.add(engine.world, cons[cons.length - 1]);
         cons[len2].length = 100 + 1.5 * radius;
         me.cons2 = cons[len2];
-        if (isDaddyLongLegs) Matter.Body.setDensity(me, 0.017); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.onDeath = function() {
             this.removeCons();
@@ -974,15 +974,12 @@ const spawn = {
 
         for (let i = 0; i < nodes; ++i) {
             spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
-            if (isDaddyLongLegs) Matter.Body.setDensity(mob[mob.length - 1], 0.01); //extra dense //normal is 0.001 //makes effective life much larger
             targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
         }
-        //spawn shield around all nodes
-        if (!isDaddyLongLegs) spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
-        spawn.allowShields = true;
 
-        const attachmentStiffness = isDaddyLongLegs ? 0.0003 : 0.05
-        if (!isDaddyLongLegs) spawn.constrain2AdjacentMobs(nodes + 2, attachmentStiffness, true); //loop mobs together
+        const attachmentStiffness = 0.05
+        spawn.constrain2AdjacentMobs(nodes, attachmentStiffness, true); //loop mobs together
+
         for (let i = 0; i < nodes; ++i) { //attach to center mob
             consBB[consBB.length] = Constraint.create({
                 bodyA: me,
@@ -992,6 +989,9 @@ const spawn = {
             });
             World.add(engine.world, consBB[consBB.length - 1]);
         }
+        //spawn shield around all nodes
+        spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
+        spawn.allowShields = true;
     },
     timeSkipBoss(x, y, radius = 55) {
         mobs.spawn(x, y, 6, radius, '#000');

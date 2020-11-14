@@ -24,8 +24,29 @@ function playerOnGroundCheck(event) {
     //runs on collisions events
     function enter() {
         mech.numTouching++;
-        if (!mech.onGround) mech.enterLand();
+        if (!mech.onGround) {
+            mech.onGround = true;
+            if (mech.crouch) {
+                if (mech.checkHeadClear()) {
+                    mech.undoCrouch();
+                } else {
+                    mech.yOffGoal = mech.yOffWhen.crouch;
+                }
+            } else {
+                //sets a hard land where player stays in a crouch for a bit and can't jump
+                //crouch is forced in groundControl below
+                const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
+                if (momentum > 130) {
+                    mech.doCrouch();
+                    mech.yOff = mech.yOffWhen.jump;
+                    mech.hardLandCD = mech.cycle + Math.min(momentum / 6.5 - 6, 40)
+                } else {
+                    mech.yOffGoal = mech.yOffWhen.stand;
+                }
+            }
+        }
     }
+
     const pairs = event.pairs;
     for (let i = 0, j = pairs.length; i != j; ++i) {
         let pair = pairs[i];
@@ -42,76 +63,26 @@ function playerOnGroundCheck(event) {
 
 function playerOffGroundCheck(event) {
     //runs on collisions events
-    function enter() {
-        if (mech.onGround && mech.numTouching === 0) mech.enterAir();
-    }
     const pairs = event.pairs;
     for (let i = 0, j = pairs.length; i != j; ++i) {
-        if (pairs[i].bodyA === jumpSensor) {
-            enter();
-        } else if (pairs[i].bodyB === jumpSensor) {
-            enter();
+        if (pairs[i].bodyA === jumpSensor || pairs[i].bodyB === jumpSensor) {
+            if (mech.onGround && mech.numTouching === 0) {
+                mech.onGround = false;
+                mech.hardLandCD = 0 // disable hard landing
+                if (mech.checkHeadClear()) {
+                    if (mech.crouch) {
+                        mech.undoCrouch();
+                    }
+                    mech.yOffGoal = mech.yOffWhen.jump;
+                }
+            }
         }
     }
 }
 
-// function playerHeadCheck(event) {
-//   //runs on collisions events
-//   if (mech.crouch) {
-//     mech.isHeadClear = true;
-//     const pairs = event.pairs;
-//     for (let i = 0, j = pairs.length; i != j; ++i) {
-//       if (pairs[i].bodyA === headSensor) {
-//         mech.isHeadClear = false;
-//       } else if (pairs[i].bodyB === headSensor) {
-//         mech.isHeadClear = false;
-//       }
-//     }
-//   }
-// }
-
 function collisionChecks(event) {
     const pairs = event.pairs;
     for (let i = 0, j = pairs.length; i != j; i++) {
-
-        // //map + bullet collisions
-        // if (pairs[i].bodyA.collisionFilter.category === cat.map && pairs[i].bodyB.collisionFilter.category === cat.bullet) {
-        //   collideBulletStatic(pairs[i].bodyB)
-        // } else if (pairs[i].bodyB.collisionFilter.category === cat.map && pairs[i].bodyA.collisionFilter.category === cat.bullet) {
-        //   collideBulletStatic(pairs[i].bodyA)
-        // }
-        // //triggers when the bullets hits something static
-        // function collideBulletStatic(obj, speedThreshold = 12, massThreshold = 2) {
-        //   if (obj.onWallHit) obj.onWallHit();
-        // }
-
-        // function collidePlayer(obj) {
-        //   //player dmg from hitting a body
-        //   if (obj.classType === "body" && obj.speed > 10 && mech.immuneCycle < mech.cycle) {
-        //     const velocityThreshold = 30 //keep this lines up with player.enterLand numbers  (130/5 = 26)
-        //     if (player.position.y > obj.position.y) { //block is above the player look at total momentum difference
-        //       const velocityDiffMag = Vector.magnitude(Vector.sub(player.velocity, obj.velocity))
-        //       if (velocityDiffMag > velocityThreshold) hit(velocityDiffMag - velocityThreshold)
-        //     } else { //block is below player only look at horizontal momentum difference
-        //       const velocityDiffMagX = Math.abs(obj.velocity.x - player.velocity.x)
-        //       if (velocityDiffMagX > velocityThreshold) hit(velocityDiffMagX - velocityThreshold)
-        //     }
-
-        //     function hit(dmg) {
-        //       mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
-        //       dmg = Math.min(Math.max(Math.sqrt(dmg) * obj.mass * 0.01, 0.02), 0.15);
-        //       mech.damage(dmg);
-        //       game.drawList.push({ //add dmg to draw queue
-        //         x: pairs[i].activeContacts[0].vertex.x,
-        //         y: pairs[i].activeContacts[0].vertex.y,
-        //         radius: dmg * 500,
-        //         color: game.mobDmgColor,
-        //         time: game.drawTime
-        //       });
-        //     }
-        //   }
-        // }
-
         //mob + (player,bullet,body) collisions
         for (let k = 0; k < mob.length; k++) {
             if (mob[k].alive && mech.alive) {

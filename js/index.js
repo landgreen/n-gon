@@ -987,8 +987,8 @@ document.getElementById("updates").addEventListener("toggle", function() {
     loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
         function(data) {
             // console.log(data)
-            for (let i = 0, len = 4; i < len; i++) {
-                text += data[i].commit.author.date.substr(0, 10) + ": "; //+ "<br>"
+            for (let i = 0, len = 3; i < len; i++) {
+                text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
                 text += data[i].commit.message
                 if (i < len - 1) text += "<hr>"
             }
