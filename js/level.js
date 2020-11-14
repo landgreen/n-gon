@@ -17,12 +17,13 @@ const level = {
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            // b.giveGuns("drones")
+            // b.giveGuns("super balls")
             // mod.giveMod("incendiary ammunition")
+            // mod.giveMod("super ball")
 
 
-            // level.intro(); //starting level
-            level.testing(); //not in rotation
+            level.intro(); //starting level
+            // level.testing(); //not in rotation
             // level.finalBoss() //final boss level
             // level.gauntlet(); //before final boss level
             // level.testChamber() //less mobs, more puzzle

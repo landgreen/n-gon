@@ -1576,7 +1576,7 @@ const mod = {
         //************************************************** 
         {
             name: "incendiary ammunition",
-            description: "your <strong>bullets</strong> <strong class='color-e'>explode</strong> after a short time<br>(nail gun, shotgun, super balls, drones)",
+            description: "<strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><span style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</span>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1592,7 +1592,7 @@ const mod = {
         },
         {
             name: "Lorentzian topology",
-            description: "your <strong>bullets</strong> last <strong>33% longer</strong><br><span style = 'font-size: 85%'>drones, spores, super balls, foam, wave, ice IX, neutron</span>",
+            description: "<strong>bullets</strong> last <strong>33% longer</strong><br><span style = 'font-size: 85%'>drones, spores, super balls, foam, wave, ice IX, neutron</span>",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -1775,7 +1775,7 @@ const mod = {
         },
         {
             name: "super duper",
-            description: "fire <strong>2</strong> additional <strong>super balls</strong>",
+            description: "fire <strong>1</strong> additional <strong>super ball</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1783,7 +1783,7 @@ const mod = {
             },
             requires: "super balls, but not the mod super ball",
             effect() {
-                mod.superBallNumber += 2
+                mod.superBallNumber++
             },
             remove() {
                 mod.superBallNumber = 4;
@@ -1791,7 +1791,7 @@ const mod = {
         },
         {
             name: "super ball",
-            description: "fire one <strong>large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
+            description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1807,7 +1807,7 @@ const mod = {
         },
         {
             name: "super sized",
-            description: `your <strong>super balls</strong> are <strong>22%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
+            description: `your <strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
             count: 0,
             maxCount: 9,
             allowed() {
@@ -1815,7 +1815,7 @@ const mod = {
             },
             requires: "super balls",
             effect() {
-                mod.bulletSize += 0.2
+                mod.bulletSize += 0.15
             },
             remove() {
                 mod.bulletSize = 1;

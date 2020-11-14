@@ -604,7 +604,6 @@ const b = {
                                     const that = this
                                     setTimeout(function() {
                                         if (Matter.Query.collides(that, map).length === 0 || Matter.Query.point(map, that.position).length > 0) {
-                                            // console.log(that)
                                             that.endCycle = 0 // if not touching map explode
                                             that.isArmed = false
                                             b.mine(that.position, that.velocity, that.angle)
@@ -929,8 +928,9 @@ const b = {
             isImproved: false,
             beforeDmg(who) {
                 if (mod.isIncendiary) {
-                    b.explosion(this.position, 120 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
-                    this.endCycle = 0
+                    const max = Math.min(this.endCycle - game.cycle, 1500)
+                    b.explosion(this.position, max * 0.08 + this.isImproved * 100 + 60 * Math.random()); //makes bullet do explosive damage at end
+                    this.endCycle -= max
                 } else {
                     //move away from target after hitting
                     const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20)
@@ -938,7 +938,6 @@ const b = {
                         x: unit.x,
                         y: unit.y
                     });
-
                     this.lockedOn = null
                     if (this.endCycle > game.cycle + this.deathCycles) {
                         this.endCycle -= 60
@@ -2072,10 +2071,14 @@ const b = {
                     bullet[me].restitution = 1;
                     bullet[me].friction = 0;
                     bullet[me].do = function() {
-                        this.force.y += this.mass * 0.001;
+                        this.force.y += this.mass * 0.0012;
                     };
                     bullet[me].beforeDmg = function(who) {
                         mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+                        if (mod.isIncendiary) {
+                            b.explosion(this.position, this.mass * 250); //makes bullet do explosive damage at end
+                            this.endCycle = 0
+                        }
                     };
                 } else {
                     b.muzzleFlash(20);
@@ -2096,6 +2099,12 @@ const b = {
                         bullet[me].friction = 0;
                         bullet[me].do = function() {
                             this.force.y += this.mass * 0.001;
+                        };
+                        bullet[me].beforeDmg = function() {
+                            if (mod.isIncendiary) {
+                                b.explosion(this.position, this.mass * 330 + 40 * Math.random()); //makes bullet do explosive damage at end
+                                this.endCycle = 0
+                            }
                         };
                         dir += SPREAD;
                     }

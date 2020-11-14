@@ -1,16 +1,12 @@
 *********** NEXT PATCH ***********
 
-bug - spider boss move at full speed again (watch out)
-bots that uses energy stop when you hit 50% energy if you have mass-energy mod
-
+bug fix- spider boss moves at full speed again (watch out)
+bots that uses energy, stop when you hit 50% energy if you have mass-energy mod
 you get a warning before you overwrite your current gun due to integrated armament
 
 gun - flak is removed
-mod: High-explosive incendiary, or incendiary rounds
-  shotgun: several large explosions
-  nail gun: rapid fire explosions
-  drones: drones explode on impact
-  super balls: explode on contact
+mod: incendiary ammunition - bullets explode
+  shotgun,  nail gun,  drones,  super balls
 
 ************** BUGS **************
 
