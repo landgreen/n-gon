@@ -996,7 +996,7 @@ const mobs = {
                 }
             },
             damage(dmg, isBypassShield = false) {
-                if (!this.isShielded || isBypassShield) {
+                if ((!this.isShielded || isBypassShield) && this.alive) {
                     dmg *= mod.damageFromMods()
                     //mobs specific damage changes
                     if (mod.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500

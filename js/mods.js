@@ -408,7 +408,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -424,7 +424,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -440,7 +440,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.isFlechetteExplode
+                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -457,7 +457,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || mod.haveGunCheck("grenades") || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob || mod.isFlechetteExplode || mod.isPulseLaser
+                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob || mod.isFlechetteExplode || mod.isPulseLaser
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -922,7 +922,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.isPulseStun || mod.isNeutronStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isWormholeDamage
+                return mod.isStunField || mod.isPulseStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isWormholeDamage
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -1580,7 +1580,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || (mod.haveGunCheck("nail gun") && !mod.isIceCrystals && !mod.isNailCrit) || (mod.haveGunCheck("shotgun") && !mod.isNailShot)
+                return (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)) || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || (mod.haveGunCheck("nail gun") && !mod.isIceCrystals && !mod.isNailCrit) || (mod.haveGunCheck("shotgun") && !mod.isNailShot)
             },
             requires: "drones, super balls, nail gun, shotgun",
             effect() {
@@ -1907,7 +1907,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes") || mod.isNailPoison || mod.isHeavyWater || mod.isWormholeDamage
+                return mod.haveGunCheck("flechettes") || mod.isNailPoison || mod.isHeavyWater || mod.isWormholeDamage || mod.isNeutronBomb
             },
             requires: "radiation damage source",
             effect() {
@@ -2021,9 +2021,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades")
+                return mod.haveGunCheck("grenades") && !mod.isNeutronBomb
             },
-            requires: "grenades",
+            requires: "grenades, not neutron bomb",
             effect() {
                 mod.grenadeFragments += 5
             },
@@ -2037,7 +2037,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isVacuumBomb
+                return mod.haveGunCheck("grenades") && !mod.isVacuumBomb && !mod.isNeutronBomb
             },
             requires: "grenades, not vacuum bomb",
             effect() {
@@ -2053,9 +2053,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isRPG
+                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.isNeutronBomb
             },
-            requires: "grenades, not rocket-propelled",
+            requires: "grenades, not rocket-propelled or neutron bomb",
             effect() {
                 mod.isVacuumBomb = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2070,12 +2070,34 @@ const mod = {
             }
         },
         {
+            name: "neutron bomb",
+            description: "<strong>grenades</strong> are irradiated with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.isVacuumBomb && !mod.grenadeFragments
+            },
+            requires: "grenades, not rocket-propelled, vacuum bomb, or fragmentation",
+            effect() {
+                mod.isNeutronBomb = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireNeutron
+                }
+            },
+            remove() {
+                mod.isNeutronBomb = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireNormal
+                }
+            }
+        },
+        {
             name: "water shielding",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("neutron bomb")
+                return mod.isNeutronBomb
             },
             requires: "neutron bomb",
             effect() {
@@ -2083,22 +2105,6 @@ const mod = {
             },
             remove() {
                 mod.isNeutronImmune = false
-            }
-        },
-        {
-            name: "inertial confinement",
-            description: "<strong>neutron bomb's</strong> detonation <br><strong>stuns</strong> nearby mobs for <strong>1.5</strong> seconds",
-            maxCount: 3,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("neutron bomb")
-            },
-            requires: "neutron bomb",
-            effect() {
-                mod.isNeutronStun += 90;
-            },
-            remove() {
-                mod.isNeutronStun = 0;
             }
         },
         {

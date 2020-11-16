@@ -993,7 +993,6 @@ document.getElementById("updates").addEventListener("toggle", function() {
                 if (i < len - 1) text += "<hr>"
             }
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
-            console.log(text)
         },
         function(xhr) {
             console.error(xhr);

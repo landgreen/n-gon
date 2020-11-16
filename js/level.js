@@ -12,12 +12,13 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            level.difficultyIncrease(8)
+            // level.difficultyIncrease(8)
             // game.enableConstructMode() //used to build maps in testing mode
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            // b.giveGuns("super balls")
+            // b.giveGuns("missiles")
+            // mod.is3Missiles = true
             // mod.giveMod("incendiary ammunition")
             // mod.giveMod("super ball")
 
@@ -141,7 +142,7 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1600, -500, 200)
+        spawn.starter(1900, -500, 20)
         // spawn.bomberBoss(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
@@ -152,7 +153,7 @@ const level = {
         // spawn.cellBossCulture(1600, -500)
         // spawn.spiderBoss(1600, -500)
         // spawn.sniper(1200, -500)
-        // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
+        spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeBoss(1200, -500, "launcher")
         // spawn.snakeBoss(1200, -500)

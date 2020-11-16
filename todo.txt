@@ -1,12 +1,9 @@
 *********** NEXT PATCH ***********
+mod - neutron bomb is a grenade mod, it's damage is 33% higher
+  direct hits also apply radiation damage over time
 
-bug fix- spider boss moves at full speed again (watch out)
-bots that uses energy, stop when you hit 50% energy if you have mass-energy mod
-you get a warning before you overwrite your current gun due to integrated armament
-
-gun - flak is removed
-mod: incendiary ammunition - bullets explode
-  shotgun,  nail gun,  drones,  super balls
+missiles aim better, accelerate quicker, push blocks out of the way better
+  crouch fire mode rapidly launches missiles vertically 
 
 ************** BUGS **************
 
@@ -29,23 +26,32 @@ mod: incendiary ammunition - bullets explode
 
 ************** TODO **************
 
+rework missiles - move faster
+  target more accurately
+  don't get stuck thrusting into a wall
+  less delay right after firing
+  mods
 
+    recursive is kinda dumb
 
-rework super balls - start with more damage, ramp slower from mods
-  +1 ball per shot from mods
-  small scale size increased
-    or incendiary and no size increase
+new power up - increase damage and fire speed, for 15 seconds
+  named boost?
+  enabled by a mod?
+  power up color: ?
+  how to indicate effect duration
+  or just give the effect after picking up a reroll
 
-mod - make neutron bomb a grenade mod
+mod - overfilled energy decays slower
+
+mod - remove max health, but you take 60% more harm
+
+mod - taking damage fires your current weapon at the nearest mob
+  requires? some harm reduction
+
+mod - a 4th mod selection option that is always a bot
 
 mod - railgun's push effect is increased, and it does some damage to nearby mobs
   maybe only triggers at max energy
-
-mod - neutron bomb needs a method to "catch" mobs in it's field
-  apply stun status effect
-  too similar to the stun effect?
-
-mod - a 4th mod selection option that is always a gun or field
 
 mod - nano scale field could be a mod
   excess energy is converted to bullets
@@ -56,9 +62,7 @@ mod - nano scale field could be a mod
     cloaking field - maybe just don't spawn bullets when cloaked
 
 Mod: "Solar Power": Energy regeneration is doubled while standing still
-
-mod - self destruct - drones explode when they die
-  drones lose extra time on collisions, so they often explode after a collision
+  run in the 1 second check
 
 mod - a bot that eats up health and ammo, but poops out a mod (10 power ups = 1 mod?)
   or it poops a reroll after picking up 2 heal/ammo
@@ -69,21 +73,14 @@ mod - a bot that eats up health and ammo, but poops out a mod (10 power ups = 1 
   moves slower then the player so you can get to it before the bot if you hurry
   disable crystalized armor?
 
-mod - rerolls give at least 1 mod that applies your field and gun if possible
-  give fields and guns a tag
-  also spawn a few rerolls for balance?
-
 mod: take less harm if you are in the air
   require squirrel cage rotor
 
-mod - explosions apply radiation damage over time
-  or spawn a neutron bomb with a short timer
+Laser mod: For each reflection of laser, damage increases by 10%
 
-mod - remove a random mod as a condition for picking up a really good mod
+mechanic - remove a random mod as a condition for picking up a really good mod
 
-mod - double the player's time rate (like you do with the time dilation mod)
-
-mod - do something for 2 seconds after firing
+mechanic - do something for 2 seconds after firing
   if (mech.fireCDcycle + 120)
 
 mod - do 50% more damage in close, but 50% less at a distance
@@ -111,15 +108,9 @@ field - one block orbits you, it can protect you a bit and do collision damage
 wormholes need to give feedback on where a portal can go
   or automatically put portals in safe places
 
-find a way to automatically show patch information from github on n-gon main page
-
 repeat map in vertical and horizontal space
   or at least vertical space
   camera looks strange when you teleport player with a high velocity
-
-sucker mobs do something when they touch blocks
-  heal
-  remove the blocks from the map
 
 add an ending to the game
   maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
@@ -152,21 +143,9 @@ look for mods that could update description text with count and mod.is  informat
 
 mouse event e.which is deprecated
 
-add a flag to some bullets to indicate that mobs can't learn the player position from bullet damage in bullet-mob collisions
-  if isNotRevealPlayerLocation flag is true have the mob still know player location if nearby player
-  on hide if bullet age is above 4 seconds?
-  spores
-  mines
-  conditions to reveal player from damage?
-    1. bullet spawned from player
-    2. bullet is less than 4 seconds old
-    3. damage is nearby player or in line of sight of player
-
 add some more computer / AI stuff to the level lore text
 
-general idea: shrink mech.baseHealth in a mod or field
-
-change player color based on harm reduction
+mechanic - shrink mech.baseHealth in a mod or field
 
 standing wave harmonics mod - push things away
   push scales with mass up to about 4

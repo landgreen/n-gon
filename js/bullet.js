@@ -290,12 +290,14 @@ const b = {
                 mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
             },
             minDmgSpeed: 10,
-            lookFrequency: Math.floor(15 + Math.random() * 3),
-            explodeRad: 170 + 60 * Math.random(),
+            lookFrequency: Math.floor(10 + Math.random() * 3),
+            explodeRad: 180 + 60 * Math.random(),
+            density: 0.02, //0.001 is normal
             beforeDmg() {
+                Matter.Body.setDensity(this, 0.0001); //reduce density to normal
                 this.tryToLockOn();
                 this.endCycle = 0; //bullet ends cycle after doing damage  // also triggers explosion
-            }, //this.endCycle = 0  //triggers despawn
+            },
             onEnd() {
                 b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
                 if (spawn) {
@@ -310,15 +312,14 @@ const b = {
             lockedOn: null,
             tryToLockOn() {
                 let closeDist = Infinity;
-                //look for closest target to where the missile will be in 30 cycles
-                const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 50))
+                const futurePos = Vector.add(this.position, Vector.mult(this.velocity, 30)) //look for closest target to where the missile will be in 30 cycles
                 this.lockedOn = null;
                 // const futurePos = this.lockedOn ? :Vector.add(this.position, Vector.mult(this.velocity, 50))
                 for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
                         mob[i].alive && mob[i].dropPowerUp &&
-                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                        Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                        // && Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     ) {
                         const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
                         if (futureDist < closeDist) {
@@ -347,21 +348,20 @@ const b = {
                             y: Math.sin(this.angle)
                         };
                         const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
-                        if (Vector.dot(target, face) > -0.98) {
-                            if (Vector.cross(target, face) > 0) {
-                                Matter.Body.rotate(this, 0.1);
-                            } else {
-                                Matter.Body.rotate(this, -0.1);
-                            }
-                            this.frictionAir = 0.06; //extra friction if turning
+                        // const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
+                        const dot = Vector.dot(target, face)
+                        const aim = Math.min(0.08, (1 + dot) * 1)
+                        if (Vector.cross(target, face) > 0) {
+                            Matter.Body.rotate(this, aim);
                         } else {
-                            this.frictionAir = 0.025; //low friction if not turning
+                            Matter.Body.rotate(this, -aim);
                         }
+                        this.frictionAir = Math.min(0.1, Math.max(0.04, (1 + dot) * 1)) //0.08; //extra friction if turning
                     }
                     //accelerate in direction bullet is facing
-                    const dir = this.angle; // + (Math.random() - 0.5);
-                    this.force.x += Math.cos(dir) * thrust;
-                    this.force.y += Math.sin(dir) * thrust;
+                    const dir = this.angle;
+                    this.force.x += thrust * Math.cos(dir);
+                    this.force.y += thrust * Math.sin(dir);
 
                     ctx.beginPath(); //draw rocket
                     ctx.arc(this.position.x - Math.cos(this.angle) * (25 * size - 3) + (Math.random() - 0.5) * 4,
@@ -380,7 +380,7 @@ const b = {
                 }
             },
         });
-        const thrust = 0.0044 * bullet[me].mass;
+        const thrust = 0.0065 * bullet[me].mass;
         Matter.Body.setVelocity(bullet[me], {
             x: mech.Vx / 2 + speed * Math.cos(angle),
             y: mech.Vy / 2 + speed * Math.sin(angle)
@@ -2355,55 +2355,55 @@ const b = {
             name: "missiles",
             description: "launch missiles that <strong>accelerate</strong> towards <strong>mobs</strong><br><strong class='color-e'>explodes</strong> when near target",
             ammo: 0,
-            ammoPack: 3,
+            ammoPack: 3.3,
             have: false,
             fireCycle: 0,
             ammoLoaded: 0,
             fire() {
+                //missile(where, dir, speed, size = 1, spawn = 0) {
                 if (mod.is3Missiles) {
                     if (mech.crouch) {
-                        mech.fireCDcycle = mech.cycle + 50 * b.fireCD; // cool down
-                        const direction = {
-                            x: Math.cos(mech.angle),
-                            y: Math.sin(mech.angle)
-                        }
-                        const push = Vector.mult(Vector.perp(direction), 0.0007)
+                        mech.fireCDcycle = mech.cycle + 18 * b.fireCD; // cool down
                         for (let i = 0; i < 3; i++) {
-                            //missile(where, dir, speed, size = 1, spawn = 0) {
                             b.missile({
-                                x: mech.pos.x + 40 * direction.x,
-                                y: mech.pos.y + 40 * direction.y
-                            }, mech.angle + 0.06 * (1 - i), 0, 0.7, mod.recursiveMissiles)
-                            bullet[bullet.length - 1].force.x += push.x * (i - 1);
-                            bullet[bullet.length - 1].force.y += push.y * (i - 1);
+                                x: mech.pos.x,
+                                y: mech.pos.y - 40
+                            }, -Math.PI / 2 + 0.08 * (1 - i), 0, 0.7, mod.recursiveMissiles)
                         }
                     } else {
-                        mech.fireCDcycle = mech.cycle + 35 * b.fireCD; // cool down
+                        mech.fireCDcycle = mech.cycle + 55 * b.fireCD; // cool down
                         const direction = {
                             x: Math.cos(mech.angle),
                             y: Math.sin(mech.angle)
                         }
-                        const push = Vector.mult(Vector.perp(direction), 0.0008)
+                        const push = Vector.mult(Vector.perp(direction), 0.02)
                         for (let i = 0; i < 3; i++) {
-                            //missile(where, dir, speed, size = 1, spawn = 0) {
                             b.missile({
                                 x: mech.pos.x + 40 * direction.x,
                                 y: mech.pos.y + 40 * direction.y
-                            }, mech.angle, 0, 0.7, mod.recursiveMissiles)
+                            }, mech.angle + 0.1 * (Math.random() - 0.5), 5, 0.7, mod.recursiveMissiles)
                             bullet[bullet.length - 1].force.x += push.x * (i - 1);
                             bullet[bullet.length - 1].force.y += push.y * (i - 1);
                         }
                     }
                 } else {
-                    mech.fireCDcycle = mech.cycle + Math.floor(mech.crouch ? 40 : 25) * b.fireCD; // cool down
-                    b.missile({
-                            x: mech.pos.x + 40 * Math.cos(mech.angle),
-                            y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
-                        },
-                        mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
-                        -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.fireCD,
-                        1, mod.recursiveMissiles)
-                    bullet[bullet.length - 1].force.y += 0.0006; //a small push down at first to make it seem like the missile is briefly falling
+                    if (mech.crouch) {
+                        mech.fireCDcycle = mech.cycle + 18 * b.fireCD; // cool down
+                        b.missile({
+                                x: mech.pos.x,
+                                y: mech.pos.y - 40
+                            },
+                            -Math.PI / 2, 0, 1, mod.recursiveMissiles)
+                    } else {
+                        mech.fireCDcycle = mech.cycle + 55 * b.fireCD; // cool down
+                        b.missile({
+                                x: mech.pos.x + 40 * Math.cos(mech.angle),
+                                y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
+                            },
+                            mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2), 20, 1, mod.recursiveMissiles)
+                        // bullet[bullet.length - 1].force.y += 0.01; //a small push down at first to make it seem like the missile is briefly falling
+                    }
+
                 }
             }
         },
@@ -2461,7 +2461,7 @@ const b = {
             fireNormal() {
                 const me = bullet.length;
                 const dir = mech.angle; // + Math.random() * 0.05;
-                bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 20, b.fireAttributes(dir, false));
+                bullet[me] = Bodies.circle(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 15, b.fireAttributes(dir, false));
                 Matter.Body.setDensity(bullet[me], 0.0005);
                 bullet[me].explodeRad = 275;
                 bullet[me].onEnd = function() {
@@ -2495,6 +2495,129 @@ const b = {
                     bullet[me].do = function() {
                         this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
                     };
+                }
+            },
+            fireNeutron() {
+                const me = bullet.length;
+                const dir = mech.angle;
+                bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 4, b.fireAttributes(dir, false));
+                b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 30 : 20, dir, me); //cd , speed
+                Matter.Body.setDensity(bullet[me], 0.000001);
+                bullet[me].endCycle = Infinity;
+                bullet[me].frictionAir = 0;
+                bullet[me].friction = 1;
+                bullet[me].frictionStatic = 1;
+                bullet[me].restitution = 0;
+                bullet[me].minDmgSpeed = 0;
+                bullet[me].damageRadius = 100;
+                bullet[me].maxDamageRadius = (435 + 150 * Math.random()) * (mod.isNeutronImmune ? 1.2 : 1)
+                bullet[me].stuckTo = null;
+                bullet[me].stuckToRelativePosition = null;
+                bullet[me].beforeDmg = function() {};
+                bullet[me].stuck = function() {};
+                bullet[me].do = function() {
+                    function onCollide(that) {
+                        that.collisionFilter.mask = 0; //non collide with everything
+                        Matter.Body.setVelocity(that, {
+                            x: 0,
+                            y: 0
+                        });
+                        that.do = that.radiationMode;
+                    }
+
+                    const mobCollisions = Matter.Query.collides(this, mob)
+                    if (mobCollisions.length) {
+                        onCollide(this)
+                        this.stuckTo = mobCollisions[0].bodyA
+                        mobs.statusDoT(this.stuckTo, 0.5, 360) //apply radiation damage status effect on direct hits
+
+                        if (this.stuckTo.isVerticesChange) {
+                            this.stuckToRelativePosition = {
+                                x: 0,
+                                y: 0
+                            }
+                        } else {
+                            //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+                            this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+                        }
+                        this.stuck = function() {
+                            if (this.stuckTo && this.stuckTo.alive) {
+                                const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
+                                Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
+                                Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+                            } else {
+                                this.collisionFilter.mask = cat.map | cat.body | cat.player | cat.mob; //non collide with everything but map
+                                this.stuck = function() {
+                                    this.force.y += this.mass * 0.001;
+                                }
+                            }
+                        }
+                    } else {
+                        const bodyCollisions = Matter.Query.collides(this, body)
+                        if (bodyCollisions.length) {
+                            if (!bodyCollisions[0].bodyA.isNotHoldable) {
+                                onCollide(this)
+                                this.stuckTo = bodyCollisions[0].bodyA
+                                //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+                                this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+                            } else {
+                                this.do = this.radiationMode;
+                            }
+                            this.stuck = function() {
+                                if (this.stuckTo) {
+                                    const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
+                                    Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
+                                    // Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+                                } else {
+                                    this.force.y += this.mass * 0.001;
+                                }
+                            }
+                        } else {
+                            if (Matter.Query.collides(this, map).length) {
+                                onCollide(this)
+                            } else { //if colliding with nothing just fall
+                                this.force.y += this.mass * 0.001;
+                            }
+                        }
+                    }
+                }
+                bullet[me].radiationMode = function() {
+                    this.stuck(); //runs different code based on what the bullet is stuck to
+                    if (!mech.isBodiesAsleep) {
+                        this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
+                        this.maxDamageRadius -= 0.8 / mod.isBulletsLastLonger //+ 0.5 * Math.sin(game.cycle * 0.1) //slowly shrink max radius
+
+                        if (this.damageRadius < 15) {
+                            this.endCycle = 0;
+                        } else {
+                            //aoe damage to player
+                            if (!mod.isNeutronImmune && Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
+                                const DRAIN = 0.0023
+                                if (mech.energy > DRAIN) {
+                                    mech.energy -= DRAIN
+                                } else {
+                                    mech.energy = 0;
+                                    mech.damage(0.00015)
+                                }
+                            }
+                            //aoe damage to mobs
+                            for (let i = 0, len = mob.length; i < len; i++) {
+                                if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
+                                    let dmg = b.dmgScale * 0.08
+                                    if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
+                                    if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
+                                    mob[i].damage(dmg);
+                                    mob[i].locatePlayer();
+                                }
+                            }
+                            ctx.beginPath();
+                            ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
+                            ctx.globalCompositeOperation = "lighter"
+                            ctx.fillStyle = `rgba(25,139,170,${0.2+0.06*Math.random()})`;
+                            ctx.fill();
+                            ctx.globalCompositeOperation = "source-over"
+                        }
+                    }
                 }
             },
             fireVacuum() {
@@ -2559,156 +2682,6 @@ const b = {
                         ctx.fill();
                     }
                 };
-            }
-        },
-        {
-            name: "neutron bomb",
-            description: "toss a chunk of <strong class='color-p'>Cf-252</strong> which emits <strong class='color-p'>neutrons</strong><br>that do <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and <strong class='color-f'>energy</strong> drain",
-            ammo: 0,
-            ammoPack: 5,
-            have: false,
-            fire() {
-                const me = bullet.length;
-                const dir = mech.angle;
-                bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 4, b.fireAttributes(dir, false));
-                b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 30 : 20, dir, me); //cd , speed
-                Matter.Body.setDensity(bullet[me], 0.000001);
-                bullet[me].endCycle = Infinity;
-                bullet[me].frictionAir = 0;
-                bullet[me].friction = 1;
-                bullet[me].frictionStatic = 1;
-                bullet[me].restitution = 0;
-                bullet[me].minDmgSpeed = 0;
-                bullet[me].damageRadius = 100;
-                bullet[me].maxDamageRadius = (435 + 150 * Math.random()) * (mod.isNeutronImmune ? 1.2 : 1)
-                bullet[me].stuckTo = null;
-                bullet[me].stuckToRelativePosition = null;
-                bullet[me].beforeDmg = function() {};
-                bullet[me].stuck = function() {};
-                bullet[me].do = function() {
-                    function onCollide(that) {
-                        that.collisionFilter.mask = 0; //non collide with everything
-                        Matter.Body.setVelocity(that, {
-                            x: 0,
-                            y: 0
-                        });
-                        // that.frictionAir = 1;
-                        that.do = that.radiationMode;
-
-                        if (mod.isNeutronStun) {
-                            //push blocks
-                            const dist = that.maxDamageRadius * 0.9
-                            for (let i = 0, len = body.length; i < len; ++i) {
-                                const SUB = Vector.sub(body[i].position, that.position)
-                                const DISTANCE = Vector.magnitude(SUB)
-                                if (DISTANCE < dist) {
-                                    const FORCE = Vector.mult(Vector.normalise(SUB), 0.04 * body[i].mass)
-                                    body[i].force.x += FORCE.x;
-                                    body[i].force.y += FORCE.y - body[i].mass * game.g * 5; //kick up a bit to give them some arc
-                                }
-                            }
-                            //stun mobs
-                            for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (Vector.magnitude(Vector.sub(mob[i].position, that.position)) < dist) {
-                                    mobs.statusStun(mob[i], mod.isNeutronStun)
-                                }
-                            }
-                        }
-                    }
-
-                    const mobCollisions = Matter.Query.collides(this, mob)
-                    if (mobCollisions.length) {
-                        onCollide(this)
-                        this.stuckTo = mobCollisions[0].bodyA
-
-                        if (this.stuckTo.isVerticesChange) {
-                            this.stuckToRelativePosition = {
-                                x: 0,
-                                y: 0
-                            }
-                        } else {
-                            //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-                            this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
-                        }
-                        this.stuck = function() {
-                            if (this.stuckTo && this.stuckTo.alive) {
-                                const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
-                                Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
-                                Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
-                            } else {
-                                this.collisionFilter.mask = cat.map | cat.body | cat.player | cat.mob; //non collide with everything but map
-                                this.stuck = function() {
-                                    this.force.y += this.mass * 0.001;
-                                }
-                            }
-                        }
-                    } else {
-                        const bodyCollisions = Matter.Query.collides(this, body)
-                        if (bodyCollisions.length) {
-                            if (!bodyCollisions[0].bodyA.isNotHoldable) {
-                                onCollide(this)
-                                this.stuckTo = bodyCollisions[0].bodyA
-                                //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-                                this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
-                            } else {
-                                this.do = this.radiationMode;
-                            }
-                            this.stuck = function() {
-                                if (this.stuckTo) {
-                                    const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
-                                    Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
-                                    // Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
-                                } else {
-                                    this.force.y += this.mass * 0.001;
-                                }
-                            }
-                        } else {
-                            if (Matter.Query.collides(this, map).length) {
-                                onCollide(this)
-                            } else { //if colliding with nothing just fall
-                                this.force.y += this.mass * 0.001;
-                            }
-                        }
-                    }
-                }
-                bullet[me].radiationMode = function() {
-                    this.stuck(); //runs different code based on what the bullet is stuck to
-                    if (!mech.isBodiesAsleep) {
-                        this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
-                        this.maxDamageRadius -= 0.8 / mod.isBulletsLastLonger //+ 0.5 * Math.sin(game.cycle * 0.1) //slowly shrink max radius
-
-                        if (this.damageRadius < 15) {
-                            this.endCycle = 0;
-                        } else {
-                            //aoe damage to player
-                            if (!mod.isNeutronImmune && Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-                                const DRAIN = 0.0015
-                                if (mech.energy > DRAIN) {
-                                    mech.energy -= DRAIN
-                                } else {
-                                    mech.energy = 0;
-                                    mech.damage(0.00015)
-                                }
-                            }
-                            //aoe damage to mobs
-                            for (let i = 0, len = mob.length; i < len; i++) {
-                                if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                                    let dmg = b.dmgScale * 0.05
-                                    if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.3 //reduce damage if a wall is in the way
-                                    if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
-                                    mob[i].damage(dmg);
-                                    mob[i].locatePlayer();
-                                }
-                            }
-                            ctx.beginPath();
-                            ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
-                            ctx.globalCompositeOperation = "lighter"
-                            ctx.fillStyle = `rgba(25,139,170,${0.2+0.06*Math.random()})`;
-                            ctx.fill();
-                            ctx.globalCompositeOperation = "source-over"
-                        }
-                    }
-                }
             }
         },
         {

@@ -1342,21 +1342,15 @@ const mech = {
                     if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle) {
                         if (mod.isSporeField) {
                             // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-                            const len = Math.floor(6 + 4 * Math.random())
+                            const len = Math.floor(6 + 5 * Math.random())
                             mech.energy -= len * 0.09;
                             for (let i = 0; i < len; i++) {
                                 b.spore(mech.pos)
                             }
                         } else if (mod.isMissileField) {
                             // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-                            mech.energy -= 0.5;
-                            b.missile({
-                                    x: mech.pos.x + 40 * Math.cos(mech.angle),
-                                    y: mech.pos.y + 40 * Math.sin(mech.angle) - 3
-                                },
-                                mech.angle + (0.5 - Math.random()) * (mech.crouch ? 0 : 0.2),
-                                -3 * (0.5 - Math.random()) + (mech.crouch ? 25 : -8) * b.fireCD,
-                                1, mod.recursiveMissiles)
+                            mech.energy -= 0.45;
+                            b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1, mod.recursiveMissiles)
                         } else if (mod.isIceField) {
                             // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
                             mech.energy -= 0.04;
