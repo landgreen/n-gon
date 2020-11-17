@@ -933,6 +933,22 @@ const mod = {
             }
         },
         {
+            name: "supercapacitor",
+            description: "<strong class='color-f'>energy</strong> above your max decays <strong>66%</strong> slower",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mod.isEnergyRecovery || mod.isPiezo || mod.energySiphon > 0 || mod.isRailEnergyGain || mod.isWormholeEnergy || mod.iceEnergy > 0) && mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing"
+            },
+            requires: "a source of overfilled energy",
+            effect() {
+                mod.overfillDrain = 0.933
+            },
+            remove() {
+                mod.overfillDrain = 0.8
+            }
+        },
+        {
             name: "piezoelectricity",
             description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>200%</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
@@ -3262,5 +3278,6 @@ const mod = {
     isRadioactive: null,
     isRailEnergyGain: null,
     isMineSentry: null,
-    isIncendiary: null
+    isIncendiary: null,
+    overfillDrain: null
 }

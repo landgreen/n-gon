@@ -2110,7 +2110,7 @@ const spawn = {
     },
     seeker(x, y, radius = 5, sides = 0) {
         //bullets
-        mobs.spawn(x, y, sides, radius, "rgb(150,150,255)");
+        mobs.spawn(x, y, sides, radius, "rgb(255,0,255)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
         me.onHit = function() {
@@ -2196,9 +2196,9 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.accelMag = 0.0011 * game.accelScale;
-        me.memory = 200;
+        me.memory = 250;
         me.laserRange = 500;
-        Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0013 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -2211,8 +2211,8 @@ const spawn = {
         };
 
         //snake tail
-        const nodes = Math.min(3 + Math.ceil(Math.random() * game.difficulty + 2), 8)
-        spawn.lineBoss(x + 105, y, "spawns", nodes);
+        const nodes = 2 + Math.min(3 + Math.ceil(Math.random() * game.difficulty + 2), 8)
+        spawn.lineBoss(x + 105, y, "snakeBody", nodes);
         //constraint boss with first 3 mobs in lineboss
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes],
@@ -2233,6 +2233,27 @@ const spawn = {
         });
         World.add(engine.world, consBB[consBB.length - 1]);
 
+    },
+    snakeBody(x, y, radius = 20) {
+        mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
+        let me = mob[mob.length - 1];
+        me.onHit = function() {
+            //run this function on hitting player
+            this.explode();
+        };
+        me.collisionFilter.mask = cat.bullet | cat.player
+        // me.g = 0.0002; //required if using 'gravity'
+        // me.accelMag = 0 //0.001 * game.accelScale;
+        // me.memory = 0;
+        me.leaveBody = false;
+        // me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * game.lookFreqScale);
+        me.frictionAir = 0.02;
+        me.do = function() {
+            // this.gravity();
+            // this.seePlayerCheck();
+            this.checkStatus();
+            // this.attraction();
+        };
     },
     tetherBoss(x, y, radius = 90) {
         // constrained mob boss for the towers level

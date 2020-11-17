@@ -1,9 +1,8 @@
 *********** NEXT PATCH ***********
-mod - neutron bomb is a grenade mod, it's damage is 33% higher
-  direct hits also apply radiation damage over time
+some changes to snake boss
 
-missiles aim better, accelerate quicker, push blocks out of the way better
-  crouch fire mode rapidly launches missiles vertically 
+supercapacitor - overfill energy decays 66% slower
+  (thanks to NoHaxJustPi for coding this)
 
 ************** BUGS **************
 
@@ -26,13 +25,7 @@ missiles aim better, accelerate quicker, push blocks out of the way better
 
 ************** TODO **************
 
-rework missiles - move faster
-  target more accurately
-  don't get stuck thrusting into a wall
-  less delay right after firing
-  mods
-
-    recursive is kinda dumb
+vacuum and neutron bomb could merge
 
 new power up - increase damage and fire speed, for 15 seconds
   named boost?

@@ -12,8 +12,8 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // level.difficultyIncrease(8)
             // game.enableConstructMode() //used to build maps in testing mode
+            // level.difficultyIncrease(8)
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
@@ -142,18 +142,18 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 20)
+        // spawn.starter(1900, -500, 20)
         // spawn.bomberBoss(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.spawner(1600, -500)
-        // spawn.sniper(1700, -120, 50)
+        spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.sucker(1800, -120)
+        spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)
         // spawn.spiderBoss(1600, -500)
-        // spawn.sniper(1200, -500)
-        spawn.shield(mob[mob.length - 1], 1800, -120, 1);
+        spawn.launcher(1200, -500)
+        // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeBoss(1200, -500, "launcher")
         // spawn.snakeBoss(1200, -500)
@@ -2090,10 +2090,10 @@ const level = {
         spawn.randomBoss(-1300, -1100, -0.3);
 
         if (game.difficulty > 3) {
-            if (Math.random() < 0.1) {
+            if (Math.random() < 0.25) {
                 spawn.randomLevelBoss(-800, -1300)
             } else {
-                spawn.snakeBoss(-1300 + Math.random() * 2000, -2200); //boss snake with head
+                spawn.snakeBoss(-1000 + Math.random() * 1500, -2200); //boss snake with head
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
