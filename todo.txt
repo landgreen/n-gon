@@ -1,8 +1,11 @@
 *********** NEXT PATCH ***********
-some changes to snake boss
 
-supercapacitor - overfill energy decays 66% slower
-  (thanks to NoHaxJustPi for coding this)
+snake boss is updated
+  -fear the snake
+
+mod neutron bomb: vacuum permittivity - gets a larger radius and a slow effect
+
+bosses are only stunned for 1/5 of the normal stun time
 
 ************** BUGS **************
 
@@ -25,7 +28,10 @@ supercapacitor - overfill energy decays 66% slower
 
 ************** TODO **************
 
-vacuum and neutron bomb could merge
+mod - railgun's push effect is increased, and it does some damage to nearby mobs
+  maybe only triggers at max energy
+
+Laser mod: For each reflection of laser, damage increases by 10%
 
 new power up - increase damage and fire speed, for 15 seconds
   named boost?
@@ -34,42 +40,26 @@ new power up - increase damage and fire speed, for 15 seconds
   how to indicate effect duration
   or just give the effect after picking up a reroll
 
-mod - overfilled energy decays slower
+mod - bot very slowly follows you and gives you a bonus when it's in range
+  it moves through walls
+  effect: damage bonus?, damage reduction?, push away mobs, limit top speed of mobs/blocks/player?
 
-mod - remove max health, but you take 60% more harm
-
-mod - taking damage fires your current weapon at the nearest mob
-  requires? some harm reduction
-
-mod - a 4th mod selection option that is always a bot
-
-mod - railgun's push effect is increased, and it does some damage to nearby mobs
-  maybe only triggers at max energy
-
-mod - nano scale field could be a mod
-  excess energy is converted to bullets
-    run this code in the energy overfill code check
-  possible issues
-    worm hole, Penrose process - nerf a bit
-    pair production - nerf and give it to anyone
-    cloaking field - maybe just don't spawn bullets when cloaked
+add an ending to the game
+  maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
+  mirror ending (if no cheats)
+    level after final boss battle is the intro level, but flipped left right, with a fake player
+      damage the fake player to end the game
+      message about go outside
+  no ending (if cheats)
+    game goes on forever
+    also game goes on if player attacks, the fake player
+  game never ends if you have used cheats
 
 Mod: "Solar Power": Energy regeneration is doubled while standing still
   run in the 1 second check
 
-mod - a bot that eats up health and ammo, but poops out a mod (10 power ups = 1 mod?)
-  or it poops a reroll after picking up 2 heal/ammo
-    requires the reroll -> bot mod
-    4 rerolls can convert to a bot,  also 1 rerolls can convert to 5% damage
-    the mods that do those effects could be required before you see this bot
-  it passes through walls
-  moves slower then the player so you can get to it before the bot if you hurry
-  disable crystalized armor?
-
 mod: take less harm if you are in the air
   require squirrel cage rotor
-
-Laser mod: For each reflection of laser, damage increases by 10%
 
 mechanic - remove a random mod as a condition for picking up a really good mod
 
@@ -79,10 +69,6 @@ mechanic - do something for 2 seconds after firing
 mod - do 50% more damage in close, but 50% less at a distance
   code it like mod.isFarAwayDmg
     have these mods disable each other
-
-mod - bot very slowly follows you and gives you a bonus when it's in range
-  it moves through walls
-  effect: damage bonus?, damage reduction?, push away mobs, limit top speed of mobs/blocks/player?
 
 mod - foam is attracted to mobs
   use a gravitational attraction model?
@@ -105,21 +91,11 @@ repeat map in vertical and horizontal space
   or at least vertical space
   camera looks strange when you teleport player with a high velocity
 
-add an ending to the game
-  maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
-  mirror ending (if no cheats)
-    level after final boss battle is the intro level, but flipped left right, with a fake player
-      damage the fake player to end the game
-      message about go outside
-  no ending (if cheats)
-    game goes on forever
-    also game goes on if player attacks, the fake player
-  game never ends if you have used cheats
-
 new status effect: fear - push mob away from player for a time
 
 new status effect - apply status effect to mobs that makes blocks attracted to them
   only lasts a few cycles
+  or zero cycles and it doesn't need to be a status
 
 have some mobs spawn in later in the level  (in hard and why modes)
   where

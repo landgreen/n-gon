@@ -2192,16 +2192,23 @@ const spawn = {
         };
     },
     snakeBoss(x, y, radius = 75) { //snake boss with a laser head
-        mobs.spawn(x, y, 8, radius, "rgb(255,50,130)");
+        mobs.spawn(x, y, 8, radius, "rgb(55,170,170)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.0011 * game.accelScale;
+        me.accelMag = 0.0008 * game.accelScale;
         me.memory = 250;
         me.laserRange = 500;
-        Matter.Body.setDensity(me, 0.0013 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            //wake up tail mobs
+            for (let i = 0; i < mob.length; i++) {
+                if (mob[i].isSnakeTail && mob[i].alive) {
+                    mob[i].do = mob[i].doActive
+                    mob[i].removeConsBB();
+                }
+            }
         };
         me.do = function() {
             this.seePlayerCheck();
@@ -2211,7 +2218,7 @@ const spawn = {
         };
 
         //snake tail
-        const nodes = 2 + Math.min(3 + Math.ceil(Math.random() * game.difficulty + 2), 8)
+        const nodes = Math.min(8 + Math.ceil(0.5 * game.difficulty), 40)
         spawn.lineBoss(x + 105, y, "snakeBody", nodes);
         //constraint boss with first 3 mobs in lineboss
         consBB[consBB.length] = Constraint.create({
@@ -2235,7 +2242,7 @@ const spawn = {
 
     },
     snakeBody(x, y, radius = 20) {
-        mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
+        mobs.spawn(x, y, 4, radius, "rgb(55,170,170)");
         let me = mob[mob.length - 1];
         me.onHit = function() {
             //run this function on hitting player
@@ -2243,16 +2250,18 @@ const spawn = {
         };
         me.collisionFilter.mask = cat.bullet | cat.player
         // me.g = 0.0002; //required if using 'gravity'
-        // me.accelMag = 0 //0.001 * game.accelScale;
-        // me.memory = 0;
+        me.accelMag = 0.001 * game.accelScale;
         me.leaveBody = false;
-        // me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * game.lookFreqScale);
+        me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * game.lookFreqScale);
         me.frictionAir = 0.02;
+        me.isSnakeTail = true;
         me.do = function() {
-            // this.gravity();
-            // this.seePlayerCheck();
             this.checkStatus();
-            // this.attraction();
+        };
+        me.doActive = function() {
+            this.seePlayerCheck();
+            this.checkStatus();
+            this.attraction();
         };
     },
     tetherBoss(x, y, radius = 90) {

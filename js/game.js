@@ -459,13 +459,9 @@ const game = {
         addGravity(body, game.g);
         player.force.y += player.mass * game.g;
     },
-    // reset() { //run on first run, and each later run after you die
-
-    // },
     firstRun: true,
     splashReturn() {
         game.onTitlePage = true;
-        // document.getElementById('splash').onclick = 'run(this)';
         document.getElementById("splash").onclick = function() {
             game.startGame();
         };

@@ -1596,7 +1596,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)) || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || (mod.haveGunCheck("nail gun") && !mod.isIceCrystals && !mod.isNailCrit) || (mod.haveGunCheck("shotgun") && !mod.isNailShot)
+                return (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)) || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || (mod.haveGunCheck("nail gun")) || (mod.haveGunCheck("shotgun")) && !mod.isIceCrystals && !mod.isNailCrit && !mod.isNailShot && !mod.isNailPoison
             },
             requires: "drones, super balls, nail gun, shotgun",
             effect() {
@@ -1608,15 +1608,15 @@ const mod = {
         },
         {
             name: "Lorentzian topology",
-            description: "<strong>bullets</strong> last <strong>33% longer</strong><br><span style = 'font-size: 85%'>drones, spores, super balls, foam, wave, ice IX, neutron</span>",
+            description: "<strong>bullets</strong> last <strong>30% longer</strong><br><span style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</span>",
             maxCount: 3,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mod.haveGunCheck("spores") || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || mod.haveGunCheck("foam") || mod.haveGunCheck("wave beam") || mod.haveGunCheck("ice IX") || mod.haveGunCheck("neutron bomb")
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mod.haveGunCheck("spores") || mod.haveGunCheck("drones") || mod.haveGunCheck("missiles") || mod.haveGunCheck("foam") || mod.haveGunCheck("wave beam") || mod.haveGunCheck("ice IX") || mod.isNeutronBomb
             },
-            requires: "drones, spores, super balls, foam<br>wave beam, ice IX, neutron bomb",
+            requires: "drones, spores, missiles, foam<br>wave beam, ice IX, neutron bomb",
             effect() {
-                mod.isBulletsLastLonger += 0.33
+                mod.isBulletsLastLonger += 0.3
             },
             remove() {
                 mod.isBulletsLastLonger = 1;
@@ -2071,7 +2071,7 @@ const mod = {
             allowed() {
                 return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.isNeutronBomb
             },
-            requires: "grenades, not rocket-propelled or neutron bomb",
+            requires: "grenades, not rocket-propelled",
             effect() {
                 mod.isVacuumBomb = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2080,8 +2080,10 @@ const mod = {
             },
             remove() {
                 mod.isVacuumBomb = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireNormal
+                if (!mod.isNeutronBomb) {
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "grenades") b.guns[i].fire = (mod.isNeutronBomb) ? b.guns[i].fireNeutron : b.guns[i].fireNormal
+                    }
                 }
             }
         },
@@ -2091,9 +2093,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.isVacuumBomb && !mod.grenadeFragments
+                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.grenadeFragments && !mod.isVacuumBomb
             },
-            requires: "grenades, not rocket-propelled, vacuum bomb, or fragmentation",
+            requires: "grenades, not rocket-propelled or fragmentation",
             effect() {
                 mod.isNeutronBomb = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2103,7 +2105,7 @@ const mod = {
             remove() {
                 mod.isNeutronBomb = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireNormal
+                    if (b.guns[i].name === "grenades") b.guns[i].fire = (mod.isVacuumBomb) ? b.guns[i].fireVacuum : b.guns[i].fireNormal
                 }
             }
         },
@@ -2121,6 +2123,22 @@ const mod = {
             },
             remove() {
                 mod.isNeutronImmune = false
+            }
+        },
+        {
+            name: "vacuum permittivity",
+            description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isNeutronBomb
+            },
+            requires: "neutron bomb",
+            effect() {
+                mod.isNeutronSlow = true
+            },
+            remove() {
+                mod.isNeutronSlow = false
             }
         },
         {
@@ -2334,7 +2352,7 @@ const mod = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4%</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>166%</strong> of your max",
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4%</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>50%</strong> of your max",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3279,5 +3297,6 @@ const mod = {
     isRailEnergyGain: null,
     isMineSentry: null,
     isIncendiary: null,
-    overfillDrain: null
+    overfillDrain: null,
+    isNeutronSlow: null
 }

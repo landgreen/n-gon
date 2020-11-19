@@ -852,7 +852,7 @@ const b = {
                 if (mod.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && who.alive) {
                     setTimeout(function() {
                         if (!who.alive) {
-                            mech.energy += mod.iceEnergy * 0.66 * mech.maxEnergy
+                            mech.energy += mod.iceEnergy * 0.5 * mech.maxEnergy
                             mech.addHealth(mod.iceEnergy * 0.04)
                         }
                     }, 10);
@@ -2066,7 +2066,7 @@ const b = {
                         y: SPEED * Math.sin(dir)
                     });
                     // Matter.Body.setDensity(bullet[me], 0.0001);
-                    bullet[me].endCycle = game.cycle + Math.floor((300 + 60 * Math.random()) * mod.isBulletsLastLonger);
+                    bullet[me].endCycle = game.cycle + Math.floor(300 + 60 * Math.random());
                     bullet[me].minDmgSpeed = 0;
                     bullet[me].restitution = 1;
                     bullet[me].friction = 0;
@@ -2363,12 +2363,13 @@ const b = {
                 //missile(where, dir, speed, size = 1, spawn = 0) {
                 if (mod.is3Missiles) {
                     if (mech.crouch) {
-                        mech.fireCDcycle = mech.cycle + 18 * b.fireCD; // cool down
+                        mech.fireCDcycle = mech.cycle + 17 * b.fireCD; // cool down
                         for (let i = 0; i < 3; i++) {
                             b.missile({
                                 x: mech.pos.x,
                                 y: mech.pos.y - 40
-                            }, -Math.PI / 2 + 0.08 * (1 - i), 0, 0.7, mod.recursiveMissiles)
+                            }, -Math.PI / 2 + 0.08 * (1 - i) + 0.3 * (Math.random() - 0.5), 0, 0.7, mod.recursiveMissiles)
+                            bullet[bullet.length - 1].force.x -= 0.015 * (i - 1);
                         }
                     } else {
                         mech.fireCDcycle = mech.cycle + 55 * b.fireCD; // cool down
@@ -2381,19 +2382,22 @@ const b = {
                             b.missile({
                                 x: mech.pos.x + 40 * direction.x,
                                 y: mech.pos.y + 40 * direction.y
-                            }, mech.angle + 0.1 * (Math.random() - 0.5), 5, 0.7, mod.recursiveMissiles)
+                            }, mech.angle + 0.06 * (Math.random() - 0.5), 5, 0.7, mod.recursiveMissiles)
                             bullet[bullet.length - 1].force.x += push.x * (i - 1);
                             bullet[bullet.length - 1].force.y += push.y * (i - 1);
                         }
                     }
                 } else {
                     if (mech.crouch) {
-                        mech.fireCDcycle = mech.cycle + 18 * b.fireCD; // cool down
+                        mech.fireCDcycle = mech.cycle + 17 * b.fireCD; // cool down
+                        const off = Math.random() - 0.5
                         b.missile({
                                 x: mech.pos.x,
                                 y: mech.pos.y - 40
                             },
-                            -Math.PI / 2, 0, 1, mod.recursiveMissiles)
+                            -Math.PI / 2 + 0.15 * off, 0, 1, mod.recursiveMissiles)
+                        bullet[bullet.length - 1].force.x += off * 0.03;
+                        // bullet[bullet.length - 1].force.y += push.y * (i - 1);
                     } else {
                         mech.fireCDcycle = mech.cycle + 55 * b.fireCD; // cool down
                         b.missile({
@@ -2501,7 +2505,7 @@ const b = {
                 const me = bullet.length;
                 const dir = mech.angle;
                 bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 4, b.fireAttributes(dir, false));
-                b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 30 : 20, dir, me); //cd , speed
+                b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 35 : 20, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
                 bullet[me].endCycle = Infinity;
                 bullet[me].frictionAir = 0;
@@ -2510,9 +2514,11 @@ const b = {
                 bullet[me].restitution = 0;
                 bullet[me].minDmgSpeed = 0;
                 bullet[me].damageRadius = 100;
-                bullet[me].maxDamageRadius = (435 + 150 * Math.random()) * (mod.isNeutronImmune ? 1.2 : 1)
+                bullet[me].maxDamageRadius = 450 + 130 * mod.isNeutronSlow + 130 * mod.isNeutronImmune //+ 150 * Math.random()
+                bullet[me].radiusDecay = (0.81 + 0.15 * mod.isNeutronSlow + 0.15 * mod.isNeutronImmune) / mod.isBulletsLastLonger
                 bullet[me].stuckTo = null;
                 bullet[me].stuckToRelativePosition = null;
+                bullet[me].vacuumSlow = 0.97;
                 bullet[me].beforeDmg = function() {};
                 bullet[me].stuck = function() {};
                 bullet[me].do = function() {
@@ -2581,12 +2587,11 @@ const b = {
                         }
                     }
                 }
-                bullet[me].radiationMode = function() {
+                bullet[me].radiationMode = function() { //the do code after the bullet is stuck on something,  projects a damaging radiation field
                     this.stuck(); //runs different code based on what the bullet is stuck to
                     if (!mech.isBodiesAsleep) {
                         this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
-                        this.maxDamageRadius -= 0.8 / mod.isBulletsLastLonger //+ 0.5 * Math.sin(game.cycle * 0.1) //slowly shrink max radius
-
+                        this.maxDamageRadius -= this.radiusDecay
                         if (this.damageRadius < 15) {
                             this.endCycle = 0;
                         } else {
@@ -2603,11 +2608,17 @@ const b = {
                             //aoe damage to mobs
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                                    let dmg = b.dmgScale * 0.08
+                                    let dmg = b.dmgScale * 0.082
                                     if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                                     if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
                                     mob[i].damage(dmg);
                                     mob[i].locatePlayer();
+                                    if (mod.isNeutronSlow) {
+                                        Matter.Body.setVelocity(mob[i], {
+                                            x: mob[i].velocity.x * this.vacuumSlow,
+                                            y: mob[i].velocity.y * this.vacuumSlow
+                                        });
+                                    }
                                 }
                             }
                             ctx.beginPath();
@@ -2616,6 +2627,24 @@ const b = {
                             ctx.fillStyle = `rgba(25,139,170,${0.2+0.06*Math.random()})`;
                             ctx.fill();
                             ctx.globalCompositeOperation = "source-over"
+                            if (mod.isNeutronSlow) {
+                                const that = this
+
+                                function slow(who, radius = that.explodeRad * 3.2) {
+                                    for (i = 0, len = who.length; i < len; i++) {
+                                        const sub = Vector.sub(that.position, who[i].position);
+                                        const dist = Vector.magnitude(sub);
+                                        if (dist < radius) {
+                                            Matter.Body.setVelocity(who[i], {
+                                                x: who[i].velocity.x * that.vacuumSlow,
+                                                y: who[i].velocity.y * that.vacuumSlow
+                                            });
+                                        }
+                                    }
+                                }
+                                slow(body, this.damageRadius)
+                                slow([player], this.damageRadius)
+                            }
                         }
                     }
                 }

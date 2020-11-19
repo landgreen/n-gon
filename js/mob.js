@@ -145,7 +145,7 @@ const mobs = {
                     who.isStunned = false
                 },
                 type: "stun",
-                endCycle: game.cycle + cycles,
+                endCycle: game.cycle + cycles * (who.isBoss ? 0.2 : 1),
             })
         }
     },

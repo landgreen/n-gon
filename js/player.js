@@ -390,6 +390,8 @@ const mech = {
             document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
             document.getElementById("fade-out").style.opacity = 1; //slowly fades out
             setTimeout(function() {
+                World.clear(engine.world);
+                Engine.clear(engine);
                 game.splashReturn();
             }, 3000);
         }
@@ -462,6 +464,7 @@ const mech = {
                 if (Math.random() < 0.5) b.drone() //spawn drone
             }
         }
+
         if (mod.isEnergyHealth) {
             mech.energy -= dmg;
             if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
@@ -1339,7 +1342,7 @@ const mech = {
             description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
             effect: () => {
                 mech.hold = function() {
-                    if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle) {
+                    if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && input.field) {
                         if (mod.isSporeField) {
                             // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
                             const len = Math.floor(6 + 5 * Math.random())
