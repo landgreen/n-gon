@@ -540,8 +540,13 @@ const spawn = {
         me.onDeath = function() {
             this.leaveBody = false;
             this.dropPowerUp = false;
-
-            if (vertices > 3) spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
+            if (vertices > 3) {
+                spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
+                Matter.Body.setVelocity(mob[mob.length - 1], {
+                    x: this.velocity.x,
+                    y: this.velocity.y
+                })
+            }
             for (let i = 0; i < powerUp.length; i++) {
                 powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
             }

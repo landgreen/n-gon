@@ -1342,25 +1342,25 @@ const mech = {
             description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
             effect: () => {
                 mech.hold = function() {
-                    if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && input.field) {
+                    if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && !input.field) {
                         if (mod.isSporeField) {
                             // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-                            const len = Math.floor(6 + 5 * Math.random())
-                            mech.energy -= len * 0.09;
+                            const len = Math.floor(5 + 5 * Math.random())
+                            mech.energy -= len * 0.1;
                             for (let i = 0; i < len; i++) {
                                 b.spore(mech.pos)
                             }
                         } else if (mod.isMissileField) {
                             // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-                            mech.energy -= 0.45;
+                            mech.energy -= 0.5;
                             b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1, mod.recursiveMissiles)
                         } else if (mod.isIceField) {
                             // mech.fieldCDcycle = mech.cycle + 17; // set cool down to prevent +energy from making huge numbers of drones
-                            mech.energy -= 0.04;
+                            mech.energy -= 0.05;
                             b.iceIX(1)
                         } else {
                             // mech.fieldCDcycle = mech.cycle + 10; // set cool down to prevent +energy from making huge numbers of drones
-                            mech.energy -= 0.33;
+                            mech.energy -= 0.35;
                             b.drone(1)
                         }
                     }

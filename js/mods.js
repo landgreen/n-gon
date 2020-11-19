@@ -938,7 +938,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.isEnergyRecovery || mod.isPiezo || mod.energySiphon > 0 || mod.isRailEnergyGain || mod.isWormholeEnergy || mod.iceEnergy > 0) && mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing"
+                return mod.isEnergyRecovery || mod.isPiezo || mod.energySiphon > 0 || mod.isRailEnergyGain || mod.isWormholeEnergy || mod.iceEnergy > 0
             },
             requires: "a source of overfilled energy",
             effect() {
@@ -3073,9 +3073,9 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return true
+                return !mod.isEnergyNoAmmo
             },
-            requires: "",
+            requires: "not exciton lattice",
             effect() {
                 for (let i = 0; i < 6; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");

@@ -1,11 +1,11 @@
 *********** NEXT PATCH ***********
 
-snake boss is updated
-  -fear the snake
+power up boss no longer slows down after each time you kill it
+  - fear the power up boss
 
-mod neutron bomb: vacuum permittivity - gets a larger radius and a slow effect
-
-bosses are only stunned for 1/5 of the normal stun time
+holding down the field button will stop nano-scale field from converting energy into bullets
+  energy costs have been increased a bit
+  nano scale can now use mod - supercapacitor
 
 ************** BUGS **************
 

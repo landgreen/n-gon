@@ -155,8 +155,8 @@ const level = {
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeBoss(1200, -500, "launcher")
-        spawn.snakeBoss(1200, -500)
-        // spawn.timeSkipBoss(2900, -500)
+        // spawn.snakeBoss(1200, -500)
+        spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
     template() {
