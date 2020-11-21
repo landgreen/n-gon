@@ -1,11 +1,5 @@
 *********** NEXT PATCH ***********
 
-power up boss no longer slows down after each time you kill it
-  - fear the power up boss
-
-holding down the field button will stop nano-scale field from converting energy into bullets
-  energy costs have been increased a bit
-  nano scale can now use mod - supercapacitor
 
 ************** BUGS **************
 
@@ -23,13 +17,10 @@ holding down the field button will stop nano-scale field from converting energy 
   after sticking to the top right corner of a wall
   notes: had only gun mine, mod mine reclamation, field plasma,
 
-(repeatable almost everytime) bug - mines spawn extra mines when fired at thin map wall while jumping
+(repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 
 ************** TODO **************
-
-mod - railgun's push effect is increased, and it does some damage to nearby mobs
-  maybe only triggers at max energy
 
 Laser mod: For each reflection of laser, damage increases by 10%
 

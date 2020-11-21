@@ -2924,9 +2924,46 @@ const b = {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
-            ammoPack: 3.5,
+            ammoPack: 3.25,
             have: false,
             fire() {
+                function pushAway(range) { //push away blocks when firing
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        const SUB = Vector.sub(mob[i].position, mech.pos)
+                        const DISTANCE = Vector.magnitude(SUB)
+                        if (DISTANCE < range) {
+                            const DEPTH = Math.min(range - DISTANCE, 1500)
+                            const FORCE = Vector.mult(Vector.normalise(SUB), 0.001 * Math.sqrt(DEPTH) * mob[i].mass)
+                            mob[i].force.x += FORCE.x;
+                            mob[i].force.y += FORCE.y;
+                            if (mod.isRailAreaDamage) {
+                                mob[i].force.x += 2 * FORCE.x;
+                                mob[i].force.y += 2 * FORCE.y;
+                                const damage = b.dmgScale * 0.1 * Math.sqrt(DEPTH)
+                                mob[i].damage(damage);
+                                mob[i].locatePlayer();
+                                game.drawList.push({ //add dmg to draw queue
+                                    x: mob[i].position.x,
+                                    y: mob[i].position.y,
+                                    radius: Math.log(2 * damage + 1.1) * 40,
+                                    color: "rgba(100,0,200,0.25)",
+                                    time: game.drawTime
+                                });
+                            }
+                        }
+                    }
+                    for (let i = 0, len = body.length; i < len; ++i) {
+                        const SUB = Vector.sub(body[i].position, mech.pos)
+                        const DISTANCE = Vector.magnitude(SUB)
+                        if (DISTANCE < range) {
+                            const DEPTH = Math.min(range - DISTANCE, 500)
+                            const FORCE = Vector.mult(Vector.normalise(SUB), 0.002 * Math.sqrt(DEPTH) * body[i].mass)
+                            body[i].force.x += FORCE.x;
+                            body[i].force.y += FORCE.y - body[i].mass * game.g * 1.5; //kick up a bit to give them some arc
+                        }
+                    }
+                }
+
                 if (mod.isCapacitor) {
                     if (mech.energy > 0.16 || mod.isRailEnergyGain) {
                         mech.energy += 0.16 * (mod.isRailEnergyGain ? 6 : -1)
@@ -3012,29 +3049,7 @@ const b = {
                         player.force.x -= KNOCK * Math.cos(mech.angle)
                         player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
 
-                        //push away blocks when firing
-                        let range = 450
-                        for (let i = 0, len = body.length; i < len; ++i) {
-                            const SUB = Vector.sub(body[i].position, mech.pos)
-                            const DISTANCE = Vector.magnitude(SUB)
-
-                            if (DISTANCE < range) {
-                                const DEPTH = Math.min(range - DISTANCE, 300)
-                                const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * body[i].mass)
-                                body[i].force.x += FORCE.x;
-                                body[i].force.y += FORCE.y - body[i].mass * (game.g * 1.5); //kick up a bit to give them some arc
-                            }
-                        }
-                        for (let i = 0, len = mob.length; i < len; ++i) {
-                            const SUB = Vector.sub(mob[i].position, mech.pos)
-                            const DISTANCE = Vector.magnitude(SUB)
-                            if (DISTANCE < range) {
-                                const DEPTH = Math.min(range - DISTANCE, 300)
-                                const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * mob[i].mass)
-                                mob[i].force.x += 1.5 * FORCE.x;
-                                mob[i].force.y += 1.5 * FORCE.y;
-                            }
-                        }
+                        pushAway(800)
                     } else {
                         mech.fireCDcycle = mech.cycle + Math.floor(120);
                     }
@@ -3112,31 +3127,7 @@ const b = {
                             const KNOCK = ((mech.crouch) ? 0.1 : 0.5) * this.charge * this.charge
                             player.force.x -= KNOCK * Math.cos(mech.angle)
                             player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
-
-                            //push away blocks when firing
-                            let range = 900 * this.charge
-                            for (let i = 0, len = body.length; i < len; ++i) {
-                                const SUB = Vector.sub(body[i].position, mech.pos)
-                                const DISTANCE = Vector.magnitude(SUB)
-
-                                if (DISTANCE < range) {
-                                    const DEPTH = Math.min(range - DISTANCE, 300)
-                                    const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * body[i].mass)
-                                    body[i].force.x += FORCE.x;
-                                    body[i].force.y += FORCE.y - body[i].mass * (game.g * 1.5); //kick up a bit to give them some arc
-                                }
-                            }
-                            for (let i = 0, len = mob.length; i < len; ++i) {
-                                const SUB = Vector.sub(mob[i].position, mech.pos)
-                                const DISTANCE = Vector.magnitude(SUB)
-
-                                if (DISTANCE < range) {
-                                    const DEPTH = Math.min(range - DISTANCE, 300)
-                                    const FORCE = Vector.mult(Vector.normalise(SUB), 0.003 * Math.sqrt(DEPTH) * mob[i].mass)
-                                    mob[i].force.x += 1.5 * FORCE.x;
-                                    mob[i].force.y += 1.5 * FORCE.y;
-                                }
-                            }
+                            pushAway(1200 * this.charge)
                         } else { // charging on mouse down
                             mech.fireCDcycle = Infinity //can't fire until mouse is released
                             const previousCharge = this.charge

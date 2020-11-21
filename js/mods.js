@@ -2449,6 +2449,22 @@ const mod = {
             }
         },
         {
+            name: "dielectric polarization",
+            description: "firing the <strong>rail gun</strong> <strong class='color-d'>damages</strong> nearby <strong>mobs</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("rail gun")
+            },
+            requires: "rail gun",
+            effect() {
+                mod.isRailAreaDamage = true;
+            },
+            remove() {
+                mod.isRailAreaDamage = false;
+            }
+        },
+        {
             name: "capacitor bank",
             description: "the <strong>rail gun</strong> no longer takes time to <strong>charge</strong><br><strong>rail gun</strong> rods are <strong>66%</strong> less massive",
             maxCount: 1,
@@ -3298,5 +3314,6 @@ const mod = {
     isMineSentry: null,
     isIncendiary: null,
     overfillDrain: null,
-    isNeutronSlow: null
+    isNeutronSlow: null,
+    isRailAreaDamage: null
 }

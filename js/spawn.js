@@ -2,21 +2,21 @@
 const spawn = {
     pickList: ["starter", "starter"],
     fullPickList: [
-        "hopper", "hopper", "hopper", "hopper",
-        "shooter", "shooter", "shooter",
-        "chaser", "chaser",
+        "hopper", "hopper", "hopper",
+        "shooter", "shooter",
         "striker", "striker",
         "laser", "laser",
         "exploder", "exploder",
         "stabber", "stabber",
         "launcher", "launcher",
+        "springer", "springer",
+        "sucker", "sucker",
+        "chaser",
         "sniper",
         "spinner",
         "grower",
-        "springer",
         "beamer",
         "focuser",
-        "sucker",
         "spawner",
         "ghoster",
         "sneaker",
@@ -173,7 +173,7 @@ const spawn = {
             this.modeSuck()
             this.modeLasers()
         }
-        me.spawnInterval = 302
+        me.spawnInterval = 362
         me.modeSpawns = function() {
             if (!(this.cycle % this.spawnInterval) && !mech.isBodiesAsleep && mob.length < 40) {
                 if (this.mode !== 3) Matter.Body.setAngularVelocity(this, 0.1)
@@ -265,7 +265,7 @@ const spawn = {
             }
             if (this.cycle < 240) { //damage scales up over 2 seconds to give player time to move
                 const scale = this.cycle / 240
-                const dmg = 0.14 * game.dmgScale * scale
+                const dmg = (this.cycle < 120) ? 0 : 0.14 * game.dmgScale * scale
                 ctx.beginPath();
                 this.laser(this.vertices[0], this.angle + Math.PI / 6, dmg);
                 this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6, dmg);
@@ -354,7 +354,7 @@ const spawn = {
                 vertexCollision(where, look, body);
                 if (!mech.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && best.who === player && mech.immuneCycle < mech.cycle) {
-                    mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                    mech.immuneCycle = mech.cycle + 60 + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
                     mech.damage(dmg);
                     game.drawList.push({ //add dmg to draw queue
                         x: best.x,
@@ -743,18 +743,18 @@ const spawn = {
             }
         }
     },
-    sucker(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
+    sucker(x, y, radius = 30 + Math.ceil(Math.random() * 25)) {
         radius = 9 + radius / 8; //extra small
-        mobs.spawn(x, y, 6, radius, "#000");
+        mobs.spawn(x, y, 6, radius, "transparent");
         let me = mob[mob.length - 1];
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = radius * 23; //required for blackhole
         me.seeAtDistance2 = (me.eventHorizon + 200) * (me.eventHorizon + 200); //vision limit is event horizon
-        me.accelMag = 0.0001 * game.accelScale;
+        me.accelMag = 0.00009 * game.accelScale;
         me.frictionAir = 0.025;
         me.collisionFilter.mask = cat.player | cat.bullet
         me.memory = Infinity;
-        Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
         me.do = function() {
             //keep it slow, to stop issues from explosion knock backs
             if (this.speed > 5) {
@@ -1535,8 +1535,8 @@ const spawn = {
     striker(x, y, radius = 14 + Math.ceil(Math.random() * 25)) {
         mobs.spawn(x, y, 5, radius, "rgb(221,102,119)");
         let me = mob[mob.length - 1];
-        me.accelMag = 0.0003 * game.accelScale;
-        me.g = 0.0002; //required if using 'gravity'
+        me.accelMag = 0.00034 * game.accelScale;
+        me.g = 0.00015; //required if using 'gravity'
         me.frictionStatic = 0;
         me.friction = 0;
         me.delay = 90 * game.CDScale;
@@ -1564,18 +1564,26 @@ const spawn = {
             }
             this.checkStatus();
             this.attraction();
-            if (this.seePlayer.recall && this.cd < game.cycle) {
-                const dist = Vector.sub(this.seePlayer.position, this.position);
-                const distMag = Vector.magnitude(dist);
-                if (distMag < 400) {
+            if (this.cd < game.cycle) {
+                if (this.seePlayer.recall) {
+                    const dist = Vector.sub(this.seePlayer.position, this.position);
+                    const distMag = Vector.magnitude(dist);
                     this.cd = game.cycle + this.delay;
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
-                    Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), distMag - 20 - radius));
+                    if (distMag < 400) {
+                        Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), distMag - 20 - radius));
+                    } else {
+                        Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), 300));
+                    }
                     ctx.lineTo(this.position.x, this.position.y);
-                    ctx.lineWidth = radius * 2;
+                    ctx.lineWidth = radius * 2.1;
                     ctx.strokeStyle = this.fill; //"rgba(0,0,0,0.5)"; //'#000'
                     ctx.stroke();
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * 0.5,
+                        y: this.velocity.y * 0.5
+                    });
                 }
             }
         };
@@ -2200,7 +2208,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgb(55,170,170)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.0008 * game.accelScale;
+        me.accelMag = 0.00075 * game.accelScale;
         me.memory = 250;
         me.laserRange = 500;
         Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
