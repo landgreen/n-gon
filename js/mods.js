@@ -90,7 +90,7 @@ const mod = {
         if (mod.isEnergyLoss) dmg *= 1.5;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
-        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 5.5;
+        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 7;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
@@ -117,7 +117,7 @@ const mod = {
             }
         }, {
             name: "capacitor",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>5.5%</strong> stored <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>7%</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2518,7 +2518,7 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseLaser
+                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseLaser && !mod.historyLaser
             },
             requires: "laser, not wide beam",
             effect() {
@@ -2538,14 +2538,20 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseAim
+                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseAim && !mod.historyLaser
             },
             requires: "laser, not specular reflection",
             effect() {
                 mod.beamSplitter++
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
             },
             remove() {
                 mod.beamSplitter = 0
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
             }
         },
         {
@@ -2560,10 +2566,16 @@ const mod = {
             effect() {
                 if (mod.wideLaser === 0) mod.wideLaser = 3
                 mod.isWideLaser = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
             },
             remove() {
                 mod.wideLaser = 0
                 mod.isWideLaser = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
             }
         },
         {
@@ -2577,12 +2589,43 @@ const mod = {
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
                 mod.wideLaser = 4
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
             },
             remove() {
                 if (mod.isWideLaser) {
                     mod.wideLaser = 3
                 } else {
                     mod.wideLaser = 0
+                }
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
+            }
+        },
+        {
+            name: "slow light propagation",
+            description: "",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isPulseLaser
+            },
+            requires: "laser, not specular reflection<br>not diffraction grating",
+            effect() {
+                this.description = `add 10 more <strong>laser</strong> beams into into your past`
+                //`<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
+                mod.historyLaser++
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                }
+            },
+            remove() {
+                this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>200%</strong>"
+                mod.historyLaser = 0
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             }
         },
@@ -2592,19 +2635,19 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.isWideLaser
+                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.isWideLaser && !mod.historyLaser
             },
             requires: "laser, not specular reflection, not diffuse",
             effect() {
                 mod.isPulseLaser = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].fire = b.guns[i].firePulse
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
                 mod.isPulseLaser = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].fire = b.guns[i].fireLaser
+                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             }
         },
@@ -3315,5 +3358,6 @@ const mod = {
     isIncendiary: null,
     overfillDrain: null,
     isNeutronSlow: null,
-    isRailAreaDamage: null
+    isRailAreaDamage: null,
+    historyLaser: null
 }

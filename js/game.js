@@ -747,6 +747,19 @@ const game = {
                 fallCheck(mob);
                 fallCheck(body);
                 fallCheck(powerUp, true);
+
+
+                //check for double crouch
+                //crouch playerHead.position.y - player.position.y = 9.7  //positive
+                //standing playerHead.position.y - player.position.y = -30 //negative
+                if (!mech.crouch && ((playerHead.position.y - player.position.y) > 0)) {
+                    // mech.undoCrouch()
+                    Matter.Body.translate(playerHead, {
+                        x: 0,
+                        y: 40
+                    });
+                }
+                // else if (mech.crouch && ((playerHead.position.y - player.position.y) < 0)) {}
             }
         }
     },

@@ -1847,8 +1847,8 @@ const b = {
             name: "nail gun",
             description: "use compressed air to fire a stream of <strong>nails</strong><br><strong>delay</strong> after firing <strong>decreases</strong> as you shoot",
             ammo: 0,
-            ammoPack: 60,
-            defaultAmmoPack: 60,
+            ammoPack: 55,
+            defaultAmmoPack: 55,
             recordedAmmo: 0,
             have: false,
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -1918,7 +1918,7 @@ const b = {
                         if (mech.energy < 0.01) {
                             mech.fireCDcycle = mech.cycle + 60; // cool down
                         } else {
-                            mech.energy -= mech.fieldRegen + 0.009
+                            mech.energy -= mech.fieldRegen + 0.01
                         }
                     }
                 }
@@ -1929,8 +1929,8 @@ const b = {
             name: "shotgun",
             description: "fire a <strong>burst</strong> of short range <strong> bullets</strong> <br><em>crouch to reduce recoil</em>",
             ammo: 0,
-            ammoPack: 6,
-            defaultAmmoPack: 6,
+            ammoPack: 5.5,
+            defaultAmmoPack: 5.5,
             have: false,
             fire() {
                 let knock, spread
@@ -2924,7 +2924,7 @@ const b = {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
-            ammoPack: 3.25,
+            ammoPack: 3.15,
             have: false,
             fire() {
                 function pushAway(range) { //push away blocks when firing
@@ -3262,80 +3262,147 @@ const b = {
             fire() {
 
             },
+            chooseFireMethod() {
+                if (mod.isPulseLaser) {
+                    this.fire = this.firePulse
+                } else if (mod.beamSplitter) {
+                    this.fire = this.fireSplit
+                } else if (mod.historyLaser) {
+                    this.fire = this.fireHistory
+                } else if (mod.isWideLaser) {
+                    this.fire = this.fireWideBeam
+                } else {
+                    this.fire = this.fireLaser
+                }
+            },
             fireLaser() {
                 if (mech.energy < mod.laserFieldDrain) {
                     mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
                 } else {
                     mech.fireCDcycle = mech.cycle
                     mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
-                    if (mod.wideLaser) {
+                    b.laser();
+                }
+            },
+            fireSplit() {
+                if (mech.energy < mod.laserFieldDrain) {
+                    mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
+                } else {
+                    mech.fireCDcycle = mech.cycle
+                    mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
+                    const divergence = mech.crouch ? 0.15 : 0.2
+                    let dmg = 0.1 + mod.laserDamage * Math.pow(0.9, mod.laserDamage)
+                    const where = {
+                        x: mech.pos.x + 20 * Math.cos(mech.angle),
+                        y: mech.pos.y + 20 * Math.sin(mech.angle)
+                    }
+                    b.laser(where, {
+                        x: where.x + 3000 * Math.cos(mech.angle),
+                        y: where.y + 3000 * Math.sin(mech.angle)
+                    }, dmg)
+                    for (let i = 1; i < 1 + mod.beamSplitter; i++) {
+                        b.laser(where, {
+                            x: where.x + 3000 * Math.cos(mech.angle + i * divergence),
+                            y: where.y + 3000 * Math.sin(mech.angle + i * divergence)
+                        }, dmg)
+                        b.laser(where, {
+                            x: where.x + 3000 * Math.cos(mech.angle - i * divergence),
+                            y: where.y + 3000 * Math.sin(mech.angle - i * divergence)
+                        }, dmg)
+                    }
+                }
+            },
+            fireWideBeam() {
+                if (mech.energy < mod.laserFieldDrain) {
+                    mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
+                } else {
+                    mech.fireCDcycle = mech.cycle
+                    mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
+                    const dmg = 0.55 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const wideLaser = function(where = {
+                        x: mech.pos.x + 20 * Math.cos(mech.angle),
+                        y: mech.pos.y + 20 * Math.sin(mech.angle)
+                    }, angle = mech.angle) {
                         ctx.strokeStyle = "#f00";
                         ctx.lineWidth = 8
                         ctx.globalAlpha = 0.5;
                         ctx.beginPath();
-
                         const off = 7.5
-                        const dmg = 0.55 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
-                        const where = {
-                            x: mech.pos.x + 20 * Math.cos(mech.angle),
-                            y: mech.pos.y + 20 * Math.sin(mech.angle)
-                        }
                         b.laser(where, {
-                            x: where.x + 3000 * Math.cos(mech.angle),
-                            y: where.y + 3000 * Math.sin(mech.angle)
+                            x: where.x + 3000 * Math.cos(angle),
+                            y: where.y + 3000 * Math.sin(angle)
                         }, dmg, 0, true)
                         for (let i = 1; i < mod.wideLaser; i++) {
                             let whereOff = Vector.add(where, {
-                                x: i * off * Math.cos(mech.angle + Math.PI / 2),
-                                y: i * off * Math.sin(mech.angle + Math.PI / 2)
+                                x: i * off * Math.cos(angle + Math.PI / 2),
+                                y: i * off * Math.sin(angle + Math.PI / 2)
                             })
                             b.laser(whereOff, {
-                                x: whereOff.x + 3000 * Math.cos(mech.angle),
-                                y: whereOff.y + 3000 * Math.sin(mech.angle)
+                                x: whereOff.x + 3000 * Math.cos(angle),
+                                y: whereOff.y + 3000 * Math.sin(angle)
                             }, dmg, 0, true)
                             whereOff = Vector.add(where, {
-                                x: i * off * Math.cos(mech.angle - Math.PI / 2),
-                                y: i * off * Math.sin(mech.angle - Math.PI / 2)
+                                x: i * off * Math.cos(angle - Math.PI / 2),
+                                y: i * off * Math.sin(angle - Math.PI / 2)
                             })
                             b.laser(whereOff, {
-                                x: whereOff.x + 3000 * Math.cos(mech.angle),
-                                y: whereOff.y + 3000 * Math.sin(mech.angle)
+                                x: whereOff.x + 3000 * Math.cos(angle),
+                                y: whereOff.y + 3000 * Math.sin(angle)
                             }, dmg, 0, true)
                         }
                         ctx.stroke();
                         ctx.globalAlpha = 1;
-                    } else if (mod.beamSplitter) {
-                        const divergence = mech.crouch ? 0.15 : 0.2
-                        let dmg = 0.1 + mod.laserDamage * Math.pow(0.9, mod.laserDamage)
-                        const where = {
-                            x: mech.pos.x + 20 * Math.cos(mech.angle),
-                            y: mech.pos.y + 20 * Math.sin(mech.angle)
-                        }
-                        b.laser(where, {
-                            x: where.x + 3000 * Math.cos(mech.angle),
-                            y: where.y + 3000 * Math.sin(mech.angle)
-                        }, dmg)
-                        for (let i = 1; i < 1 + mod.beamSplitter; i++) {
-                            b.laser(where, {
-                                x: where.x + 3000 * Math.cos(mech.angle + i * divergence),
-                                y: where.y + 3000 * Math.sin(mech.angle + i * divergence)
-                            }, dmg)
-                            b.laser(where, {
-                                x: where.x + 3000 * Math.cos(mech.angle - i * divergence),
-                                y: where.y + 3000 * Math.sin(mech.angle - i * divergence)
-                            }, dmg)
-                            // dmg *= 0.9
-                        }
-                    } else {
-                        b.laser()
                     }
+                    wideLaser();
+                }
+            },
+            fireHistory() {
+                if (mech.energy < mod.laserFieldDrain) {
+                    mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
+                } else {
+                    mech.fireCDcycle = mech.cycle
+                    mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
+                    const dmg = 0.25 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
+                    ctx.strokeStyle = "#f00";
+                    let spacing, len
+                    if (mod.wideLaser === 3) {
+                        ctx.lineWidth = 2
+                        spacing = 1
+                        len = 19 + mod.historyLaser * 10
+                    } else if (mod.wideLaser === 4) {
+                        ctx.lineWidth = 3
+                        spacing = 1
+                        len = 29 + mod.historyLaser * 10
+                    } else {
+                        ctx.lineWidth = 1
+                        spacing = 3
+                        len = 9 + mod.historyLaser * 10
+                    }
+                    ctx.beginPath();
+                    b.laser({
+                        x: mech.pos.x + 20 * Math.cos(mech.angle),
+                        y: mech.pos.y + 20 * Math.sin(mech.angle)
+                    }, {
+                        x: mech.pos.x + 3000 * Math.cos(mech.angle),
+                        y: mech.pos.y + 3000 * Math.sin(mech.angle)
+                    }, dmg, 0, true);
+                    for (let i = 0; i < len; i++) {
+                        const history = mech.history[(mech.cycle - i * spacing) % 300]
+                        b.laser({
+                            x: history.position.x + 20 * Math.cos(history.angle),
+                            y: history.position.y + 20 * Math.sin(history.angle)
+                        }, {
+                            x: history.position.x + 3000 * Math.cos(history.angle),
+                            y: history.position.y + 3000 * Math.sin(history.angle)
+                        }, dmg, 0, true);
+                    }
+                    ctx.stroke();
                 }
             },
             firePulse() {
                 mech.fireCDcycle = mech.cycle + Math.floor((mod.isPulseAim ? 25 : 50) * b.fireCD); // cool down
                 let energy = 0.27 * Math.min(mech.energy, 1.5)
                 mech.energy -= energy * mod.isLaserDiode
-
                 if (mod.beamSplitter) {
                     energy *= 0.66
                     b.pulse(energy, mech.angle)

@@ -17,10 +17,10 @@ const level = {
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            // b.giveGuns("rail gun")
+            // b.giveGuns("laser")
             // mod.is3Missiles = true
-            // mod.giveMod("dielectric polarization")
-            // mod.giveMod("capacitor bank")
+            // mod.giveMod("history laser")
+            // mod.giveMod("diffuse beam")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -56,6 +56,21 @@ const level = {
         level.addToWorld(); //add bodies to game engine
         game.draw.setPaths();
         b.respawnBots();
+        for (let i = 0; i < 300; i++) { //reset history
+            mech.history[i] = {
+                position: {
+                    x: mech.pos.x,
+                    y: mech.pos.y,
+                },
+                velocity: {
+                    x: player.velocity.x,
+                    y: player.velocity.y
+                },
+                angle: mech.angle,
+                health: mech.health,
+                energy: mech.energy,
+            }
+        }
         if (mod.isArmorFromPowerUps) {
             mod.armorFromPowerUps += 0.05 * powerUps.totalPowerUps
             mech.setMaxHealth();
@@ -142,10 +157,10 @@ const level = {
         // spawn.boost(1500, 0, 900);
 
         // spawn.starter(1900, -500, 20)
-        // spawn.bomberBoss(2900, -500)
+        // spawn.sucker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        spawn.striker(1600, -500)
+        // spawn.striker(1600, -500)
         // spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
@@ -156,7 +171,7 @@ const level = {
 
         // spawn.nodeBoss(1200, -500, "launcher")
         // spawn.snakeBoss(1200, -500)
-        // spawn.powerUpBoss(2900, -500)
+        spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
     template() {
@@ -2957,6 +2972,13 @@ const level = {
                 height: 475,
                 color: BGColor
             });
+            level.fill.push({
+                x: 1800,
+                y: -1120,
+                width: 775,
+                height: 600,
+                color: BGColor
+            });
             drawOnTheMapMapRect(3800, -270, 75, 75);
             drawOnTheMapMapRect(3900, -895, 500, 75);
             drawOnTheMapMapRect(3900, -1195, 75, 375);
@@ -2981,15 +3003,6 @@ const level = {
             drawOnTheMapBodyRect(4850, -720, 250, 200);
             drawOnTheMapBodyRect(4050, -970, 25, 25);
             drawOnTheMapBodyRect(3075, -1245, 50, 50);
-            buttonSortieSalle = level.button(3000, -1745)
-            spawn.mapVertex(3065, -1745, "100 10 -100 10 -70 -10 70 -10");
-            len = map.length - 1
-            map[len].collisionFilter.category = cat.map;
-            map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
-            Matter.Body.setStatic(map[len], true); //make static
-            World.add(engine.world, map[len]); //add to world
-            game.draw.setPaths() //update map graphics
-
             portalEnHaut = level.portal({
                 x: 3650,
                 y: -1470
@@ -3001,13 +3014,14 @@ const level = {
             spawn.randomSmallMob(2500, -2070 + Math.random(), 1);
             spawn.randomSmallMob(5000, -1370, 1);
             spawn.randomMob(5000, -645, 0.9);
-            spawn.randomMob(4050, 970, 0.9);
+            spawn.randomMob(4050, -970, 0.9);
             spawn.randomSmallMob(2800, -1620, 0.7);
             spawn.randomMob(2400, -1370, 0.5);
             spawn.randomMob(3725, -1320, 0.3);
             spawn.randomBoss(2115, -2020, 0.1)
 
             powerUps.spawn(5000, -1275, "heal");
+
             levelCustom2();
         }
         //////////////////////////////////////////
@@ -3029,16 +3043,6 @@ const level = {
                 portalEnHaut[2].query();
                 portalEnHaut[3].query();
                 rotor.rotate();
-                // rotor2.rotate
-                buttonSortieSalle.query();
-                buttonSortieSalle.draw();
-                ////////////
-                if (buttonSortieSalle.isUp) {
-                    doorSortieSalle.isOpen = door3isOpen;
-                } else {
-                    doorSortieSalle.isOpen = false;
-                    door3isOpen = false;
-                }
                 doorSortieSalle.openClose();
                 level.playerExitCheck();
             };
@@ -3053,6 +3057,7 @@ const level = {
                 ctx.beginPath();
                 ctx.arc(balance.pointA.x, balance.pointA.y, 9, 0, 2 * Math.PI);
                 ctx.fill();
+
             };
         }
         //spawn box
@@ -3091,7 +3096,7 @@ const level = {
         spawn.bodyRect(1700, -195, 50, 50);
         spawn.mapRect(450, -520, 1600, 100); //plafond 1
         spawn.mapRect(450, 255, 1600, 100); //sol 1
-        spawn.mapRect(2250, -95, 1450, 75); //entresol
+        spawn.mapRect(2250, -45, 1450, 75); //entresol
         spawn.mapRect(3900, -520, 2000, 100); //plafond 2
         spawn.mapRect(3900, 255, 2000, 100); //sol 2
         //grande salle
@@ -3135,40 +3140,43 @@ const level = {
         spawn.randomMob(8800, -45, 0.2);
         spawn.randomBoss(8025, -845, 0.2);
 
-        // if (game.difficulty > 2) {
-        if (Math.random() < 0.2) {
-            // tether ball
-            spawn.tetherBoss(8000, 630)
+        if (game.difficulty > 2) {
+            if (Math.random() < 0.2) {
+                // tether ball
+                spawn.tetherBoss(8000, 630)
+                let me = mob[mob.length - 1];
+                me.onDeath = function() {
+                    this.removeCons(); //remove constraint
+                    spawnCouloirEnHaut()
+                    doorSortieSalle.isOpen = false;
+                };
+                cons[cons.length] = Constraint.create({
+                    pointA: {
+                        x: 8550,
+                        y: 680
+                    },
+                    bodyB: mob[mob.length - 1],
+                    stiffness: 0.00015
+                });
+                World.add(engine.world, cons[cons.length - 1]);
+                if (game.difficulty > 4) spawn.nodeBoss(8000, 630, "spawns", 8, 20, 105);
+            } else {
+                spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss"]);
+                let me = mob[mob.length - 1];
+                me.onDeath = function() {
+                    this.removeCons(); //remove constraint
+                    spawnCouloirEnHaut()
+                    doorSortieSalle.isOpen = false;
+                };
+            }
+        } else {
+            spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
             let me = mob[mob.length - 1];
             me.onDeath = function() {
-                this.removeCons(); //remove constraint
                 spawnCouloirEnHaut()
-            };
-            cons[cons.length] = Constraint.create({
-                pointA: {
-                    x: 8550,
-                    y: 680
-                },
-                bodyB: mob[mob.length - 1],
-                stiffness: 0.00015
-            });
-            World.add(engine.world, cons[cons.length - 1]);
-            if (game.difficulty > 4) spawn.nodeBoss(8000, 630, "spawns", 8, 20, 105);
-        } else if (game.difficulty > 3) {
-            spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss"]);
-            let me = mob[mob.length - 1];
-            me.onDeath = function() {
-                this.removeCons(); //remove constraint
-                spawnCouloirEnHaut()
+                doorSortieSalle.isOpen = false;
             };
         }
-        // } else {
-        //   spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
-        //   let me = mob[mob.length - 1];
-        //   me.onDeath = function () {
-        //     spawnCouloirEnHaut()
-        //   };
-        // }
     },
     house() {
         const rotor = level.rotor(4315, -315, -0.0002, 120, 20, 200);

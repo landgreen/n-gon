@@ -1,15 +1,19 @@
 *********** NEXT PATCH ***********
 
+balance: mod capacitor - gives 1% damage for every 7% energy (was 5.5%)
+some fixes on community level detour
+added a once every 7 second check to try to undo the crouch bug
+  (I have no idea how to crouch bug is happening, so I can't even test this fix)
+
+mod: slow light propagation - laser is divided into your past, and increase total damage by 200%
+  let me know about balance (is this too strong or too weak)
 
 ************** BUGS **************
 
 (4+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
   players have extra gravity
     might be from the short jump code
-      added a line to wormhole to reset possible short jump
-
-(3 reports) bug - getting locked into crouch on community levels, but showing the player as still standing
-  maybe improper vertices for map bodies
+    add in a check every 5 seconds to try and fix it
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
@@ -21,6 +25,46 @@
 
 
 ************** TODO **************
+  mod - if you take damage and you have full energy remove your energy and go back in time 1 second
+    for time dilation field?
+    check to see if your previous location is clear or mobs, blocks
+    go back proportional to your energy
+      pause game, switch the game.loop to cycle backwards in player position until energy runs out
+
+mod plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
+  grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
+  extra energy is drained when field is longer
+
+write custom dialogue for field / guns / mods used in last game
+  you'd have to store an array of guns/fields/mod used last game
+
+mod laser history
+  what about only works with diffuse
+    no energy cost increase
+    each stack makes each beam thicker?
+    separate the beam into individual nonreflecting lines each 3 cycles farther into the past
+    taking wider diffuse beam means more lines farther into the past?
+      or double thickness beam
+
+technology - player data logging
+
+  mod/field - pressing field while crouched sends the player back in time
+    mod for time dilation?
+  mod - When you fire your laser also fire from where you were 1/2 a second in the past
+    stacking mod each stack produces another laser from farther in the past
+    drains extra energy
+  could be used in mob targeting
+    build a new type of attraction for mobs
+      if mobs can't see player, they check to see if they can see where the player was in the history
+    if mobs can't see player, they could check to see if they can find player in the past
+  mod bot - a bot follows where the player was 1 second ago
+    gives player a harm reduction bonus when it is near the player
+
+using a reroll gives 3 options for mods, and 3 options for guns/fields/mods
+  or 6 options for mods (rewrite mod selection to work with 1-6 options)
+  the second stack of 3 mods could have repeats, so you don't have to write new mod code
+  adjust css to make 2 columns of 3
+  can't use with cardinality
 
 Laser mod: For each reflection of laser, damage increases by 10%
 
