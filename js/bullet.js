@@ -3362,21 +3362,21 @@ const b = {
                 } else {
                     mech.fireCDcycle = mech.cycle
                     mech.energy -= mech.fieldRegen + mod.laserFieldDrain * mod.isLaserDiode
-                    const dmg = 0.25 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const dmg = 0.5 * mod.laserDamage //  3.5 * 0.55 = 200% more damage
                     ctx.strokeStyle = "#f00";
                     let spacing, len
                     if (mod.wideLaser === 3) {
                         ctx.lineWidth = 2
-                        spacing = 1
-                        len = 19 + mod.historyLaser * 10
+                        spacing = 2
+                        len = 10 + mod.historyLaser * 5
                     } else if (mod.wideLaser === 4) {
                         ctx.lineWidth = 3
                         spacing = 1
-                        len = 29 + mod.historyLaser * 10
+                        len = 15 + mod.historyLaser * 5
                     } else {
                         ctx.lineWidth = 1
-                        spacing = 3
-                        len = 9 + mod.historyLaser * 10
+                        spacing = 5
+                        len = 5 + mod.historyLaser * 5
                     }
                     ctx.beginPath();
                     b.laser({
@@ -3386,7 +3386,7 @@ const b = {
                         x: mech.pos.x + 3000 * Math.cos(mech.angle),
                         y: mech.pos.y + 3000 * Math.sin(mech.angle)
                     }, dmg, 0, true);
-                    for (let i = 0; i < len; i++) {
+                    for (let i = 1; i < len; i++) {
                         const history = mech.history[(mech.cycle - i * spacing) % 300]
                         b.laser({
                             x: history.position.x + 20 * Math.cos(history.angle),

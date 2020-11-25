@@ -135,6 +135,11 @@ const mech = {
     transY: 0,
     history: [], //tracks the last second of player position
     move() {
+        mech.pos.x = player.position.x;
+        mech.pos.y = playerBody.position.y - mech.yOff;
+        mech.Vx = player.velocity.x;
+        mech.Vy = player.velocity.y;
+
         //tracks the last second of player information
         // console.log(mech.history)
         mech.history.splice(mech.cycle % 300, 1, {
@@ -152,11 +157,6 @@ const mech = {
         });
         // const back = 59  // 59 looks at 1 second ago //29 looks at 1/2 a second ago
         // historyIndex = (mech.cycle - back) % 60
-
-        mech.pos.x = player.position.x;
-        mech.pos.y = playerBody.position.y - mech.yOff;
-        mech.Vx = player.velocity.x;
-        mech.Vy = player.velocity.y;
     },
     transSmoothX: 0,
     transSmoothY: 0,
@@ -459,6 +459,7 @@ const mech = {
     harmReduction() {
         let dmg = 1
         dmg *= mech.fieldHarmReduction
+        if (mod.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.018, 0.5)
         if (mod.isSlowFPS) dmg *= 0.85
         if (mod.isPiezo) dmg *= 0.85
         if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
@@ -1768,13 +1769,13 @@ const mech = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>66%</strong>",
+            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>111%</strong>",
             effect: () => {
                 mech.fieldFire = true;
                 mech.fieldMeterColor = "#fff";
                 mech.fieldPhase = 0;
                 mech.isCloak = false
-                mech.fieldDamage = 1.66
+                mech.fieldDamage = 2.11 // 1 + 111/100
                 mech.fieldDrawRadius = 0
                 const drawRadius = 1000
 

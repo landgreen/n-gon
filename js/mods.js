@@ -95,6 +95,7 @@ const mod = {
         if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
+        if (mod.isSpeedDamage) dmg *= 1 + Math.min(0.33, player.speed * 0.011)
         return dmg * mod.slowFire * mod.aimDamage
     },
     totalBots() {
@@ -816,6 +817,38 @@ const mod = {
                 mod.squirrelFx = 1;
                 mod.squirrelJump = 1;
                 mech.setMovement()
+            }
+        },
+        {
+            name: "Newton's 1st law",
+            description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>50%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.Fx > 0.016
+            },
+            requires: "speed increase",
+            effect() {
+                mod.isSpeedHarm = true
+            },
+            remove() {
+                mod.isSpeedHarm = false
+            }
+        },
+        {
+            name: "Newton's 2nd law",
+            description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>33%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.Fx > 0.016
+            },
+            requires: "speed increase",
+            effect() {
+                mod.isSpeedDamage = true
+            },
+            remove() {
+                mod.isSpeedDamage = false
             }
         },
         {
@@ -2534,7 +2567,7 @@ const mod = {
         },
         {
             name: "diffraction grating",
-            description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease laser <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
+            description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2622,7 +2655,7 @@ const mod = {
                 }
             },
             remove() {
-                this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>200%</strong>"
+                this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total laser <strong class='color-d'>damage</strong> by <strong>200%</strong>"
                 mod.historyLaser = 0
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -2885,7 +2918,7 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mod.blockDmg += 0.7 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+                mod.blockDmg += 0.75 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
             },
             remove() {
                 mod.blockDmg = 0;
@@ -2901,8 +2934,8 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mech.fieldRange += 175 * 0.17
-                mech.fieldShieldingScale *= 0.6
+                mech.fieldRange += 175 * 0.2
+                mech.fieldShieldingScale *= 0.55
             },
             remove() {
                 mech.fieldRange = 175;
@@ -3359,5 +3392,7 @@ const mod = {
     overfillDrain: null,
     isNeutronSlow: null,
     isRailAreaDamage: null,
-    historyLaser: null
+    historyLaser: null,
+    isSpeedHarm: null,
+    isSpeedDamage: null
 }

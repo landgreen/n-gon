@@ -33,6 +33,7 @@ const powerUps = {
         }
         game.paused = true;
         game.isChoosing = true; //stops p from un pausing on key down
+        build.pauseGrid()
     },
     endDraft() {
         if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
@@ -42,6 +43,7 @@ const powerUps = {
         document.getElementById("choose-background").style.display = "none"
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
+        build.unPauseGrid()
         game.paused = false;
         game.isChoosing = false; //stops p from un pausing on key down
         mech.immuneCycle = mech.cycle + 60; //player is immune to collision damage for 30 cycles

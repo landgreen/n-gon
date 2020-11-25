@@ -94,7 +94,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.locatePlayer();
-        const density = 1
+        const density = 0.95
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -104,7 +104,7 @@ const spawn = {
         };
         me.onDamage = function() {};
         me.cycle = 420;
-        me.endCycle = 720;
+        me.endCycle = 780;
         me.mode = 0;
         me.do = function() {
             Matter.Body.setPosition(this, { //hold position
@@ -173,7 +173,7 @@ const spawn = {
             this.modeSuck()
             this.modeLasers()
         }
-        me.spawnInterval = 362
+        me.spawnInterval = 395
         me.modeSpawns = function() {
             if (!(this.cycle % this.spawnInterval) && !mech.isBodiesAsleep && mob.length < 40) {
                 if (this.mode !== 3) Matter.Body.setAngularVelocity(this, 0.1)
