@@ -2259,7 +2259,7 @@ const b = {
                                     // check if inside a mob
                                     q = Matter.Query.point(mob, this.position)
                                     for (let i = 0; i < q.length; i++) {
-                                        let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.8) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                                        let dmg = b.dmgScale * 0.4 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.8) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                                         q[i].damage(dmg);
                                         q[i].foundPlayer();
                                         game.drawList.push({ //add dmg to draw queue
@@ -2292,7 +2292,7 @@ const b = {
                                             for (let i = 0; i < q.length; i++) {
                                                 slowCheck = 0.3;
                                                 Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                                                let dmg = b.dmgScale * 0.36 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.8) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                                                let dmg = b.dmgScale * 0.4 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.8) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
                                                 q[i].damage(dmg);
                                                 q[i].foundPlayer();
                                                 game.drawList.push({ //add dmg to draw queue

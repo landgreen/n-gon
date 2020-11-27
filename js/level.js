@@ -13,13 +13,13 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // game.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(8)
+            // level.difficultyIncrease(89)
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
             // b.giveGuns("laser")
             // mod.is3Missiles = true
-            // mod.giveMod("history laser")
+            // mod.giveMod("CPT reversal")
             // mod.giveMod("diffuse beam")
 
             level.intro(); //starting level
@@ -156,7 +156,7 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        // spawn.starter(1900, -500, 20)
+        spawn.starter(1900, -500, 20)
         // spawn.sucker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
@@ -171,7 +171,7 @@ const level = {
 
         // spawn.nodeBoss(1200, -500, "launcher")
         // spawn.snakeBoss(1200, -500)
-        spawn.powerUpBoss(2900, -500)
+        // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
     template() {
@@ -762,7 +762,11 @@ const level = {
         spawn.randomMob(-75, -850, -0.1);
         spawn.randomMob(1300, -600, -0.1);
         spawn.randomMob(550, -3400, 0);
-        if (game.difficulty > 50) {
+        spawn.randomMob(0, -1175, 0.5);
+        spawn.randomMob(-75, -1150, 0.5);
+        spawn.randomMob(1075, -625, 0.5);
+        spawn.randomMob(1725, -575, 0.5);
+        if (game.difficulty > 40) {
             spawn.randomMob(2300, -2775, -0.5);
             spawn.randomMob(600, -925, -0.5);
             spawn.randomMob(1550, -2750, -0.5);
@@ -770,7 +774,7 @@ const level = {
             spawn.randomMob(-75, -1475, 0);
             spawn.randomBoss(600, -2600, 0);
         }
-        if (game.difficulty < 32) {
+        if (game.difficulty < 25) {
             spawn.randomMob(700, -1650, 0);
             spawn.randomMob(600, -3500, 0.2);
             spawn.randomMob(-75, -1175, 0.2);
@@ -871,12 +875,6 @@ const level = {
 
         spawn.mapRect(2625, 2288, 650, 50);
         spawn.mapRect(2700, 2276, 500, 50);
-        // spawn.mapRect(3000, 400, 1000, 1250);
-        // spawn.mapRect(3000, 1925, 1000, 150);
-        // spawn.mapRect(3100, 1875, 800, 100);
-        // spawn.mapRect(3100, 1600, 800, 100);
-        // spawn.mapRect(3100, 350, 800, 100);
-        // spawn.mapRect(3100, 2025, 800, 100);
 
         spawn.mapRect(2400, 0, 200, 1925); //left down tube wall
         spawn.mapRect(600, 2300, 3750, 200);
@@ -888,7 +886,6 @@ const level = {
         spawn.mapRect(600, 1700, 2000, 200); //bottom left room ceiling
         spawn.mapRect(500, 1700, 200, 800); //left wall
         spawn.mapRect(675, 1875, 325, 150, 0.5);
-
 
         spawn.mapRect(4450, 2900, 4900, 200); //boss room floor
         spawn.mapRect(4150, 2600, 400, 500);
@@ -909,25 +906,30 @@ const level = {
         spawn.mapRect(9300, 2590, 650, 25);
         spawn.mapRect(9700, 2580, 100, 50);
 
-        spawn.randomBoss(1300, 2100, 0.5);
-        spawn.randomMob(8300, 2100, 0.2);
-        spawn.randomSmallMob(2575, -75, 0.2); //entrance
-        spawn.randomMob(8125, 2450, 0.25);
-        spawn.randomSmallMob(3200, 250, 0.3);
-        spawn.randomMob(2425, 2150, 0.3);
-        spawn.randomSmallMob(3500, 250, 0.4);
-        spawn.randomMob(3800, 2175, 0.4);
-        spawn.randomSmallMob(1100, -300, 0.4); //entrance
-        spawn.randomMob(4450, 2500, 0.5);
-        spawn.randomMob(6350, 2525, 0.5);
-        spawn.randomBoss(9200, 2400, 0.6);
-        spawn.randomSmallMob(1900, -250, 0.6); //entrance
-        spawn.randomMob(1500, 2100, 0.7);
-        spawn.randomSmallMob(1700, -150, 0.7); //entrance
-        spawn.randomMob(8800, 2725, 0.8);
-        spawn.randomMob(7300, 2200, 0.8);
-        spawn.randomMob(2075, 2025, 0.8);
-        spawn.randomMob(3475, 2175, 0.8);
+        spawn.randomBoss(1300, 2100, 0.1);
+        spawn.randomMob(8300, 2100, 0.1);
+        spawn.randomSmallMob(2575, -75, 0.1); //entrance
+        spawn.randomMob(8125, 2450, 0.1);
+        spawn.randomSmallMob(3200, 250, 0.1);
+        spawn.randomMob(2425, 2150, 0.1);
+        spawn.randomSmallMob(3500, 250, 0.2);
+        spawn.randomMob(3800, 2175, 0.2);
+        spawn.randomSmallMob(1100, -300, 0.2); //entrance
+        spawn.randomMob(4450, 2500, 0.2);
+        spawn.randomMob(6350, 2525, 0.2);
+        spawn.randomBoss(9200, 2400, 0.3);
+        spawn.randomSmallMob(1900, -250, 0.3); //entrance
+        spawn.randomMob(1500, 2100, 0.4);
+        spawn.randomSmallMob(1700, -150, 0.4); //entrance
+        spawn.randomMob(8800, 2725, 0.5);
+        spawn.randomMob(7300, 2200, 0.5);
+        spawn.randomMob(2075, 2025, 0.5);
+        spawn.randomMob(3475, 2175, 0.5);
+        spawn.randomMob(8900, 2825, 0.5);
+        spawn.randomMob(9600, 2425, 0.9);
+        spawn.randomMob(3600, 1725, 0.9);
+        spawn.randomMob(4100, 1225, 0.9);
+        spawn.randomMob(2825, 400, 0.9);
         if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss"]);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
     },
@@ -996,13 +998,6 @@ const level = {
             height: 775,
             color: "rgba(0,20,40,0.2)"
         });
-        level.fill.push({
-            x: 1800,
-            y: -475,
-            width: 850,
-            height: 775,
-            color: "rgba(0,20,40,0.2)"
-        });
         level.fillBG.push({
             x: -250,
             y: -750,
@@ -1037,19 +1032,26 @@ const level = {
             color: "#d0d4d6"
         });
         //tall platform
-        spawn.mapVertex(2225, -450, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
+        spawn.mapVertex(2225, -250, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
         spawn.mapRect(1725, -2800, 1000, 50); //super high shade
-        spawn.mapRect(1800, -500, 850, 100); //far left starting ceiling
+        spawn.mapRect(1800, -300, 850, 100); //far left starting ceiling
         spawn.bodyRect(2400, -2950, 150, 150); //shield from laser
         level.fillBG.push({
             x: 2000,
             y: -2800,
             width: 450,
-            height: 2300,
+            height: 2500,
             color: "#d0d4d6"
         });
+        level.fill.push({
+            x: 1800,
+            y: -275,
+            width: 850,
+            height: 775,
+            color: "rgba(0,20,40,0.2)"
+        });
         //tall platform
-        spawn.mapVertex(3350, 200, "375 0  -375 0  -250 -250  250 -250"); //base
+        spawn.mapVertex(3350, 200, "400 0  -400 0  -275 -275  275 -275"); //base
         spawn.bodyRect(3400, -150, 150, 150);
         spawn.mapRect(2850, -3150, 1000, 50); //super high shade
         spawn.bodyRect(3675, -3470, 525, 20); //plank
@@ -1089,16 +1091,9 @@ const level = {
         spawn.mapRect(4600, -1300, 450, 100);
 
         //steep stairs
-        // spawn.mapRect(4100, -1700, 100, 100);
-        // spawn.mapRect(4200, -2050, 100, 450);
-        // spawn.mapRect(4300, -2400, 100, 800);
-        // spawn.mapRect(4400, -2750, 100, 1150);
-        // spawn.mapRect(4500, -3100, 100, 1500);
         spawn.mapRect(4100, -2250, 100, 650);
         spawn.mapRect(4100, -3450, 100, 650); //left top shelf
         spawn.mapRect(4600, -3450, 100, 1850);
-        // spawn.mapRect(4200, -3450, 100, 400); //left top shelf
-        // spawn.mapRect(4300, -3450, 100, 100); //left top shelf
         level.fill.push({
             x: 4100,
             y: -3450,
@@ -1106,31 +1101,24 @@ const level = {
             height: 2250,
             color: "rgba(0,20,40,0.13)"
         });
-        // level.fill.push({
-        //   x: 4100,
-        //   y: -1600,
-        //   width: 600,
-        //   height: 300,
-        //   color: "rgba(0,20,40,0.13)"
-        // });
 
         spawn.randomSmallMob(4400, -3500);
         spawn.randomSmallMob(4800, -800);
-        spawn.randomSmallMob(800, 150);
-        spawn.randomMob(700, -600, 0.8);
-        spawn.randomMob(3100, -3600, 0.7);
-        spawn.randomMob(3300, -1000, 0.7);
-        spawn.randomMob(4200, -250, 0.7);
-        spawn.randomMob(4900, -1500, 0.6);
-        spawn.randomMob(1200, 100, 0.4);
+        spawn.randomMob(800, -2600);
+        spawn.randomMob(700, -600, 0.3);
+        spawn.randomMob(3100, -3600, 0.3);
+        spawn.randomMob(3300, -1000, 0.3);
+        spawn.randomMob(4200, -250, 0.3);
+        spawn.randomMob(4900, -1500, 0.3);
+        spawn.randomMob(3800, 175, 0.4);
+        spawn.randomMob(5750, 125, 0.4);
         spawn.randomMob(5900, -1500, 0.4);
         spawn.randomMob(4700, -800, 0.4);
         spawn.randomMob(1400, -400, 0.3);
-        spawn.randomMob(1200, 100, 0.3);
-        spawn.randomMob(2550, -100, 0.2);
-        spawn.randomMob(2000, -2800, 0.2);
-        spawn.randomMob(2000, -500, 0.2);
-        spawn.randomMob(4475, -3550, 0.1);
+        spawn.randomMob(2850, 175, 0.4);
+        spawn.randomMob(2000, -2800, 0.4);
+        spawn.randomMob(2200, -500, 0.4);
+        spawn.randomMob(4475, -3550, 0.3);
         spawn.randomBoss(5000, -2150, 1);
         spawn.randomBoss(3700, -4100, 0.3);
         spawn.randomBoss(2700, -1600, 0.1);
@@ -1538,6 +1526,12 @@ const level = {
         spawn.randomMob(4700, -150, 0.2);
         spawn.randomBoss(4000, -350, 0.6);
         spawn.randomBoss(2750, -550, 0.1);
+        spawn.randomMob(2175, -925, 0.5);
+        spawn.randomMob(2750, 100, 0.5);
+        spawn.randomMob(4250, -1725, 0.5);
+        spawn.randomMob(3575, -2425, 0.5);
+        spawn.randomMob(3975, -3900, 0.5);
+        spawn.randomMob(1725, 125, 0.5);
         if (game.difficulty > 3) {
             if (Math.random() < 0.1) { // tether ball
                 spawn.tetherBoss(4250, 0)

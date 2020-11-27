@@ -108,13 +108,13 @@ summary {
 
 #choose-background {
     position: absolute;
-    z-index: 2;
+    z-index: 3;
     width: 100%;
     height: 100%;
     display: none;
-    background-color: #fff;
-    opacity: 0.5;
-    /* transition: display 0.5s; */
+    background-color: #ccc;
+    opacity: 0.6;
+    /* transition: opacity 1.5s; */
 }
 
 #construct {
@@ -151,6 +151,7 @@ summary {
     grid-auto-rows: minmax(auto, auto);
     grid-gap: 10px;
     font-size: 1.3em;
+    /* box-shadow: 0px 0px 40px 20px rgba(255, 255, 255, 0.25); */
 }
 
 .choose-grid-module {
@@ -188,7 +189,7 @@ summary {
     grid-gap: 0px;
     align-content: space-between;
 
-    z-index: 10;
+    z-index: 2;
     font-size: 1.3em;
 }
 

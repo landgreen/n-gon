@@ -970,9 +970,11 @@ const mobs = {
                 Matter.Body.setAngle(this, angle - Math.PI);
             },
             explode(mass = this.mass) {
-                mech.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * game.dmgScale);
-                this.dropPowerUp = false;
-                this.death(); //death with no power up or body
+                if (mech.immuneCycle < mech.cycle) {
+                    mech.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * game.dmgScale);
+                    this.dropPowerUp = false;
+                    this.death(); //death with no power up or body
+                }
             },
             timeLimit() {
                 if (!mech.isBodiesAsleep) {

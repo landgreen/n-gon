@@ -476,6 +476,45 @@ const mech = {
         return dmg
     },
     damage(dmg) {
+        if (mod.isTimeAvoidDeath && mech.energy > 0.97) {
+            const steps = Math.floor(Math.min(240, 120 * mech.energy)) //go back 2 seconds at 100% energy
+            let history = mech.history[(mech.cycle - steps) % 300]
+            Matter.Body.setPosition(player, history.position);
+            Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+            mech.energy = Math.max(mech.energy - steps, 0.01)
+            mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+
+            let isDrawPlayer = true
+            const shortPause = function() {
+                if (mech.defaultFPSCycle < mech.cycle) { //back to default values
+                    game.fpsCap = game.fpsCapDefault
+                    game.fpsInterval = 1000 / game.fpsCap;
+                } else {
+                    requestAnimationFrame(shortPause);
+                    if (isDrawPlayer) {
+                        isDrawPlayer = false
+
+                        ctx.save();
+                        ctx.translate(canvas.width2, canvas.height2); //center
+                        ctx.scale(game.zoom / game.edgeZoomOutSmooth, game.zoom / game.edgeZoomOutSmooth); //zoom in once centered
+                        ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
+                        for (let i = 1; i < steps; i++) {
+                            history = mech.history[(mech.cycle - i) % 300]
+                            mech.pos.x = history.position.x
+                            mech.pos.y = history.position.y
+                            mech.draw();
+                        }
+                        ctx.restore();
+                    }
+                }
+            };
+
+            if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
+            game.fpsCap = 4 //1 is shortest pause, 4 is standard
+            game.fpsInterval = 1000 / game.fpsCap;
+            mech.defaultFPSCycle = mech.cycle
+            return
+        }
         mech.lastHarmCycle = mech.cycle
         if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
             const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40)
@@ -549,7 +588,6 @@ const mech = {
         }
 
         if (dmg > 0.06 / mech.holdingMassScale) mech.drop(); //drop block if holding
-
         const normalFPS = function() {
             if (mech.defaultFPSCycle < mech.cycle) { //back to default values
                 game.fpsCap = game.fpsCapDefault
@@ -1769,13 +1807,13 @@ const mech = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>111%</strong>",
+            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>133%</strong>",
             effect: () => {
                 mech.fieldFire = true;
                 mech.fieldMeterColor = "#fff";
                 mech.fieldPhase = 0;
                 mech.isCloak = false
-                mech.fieldDamage = 2.11 // 1 + 111/100
+                mech.fieldDamage = 2.33 // 1 + 111/100
                 mech.fieldDrawRadius = 0
                 const drawRadius = 1000
 
@@ -2293,11 +2331,13 @@ const mech = {
                                                 mech.fieldRange *= 0.8
                                                 if (mod.isWormholeEnergy) mech.energy += 0.5
                                                 if (mod.isWormSpores) { //pandimensionalspermia
-                                                    b.spore(Vector.add(mech.hole.pos2, Vector.rotate({
-                                                        x: mech.fieldRange,
-                                                        y: 0
-                                                    }, 2 * Math.PI * Math.random())))
-                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, -Math.PI / 2), 15));
+                                                    for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
+                                                        b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
+                                                            x: mech.fieldRange,
+                                                            y: 0
+                                                        }, 2 * Math.PI * Math.random())))
+                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), 15));
+                                                    }
                                                 }
                                                 break
                                             }
@@ -2317,12 +2357,13 @@ const mech = {
                                             // if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
                                             if (mod.isWormholeEnergy) mech.energy += 0.5
                                             if (mod.isWormSpores) { //pandimensionalspermia
-                                                b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
-                                                    x: mech.fieldRange,
-                                                    y: 0
-                                                }, 2 * Math.PI * Math.random())))
-                                                Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), 15));
-
+                                                for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
+                                                    b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
+                                                        x: mech.fieldRange,
+                                                        y: 0
+                                                    }, 2 * Math.PI * Math.random())))
+                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), 15));
+                                                }
                                             }
                                             break
                                         }
@@ -2383,7 +2424,7 @@ const mech = {
                         ) {
                             const sub = Vector.sub(game.mouseInGame, mech.pos)
                             const mag = Vector.magnitude(sub)
-                            const drain = 0.04 + 0.007 * Math.sqrt(mag)
+                            const drain = 0.03 + 0.005 * Math.sqrt(mag)
                             if (mech.energy > drain && mag > 300) {
                                 mech.energy -= drain
                                 mech.hole.isReady = false;

@@ -2215,9 +2215,9 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-            //wake up tail mobs
-            for (let i = 0; i < mob.length; i++) {
+            for (let i = 0; i < mob.length; i++) { //wake up tail mobs
                 if (mob[i].isSnakeTail && mob[i].alive) {
+                    mob[i].isSnakeTail = false;
                     mob[i].do = mob[i].doActive
                     mob[i].removeConsBB();
                 }
@@ -2257,23 +2257,32 @@ const spawn = {
     snakeBody(x, y, radius = 20) {
         mobs.spawn(x, y, 4, radius, "rgb(55,170,170)");
         let me = mob[mob.length - 1];
-        me.onHit = function() {
-            //run this function on hitting player
-            this.explode();
-        };
-        me.collisionFilter.mask = cat.bullet | cat.player
-        // me.g = 0.0002; //required if using 'gravity'
-        me.accelMag = 0.001 * game.accelScale;
+        // me.onHit = function() {
+        //     //run this function on hitting player
+        //     this.explode();
+        // };
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.mob
+        me.accelMag = 0.0006 * game.accelScale;
         me.leaveBody = false;
-        me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * game.lookFreqScale);
         me.frictionAir = 0.02;
         me.isSnakeTail = true;
+        me.onDeath = function() {
+            if (this.isSnakeTail) { //wake up tail mobs
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob[i].isSnakeTail && mob[i].alive) {
+                        mob[i].isSnakeTail = false;
+                        mob[i].do = mob[i].doActive
+                        mob[i].removeConsBB();
+                    }
+                }
+            }
+        };
         me.do = function() {
             this.checkStatus();
         };
         me.doActive = function() {
-            this.seePlayerCheck();
             this.checkStatus();
+            this.alwaysSeePlayer();
             this.attraction();
         };
     },

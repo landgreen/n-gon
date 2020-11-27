@@ -982,6 +982,22 @@ const mod = {
             }
         },
         {
+            name: "CPT reversal",
+            description: "<strong>rewind 2-4</strong> seconds to avoid <strong class='color-harm'>harm</strong><br>drains a minimum of <strong>100%</strong> <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss
+            },
+            requires: "not nano-scale manufacturing, not mass-energy equivalence, not standing wave harmonics, not acute stress response",
+            effect() {
+                mod.isTimeAvoidDeath = true;
+            },
+            remove() {
+                mod.isTimeAvoidDeath = false;
+            }
+        },
+        {
             name: "piezoelectricity",
             description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>200%</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
@@ -1022,7 +1038,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPiezo
+                return !mod.isPiezo && !mod.isTimeAvoidDeath
             },
             requires: "not piezoelectricity<br>or acute stress response",
             effect: () => {
@@ -1629,7 +1645,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)) || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || (mod.haveGunCheck("nail gun")) || (mod.haveGunCheck("shotgun")) && !mod.isIceCrystals && !mod.isNailCrit && !mod.isNailShot && !mod.isNailPoison
+                return ((mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)) || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || mod.haveGunCheck("nail gun") || mod.haveGunCheck("shotgun")) && !mod.isIceCrystals && !mod.isNailCrit && !mod.isNailShot && !mod.isNailPoison
             },
             requires: "drones, super balls, nail gun, shotgun",
             effect() {
@@ -3123,7 +3139,7 @@ const mod = {
         },
         {
             name: "traversable geodesics",
-            description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> power up",
+            description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong class='color-g'>ammo</strong> power up",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3133,6 +3149,7 @@ const mod = {
             effect() {
                 mod.isWormBullets = true
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
             },
             remove() {
                 mod.isWormBullets = false
@@ -3394,5 +3411,6 @@ const mod = {
     isRailAreaDamage: null,
     historyLaser: null,
     isSpeedHarm: null,
-    isSpeedDamage: null
+    isSpeedDamage: null,
+    isTimeSkip: null
 }

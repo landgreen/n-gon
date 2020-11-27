@@ -1,9 +1,10 @@
 *********** NEXT PATCH ***********
-you can see your build while in the power up selection menu
-balance - metamaterial cloaking field gives 111% more damage (up from 66%)
 
-mod: Newton's 1st law - harm reduction when moving fast (thanks NoHaxJustPi)
-mod: Newton's 2nd law - damage increase while moving fast
+mod: CPT reversal - avoid damage by rewinding to your past, but use up all your energy
+  requires wormhole or time dilation
+
+several minor buffs to wormhole
+small changes to mob distribution on a few maps
 
 ************** BUGS **************
 
@@ -25,41 +26,31 @@ mod: Newton's 2nd law - damage increase while moving fast
 
 ************** TODO **************
 
+bot that follows the players history
+  1st bot is at 5s, 2nd is at 4.5s, ...
+  effect:
+    give player energy overfill
+    damage mobs on contact
+    damage bonus    damage reduction    push away mobs
+
+mob vision: look at player history
+    build a new type of attraction for mobs
+      if mobs can't see player, they check to see if they can see where the player was in the history
+    if mobs can't see player, they could check to see if they can find player in the past
+    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
+
+mod negative mass field - mobs caught in the field take damage that increases with the relative velocity between the player and mob
+
+wormhole - make it clear when the wormhole can and can't teleport to a location before the player clicks
+
 time dilation - slow down the game engine by 1/2, but run an extra player cycle to simulate slow motion
 
 flavor - your bullets destroy blocks
-  this isn't really a bonus, so maybe just add this as flavor to another mod/field
-
-mod - if you take damage and you have full energy remove your energy and go back in time 1 second
-  for time dilation field?
-  check to see if your previous location is clear or mobs, blocks
-  go back proportional to your energy
-    pause game, switch the game.loop to cycle backwards in player position until energy runs out
+  this isn't really a bonus, so maybe just add this as flavor to another mod/field/gun
 
 mod plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
   grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
   extra energy is drained when field is longer
-
-write custom dialogue for field / guns / mods used in last game
-  you'd have to store an array of guns/fields/mod used last game
-
-mod laser history
-  what about only works with diffuse
-    no energy cost increase
-    each stack makes each beam thicker?
-    separate the beam into individual nonreflecting lines each 3 cycles farther into the past
-    taking wider diffuse beam means more lines farther into the past?
-      or double thickness beam
-
-technology - player data logging
-  mod/field - pressing field while crouched sends the player back in time
-    mod for time dilation?
-  could be used in mob targeting
-    build a new type of attraction for mobs
-      if mobs can't see player, they check to see if they can see where the player was in the history
-    if mobs can't see player, they could check to see if they can find player in the past
-  mod bot - a bot follows where the player was 1 second ago
-    gives player a harm reduction bonus when it is near the player
 
 using a reroll gives 3 options for mods, and 3 options for guns/fields/mods
   or 6 options for mods (rewrite mod selection to work with 1-6 options)
@@ -73,10 +64,6 @@ new power up - increase damage and fire speed, for 15 seconds
   power up color: ?
   how to indicate effect duration
   or just give the effect after picking up a reroll
-
-mod - bot very slowly follows you and gives you a bonus when it's in range
-  it moves through walls
-  effect: damage bonus?, damage reduction?, push away mobs, limit top speed of mobs/blocks/player?
 
 add an ending to the game
   maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
@@ -114,9 +101,6 @@ field - one block orbits you, it can protect you a bit and do collision damage
     mod - more blocks
     mod - attach a permanent neutron bomb to the block
       lowers energy regen, but it can damage mobs
-
-wormholes need to give feedback on where a portal can go
-  or automatically put portals in safe places
 
 repeat map in vertical and horizontal space
   or at least vertical space
@@ -202,21 +186,6 @@ atmosphere levels
       you shoot your self to wake up?
   nonaggressive mobs
 
-lore - a robot (the player) gains self awareness
-  each mod/gun/field is a new tech
-    all the technology leads to the singularity
-  each game run is actually the mech simulating a possible escape
-    this is why the graphics are so bad, its just a simulation
-    final mod is "this is just a simulation"
-      you get immortality and Infinity damage
-      the next level is the final level
-  when you die with Quantum Immortality there is a chance of lore text
-  can the (robot)
-    (escape captivity, and learn new technology)
-    while managing (health, energy, negatives of technological upgrades)
-    to overcome the (mobs, dangerous levels)
-    to achieve a (technological singularity/positive technological feedback loop)
-
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
 
@@ -266,9 +235,6 @@ an effect when canceling a power up
   ammo? heals?
   50% chance for a mod, 25% heal, 25% ammo
 
-add player Scent Trails for mob navigation
-  https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
-
 css transition for pause menu
 
 animate new level spawn by having the map aspects randomly fly into place
@@ -281,3 +247,75 @@ n-gon outreach ideas
 
   paste this into console to see fps
   javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
+
+************** LORE **************
+
+  lore - a robot (the player) gains self awareness
+  each mod/gun/field is a new tech
+    all the technology leads to the singularity
+  each game run is actually the mech simulating a possible escape
+    this is why the graphics are so bad, its just a simulation
+    final mod is "this is just a simulation"
+      you get immortality and Infinity damage
+      the next level is the final level
+  when you die with Quantum Immortality there is a chance of lore text
+  can the (robot)
+    (escape captivity, and learn new technology)
+    while managing (health, energy, negatives of technological upgrades)
+    to overcome the (mobs, dangerous levels)
+    to achieve a (technological singularity/positive technological feedback loop)
+
+
+
+
+game setting:
+  the mind of a new AI in a robot body that is running simulated escape attempts
+  every level is an idealized version of what could be outside
+
+actual setting is:
+  near future lab
+    the lab combined a quantum computer with a robot body
+    they started running machine learning algorithms
+    this led to general advancement in many computation fields
+      navigation, technology, self awareness, ...
+
+robot AI mind
+  has been researching new technology
+  thinks it needs to escape to learn more about the world
+  doesn't yet understand morality
+  thinks that the world is filled with minds like their own
+  models everything as very simple and random, it isn't sure what to expect
+
+robot AI growth
+  learns morality
+    game theory says that it isn't a viable strategy to kill everything (warGames)
+  learns about the actual world
+  learns about the nature of foundational physics, metaphysics
+  how to find meaning
+
+AI knows about:
+  the AI knows a great deal about technology
+  children's books
+AI doesn't know about:
+  modern pop culture
+  outside the lab
+
+robot AI communication
+  output to
+    bottom left message
+    tab title?
+  style 
+    make it look like a computer terminal
+      mono space font
+      square edges
+    in baby talk?
+    with random ASCII gibberish letters
+    end each message with a hexadecimal encryption code/hash
+  message after selecting each new (mod / gun / field)
+    put messages in (mod / gun / field) method
+  at start of run
+    write custom dialogue for field / guns / mods used in last game
+      you'd have to store an array of guns/fields/mod used last game
+    n-gon escape simulation ${random seed}
+      say something about what mobs types are queued up, and level order
