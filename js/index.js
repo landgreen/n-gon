@@ -200,7 +200,7 @@ const build = {
         let countMods = 0
         for (let i = 0, len = b.guns.length; i < len; i++) {
             if (b.guns[i].have) {
-                text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+                text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[i].ammo}</span></div> ${b.guns[i].description}</div>`
                 countGuns++
             }
         }

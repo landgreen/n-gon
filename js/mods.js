@@ -987,9 +987,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss
+                return (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1) && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss && !mod.isPiezo
             },
-            requires: "not nano-scale manufacturing, not mass-energy equivalence, not standing wave harmonics, not acute stress response",
+            requires: "not nano-scale manufacturing, mass-energy equivalence, standing wave harmonics, acute stress response, piezoelectricity",
             effect() {
                 mod.isTimeAvoidDeath = true;
             },
@@ -1003,9 +1003,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !mod.isEnergyHealth && !mod.isTimeAvoidDeath
             },
-            requires: "not mass-energy equivalence",
+            requires: "not mass-energy equivalence, CPT reversal",
             effect() {
                 mod.isPiezo = true;
                 mech.energy += mech.maxEnergy * 2;
@@ -1016,11 +1016,11 @@ const mod = {
         },
         {
             name: "ground state",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPiezo && !mod.timeEnergyRegen
+                return mod.isPiezo && mod.energyRegen > 0.001
             },
             requires: "piezoelectricity",
             effect: () => {
@@ -1559,7 +1559,7 @@ const mod = {
         },
         {
             name: "quantum immortality",
-            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>5</strong> <strong class='color-r'>rerolls</strong>",
+            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1568,9 +1568,8 @@ const mod = {
             requires: "at least 2 rerolls",
             effect() {
                 mod.isImmortal = true;
-                for (let i = 0; i < 5; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
-                }
+                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                for (let i = 0; i < 4; i++) {}
             },
             remove() {
                 mod.isImmortal = false;
@@ -1634,6 +1633,70 @@ const mod = {
                 game.updateModHUD();
             },
             remove() {}
+        },
+        {
+            name: "perpetual rerolls",
+            description: "find <strong>1</strong> <strong class='color-r'>reroll</strong> power up<br>at the start of each <strong>level</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isSuperDeterminism && !mod.isPerpetualHeal && !mod.isPerpetualAmmo && !mod.isPerpetualStun
+            },
+            requires: "only 1 perpetual effect, not superdeterminism",
+            effect() {
+                mod.isPerpetualReroll = true
+            },
+            remove() {
+                mod.isPerpetualReroll = false
+            }
+        },
+        {
+            name: "perpetual heals",
+            description: "find <strong>2</strong> <strong class='color-h'>heal</strong> power ups<br>at the start of each <strong>level</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isPerpetualReroll && !mod.isPerpetualAmmo && !mod.isPerpetualStun
+            },
+            requires: "only 1 perpetual effect",
+            effect() {
+                mod.isPerpetualHeal = true
+            },
+            remove() {
+                mod.isPerpetualHeal = false
+            }
+        },
+        {
+            name: "perpetual ammo",
+            description: "find <strong>2</strong> <strong class='color-g'>ammo</strong> power ups<br>at the start of each <strong>level</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isPerpetualReroll && !mod.isPerpetualHeal && !mod.isPerpetualReroll && !mod.isPerpetualStun
+            },
+            requires: "only 1 perpetual effect, not exciton lattice",
+            effect() {
+                mod.isPerpetualAmmo = true
+            },
+            remove() {
+                mod.isPerpetualAmmo = false
+            }
+        },
+        {
+            name: "perpetual stun",
+            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds<br>at the start of each <strong>level</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isPerpetualReroll && !mod.isPerpetualHeal && !mod.isPerpetualAmmo
+            },
+            requires: "only 1 perpetual effect",
+            effect() {
+                mod.isPerpetualStun = true
+            },
+            remove() {
+                mod.isPerpetualStun = false
+            }
         },
         //************************************************** 
         //************************************************** gun
@@ -2774,9 +2837,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.oneSuperBall || mod.isCloakStun || mod.orbitBotCount > 1
+                return mod.isStunField || mod.oneSuperBall || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isPerpetualStun
             },
-            requires: "flux pinning or super ball<br>or flashbang",
+            requires: "a stun effect",
             effect() {
                 mod.isCrit = true;
             },
@@ -2830,7 +2893,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
+                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field" && mod.energyRegen !== 0;
             },
             requires: "time dilation field",
             effect: () => {
@@ -3193,10 +3256,9 @@ const mod = {
             },
             remove() {}
         },
-
         {
             name: "rerolls",
-            description: "spawn <strong>5</strong> <strong class='color-r'>reroll</strong> power ups",
+            description: "spawn <strong>4</strong> <strong class='color-r'>reroll</strong> power ups",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3206,7 +3268,7 @@ const mod = {
             },
             requires: "not superdeterminism",
             effect() {
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 4; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                 }
                 this.count--
@@ -3401,7 +3463,6 @@ const mod = {
     isWideLaser: null,
     wideLaser: null,
     isPulseLaser: null,
-    timeEnergyRegen: null,
     isRadioactive: null,
     isRailEnergyGain: null,
     isMineSentry: null,
@@ -3412,5 +3473,9 @@ const mod = {
     historyLaser: null,
     isSpeedHarm: null,
     isSpeedDamage: null,
-    isTimeSkip: null
+    isTimeSkip: null,
+    isPerpetualReroll: null,
+    isPerpetualAmmo: null,
+    isPerpetualHeal: null,
+    isPerpetualStun: null
 }

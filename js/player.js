@@ -272,8 +272,7 @@ const mech = {
     },
     alive: false,
     death() {
-        if (mod.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized stats
-
+        if (mod.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //count mods
             let totalMods = 0;
             for (let i = 0; i < mod.mods.length; i++) {
@@ -466,7 +465,7 @@ const mech = {
         if (mod.isBotArmor) dmg *= 0.95 ** mod.totalBots()
         if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
         if (mod.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
-        if (mod.energyRegen === 0) dmg *= 0.5 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
+        if (mod.energyRegen === 0) dmg *= 0.4 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
         if (mod.isTurret && mech.crouch) dmg *= 0.5;
         if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -1832,7 +1831,7 @@ const mech = {
                     }
 
                     //120 cycles after shooting (or using field) enable cloak
-                    if (mech.energy < 0.05 && mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
+                    if (mech.energy < 0.05 && mech.fireCDcycle < mech.cycle && !input.fire) mech.fireCDcycle = mech.cycle
                     if (mech.fireCDcycle + 50 < mech.cycle) {
                         if (!mech.isCloak) {
                             mech.isCloak = true //enter cloak

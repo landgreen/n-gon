@@ -2262,7 +2262,7 @@ const spawn = {
         //     this.explode();
         // };
         me.collisionFilter.mask = cat.bullet | cat.player | cat.mob
-        me.accelMag = 0.0006 * game.accelScale;
+        me.accelMag = 0.0004 * game.accelScale;
         me.leaveBody = false;
         me.frictionAir = 0.02;
         me.isSnakeTail = true;

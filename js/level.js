@@ -82,6 +82,18 @@ const level = {
                 powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
             }
         }
+        if (mod.isPerpetualReroll) powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "reroll", false);
+        if (mod.isPerpetualAmmo) {
+            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
+            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
+        }
+        if (mod.isPerpetualHeal) {
+            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+        }
+        if (mod.isPerpetualStun) {
+            for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 60 * 8)
+        }
         if (mod.isGunCycle) {
             b.inventoryGun++;
             if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
