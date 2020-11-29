@@ -19,7 +19,7 @@ const level = {
             // mech.setField("wormhole")
             // b.giveGuns("laser")
             // mod.is3Missiles = true
-            // mod.giveMod("CPT reversal")
+            // mod.giveMod("reallocation")
             // mod.giveMod("diffuse beam")
 
             level.intro(); //starting level
@@ -56,21 +56,7 @@ const level = {
         level.addToWorld(); //add bodies to game engine
         game.draw.setPaths();
         b.respawnBots();
-        for (let i = 0; i < 300; i++) { //reset history
-            mech.history[i] = {
-                position: {
-                    x: mech.pos.x,
-                    y: mech.pos.y,
-                },
-                velocity: {
-                    x: player.velocity.x,
-                    y: player.velocity.y
-                },
-                angle: mech.angle,
-                health: mech.health,
-                energy: mech.energy,
-            }
-        }
+        mech.resetHistory();
         if (mod.isArmorFromPowerUps) {
             mod.armorFromPowerUps += 0.05 * powerUps.totalPowerUps
             mech.setMaxHealth();

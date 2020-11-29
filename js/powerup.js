@@ -36,6 +36,7 @@ const powerUps = {
         build.pauseGrid(true)
     },
     endDraft() {
+        if (mod.isCancelDuplication) mod.cancelCount++
         if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
             powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
         }
@@ -70,7 +71,7 @@ const powerUps = {
                     b.randomBot()
                     if (mod.renormalization) {
                         for (let i = 0; i < limit; i++) {
-                            if (Math.random() < 0.37) {
+                            if (Math.random() < 0.42) {
                                 mech.fieldCDcycle = mech.cycle + 30;
                                 powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                             }
@@ -81,7 +82,7 @@ const powerUps = {
             if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
                 document.getElementById("mod-anthropic").innerHTML = `-${powerUps.reroll.rerolls}`
             }
-            if (mod.renormalization && Math.random() < 0.37 && amount < 0) {
+            if (mod.renormalization && Math.random() < 0.42 && amount < 0) {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
             }
             if (mod.isRerollHaste) {
@@ -602,7 +603,7 @@ const powerUps = {
             (!game.isNoPowerUps || (target === 'reroll' || target === 'heal' || target === 'ammo'))
         ) {
             powerUps.directSpawn(x, y, target, moving, mode, size)
-            if (mod.duplicateChance && Math.random() < mod.duplicateChance) {
+            if (Math.random() < mod.duplicationChance()) {
                 powerUps.directSpawn(x, y, target, moving, mode)
                 powerUp[powerUp.length - 1].isBonus = true
             }

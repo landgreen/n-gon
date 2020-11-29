@@ -1,10 +1,14 @@
 const mod = {
     totalCount: null,
-    setupAllMods() {
+    setupAllMods(isLost = false) {
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             mod.mods[i].remove();
+            if (isLost) {
+                mod.mods[i].isLost = false;
+            } else if (mod.mods[i].count > 0) {
+                mod.mods[i].isLost = true
+            }
             mod.mods[i].count = 0
-            if (mod.mods[i].isLost) mod.mods[i].isLost = false;
         }
         mod.armorFromPowerUps = 0;
         mod.totalCount = 0;
@@ -97,6 +101,9 @@ const mod = {
         if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
         if (mod.isSpeedDamage) dmg *= 1 + Math.min(0.33, player.speed * 0.011)
         return dmg * mod.slowFire * mod.aimDamage
+    },
+    duplicationChance() {
+        return (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance
     },
     totalBots() {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
@@ -559,7 +566,7 @@ const mod = {
         },
         {
             name: "foam-bot upgrade",
-            description: "<strong>150%</strong> increased <strong>foam size</strong><br><em>applies to all current and future foam-bots</em>",
+            description: "<strong>200%</strong> increased <strong>foam</strong> <strong>size</strong> and <strong>fire rate</strong><br><em>applies to all current and future foam-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -598,7 +605,7 @@ const mod = {
         },
         {
             name: "boom-bot upgrade",
-            description: "<strong>200%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size<br><em>applies to all current and future boom-bots</em>",
+            description: "<strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size<br><em>applies to all current and future boom-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -637,7 +644,7 @@ const mod = {
         },
         {
             name: "laser-bot upgrade",
-            description: "<strong>200%</strong> increased laser <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
+            description: "<strong>350%</strong> increased laser <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -676,7 +683,7 @@ const mod = {
         },
         {
             name: "orbital-bot upgrade",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong> and <strong>radius</strong> by <strong>30%</strong><br><em>applies to all current and future orbit-bots</em>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>150%</strong> and <strong>radius</strong> by <strong>30%</strong><br><em>applies to all current and future orbit-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -708,7 +715,7 @@ const mod = {
         },
         {
             name: "perimeter defense",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>4%</strong><br>for each of your permanent <strong>bots</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>5%</strong><br>for each of your permanent <strong>bots</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1292,17 +1299,11 @@ const mod = {
             requires: "",
             effect: () => {
                 mod.isBayesian = true
-                mod.duplicateChance += 0.16
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
-
             },
             remove() {
-                if (mod.isBayesian) {
-                    mod.duplicateChance -= 0.16
-                    if (mod.duplicateChance < 0) mod.duplicateChance = 0
-                }
                 mod.isBayesian = false
-                if (mod.duplicateChance === 0) game.draw.powerUp = game.draw.powerUpNormal
+                if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
             }
         },
         {
@@ -1317,13 +1318,109 @@ const mod = {
             effect() {
                 mod.duplicateChance += 0.07
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
-                // this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
             },
             remove() {
-                mod.duplicateChance -= 0.08 * this.count
-                if (mod.duplicateChance === 0) game.draw.powerUp = game.draw.powerUpNormal
-                // this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
+                mod.duplicateChance = 0
+                if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
             }
+        },
+        {
+            name: "futures exchange",
+            description: "clicking <strong>X</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>increases power up <strong>duplication</strong> chance by <strong>4%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !mod.isDeterminism
+            },
+            requires: "not determinism",
+            effect() {
+                mod.isCancelDuplication = true
+                mod.cancelCount = 0
+                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
+            },
+            remove() {
+                mod.isCancelDuplication = false
+                mod.cancelCount = 0
+                if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
+            }
+        },
+        {
+            name: "reallocation",
+            description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive mods lose all stacks</em>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            allowed() {
+                return (mod.totalCount > 0) && !mod.isSuperDeterminism && mod.duplicationChance() > 0
+            },
+            requires: "at least 1 mod, a chance to duplicate power ups",
+            effect: () => {
+                const have = [] //find which mods you have
+                for (let i = 0; i < mod.mods.length; i++) {
+                    if (mod.mods[i].count > 0) have.push(i)
+                }
+                const choose = have[Math.floor(Math.random() * have.length)]
+                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by reallocation`, 300)
+                for (let i = 0; i < mod.mods[choose].count; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                }
+                powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                mod.mods[choose].count = 0;
+                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
+                mod.mods[choose].isLost = true
+                game.updateModHUD();
+            },
+            remove() {}
+        },
+        {
+            name: "monte carlo experiment",
+            description: "spawn <strong>2</strong> <strong class='color-m'>mods</strong><br><strong>50%</strong> chance to remove <strong>1</strong> random <strong class='color-m'>mod</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            allowed() {
+                return (mod.totalCount > 0) && !mod.isSuperDeterminism && mod.duplicationChance() > 0
+            },
+            requires: "at least 1 mod, a chance to duplicate power ups",
+            effect: () => {
+                const have = [] //find which mods you have
+                for (let i = 0; i < mod.mods.length; i++) {
+                    if (mod.mods[i].count > 0) have.push(i)
+                }
+                const choose = have[Math.floor(Math.random() * have.length)]
+                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by reallocation`, 300)
+                for (let i = 0; i < mod.mods[choose].count; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                }
+                powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                mod.mods[choose].count = 0;
+                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
+                mod.mods[choose].isLost = true
+                game.updateModHUD();
+            },
+            remove() {}
+        },
+        {
+            name: "exchange symmetry",
+            description: `spawn <strong>1</strong> <strong class='color-m'>mod</strong><br>with <strong>double</strong> your normal chance for power up <strong>duplication</strong>`,
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            allowed() {
+                return !mod.isSuperDeterminism && mod.duplicationChance() > 0
+            },
+            requires: "at least 1 mod, a chance to duplicate power ups",
+            effect: () => {
+                const chanceStore = mod.duplicateChance
+                mod.duplicateChance = (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
+                powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                mod.duplicateChance = chanceStore
+            },
+            remove() {}
         },
         {
             name: "entanglement",
@@ -1507,7 +1604,7 @@ const mod = {
         },
         {
             name: "superdeterminism",
-            description: "spawn <strong>3</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+            description: "spawn <strong>6</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1517,7 +1614,7 @@ const mod = {
             requires: "determinism",
             effect: () => {
                 mod.isSuperDeterminism = true;
-                for (let i = 0; i < 3; i++) { //if you change the six also change it in Born rule
+                for (let i = 0; i < 6; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
@@ -1543,7 +1640,7 @@ const mod = {
         },
         {
             name: "renormalization",
-            description: "consuming a <strong class='color-r'>reroll</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
+            description: "consuming a <strong class='color-r'>reroll</strong> for <strong>any</strong> purpose<br>has a <strong>42%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1568,8 +1665,9 @@ const mod = {
             requires: "at least 2 rerolls",
             effect() {
                 mod.isImmortal = true;
-                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
-                for (let i = 0; i < 4; i++) {}
+                for (let i = 0; i < 4; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                }
             },
             remove() {
                 mod.isImmortal = false;
@@ -1598,7 +1696,7 @@ const mod = {
                 if (mod.isDeterminism) count -= 3 //remove the bonus mods 
                 if (mod.isSuperDeterminism) count -= 2 //remove the bonus mods 
 
-                mod.setupAllMods(); // remove all mods
+                mod.setupAllMods(false); // remove all mods
                 for (let i = 0; i < count; i++) { // spawn new mods power ups
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
@@ -1607,36 +1705,8 @@ const mod = {
             remove() {}
         },
         {
-            name: "reallocation",
-            description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>2</strong> new <strong class='color-g'>guns</strong><br><em>recursive mods lose all stacks</em>",
-            maxCount: 1,
-            count: 0,
-            isNonRefundable: true,
-            isCustomHide: true,
-            allowed() {
-                return (mod.totalCount > 0) && !mod.isSuperDeterminism
-            },
-            requires: "at least 1 mod",
-            effect: () => {
-                const have = [] //find which mods you have
-                for (let i = 0; i < mod.mods.length; i++) {
-                    if (mod.mods[i].count > 0) have.push(i)
-                }
-                const choose = have[Math.floor(Math.random() * have.length)]
-                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by reallocation`, 300)
-                for (let i = 0; i < 2 * mod.mods[choose].count; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                }
-                mod.mods[choose].count = 0;
-                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
-                mod.mods[choose].isLost = true
-                game.updateModHUD();
-            },
-            remove() {}
-        },
-        {
             name: "perpetual rerolls",
-            description: "find <strong>1</strong> <strong class='color-r'>reroll</strong> power up<br>at the start of each <strong>level</strong>",
+            description: "find <strong>1</strong> <strong class='color-r'>reroll</strong> at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1652,7 +1722,7 @@ const mod = {
         },
         {
             name: "perpetual heals",
-            description: "find <strong>2</strong> <strong class='color-h'>heal</strong> power ups<br>at the start of each <strong>level</strong>",
+            description: "find <strong>2</strong> <strong class='color-h'>heals</strong> at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1668,7 +1738,7 @@ const mod = {
         },
         {
             name: "perpetual ammo",
-            description: "find <strong>2</strong> <strong class='color-g'>ammo</strong> power ups<br>at the start of each <strong>level</strong>",
+            description: "find <strong>2</strong> <strong class='color-g'>ammo</strong> at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1772,15 +1842,17 @@ const mod = {
                 }
             },
             remove() {
-                mod.isIceCrystals = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "nail gun") {
-                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-                        b.guns[i].ammo = b.guns[i].recordedAmmo
-                        game.updateGunHUD();
-                        break;
+                if (mod.isIceCrystals) {
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") {
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                            if (b.guns[i].recordedAmmo) b.guns[i].ammo = b.guns[i].recordedAmmo
+                            game.updateGunHUD();
+                            break;
+                        }
                     }
                 }
+                mod.isIceCrystals = false;
             }
         },
         {
@@ -1962,23 +2034,37 @@ const mod = {
                 mod.isFlechetteMultiShot = true;
                 //cut current ammo by 1/3
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flechettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+                    if (b.guns[i].name === "flechettes") {
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+                        break
+                    }
                 }
                 //cut ammo packs by 1/3
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                    if (b.guns[i].name === "flechettes") b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+                    if (b.guns[i].name === "flechettes") {
+                        b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+                        break
+                    }
                 }
                 game.updateGunHUD();
             },
             remove() {
+                if (mod.isFlechetteMultiShot) {
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "flechettes") {
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
+                            break
+                        }
+                    }
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "flechettes") {
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                            break
+                        }
+                        game.updateGunHUD();
+                    }
+                }
                 mod.isFlechetteMultiShot = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flechettes") b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
-                }
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flechettes") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-                }
-                game.updateGunHUD();
             }
         },
         {
@@ -2727,7 +2813,6 @@ const mod = {
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
                 this.description = `add 10 more <strong>laser</strong> beams into into your past`
-                //`<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
                 mod.historyLaser++
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -3202,7 +3287,7 @@ const mod = {
         },
         {
             name: "traversable geodesics",
-            description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong class='color-g'>ammo</strong> power up",
+            description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong class='color-g'>ammo</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3220,7 +3305,7 @@ const mod = {
         },
         {
             name: "heals",
-            description: "spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
+            description: "spawn <strong>6</strong> <strong class='color-h'>heals</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3239,7 +3324,7 @@ const mod = {
         },
         {
             name: "ammo",
-            description: "spawn <strong>6</strong> <strong class='color-g'>ammo</strong> power ups",
+            description: "spawn <strong>6</strong> <strong class='color-g'>ammo</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3258,7 +3343,7 @@ const mod = {
         },
         {
             name: "rerolls",
-            description: "spawn <strong>4</strong> <strong class='color-r'>reroll</strong> power ups",
+            description: "spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3277,7 +3362,7 @@ const mod = {
         },
         {
             name: "gun",
-            description: "spawn a <strong class='color-g'>gun</strong> power up",
+            description: "spawn a <strong class='color-g'>gun</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3294,7 +3379,7 @@ const mod = {
         },
         {
             name: "field",
-            description: "spawn a <strong class='color-f'>field</strong> power up",
+            description: "spawn a <strong class='color-f'>field</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3477,5 +3562,7 @@ const mod = {
     isPerpetualReroll: null,
     isPerpetualAmmo: null,
     isPerpetualHeal: null,
-    isPerpetualStun: null
+    isPerpetualStun: null,
+    isCancelDuplication: null,
+    cancelCount: null
 }

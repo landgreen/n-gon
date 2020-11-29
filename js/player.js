@@ -134,6 +134,23 @@ const mech = {
     transX: 0,
     transY: 0,
     history: [], //tracks the last second of player position
+    resetHistory() {
+        for (let i = 0; i < 300; i++) { //reset history
+            mech.history[i] = {
+                position: {
+                    x: mech.pos.x,
+                    y: mech.pos.y,
+                },
+                velocity: {
+                    x: player.velocity.x,
+                    y: player.velocity.y
+                },
+                angle: mech.angle,
+                health: mech.health,
+                energy: mech.energy,
+            }
+        }
+    },
     move() {
         mech.pos.x = player.position.x;
         mech.pos.y = playerBody.position.y - mech.yOff;
@@ -480,6 +497,20 @@ const mech = {
             let history = mech.history[(mech.cycle - steps) % 300]
             Matter.Body.setPosition(player, history.position);
             Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+            // move bots to follow player
+            for (let i = 0; i < bullet.length; i++) {
+                if (bullet[i].botType) {
+                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                        x: 250 * (Math.random() - 0.5),
+                        y: 250 * (Math.random() - 0.5)
+                    }));
+                    Matter.Body.setVelocity(bullet[i], {
+                        x: 0,
+                        y: 0
+                    });
+                }
+            }
+
             mech.energy = Math.max(mech.energy - steps, 0.01)
             mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
 
@@ -504,6 +535,7 @@ const mech = {
                             mech.draw();
                         }
                         ctx.restore();
+                        mech.resetHistory()
                     }
                 }
             };

@@ -179,11 +179,12 @@ const build = {
     pauseGrid() {
         let text = ""
         if (!game.isChoosing) text += `<div class="pause-grid-module">
-      <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>
-      <div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
+      <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
+        text += `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
       <strong class='color-d'>damage</strong> increase: ${((mod.damageFromMods()-1)*100).toFixed(0)}%
       <br><strong class='color-harm'>harm</strong> reduction: ${((1-mech.harmReduction())*100).toFixed(0)}%
       <br><strong>fire delay</strong> decrease: ${((1-b.fireCD)*100).toFixed(0)}%
+      <br><strong>duplication</strong> chance: ${(Math.min(1,mod.duplicationChance())*100).toFixed(0)}%
       <br>
       <br><strong class='color-r'>rerolls</strong>: ${powerUps.reroll.rerolls}
       <br><strong class='color-h'>health</strong>: (${(mech.health*100).toFixed(0)} / ${(mech.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(mech.energy*100).toFixed(0)} / ${(mech.maxEnergy*100).toFixed(0)})
@@ -798,6 +799,7 @@ window.addEventListener("keydown", function(event) {
                 mod.giveMod()
                 break
             case "r":
+                mech.resetHistory();
                 Matter.Body.setPosition(player, game.mouseInGame);
                 Matter.Body.setVelocity(player, {
                     x: 0,

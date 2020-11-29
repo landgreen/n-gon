@@ -1324,7 +1324,7 @@ const b = {
             restitution: 0.6 * (1 + 0.5 * Math.random()),
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 60 + Math.floor(17 * Math.random()) - 10 * mod.isFoamBotUpgrade,
+            lookFrequency: 60 + Math.floor(17 * Math.random()) - 20 * mod.isFoamBotUpgrade,
             cd: 0,
             delay: 100,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
@@ -1383,7 +1383,7 @@ const b = {
             lookFrequency: 40 + Math.floor(7 * Math.random()),
             drainThreshold: mod.isEnergyHealth ? 0.5 : 0.15,
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-            range: 700 * (1 + 0.1 * Math.random()) + 250 * mod.isLaserBotUpgrade,
+            range: 700 * (1 + 0.1 * Math.random()) + 300 * mod.isLaserBotUpgrade,
             followRange: 150 + Math.floor(30 * Math.random()),
             offPlayer: {
                 x: 0,
@@ -1437,7 +1437,7 @@ const b = {
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && mech.energy > this.drainThreshold) {
                     mech.energy -= 0.0012 * mod.isLaserDiode
-                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.06 + 0.1 * this.isUpgraded))
+                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.06 + 0.15 * this.isUpgraded))
                 }
             }
         })
@@ -1459,7 +1459,7 @@ const b = {
             minDmgSpeed: 0,
             lookFrequency: 43 + Math.floor(7 * Math.random()),
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 500 * (1 + 0.1 * Math.random()) + 250 * mod.isBoomBotUpgrade,
+            range: 500 * (1 + 0.1 * Math.random()) + 350 * mod.isBoomBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -1470,7 +1470,7 @@ const b = {
             explode: 0,
             beforeDmg() {
                 if (this.lockedOn) {
-                    const explosionRadius = Math.min(170 + 170 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
+                    const explosionRadius = Math.min(170 + 200 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, mech.pos)) - 30)
                     if (explosionRadius > 60) {
                         this.explode = explosionRadius
                         // 
@@ -1760,7 +1760,7 @@ const b = {
                     })
                     for (let i = 0; i < q.length; i++) {
                         mobs.statusStun(q[i], 180)
-                        const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2 : 1) * (mod.isCrit ? 4 : 1)
+                        const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1) * (mod.isCrit ? 4 : 1)
                         q[i].damage(dmg);
                         q[i].foundPlayer();
                         game.drawList.push({ //add dmg to draw queue
@@ -1927,7 +1927,7 @@ const b = {
         },
         {
             name: "shotgun",
-            description: "fire a <strong>burst</strong> of short range <strong> bullets</strong> <br><em>crouch to reduce recoil</em>",
+            description: "fire a <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
             ammoPack: 5.5,
             defaultAmmoPack: 5.5,
@@ -2218,7 +2218,7 @@ const b = {
         },
         {
             name: "wave beam",
-            description: "emit a <strong>sine wave</strong> of oscillating particles<br>that can propagate <strong>through solids</strong>",
+            description: "emit a <strong>sine wave</strong> of oscillating particles<br>propagates through <strong>walls</strong>",
             ammo: 0,
             ammoPack: 70,
             have: false,
