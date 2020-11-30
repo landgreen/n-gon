@@ -196,14 +196,12 @@ const b = {
         dist = Vector.magnitude(sub);
 
         if (dist < radius) {
-
             if (mod.isImmuneExplosion) {
                 const mitigate = Math.min(1, Math.max(1 - mech.energy * 0.7, 0))
                 mech.damage(mitigate * radius * (mod.isExplosionHarm ? 0.0004 : 0.0001));
             } else {
                 mech.damage(radius * (mod.isExplosionHarm ? 0.0004 : 0.0001));
             }
-
             // if (!(mod.isImmuneExplosion && mech.energy > 0.97)) {
             //   if (mod.isExplosionHarm) {
             //     mech.damage(radius * 0.0004); //300% more player damage from explosions
@@ -212,11 +210,11 @@ const b = {
             //   }
             //   mech.drop();
             // }
-            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.015);
+            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
             player.force.x += knock.x;
             player.force.y += knock.y;
         } else if (dist < alertRange) {
-            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.008);
+            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
             player.force.x += knock.x;
             player.force.y += knock.y;
         }
@@ -230,7 +228,7 @@ const b = {
                 body[i].force.x += knock.x;
                 body[i].force.y += knock.y;
             } else if (dist < alertRange) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.013);
+                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.011);
                 body[i].force.x += knock.x;
                 body[i].force.y += knock.y;
             }
@@ -241,11 +239,11 @@ const b = {
             sub = Vector.sub(where, powerUp[i].position);
             dist = Vector.magnitude(sub);
             if (dist < radius) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.015);
+                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.013);
                 powerUp[i].force.x += knock.x;
                 powerUp[i].force.y += knock.y;
             } else if (dist < alertRange) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.01);
+                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.007);
                 powerUp[i].force.x += knock.x;
                 powerUp[i].force.y += knock.y;
             }
@@ -1381,7 +1379,7 @@ const b = {
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 40 + Math.floor(7 * Math.random()),
-            drainThreshold: mod.isEnergyHealth ? 0.5 : 0.15,
+            drainThreshold: mod.isEnergyHealth ? 0.5 : 0.33,
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
             range: 700 * (1 + 0.1 * Math.random()) + 300 * mod.isLaserBotUpgrade,
             followRange: 150 + Math.floor(30 * Math.random()),
@@ -1538,7 +1536,7 @@ const b = {
             cd: 0,
             acceleration: 0.009,
             endCycle: Infinity,
-            drainThreshold: mod.isEnergyHealth ? 0.5 : 0.15,
+            drainThreshold: mod.isEnergyHealth ? 0.4 : 0.2,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,

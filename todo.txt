@@ -1,14 +1,8 @@
 *********** NEXT PATCH ***********
+balance: perimeter defense - 3% harm reduction for each bot (was 5%)
 
-all bot upgrade mods are improved by about 33%
-mod superdeterminism - spawns 6 mods  (was 3)
-
-mod: futures exchange - canceling power ups increases duplication chance by 4%
-mod: monte carlo experiment - spawn 2 mods, but you have a 50% chance to lose a random mod
-  requires duplication mods, not available in custom
-mod: exchange symmetry - spawn 1 mod with double your normal duplication chance
-  requires duplication mods, not available in custom
-
+mod: network effect - 2% damage for each bot
+mod: commodities exchange - canceling a power up gives 6 rerolls, ammo, or heals
 
 ************** BUGS **************
 
@@ -29,8 +23,6 @@ mod: exchange symmetry - spawn 1 mod with double your normal duplication chance
 
 
 ************** TODO **************
-
-mod: canceling a mod gun or field increases your duplication chance for all power up by 4%
 
 in custom make a top bar that is fixed
   use media rules to make the layout look nice

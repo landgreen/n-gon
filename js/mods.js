@@ -100,6 +100,7 @@ const mod = {
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
         if (mod.isSpeedDamage) dmg *= 1 + Math.min(0.33, player.speed * 0.011)
+        if (mod.isBotDamage) dmg *= 1 + 0.02 * mod.totalBots()
         return dmg * mod.slowFire * mod.aimDamage
     },
     duplicationChance() {
@@ -715,11 +716,11 @@ const mod = {
         },
         {
             name: "perimeter defense",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>5%</strong><br>for each of your permanent <strong>bots</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>3%</strong><br>for each of your permanent <strong>bots</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.totalBots() > 4 && !mod.isEnergyHealth
+                return mod.totalBots() > 5 && !mod.isEnergyHealth
             },
             requires: "5 or more bots",
             effect() {
@@ -727,6 +728,21 @@ const mod = {
             },
             remove() {
                 mod.isBotArmor = false
+            }
+        }, {
+            name: "network effect",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>2%</strong><br>for each of your permanent <strong>bots</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.totalBots() > 6 && !mod.isEnergyHealth
+            },
+            requires: "6 or more bots",
+            effect() {
+                mod.isBotDamage = true
+            },
+            remove() {
+                mod.isBotDamage = false
             }
         },
         {
@@ -1345,6 +1361,22 @@ const mod = {
             }
         },
         {
+            name: "commodities exchange",
+            description: "clicking <strong>X</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.duplicationChance() > 0 && !mod.isDeterminism
+            },
+            requires: "a chance to duplicate power ups, not determinism",
+            effect() {
+                mod.isCancelRerolls = true
+            },
+            remove() {
+                mod.isCancelRerolls = false
+            }
+        },
+        {
             name: "reallocation",
             description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive mods lose all stacks</em>",
             maxCount: 1,
@@ -1589,9 +1621,9 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return !mod.isExtraChoice
+                return !mod.isExtraChoice && !mod.isCancelDuplication && !mod.isCancelRerolls
             },
-            requires: "not cardinality",
+            requires: "not cardinality, not futures or commodities exchanges",
             effect: () => {
                 mod.isDeterminism = true;
                 for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
@@ -1640,7 +1672,7 @@ const mod = {
         },
         {
             name: "renormalization",
-            description: "consuming a <strong class='color-r'>reroll</strong> for <strong>any</strong> purpose<br>has a <strong>42%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
+            description: "consuming a <strong class='color-r'>reroll</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3564,5 +3596,7 @@ const mod = {
     isPerpetualHeal: null,
     isPerpetualStun: null,
     isCancelDuplication: null,
-    cancelCount: null
+    cancelCount: null,
+    isCancelRerolls: null,
+    isBotDamage: null
 }

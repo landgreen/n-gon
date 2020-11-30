@@ -35,10 +35,21 @@ const powerUps = {
         game.isChoosing = true; //stops p from un pausing on key down
         build.pauseGrid(true)
     },
-    endDraft() {
-        if (mod.isCancelDuplication) mod.cancelCount++
+    endDraft(isCanceled = false) {
+        if (isCanceled) {
+            if (mod.isCancelDuplication) mod.cancelCount++
+            if (mod.isCancelRerolls) {
+                let type = (mech.health < 0.25 || mod.isEnergyNoAmmo) ? "heal" : "ammo"
+                if (Math.random() < 0.33) {
+                    type = "heal"
+                } else if (Math.random() < 0.5 && !mod.isSuperDeterminism) {
+                    type = "reroll"
+                }
+                for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), type, false);
+            }
+        }
         if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
-            powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+            powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "reroll", false);
         }
         document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-background").style.display = "none"
@@ -71,7 +82,7 @@ const powerUps = {
                     b.randomBot()
                     if (mod.renormalization) {
                         for (let i = 0; i < limit; i++) {
-                            if (Math.random() < 0.42) {
+                            if (Math.random() < 0.37) {
                                 mech.fieldCDcycle = mech.cycle + 30;
                                 powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
                             }
@@ -82,7 +93,7 @@ const powerUps = {
             if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
                 document.getElementById("mod-anthropic").innerHTML = `-${powerUps.reroll.rerolls}`
             }
-            if (mod.renormalization && Math.random() < 0.42 && amount < 0) {
+            if (mod.renormalization && Math.random() < 0.37 && amount < 0) {
                 powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
             }
             if (mod.isRerollHaste) {
@@ -155,7 +166,7 @@ const powerUps = {
         },
         effect() {
             //give ammo to all guns in inventory
-            if (mod.isAmmoForGun) {
+            if (mod.isAmmoForGun && b.inventory > 0) {
                 const target = b.guns[b.activeGun]
                 target.ammo += Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
             } else {
@@ -240,7 +251,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft(true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
                 if (!mod.isDeterminism) {
@@ -310,7 +321,7 @@ const powerUps = {
 
                 }
                 let text = ""
-                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft(true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
                 let choice1 = pick()
                 let choice2 = -1
@@ -383,7 +394,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft()'>✕</div>`
+                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft(true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
                 if (!mod.isDeterminism) {

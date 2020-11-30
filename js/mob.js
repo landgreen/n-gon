@@ -1052,7 +1052,7 @@ const mobs = {
                     if (mod.isExplodeMob) b.explosion(this.position, Math.min(550, Math.sqrt(this.mass + 2.5) * 50))
                     if (mod.nailsDeathMob) b.targetedNail(this.position, mod.nailsDeathMob, 40 + 7 * Math.random())
                 } else if (mod.isShieldAmmo && this.shield) {
-                    let type = "ammo"
+                    let type = mod.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"
                     } else if (Math.random() < 0.3 && !mod.isSuperDeterminism) {

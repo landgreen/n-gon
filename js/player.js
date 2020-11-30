@@ -479,7 +479,7 @@ const mech = {
         if (mod.isSlowFPS) dmg *= 0.85
         if (mod.isPiezo) dmg *= 0.85
         if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
-        if (mod.isBotArmor) dmg *= 0.95 ** mod.totalBots()
+        if (mod.isBotArmor) dmg *= 0.97 ** mod.totalBots()
         if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
         if (mod.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
         if (mod.energyRegen === 0) dmg *= 0.4 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
