@@ -1,8 +1,8 @@
 *********** NEXT PATCH ***********
-balance: perimeter defense - 3% harm reduction for each bot (was 5%)
 
-mod: network effect - 2% damage for each bot
-mod: commodities exchange - canceling a power up gives 6 rerolls, ammo, or heals
+custom and pause menu style update (mostly just thinner lines between blocks)
+
+mod: shotgun slug - fire a big bullet
 
 ************** BUGS **************
 
@@ -11,7 +11,9 @@ mod: commodities exchange - canceling a power up gives 6 rerolls, ammo, or heals
 (4+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
   players have extra gravity
     might be from the short jump code
-    add in a check every 5 seconds to try and fix it
+    add in a check every 7 seconds to try and fix it
+      this fix was added and it is working
+        maybe move the fix to once a second?
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
@@ -23,6 +25,12 @@ mod: commodities exchange - canceling a power up gives 6 rerolls, ammo, or heals
 
 
 ************** TODO **************
+
+bullet mechanic - a bullet that swims through the air
+  rotate the velocity vector towards the normalized facing vector
+    use the cross product > 0 to determine which direction to rotate the velocity
+
+lower recoil on nail shot gun
 
 in custom make a top bar that is fixed
   use media rules to make the layout look nice

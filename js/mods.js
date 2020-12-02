@@ -270,7 +270,7 @@ const mod = {
         },
         {
             name: "electrostatic discharge",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br><strong>20%</strong> increased <strong>delay</strong> after firing",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br><strong>20%</strong> increased <strong><em>delay</em></strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -287,7 +287,7 @@ const mod = {
         },
         {
             name: "Ψ(t) collapse",
-            description: "<strong>66%</strong> decreased <strong>delay</strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -307,7 +307,7 @@ const mod = {
         },
         {
             name: "auto-loading heuristics",
-            description: "<strong>30%</strong> decreased <strong>delay</strong> after firing",
+            description: "<strong>30%</strong> decreased <strong><em>delay</em></strong> after firing",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -747,7 +747,7 @@ const mod = {
         },
         {
             name: "bot replication",
-            description: "<strong>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
+            description: "<strong class='color-dup'>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
@@ -848,9 +848,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.Fx > 0.016
+                return mech.Fx > 0.016 && !mod.isEnergyHealth
             },
-            requires: "speed increase",
+            requires: "speed increase, not mass-energy equivalence",
             effect() {
                 mod.isSpeedHarm = true
             },
@@ -1061,9 +1061,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPiezo && !mod.isTimeAvoidDeath
+                return !mod.isPiezo && !mod.isTimeAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
-            requires: "not piezoelectricity<br>or acute stress response",
+            requires: "not piezoelectricity, acute stress response, 1st law, negative mass field",
             effect: () => {
                 mech.health = 0
                 // mech.displayHealth();
@@ -1306,7 +1306,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>16%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>16%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1324,7 +1324,7 @@ const mod = {
         },
         {
             name: "stimulated emission",
-            description: "<strong>7%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong>",
+            description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1342,7 +1342,7 @@ const mod = {
         },
         {
             name: "futures exchange",
-            description: "clicking <strong>X</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>increases power up <strong>duplication</strong> chance by <strong>4%</strong>",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>increases power up <strong class='color-dup'>duplication</strong> chance by <strong>4%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1362,7 +1362,7 @@ const mod = {
         },
         {
             name: "commodities exchange",
-            description: "clicking <strong>X</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "clicking  <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1437,7 +1437,7 @@ const mod = {
         },
         {
             name: "exchange symmetry",
-            description: `spawn <strong>1</strong> <strong class='color-m'>mod</strong><br>with <strong>double</strong> your normal chance for power up <strong>duplication</strong>`,
+            description: `spawn <strong>1</strong> <strong class='color-m'>mod</strong><br>with <strong>double</strong> your normal chance for power up <strong class='color-dup'>duplication</strong>`,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1905,7 +1905,7 @@ const mod = {
         },
         {
             name: "pneumatic actuator",
-            description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong>delay</strong> after firing",
+            description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1975,11 +1975,11 @@ const mod = {
         },
         {
             name: "nailshot",
-            description: "the <strong>shotgun</strong> fires <strong>nails</strong><br><em>effective at a distance</em>",
+            description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("shotgun") && !mod.isIncendiary
+                return mod.haveGunCheck("shotgun") && !mod.isIncendiary && !mod.isSlugShot
             },
             requires: "shotgun",
             effect() {
@@ -1990,8 +1990,24 @@ const mod = {
             }
         },
         {
+            name: "shotgun slug",
+            description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.haveGunCheck("shotgun") && !mod.isNailShot
+            },
+            requires: "shotgun",
+            effect() {
+                mod.isSlugShot = true;
+            },
+            remove() {
+                mod.isSlugShot = false;
+            }
+        },
+        {
             name: "Newton's 3rd law",
-            description: "the <strong>shotgun</strong> fires <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
+            description: "the <strong>shotgun</strong> fire <strong><em>delay</em></strong> is <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2247,7 +2263,7 @@ const mod = {
         },
         {
             name: "MIRV",
-            description: "launch <strong>3</strong> small <strong>missiles</strong> instead of <strong>1</strong> <br><strong>1.5x</strong> increase in <strong>delay</strong> after firing",
+            description: "launch <strong>3</strong> small <strong>missiles</strong> instead of <strong>1</strong> <br><strong>1.5x</strong> increase in <strong><em>delay</em></strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2898,7 +2914,7 @@ const mod = {
         },
         {
             name: "neocognitron",
-            description: "<strong>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong>delay</strong> after firing",
+            description: "<strong>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3237,7 +3253,7 @@ const mod = {
         },
         {
             name: "discrete optimization",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong>delay</strong> after firing",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
             maxCount: 1,
             count: 0,
             allowed() {

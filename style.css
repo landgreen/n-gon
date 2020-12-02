@@ -90,7 +90,7 @@ summary {
 }
 
 .SVG-button {
-    border: 2px #333 solid;
+    border: 1.5px #333 solid;
     border-radius: 9px;
     background-color: #fff;
 }
@@ -208,7 +208,7 @@ summary {
     padding: 10px;
     line-height: 170%;
     /* border-radius: 6px; */
-    border: 2px #333 solid;
+    border: 1px #333 solid;
     background-color: #fff;
     font-size: 0.65em;
 }
@@ -239,7 +239,7 @@ summary {
     padding: 10px;
     line-height: 170%;
     /* border-radius: 6px; */
-    border: 2px #333 solid;
+    border: 1px #17263b solid;
     background-color: #fff;
 
     line-height: 170%;
@@ -281,12 +281,15 @@ summary {
 }
 
 .build-grid-disabled {
-    opacity: 0.5;
-    color: #ccc;
+    /* opacity: 0.5; */
+    background-color: var(--build-bg-color);
+    color: rgba(0, 0, 0, 0.2);
+    /* transition: background-color 1s, color 1s; */
 }
 
 .build-grid-disabled:hover {
-    background-color: #fff;
+    /* background-color: #fff; */
+    background-color: var(--build-bg-color);
 }
 
 #info {
@@ -483,6 +486,14 @@ em {
     letter-spacing: 1px;
 }
 
+.color-dup {
+    /* color: hsl(243, 100%, 38%); */
+    font-variant: small-caps;
+    letter-spacing: 1px;
+    text-shadow: 1.5px -1.5px hsla(243, 100%, 38%, 0.2);
+    /* text-decoration: underline; */
+}
+
 .color-cloaked {
     opacity: 0.25;
     letter-spacing: 1px;
@@ -571,7 +582,7 @@ em {
 }
 
 .grey {
-    background: #ccc;
+    background: #afb6c2;
 }
 
 .gun {

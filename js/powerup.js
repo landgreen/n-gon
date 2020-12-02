@@ -93,9 +93,7 @@ const powerUps = {
             if (mod.isDeathAvoid && document.getElementById("mod-anthropic")) {
                 document.getElementById("mod-anthropic").innerHTML = `-${powerUps.reroll.rerolls}`
             }
-            if (mod.renormalization && Math.random() < 0.37 && amount < 0) {
-                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
-            }
+            if (mod.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
             if (mod.isRerollHaste) {
                 if (powerUps.reroll.rerolls === 0) {
                     mod.rerollHaste = 0.66;

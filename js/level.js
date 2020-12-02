@@ -13,13 +13,14 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // game.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(89)
+            // level.difficultyIncrease(29)
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            // b.giveGuns("laser")
+            // b.giveGuns("shotgun")
+            // mod.isIncendiary = true
             // mod.is3Missiles = true
-            // mod.giveMod("reallocation")
+            // mod.giveMod("shotgun slug")
             // mod.giveMod("diffuse beam")
 
             level.intro(); //starting level
@@ -154,7 +155,7 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 20)
+        spawn.starter(1900, -500, 320)
         // spawn.sucker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
