@@ -775,6 +775,7 @@ const mech = {
     fieldRange: 155,
     fieldShieldingScale: 1,
     fieldDamage: 1,
+    duplicateChance: 0,
     energy: 0,
     fieldRegen: 0,
     fieldMode: 0,
@@ -806,6 +807,8 @@ const mech = {
         mech.fieldBlockCD = 10;
         mech.fieldHarmReduction = 1;
         mech.fieldDamage = 1
+        mech.duplicateChance = 0
+        if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
         mech.grabPowerUpRange2 = 156000;
         mech.fieldRange = 155;
         mech.fieldFire = false;
@@ -1284,7 +1287,7 @@ const mech = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br><strong>throw</strong> blocks to <strong class='color-d'>damage</strong> mobs<br><strong>pick up</strong> power ups",
+            description: "using the field drains <strong class='color-f'>energy</strong><br><strong>block</strong> mobs, <strong>grab</strong> power ups<br><strong>pick up</strong> and <strong>throw</strong> blocks",
             effect: () => {
                 game.replaceTextLog = true; //allow text over write
                 mech.hold = function() {
@@ -2272,10 +2275,12 @@ const mech = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups<br><strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: () => {
                 game.replaceTextLog = true; //allow text over write
                 mech.drop();
+                mech.duplicateChance = 0.1
+                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
                 // mech.hole = {  //this is reset with each new field, but I'm leaving it here for reference
                 //   isOn: false,
                 //   isReady: true,

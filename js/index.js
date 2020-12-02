@@ -275,7 +275,7 @@ const build = {
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             const modID = document.getElementById("mod-" + i)
             if (!mod.mods[i].isCustomHide) {
-                if (mod.mods[i].allowed() || isAllowed) {
+                if (mod.mods[i].allowed() || isAllowed || mod.mods[i].count > 0) {
                     if (mod.mods[i].count > 1) {
                         modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
                     } else {
@@ -480,7 +480,7 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             const modID = document.getElementById("mod-" + i)
             if (!mod.mods[i].isCustomHide) {
-                if (mod.mods[i].allowed() || mod.mods[i].count > 1) {
+                if (mod.mods[i].allowed() || mod.mods[i].count > 0) {
                     if (mod.mods[i].count > 1) {
                         modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
                     } else {

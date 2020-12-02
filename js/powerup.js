@@ -129,6 +129,33 @@ const powerUps = {
         },
         use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or mod
             powerUps.reroll.changeRerolls(-1)
+
+
+            // banish rerolled mods
+            if (mod.isBanish && type === 'mod') {
+                const banishLength = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
+                if (powerUps.mod.choiceLog.length > banishLength || powerUps.mod.choiceLog.length === banishLength) { //I'm not sure this check is needed
+                    for (let i = 0; i < banishLength; i++) {
+                        powerUps.mod.banishLog.push(powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i])
+                    }
+                }
+
+                if (powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length < 1) {
+                    for (let i = 0, len = mod.mods.length; i < len; i++) {
+                        if (mod.mods[i].name === "erase") {
+                            powerUps.ejectMod(i)
+                        }
+                    }
+                    game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br><strong>erase</strong> has been ejected<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
+                } else {
+                    game.makeTextLog(`about ${powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length} estimated <strong class='color-m'>mods</strong> left`, 300)
+                }
+
+
+                // console.log(powerUps.mod.banishLog)
+            }
+
+
             powerUps[type].effect();
         },
     },
@@ -155,7 +182,6 @@ const powerUps = {
 
         }
     },
-
     ammo: {
         name: "ammo",
         color: "#467",
@@ -164,9 +190,11 @@ const powerUps = {
         },
         effect() {
             //give ammo to all guns in inventory
-            if (mod.isAmmoForGun && b.inventory > 0) {
+            if (mod.isAmmoForGun && b.inventory.length > 0) {
                 const target = b.guns[b.activeGun]
                 target.ammo += Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
+                game.makeTextLog("<div class='circle ammo'></div> &nbsp; added  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
+
             } else {
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
                     const target = b.guns[b.inventory[i]]
@@ -176,40 +204,6 @@ const powerUps = {
                 }
             }
             game.updateGunHUD();
-
-
-            // //only get ammo for guns player has
-            // let target;
-            // if (b.inventory.length > 0) {
-            //   if (mod.isAmmoForGun) {
-            //     target = b.guns[b.activeGun];
-            //   } else {
-            //     //find a gun in your inventory
-            //     target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]];
-            //     //try 3 more times to give ammo to a gun with ammo, not Infinity
-            //     if (target.ammo === Infinity) {
-            //       target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-            //       if (target.ammo === Infinity) {
-            //         target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-            //         if (target.ammo === Infinity) target = b.guns[b.inventory[Math.floor(Math.random() * (b.inventory.length))]]
-            //       }
-            //     }
-            //   }
-            //   //give ammo
-            //   if (target.ammo === Infinity) {
-            //     if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
-            //     if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
-            //   } else {
-            //     let ammo = Math.ceil((target.ammoPack * (0.8 + 0.25 * Math.random())));
-            //     target.ammo += ammo;
-            //     game.updateGunHUD();
-            //     game.makeTextLog("<div class='circle gun'></div> &nbsp; <span style='font-size:110%;'>+" + ammo + " ammo for " + target.name + "</span>", 300);
-            //   }
-            // } else {
-            //   // target = b.guns[Math.floor(Math.random() * b.guns.length)];         //if you don't have any guns just add ammo to a random gun you don't have yet
-            //   if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
-            //   if (!game.lastLogTime) game.makeTextLog("<span style='font-size:115%;'><span class='color-f'>+energy</span></span>", 300);
-            // }
         }
     },
     field: {
@@ -287,6 +281,8 @@ const powerUps = {
             return 42;
         },
         choiceLog: [], //records all previous choice options
+        lastTotalChoices: 0, //tracks how many mods were available for random selection last time a mod was picked up
+        banishLog: [], //records all mods permanently removed from the selection pool
         effect() {
             if (mech.alive) {
                 function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
@@ -296,15 +292,28 @@ const powerUps = {
                             options.push(i);
                         }
                     }
-                    //remove repeats from last selection
-                    const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
-                    if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
-                        for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
-                            if (options.length > totalChoices) {
-                                for (let j = 0, len = options.length; j < len; j++) {
-                                    if (powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i] === options[j]) {
-                                        options.splice(j, 1) //remove previous choice from option pool
-                                        break
+                    powerUps.mod.lastTotalChoices = options.length //this is recorded so that banish can know how many mods were available
+
+                    if (mod.isBanish) { //remove banished mods from last selection
+                        for (let i = 0; i < powerUps.mod.banishLog.length; i++) {
+                            for (let j = 0; j < options.length; j++) {
+                                if (powerUps.mod.banishLog[i] === options[j]) {
+                                    options.splice(j, 1)
+                                    break
+                                }
+                            }
+                        }
+                    } else {
+                        //remove repeats from last selection
+                        const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
+                        if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+                            for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+                                if (options.length > totalChoices) {
+                                    for (let j = 0, len = options.length; j < len; j++) {
+                                        if (powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i] === options[j]) {
+                                            options.splice(j, 1) //remove previous choice from option pool
+                                            break
+                                        }
                                     }
                                 }
                             }
@@ -555,14 +564,28 @@ const powerUps = {
             powerUps.spawnRandomPowerUp(x, y);
         }
     },
-    ejectMod() {
+    ejectMod(choose = 'random') {
         //find which mods you have
-        const have = []
-        for (let i = 0; i < mod.mods.length; i++) {
-            if (mod.mods[i].count > 0) have.push(i)
-        }
-        if (have.length) {
-            const choose = have[Math.floor(Math.random() * have.length)]
+        if (choose === 'random') {
+            const have = []
+            for (let i = 0; i < mod.mods.length; i++) {
+                if (mod.mods[i].count > 0) have.push(i)
+            }
+            if (have.length) {
+                choose = have[Math.floor(Math.random() * have.length)]
+                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> was ejected`, 600) //message about what mod was lost
+                for (let i = 0; i < mod.mods[choose].count; i++) {
+                    powerUps.directSpawn(mech.pos.x, mech.pos.y, "mod");
+                    powerUp[powerUp.length - 1].isBonus = true
+                }
+                // remove a random mod from the list of mods you have
+                mod.mods[choose].remove();
+                mod.mods[choose].count = 0;
+                mod.mods[choose].isLost = true;
+                game.updateModHUD();
+                mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected mod
+            }
+        } else {
             game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> was ejected`, 600) //message about what mod was lost
             for (let i = 0; i < mod.mods[choose].count; i++) {
                 powerUps.directSpawn(mech.pos.x, mech.pos.y, "mod");

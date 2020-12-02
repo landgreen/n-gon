@@ -104,7 +104,7 @@ const mod = {
         return dmg * mod.slowFire * mod.aimDamage
     },
     duplicationChance() {
-        return (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance
+        return (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance + mech.duplicateChance
     },
     totalBots() {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
@@ -1448,7 +1448,7 @@ const mod = {
             requires: "at least 1 mod, a chance to duplicate power ups",
             effect: () => {
                 const chanceStore = mod.duplicateChance
-                mod.duplicateChance = (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
+                mod.duplicateChance = (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mech.duplicateChance + mod.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                 powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 mod.duplicateChance = chanceStore
             },
@@ -1684,6 +1684,25 @@ const mod = {
             },
             remove() {
                 mod.renormalization = false;
+            }
+        },
+        {
+            name: "erase",
+            description: "permanently remove <strong class='color-r'>rerolled</strong> <strong class='color-m'>mods</strong><br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (powerUps.reroll.rerolls > 5 || build.isCustomSelection) && !mod.isDeterminism
+            },
+            requires: "not determinism, at least 4 rerolls",
+            effect() {
+                mod.isBanish = true
+                for (let i = 0; i < 4; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                }
+            },
+            remove() {
+                mod.isBanish = false
             }
         },
         {
@@ -3614,5 +3633,6 @@ const mod = {
     isCancelDuplication: null,
     cancelCount: null,
     isCancelRerolls: null,
-    isBotDamage: null
+    isBotDamage: null,
+    isBanish: null
 }

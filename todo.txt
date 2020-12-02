@@ -1,8 +1,11 @@
 *********** NEXT PATCH ***********
 
-custom and pause menu style update (mostly just thinner lines between blocks)
+field - wormhole now has a 10% chance to duplicate power ups
+mod: erase - remove rerolled mods from the selection pool
 
-mod: shotgun slug - fire a big bullet
+custom now lets you reproduce builds that only occur in game when a mod/gun/field is removed is ejected
+  example: in custom you can get time dilation only mods, then jump over to nano scale field and keep the crazy time dilation regen
+  this might cause some problems, let me know if anything gets weird
 
 ************** BUGS **************
 
@@ -25,6 +28,14 @@ mod: shotgun slug - fire a big bullet
 
 
 ************** TODO **************
+
+mod pilot wave: mini black hole - pull mobs and blocks in with more force
+  also from farther away
+  also do damage?
+mod pilot wave: antigravity - blocks have no gravity for a few seconds after exiting the field
+  maybe they bounce too?
+
+make the custom mode not disable mods that don't meet requirements after choosing a new mod
 
 bullet mechanic - a bullet that swims through the air
   rotate the velocity vector towards the normalized facing vector
