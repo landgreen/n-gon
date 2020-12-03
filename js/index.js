@@ -287,7 +287,7 @@ const build = {
                         modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
                     }
                 } else {
-                    modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+                    modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
                     if (!modID.classList.contains("build-grid-disabled")) {
                         modID.classList.add("build-grid-disabled");
                         modID.onclick = null
@@ -343,7 +343,7 @@ const build = {
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             if (!mod.mods[i].isCustomHide) {
                 if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
-                    text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+                    text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
                 } else if (mod.mods[i].count > 1) {
                     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
                 } else {
@@ -491,7 +491,7 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
                         modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
                     }
                 } else {
-                    modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;"><strong>requires:</strong> ${mod.mods[i].requires}</span></div>`
+                    modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
                     if (!modID.classList.contains("build-grid-disabled")) {
                         modID.classList.add("build-grid-disabled");
                         modID.onclick = null

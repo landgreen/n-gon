@@ -13,7 +13,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // game.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(29)
+            // level.difficultyIncrease(9)
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
@@ -155,8 +155,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 320)
-        // spawn.sucker(2900, -500)
+        // spawn.starter(1900, -500, 320)
+        spawn.exploder(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
@@ -165,7 +165,7 @@ const level = {
         // spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)
         // spawn.spiderBoss(1600, -500)
-        // spawn.launcher(1200, -500)
+        // spawn.laser(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeBoss(1200, -500, "launcher")

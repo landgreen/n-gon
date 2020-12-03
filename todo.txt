@@ -1,13 +1,10 @@
 *********** NEXT PATCH ***********
 
-field - wormhole now has a 10% chance to duplicate power ups
-mod: erase - remove rerolled mods from the selection pool
-
-custom now lets you reproduce builds that only occur in game when a mod/gun/field is removed is ejected
-  example: in custom you can get time dilation only mods, then jump over to nano scale field and keep the crazy time dilation regen
-  this might cause some problems, let me know if anything gets weird
 
 ************** BUGS **************
+
+(fixed) red square mobs no longer die on contact
+  might be side effects (we put the player invincibility after mob on damage code)
 
 (always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
@@ -26,8 +23,9 @@ custom now lets you reproduce builds that only occur in game when a mod/gun/fiel
 
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
-
 ************** TODO **************
+
+extend erase to cancel
 
 mod pilot wave: mini black hole - pull mobs and blocks in with more force
   also from farther away

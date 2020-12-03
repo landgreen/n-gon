@@ -1,13 +1,9 @@
 const mod = {
     totalCount: null,
-    setupAllMods(isLost = false) {
+    setupAllMods() {
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             mod.mods[i].remove();
-            if (isLost) {
-                mod.mods[i].isLost = false;
-            } else if (mod.mods[i].count > 0) {
-                mod.mods[i].isLost = true
-            }
+            mod.mods[i].isLost = false
             mod.mods[i].count = 0
         }
         mod.armorFromPowerUps = 0;
@@ -1688,7 +1684,7 @@ const mod = {
         },
         {
             name: "erase",
-            description: "permanently remove <strong class='color-r'>rerolled</strong> <strong class='color-m'>mods</strong><br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            description: "<strong class='color-r'>rerolled</strong> or <strong>canceled</strong> <strong class='color-m'>mods</strong> will not <strong>reoccur</strong> <br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1703,6 +1699,7 @@ const mod = {
             },
             remove() {
                 mod.isBanish = false
+                powerUps.mod.banishLog = [] //reset banish log
             }
         },
         {
@@ -1747,7 +1744,7 @@ const mod = {
                 if (mod.isDeterminism) count -= 3 //remove the bonus mods 
                 if (mod.isSuperDeterminism) count -= 2 //remove the bonus mods 
 
-                mod.setupAllMods(false); // remove all mods
+                mod.setupAllMods(); // remove all mods
                 for (let i = 0; i < count; i++) { // spawn new mods power ups
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
@@ -2789,12 +2786,12 @@ const mod = {
             effect() {
                 mod.laserReflections++;
                 mod.laserDamage += 0.08; //base is 0.12
-                mod.laserFieldDrain += 0.0007 //base is 0.002
+                mod.laserFieldDrain += 0.0008 //base is 0.002
             },
             remove() {
                 mod.laserReflections = 2;
                 mod.laserDamage = 0.16;
-                mod.laserFieldDrain = 0.0014;
+                mod.laserFieldDrain = 0.0016;
             }
         },
         {
@@ -3634,5 +3631,5 @@ const mod = {
     cancelCount: null,
     isCancelRerolls: null,
     isBotDamage: null,
-    isBanish: null
+    isBanish: null,
 }

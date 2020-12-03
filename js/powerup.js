@@ -19,7 +19,7 @@ const powerUps = {
             // game.makeTextLog(`<div class="circle mod"></div> &nbsp; <strong style='font-size:30px;'>${mod.mods[index].name}</strong><br><br> ${mod.mods[index].description}`, 500);
             // game.replaceTextLog = false;
         }
-        powerUps.endDraft();
+        powerUps.endDraft(type);
     },
     showDraft() {
         // document.getElementById("choose-grid").style.gridTemplateColumns = "repeat(2, minmax(370px, 1fr))"
@@ -35,17 +35,33 @@ const powerUps = {
         game.isChoosing = true; //stops p from un pausing on key down
         build.pauseGrid(true)
     },
-    endDraft(isCanceled = false) {
+    endDraft(type, isCanceled = false) {
         if (isCanceled) {
             if (mod.isCancelDuplication) mod.cancelCount++
             if (mod.isCancelRerolls) {
-                let type = (mech.health < 0.25 || mod.isEnergyNoAmmo) ? "heal" : "ammo"
+                let spawnType = (mech.health < 0.25 || mod.isEnergyNoAmmo) ? "heal" : "ammo"
                 if (Math.random() < 0.33) {
-                    type = "heal"
+                    spawnType = "heal"
                 } else if (Math.random() < 0.5 && !mod.isSuperDeterminism) {
-                    type = "reroll"
+                    spawnType = "reroll"
                 }
-                for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), type, false);
+                for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
+            }
+            if (mod.isBanish && type === 'mod') { // banish rerolled mods by adding them to the list of banished mods
+                const banishLength = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
+                if (powerUps.mod.choiceLog.length > banishLength || powerUps.mod.choiceLog.length === banishLength) { //I'm not sure this check is needed
+                    for (let i = 0; i < banishLength; i++) {
+                        powerUps.mod.banishLog.push(powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i])
+                    }
+                }
+                if (powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length < 1) { //check for out of mods to banish
+                    for (let i = 0, len = mod.mods.length; i < len; i++) {
+                        if (mod.mods[i].name === "erase") powerUps.ejectMod(i)
+                    }
+                    game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
+                } else {
+                    game.makeTextLog(`about ${powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length} estimated <strong class='color-m'>mods</strong> left`, 300)
+                }
             }
         }
         if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
@@ -130,32 +146,25 @@ const powerUps = {
         use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or mod
             powerUps.reroll.changeRerolls(-1)
 
-
-            // banish rerolled mods
-            if (mod.isBanish && type === 'mod') {
+            if (mod.isBanish && type === 'mod') { // banish rerolled mods
                 const banishLength = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
                 if (powerUps.mod.choiceLog.length > banishLength || powerUps.mod.choiceLog.length === banishLength) { //I'm not sure this check is needed
                     for (let i = 0; i < banishLength; i++) {
                         powerUps.mod.banishLog.push(powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i])
                     }
                 }
-
                 if (powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length < 1) {
                     for (let i = 0, len = mod.mods.length; i < len; i++) {
                         if (mod.mods[i].name === "erase") {
                             powerUps.ejectMod(i)
                         }
                     }
-                    game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br><strong>erase</strong> has been ejected<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
+                    game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
+
                 } else {
                     game.makeTextLog(`about ${powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length} estimated <strong class='color-m'>mods</strong> left`, 300)
                 }
-
-
-                // console.log(powerUps.mod.banishLog)
             }
-
-
             powerUps[type].effect();
         },
     },
@@ -192,9 +201,9 @@ const powerUps = {
             //give ammo to all guns in inventory
             if (mod.isAmmoForGun && b.inventory.length > 0) {
                 const target = b.guns[b.activeGun]
-                target.ammo += Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
-                game.makeTextLog("<div class='circle ammo'></div> &nbsp; added  " + (Math.min(mech.maxHealth - mech.health, heal) * game.healScale * 100).toFixed(0) + "%</span>", 300)
-
+                const ammoAdded = Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
+                target.ammo += ammoAdded
+                // game.makeTextLog(`<div class='circle gun'></div> &nbsp; ${ammoAdded} ammo added`, 300)
             } else {
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
                     const target = b.guns[b.inventory[i]]
@@ -243,7 +252,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft(true)'>✕</div>`
+                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("field",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a field</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
                 if (!mod.isDeterminism) {
@@ -328,7 +337,7 @@ const powerUps = {
 
                 }
                 let text = ""
-                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft(true)'>✕</div>`
+                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("mod",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a mod</h3>`
                 let choice1 = pick()
                 let choice2 = -1
@@ -401,7 +410,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft(true)'>✕</div>`
+                if (!mod.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("gun",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>choose a gun</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
                 if (!mod.isDeterminism) {

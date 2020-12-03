@@ -510,9 +510,6 @@ const game = {
         input.endKeySensing();
         b.removeAllGuns();
         game.isNoPowerUps = false;
-        for (let i = 0; i < mod.mods.length; i++) {
-            if (mod.mods[i].isLost) mod.mods[i].isLost = false;
-        }
         mod.setupAllMods(); //sets mods to default values
         b.setFireCD();
         game.updateModHUD();
