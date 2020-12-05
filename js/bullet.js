@@ -852,7 +852,7 @@ const b = {
                 if (mod.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && who.alive) {
                     setTimeout(function() {
                         if (!who.alive) {
-                            mech.energy += mod.iceEnergy * 0.5 * mech.maxEnergy
+                            mech.energy += mod.iceEnergy
                             mech.addHealth(mod.iceEnergy * 0.04)
                         }
                     }, 10);
@@ -1255,7 +1255,7 @@ const b = {
             if (isKeep) mod.boomBotCount++;
         }
     },
-    nailBot(position = mech.pos) {
+    nailBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (12 + 4 * Math.random())
@@ -1286,7 +1286,7 @@ const b = {
             onEnd() {},
             do() {
                 if (this.lastLookCycle < game.cycle && !mech.isCloak) {
-                    this.lastLookCycle = game.cycle + 80 - this.isUpgraded * 65
+                    this.lastLookCycle = game.cycle + (this.isUpgraded ? 15 : 80)
                     let target
                     for (let i = 0, len = mob.length; i < len; i++) {
                         const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -1310,7 +1310,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    foamBot(position = mech.pos) {
+    foamBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (10 + 5 * Math.random())
@@ -1366,7 +1366,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    laserBot(position = mech.pos) {
+    laserBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (14 + 6 * Math.random())
@@ -1443,7 +1443,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    boomBot(position = mech.pos) {
+    boomBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (7 + 2 * Math.random())
@@ -1521,7 +1521,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    plasmaBot(position = mech.pos) {
+    plasmaBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = 21
@@ -2135,8 +2135,8 @@ const b = {
             name: "flechettes",
             description: "fire a volley of <strong class='color-p'>uranium-235</strong> <strong>needles</strong><br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
             ammo: 0,
-            ammoPack: 55,
-            defaultAmmoPack: 55,
+            ammoPack: 65,
+            defaultAmmoPack: 65,
             have: false,
             count: 0, //used to track how many shots are in a volley before a big CD
             lastFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -2163,9 +2163,9 @@ const b = {
                                         this.immuneList.push(who.id)
                                         who.foundPlayer();
                                         if (mod.isFastDot) {
-                                            mobs.statusDoT(who, 4, 30)
+                                            mobs.statusDoT(who, 3.78, 30)
                                         } else {
-                                            mobs.statusDoT(who, 0.66, mod.isSlowDot ? 360 : 180)
+                                            mobs.statusDoT(who, 0.63, mod.isSlowDot ? 360 : 180)
                                         }
                                         game.drawList.push({ //add dmg to draw queue
                                             x: this.position.x,
@@ -2222,10 +2222,10 @@ const b = {
                     makeFlechette(mech.angle - 0.02 - 0.005 * Math.random())
                 }
 
-                const CD = (mech.crouch) ? 60 : 30
+                const CD = (mech.crouch) ? 50 : 20
                 if (this.lastFireCycle + CD < mech.cycle) this.count = 0 //reset count if it cycles past the CD
                 this.lastFireCycle = mech.cycle
-                if (this.count > ((mech.crouch) ? 7 : 1)) {
+                if (this.count > ((mech.crouch) ? 8 : 1)) {
                     this.count = 0
                     mech.fireCDcycle = mech.cycle + Math.floor(CD * b.fireCD); // cool down
                     const who = bullet[bullet.length - 1]

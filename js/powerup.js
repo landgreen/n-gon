@@ -54,14 +54,7 @@ const powerUps = {
                         powerUps.mod.banishLog.push(powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i])
                     }
                 }
-                if (powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length < 1) { //check for out of mods to banish
-                    for (let i = 0, len = mod.mods.length; i < len; i++) {
-                        if (mod.mods[i].name === "erase") powerUps.ejectMod(i)
-                    }
-                    game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
-                } else {
-                    game.makeTextLog(`about ${powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length} estimated <strong class='color-m'>mods</strong> left`, 300)
-                }
+                game.makeTextLog(`about ${Math.max(0,powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length)} estimated <strong class='color-m'>mods</strong> left`, 300)
             }
         }
         if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
@@ -93,7 +86,7 @@ const powerUps = {
             if (powerUps.reroll.rerolls < 0) powerUps.reroll.rerolls = 0
 
             if (mod.isRerollBots) {
-                const limit = 4
+                const limit = 5
                 for (; powerUps.reroll.rerolls > limit - 1; powerUps.reroll.rerolls -= limit) {
                     b.randomBot()
                     if (mod.renormalization) {
@@ -153,17 +146,7 @@ const powerUps = {
                         powerUps.mod.banishLog.push(powerUps.mod.choiceLog[powerUps.mod.choiceLog.length - 1 - i])
                     }
                 }
-                if (powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length < 1) {
-                    for (let i = 0, len = mod.mods.length; i < len; i++) {
-                        if (mod.mods[i].name === "erase") {
-                            powerUps.ejectMod(i)
-                        }
-                    }
-                    game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
-
-                } else {
-                    game.makeTextLog(`about ${powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length} estimated <strong class='color-m'>mods</strong> left`, 300)
-                }
+                game.makeTextLog(`about ${Math.max(0,powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length)} estimated <strong class='color-m'>mods</strong> left`, 300)
             }
             powerUps[type].effect();
         },
@@ -312,8 +295,7 @@ const powerUps = {
                                 }
                             }
                         }
-                    } else {
-                        //remove repeats from last selection
+                    } else { //remove repeats from last selection
                         const totalChoices = mod.isDeterminism ? 1 : 3 + mod.isExtraChoice * 2
                         if (powerUps.mod.choiceLog.length > totalChoices || powerUps.mod.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
                             for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
@@ -365,7 +347,16 @@ const powerUps = {
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
                 } else {
-                    powerUps.giveRandomAmmo()
+                    if (mod.isBanish) {
+                        for (let i = 0, len = mod.mods.length; i < len; i++) {
+                            if (mod.mods[i].name === "erase") powerUps.ejectMod(i)
+                        }
+                        game.makeTextLog(`No <strong class='color-m'>mods</strong> left<br>erased <strong class='color-m'>mods</strong> have been recovered`, 300)
+                        powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                        powerUps.endDraft("mod");
+                    } else {
+                        powerUps.giveRandomAmmo()
+                    }
                 }
             }
         }

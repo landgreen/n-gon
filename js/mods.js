@@ -82,7 +82,9 @@ const mod = {
     },
     damageFromMods() {
         let dmg = mech.fieldDamage
-        // if (mod.aimDamage>1) 
+        // if (mod.aimDamage>1)
+        if (mod.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
+        if (mod.isMaxEnergyMod) dmg *= 1.4
         if (mod.isEnergyNoAmmo) dmg *= 1.5
         if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
@@ -100,7 +102,7 @@ const mod = {
         return dmg * mod.slowFire * mod.aimDamage
     },
     duplicationChance() {
-        return (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance + mech.duplicateChance
+        return (mod.isBayesian ? 0.2 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance + mech.duplicateChance
     },
     totalBots() {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
@@ -122,7 +124,7 @@ const mod = {
             }
         }, {
             name: "capacitor",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>7%</strong> stored <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>7</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -153,7 +155,7 @@ const mod = {
             }
         },
         {
-            name: "acute stress response",
+            name: "exothermic process",
             description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
             maxCount: 1,
             count: 0,
@@ -166,6 +168,40 @@ const mod = {
             },
             remove() {
                 mod.isEnergyLoss = false;
+            }
+        },
+        {
+            name: "heat engine",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br>reduce maximum <strong class='color-f'>energy</strong> by <strong>50</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isEnergyLoss && mech.maxEnergy === 1 && !mod.isMissileField && !mod.isSporeField && !mod.isTimeAvoidDeath
+            },
+            requires: "heat engine, not max energy increase, CPT, missile or spore nano-scale",
+            effect() {
+                mod.isMaxEnergyMod = true;
+                mech.setMaxEnergy()
+            },
+            remove() {
+                mod.isMaxEnergyMod = false;
+                mech.setMaxEnergy()
+            }
+        },
+        {
+            name: "Gibbs free energy",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> <strong class='color-f'>energy</strong> below <strong>100</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isEnergyLoss && mech.maxEnergy < 1.1
+            },
+            requires: "heat engine",
+            effect() {
+                mod.isLowEnergyDamage = true;
+            },
+            remove() {
+                mod.isLowEnergyDamage = false;
             }
         },
         {
@@ -202,13 +238,13 @@ const mod = {
         },
         {
             name: "fluoroantimonic acid",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong>health</strong> is above <strong>100%</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong>health</strong> is above <strong>100</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
                 return mech.maxHealth > 1;
             },
-            requires: "health above 100%",
+            requires: "health above 100",
             effect() {
                 mod.isAcidDmg = true;
             },
@@ -218,13 +254,13 @@ const mod = {
         },
         {
             name: "negative feedback",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10%</strong> missing base <strong>health</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> missing base <strong>health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
                 return mech.health < 0.6 || build.isCustomSelection
             },
-            requires: "health below 60%",
+            requires: "health below 60",
             effect() {
                 mod.isLowHealthDmg = true; //used in mob.damage()
             },
@@ -283,7 +319,7 @@ const mod = {
         },
         {
             name: "Ψ(t) collapse",
-            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>if you have no <strong class='color-r'>rerolls</strong>",
+            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -341,9 +377,9 @@ const mod = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return true
+                return mod.nailsDeathMob || mod.sporesOnDeath || mod.isExplodeMob
             },
-            requires: "",
+            requires: "zoospore vector or impact shear or thermal runaway",
             effect: () => {
                 mod.mobSpawnWithHealth *= 0.88
 
@@ -362,9 +398,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return true
+                return !mod.nailsDeathMob && !mod.isExplodeMob
             },
-            requires: "",
+            requires: "not impact shear or thermal runaway",
             effect() {
                 mod.sporesOnDeath += 0.09;
                 for (let i = 0; i < 8; i++) {
@@ -381,9 +417,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return true
+                return !mod.sporesOnDeath && !mod.isExplodeMob
             },
-            requires: "",
+            requires: "not zoospore vector or thermal runaway",
             effect: () => {
                 mod.nailsDeathMob++
             },
@@ -397,9 +433,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return (mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode) && !mod.sporesOnDeath && !mod.nailsDeathMob
             },
-            requires: "",
+            requires: "an explosive damage source, not zoospore vector or impact shear",
             effect: () => {
                 mod.isExplodeMob = true;
             },
@@ -490,13 +526,13 @@ const mod = {
         },
         {
             name: "bot fabrication",
-            description: "anytime you collect <strong>4</strong> <strong class='color-r'>rerolls</strong><br>use them to build a <strong>random bot</strong>",
+            description: "anytime you collect <strong>5</strong> <strong class='color-r'>rerolls</strong><br>use them to build a <strong>random bot</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 3 || build.isCustomSelection
+                return powerUps.reroll.rerolls > 5 || build.isCustomSelection
             },
-            requires: "at least 4 rerolls",
+            requires: "at least 6 rerolls",
             effect() {
                 mod.isRerollBots = true;
                 powerUps.reroll.changeRerolls(0)
@@ -524,7 +560,7 @@ const mod = {
         },
         {
             name: "nail-bot upgrade",
-            description: "<strong>300%</strong> increased <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
+            description: "<strong>500%</strong> increased <strong> fire rate</strong><br><em>applies to all current and future nail-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -731,7 +767,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.totalBots() > 6 && !mod.isEnergyHealth
+                return mod.totalBots() > 6
             },
             requires: "6 or more bots",
             effect() {
@@ -808,11 +844,12 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mod.duplicationChance() > 0
             },
-            requires: "",
+            requires: "some power up duplication",
             effect() {
                 mod.isMineDrop = true;
+                if (mod.isMineDrop) b.mine(mech.pos, { x: 0, y: 0 }, 0, mod.isMineAmmoBack)
             },
             remove() {
                 mod.isMineDrop = false;
@@ -1002,13 +1039,13 @@ const mod = {
         },
         {
             name: "CPT reversal",
-            description: "<strong>rewind 2-4</strong> seconds to avoid <strong class='color-harm'>harm</strong><br>drains a minimum of <strong>100%</strong> <strong class='color-f'>energy</strong>",
+            description: "<strong>rewind 1.5 - 5</strong> seconds to avoid <strong class='color-harm'>harm</strong><br>drains <strong>66 - 220</strong> <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1) && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss && !mod.isPiezo
+                return mech.maxEnergy > 0.99 && (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1) && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss && !mod.isPiezo
             },
-            requires: "not nano-scale manufacturing, mass-energy equivalence, standing wave harmonics, acute stress response, piezoelectricity",
+            requires: "not nano-scale, mass-energy, standing wave, acute stress, piezoelectricity",
             effect() {
                 mod.isTimeAvoidDeath = true;
             },
@@ -1018,7 +1055,7 @@ const mod = {
         },
         {
             name: "piezoelectricity",
-            description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>200%</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
+            description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>200</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1039,9 +1076,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPiezo && mod.energyRegen > 0.001
+                return mod.isPiezo && mod.energyRegen !== 0.004
             },
-            requires: "piezoelectricity",
+            requires: "piezoelectricity, not time crystals",
             effect: () => {
                 mod.energyRegen = 0;
                 mech.fieldRegen = mod.energyRegen;
@@ -1057,7 +1094,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPiezo && !mod.isTimeAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
+                return !mod.isEnergyLoss && !mod.isPiezo && !mod.isTimeAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
             requires: "not piezoelectricity, acute stress response, 1st law, negative mass field",
             effect: () => {
@@ -1081,7 +1118,7 @@ const mod = {
         },
         {
             name: "1st ionization energy",
-            description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>4%</strong>",
+            description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>4</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1106,13 +1143,13 @@ const mod = {
         },
         {
             name: "overcharge",
-            description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>50%</strong>",
+            description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>50</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
-                return true
+                return mech.maxEnergy > 0.99
             },
-            requires: "",
+            requires: "max energy >= 1",
             effect() {
                 // mech.maxEnergy += 0.5
                 // mech.energy += 0.5
@@ -1130,9 +1167,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return true
+                return mod.damageFromMods() > 1
             },
-            requires: "",
+            requires: "some increased damage",
             effect() {
                 mod.energySiphon += 0.07;
             },
@@ -1146,9 +1183,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mech.maxEnergy > 0.99
             },
-            requires: "",
+            requires: "max energy >= 1",
             effect() {
                 mod.isEnergyRecovery = true;
             },
@@ -1158,7 +1195,7 @@ const mod = {
         },
         {
             name: "scrap recycling",
-            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><strong class='color-h'>heal</strong> <strong>1%</strong> of max health every second",
+            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regain <strong>1%</strong> of max <strong class='color-h'>health</strong> every second",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1178,9 +1215,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !mod.isEnergyHealth && mod.damageFromMods() > 1
             },
-            requires: "not mass-energy equivalence",
+            requires: "some increased damage, not mass-energy equivalence",
             effect() {
                 mod.healthDrain += 0.01;
             },
@@ -1190,7 +1227,7 @@ const mod = {
         },
         {
             name: "supersaturation",
-            description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>50%</strong>",
+            description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>50</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1210,7 +1247,7 @@ const mod = {
         },
         {
             name: "crystallized armor",
-            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>5%</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
+            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>5</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1228,7 +1265,7 @@ const mod = {
         },
         {
             name: "negentropy",
-            description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>50%</strong> missing health`,
+            description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>50</strong> missing health`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1302,7 +1339,7 @@ const mod = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>16%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1342,9 +1379,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isDeterminism
+                return mod.duplicationChance() > 0 && !mod.isDeterminism
             },
-            requires: "not determinism",
+            requires: "a chance to duplicate power ups, not determinism",
             effect() {
                 mod.isCancelDuplication = true
                 mod.cancelCount = 0
@@ -1380,7 +1417,7 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 0) && !mod.isSuperDeterminism && mod.duplicationChance() > 0
+                return (mod.totalCount > 3) && !mod.isSuperDeterminism
             },
             requires: "at least 1 mod, a chance to duplicate power ups",
             effect: () => {
@@ -1410,7 +1447,7 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 0) && !mod.isSuperDeterminism && mod.duplicationChance() > 0
+                return (mod.totalCount > 3) && !mod.isSuperDeterminism && mod.duplicationChance() > 0
             },
             requires: "at least 1 mod, a chance to duplicate power ups",
             effect: () => {
@@ -1433,18 +1470,19 @@ const mod = {
         },
         {
             name: "exchange symmetry",
-            description: `spawn <strong>1</strong> <strong class='color-m'>mod</strong><br>with <strong>double</strong> your normal chance for power up <strong class='color-dup'>duplication</strong>`,
+            description: `use a <strong class='color-r'>reroll</strong> to spawn <strong>1</strong> <strong class='color-m'>mod</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !mod.isSuperDeterminism && mod.duplicationChance() > 0
+                return !mod.isSuperDeterminism && mod.duplicationChance() > 0 && powerUps.reroll.rerolls > 1
             },
-            requires: "at least 1 mod, a chance to duplicate power ups",
+            requires: "at least 1 mod and 1 reroll, a chance to duplicate power ups",
             effect: () => {
+                powerUps.reroll.changeRerolls(-1)
                 const chanceStore = mod.duplicateChance
-                mod.duplicateChance = (mod.isBayesian ? 0.16 : 0) + mod.cancelCount * 0.04 + mech.duplicateChance + mod.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
+                mod.duplicateChance = (mod.isBayesian ? 0.2 : 0) + mod.cancelCount * 0.04 + mech.duplicateChance + mod.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                 powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 mod.duplicateChance = chanceStore
             },
@@ -1612,7 +1650,7 @@ const mod = {
         },
         {
             name: "determinism",
-            description: "spawn <strong>4</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
+            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1622,7 +1660,7 @@ const mod = {
             requires: "not cardinality, not futures or commodities exchanges",
             effect: () => {
                 mod.isDeterminism = true;
-                for (let i = 0; i < 4; i++) { //if you change the six also change it in Born rule
+                for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
@@ -1632,7 +1670,7 @@ const mod = {
         },
         {
             name: "superdeterminism",
-            description: "spawn <strong>6</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+            description: "spawn <strong>7</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1642,7 +1680,7 @@ const mod = {
             requires: "determinism",
             effect: () => {
                 mod.isSuperDeterminism = true;
-                for (let i = 0; i < 6; i++) { //if you change the six also change it in Born rule
+                for (let i = 0; i < 7; i++) { //if you change the six also change it in Born rule
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
             },
@@ -1790,7 +1828,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPerpetualReroll && !mod.isPerpetualHeal && !mod.isPerpetualReroll && !mod.isPerpetualStun
+                return !mod.isPerpetualReroll && !mod.isPerpetualHeal && !mod.isPerpetualReroll && !mod.isPerpetualStun && !mod.isEnergyNoAmmo
             },
             requires: "only 1 perpetual effect, not exciton lattice",
             effect() {
@@ -2425,7 +2463,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("mine") && !mod.isMineAmmoBack
+                return (mod.haveGunCheck("mine") && !mod.isMineAmmoBack) || mod.isMineDrop
             },
             requires: "mine, not mine reclamation",
             effect() {
@@ -2441,7 +2479,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
+                return mod.isMineDrop + mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2457,7 +2495,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
+                return mod.isMineDrop + mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2534,7 +2572,7 @@ const mod = {
         },
         {
             name: "mutualism",
-            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>1%</strong> <strong>health</strong> until they <strong>die</strong>",
+            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>1</strong> <strong>health</strong> until they <strong>die</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2614,7 +2652,7 @@ const mod = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4%</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>50%</strong> of your max",
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>100</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3181,7 +3219,7 @@ const mod = {
             requires: "nano-scale manufacturing",
             effect: () => {
                 mod.isMassEnergy = true // used in mech.grabPowerUp
-                if (mech.energy < mech.maxEnergy * 2.5) mech.energy = mech.maxEnergy * 2.5
+                mech.energy += mech.maxEnergy * 2.5
             },
             remove() {
                 mod.isMassEnergy = false;
@@ -3193,7 +3231,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isMissileField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isMissileField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
@@ -3209,7 +3247,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
@@ -3319,7 +3357,7 @@ const mod = {
         },
         {
             name: "Penrose process",
-            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills by <strong>50%</strong>",
+            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills by <strong>50</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3632,4 +3670,6 @@ const mod = {
     isCancelRerolls: null,
     isBotDamage: null,
     isBanish: null,
+    isMaxEnergyMod: null,
+    isLowEnergyDamage: null
 }

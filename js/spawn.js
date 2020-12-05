@@ -94,7 +94,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.locatePlayer();
-        const density = 0.9
+        const density = 0.85
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -179,15 +179,17 @@ const spawn = {
                 if (this.mode !== 3) Matter.Body.setAngularVelocity(this, 0.1)
                 //fire a bullet from each vertex
                 let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-                for (let i = 0, len = this.vertices.length; i < len; i++) {
+
+                const step = (this.health > 0.75) ? 2 : 1
+                for (let i = 0, len = this.vertices.length; i < len; i += step) {
                     spawn[whoSpawn](this.vertices[i].x, this.vertices[i].y);
-                    //give the bullet a rotational velocity as if they were attached to a vertex
-                    const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -18)
+                    const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -18) //give the mob a rotational velocity as if they were attached to a vertex
                     Matter.Body.setVelocity(mob[mob.length - 1], {
                         x: this.velocity.x + velocity.x,
                         y: this.velocity.y + velocity.y
                     });
                 }
+
                 if (game.difficulty > 60) {
                     spawn.randomLevelBoss(3000, -1100)
                     if (game.difficulty > 100) {

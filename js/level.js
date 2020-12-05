@@ -13,7 +13,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // game.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(9)
+            // level.difficultyIncrease(99)
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
@@ -2300,7 +2300,7 @@ const level = {
                 //chance to spawn a ring of exploding mobs around this boss
                 if (game.difficulty > 6) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
             } else {
-                spawn.randomLevelBoss(2200, -650)
+                spawn.randomLevelBoss(2200, -450)
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned

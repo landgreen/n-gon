@@ -1,5 +1,13 @@
 *********** NEXT PATCH ***********
 
+added more requirements to various mods
+
+CPT reversal is more flexible with energy
+  1.5-5 seconds of rewind drains 66% - 220% energy
+
+mod: exothermic process - renamed acute stress response
+mod: heat engine  - reduce max energy by 50  increase damage by 40%
+mod: Gibbs free energy - gain 5% damage for every 10 energy below 100
 
 ************** BUGS **************
 
@@ -25,21 +33,33 @@
 
 ************** TODO **************
 
-extend erase to cancel
+mod that gives a bonus for low energy
+  damage again or something different
+  requires heat engine
+
+CPT like mods
+  delayed rewind:  after taking damage, play for 2 seconds, then rewind to just before you took damage
+    and return lost health
+    this might need code to run in a field to work
+      time dilation field?
+  gain a scrap bot after rewinding
+  use ammo to rewind instead of energy
+  explode the area where you were hit before rewinding
+
+spawn a few power ups on the final boss level
 
 mod pilot wave: mini black hole - pull mobs and blocks in with more force
   also from farther away
   also do damage?
 mod pilot wave: antigravity - blocks have no gravity for a few seconds after exiting the field
   maybe they bounce too?
-
-make the custom mode not disable mods that don't meet requirements after choosing a new mod
+  maybe they explode?
 
 bullet mechanic - a bullet that swims through the air
   rotate the velocity vector towards the normalized facing vector
     use the cross product > 0 to determine which direction to rotate the velocity
 
-lower recoil on nail shot gun
+lower recoil on nail shot gun?
 
 in custom make a top bar that is fixed
   use media rules to make the layout look nice
@@ -85,17 +105,6 @@ new power up - increase damage and fire speed, for 15 seconds
   power up color: ?
   how to indicate effect duration
   or just give the effect after picking up a reroll
-
-add an ending to the game
-  maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
-  mirror ending (if no cheats)
-    level after final boss battle is the intro level, but flipped left right, with a fake player
-      damage the fake player to end the game
-      message about go outside
-  no ending (if cheats)
-    game goes on forever
-    also game goes on if player attacks, the fake player
-  game never ends if you have used cheats
 
 Mod: "Solar Power": Energy regeneration is doubled while standing still
   run in the 1 second check
@@ -288,8 +297,6 @@ n-gon outreach ideas
     to achieve a (technological singularity/positive technological feedback loop)
 
 
-
-
 game setting:
   the mind of a new AI in a robot body that is running simulated escape attempts
   every level is an idealized version of what could be outside
@@ -340,3 +347,14 @@ robot AI communication
       you'd have to store an array of guns/fields/mod used last game
     n-gon escape simulation ${random seed}
       say something about what mobs types are queued up, and level order
+
+add an ending to the game
+  maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
+  mirror ending (if no cheats)
+    level after final boss battle is the intro level, but flipped left right, with a fake player
+      damage the fake player to end the game
+      message about go outside
+  no ending (if cheats)
+    game goes on forever
+    also game goes on if player attacks, the fake player
+  game never ends if you have used cheats

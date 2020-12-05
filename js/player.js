@@ -492,8 +492,8 @@ const mech = {
         return dmg
     },
     damage(dmg) {
-        if (mod.isTimeAvoidDeath && mech.energy > 0.97) {
-            const steps = Math.floor(Math.min(240, 120 * mech.energy)) //go back 2 seconds at 100% energy
+        if (mod.isTimeAvoidDeath && mech.energy > 0.66) {
+            const steps = Math.floor(Math.min(299, 137 * mech.energy)) //go back 2 seconds at 100% energy
             let history = mech.history[(mech.cycle - steps) % 300]
             Matter.Body.setPosition(player, history.position);
             Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
@@ -511,8 +511,8 @@ const mech = {
                 }
             }
 
-            mech.energy = Math.max(mech.energy - steps, 0.01)
-            mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+            mech.energy = Math.max(mech.energy - steps / 136, 0.01)
+            mech.immuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
 
             let isDrawPlayer = true
             const shortPause = function() {
@@ -541,7 +541,7 @@ const mech = {
             };
 
             if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
-            game.fpsCap = 4 //1 is shortest pause, 4 is standard
+            game.fpsCap = 3 //1 is shortest pause, 4 is standard
             game.fpsInterval = 1000 / game.fpsCap;
             mech.defaultFPSCycle = mech.cycle
             return
@@ -838,7 +838,7 @@ const mech = {
         }
     },
     setMaxEnergy() {
-        mech.maxEnergy = 1 + mod.bonusEnergy + mod.healMaxEnergyBonus
+        mech.maxEnergy = (mod.isMaxEnergyMod ? 0.5 : 1) + mod.bonusEnergy + mod.healMaxEnergyBonus
     },
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
@@ -2253,7 +2253,7 @@ const mech = {
                                 ctx.fill();
                                 ctx.globalCompositeOperation = "source-over";
                                 ctx.beginPath();
-                                ctx.ellipse(mech.fieldPosition.x, mech.fieldPosition.y, 1.2 * mech.fieldRadius * off1, 1.2 * mech.fieldRadius * off2, rotate, 0, mech.energy * 2 * Math.PI);
+                                ctx.ellipse(mech.fieldPosition.x, mech.fieldPosition.y, 1.2 * mech.fieldRadius * off1, 1.2 * mech.fieldRadius * off2, rotate, 0, 2 * Math.PI * mech.energy / mech.maxEnergy);
                                 ctx.strokeStyle = "#000";
                                 ctx.lineWidth = 4;
                                 ctx.stroke();
@@ -2367,12 +2367,12 @@ const mech = {
                                                 mech.fieldRange *= 0.8
                                                 if (mod.isWormholeEnergy) mech.energy += 0.5
                                                 if (mod.isWormSpores) { //pandimensionalspermia
-                                                    for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
-                                                        b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
-                                                            x: mech.fieldRange,
+                                                    for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
+                                                        b.spore(Vector.add(mech.hole.pos2, Vector.rotate({
+                                                            x: mech.fieldRange * 0.4,
                                                             y: 0
                                                         }, 2 * Math.PI * Math.random())))
-                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), 15));
+                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), -15));
                                                     }
                                                 }
                                                 break
@@ -2393,9 +2393,9 @@ const mech = {
                                             // if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
                                             if (mod.isWormholeEnergy) mech.energy += 0.5
                                             if (mod.isWormSpores) { //pandimensionalspermia
-                                                for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
+                                                for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
                                                     b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
-                                                        x: mech.fieldRange,
+                                                        x: mech.fieldRange * 0.4,
                                                         y: 0
                                                     }, 2 * Math.PI * Math.random())))
                                                     Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(mech.hole.unit, Math.PI / 2), 15));
