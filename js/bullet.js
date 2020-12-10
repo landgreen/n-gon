@@ -24,7 +24,7 @@ const b = {
                 if (mod.isAmmoFromHealth) {
                     if (mech.health > 2 * mod.isAmmoFromHealth * mech.maxHealth) {
                         mech.damage(mod.isAmmoFromHealth * mech.maxHealth / mech.harmReduction());
-                        powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                        if (!(mod.isRewindAvoidDeath && mech.energy > 0.66)) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo"); //don't give ammo if CPT triggered
                     } else {
                         game.replaceTextLog = true;
                         game.makeTextLog("not enough health for catabolism to produce ammo", 120);
@@ -285,7 +285,7 @@ const b = {
             bullet[me].explodeRad = 275;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (mod.grenadeFragments) b.targetedNail(this.position, mod.grenadeFragments)
+                if (mod.fragments) b.targetedNail(this.position, mod.fragments * 5)
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -310,7 +310,7 @@ const b = {
             bullet[me].explodeRad = 275;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (mod.grenadeFragments) b.targetedNail(this.position, mod.grenadeFragments)
+                if (mod.fragments) b.targetedNail(this.position, mod.fragments * 5)
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -345,7 +345,7 @@ const b = {
             bullet[me].explodeRad = 325 + Math.floor(Math.random() * 50);;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (mod.grenadeFragments) b.targetedNail(this.position, mod.grenadeFragments)
+                if (mod.fragments) b.targetedNail(this.position, mod.fragments * 7)
             }
             bullet[me].beforeDmg = function() {};
             bullet[me].restitution = 0.4;
@@ -426,14 +426,6 @@ const b = {
             bullet[me].stuckTo = null;
             bullet[me].stuckToRelativePosition = null;
             bullet[me].vacuumSlow = 0.97;
-            if (mod.isRewindGrenade && input.down) {
-                Matter.Body.setVelocity(bullet[me], {
-                    x: 0,
-                    y: 0
-                });
-                bullet[me].maxDamageRadius *= 1.3
-                mech.rewind(200, false)
-            }
             bullet[me].beforeDmg = function() {};
             bullet[me].stuck = function() {};
             bullet[me].do = function() {
@@ -2300,6 +2292,14 @@ const b = {
                             }
                         }
                     };
+                    if (mod.fragments) {
+                        bullet[me].beforeDmg = function() {
+                            if (this.speed > 4) {
+                                b.targetedNail(this.position, mod.fragments * 8)
+                                this.endCycle = 0 //triggers despawn
+                            }
+                        }
+                    }
                 } else if (mod.isIncendiary) {
                     const SPEED = mech.crouch ? 35 : 25
                     const END = Math.floor(mech.crouch ? 9 : 6);
@@ -2716,162 +2716,6 @@ const b = {
                 mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 40 : 30) * b.fireCD); // cool down
                 b.grenade()
             },
-            fireNeutron() {
-                const me = bullet.length;
-                const dir = mech.angle;
-                bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 10, 4, b.fireAttributes(dir, false));
-                b.fireProps(mech.crouch ? 45 : 25, mech.crouch ? 35 : 20, dir, me); //cd , speed
-                Matter.Body.setDensity(bullet[me], 0.000001);
-                bullet[me].endCycle = Infinity;
-                bullet[me].frictionAir = 0;
-                bullet[me].friction = 1;
-                bullet[me].frictionStatic = 1;
-                bullet[me].restitution = 0;
-                bullet[me].minDmgSpeed = 0;
-                bullet[me].damageRadius = 100;
-                bullet[me].maxDamageRadius = 450 + 130 * mod.isNeutronSlow + 130 * mod.isNeutronImmune //+ 150 * Math.random()
-                bullet[me].radiusDecay = (0.81 + 0.15 * mod.isNeutronSlow + 0.15 * mod.isNeutronImmune) / mod.isBulletsLastLonger
-                bullet[me].stuckTo = null;
-                bullet[me].stuckToRelativePosition = null;
-                bullet[me].vacuumSlow = 0.97;
-                if (mod.isRewindGrenade && input.down) {
-                    Matter.Body.setVelocity(bullet[me], {
-                        x: 0,
-                        y: 0
-                    });
-                    bullet[me].maxDamageRadius *= 1.3
-                    mech.rewind(200, false)
-                }
-                bullet[me].beforeDmg = function() {};
-                bullet[me].stuck = function() {};
-                bullet[me].do = function() {
-                    function onCollide(that) {
-                        that.collisionFilter.mask = 0; //non collide with everything
-                        Matter.Body.setVelocity(that, {
-                            x: 0,
-                            y: 0
-                        });
-                        that.do = that.radiationMode;
-                    }
-
-                    const mobCollisions = Matter.Query.collides(this, mob)
-                    if (mobCollisions.length) {
-                        onCollide(this)
-                        this.stuckTo = mobCollisions[0].bodyA
-                        mobs.statusDoT(this.stuckTo, 0.5, 360) //apply radiation damage status effect on direct hits
-
-                        if (this.stuckTo.isVerticesChange) {
-                            this.stuckToRelativePosition = {
-                                x: 0,
-                                y: 0
-                            }
-                        } else {
-                            //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-                            this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
-                        }
-                        this.stuck = function() {
-                            if (this.stuckTo && this.stuckTo.alive) {
-                                const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
-                                Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
-                                Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
-                            } else {
-                                this.collisionFilter.mask = cat.map | cat.body | cat.player | cat.mob; //non collide with everything but map
-                                this.stuck = function() {
-                                    this.force.y += this.mass * 0.001;
-                                }
-                            }
-                        }
-                    } else {
-                        const bodyCollisions = Matter.Query.collides(this, body)
-                        if (bodyCollisions.length) {
-                            if (!bodyCollisions[0].bodyA.isNotHoldable) {
-                                onCollide(this)
-                                this.stuckTo = bodyCollisions[0].bodyA
-                                //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-                                this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
-                            } else {
-                                this.do = this.radiationMode;
-                            }
-                            this.stuck = function() {
-                                if (this.stuckTo) {
-                                    const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
-                                    Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
-                                    // Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
-                                } else {
-                                    this.force.y += this.mass * 0.001;
-                                }
-                            }
-                        } else {
-                            if (Matter.Query.collides(this, map).length) {
-                                onCollide(this)
-                            } else { //if colliding with nothing just fall
-                                this.force.y += this.mass * 0.001;
-                            }
-                        }
-                    }
-                }
-                bullet[me].radiationMode = function() { //the do code after the bullet is stuck on something,  projects a damaging radiation field
-                    this.stuck(); //runs different code based on what the bullet is stuck to
-                    if (!mech.isBodiesAsleep) {
-                        this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
-                        this.maxDamageRadius -= this.radiusDecay
-                        if (this.damageRadius < 15) {
-                            this.endCycle = 0;
-                        } else {
-                            //aoe damage to player
-                            if (!mod.isNeutronImmune && Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-                                const DRAIN = 0.0023
-                                if (mech.energy > DRAIN) {
-                                    mech.energy -= DRAIN
-                                } else {
-                                    mech.energy = 0;
-                                    mech.damage(0.00015)
-                                }
-                            }
-                            //aoe damage to mobs
-                            for (let i = 0, len = mob.length; i < len; i++) {
-                                if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                                    let dmg = b.dmgScale * 0.082
-                                    if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-                                    if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
-                                    mob[i].damage(dmg);
-                                    mob[i].locatePlayer();
-                                    if (mod.isNeutronSlow) {
-                                        Matter.Body.setVelocity(mob[i], {
-                                            x: mob[i].velocity.x * this.vacuumSlow,
-                                            y: mob[i].velocity.y * this.vacuumSlow
-                                        });
-                                    }
-                                }
-                            }
-                            ctx.beginPath();
-                            ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
-                            ctx.globalCompositeOperation = "lighter"
-                            ctx.fillStyle = `rgba(25,139,170,${0.2+0.06*Math.random()})`;
-                            ctx.fill();
-                            ctx.globalCompositeOperation = "source-over"
-                            if (mod.isNeutronSlow) {
-                                const that = this
-
-                                function slow(who, radius = that.explodeRad * 3.2) {
-                                    for (i = 0, len = who.length; i < len; i++) {
-                                        const sub = Vector.sub(that.position, who[i].position);
-                                        const dist = Vector.magnitude(sub);
-                                        if (dist < radius) {
-                                            Matter.Body.setVelocity(who[i], {
-                                                x: who[i].velocity.x * that.vacuumSlow,
-                                                y: who[i].velocity.y * that.vacuumSlow
-                                            });
-                                        }
-                                    }
-                                }
-                                slow(body, this.damageRadius)
-                                slow([player], this.damageRadius)
-                            }
-                        }
-                    }
-                }
-            },
         },
         {
             name: "mine",
@@ -3156,8 +3000,8 @@ const b = {
                                     });
                                     // Matter.Body.setDensity(this, 0.001);
                                 }
-                                if (mod.isRailNails && this.speed > 10) {
-                                    b.targetedNail(this.position, (Math.min(40, this.speed) - 10) * 0.6) // 0.6 as many nails as the normal rail gun
+                                if (mod.fragments && this.speed > 10) {
+                                    b.targetedNail(this.position, mod.fragments * 10)
                                     this.endCycle = 0 //triggers despawn
                                 }
                             },
@@ -3243,8 +3087,8 @@ const b = {
                                 });
                                 // Matter.Body.setDensity(this, 0.001);
                             }
-                            if (mod.isRailNails && this.speed > 10) {
-                                b.targetedNail(this.position, Math.min(40, this.speed) - 10)
+                            if (mod.fragments && this.speed > 10) {
+                                b.targetedNail(this.position, mod.fragments * 16)
                                 this.endCycle = 0 //triggers despawn
                             }
                         },

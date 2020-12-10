@@ -1,11 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-mod: causality bots - before you rewind, build bots that protect you for for 7 seconds
-
-mod grenade: causality bombs - before you rewind, drop some grenades
-
+so many bug fixes around CPT
+mod: fragments - blocks, grenades, rail gun, shotgun slugs can all eject nails on collisions, or detonation
 
 ******************************************************** BUGS ********************************************************
+
+possible bug with neutron rewind
+  status doesn't apply correctly for spawned neutron bombs that are stuck to a shield
+    also saw neutron bombs bounce off shield, for normal bullets
+  test this more
 
 mod and mob are too similar
 
@@ -31,7 +34,7 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
-combine fragmentation grenades that that mod that makes railguns fragment into nails into one single mod, and let it apply to shotgun slug
+combine fragmentation grenades, railguns fragment and apply to shotgun slug
 
 mod: power up magnetism - power ups drift towards player
   where would this code go?
@@ -39,7 +42,7 @@ mod: power up magnetism - power ups drift towards player
 super balls start at 3, not 4
   have to balance damage
 
-RPG might need a buff
+RPG might need a buff, now that it disables the other cool grenade mods
 
 retrocausality bomb should fire 3 grenades at once that spread out a small bit before they explode?
   this means you'd have to make grenades a method.

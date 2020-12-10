@@ -150,7 +150,7 @@ const mobs = {
         }
     },
     statusDoT(who, tickDamage, cycles = 180) {
-        if (!who.isShielded && !mech.isBodiesAsleep) {
+        if (!who.isShielded && !mech.isBodiesAsleep && who.alive) {
             who.status.push({
                 effect() {
                     if ((game.cycle - this.startCycle) % 30 === 0) {

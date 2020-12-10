@@ -485,11 +485,36 @@ const mech = {
         if (mod.energyRegen === 0) dmg *= 0.4 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
         if (mod.isTurret && mech.crouch) dmg *= 0.5;
         if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
-            for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.85 // 1 - 0.15
+            for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
         return dmg
     },
-    rewind(steps, isDrain = true) {
+    rewind(steps) {
+        if (mod.isRewindGrenade) {
+            for (let i = 1, len = Math.floor(1.5 + steps / 40); i < len; i++) {
+                b.grenade(Vector.add(mech.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
+                const who = bullet[bullet.length - 1]
+                if (mod.isVacuumBomb) {
+                    Matter.Body.setVelocity(who, {
+                        x: who.velocity.x * 0.5,
+                        y: who.velocity.y * 0.5
+                    });
+                } else if (mod.isRPG) {
+                    who.endCycle = (who.endCycle - game.cycle) * 0.2 + game.cycle
+                } else if (mod.isNeutronBomb) {
+                    Matter.Body.setVelocity(who, {
+                        x: who.velocity.x * 0.3,
+                        y: who.velocity.y * 0.3
+                    });
+                } else {
+                    Matter.Body.setVelocity(who, {
+                        x: who.velocity.x * 0.5,
+                        y: who.velocity.y * 0.5
+                    });
+                    who.endCycle = (who.endCycle - game.cycle) * 0.5 + game.cycle
+                }
+            }
+        }
         let history = mech.history[(mech.cycle - steps) % 300]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
@@ -506,9 +531,7 @@ const mech = {
                 });
             }
         }
-        if (isDrain) {
-            mech.energy = Math.max(mech.energy - steps / 136, 0.01)
-        }
+        mech.energy = Math.max(mech.energy - steps / 136, 0.01)
         mech.immuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
 
         let isDrawPlayer = true
@@ -539,13 +562,13 @@ const mech = {
         };
 
         if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
-        game.fpsCap = (isDrain ? 3 : 5) //1 is longest pause, 4 is standard
+        game.fpsCap = 3 //1 is longest pause, 4 is standard
         game.fpsInterval = 1000 / game.fpsCap;
         mech.defaultFPSCycle = mech.cycle
         if (mod.isRewindBot) {
-            const len = (isDrain ? steps * 0.042 : 2) * mod.isRewindBot
+            const len = steps * 0.042 * mod.isRewindBot
             for (let i = 0; i < len; i++) {
-                where = mech.history[(mech.cycle - i * 40) % 300].position //spread out spawn locations along past history
+                const where = mech.history[Math.abs(mech.cycle - i * 40) % 300].position //spread out spawn locations along past history
                 b.randomBot({
                     x: where.x + 100 * (Math.random() - 0.5),
                     y: where.y + 100 * (Math.random() - 0.5)
@@ -556,32 +579,7 @@ const mech = {
     },
     damage(dmg) {
         if (mod.isRewindAvoidDeath && mech.energy > 0.66) {
-            const steps = Math.floor(Math.min(299, 137 * mech.energy)) //go back 2 seconds at 100% energy
-            if (mod.isRewindGrenade) {
-                for (let i = 1, len = Math.floor(3 + steps / 60); i < len; i++) {
-                    b.grenade(Vector.add(mech.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
-                    const who = bullet[bullet.length - 1]
-                    if (mod.isVacuumBomb) {
-                        Matter.Body.setVelocity(who, {
-                            x: who.velocity.x * 0.5,
-                            y: who.velocity.y * 0.5
-                        });
-                    } else if (mod.isRPG) {
-                        who.endCycle = (who.endCycle - game.cycle) * 0.2 + game.cycle
-                    } else if (mod.isNeutronBomb) {
-                        Matter.Body.setVelocity(who, {
-                            x: who.velocity.x * 0.3,
-                            y: who.velocity.y * 0.3
-                        });
-                    } else {
-                        Matter.Body.setVelocity(who, {
-                            x: who.velocity.x * 0.5,
-                            y: who.velocity.y * 0.5
-                        });
-                        who.endCycle = (who.endCycle - game.cycle) * 0.5 + game.cycle
-                    }
-                }
-            }
+            const steps = Math.floor(Math.min(299, 137 * mech.energy))
             mech.rewind(steps)
             return
         }

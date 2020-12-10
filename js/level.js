@@ -20,7 +20,7 @@ const level = {
             // b.giveGuns("grenades")
             // mod.isIncendiary = true
             // mod.is3Missiles = true
-            // mod.giveMod("CPT reversal")
+            // mod.giveMod("neutron bomb")
             // mod.giveMod("causality bombs")
 
             level.intro(); //starting level
@@ -236,6 +236,16 @@ const level = {
             height: 350,
             color: "rgba(0,255,255,0.1)"
         });
+        powerUps.spawn(1675, -50, "ammo");
+        powerUps.spawn(3350, -75, "ammo");
+        powerUps.spawn(3925, -50, "ammo");
+        powerUps.spawn(4550, -75, "ammo");
+        powerUps.spawn(5225, -50, "ammo");
+        powerUps.spawn(5475, -350, "ammo");
+        powerUps.spawn(5625, -350, "ammo");
+        powerUps.spawn(5575, -425, "ammo");
+        powerUps.spawn(5550, -400, "ammo");
+        powerUps.spawn(5575, -425, "ammo");
 
         spawn.mapRect(-1950, 0, 8200, 1800); //ground
         spawn.mapRect(-1950, -1500, 1800, 1900); //left wall

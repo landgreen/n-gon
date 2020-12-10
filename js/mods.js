@@ -373,6 +373,22 @@ const mod = {
             }
         },
         {
+            name: "fragmentation",
+            description: "detonation or collision ejects <strong>nails</strong><br><em>rail gun, grenades, shotgun slugs, blocks</em>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("rail gun") || (mod.haveGunCheck("shotgun") && mod.isSlugShot) || mod.throwChargeRate > 1
+            },
+            requires: "grenades, rail gun, shotgun slugs, or mass driver",
+            effect() {
+                mod.fragments++
+            },
+            remove() {
+                mod.fragments = 0
+            }
+        },
+        {
             name: "ammonium nitrate",
             description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>20%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>20%</strong>",
             maxCount: 9,
@@ -1044,9 +1060,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() { //&& (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1)
-                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss && !mod.isPiezo
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth
             },
-            requires: "not nano-scale, mass-energy, standing wave, acute stress, piezoelectricity",
+            requires: "standing wave, mass-energy, piezoelectricity, max energy reduction",
             effect() {
                 mod.isRewindAvoidDeath = true;
             },
@@ -1092,12 +1108,12 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && !mod.isRewindAvoidDeath
+                return !mod.isEnergyHealth
             },
-            requires: "not mass-energy equivalence, CPT reversal",
+            requires: "not mass-energy equivalence",
             effect() {
                 mod.isPiezo = true;
-                mech.energy += mech.maxEnergy * 2;
+                mech.energy += 200;
             },
             remove() {
                 mod.isPiezo = false;
@@ -1893,7 +1909,7 @@ const mod = {
         //************************************************** 
         {
             name: "incendiary ammunition",
-            description: "<strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><span style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</span>",
+            description: "<strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><em style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1909,7 +1925,7 @@ const mod = {
         },
         {
             name: "Lorentzian topology",
-            description: "<strong>bullets</strong> last <strong>30% longer</strong><br><span style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</span>",
+            description: "<strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -2365,22 +2381,6 @@ const mod = {
             }
         },
         {
-            name: "fragmentation grenade",
-            description: "<strong>grenades</strong> are loaded with <strong>5</strong> nails<br>on detonation <strong>nails</strong> are ejected towards mobs",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isNeutronBomb
-            },
-            requires: "grenades, not neutron bomb",
-            effect() {
-                mod.grenadeFragments += 5
-            },
-            remove() {
-                mod.grenadeFragments = 0
-            }
-        },
-        {
             name: "rocket-propelled grenade",
             description: "<strong>grenades</strong> rapidly <strong>accelerate</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
             maxCount: 1,
@@ -2422,7 +2422,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.grenadeFragments && !mod.isVacuumBomb
+                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.fragments && !mod.isVacuumBomb
             },
             requires: "grenades, not rocket-propelled or fragmentation",
             effect() {
@@ -2504,7 +2504,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isMineDrop + mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
+                return mod.isMineDrop + mod.nailBotCount + mod.fragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2520,7 +2520,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isMineDrop + mod.nailBotCount + mod.grenadeFragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isRailNails + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
+                return mod.isMineDrop + mod.nailBotCount + mod.fragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2803,22 +2803,6 @@ const mod = {
             },
             remove() {
                 mod.isCapacitor = false;
-            }
-        },
-        {
-            name: "fragmenting projectiles",
-            description: "<strong>rail gun</strong> rods fragment into <strong>nails</strong><br>after hitting mobs at high speeds",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mod.haveGunCheck("rail gun")
-            },
-            requires: "rail gun",
-            effect() {
-                mod.isRailNails = true;
-            },
-            remove() {
-                mod.isRailNails = false;
             }
         },
         {
@@ -3575,7 +3559,6 @@ const mod = {
     isFlechetteMultiShot: null,
     isMineAmmoBack: null,
     isPlasmaRange: null,
-    isRailNails: null,
     isFreezeMobs: null,
     recursiveMissiles: null,
     isIceCrystals: null,
@@ -3587,7 +3570,7 @@ const mod = {
     energyRegen: null,
     isVacuumBomb: null,
     renormalization: null,
-    grenadeFragments: null,
+    fragments: null,
     isEnergyDamage: null,
     isBotSpawner: null,
     waveHelix: null,
