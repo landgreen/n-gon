@@ -485,65 +485,104 @@ const mech = {
         if (mod.energyRegen === 0) dmg *= 0.4 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
         if (mod.isTurret && mech.crouch) dmg *= 0.5;
         if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
-            for (let i = 0, len = b.inventory.length; i < len; i++) {
-                dmg *= 0.85 // 1 - 0.15
-            }
+            for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.85 // 1 - 0.15
         }
         return dmg
     },
-    damage(dmg) {
-        if (mod.isTimeAvoidDeath && mech.energy > 0.66) {
-            const steps = Math.floor(Math.min(299, 137 * mech.energy)) //go back 2 seconds at 100% energy
-            let history = mech.history[(mech.cycle - steps) % 300]
-            Matter.Body.setPosition(player, history.position);
-            Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
-            // move bots to follow player
-            for (let i = 0; i < bullet.length; i++) {
-                if (bullet[i].botType) {
-                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-                        x: 250 * (Math.random() - 0.5),
-                        y: 250 * (Math.random() - 0.5)
-                    }));
-                    Matter.Body.setVelocity(bullet[i], {
-                        x: 0,
-                        y: 0
-                    });
+    rewind(steps, isDrain = true) {
+        let history = mech.history[(mech.cycle - steps) % 300]
+        Matter.Body.setPosition(player, history.position);
+        Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+        // move bots to follow player
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType) {
+                Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                    x: 250 * (Math.random() - 0.5),
+                    y: 250 * (Math.random() - 0.5)
+                }));
+                Matter.Body.setVelocity(bullet[i], {
+                    x: 0,
+                    y: 0
+                });
+            }
+        }
+        if (isDrain) {
+            mech.energy = Math.max(mech.energy - steps / 136, 0.01)
+        }
+        mech.immuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
+
+        let isDrawPlayer = true
+        const shortPause = function() {
+            if (mech.defaultFPSCycle < mech.cycle) { //back to default values
+                game.fpsCap = game.fpsCapDefault
+                game.fpsInterval = 1000 / game.fpsCap;
+                document.getElementById("dmg").style.transition = "opacity 1s";
+                document.getElementById("dmg").style.opacity = "0";
+            } else {
+                requestAnimationFrame(shortPause);
+                if (isDrawPlayer) {
+                    isDrawPlayer = false
+                    ctx.save();
+                    ctx.translate(canvas.width2, canvas.height2); //center
+                    ctx.scale(game.zoom / game.edgeZoomOutSmooth, game.zoom / game.edgeZoomOutSmooth); //zoom in once centered
+                    ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
+                    for (let i = 1; i < steps; i++) {
+                        history = mech.history[(mech.cycle - i) % 300]
+                        mech.pos.x = history.position.x
+                        mech.pos.y = history.position.y
+                        mech.draw();
+                    }
+                    ctx.restore();
+                    mech.resetHistory()
                 }
             }
+        };
 
-            mech.energy = Math.max(mech.energy - steps / 136, 0.01)
-            mech.immuneCycle = mech.cycle + 30; //player is immune to collision damage for 30 cycles
-
-            let isDrawPlayer = true
-            const shortPause = function() {
-                if (mech.defaultFPSCycle < mech.cycle) { //back to default values
-                    game.fpsCap = game.fpsCapDefault
-                    game.fpsInterval = 1000 / game.fpsCap;
-                } else {
-                    requestAnimationFrame(shortPause);
-                    if (isDrawPlayer) {
-                        isDrawPlayer = false
-
-                        ctx.save();
-                        ctx.translate(canvas.width2, canvas.height2); //center
-                        ctx.scale(game.zoom / game.edgeZoomOutSmooth, game.zoom / game.edgeZoomOutSmooth); //zoom in once centered
-                        ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
-                        for (let i = 1; i < steps; i++) {
-                            history = mech.history[(mech.cycle - i) % 300]
-                            mech.pos.x = history.position.x
-                            mech.pos.y = history.position.y
-                            mech.draw();
-                        }
-                        ctx.restore();
-                        mech.resetHistory()
+        if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
+        game.fpsCap = (isDrain ? 3 : 5) //1 is longest pause, 4 is standard
+        game.fpsInterval = 1000 / game.fpsCap;
+        mech.defaultFPSCycle = mech.cycle
+        if (mod.isRewindBot) {
+            const len = (isDrain ? steps * 0.042 : 2) * mod.isRewindBot
+            for (let i = 0; i < len; i++) {
+                where = mech.history[(mech.cycle - i * 40) % 300].position //spread out spawn locations along past history
+                b.randomBot({
+                    x: where.x + 100 * (Math.random() - 0.5),
+                    y: where.y + 100 * (Math.random() - 0.5)
+                }, false, false)
+                bullet[bullet.length - 1].endCycle = game.cycle + 360 + Math.floor(180 * Math.random()) //6-9 seconds
+            }
+        }
+    },
+    damage(dmg) {
+        if (mod.isRewindAvoidDeath && mech.energy > 0.66) {
+            const steps = Math.floor(Math.min(299, 137 * mech.energy)) //go back 2 seconds at 100% energy
+            if (mod.isRewindGrenade) {
+                for (let i = 1, len = Math.floor(3 + steps / 60); i < len; i++) {
+                    b.grenade(Vector.add(mech.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
+                    const who = bullet[bullet.length - 1]
+                    if (mod.isVacuumBomb) {
+                        Matter.Body.setVelocity(who, {
+                            x: who.velocity.x * 0.5,
+                            y: who.velocity.y * 0.5
+                        });
+                    } else if (mod.isRPG) {
+                        who.endCycle = (who.endCycle - game.cycle) * 0.2 + game.cycle
+                    } else if (mod.isNeutronBomb) {
+                        Matter.Body.setVelocity(who, {
+                            x: who.velocity.x * 0.3,
+                            y: who.velocity.y * 0.3
+                        });
+                    } else {
+                        Matter.Body.setVelocity(who, {
+                            x: who.velocity.x * 0.5,
+                            y: who.velocity.y * 0.5
+                        });
+                        who.endCycle = (who.endCycle - game.cycle) * 0.5 + game.cycle
                     }
                 }
-            };
-
-            if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
-            game.fpsCap = 3 //1 is shortest pause, 4 is standard
-            game.fpsInterval = 1000 / game.fpsCap;
-            mech.defaultFPSCycle = mech.cycle
+            }
+            mech.rewind(steps)
             return
         }
         mech.lastHarmCycle = mech.cycle
@@ -1765,7 +1804,7 @@ const mech = {
                         mech.grabPowerUp();
                         mech.lookForPickUp(180);
 
-                        const DRAIN = 0.0011
+                        const DRAIN = 0.0013
                         if (mech.energy > DRAIN) {
                             mech.energy -= DRAIN;
                             if (mech.energy < DRAIN) {

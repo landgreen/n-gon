@@ -108,21 +108,6 @@ const mod = {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
     },
     mods: [{
-            name: "integrated armament",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return b.inventory.length < 2
-            },
-            requires: "no more than 1 gun",
-            effect() {
-                mod.isOneGun = true;
-            },
-            remove() {
-                mod.isOneGun = false;
-            }
-        }, {
             name: "capacitor",
             description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>7</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
@@ -176,7 +161,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isEnergyLoss && mech.maxEnergy === 1 && !mod.isMissileField && !mod.isSporeField && !mod.isTimeAvoidDeath
+                return mod.isEnergyLoss && mech.maxEnergy === 1 && !mod.isMissileField && !mod.isSporeField && !mod.isRewindAvoidDeath
             },
             requires: "heat engine, not max energy increase, CPT, missile or spore nano-scale",
             effect() {
@@ -210,9 +195,9 @@ const mod = {
             maxCount: 6,
             count: 0,
             allowed() {
-                return true
+                return mech.Fx === 0.016
             },
-            requires: "",
+            requires: "base movement speed",
             effect: () => {
                 mod.restDamage += 0.25
             },
@@ -250,6 +235,22 @@ const mod = {
             },
             remove() {
                 mod.isAcidDmg = false;
+            }
+        },
+        {
+            name: "integrated armament",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length < 2
+            },
+            requires: "no more than 1 gun",
+            effect() {
+                mod.isOneGun = true;
+            },
+            remove() {
+                mod.isOneGun = false;
             }
         },
         {
@@ -372,78 +373,6 @@ const mod = {
             }
         },
         {
-            name: "reaction inhibitor",
-            description: "mobs spawn with <strong>12%</strong> less <strong>health</strong>",
-            maxCount: 3,
-            count: 0,
-            allowed() {
-                return mod.nailsDeathMob || mod.sporesOnDeath || mod.isExplodeMob
-            },
-            requires: "zoospore vector or impact shear or thermal runaway",
-            effect: () => {
-                mod.mobSpawnWithHealth *= 0.88
-
-                //set all mobs at full health to 0.85
-                for (let i = 0; i < mob.length; i++) {
-                    if (mob.health > mod.mobSpawnWithHealth) mob.health = mod.mobSpawnWithHealth
-                }
-            },
-            remove() {
-                mod.mobSpawnWithHealth = 1;
-            }
-        },
-        {
-            name: "zoospore vector",
-            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>9%</strong> chance",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return !mod.nailsDeathMob && !mod.isExplodeMob
-            },
-            requires: "not impact shear or thermal runaway",
-            effect() {
-                mod.sporesOnDeath += 0.09;
-                for (let i = 0; i < 8; i++) {
-                    b.spore(mech.pos)
-                }
-            },
-            remove() {
-                mod.sporesOnDeath = 0;
-            }
-        },
-        {
-            name: "impact shear",
-            description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br>nails target nearby mobs",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return !mod.sporesOnDeath && !mod.isExplodeMob
-            },
-            requires: "not zoospore vector or thermal runaway",
-            effect: () => {
-                mod.nailsDeathMob++
-            },
-            remove() {
-                mod.nailsDeathMob = 0;
-            }
-        },
-        {
-            name: "thermal runaway",
-            description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return (mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode) && !mod.sporesOnDeath && !mod.nailsDeathMob
-            },
-            requires: "an explosive damage source, not zoospore vector or impact shear",
-            effect: () => {
-                mod.isExplodeMob = true;
-            },
-            remove() {
-                mod.isExplodeMob = false;
-            }
-        },
-        {
             name: "ammonium nitrate",
             description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>20%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>20%</strong>",
             maxCount: 9,
@@ -509,36 +438,91 @@ const mod = {
             }
         },
         {
+            name: "thermal runaway",
+            description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode) && !mod.sporesOnDeath && !mod.nailsDeathMob && !mod.isBotSpawner
+            },
+            requires: "an explosive damage source, no other mob death mods",
+            effect: () => {
+                mod.isExplodeMob = true;
+            },
+            remove() {
+                mod.isExplodeMob = false;
+            }
+        },
+        {
+            name: "reaction inhibitor",
+            description: "mobs spawn with <strong>12%</strong> less <strong>health</strong>",
+            maxCount: 3,
+            count: 0,
+            allowed() {
+                return mod.nailsDeathMob || mod.sporesOnDeath || mod.isExplodeMob || mod.isBotSpawner
+            },
+            requires: "any mob death mod",
+            effect: () => {
+                mod.mobSpawnWithHealth *= 0.88
+
+                //set all mobs at full health to 0.85
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob.health > mod.mobSpawnWithHealth) mob.health = mod.mobSpawnWithHealth
+                }
+            },
+            remove() {
+                mod.mobSpawnWithHealth = 1;
+            }
+        },
+        {
+            name: "zoospore vector",
+            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>9%</strong> chance",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return !mod.nailsDeathMob && !mod.isExplodeMob && !mod.isBotSpawner
+            },
+            requires: "no other mob death mods",
+            effect() {
+                mod.sporesOnDeath += 0.09;
+                for (let i = 0; i < 8; i++) {
+                    b.spore(mech.pos)
+                }
+            },
+            remove() {
+                mod.sporesOnDeath = 0;
+            }
+        },
+        {
+            name: "impact shear",
+            description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br>nails target nearby mobs",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return !mod.sporesOnDeath && !mod.isExplodeMob && !mod.isBotSpawner
+            },
+            requires: "no other mob death mods",
+            effect: () => {
+                mod.nailsDeathMob++
+            },
+            remove() {
+                mod.nailsDeathMob = 0;
+            }
+        },
+        {
             name: "scrap bots",
             description: "<strong>20%</strong> chance to build a <strong>bot</strong> after killing a mob<br>the bot lasts for about <strong>20</strong> seconds",
             maxCount: 3,
             count: 0,
             allowed() {
-                return mod.totalBots() > 0
+                return mod.totalBots() > 0 && !mod.sporesOnDeath && !mod.nailsDeathMob && !mod.isExplodeMob
             },
-            requires: "a bot",
+            requires: "a bot and no other mob death mods",
             effect() {
                 mod.isBotSpawner += 0.20;
             },
             remove() {
                 mod.isBotSpawner = 0;
-            }
-        },
-        {
-            name: "bot fabrication",
-            description: "anytime you collect <strong>5</strong> <strong class='color-r'>rerolls</strong><br>use them to build a <strong>random bot</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return powerUps.reroll.rerolls > 5 || build.isCustomSelection
-            },
-            requires: "at least 6 rerolls",
-            effect() {
-                mod.isRerollBots = true;
-                powerUps.reroll.changeRerolls(0)
-            },
-            remove() {
-                mod.isRerollBots = false;
             }
         },
         {
@@ -664,9 +648,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return true
+                return mech.maxEnergy > 0.5
             },
-            requires: "",
+            requires: "maximum energy above 50%",
             effect() {
                 mod.laserBotCount++;
                 b.laserBot();
@@ -744,6 +728,23 @@ const mod = {
                         bullet[i].orbitalSpeed = Math.sqrt(0.25 / range)
                     }
                 }
+            }
+        },
+        {
+            name: "bot fabrication",
+            description: "anytime you collect <strong>5</strong> <strong class='color-r'>rerolls</strong><br>use them to build a <strong>random bot</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls > 5 || build.isCustomSelection
+            },
+            requires: "at least 6 rerolls",
+            effect() {
+                mod.isRerollBots = true;
+                powerUps.reroll.changeRerolls(0)
+            },
+            remove() {
+                mod.isRerollBots = false;
             }
         },
         {
@@ -1039,18 +1040,50 @@ const mod = {
         },
         {
             name: "CPT reversal",
-            description: "<strong>rewind 1.5 - 5</strong> seconds to avoid <strong class='color-harm'>harm</strong><br>drains <strong>66 - 220</strong> <strong class='color-f'>energy</strong>",
+            description: "<strong class='color-rewind'>rewind</strong> <strong>1.5 - 5</strong> seconds to avoid <strong class='color-harm'>harm</strong><br>drains <strong>66 - 220</strong> <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
-            allowed() {
-                return mech.maxEnergy > 0.99 && (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1) && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss && !mod.isPiezo
+            allowed() { //&& (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1)
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isEnergyLoss && !mod.isPiezo
             },
             requires: "not nano-scale, mass-energy, standing wave, acute stress, piezoelectricity",
             effect() {
-                mod.isTimeAvoidDeath = true;
+                mod.isRewindAvoidDeath = true;
             },
             remove() {
-                mod.isTimeAvoidDeath = false;
+                mod.isRewindAvoidDeath = false;
+            }
+        },
+        {
+            name: "causality bots",
+            description: "when you <strong class='color-rewind'>rewind</strong>, build some <strong>bots</strong><br>that protect you for about <strong>7</strong> seconds",
+            maxCount: 3,
+            count: 0,
+            allowed() {
+                return mod.isRewindAvoidDeath || mod.isRewindEnergy
+            },
+            requires: "CPT",
+            effect() {
+                mod.isRewindBot++;
+            },
+            remove() {
+                mod.isRewindBot = 0;
+            }
+        },
+        {
+            name: "causality bombs",
+            description: "before you <strong class='color-rewind'>rewind</strong> drop some <strong>grenades</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isRewindAvoidDeath
+            },
+            requires: "CPT",
+            effect() {
+                mod.isRewindGrenade = true;
+            },
+            remove() {
+                mod.isRewindGrenade = false;
             }
         },
         {
@@ -1059,7 +1092,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && !mod.isTimeAvoidDeath
+                return !mod.isEnergyHealth && !mod.isRewindAvoidDeath
             },
             requires: "not mass-energy equivalence, CPT reversal",
             effect() {
@@ -1094,7 +1127,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyLoss && !mod.isPiezo && !mod.isTimeAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
+                return !mod.isEnergyLoss && !mod.isPiezo && !mod.isRewindAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
             requires: "not piezoelectricity, acute stress response, 1st law, negative mass field",
             effect: () => {
@@ -1163,7 +1196,7 @@ const mod = {
         },
         {
             name: "energy conservation",
-            description: "<strong>7%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
+            description: "<strong>6%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1171,7 +1204,7 @@ const mod = {
             },
             requires: "some increased damage",
             effect() {
-                mod.energySiphon += 0.07;
+                mod.energySiphon += 0.06;
             },
             remove() {
                 mod.energySiphon = 0;
@@ -2355,12 +2388,14 @@ const mod = {
             allowed() {
                 return mod.haveGunCheck("grenades") && !mod.isVacuumBomb && !mod.isNeutronBomb
             },
-            requires: "grenades, not vacuum bomb",
+            requires: "grenades, not vacuum bomb, neutron",
             effect() {
                 mod.isRPG = true;
+                b.setGrenadeMode()
             },
             remove() {
                 mod.isRPG = false;
+                b.setGrenadeMode()
             }
         },
         {
@@ -2374,17 +2409,11 @@ const mod = {
             requires: "grenades, not rocket-propelled",
             effect() {
                 mod.isVacuumBomb = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireVacuum
-                }
+                b.setGrenadeMode()
             },
             remove() {
                 mod.isVacuumBomb = false;
-                if (!mod.isNeutronBomb) {
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "grenades") b.guns[i].fire = (mod.isNeutronBomb) ? b.guns[i].fireNeutron : b.guns[i].fireNormal
-                    }
-                }
+                b.setGrenadeMode()
             }
         },
         {
@@ -2398,15 +2427,11 @@ const mod = {
             requires: "grenades, not rocket-propelled or fragmentation",
             effect() {
                 mod.isNeutronBomb = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "grenades") b.guns[i].fire = b.guns[i].fireNeutron
-                }
+                b.setGrenadeMode()
             },
             remove() {
                 mod.isNeutronBomb = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "grenades") b.guns[i].fire = (mod.isVacuumBomb) ? b.guns[i].fireVacuum : b.guns[i].fireNormal
-                }
+                b.setGrenadeMode()
             }
         },
         {
@@ -3671,5 +3696,7 @@ const mod = {
     isBotDamage: null,
     isBanish: null,
     isMaxEnergyMod: null,
-    isLowEnergyDamage: null
+    isLowEnergyDamage: null,
+    isRewindBot: null,
+    isRewindGrenade: null
 }

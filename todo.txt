@@ -1,20 +1,18 @@
-*********** NEXT PATCH ***********
+******************************************************** NEXT PATCH ********************************************************
 
-added more requirements to various mods
+mod: causality bots - before you rewind, build bots that protect you for for 7 seconds
 
-CPT reversal is more flexible with energy
-  1.5-5 seconds of rewind drains 66% - 220% energy
+mod grenade: causality bombs - before you rewind, drop some grenades
 
-mod: exothermic process - renamed acute stress response
-mod: heat engine  - reduce max energy by 50  increase damage by 40%
-mod: Gibbs free energy - gain 5% damage for every 10 energy below 100
 
-************** BUGS **************
+******************************************************** BUGS ********************************************************
 
-(fixed) red square mobs no longer die on contact
-  might be side effects (we put the player invincibility after mob on damage code)
+mod and mob are too similar
 
 (always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
+
+(always) is there a way to check if the player is stuck inside the map or block
+  trigger a short term non-collide if that occurs
 
 (4+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
   players have extra gravity
@@ -31,20 +29,39 @@ mod: Gibbs free energy - gain 5% damage for every 10 energy below 100
 
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
-************** TODO **************
+******************************************************** TODO ********************************************************
 
-mod that gives a bonus for low energy
-  damage again or something different
-  requires heat engine
+combine fragmentation grenades that that mod that makes railguns fragment into nails into one single mod, and let it apply to shotgun slug
 
-CPT like mods
-  delayed rewind:  after taking damage, play for 2 seconds, then rewind to just before you took damage
-    and return lost health
-    this might need code to run in a field to work
-      time dilation field?
-  gain a scrap bot after rewinding
-  use ammo to rewind instead of energy
-  explode the area where you were hit before rewinding
+mod: power up magnetism - power ups drift towards player
+  where would this code go?
+
+super balls start at 3, not 4
+  have to balance damage
+
+RPG might need a buff
+
+retrocausality bomb should fire 3 grenades at once that spread out a small bit before they explode?
+  this means you'd have to make grenades a method.
+
+make different move methods
+  mod: crouch charge jump
+  mod: double jump
+
+mod: when mobs are at full health you do 40% to them
+
+mechanic: failed technology - add mods to the mod pool with a dumb effect
+  don't show up in custom?
+  negative effect (one time effects are better to avoid code clutter)
+    remove all your energy
+    eject all your rerolls (not bad with dup)
+    teleport to the start of the level
+    remove your bots (requires you to have some bots)
+    your bots are changed to random bots
+
+mod - move super fast, go intangible, drain energy very fast
+  this is like a dodge roll
+  mod for standing wave?, cloaking?
 
 spawn a few power ups on the final boss level
 
@@ -279,7 +296,7 @@ n-gon outreach ideas
   javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
 
 
-************** LORE **************
+******************************************************** LORE ********************************************************
 
   lore - a robot (the player) gains self awareness
   each mod/gun/field is a new tech

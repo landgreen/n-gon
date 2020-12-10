@@ -517,12 +517,19 @@ em {
 .color-harm {
     /* color:  */
     /* text-shadow: #FC0 1px 0 10px; */
-    background-color: hsla(325, 100%, 85%, 0.15);
+    background-color: hsla(51, 100%, 71%, 0.187);
     padding: 2px;
     border-radius: 4px;
     letter-spacing: 1px;
     font-weight: 100;
 }
+
+/* .color-rewind {
+    background-image: linear-gradient(to left, #fff, #bbb);
+    border-radius: 5px;
+    padding: 2px;
+    letter-spacing: 1px;
+} */
 
 .color-r {
     color: #f7b;

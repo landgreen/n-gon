@@ -17,11 +17,11 @@ const level = {
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("wormhole")
-            // b.giveGuns("shotgun")
+            // b.giveGuns("grenades")
             // mod.isIncendiary = true
             // mod.is3Missiles = true
-            // mod.giveMod("shotgun slug")
-            // mod.giveMod("diffuse beam")
+            // mod.giveMod("CPT reversal")
+            // mod.giveMod("causality bombs")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
