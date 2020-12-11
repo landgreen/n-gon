@@ -108,7 +108,7 @@ function collisionChecks(event) {
                             return
                         }
                         mech.damage(dmg);
-                        if (mod.isPiezo) mech.energy += 200;
+                        if (mod.isPiezo) mech.energy += 2;
                         if (mod.isBayesian) powerUps.ejectMod()
                         if (mob[k].onHit) mob[k].onHit(k);
                         mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles

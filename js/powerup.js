@@ -57,8 +57,8 @@ const powerUps = {
                 game.makeTextLog(`about ${Math.max(0,powerUps.mod.lastTotalChoices - powerUps.mod.banishLog.length)} estimated <strong class='color-m'>mods</strong> left`, 300)
             }
         }
-        if (mod.manyWorlds && powerUps.reroll.rerolls < 1) {
-            powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "reroll", false);
+        if (mod.manyWorlds && powerUps.reroll.rerolls === 0) {
+            for (let i = 0; i < 2; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "reroll", false);
         }
         document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-background").style.display = "none"
@@ -435,7 +435,7 @@ const powerUps = {
         }
     },
     onPickUp(where) {
-        if (mod.isMassEnergy && mech.energy < mech.maxEnergy * 2.5) mech.energy = mech.maxEnergy * 2.5;
+        if (mod.isMassEnergy && mech.energy < mech.maxEnergy * 2.5) mech.energy += 3;
         if (mod.isMineDrop) b.mine({
             x: where.x,
             y: where.y

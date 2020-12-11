@@ -163,7 +163,7 @@ const mod = {
             allowed() {
                 return mod.isEnergyLoss && mech.maxEnergy === 1 && !mod.isMissileField && !mod.isSporeField && !mod.isRewindAvoidDeath
             },
-            requires: "heat engine, not max energy increase, CPT, missile or spore nano-scale",
+            requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
             effect() {
                 mod.isMaxEnergyMod = true;
                 mech.setMaxEnergy()
@@ -181,7 +181,7 @@ const mod = {
             allowed() {
                 return mod.isEnergyLoss && mech.maxEnergy < 1.1
             },
-            requires: "heat engine",
+            requires: "exothermic process",
             effect() {
                 mod.isLowEnergyDamage = true;
             },
@@ -374,7 +374,7 @@ const mod = {
         },
         {
             name: "fragmentation",
-            description: "detonation or collision ejects <strong>nails</strong><br><em>rail gun, grenades, shotgun slugs, blocks</em>",
+            description: "detonation or collisions with mobs eject <strong>nails</strong><br><em>blocks, rail gun, grenades, shotgun slugs</em>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1113,7 +1113,7 @@ const mod = {
             requires: "not mass-energy equivalence",
             effect() {
                 mod.isPiezo = true;
-                mech.energy += 200;
+                mech.energy += 2;
             },
             remove() {
                 mod.isPiezo = false;
@@ -1635,7 +1635,7 @@ const mod = {
         },
         {
             name: "catabolism",
-            description: "gain <strong class='color-g'>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>drains <strong>2.3%</strong> of <strong>max health</strong>",
+            description: "gain <strong class='color-g'>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>drains <strong>2%</strong> of <strong>max health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1643,7 +1643,7 @@ const mod = {
             },
             requires: "not mass-energy equivalence<br>not exciton-lattice",
             effect: () => {
-                mod.isAmmoFromHealth = 0.023;
+                mod.isAmmoFromHealth = 0.02;
             },
             remove() {
                 mod.isAmmoFromHealth = 0;
@@ -1739,13 +1739,13 @@ const mod = {
         },
         {
             name: "many-worlds",
-            description: "if you have no <strong class='color-r'>rerolls</strong> spawn one<br>after choosing a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong>",
+            description: "after choosing a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>rerolls</strong> spawn <strong>2</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls < 3 && !mod.isSuperDeterminism && !mod.isRerollHaste
+                return powerUps.reroll.rerolls === 0 && !mod.isSuperDeterminism && !mod.isRerollHaste
             },
-            requires: "not superdeterminism or Ψ(t) collapse<br>fewer than 3 rerolls",
+            requires: "not superdeterminism or Ψ(t) collapse<br>no rerolls",
             effect: () => {
                 mod.manyWorlds = true;
             },
@@ -2597,7 +2597,7 @@ const mod = {
         },
         {
             name: "mutualism",
-            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>1</strong> <strong>health</strong> until they <strong>die</strong>",
+            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong>health</strong> until they <strong>die</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2996,6 +2996,40 @@ const mod = {
         //************************************************** mods
         //************************************************** 
         {
+            name: "bremsstrahlung radiation",
+            description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+            },
+            requires: "standing wave harmonics",
+            effect() {
+                mod.blockDmg += 0.75 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+            },
+            remove() {
+                mod.blockDmg = 0;
+            }
+        },
+        {
+            name: "frequency resonance",
+            description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>40%</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
+            },
+            requires: "standing wave harmonics",
+            effect() {
+                mech.fieldRange += 175 * 0.2
+                mech.fieldShieldingScale *= 0.55
+            },
+            remove() {
+                mech.fieldRange = 175;
+                mech.fieldShieldingScale = 1;
+            }
+        },
+        {
             name: "flux pinning",
             description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>+1</strong> second",
             maxCount: 9,
@@ -3044,195 +3078,90 @@ const mod = {
             }
         },
         {
-            name: "timelike world line",
-            description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
-            },
-            requires: "time dilation field",
-            effect() {
-                mod.isTimeSkip = true;
-                b.setFireCD();
-            },
-            remove() {
-                mod.isTimeSkip = false;
-                b.setFireCD();
-            }
-        },
-        {
-            name: "Lorentz transformation",
-            description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
-            },
-            requires: "time dilation field",
-            effect() {
-                mod.fastTime = 1.40;
-                mod.fastTimeJump = 1.11;
-                mech.setMovement();
-                b.setFireCD();
-            },
-            remove() {
-                mod.fastTime = 1;
-                mod.fastTimeJump = 1;
-                mech.setMovement();
-                b.setFireCD();
-            }
-        },
-        {
-            name: "time crystals",
-            description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field" && mod.energyRegen !== 0;
-            },
-            requires: "time dilation field",
-            effect: () => {
-                mod.energyRegen = 0.004;
-                mech.fieldRegen = mod.energyRegen;
-            },
-            remove() {
-                mod.energyRegen = 0.001;
-                mech.fieldRegen = mod.energyRegen;
-            }
-        },
-        {
-            name: "plasma jet",
-            description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
-            },
-            requires: "plasma torch",
-            effect() {
-                mod.isPlasmaRange += 0.27;
-            },
-            remove() {
-                mod.isPlasmaRange = 1;
-            }
-        },
-        {
-            name: "plasma-bot",
-            description: "a bot uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
-            },
-            requires: "plasma torch",
-            effect() {
-                mod.plasmaBotCount++;
-                b.plasmaBot();
-            },
-            remove() {
-                mod.plasmaBotCount = 0;
-            }
-        },
-        {
-            name: "degenerate matter",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>while <strong>negative mass field</strong> is active",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
-            },
-            requires: "negative mass field",
-            effect() {
-                mod.isHarmReduce = true
-            },
-            remove() {
-                mod.isHarmReduce = false;
-                // if (mech.fieldUpgrades[mech.fieldMode].name === "negative mass field") mech.setField("negative mass field") //reset harm reduction
-            }
-        },
-        {
-            name: "annihilation",
-            description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
-            },
-            requires: "negative mass field",
-            effect() {
-                mod.isAnnihilation = true
-            },
-            remove() {
-                mod.isAnnihilation = false;
-            }
-        },
-        {
-            name: "negative temperature",
-            description: "<strong>negative mass field</strong> uses <strong class='color-f'>energy</strong><br>to <strong class='color-s'>freeze</strong> each mob caught in it's effect",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
-            },
-            requires: "negative mass field",
-            effect() {
-                mod.isFreezeMobs = true;
-            },
-            remove() {
-                mod.isFreezeMobs = false;
-            }
-        },
-        {
-            name: "bremsstrahlung radiation",
-            description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
-            },
-            requires: "standing wave harmonics",
-            effect() {
-                mod.blockDmg += 0.75 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
-            },
-            remove() {
-                mod.blockDmg = 0;
-            }
-        },
-        {
-            name: "frequency resonance",
-            description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>40%</strong>",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "standing wave harmonics"
-            },
-            requires: "standing wave harmonics",
-            effect() {
-                mech.fieldRange += 175 * 0.2
-                mech.fieldShieldingScale *= 0.55
-            },
-            remove() {
-                mech.fieldRange = 175;
-                mech.fieldShieldingScale = 1;
-            }
-        },
-        {
             name: "pair production",
-            description: "<strong>power ups</strong> overload your <strong class='color-f'>energy</strong><br>to <strong>250%</strong> of your maximum <strong class='color-f'>energy</strong>",
+            description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong> by <strong>300</strong>",
             maxCount: 1,
             count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+            },
+            requires: "nano-scale manufacturing",
+            effect: () => {
+                mod.isMassEnergy = true // used in mech.grabPowerUp
+                mech.energy += 3
+            },
+            remove() {
+                mod.isMassEnergy = false;
+            }
+        },
+        {
+            name: "bot manufacturing",
+            description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>3</strong> random <strong>bots</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
             allowed() {
                 return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing"
             },
             requires: "nano-scale manufacturing",
             effect: () => {
-                mod.isMassEnergy = true // used in mech.grabPowerUp
-                mech.energy += mech.maxEnergy * 2.5
+                mech.energy = 0.01;
+                b.randomBot()
+                b.randomBot()
+                b.randomBot()
             },
-            remove() {
-                mod.isMassEnergy = false;
-            }
+            remove() {}
+        },
+        {
+            name: "bot prototypes",
+            description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all bots of a random type and <strong>build</strong> <strong>2</strong> of that <strong>bot</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isNailBotUpgrade && mod.isFoamBotUpgrade && mod.isBoomBotUpgrade && mod.isLaserBotUpgrade && mod.isOrbitBotUpgrade)
+            },
+            requires: "nano-scale manufacturing",
+            effect: () => {
+                mech.energy = 0.01;
+                //fill array of available bots
+                const notUpgradedBots = []
+                if (!mod.isNailBotUpgrade) {
+                    notUpgradedBots.push(() => {
+                        mod.giveMod("nail-bot upgrade")
+                        for (let i = 0; i < 2; i++) mod.giveMod("nail-bot")
+                    })
+                }
+                if (!mod.isFoamBotUpgrade) {
+                    notUpgradedBots.push(() => {
+                        mod.giveMod("foam-bot upgrade")
+                        for (let i = 0; i < 2; i++) mod.giveMod("foam-bot")
+                    })
+                }
+                if (!mod.isBoomBotUpgrade) {
+                    notUpgradedBots.push(() => {
+                        mod.giveMod("boom-bot upgrade")
+                        for (let i = 0; i < 2; i++) mod.giveMod("boom-bot")
+                    })
+                }
+                if (!mod.isLaserBotUpgrade) {
+                    notUpgradedBots.push(() => {
+                        mod.giveMod("laser-bot upgrade")
+                        for (let i = 0; i < 2; i++) mod.giveMod("laser-bot")
+                    })
+                }
+                if (!mod.isOrbitBotUpgrade) {
+                    notUpgradedBots.push(() => {
+                        mod.giveMod("orbital-bot upgrade")
+                        for (let i = 0; i < 2; i++) mod.giveMod("orbital-bot")
+                    })
+                }
+                //choose random function from the array and run it
+                notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]()
+            },
+            remove() {}
         },
         {
             name: "mycelium manufacturing",
@@ -3283,6 +3212,146 @@ const mod = {
             }
         },
         {
+            name: "degenerate matter",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>while <strong>negative mass field</strong> is active",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+            },
+            requires: "negative mass field",
+            effect() {
+                mod.isHarmReduce = true
+            },
+            remove() {
+                mod.isHarmReduce = false;
+                // if (mech.fieldUpgrades[mech.fieldMode].name === "negative mass field") mech.setField("negative mass field") //reset harm reduction
+            }
+        },
+        {
+            name: "annihilation",
+            description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+            },
+            requires: "negative mass field",
+            effect() {
+                mod.isAnnihilation = true
+            },
+            remove() {
+                mod.isAnnihilation = false;
+            }
+        },
+        {
+            name: "negative temperature",
+            description: "<strong>negative mass field</strong> uses <strong class='color-f'>energy</strong><br>to <strong class='color-s'>freeze</strong> each mob caught in it's effect",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+            },
+            requires: "negative mass field",
+            effect() {
+                mod.isFreezeMobs = true;
+            },
+            remove() {
+                mod.isFreezeMobs = false;
+            }
+        },
+        {
+            name: "plasma jet",
+            description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+            },
+            requires: "plasma torch",
+            effect() {
+                mod.isPlasmaRange += 0.27;
+            },
+            remove() {
+                mod.isPlasmaRange = 1;
+            }
+        },
+        {
+            name: "plasma-bot",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+            },
+            requires: "plasma torch",
+            effect() {
+                mod.plasmaBotCount++;
+                b.plasmaBot();
+            },
+            remove() {
+                mod.plasmaBotCount = 0;
+            }
+        },
+        {
+            name: "timelike world line",
+            description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
+            },
+            requires: "time dilation field",
+            effect() {
+                mod.isTimeSkip = true;
+                b.setFireCD();
+            },
+            remove() {
+                mod.isTimeSkip = false;
+                b.setFireCD();
+            }
+        },
+        {
+            name: "Lorentz transformation",
+            description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "time dilation field" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+            },
+            requires: "time dilation field",
+            effect() {
+                mod.fastTime = 1.40;
+                mod.fastTimeJump = 1.11;
+                mech.setMovement();
+                b.setFireCD();
+            },
+            remove() {
+                mod.fastTime = 1;
+                mod.fastTimeJump = 1;
+                mech.setMovement();
+                b.setFireCD();
+            }
+        },
+        {
+            name: "time crystals",
+            description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mech.fieldUpgrades[mech.fieldMode].name === "time dilation field" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && mod.energyRegen !== 0;
+            },
+            requires: "time dilation field",
+            effect: () => {
+                mod.energyRegen = 0.004;
+                mech.fieldRegen = mod.energyRegen;
+            },
+            remove() {
+                mod.energyRegen = 0.001;
+                mech.fieldRegen = mod.energyRegen;
+            }
+        },
+        {
             name: "phase decoherence",
             description: "become <strong>intangible</strong> while <strong class='color-cloaked'>cloaked</strong><br>but, passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
             maxCount: 1,
@@ -3320,7 +3389,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "metamaterial cloaking"
+                return mech.fieldUpgrades[mech.fieldMode].name === "metamaterial cloaking" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
             },
             requires: "metamaterial cloaking",
             effect() {

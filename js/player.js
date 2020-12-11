@@ -1484,7 +1484,7 @@ const mech = {
                             mech.energy -= 0.057;
                             b.iceIX(1)
                         } else {
-                            mech.energy -= 0.4;
+                            mech.energy -= 0.45;
                             b.drone(1)
                         }
                     }
@@ -2152,7 +2152,7 @@ const mech = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
+            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br>allows <strong class='color-m'>mods</strong> that normally require other <strong class='color-f'>fields</strong>",
             effect: () => {
                 game.replaceTextLog = true; //allow text over write
                 mech.fieldPhase = 0;

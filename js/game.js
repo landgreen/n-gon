@@ -588,7 +588,7 @@ const game = {
         if (mod.isMutualism && !mod.isEnergyHealth) {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].isMutualismActive) {
-                    mech.health += 0.01
+                    mech.health += 0.005
                     if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
                     mech.displayHealth();
                 }

@@ -1,11 +1,18 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-so many bug fixes around CPT
-mod: fragments - blocks, grenades, rail gun, shotgun slugs can all eject nails on collisions, or detonation
+catabolism - 2% (was 2.3%) of max health removed
+many worlds - spawns 2 rerolls (was 1)
+pilot wave field- now has access to several mods that normally require other fields
+  this plus the fragmenting block mod are a big buff for late game pilot wave
+  let me know if it is too strong
+
+mod nano-scale: bot prototypes - upgrade a bot type and build 2 of that bot
+mod nano-scale: bot manufacturing - build 3 random bots
+  these mods don't show up in custom
 
 ******************************************************** BUGS ********************************************************
 
-possible bug with neutron rewind
+(not able to reproduce, might be fixed) possible bug with neutron rewind
   status doesn't apply correctly for spawned neutron bombs that are stuck to a shield
     also saw neutron bombs bounce off shield, for normal bullets
   test this more
@@ -17,11 +24,12 @@ mod and mob are too similar
 (always) is there a way to check if the player is stuck inside the map or block
   trigger a short term non-collide if that occurs
 
-(4+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
+(8+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
+  test this on a slower computer, doesn't occur on my computer
   players have extra gravity
     might be from the short jump code
     add in a check every 7 seconds to try and fix it
-      this fix was added and it is working
+      this fix was added and it is working for some cases
         maybe move the fix to once a second?
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
@@ -34,7 +42,11 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
-combine fragmentation grenades, railguns fragment and apply to shotgun slug
+be able to open up custom mode in the normal game
+  might need to be rebuilt from scratch
+  while in through testing mode?
+  have a way to make limited changes as allowed by mods you pick up in game
+  disable the in custom setting flag
 
 mod: power up magnetism - power ups drift towards player
   where would this code go?
@@ -43,9 +55,6 @@ super balls start at 3, not 4
   have to balance damage
 
 RPG might need a buff, now that it disables the other cool grenade mods
-
-retrocausality bomb should fire 3 grenades at once that spread out a small bit before they explode?
-  this means you'd have to make grenades a method.
 
 make different move methods
   mod: crouch charge jump
@@ -66,8 +75,6 @@ mod - move super fast, go intangible, drain energy very fast
   this is like a dodge roll
   mod for standing wave?, cloaking?
 
-spawn a few power ups on the final boss level
-
 mod pilot wave: mini black hole - pull mobs and blocks in with more force
   also from farther away
   also do damage?
@@ -78,8 +85,6 @@ mod pilot wave: antigravity - blocks have no gravity for a few seconds after exi
 bullet mechanic - a bullet that swims through the air
   rotate the velocity vector towards the normalized facing vector
     use the cross product > 0 to determine which direction to rotate the velocity
-
-lower recoil on nail shot gun?
 
 in custom make a top bar that is fixed
   use media rules to make the layout look nice

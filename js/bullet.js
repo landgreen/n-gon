@@ -1030,7 +1030,7 @@ const b = {
             },
             onEnd() {
                 if (mod.isMutualism && this.isMutualismActive && !mod.isEnergyHealth) {
-                    mech.health += 0.01
+                    mech.health += 0.005
                     if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
                     mech.displayHealth();
                 }
@@ -1111,7 +1111,7 @@ const b = {
         World.add(engine.world, bullet[bIndex]); //add bullet to world
 
         if (mod.isMutualism && mech.health > 0.02) {
-            mech.health -= 0.01
+            mech.health -= 0.005
             mech.displayHealth();
             bullet[bIndex].isMutualismActive = true
         }
