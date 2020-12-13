@@ -13,15 +13,15 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // game.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(99)
+            // level.difficultyIncrease(19)
             // game.zoomScale = 1000;
             // game.setZoom();
-            // mech.setField("wormhole")
-            // b.giveGuns("grenades")
-            // mod.isIncendiary = true
-            // mod.is3Missiles = true
-            // mod.giveMod("neutron bomb")
-            // mod.giveMod("causality bombs")
+            // mech.setField("plasma torch")
+            // b.giveGuns("wave beam")
+            // mod.giveMod("micro-extruder")
+            // for (let i = 0; i < 15; i++) mod.giveMod("supply chain")
+
+
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -155,8 +155,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        // spawn.starter(1900, -500, 320)
-        spawn.exploder(2900, -500)
+        spawn.starter(1900, -500, 200)
+        // spawn.exploder(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
@@ -3805,11 +3805,12 @@ const level = {
     },
     nextLevel() {
         if (level.bossKilled) level.levelsCleared++;
-        level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
-        if (level.levelsCleared > level.levels.length) level.difficultyIncrease(game.difficultyMode)
-        if (level.levelsCleared > level.levels.length * 1.25) level.difficultyIncrease(game.difficultyMode)
-        if (level.levelsCleared > level.levels.length * 1.5) level.difficultyIncrease(game.difficultyMode)
-        if (level.levelsCleared > level.levels.length * 2) level.difficultyIncrease(game.difficultyMode)
+        // level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
+
+        //difficulty is increased 5 times when finalBoss dies
+        const len = level.levelsCleared / level.levels.length //add 1 extra difficulty step for each time you have cleared all the levels
+        for (let i = 0; i < len; i++) level.difficultyIncrease(game.difficultyMode)
+
         level.onLevel++; //cycles map to next level
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
         //reset lost mod display

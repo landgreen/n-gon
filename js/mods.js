@@ -6,6 +6,12 @@ const mod = {
             mod.mods[i].isLost = false
             mod.mods[i].count = 0
         }
+        // mod.nailBotCount = 0;
+        // mod.foamBotCount = 0;
+        // mod.boomBotCount = 0;
+        // mod.laserBotCount = 0;
+        // mod.orbitalBotCount = 0;
+        // mod.plasmaBotCount = 0;
         mod.armorFromPowerUps = 0;
         mod.totalCount = 0;
         game.updateModHUD();
@@ -44,6 +50,14 @@ const mod = {
             mod.mods[index].count++
             mod.totalCount++ //used in power up randomization
             game.updateModHUD();
+        }
+    },
+    setModToNonRefundable(name) {
+        for (let i = 0; i < mod.mods.length; i++) {
+            if (mod.mods.name === name) {
+                mod.mods[i].isNonRefundable = true;
+                return
+            }
         }
     },
     // giveBasicMod(index = 'random') {
@@ -92,7 +106,7 @@ const mod = {
         if (mod.isEnergyLoss) dmg *= 1.5;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
-        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 7;
+        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 8;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
@@ -109,7 +123,7 @@ const mod = {
     },
     mods: [{
             name: "capacitor",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>7</strong> stored <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>8</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1028,7 +1042,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.isPulseStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.isPilotFreeze || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isWormholeDamage
+                return mod.isStunField || mod.isPulseStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isWormholeDamage
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -1145,7 +1159,7 @@ const mod = {
             allowed() {
                 return !mod.isEnergyLoss && !mod.isPiezo && !mod.isRewindAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
-            requires: "not piezoelectricity, acute stress response, 1st law, negative mass field",
+            requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass field",
             effect: () => {
                 mech.health = 0
                 // mech.displayHealth();
@@ -1428,9 +1442,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.duplicationChance() > 0 && !mod.isDeterminism
+                return !mod.isDeterminism
             },
-            requires: "a chance to duplicate power ups, not determinism",
+            requires: "not determinism",
             effect() {
                 mod.isCancelDuplication = true
                 mod.cancelCount = 0
@@ -1823,7 +1837,6 @@ const mod = {
                 //remove active bullets  //to get rid of bots
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = [];
-
                 let count = 0 //count mods
                 for (let i = 0, len = mod.mods.length; i < len; i++) { // spawn new mods power ups
                     if (!mod.mods[i].isNonRefundable) count += mod.mods[i].count
@@ -2304,7 +2317,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("wave beam")
+                return mod.haveGunCheck("wave beam") && !mod.isExtruder
             },
             requires: "wave beam",
             effect() {
@@ -2320,7 +2333,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("wave beam") && !mod.isWaveReflect
+                return mod.haveGunCheck("wave beam") && !mod.isWaveReflect && !mod.isExtruder
             },
             requires: "wave beam",
             effect() {
@@ -2338,7 +2351,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("wave beam") && mod.waveSpeedMap !== 3
+                return mod.haveGunCheck("wave beam") && mod.waveSpeedMap !== 3 && !mod.isExtruder
             },
             requires: "wave beam",
             effect() {
@@ -3128,36 +3141,46 @@ const mod = {
                 mech.energy = 0.01;
                 //fill array of available bots
                 const notUpgradedBots = []
-                if (!mod.isNailBotUpgrade) {
-                    notUpgradedBots.push(() => {
-                        mod.giveMod("nail-bot upgrade")
-                        for (let i = 0; i < 2; i++) mod.giveMod("nail-bot")
-                    })
-                }
-                if (!mod.isFoamBotUpgrade) {
-                    notUpgradedBots.push(() => {
-                        mod.giveMod("foam-bot upgrade")
-                        for (let i = 0; i < 2; i++) mod.giveMod("foam-bot")
-                    })
-                }
-                if (!mod.isBoomBotUpgrade) {
-                    notUpgradedBots.push(() => {
-                        mod.giveMod("boom-bot upgrade")
-                        for (let i = 0; i < 2; i++) mod.giveMod("boom-bot")
-                    })
-                }
-                if (!mod.isLaserBotUpgrade) {
-                    notUpgradedBots.push(() => {
-                        mod.giveMod("laser-bot upgrade")
-                        for (let i = 0; i < 2; i++) mod.giveMod("laser-bot")
-                    })
-                }
-                if (!mod.isOrbitBotUpgrade) {
-                    notUpgradedBots.push(() => {
-                        mod.giveMod("orbital-bot upgrade")
-                        for (let i = 0; i < 2; i++) mod.giveMod("orbital-bot")
-                    })
-                }
+                if (!mod.isNailBotUpgrade) notUpgradedBots.push(() => {
+                    mod.giveMod("nail-bot upgrade")
+                    mod.setModToNonRefundable("nail-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.nailBot()
+                        mod.nailBotCount++;
+                    }
+                })
+                if (!mod.isFoamBotUpgrade) notUpgradedBots.push(() => {
+                    mod.giveMod("foam-bot upgrade")
+                    mod.setModToNonRefundable("foam-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.foamBot()
+                        mod.foamBotCount++;
+                    }
+                })
+                if (!mod.isBoomBotUpgrade) notUpgradedBots.push(() => {
+                    mod.giveMod("boom-bot upgrade")
+                    mod.setModToNonRefundable("boom-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.boomBot()
+                        mod.boomBotCount++;
+                    }
+                })
+                if (!mod.isLaserBotUpgrade) notUpgradedBots.push(() => {
+                    mod.giveMod("laser-bot upgrade")
+                    mod.setModToNonRefundable("laser-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.laserBot()
+                        mod.laserBotCount++;
+                    }
+                })
+                if (!mod.isOrbitBotUpgrade) notUpgradedBots.push(() => {
+                    mod.giveMod("orbital-bot upgrade")
+                    mod.setModToNonRefundable("orbital-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.orbitalBot()
+                        mod.orbitalBotCount++;
+                    }
+                })
                 //choose random function from the array and run it
                 notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]()
             },
@@ -3225,7 +3248,6 @@ const mod = {
             },
             remove() {
                 mod.isHarmReduce = false;
-                // if (mech.fieldUpgrades[mech.fieldMode].name === "negative mass field") mech.setField("negative mass field") //reset harm reduction
             }
         },
         {
@@ -3245,19 +3267,19 @@ const mod = {
             }
         },
         {
-            name: "negative temperature",
-            description: "<strong>negative mass field</strong> uses <strong class='color-f'>energy</strong><br>to <strong class='color-s'>freeze</strong> each mob caught in it's effect",
+            name: "Bose Einstein condensate",
+            description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "negative mass field"
+                return mech.fieldUpgrades[mech.fieldMode].name === "pilot wave" || mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" || mech.fieldUpgrades[mech.fieldMode].name === "time dilation field"
             },
-            requires: "negative mass field",
+            requires: "pilot wave, negative mass field, time dilation field",
             effect() {
-                mod.isFreezeMobs = true;
+                mod.isFreezeMobs = true
             },
             remove() {
-                mod.isFreezeMobs = false;
+                mod.isFreezeMobs = false
             }
         },
         {
@@ -3291,6 +3313,22 @@ const mod = {
             },
             remove() {
                 mod.plasmaBotCount = 0;
+            }
+        },
+        {
+            name: "micro-extruder",
+            description: "<strong class='color-plasma'>plasma</strong> torch ejects a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch"
+            },
+            requires: "plasma torch",
+            effect() {
+                mod.isExtruder = true;
+            },
+            remove() {
+                mod.isExtruder = false;
             }
         },
         {
@@ -3399,22 +3437,6 @@ const mod = {
             remove() {
                 mod.aimDamage = 1
                 b.setFireCD();
-            }
-        },
-        {
-            name: "Bose Einstein condensate",
-            description: "<strong>mobs</strong> in superposition with the <strong>pilot wave</strong><br>are <strong class='color-s'>frozen</strong> for <strong>2</strong> seconds",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
-            },
-            requires: "pilot wave",
-            effect() {
-                mod.isPilotFreeze = true
-            },
-            remove() {
-                mod.isPilotFreeze = false
             }
         },
         {
@@ -3647,7 +3669,6 @@ const mod = {
     isNailPoison: null,
     isEnergyHealth: null,
     isPulseStun: null,
-    isPilotFreeze: null,
     restDamage: null,
     isRPG: null,
     is3Missiles: null,
@@ -3750,5 +3771,6 @@ const mod = {
     isMaxEnergyMod: null,
     isLowEnergyDamage: null,
     isRewindBot: null,
-    isRewindGrenade: null
+    isRewindGrenade: null,
+    isExtruder: null
 }

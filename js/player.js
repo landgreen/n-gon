@@ -491,7 +491,7 @@ const mech = {
     },
     rewind(steps) {
         if (mod.isRewindGrenade) {
-            for (let i = 1, len = Math.floor(1.5 + steps / 40); i < len; i++) {
+            for (let i = 1, len = Math.floor(2 + steps / 40); i < len; i++) {
                 b.grenade(Vector.add(mech.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
                 const who = bullet[bullet.length - 1]
                 if (mod.isVacuumBomb) {
@@ -1163,6 +1163,8 @@ const mech = {
             } else {
                 mech.drawHold(who);
             }
+            // if (mod.isFreezeMobs) mobs.statusSlow(who, 60) //this works but doesn't have a fun effect
+
             // mech.holdingTarget = null
             //knock backs
             if (mech.fieldShieldingScale > 0) {
@@ -1293,7 +1295,14 @@ const mech = {
                     }
                 }
             }
-            wake(mob);
+            if (mod.isFreezeMobs) {
+                for (let i = 0, len = mob.length; i < len; ++i) {
+                    Matter.Sleeping.set(mob[i], false)
+                    mobs.statusSlow(mob[i], 60)
+                }
+            } else {
+                wake(mob);
+            }
             wake(body);
             wake(bullet);
             for (let i = 0, len = cons.length; i < len; i++) {
@@ -1396,10 +1405,6 @@ const mech = {
             effect: () => {
                 mech.fieldShieldingScale = 0;
                 mech.grabPowerUpRange2 = 10000000
-                // mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
-                // mech.fieldMeterColor = "#0af"
-                // mech.fieldArc = 0.3; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
-                // mech.calculateFieldThreshold();
                 mech.hold = function() {
                     const wave = Math.sin(mech.cycle * 0.022);
                     mech.fieldRange = 170 + 12 * wave
@@ -1643,137 +1648,10 @@ const mech = {
                     } else if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
                         mech.grabPowerUp();
                         mech.lookForPickUp();
-                        const DRAIN = 0.0012
-                        if (mech.energy > DRAIN) {
-                            mech.energy -= DRAIN;
-                            if (mech.energy < 0) {
-                                mech.fieldCDcycle = mech.cycle + 120;
-                                mech.energy = 0;
-                            }
-                            //calculate laser collision
-                            let best;
-                            let range = mod.isPlasmaRange * (120 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
-                            // const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
-                            const path = [{
-                                    x: mech.pos.x + 20 * Math.cos(mech.angle),
-                                    y: mech.pos.y + 20 * Math.sin(mech.angle)
-                                },
-                                {
-                                    x: mech.pos.x + range * Math.cos(mech.angle),
-                                    y: mech.pos.y + range * Math.sin(mech.angle)
-                                }
-                            ];
-                            const vertexCollision = function(v1, v1End, domain) {
-                                for (let i = 0; i < domain.length; ++i) {
-                                    let vertices = domain[i].vertices;
-                                    const len = vertices.length - 1;
-                                    for (let j = 0; j < len; j++) {
-                                        results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                                        if (results.onLine1 && results.onLine2) {
-                                            const dx = v1.x - results.x;
-                                            const dy = v1.y - results.y;
-                                            const dist2 = dx * dx + dy * dy;
-                                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                                                best = {
-                                                    x: results.x,
-                                                    y: results.y,
-                                                    dist2: dist2,
-                                                    who: domain[i],
-                                                    v1: vertices[j],
-                                                    v2: vertices[j + 1]
-                                                };
-                                            }
-                                        }
-                                    }
-                                    results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-                                    if (results.onLine1 && results.onLine2) {
-                                        const dx = v1.x - results.x;
-                                        const dy = v1.y - results.y;
-                                        const dist2 = dx * dx + dy * dy;
-                                        if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-                                            best = {
-                                                x: results.x,
-                                                y: results.y,
-                                                dist2: dist2,
-                                                who: domain[i],
-                                                v1: vertices[0],
-                                                v2: vertices[len]
-                                            };
-                                        }
-                                    }
-                                }
-                            };
-
-                            //check for collisions
-                            best = {
-                                x: null,
-                                y: null,
-                                dist2: Infinity,
-                                who: null,
-                                v1: null,
-                                v2: null
-                            };
-                            vertexCollision(path[0], path[1], mob);
-                            vertexCollision(path[0], path[1], map);
-                            vertexCollision(path[0], path[1], body);
-                            if (best.dist2 != Infinity) { //if hitting something
-                                path[path.length - 1] = {
-                                    x: best.x,
-                                    y: best.y
-                                };
-                                if (best.who.alive) {
-                                    const dmg = 0.8 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
-                                    best.who.damage(dmg);
-                                    best.who.locatePlayer();
-
-                                    //push mobs away
-                                    const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
-                                    Matter.Body.applyForce(best.who, path[1], force)
-                                    Matter.Body.setVelocity(best.who, { //friction
-                                        x: best.who.velocity.x * 0.7,
-                                        y: best.who.velocity.y * 0.7
-                                    });
-                                    //draw mob damage circle
-                                    game.drawList.push({
-                                        x: path[1].x,
-                                        y: path[1].y,
-                                        radius: Math.sqrt(dmg) * 50,
-                                        color: "rgba(255,0,255,0.2)",
-                                        time: game.drawTime * 4
-                                    });
-                                } else if (!best.who.isStatic) {
-                                    //push blocks away
-                                    const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.007 * Math.sqrt(Math.sqrt(best.who.mass)))
-                                    Matter.Body.applyForce(best.who, path[1], force)
-                                }
-                            }
-
-                            //draw blowtorch laser beam
-                            ctx.strokeStyle = "rgba(255,0,255,0.1)"
-                            ctx.lineWidth = 14
-                            ctx.beginPath();
-                            ctx.moveTo(path[0].x, path[0].y);
-                            ctx.lineTo(path[1].x, path[1].y);
-                            ctx.stroke();
-                            ctx.strokeStyle = "#f0f";
-                            ctx.lineWidth = 2
-                            ctx.stroke();
-
-                            //draw electricity
-                            const Dx = Math.cos(mech.angle);
-                            const Dy = Math.sin(mech.angle);
-                            let x = mech.pos.x + 20 * Dx;
-                            let y = mech.pos.y + 20 * Dy;
-                            ctx.beginPath();
-                            ctx.moveTo(x, y);
-                            const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 10
-                            for (let i = 0; i < 8; i++) {
-                                x += step * (Dx + 1.5 * (Math.random() - 0.5))
-                                y += step * (Dy + 1.5 * (Math.random() - 0.5))
-                                ctx.lineTo(x, y);
-                            }
-                            ctx.lineWidth = 2 * Math.random();
-                            ctx.stroke();
+                        if (mod.isExtruder) {
+                            b.extruder();
+                        } else {
+                            b.plasma();
                         }
                     } else if (mech.holdingTarget && mech.fieldCDcycle < mech.cycle) { //holding, but field button is released
                         mech.pickUp();
@@ -2270,7 +2148,7 @@ const mech = {
                                     }
                                 }
 
-                                if (mod.isPilotFreeze) {
+                                if (mod.isFreezeMobs) {
                                     for (let i = 0, len = mob.length; i < len; ++i) {
                                         if (Vector.magnitude(Vector.sub(mob[i].position, mech.fieldPosition)) < mech.fieldRadius) {
                                             mobs.statusSlow(mob[i], 120)

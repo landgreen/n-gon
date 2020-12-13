@@ -678,6 +678,262 @@ const b = {
         });
         World.add(engine.world, bullet[me]); //add bullet to world
     },
+    lastAngle: 0,
+    extruder() {
+        const color = "#f07"
+        const DRAIN = 0.00014 + mech.fieldRegen
+        if (mech.energy > DRAIN) {
+            mech.energy -= DRAIN
+            if (mech.energy < 0) {
+                mech.fieldCDcycle = mech.cycle + 120;
+                mech.energy = 0;
+            }
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = color
+            ctx.beginPath(); //draw all the wave bullets
+            for (let i = 0, len = bullet.length; i < len; i++) {
+                if (bullet[i].isBranch) {
+                    ctx.stroke();
+                    ctx.beginPath(); //draw all the wave bullets
+                } else if (bullet[i].isWave) ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
+            }
+            ctx.lineTo(mech.pos.x + 15 * Math.cos(mech.angle), mech.pos.y + 15 * Math.sin(mech.angle))
+            ctx.stroke();
+        } else {
+            mech.fireCDcycle = mech.cycle + 60; // cool down
+            for (let i = 0, len = bullet.length; i < len; i++) { //remove all bullets
+                if (bullet[i].isWave) {
+                    bullet[i].isWave = false
+                    bullet[i].endCycle = 0
+                }
+            }
+            return
+        }
+
+        const SPEED = 13
+        const me = bullet.length;
+        const where = Vector.add(mech.pos, player.velocity)
+        bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(mech.angle), where.y + 20 * Math.sin(mech.angle), 3, 0.01, {
+            cycle: -0.5,
+            isWave: true,
+            endCycle: game.cycle + 50 * mod.isPlasmaRange,
+            inertia: Infinity,
+            frictionAir: 0,
+            isInHole: true, //this keeps the bullet from entering wormholes
+            minDmgSpeed: 0,
+            dmg: b.dmgScale * 1.4, //damage also changes when you divide by mob.mass on in .do()
+            isJustReflected: false,
+            classType: "bullet",
+            isBranch: false,
+            restitution: 0,
+            collisionFilter: {
+                // category: 0,
+                // mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
+                category: cat.bullet,
+                mask: cat.map, //cat.mob | cat.mobBullet | cat.mobShield
+            },
+            beforeDmg() {},
+            onEnd() {},
+            do() {
+                mech.fireCDcycle = mech.cycle //this is here to trigger cloaking field
+                if (!input.field) {
+                    this.endCycle = 0;
+                    this.isWave = false
+                    return
+                }
+                if (!mech.isBodiesAsleep) {
+                    if (this.endCycle < game.cycle + 1) this.isWave = false
+                    if (Matter.Query.point(map, this.position).length) { //check if inside map
+                        this.isBranch = true;
+                        // for (let i = 0, len = bullet.length; i < len; i++) { //remove all bullets
+                        //     if (bullet[i].isWave && bullet[i].cycle > this.cycle) {
+                        //         bullet[i].isWave = false
+                        //         bullet[i].endCycle = 0
+                        //     }
+                        // }
+                    } else { //check if inside a body
+                        const q = Matter.Query.point(mob, this.position)
+                        for (let i = 0; i < q.length; i++) {
+                            Matter.Body.setVelocity(q[i], {
+                                x: q[i].velocity.x * 0.7,
+                                y: q[i].velocity.y * 0.7
+                            });
+                            Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
+                            let dmg = this.dmg / Math.min(10, q[i].mass)
+                            q[i].damage(dmg);
+                            q[i].foundPlayer();
+                            game.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: Math.log(2 * dmg + 1.4) * 40,
+                                color: color,
+                                time: game.drawTime
+                            });
+                        }
+                    }
+                    this.cycle++
+                    const wiggleMag = (mech.crouch ? 6 : 12) * Math.cos(game.cycle * 0.09)
+                    const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.36)) //+ wiggleMag * Math.cos(game.cycle * 0.3))
+                    const velocity = Vector.mult(player.velocity, 0.3) //move with player
+                    Matter.Body.setPosition(this, Vector.add(velocity, Vector.add(this.position, wiggle)))
+                    // Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
+                }
+            }
+        });
+        World.add(engine.world, bullet[me]); //add bullet to world
+        Matter.Body.setVelocity(bullet[me], {
+            x: SPEED * Math.cos(mech.angle),
+            y: SPEED * Math.sin(mech.angle)
+        });
+        const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
+        const angleDifference = 180 - Math.abs(Math.abs(b.lastAngle - mech.angle) - 180); //find the difference between current and previous angle
+        b.lastAngle = mech.angle
+        if (angleDifference > 0.5) { //don't draw stroke for this bullet
+            bullet[me].isBranch = true;
+            // for (let i = 0, len = bullet.length; i < len; i++) { //remove all bullets
+            //     if (bullet[i].isWave) {
+            //         bullet[i].isWave = false
+            //         bullet[i].endCycle = 0
+            //     }
+            // }
+            // return
+        }
+    },
+    plasma() {
+        const DRAIN = 0.00008 + mech.fieldRegen
+        if (mech.energy > DRAIN) {
+            mech.energy -= DRAIN;
+            if (mech.energy < 0) {
+                mech.fieldCDcycle = mech.cycle + 120;
+                mech.energy = 0;
+            }
+
+            //calculate laser collision
+            let best;
+            let range = mod.isPlasmaRange * (120 + (mech.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(mech.cycle * 0.3);
+            // const dir = mech.angle // + 0.04 * (Math.random() - 0.5)
+            const path = [{
+                    x: mech.pos.x + 20 * Math.cos(mech.angle),
+                    y: mech.pos.y + 20 * Math.sin(mech.angle)
+                },
+                {
+                    x: mech.pos.x + range * Math.cos(mech.angle),
+                    y: mech.pos.y + range * Math.sin(mech.angle)
+                }
+            ];
+            const vertexCollision = function(v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                    let vertices = domain[i].vertices;
+                    const len = vertices.length - 1;
+                    for (let j = 0; j < len; j++) {
+                        results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                                best = {
+                                    x: results.x,
+                                    y: results.y,
+                                    dist2: dist2,
+                                    who: domain[i],
+                                    v1: vertices[j],
+                                    v2: vertices[j + 1]
+                                };
+                            }
+                        }
+                    }
+                    results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                            best = {
+                                x: results.x,
+                                y: results.y,
+                                dist2: dist2,
+                                who: domain[i],
+                                v1: vertices[0],
+                                v2: vertices[len]
+                            };
+                        }
+                    }
+                }
+            };
+
+            //check for collisions
+            best = {
+                x: null,
+                y: null,
+                dist2: Infinity,
+                who: null,
+                v1: null,
+                v2: null
+            };
+            vertexCollision(path[0], path[1], mob);
+            vertexCollision(path[0], path[1], map);
+            vertexCollision(path[0], path[1], body);
+            if (best.dist2 != Infinity) { //if hitting something
+                path[path.length - 1] = {
+                    x: best.x,
+                    y: best.y
+                };
+                if (best.who.alive) {
+                    const dmg = 0.8 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                    best.who.damage(dmg);
+                    best.who.locatePlayer();
+
+                    //push mobs away
+                    const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
+                    Matter.Body.applyForce(best.who, path[1], force)
+                    Matter.Body.setVelocity(best.who, { //friction
+                        x: best.who.velocity.x * 0.7,
+                        y: best.who.velocity.y * 0.7
+                    });
+                    //draw mob damage circle
+                    game.drawList.push({
+                        x: path[1].x,
+                        y: path[1].y,
+                        radius: Math.sqrt(dmg) * 50,
+                        color: "rgba(255,0,255,0.2)",
+                        time: game.drawTime * 4
+                    });
+                } else if (!best.who.isStatic) {
+                    //push blocks away
+                    const force = Vector.mult(Vector.normalise(Vector.sub(mech.pos, path[1])), -0.007 * Math.sqrt(Math.sqrt(best.who.mass)))
+                    Matter.Body.applyForce(best.who, path[1], force)
+                }
+            }
+
+            //draw blowtorch laser beam
+            ctx.strokeStyle = "rgba(255,0,255,0.1)"
+            ctx.lineWidth = 14
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            ctx.lineTo(path[1].x, path[1].y);
+            ctx.stroke();
+            ctx.strokeStyle = "#f0f";
+            ctx.lineWidth = 2
+            ctx.stroke();
+
+            //draw electricity
+            const Dx = Math.cos(mech.angle);
+            const Dy = Math.sin(mech.angle);
+            let x = mech.pos.x + 20 * Dx;
+            let y = mech.pos.y + 20 * Dy;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 10
+            for (let i = 0; i < 8; i++) {
+                x += step * (Dx + 1.5 * (Math.random() - 0.5))
+                y += step * (Dy + 1.5 * (Math.random() - 0.5))
+                ctx.lineTo(x, y);
+            }
+            ctx.lineWidth = 2 * Math.random();
+            ctx.stroke();
+        }
+    },
     laser(where = {
         x: mech.pos.x + 20 * Math.cos(mech.angle),
         y: mech.pos.y + 20 * Math.sin(mech.angle)
@@ -2565,7 +2821,7 @@ const b = {
                         frictionAir: 0,
                         slow: 0,
                         minDmgSpeed: 0,
-                        dmg: 0,
+                        dmg: b.dmgScale * (mod.waveHelix === 1 ? 0.6 : 0.75), //control damage also when you divide by mob.mass
                         isJustReflected: false,
                         classType: "bullet",
                         collisionFilter: {
@@ -2580,7 +2836,7 @@ const b = {
                                     // check if inside a mob
                                     q = Matter.Query.point(mob, this.position)
                                     for (let i = 0; i < q.length; i++) {
-                                        let dmg = b.dmgScale * 0.4 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.8) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                                        let dmg = this.dmg / Math.min(10, q[i].mass)
                                         q[i].damage(dmg);
                                         q[i].foundPlayer();
                                         game.drawList.push({ //add dmg to draw queue
@@ -2613,7 +2869,7 @@ const b = {
                                             for (let i = 0; i < q.length; i++) {
                                                 slowCheck = 0.3;
                                                 Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                                                let dmg = b.dmgScale * 0.4 / Math.sqrt(q[i].mass) * (mod.waveHelix === 1 ? 1 : 0.8) //1 - 0.4 = 0.6 for helix mod 40% damage reduction
+                                                let dmg = this.dmg / Math.min(10, q[i].mass)
                                                 q[i].damage(dmg);
                                                 q[i].foundPlayer();
                                                 game.drawList.push({ //add dmg to draw queue
@@ -2632,6 +2888,8 @@ const b = {
                                     }
                                 }
                                 this.cycle++
+                                //6 * Math.cos(this.cycle * 0.1) +
+                                // Math.cos(game.cycle * 0.09) *
                                 const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.35) * ((i % 2) ? -1 : 1))
                                 Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
                             }

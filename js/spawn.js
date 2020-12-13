@@ -101,6 +101,16 @@ const spawn = {
             level.bossKilled = true;
             level.exit.x = 5500;
             level.exit.y = -330;
+
+            //pull in particles
+            for (let i = 0, len = body.length; i < len; ++i) { //push blocks away horizontally
+                const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, body[i].position)), 65)
+                const pushUp = Vector.add(velocity, { x: 0, y: -0.3 })
+                Matter.Body.setVelocity(body[i], Vector.add(body[i].velocity, pushUp));
+            }
+            //ramp up damage
+            for (let i = 0; i < 5; i++) level.difficultyIncrease(game.difficultyMode)
+
         };
         me.onDamage = function() {};
         me.cycle = 420;
@@ -132,7 +142,7 @@ const spawn = {
                         Matter.Body.scale(this, 10, 10);
                         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
                         if (!this.isShielded) spawn.shield(this, x, y, 1); // regen shield to also prevent stun
-                        for (let i = 0, len = body.length; i < len; ++i) {
+                        for (let i = 0, len = body.length; i < len; ++i) { //push blocks away horizontally
                             if (body[i].position.x > this.position.x) {
                                 body[i].force.x = 0.5
                             } else {
