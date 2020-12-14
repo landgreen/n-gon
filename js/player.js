@@ -1660,6 +1660,28 @@ const mech = {
                     }
                     mech.drawFieldMeter("rgba(0, 0, 0, 0.2)")
 
+                    if (mod.isExtruder) {
+                        if (input.field) {
+                            mech.wasExtruderOn = true
+                        } else {
+                            mech.wasExtruderOn = false
+                        }
+                        ctx.lineWidth = 5;
+                        ctx.strokeStyle = "#f07"
+                        ctx.beginPath(); //draw all the wave bullets
+                        for (let i = 0, len = bullet.length; i < len; i++) {
+                            if (bullet[i].isWave) {
+                                if (bullet[i].isBranch) {
+                                    ctx.stroke();
+                                    ctx.beginPath(); //draw all the wave bullets
+                                } else {
+                                    ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
+                                }
+                            }
+                        }
+                        if (mech.wasExtruderOn && mech.isExtruderOn) ctx.lineTo(mech.pos.x + 15 * Math.cos(mech.angle), mech.pos.y + 15 * Math.sin(mech.angle))
+                        ctx.stroke();
+                    }
                 }
             }
         },

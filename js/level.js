@@ -16,9 +16,9 @@ const level = {
             // level.difficultyIncrease(19)
             // game.zoomScale = 1000;
             // game.setZoom();
-            // mech.setField("plasma torch")
+            mech.setField("plasma torch")
             // b.giveGuns("wave beam")
-            // mod.giveMod("micro-extruder")
+            mod.giveMod("micro-extruder")
             // for (let i = 0; i < 15; i++) mod.giveMod("supply chain")
 
 

@@ -679,124 +679,85 @@ const b = {
         World.add(engine.world, bullet[me]); //add bullet to world
     },
     lastAngle: 0,
+    wasExtruderOn: false,
+    isExtruderOn: false,
     extruder() {
-        const color = "#f07"
-        const DRAIN = 0.00014 + mech.fieldRegen
+        const DRAIN = 0.0007 + mech.fieldRegen
         if (mech.energy > DRAIN) {
             mech.energy -= DRAIN
             if (mech.energy < 0) {
                 mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
             }
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = color
-            ctx.beginPath(); //draw all the wave bullets
-            for (let i = 0, len = bullet.length; i < len; i++) {
-                if (bullet[i].isBranch) {
-                    ctx.stroke();
-                    ctx.beginPath(); //draw all the wave bullets
-                } else if (bullet[i].isWave) ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
-            }
-            ctx.lineTo(mech.pos.x + 15 * Math.cos(mech.angle), mech.pos.y + 15 * Math.sin(mech.angle))
-            ctx.stroke();
-        } else {
-            mech.fireCDcycle = mech.cycle + 60; // cool down
-            for (let i = 0, len = bullet.length; i < len; i++) { //remove all bullets
-                if (bullet[i].isWave) {
-                    bullet[i].isWave = false
-                    bullet[i].endCycle = 0
-                }
-            }
-            return
-        }
-
-        const SPEED = 13
-        const me = bullet.length;
-        const where = Vector.add(mech.pos, player.velocity)
-        bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(mech.angle), where.y + 20 * Math.sin(mech.angle), 3, 0.01, {
-            cycle: -0.5,
-            isWave: true,
-            endCycle: game.cycle + 50 * mod.isPlasmaRange,
-            inertia: Infinity,
-            frictionAir: 0,
-            isInHole: true, //this keeps the bullet from entering wormholes
-            minDmgSpeed: 0,
-            dmg: b.dmgScale * 1.4, //damage also changes when you divide by mob.mass on in .do()
-            isJustReflected: false,
-            classType: "bullet",
-            isBranch: false,
-            restitution: 0,
-            collisionFilter: {
-                // category: 0,
-                // mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
-                category: cat.bullet,
-                mask: cat.map, //cat.mob | cat.mobBullet | cat.mobShield
-            },
-            beforeDmg() {},
-            onEnd() {},
-            do() {
-                mech.fireCDcycle = mech.cycle //this is here to trigger cloaking field
-                if (!input.field) {
-                    this.endCycle = 0;
-                    this.isWave = false
-                    return
-                }
-                if (!mech.isBodiesAsleep) {
-                    if (this.endCycle < game.cycle + 1) this.isWave = false
-                    if (Matter.Query.point(map, this.position).length) { //check if inside map
-                        this.isBranch = true;
-                        // for (let i = 0, len = bullet.length; i < len; i++) { //remove all bullets
-                        //     if (bullet[i].isWave && bullet[i].cycle > this.cycle) {
-                        //         bullet[i].isWave = false
-                        //         bullet[i].endCycle = 0
-                        //     }
-                        // }
-                    } else { //check if inside a body
-                        const q = Matter.Query.point(mob, this.position)
-                        for (let i = 0; i < q.length; i++) {
-                            Matter.Body.setVelocity(q[i], {
-                                x: q[i].velocity.x * 0.7,
-                                y: q[i].velocity.y * 0.7
-                            });
-                            Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                            let dmg = this.dmg / Math.min(10, q[i].mass)
-                            q[i].damage(dmg);
-                            q[i].foundPlayer();
-                            game.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: Math.log(2 * dmg + 1.4) * 40,
-                                color: color,
-                                time: game.drawTime
-                            });
+            const SPEED = 10
+            const me = bullet.length;
+            const where = Vector.add(mech.pos, player.velocity)
+            bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(mech.angle), where.y + 20 * Math.sin(mech.angle), 3, 0.01, {
+                cycle: -0.5,
+                isWave: true,
+                endCycle: game.cycle + 10 + 40 * mod.isPlasmaRange,
+                inertia: Infinity,
+                frictionAir: 0,
+                isInHole: true, //this keeps the bullet from entering wormholes
+                minDmgSpeed: 0,
+                dmg: b.dmgScale * 1.25, //damage also changes when you divide by mob.mass on in .do()
+                classType: "bullet",
+                isBranch: false,
+                restitution: 0,
+                collisionFilter: {
+                    // category: 0,
+                    // mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
+                    category: cat.bullet,
+                    mask: cat.map, //cat.mob | cat.mobBullet | cat.mobShield
+                },
+                beforeDmg() {},
+                onEnd() {},
+                do() {
+                    if (!mech.isBodiesAsleep) {
+                        if (this.endCycle < game.cycle + 1) this.isWave = false
+                        if (Matter.Query.point(map, this.position).length) { //check if inside map
+                            this.isBranch = true;
+                        } else { //check if inside a body
+                            const q = Matter.Query.point(mob, this.position)
+                            for (let i = 0; i < q.length; i++) {
+                                Matter.Body.setVelocity(q[i], {
+                                    x: q[i].velocity.x * 0.7,
+                                    y: q[i].velocity.y * 0.7
+                                });
+                                Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
+                                let dmg = this.dmg / Math.min(10, q[i].mass)
+                                q[i].damage(dmg);
+                                q[i].foundPlayer();
+                                game.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    color: "rgba(255, 0, 119, 0.5)",
+                                    time: game.drawTime
+                                });
+                            }
                         }
+                        this.cycle++
+                        const wiggleMag = (mech.crouch ? 6 : 12) * Math.cos(game.cycle * 0.09)
+                        const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.36)) //+ wiggleMag * Math.cos(game.cycle * 0.3))
+                        const velocity = Vector.mult(player.velocity, 0.25) //move with player
+                        Matter.Body.setPosition(this, Vector.add(velocity, Vector.add(this.position, wiggle)))
+                        // Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
                     }
-                    this.cycle++
-                    const wiggleMag = (mech.crouch ? 6 : 12) * Math.cos(game.cycle * 0.09)
-                    const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.36)) //+ wiggleMag * Math.cos(game.cycle * 0.3))
-                    const velocity = Vector.mult(player.velocity, 0.3) //move with player
-                    Matter.Body.setPosition(this, Vector.add(velocity, Vector.add(this.position, wiggle)))
-                    // Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
                 }
-            }
-        });
-        World.add(engine.world, bullet[me]); //add bullet to world
-        Matter.Body.setVelocity(bullet[me], {
-            x: SPEED * Math.cos(mech.angle),
-            y: SPEED * Math.sin(mech.angle)
-        });
-        const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
-        const angleDifference = 180 - Math.abs(Math.abs(b.lastAngle - mech.angle) - 180); //find the difference between current and previous angle
-        b.lastAngle = mech.angle
-        if (angleDifference > 0.5) { //don't draw stroke for this bullet
-            bullet[me].isBranch = true;
-            // for (let i = 0, len = bullet.length; i < len; i++) { //remove all bullets
-            //     if (bullet[i].isWave) {
-            //         bullet[i].isWave = false
-            //         bullet[i].endCycle = 0
-            //     }
-            // }
-            // return
+            });
+            World.add(engine.world, bullet[me]); //add bullet to world
+            Matter.Body.setVelocity(bullet[me], {
+                x: SPEED * Math.cos(mech.angle),
+                y: SPEED * Math.sin(mech.angle)
+            });
+            const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
+            if (180 - Math.abs(Math.abs(b.lastAngle - mech.angle) - 180) > 0.3) bullet[me].isBranch = true; //don't draw stroke for this bullet
+            b.lastAngle = mech.angle //track last angle for the above angle difference calculation
+            if (!mech.wasExtruderOn) bullet[me].isBranch = true;
+            mech.isExtruderOn = true
+        } else {
+            mech.isExtruderOn = false
         }
     },
     plasma() {

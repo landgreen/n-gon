@@ -1,37 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-wave beam damage works better vs. high mass mobs
-  also more damage and ammo
-
-mod plasma torch: extruder - plasma torch ejects a thin hot wire, does more damage, but drains more energy
-
-mod: Bose Einstein condensate - freeze mobs inside your field
-  pilot wave, negative mass field, time dilation field
-
-difficulty - after you clear the finalBoss, difficulty increase per level is now lower
-  but, when the finalBoss dies difficulty immediately increases greatly
-  
-  difficulty used to work like this:
-  (+1 per level) 0,1,2,3,4,5,6,7,8,9,10, (final boss dies)
-  (+2,3,4 per level) 12,14,16,19,22,25,29,33,37,41, (final boss dies)
-  (+4 per level) 44,48,52,56 ...
-
-  difficulty works like this now:
-  (+1 per level) 0,1,2,3,4,5,6,7,8,9,10, (final boss dies +5)
-  (+2 per level) 17,19,21,23,25,27,29,31,33,35, (final boss dies +5)
-  (+3 per level) 43,46,49,52 ...
-
-  difficulty mode scales these numbers
-  easy: x1,  normal: x2,  hard: x4,  why: x6
-
-  each time difficulty increases:
-    game.dmgScale = 0.38 * game.difficulty //damage done by mobs increases each level
-    b.dmgScale *= 0.93; // your damage goes down
-    game.healScale = 1 / (1 + game.difficulty * 0.06) //healing goes down
-    if (game.accelScale < 5) game.accelScale *= 1.02 //mob acceleration increases each level, but is capped
-    if (game.lookFreqScale > 0.2) game.lookFreqScale *= 0.98 //mob cycles between looks decreases each level, but is capped
-    if (game.CDScale > 0.2) game.CDScale *= 0.97 //mob ability cooldown time decreases each level, but is capped   
-
+extruder: leftovers still exist when field isn't active
+  range and damage are all slightly decreased
+  energy drain is greatly increased
 
 ******************************************************** BUGS ********************************************************
 
@@ -68,8 +39,6 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
-
-mod plasma torch: extruder speed is improved
 
 color/highlight field or gun mods in selection menu (or custom)
   to show that they are special
