@@ -106,7 +106,7 @@ const mod = {
         if (mod.isEnergyLoss) dmg *= 1.5;
         if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
-        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 8;
+        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 9;
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
@@ -122,8 +122,8 @@ const mod = {
         return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
     },
     mods: [{
-            name: "capacitor",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>8</strong> stored <strong class='color-f'>energy</strong>",
+            name: "electrolytes",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1054,7 +1054,7 @@ const mod = {
         },
         {
             name: "supercapacitor",
-            description: "<strong class='color-f'>energy</strong> above your max decays <strong>66%</strong> slower",
+            description: "<strong class='color-f'>energy</strong> above your max decays <strong>60%</strong> slower",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1062,10 +1062,10 @@ const mod = {
             },
             requires: "a source of overfilled energy",
             effect() {
-                mod.overfillDrain = 0.933
+                mod.overfillDrain = 0.85
             },
             remove() {
-                mod.overfillDrain = 0.8
+                mod.overfillDrain = 0.75
             }
         },
         {
@@ -1923,6 +1923,7 @@ const mod = {
         {
             name: "incendiary ammunition",
             description: "<strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><em style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</em>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1939,6 +1940,7 @@ const mod = {
         {
             name: "Lorentzian topology",
             description: "<strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
+            isGunMod: true,
             maxCount: 3,
             count: 0,
             allowed() {
@@ -1955,6 +1957,7 @@ const mod = {
         {
             name: "microstates",
             description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1971,6 +1974,7 @@ const mod = {
         {
             name: "ice crystal nucleation",
             description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2006,6 +2010,7 @@ const mod = {
         {
             name: "critical bifurcation",
             description: "<strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2022,6 +2027,7 @@ const mod = {
         {
             name: "pneumatic actuator",
             description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2038,6 +2044,7 @@ const mod = {
         {
             name: "powder-actuated",
             description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2054,6 +2061,7 @@ const mod = {
         {
             name: "shotgun spin-statistics",
             description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br><strong class='color-g'>ammo</strong> costs are <strong>doubled</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2092,6 +2100,7 @@ const mod = {
         {
             name: "nailshot",
             description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2108,6 +2117,7 @@ const mod = {
         {
             name: "shotgun slug",
             description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2124,6 +2134,7 @@ const mod = {
         {
             name: "Newton's 3rd law",
             description: "the <strong>shotgun</strong> fire <strong><em>delay</em></strong> is <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2140,6 +2151,7 @@ const mod = {
         {
             name: "super duper",
             description: "fire <strong>1</strong> additional <strong>super ball</strong>",
+            isGunMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2156,6 +2168,7 @@ const mod = {
         {
             name: "super ball",
             description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2172,8 +2185,9 @@ const mod = {
         {
             name: "super sized",
             description: `your <strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
-            count: 0,
+            isGunMod: true,
             maxCount: 9,
+            count: 0,
             allowed() {
                 return mod.haveGunCheck("super balls")
             },
@@ -2188,6 +2202,7 @@ const mod = {
         {
             name: "flechettes cartridges",
             description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong class='color-g'>ammo</strong> costs are <strong>tripled</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2234,6 +2249,7 @@ const mod = {
         {
             name: "6s half-life",
             description: "<strong>flechette</strong> needles made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2250,6 +2266,7 @@ const mod = {
         {
             name: "1/2s half-life",
             description: "<strong>flechette</strong> needles made of <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2266,6 +2283,7 @@ const mod = {
         {
             name: "supercritical fission",
             description: "<strong>flechettes</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2282,6 +2300,7 @@ const mod = {
         {
             name: "radioactive contamination",
             description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2298,6 +2317,7 @@ const mod = {
         {
             name: "piercing needles",
             description: "<strong>needles</strong> penetrate <strong>mobs</strong> and <strong>blocks</strong><br>potentially hitting <strong>multiple</strong> targets",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2314,6 +2334,7 @@ const mod = {
         {
             name: "wave packet",
             description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2330,6 +2351,7 @@ const mod = {
         {
             name: "phase velocity",
             description: "the <strong>wave beam</strong> propagates faster in solids",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2348,6 +2370,7 @@ const mod = {
         {
             name: "bound state",
             description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>bound</strong> to a <strong>region</strong> around player",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2364,6 +2387,7 @@ const mod = {
         {
             name: "recursion",
             description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong> they have a<br><strong>20%</strong> chance to launch a larger <strong>missile</strong>",
+            isGunMod: true,
             maxCount: 6,
             count: 0,
             allowed() {
@@ -2380,6 +2404,7 @@ const mod = {
         {
             name: "MIRV",
             description: "launch <strong>3</strong> small <strong>missiles</strong> instead of <strong>1</strong> <br><strong>1.5x</strong> increase in <strong><em>delay</em></strong> after firing",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2396,6 +2421,7 @@ const mod = {
         {
             name: "rocket-propelled grenade",
             description: "<strong>grenades</strong> rapidly <strong>accelerate</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2414,6 +2440,7 @@ const mod = {
         {
             name: "vacuum bomb",
             description: "<strong>grenades</strong> fire slower, <strong class='color-e'>explode</strong> bigger<br> and, <strong>suck</strong> everything towards them",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2432,6 +2459,7 @@ const mod = {
         {
             name: "neutron bomb",
             description: "<strong>grenades</strong> are irradiated with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2450,6 +2478,7 @@ const mod = {
         {
             name: "water shielding",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2466,6 +2495,7 @@ const mod = {
         {
             name: "vacuum permittivity",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2482,6 +2512,7 @@ const mod = {
         {
             name: "mine reclamation",
             description: "retrieve <strong class='color-g'>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2498,6 +2529,7 @@ const mod = {
         {
             name: "sentry",
             description: "<strong>mines</strong> are modified to <strong>target</strong> mobs with nails<br>mines last about <strong>12</strong> seconds",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2514,6 +2546,7 @@ const mod = {
         {
             name: "irradiated nails",
             description: "<strong>nails</strong> are made with a <strong class='color-p'>cobalt-60</strong> alloy<br><strong>85%</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2530,6 +2563,7 @@ const mod = {
         {
             name: "railroad ties",
             description: "<strong>nails</strong> are <strong>50%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2546,6 +2580,7 @@ const mod = {
         {
             name: "mycelial fragmentation",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release an extra <strong class='color-p' style='letter-spacing: 2px;'>spore</strong><br> once a <strong>second</strong> during their <strong>growth</strong> phase",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2562,6 +2597,7 @@ const mod = {
         {
             name: "tinsellated flagella",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2579,6 +2615,7 @@ const mod = {
             name: "cryodesiccation",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1</strong> second",
             // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2595,6 +2632,7 @@ const mod = {
         {
             name: "diplochory",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use the player for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2611,6 +2649,7 @@ const mod = {
         {
             name: "mutualism",
             description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong>health</strong> until they <strong>die</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2627,6 +2666,7 @@ const mod = {
         {
             name: "brushless motor",
             description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2643,6 +2683,7 @@ const mod = {
         {
             name: "harvester",
             description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>larger</strong>, <strong>faster</strong>, and very <strong>durable</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2659,6 +2700,7 @@ const mod = {
         {
             name: "superfluidity",
             description: "<strong class='color-s'>freeze</strong> effects apply to mobs near it's target",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2675,6 +2717,7 @@ const mod = {
         {
             name: "heavy water",
             description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>5</strong> seconds",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2691,6 +2734,7 @@ const mod = {
         {
             name: "thermoelectric effect",
             description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>100</strong>",
+            isGunMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2707,6 +2751,7 @@ const mod = {
         {
             name: "necrophoresis",
             description: "<strong>foam</strong> bullets grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2723,6 +2768,7 @@ const mod = {
         {
             name: "colloidal foam",
             description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>40%</strong> faster",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2773,6 +2819,7 @@ const mod = {
         {
             name: "half-wave rectifier",
             description: "charging the <strong>rail gun</strong> overfills your <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2789,6 +2836,7 @@ const mod = {
         {
             name: "dielectric polarization",
             description: "firing the <strong>rail gun</strong> <strong class='color-d'>damages</strong> nearby <strong>mobs</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2805,6 +2853,7 @@ const mod = {
         {
             name: "capacitor bank",
             description: "the <strong>rail gun</strong> no longer takes time to <strong>charge</strong><br><strong>rail gun</strong> rods are <strong>66%</strong> less massive",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2821,6 +2870,7 @@ const mod = {
         {
             name: "laser diodes",
             description: "<strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun and laser-bot</em>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2837,6 +2887,7 @@ const mod = {
         {
             name: "specular reflection",
             description: "<strong>laser</strong> beams gain <strong>1</strong> reflection<br>increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong>",
+            isGunMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2857,6 +2908,7 @@ const mod = {
         {
             name: "diffraction grating",
             description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
+            isGunMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2879,6 +2931,7 @@ const mod = {
         {
             name: "diffuse beam",
             description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>175%</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2903,6 +2956,7 @@ const mod = {
         {
             name: "output coupler",
             description: "<strong>widen</strong> diffuse <strong>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2929,6 +2983,7 @@ const mod = {
         {
             name: "slow light propagation",
             description: "",
+            isGunMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2953,6 +3008,7 @@ const mod = {
         {
             name: "pulse",
             description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2975,6 +3031,7 @@ const mod = {
         {
             name: "shock wave",
             description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2991,6 +3048,7 @@ const mod = {
         {
             name: "neocognitron",
             description: "<strong>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
+            isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3011,6 +3069,7 @@ const mod = {
         {
             name: "bremsstrahlung radiation",
             description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
+            isFieldMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3027,6 +3086,7 @@ const mod = {
         {
             name: "frequency resonance",
             description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>40%</strong>",
+            isFieldMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3045,6 +3105,7 @@ const mod = {
         {
             name: "flux pinning",
             description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>+1</strong> second",
+            isFieldMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3061,6 +3122,7 @@ const mod = {
         {
             name: "eddy current brake",
             description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3077,6 +3139,7 @@ const mod = {
         {
             name: "fracture analysis",
             description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3093,6 +3156,7 @@ const mod = {
         {
             name: "pair production",
             description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong> by <strong>300</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3110,6 +3174,7 @@ const mod = {
         {
             name: "bot manufacturing",
             description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>3</strong> random <strong>bots</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -3129,6 +3194,7 @@ const mod = {
         {
             name: "bot prototypes",
             description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all bots of a random type and <strong>build</strong> <strong>2</strong> of that <strong>bot</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -3189,6 +3255,7 @@ const mod = {
         {
             name: "mycelium manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3205,6 +3272,7 @@ const mod = {
         {
             name: "missile manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3221,6 +3289,7 @@ const mod = {
         {
             name: "ice IX manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to synthesize <strong>ice IX</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3237,6 +3306,7 @@ const mod = {
         {
             name: "degenerate matter",
             description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>while <strong>negative mass field</strong> is active",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3253,6 +3323,7 @@ const mod = {
         {
             name: "annihilation",
             description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3269,6 +3340,7 @@ const mod = {
         {
             name: "Bose Einstein condensate",
             description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3285,6 +3357,7 @@ const mod = {
         {
             name: "plasma jet",
             description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
+            isFieldMod: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3301,6 +3374,7 @@ const mod = {
         {
             name: "plasma-bot",
             description: "a bot uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3318,6 +3392,7 @@ const mod = {
         {
             name: "micro-extruder",
             description: "<strong class='color-plasma'>plasma</strong> torch ejects a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3334,6 +3409,7 @@ const mod = {
         {
             name: "timelike world line",
             description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3352,6 +3428,7 @@ const mod = {
         {
             name: "Lorentz transformation",
             description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3374,6 +3451,7 @@ const mod = {
         {
             name: "time crystals",
             description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3392,6 +3470,7 @@ const mod = {
         {
             name: "phase decoherence",
             description: "become <strong>intangible</strong> while <strong class='color-cloaked'>cloaked</strong><br>but, passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3408,6 +3487,7 @@ const mod = {
         {
             name: "dazzler",
             description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>30%</strong> of your stored <strong class='color-f'>energy</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3424,6 +3504,7 @@ const mod = {
         {
             name: "discrete optimization",
             description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3442,6 +3523,7 @@ const mod = {
         {
             name: "cosmic string",
             description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3458,6 +3540,7 @@ const mod = {
         {
             name: "Penrose process",
             description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills by <strong>50</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3474,6 +3557,7 @@ const mod = {
         {
             name: "transdimensional spores",
             description: "when <strong>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3490,6 +3574,7 @@ const mod = {
         {
             name: "traversable geodesics",
             description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong class='color-g'>ammo</strong>",
+            isFieldMod: true,
             maxCount: 1,
             count: 0,
             allowed() {

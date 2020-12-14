@@ -276,10 +276,23 @@ const build = {
             const modID = document.getElementById("mod-" + i)
             if (!mod.mods[i].isCustomHide) {
                 if (mod.mods[i].allowed() || isAllowed || mod.mods[i].count > 0) {
-                    if (mod.mods[i].count > 1) {
-                        modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
+                    const isCount = mod.mods[i].count > 1 ? `(${mod.mods[i].count}x)` : "";
+                    if (mod.mods[i].isFieldMod) {
+                        modID.innerHTML = ` <div class="grid-title">
+                                                <span style="position:relative;">
+                                                    <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
+                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                </span>
+                                                &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
+                    } else if (mod.mods[i].isGunMod) {
+                        modID.innerHTML = ` <div class="grid-title">
+                                                <span style="position:relative;">
+                                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.6;"></div>
+                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                </span>
+                                                &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
                     } else {
-                        modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
+                        modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
                     }
 
                     if (modID.classList.contains("build-grid-disabled")) {
@@ -347,7 +360,14 @@ const build = {
                 } else if (mod.mods[i].count > 1) {
                     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
                 } else {
+
+
+
                     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+
+
+
+
                 }
             }
         }

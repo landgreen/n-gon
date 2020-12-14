@@ -1,8 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-extruder: leftovers still exist when field isn't active
-  range and damage are all slightly decreased
-  energy drain is greatly increased
 
 ******************************************************** BUGS ********************************************************
 
@@ -39,6 +36,7 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
+consider making gun color more blue and less dark
 
 color/highlight field or gun mods in selection menu (or custom)
   to show that they are special
