@@ -212,11 +212,30 @@ const build = {
         text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             if (mod.mods[i].count > 0) {
-                if (mod.mods[i].count === 1) {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+                const isCount = mod.mods[i].count > 1 ? `(${mod.mods[i].count}x)` : "";
+
+                if (mod.mods[i].isFieldMod) {
+                    text += `<div class="pause-grid-module"><div class="grid-title">
+                                            <span style="position:relative;">
+                                                <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
+                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                            </span>
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
+                } else if (mod.mods[i].isGunMod) {
+                    text += `<div class="pause-grid-module"><div class="grid-title">
+                                            <span style="position:relative;">
+                                                <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.75;"></div>
+                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                            </span>
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
                 }
+                // if (mod.mods[i].count === 1) {
+                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+                // } else {
+                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
+                // }
                 countMods++
             }
         }
@@ -281,14 +300,14 @@ const build = {
                         modID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
                                                     <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
-                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
                                                 </span>
                                                 &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
                     } else if (mod.mods[i].isGunMod) {
                         modID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
-                                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.6;"></div>
-                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.75;"></div>
+                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
                                                 </span>
                                                 &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
                     } else {
@@ -349,7 +368,6 @@ const build = {
         for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
             text += `<div id ="field-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
         }
-
         for (let i = 0, len = b.guns.length; i < len; i++) {
             text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
         }
@@ -360,14 +378,7 @@ const build = {
                 } else if (mod.mods[i].count > 1) {
                     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
                 } else {
-
-
-
                     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
-
-
-
-
                 }
             }
         }

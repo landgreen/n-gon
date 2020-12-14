@@ -689,6 +689,7 @@ const b = {
                 mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
             }
+            mech.isExtruderOn = true
             const SPEED = 10
             const me = bullet.length;
             const where = Vector.add(mech.pos, player.velocity)
@@ -740,9 +741,9 @@ const b = {
                         this.cycle++
                         const wiggleMag = (mech.crouch ? 6 : 12) * Math.cos(game.cycle * 0.09)
                         const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.36)) //+ wiggleMag * Math.cos(game.cycle * 0.3))
-                        const velocity = Vector.mult(player.velocity, 0.25) //move with player
-                        Matter.Body.setPosition(this, Vector.add(velocity, Vector.add(this.position, wiggle)))
-                        // Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
+                        // const velocity = Vector.mult(player.velocity, 0.25) //move with player
+                        // Matter.Body.setPosition(this, Vector.add(velocity, Vector.add(this.position, wiggle)))
+                        Matter.Body.setPosition(this, Vector.add(this.position, wiggle))
                     }
                 }
             });
@@ -755,9 +756,6 @@ const b = {
             if (180 - Math.abs(Math.abs(b.lastAngle - mech.angle) - 180) > 0.3) bullet[me].isBranch = true; //don't draw stroke for this bullet
             b.lastAngle = mech.angle //track last angle for the above angle difference calculation
             if (!mech.wasExtruderOn) bullet[me].isBranch = true;
-            mech.isExtruderOn = true
-        } else {
-            mech.isExtruderOn = false
         }
     },
     plasma() {
@@ -1338,7 +1336,7 @@ const b = {
         const THRUST = 0.004
         const dir = mech.angle + spread * (Math.random() - 0.5);
         const RADIUS = 18
-        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 3, RADIUS, {
+        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 4, RADIUS, {
             angle: dir - Math.PI,
             inertia: Infinity,
             friction: 0,

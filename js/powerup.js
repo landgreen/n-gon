@@ -313,7 +313,27 @@ const powerUps = {
 
                     if (options.length > 0) {
                         const choose = options[Math.floor(Math.random() * options.length)]
-                        text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choose].name}</div> ${mod.mods[choose].description}</div>`
+                        const isCount = mod.mods[choose].count > 0 ? `(${mod.mods[choose].count+1}x)` : "";
+
+                        if (mod.mods[choose].isFieldMod) {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title">
+                                                    <span style="position:relative;">
+                                                        <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
+                                                        <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                    </span>
+                                                    &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[choose].name} ${isCount}</div>${mod.mods[choose].description}</div></div>`
+                        } else if (mod.mods[choose].isGunMod) {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title">
+                                                    <span style="position:relative;">
+                                                        <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.75;"></div>
+                                                        <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                    </span>
+                                                    &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[choose].name} ${isCount}</div>${mod.mods[choose].description}</div></div>`
+                        } else {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choose].name} ${isCount}</div>${mod.mods[choose].description}</div>`
+                        }
+
+                        // text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[choose].name}</div> ${mod.mods[choose].description}</div>`
                         return choose
                     }
 

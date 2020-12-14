@@ -155,12 +155,12 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 200)
+        // spawn.starter(1900, -500, 200)  //big boy
         // spawn.exploder(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
-        // spawn.shooter(1700, -120)
+        spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)

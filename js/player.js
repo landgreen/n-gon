@@ -1641,6 +1641,7 @@ const mech = {
             effect() {
                 mech.fieldMeterColor = "#f0f"
                 mech.hold = function() {
+                    mech.isExtruderOn = false
                     if (mech.isHolding) {
                         mech.drawHold(mech.holdingTarget);
                         mech.holding();

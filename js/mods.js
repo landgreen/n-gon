@@ -3391,7 +3391,7 @@ const mod = {
         },
         {
             name: "micro-extruder",
-            description: "<strong class='color-plasma'>plasma</strong> torch ejects a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
+            description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> extrudes a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
             isFieldMod: true,
             maxCount: 1,
             count: 0,
