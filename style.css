@@ -585,15 +585,16 @@ em {
 
 .mod {
     /* background: rgb(116, 102, 238); */
-    background: hsl(253, 80%, 67%);
+    /* background: hsl(253, 57%, 52%); */
+    background: hsl(255, 100%, 71%);
 }
 
-.grey {
+/* .grey {
     background: #afb6c2;
-}
+} */
 
 .gun {
-    background: rgb(10, 79, 198);
+    background: rgb(0, 80, 218);
 }
 
 .heal {

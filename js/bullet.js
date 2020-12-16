@@ -22,9 +22,11 @@ const b = {
                 }
             } else {
                 if (mod.isAmmoFromHealth) {
-                    if (mech.health > 2 * mod.isAmmoFromHealth * mech.maxHealth) {
-                        mech.damage(mod.isAmmoFromHealth * mech.maxHealth / mech.harmReduction());
-                        if (!(mod.isRewindAvoidDeath && mech.energy > 0.66)) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo"); //don't give ammo if CPT triggered
+                    if (mech.health > 0.05) {
+                        mech.damage(0.05 / mech.harmReduction()); //  /mech.harmReduction() undoes  damage increase from difficulty
+                        if (!(mod.isRewindAvoidDeath && mech.energy > 0.66)) { //don't give ammo if CPT triggered
+                            for (let i = 0; i < 3; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                        }
                     } else {
                         game.replaceTextLog = true;
                         game.makeTextLog("not enough health for catabolism to produce ammo", 120);
@@ -35,9 +37,7 @@ const b = {
                 }
                 mech.fireCDcycle = mech.cycle + 30; //fire cooldown        
             }
-            if (mech.holdingTarget) {
-                mech.drop();
-            }
+            if (mech.holdingTarget) mech.drop();
         }
     },
     removeAllGuns() {
@@ -307,7 +307,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0005);
-            bullet[me].explodeRad = 275;
+            bullet[me].explodeRad = 300;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (mod.fragments) b.targetedNail(this.position, mod.fragments * 5)
@@ -316,7 +316,7 @@ const b = {
             bullet[me].beforeDmg = function() {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
             };
-            speed = mech.crouch ? 43 : 32
+            speed = mech.crouch ? 46 : 32
             Matter.Body.setVelocity(bullet[me], {
                 x: mech.Vx / 2 + speed * Math.cos(angle),
                 y: mech.Vy / 2 + speed * Math.sin(angle)
@@ -681,19 +681,21 @@ const b = {
     lastAngle: 0,
     wasExtruderOn: false,
     isExtruderOn: false,
+    didExtruderDrain: false,
+    canExtruderFire: true,
     extruder() {
         const DRAIN = 0.0007 + mech.fieldRegen
-        if (mech.energy > DRAIN) {
+        if (mech.energy > DRAIN && b.canExtruderFire) {
             mech.energy -= DRAIN
             if (mech.energy < 0) {
                 mech.fieldCDcycle = mech.cycle + 120;
                 mech.energy = 0;
             }
-            mech.isExtruderOn = true
+            b.isExtruderOn = true
             const SPEED = 10
             const me = bullet.length;
             const where = Vector.add(mech.pos, player.velocity)
-            bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(mech.angle), where.y + 20 * Math.sin(mech.angle), 3, 0.01, {
+            bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(mech.angle), where.y + 20 * Math.sin(mech.angle), 4, 0.01, {
                 cycle: -0.5,
                 isWave: true,
                 endCycle: game.cycle + 10 + 40 * mod.isPlasmaRange,
@@ -755,7 +757,9 @@ const b = {
             const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
             if (180 - Math.abs(Math.abs(b.lastAngle - mech.angle) - 180) > 0.3) bullet[me].isBranch = true; //don't draw stroke for this bullet
             b.lastAngle = mech.angle //track last angle for the above angle difference calculation
-            if (!mech.wasExtruderOn) bullet[me].isBranch = true;
+            if (!b.wasExtruderOn) bullet[me].isBranch = true;
+        } else {
+            b.canExtruderFire = false;
         }
     },
     plasma() {
@@ -1336,7 +1340,7 @@ const b = {
         const THRUST = 0.004
         const dir = mech.angle + spread * (Math.random() - 0.5);
         const RADIUS = 18
-        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 4, RADIUS, {
+        bullet[me] = Bodies.polygon(mech.pos.x + 30 * Math.cos(mech.angle), mech.pos.y + 30 * Math.sin(mech.angle), 3, RADIUS, {
             angle: dir - Math.PI,
             inertia: Infinity,
             friction: 0,

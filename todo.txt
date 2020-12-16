@@ -1,12 +1,17 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+your build url can now be copied in the pause screen
 
-mods for guns and fields have an extra circle in selection menus
+mod: inductive coupling - 4 max health per power up, but limited to 44 max health per level (replaces crystalized armor)
+mod: transceiver chip - use all the power ups left over at the end of a level
+mod: catabolism - does a flat 5 damage to your health for 3 ammo  (was 2% of max health for 1 ammo)
 
 ******************************************************** BUGS ********************************************************
 
-entering custom, after dieing makes all mods look white (not disabled)
-  this goes away after clicking something so it seems to be only a graphical issue
+give worm hole pair production?
+
+2nd mod for crystalized armor
+  no cap for health power ups?
 
 (not able to reproduce, might be fixed) possible bug with neutron rewind
   status doesn't apply correctly for spawned neutron bombs that are stuck to a shield
@@ -20,8 +25,9 @@ mod and mob are too similar
 (always) is there a way to check if the player is stuck inside the map or block
   trigger a short term non-collide if that occurs
 
-(8+ reports before potential fix) bug - crouch and worm hole? -> crouch locked in
-  test this on a slower computer, doesn't occur on my computer
+(12+ reports) bug - crouch and worm hole? -> crouch locked in
+  doesn't occur on my computer?
+  you can spoof it with mech.crouch = true in console
   players have extra gravity
     might be from the short jump code
     add in a check every 7 seconds to try and fix it
@@ -37,6 +43,15 @@ mod and mob are too similar
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+make a reset hit box function as a way to fix crouch bug
+
+mod that requires integrated armament
+
+mod - reset level
+  you trade a mod for a chance at killing a new level boss and farming more ammo
+  resets health, ammo  (but not mods, fields, guns, ... ?)
+  scramble level order? or same level
 
 mechanic - Your energy regen is only active when field and gun have not been used for 5 seconds.
 

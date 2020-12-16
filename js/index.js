@@ -196,6 +196,12 @@ const build = {
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
       <br>harm difficulty scale: ${(game.dmgScale*100).toFixed(0)}%
       <br>heal difficulty scale: ${(game.healScale*100).toFixed(1)}%
+      <br><svg class="SVG-button" onclick="build.shareURL(false)" width="110" height="25" style="padding:2px; margin: 10px;">
+      <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+          <text x="5" y="18">copy build url</text>
+      </g>
+  </svg>
+
     </div>`;
         let countGuns = 0
         let countMods = 0
@@ -217,15 +223,15 @@ const build = {
                 if (mod.mods[i].isFieldMod) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
-                                                <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
-                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                              <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
                 } else if (mod.mods[i].isGunMod) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
-                                                <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.75;"></div>
-                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
                 } else {
@@ -299,15 +305,19 @@ const build = {
                     if (mod.mods[i].isFieldMod) {
                         modID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
-                                                    <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
-                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                    <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                                 </span>
                                                 &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
+
+                        // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
+                        // <div class="circle-grid mod" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
+                        // border: #fff solid 0px;
                     } else if (mod.mods[i].isGunMod) {
                         modID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
-                                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.75;"></div>
-                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                                 </span>
                                                 &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
                     } else {
@@ -319,7 +329,7 @@ const build = {
                         modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
                     }
                 } else {
-                    modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
+                    modID.innerHTML = `<div class="grid-title"> ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
                     if (!modID.classList.contains("build-grid-disabled")) {
                         modID.classList.add("build-grid-disabled");
                         modID.onclick = null
@@ -343,7 +353,7 @@ const build = {
         <text x="5" y="18">reset</text>
       </g>
     </svg>
-    <svg class="SVG-button" onclick="build.shareURL()" width="52" height="25">
+    <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
       <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
         <text x="5" y="18">share</text>
       </g>
@@ -371,12 +381,13 @@ const build = {
         for (let i = 0, len = b.guns.length; i < len; i++) {
             text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
         }
+
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             if (!mod.mods[i].isCustomHide) {
                 if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
-                    text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
-                } else if (mod.mods[i].count > 1) {
-                    text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
+                    text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title">${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
+                    // } else if (mod.mods[i].count > 1) {
+                    //     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
                 } else {
                     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
                 }
@@ -409,7 +420,7 @@ const build = {
         document.getElementById("field-0").classList.add("build-field-selected");
         document.getElementById("build-grid").style.display = "grid"
     },
-    shareURL() {
+    shareURL(isCustom = false) {
         let url = "https://landgreen.github.io/sidescroller/index.html?"
         let count = 0;
 
@@ -429,11 +440,16 @@ const build = {
         }
         url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
         url += `&difficulty=${game.difficultyMode}`
-        url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
-        url += `&noPower=${Number(document.getElementById("no-power-ups").checked)}`
+        if (isCustom) {
+            url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
+            url += `&noPower=${Number(document.getElementById("no-power-ups").checked)}`
+            alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
+        } else {
+            game.makeTextLog("n-gon build URL copied to clipboard.<br>Paste into browser address bar.", 300)
+        }
+        console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
         game.copyToClipBoard(url)
-        alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
     },
     startBuildRun() {
         build.isCustomSelection = false;
@@ -497,40 +513,40 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
         }
     }
     openCustomBuildMenu();
-    if (!game.firstRun) { //if player has already died once load that previous build
-        build.choosePowerUp(document.getElementById(`field-${field}`), field, 'field')
-        for (let i = 0; i < inventory.length; i++) {
-            build.choosePowerUp(document.getElementById(`gun-${inventory[i]}`), inventory[i], 'gun')
-        }
-        for (let i = 0; i < modList.length; i++) {
-            for (let j = 0; j < modList[i]; j++) {
-                build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod', true)
-            }
-        }
-        //update mod text //disable not allowed mods  
-        for (let i = 0, len = mod.mods.length; i < len; i++) {
-            const modID = document.getElementById("mod-" + i)
-            if (!mod.mods[i].isCustomHide) {
-                if (mod.mods[i].allowed() || mod.mods[i].count > 0) {
-                    if (mod.mods[i].count > 1) {
-                        modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
-                    } else {
-                        modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
-                    }
-                    if (modID.classList.contains("build-grid-disabled")) {
-                        modID.classList.remove("build-grid-disabled");
-                        modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
-                    }
-                } else {
-                    modID.innerHTML = `<div class="grid-title"><div class="circle-grid grey"></div> &nbsp; ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
-                    if (!modID.classList.contains("build-grid-disabled")) {
-                        modID.classList.add("build-grid-disabled");
-                        modID.onclick = null
-                    }
-                }
-            }
-        }
-    }
+    // if (!game.firstRun) { //if player has already died once load that previous build
+    //     build.choosePowerUp(document.getElementById(`field-${field}`), field, 'field')
+    //     for (let i = 0; i < inventory.length; i++) {
+    //         build.choosePowerUp(document.getElementById(`gun-${inventory[i]}`), inventory[i], 'gun')
+    //     }
+    //     for (let i = 0; i < modList.length; i++) {
+    //         for (let j = 0; j < modList[i]; j++) {
+    //             build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod', true)
+    //         }
+    //     }
+    //     //update mod text //disable not allowed mods  
+    //     for (let i = 0, len = mod.mods.length; i < len; i++) {
+    //         const modID = document.getElementById("mod-" + i)
+    //         if (!mod.mods[i].isCustomHide) {
+    //             if (mod.mods[i].allowed() || mod.mods[i].count > 0) {
+    //                 if (mod.mods[i].count > 1) {
+    //                     modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
+    //                 } else {
+    //                     modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
+    //                 }
+    //                 if (modID.classList.contains("build-grid-disabled")) {
+    //                     modID.classList.remove("build-grid-disabled");
+    //                     modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
+    //                 }
+    //             } else {
+    //                 modID.innerHTML = `<div class="grid-title">${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
+    //                 if (!modID.classList.contains("build-grid-disabled")) {
+    //                     modID.classList.add("build-grid-disabled");
+    //                     modID.onclick = null
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 });
 
 // ************************************************************************************************

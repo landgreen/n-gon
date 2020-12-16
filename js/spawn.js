@@ -930,6 +930,7 @@ const spawn = {
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         targets.push(me.id) //add to shield protection
         me.friction = 0;
@@ -991,6 +992,7 @@ const spawn = {
 
         for (let i = 0; i < nodes; ++i) {
             spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
+            Matter.Body.setDensity(mob[mob.length - 1], 0.002); //extra dense //normal is 0.001 //makes effective life much larger
             targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
         }
 

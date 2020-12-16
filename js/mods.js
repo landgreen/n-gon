@@ -110,8 +110,8 @@ const mod = {
         if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
         if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
         if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
-        if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.5
-        if (mod.isSpeedDamage) dmg *= 1 + Math.min(0.33, player.speed * 0.011)
+        if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.66
+        if (mod.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
         if (mod.isBotDamage) dmg *= 1 + 0.02 * mod.totalBots()
         return dmg * mod.slowFire * mod.aimDamage
     },
@@ -485,7 +485,7 @@ const mod = {
         },
         {
             name: "reaction inhibitor",
-            description: "mobs spawn with <strong>12%</strong> less <strong>health</strong>",
+            description: "mobs spawn with <strong>11%</strong> less <strong>health</strong>",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -493,7 +493,7 @@ const mod = {
             },
             requires: "any mob death mod",
             effect: () => {
-                mod.mobSpawnWithHealth *= 0.88
+                mod.mobSpawnWithHealth *= 0.89
 
                 //set all mobs at full health to 0.85
                 for (let i = 0; i < mob.length; i++) {
@@ -973,7 +973,7 @@ const mod = {
         },
         {
             name: "anticorrelation",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -989,7 +989,7 @@ const mod = {
         },
         {
             name: "non-Newtonian armor",
-            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
+            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1021,7 +1021,7 @@ const mod = {
         },
         {
             name: "liquid cooling",
-            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>4</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+            description: `<strong class='color-s'>freeze</strong> all mobs for <strong>5</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1118,7 +1118,7 @@ const mod = {
         },
         {
             name: "piezoelectricity",
-            description: "<strong>colliding</strong> with mobs overfills <strong class='color-f'>energy</strong> by <strong>200</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
+            description: "<strong>colliding</strong> with mobs gives you <strong>400</strong> <strong class='color-f'>energy</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1127,7 +1127,7 @@ const mod = {
             requires: "not mass-energy equivalence",
             effect() {
                 mod.isPiezo = true;
-                mech.energy += 2;
+                mech.energy += 4;
             },
             remove() {
                 mod.isPiezo = false;
@@ -1135,7 +1135,7 @@ const mod = {
         },
         {
             name: "ground state",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1159,7 +1159,7 @@ const mod = {
             allowed() {
                 return !mod.isEnergyLoss && !mod.isPiezo && !mod.isRewindAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
-            requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass field",
+            requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass",
             effect: () => {
                 mech.health = 0
                 // mech.displayHealth();
@@ -1309,8 +1309,8 @@ const mod = {
             }
         },
         {
-            name: "crystallized armor",
-            description: "increase <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>5</strong> for each<br>unused <strong>power up</strong> at the end of a <strong>level</strong>",
+            name: "inductive coupling",
+            description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 4 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 44 health per level)</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1324,6 +1324,22 @@ const mod = {
                 mod.isArmorFromPowerUps = false;
                 // mod.armorFromPowerUps = 0;  //this is now reset in mod.setupAllMods();
                 mech.setMaxHealth();
+            }
+        },
+        {
+            name: "transceiver chip",
+            description: "at the end of each <strong>level</strong><br>gain the full  <strong>effect</strong> of unused <strong>power ups</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mod.isArmorFromPowerUps
+            },
+            requires: "crystallized armor",
+            effect() {
+                mod.isEndLevelPowerUp = true;
+            },
+            remove() {
+                mod.isEndLevelPowerUp = false;
             }
         },
         {
@@ -1649,7 +1665,7 @@ const mod = {
         },
         {
             name: "catabolism",
-            description: "gain <strong class='color-g'>ammo</strong> when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>drains <strong>2%</strong> of <strong>max health</strong>",
+            description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>3</strong> <strong class='color-g'>ammo</strong>, but lose <strong>5</strong> <strong>health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1657,10 +1673,10 @@ const mod = {
             },
             requires: "not mass-energy equivalence<br>not exciton-lattice",
             effect: () => {
-                mod.isAmmoFromHealth = 0.02;
+                mod.isAmmoFromHealth = true;
             },
             remove() {
-                mod.isAmmoFromHealth = 0;
+                mod.isAmmoFromHealth = false;
             }
         },
         {
@@ -2733,7 +2749,7 @@ const mod = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and overloads <strong class='color-f'>energy</strong> by <strong>100</strong>",
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>100</strong> <strong class='color-f'>energy</strong>",
             isGunMod: true,
             maxCount: 9,
             count: 0,
@@ -2818,7 +2834,7 @@ const mod = {
         // },
         {
             name: "half-wave rectifier",
-            description: "charging the <strong>rail gun</strong> overfills your <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
+            description: "charging the <strong>rail gun</strong> gives you <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
             isGunMod: true,
             maxCount: 1,
             count: 0,
@@ -3155,7 +3171,7 @@ const mod = {
         },
         {
             name: "pair production",
-            description: "<strong>power ups</strong> overfill your <strong class='color-f'>energy</strong> by <strong>300</strong>",
+            description: "picking up a <strong>power up</strong> gives you <strong>250</strong> <strong class='color-f'>energy</strong>",
             isFieldMod: true,
             maxCount: 1,
             count: 0,
@@ -3539,7 +3555,7 @@ const mod = {
         },
         {
             name: "Penrose process",
-            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>your <strong class='color-f'>energy</strong> overfills by <strong>50</strong>",
+            description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>50</strong> <strong class='color-f'>energy</strong>",
             isFieldMod: true,
             maxCount: 1,
             count: 0,
@@ -3857,5 +3873,6 @@ const mod = {
     isLowEnergyDamage: null,
     isRewindBot: null,
     isRewindGrenade: null,
-    isExtruder: null
+    isExtruder: null,
+    isEndLevelPowerUp: null
 }

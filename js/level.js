@@ -19,7 +19,8 @@ const level = {
             // mech.setField("plasma torch")
             // b.giveGuns("wave beam")
             // mod.giveMod("micro-extruder")
-            // for (let i = 0; i < 15; i++) mod.giveMod("supply chain")
+            // mod.giveMod("piezoelectricity")
+            // for (let i = 0; i < 15; i++) mod.giveMod("plasma jet")
 
 
 
@@ -59,14 +60,16 @@ const level = {
         b.respawnBots();
         mech.resetHistory();
         if (mod.isArmorFromPowerUps) {
-            mod.armorFromPowerUps += 0.05 * powerUps.totalPowerUps
+            const gain = Math.min(0.04 * powerUps.totalPowerUps, 0.44)
+            mod.armorFromPowerUps += gain
             mech.setMaxHealth();
-            if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (0.05 * powerUps.totalPowerUps * 100).toFixed(0) + "%</span>", 300)
+            if (powerUps.totalPowerUps) game.makeTextLog("<span style='font-size:115%;'> max health increased by " + (gain * 100).toFixed(0) + "%</span>", 300)
         }
         if (mod.isHealLowHealth) {
             const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
             for (let i = 0; i < len; i++) {
                 powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+                // powerUps.heal.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), 50);
             }
         }
         if (mod.isPerpetualReroll) powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "reroll", false);

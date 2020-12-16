@@ -170,8 +170,12 @@ const powerUps = {
                 mech.setMaxEnergy();
             }
         },
-        spawn() { //used to spawn a heal with a specific size / heal amount, not normally used
-
+        spawn(x, y, size) { //used to spawn a heal with a specific size / heal amount, not normally used
+            powerUps.directSpawn(x, y, "heal", false, null, size)
+            if (Math.random() < mod.duplicationChance()) {
+                powerUps.directSpawn(x, y, "heal", false, null, size)
+                powerUp[powerUp.length - 1].isBonus = true
+            }
         }
     },
     ammo: {
@@ -318,15 +322,15 @@ const powerUps = {
                         if (mod.mods[choose].isFieldMod) {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title">
                                                     <span style="position:relative;">
-                                                        <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:1;"></div>
-                                                        <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                        <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                        <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                                     </span>
                                                     &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[choose].name} ${isCount}</div>${mod.mods[choose].description}</div></div>`
                         } else if (mod.mods[choose].isGunMod) {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('mod',${choose})"><div class="grid-title">
                                                     <span style="position:relative;">
-                                                        <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.75;"></div>
-                                                        <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.75;"></div>
+                                                        <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                        <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                                     </span>
                                                     &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[choose].name} ${isCount}</div>${mod.mods[choose].description}</div></div>`
                         } else {
@@ -455,7 +459,7 @@ const powerUps = {
         }
     },
     onPickUp(where) {
-        if (mod.isMassEnergy && mech.energy < mech.maxEnergy * 2.5) mech.energy += 3;
+        if (mod.isMassEnergy) mech.energy += 2.5;
         if (mod.isMineDrop) b.mine({
             x: where.x,
             y: where.y
@@ -656,7 +660,7 @@ const powerUps = {
         ) {
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < mod.duplicationChance()) {
-                powerUps.directSpawn(x, y, target, moving, mode)
+                powerUps.directSpawn(x, y, target, moving, mode, size)
                 powerUp[powerUp.length - 1].isBonus = true
             }
         }

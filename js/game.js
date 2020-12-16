@@ -595,6 +595,9 @@ const game = {
             }
         }
 
+        if (mod.isEndLevelPowerUp) {
+            for (let i = 0; i < powerUp.length; i++) powerUp[i].effect();
+        }
         powerUps.totalPowerUps = powerUp.length
 
         let holdTarget; //if player is holding something this remembers it before it gets deleted
@@ -752,8 +755,31 @@ const game = {
                 //check for double crouch
                 //crouch playerHead.position.y - player.position.y = 9.7  //positive
                 //standing playerHead.position.y - player.position.y = -30 //negative
+                // mech.undoCrouch()
                 if (!mech.crouch && ((playerHead.position.y - player.position.y) > 0)) {
-                    // mech.undoCrouch()
+                    Matter.Body.translate(playerHead, {
+                        x: 0,
+                        y: 40
+                    });
+                    if ((playerHead.position.y - player.position.y) > 0) {
+                        Matter.Body.translate(playerHead, {
+                            x: 0,
+                            y: 40
+                        });
+                        if ((playerHead.position.y - player.position.y) > 0) {
+                            Matter.Body.translate(playerHead, {
+                                x: 0,
+                                y: 40
+                            });
+                            if ((playerHead.position.y - player.position.y) > 0) {
+                                Matter.Body.translate(playerHead, {
+                                    x: 0,
+                                    y: 40
+                                });
+                            }
+                        }
+                    }
+                } else if (mech.crouch && ((playerHead.position.y - player.position.y) > 10)) {
                     Matter.Body.translate(playerHead, {
                         x: 0,
                         y: 40

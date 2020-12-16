@@ -353,31 +353,9 @@ const mech = {
                 game.makeGunHUD(); //update gun HUD
             }
 
-
-            function pixelWindows() {
-
-                //pixel graphics
-                let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height); //copy current canvas pixel data
-                let data = imgData.data;
-                //change random pixels
-                //strange draw offset
-                // const off = canvas.height * canvas.width * 4 / 16
-                for (let i = 0; i < data.length; i += 4) {
-                    index = i % canvas.width
-                    data[index + 0] = data[index + 0]; // red
-                    data[index + 1] = data[index + 1]; // red
-                    data[index + 2] = data[index + 2]; // red
-                    data[index + 3] = data[index + 3]; // red
-                }
-                ctx.putImageData(imgData, 0, 0); //draw new pixel data to canvas
-
-            }
-
-
             game.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                // pixelWindows()
             }
 
             function randomizeEverything() {
@@ -423,6 +401,7 @@ const mech = {
             mech.displayHealth();
             document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
             document.getElementById("fade-out").style.opacity = 1; //slowly fades out
+            // build.shareURL(false)
             setTimeout(function() {
                 World.clear(engine.world);
                 Engine.clear(engine);
@@ -475,14 +454,14 @@ const mech = {
     harmReduction() {
         let dmg = 1
         dmg *= mech.fieldHarmReduction
-        if (mod.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.018, 0.5)
+        if (mod.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
         if (mod.isSlowFPS) dmg *= 0.85
         if (mod.isPiezo) dmg *= 0.85
         if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
         if (mod.isBotArmor) dmg *= 0.97 ** mod.totalBots()
-        if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.5;
+        if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.33;
         if (mod.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
-        if (mod.energyRegen === 0) dmg *= 0.4 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
+        if (mod.energyRegen === 0) dmg *= 0.33 //0.22 + 0.78 * mech.energy //77% damage reduction at zero energy
         if (mod.isTurret && mech.crouch) dmg *= 0.5;
         if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
@@ -675,7 +654,7 @@ const mech = {
             mech.defaultFPSCycle = mech.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
             if (mod.isHarmFreeze) { //freeze all mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
-                    mobs.statusSlow(mob[i], 240)
+                    mobs.statusSlow(mob[i], 300)
                 }
             }
         } else {
@@ -1641,7 +1620,7 @@ const mech = {
             effect() {
                 mech.fieldMeterColor = "#f0f"
                 mech.hold = function() {
-                    mech.isExtruderOn = false
+                    b.isExtruderOn = false
                     if (mech.isHolding) {
                         mech.drawHold(mech.holdingTarget);
                         mech.holding();
@@ -1663,9 +1642,10 @@ const mech = {
 
                     if (mod.isExtruder) {
                         if (input.field) {
-                            mech.wasExtruderOn = true
+                            b.wasExtruderOn = true
                         } else {
-                            mech.wasExtruderOn = false
+                            b.wasExtruderOn = false
+                            b.canExtruderFire = true
                         }
                         ctx.lineWidth = 5;
                         ctx.strokeStyle = "#f07"
@@ -1680,7 +1660,7 @@ const mech = {
                                 }
                             }
                         }
-                        if (mech.wasExtruderOn && mech.isExtruderOn) ctx.lineTo(mech.pos.x + 15 * Math.cos(mech.angle), mech.pos.y + 15 * Math.sin(mech.angle))
+                        if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(mech.pos.x + 15 * Math.cos(mech.angle), mech.pos.y + 15 * Math.sin(mech.angle))
                         ctx.stroke();
                     }
                 }
