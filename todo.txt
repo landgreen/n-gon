@@ -1,22 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-your build url can now be copied in the pause screen
+new level boss that fires 2 streams of small bullets that chase you
 
-mod: inductive coupling - 4 max health per power up, but limited to 44 max health per level (replaces crystalized armor)
-mod: transceiver chip - use all the power ups left over at the end of a level
-mod: catabolism - does a flat 5 damage to your health for 3 ammo  (was 2% of max health for 1 ammo)
+mod: add a CPT gun to your inventory that rewinds your history, reverts your health, position, velocity for 10 seconds
+  I expect that spamming rewind has some overpowered combos.
+  Let me know what you find, and your ideas on balance.
+  
 
 ******************************************************** BUGS ********************************************************
 
-give worm hole pair production?
-
-2nd mod for crystalized armor
-  no cap for health power ups?
-
-(not able to reproduce, might be fixed) possible bug with neutron rewind
-  status doesn't apply correctly for spawned neutron bombs that are stuck to a shield
-    also saw neutron bombs bounce off shield, for normal bullets
-  test this more
+check for crouch after rewind
+  CPT, tesseract
 
 mod and mob are too similar
 
@@ -26,13 +20,15 @@ mod and mob are too similar
   trigger a short term non-collide if that occurs
 
 (12+ reports) bug - crouch and worm hole? -> crouch locked in
-  doesn't occur on my computer?
+  ***try checking the date of the first bug, and then look at what patches came out right before that***
+  doesn't occur on my computer? but it does occur on fast computers
   you can spoof it with mech.crouch = true in console
   players have extra gravity
     might be from the short jump code
     add in a check every 7 seconds to try and fix it
       this fix was added and it is working for some cases
         maybe move the fix to once a second?
+  bug fix - rewrite crouch to not translate the player height, but instead switch between 2 sensors
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
@@ -44,7 +40,39 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
-make a reset hit box function as a way to fix crouch bug
+mod: laser beams push like plasma torch pushes with directional force
+
+mod: worm hole - you move through time instead of space.  (field click to rewind)
+  add support for eating blocks, and damaging mobs that are nearby when you rewind
+    allow those mods
+  mod might not work as is because player needs to be able to pick up and move blocks sometimes
+    what about as a gun that uses energy not bullets?
+
+mechanic: technological dead end - add mods to the mod pool with a dumb effect
+  don't show up in custom?
+  negative effect (one time effects are better to avoid code clutter)
+    make the player rainbow colors
+      mech.color = {
+        hue: 0,
+        sat: 100,
+        light: 50
+      }
+      setInterval(function(){
+          mech.color.hue++
+          mech.setFillColors()
+      }, 10);
+    remove all your energy
+    eject all your rerolls (not bad with dup)
+    teleport to the start of the level
+    remove your bots (requires you to have some bots)
+    your bots are changed to random bots
+
+Mod: "High Risk": Spawn two bosses per level.
+  maybe limit to just the power up boss and spawn it at the exit every time to keep it simple
+  also weaken the player
+    remove a mod up?
+    lower harm reduction?
+    increase game difficulty by one level
 
 mod that requires integrated armament
 
@@ -74,15 +102,6 @@ make different move methods
   mod: double jump
 
 mod: when mobs are at full health you do 40% to them
-
-mechanic: failed technology - add mods to the mod pool with a dumb effect
-  don't show up in custom?
-  negative effect (one time effects are better to avoid code clutter)
-    remove all your energy
-    eject all your rerolls (not bad with dup)
-    teleport to the start of the level
-    remove your bots (requires you to have some bots)
-    your bots are changed to random bots
 
 mod - move super fast, go intangible, drain energy very fast
   this is like a dodge roll
@@ -371,12 +390,16 @@ robot AI communication
   output to
     bottom left message
     tab title?
-  style 
+  style
+    output console.log?
     make it look like a computer terminal
+      track multiple lines, like your vocoder program
+      messages about heal, ammo, mods, that just list internal computer code
+        example: a heal would be mech.health += 12
       mono space font
       square edges
-    in baby talk?
-    with random ASCII gibberish letters
+      black text on bottom right with no background?
+        or white text, or yellow
     end each message with a hexadecimal encryption code/hash
   message after selecting each new (mod / gun / field)
     put messages in (mod / gun / field) method
@@ -385,6 +408,14 @@ robot AI communication
       you'd have to store an array of guns/fields/mod used last game
     n-gon escape simulation ${random seed}
       say something about what mobs types are queued up, and level order
+  **all communication should be from scientists watching the simulation; the robot shouldn't talk**
+    talking about the robot, watching
+    trying to communicate with the robot?  but how
+    lines:
+      I think it's planing to escape
+      Why is it attacking those shapes?
+      Are those shapes supposed to be us?
+
 
 add an ending to the game
   maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki

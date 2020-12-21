@@ -596,7 +596,17 @@ const game = {
         }
 
         if (mod.isEndLevelPowerUp) {
-            for (let i = 0; i < powerUp.length; i++) powerUp[i].effect();
+            for (let i = 0; i < powerUp.length; i++) {
+                if (powerUp[i].name === "mod") {
+                    mod.giveMod()
+                } else if (powerUp[i].name === "gun") {
+                    if (!mod.isOneGun) b.giveGuns("random")
+                } else if (powerUp[i].name === "field") {
+                    if (mech.fieldMode === 0) mech.setField(Math.ceil(Math.random() * (mech.fieldUpgrades.length - 1))) //pick a random field, but not field 0
+                } else {
+                    powerUp[i].effect();
+                }
+            }
         }
         powerUps.totalPowerUps = powerUp.length
 
@@ -761,24 +771,24 @@ const game = {
                         x: 0,
                         y: 40
                     });
-                    if ((playerHead.position.y - player.position.y) > 0) {
-                        Matter.Body.translate(playerHead, {
-                            x: 0,
-                            y: 40
-                        });
-                        if ((playerHead.position.y - player.position.y) > 0) {
-                            Matter.Body.translate(playerHead, {
-                                x: 0,
-                                y: 40
-                            });
-                            if ((playerHead.position.y - player.position.y) > 0) {
-                                Matter.Body.translate(playerHead, {
-                                    x: 0,
-                                    y: 40
-                                });
-                            }
-                        }
-                    }
+                    // if ((playerHead.position.y - player.position.y) > 0) {
+                    //     Matter.Body.translate(playerHead, {
+                    //         x: 0,
+                    //         y: 40
+                    //     });
+                    //     if ((playerHead.position.y - player.position.y) > 0) {
+                    //         Matter.Body.translate(playerHead, {
+                    //             x: 0,
+                    //             y: 40
+                    //         });
+                    //         if ((playerHead.position.y - player.position.y) > 0) {
+                    //             Matter.Body.translate(playerHead, {
+                    //                 x: 0,
+                    //                 y: 40
+                    //             });
+                    //         }
+                    //     }
+                    // }
                 } else if (mech.crouch && ((playerHead.position.y - player.position.y) > 10)) {
                     Matter.Body.translate(playerHead, {
                         x: 0,

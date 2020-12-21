@@ -787,7 +787,7 @@ window.addEventListener("keydown", function(event) {
             break
     }
     if (game.testing) {
-        switch (event.key) {
+        switch (event.key.toLowerCase()) {
             case "o":
                 game.isAutoZoom = false;
                 game.zoomScale /= 0.9;
@@ -1082,3 +1082,23 @@ function cycle() {
         // }
     }
 }
+
+
+
+//display console logs in game
+
+// function proxy(context, method, message) {
+//     return function() {
+//         // method.apply(context, [message].concat(Array.prototype.slice.apply(arguments)))
+//         game.makeTextLog(arguments[0], 300)
+//     }
+// }
+
+// console.log = proxy(console, console.log, 'n-gon: ')
+// console.error = proxy(console, console.error, 'Error:')
+// console.warn = proxy(console, console.warn, 'Warning:')
+
+// let's test
+// console.log('im from console.log', level, 2, 3);
+//   console.error('im from console.error', 1, 2, 3);
+//   console.warn('im from console.warn', 1, 2, 3);

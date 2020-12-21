@@ -81,7 +81,7 @@ const spawn = {
             }
         }
     },
-    randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss"]) {
+    randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //all need a particular level to work so they are not included
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -101,15 +101,34 @@ const spawn = {
             level.bossKilled = true;
             level.exit.x = 5500;
             level.exit.y = -330;
+            //ramp up damage
+            for (let i = 0; i < 4; i++) level.difficultyIncrease(game.difficultyMode)
+
 
             //pull in particles
-            for (let i = 0, len = body.length; i < len; ++i) { //push blocks away horizontally
+            for (let i = 0, len = body.length; i < len; ++i) {
                 const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, body[i].position)), 65)
-                const pushUp = Vector.add(velocity, { x: 0, y: -0.3 })
+                const pushUp = Vector.add(velocity, { x: 0, y: -0.5 })
                 Matter.Body.setVelocity(body[i], Vector.add(body[i].velocity, pushUp));
             }
-            //ramp up damage
-            for (let i = 0; i < 5; i++) level.difficultyIncrease(game.difficultyMode)
+            //push away mobs
+            for (let i = 0, len = mob.length; i < len; ++i) {
+                if (mob[i] !== this) {
+                    const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), -65)
+                    Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, velocity));
+                }
+            }
+
+            //draw stuff
+            for (let i = 0, len = 22; i < len; i++) {
+                game.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: (i + 1) * 150,
+                    color: `rgba(255,255,255,0.17)`,
+                    time: 5 * (len - i + 1)
+                });
+            }
 
         };
         me.onDamage = function() {};
@@ -761,7 +780,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = radius * 23; //required for blackhole
-        me.seeAtDistance2 = (me.eventHorizon + 300) * (me.eventHorizon + 300); //vision limit is event horizon
+        me.seeAtDistance2 = (me.eventHorizon + 400) * (me.eventHorizon + 400); //vision limit is event horizon
         me.accelMag = 0.00009 * game.accelScale;
         me.frictionAir = 0.025;
         me.collisionFilter.mask = cat.player | cat.bullet
@@ -775,8 +794,15 @@ const spawn = {
                     y: this.velocity.y * 0.99
                 });
             }
-            // this.seePlayerByDistOrLOS();
-            this.seePlayerCheckByDistance()
+            // this.seePlayerCheckByDistance()
+            if (!(game.cycle % this.seePlayerFreq)) {
+                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !mech.isCloak   ignore cloak for black holes
+                    this.locatePlayer();
+                    if (!this.seePlayer.yes) this.seePlayer.yes = true;
+                } else if (this.seePlayer.recall) {
+                    this.lostPlayer();
+                }
+            }
             this.checkStatus();
             if (this.seePlayer.recall) {
                 //eventHorizon waves in and out
@@ -832,7 +858,7 @@ const spawn = {
         me.isBoss = true;
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = 1100; //required for black hole
-        me.seeAtDistance2 = (me.eventHorizon + 1000) * (me.eventHorizon + 1000); //vision limit is event horizon
+        me.seeAtDistance2 = (me.eventHorizon + 1200) * (me.eventHorizon + 1200); //vision limit is event horizon
         me.accelMag = 0.00003 * game.accelScale;
         me.collisionFilter.mask = cat.player | cat.bullet
         // me.frictionAir = 0.005;
@@ -865,7 +891,14 @@ const spawn = {
                     y: this.velocity.y * 0.95
                 });
             }
-            this.seePlayerByDistOrLOS();
+            if (!(game.cycle % this.seePlayerFreq)) {
+                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !mech.isCloak   ignore cloak for black holes
+                    this.locatePlayer();
+                    if (!this.seePlayer.yes) this.seePlayer.yes = true;
+                } else if (this.seePlayer.recall) {
+                    this.lostPlayer();
+                }
+            }
             this.checkStatus();
             if (this.seePlayer.recall) {
                 //accelerate towards the player
@@ -1865,7 +1898,7 @@ const spawn = {
         me.onHit = function() {
             this.explode(this.mass * 20);
         };
-        Matter.Body.setDensity(me, 0.00005); //normal is 0.001
+        Matter.Body.setDensity(me, 0.00004); //normal is 0.001
         me.timeLeft = 200;
         me.g = 0.001; //required if using 'gravity'
         me.frictionAir = 0;
@@ -2106,7 +2139,7 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.02;
-        me.memory = 420 * game.CDScale;
+        me.memory = 420;
         me.repulsionRange = 1200000; //squared
         spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.004 + 0.0005 * Math.sqrt(game.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
@@ -2124,7 +2157,7 @@ const spawn = {
                 Matter.Body.setAngularVelocity(this, 0.11)
                 //fire a bullet from each vertex
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    spawn.seeker(this.vertices[i].x, this.vertices[i].y, 7)
+                    spawn.seeker(this.vertices[i].x, this.vertices[i].y, 6)
                     //give the bullet a rotational velocity as if they were attached to a vertex
                     const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -10)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -2135,7 +2168,84 @@ const spawn = {
             }
         };
     },
-    seeker(x, y, radius = 5, sides = 0) {
+    streamBoss(x, y, radius = 110) {
+        mobs.spawn(x, y, 5, radius, "rgb(245,180,255)");
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        // me.accelMag = 0.00023 * game.accelScale;
+        me.accelMag = 0.00008 * game.accelScale;
+        // me.fireFreq = Math.floor(30 * game.CDScale)
+        me.canFire = false;
+        me.closestVertex1 = 0;
+        me.closestVertex2 = 1;
+        me.cycle = 0
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.frictionAir = 0.022;
+        me.memory = 240;
+        me.repulsionRange = 1200000; //squared
+        spawn.shield(me, x, y, 1);
+        Matter.Body.setDensity(me, 0.025); //extra dense //normal is 0.001 //makes effective life much larger
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
+        };
+        me.onDamage = function() {};
+        me.do = function() {
+            this.seePlayerCheck();
+            this.checkStatus();
+            this.attraction();
+            this.repulsion();
+
+            this.cycle++
+            if (this.seePlayer.recall && ((this.cycle % 15) === 0) && !mech.isBodiesAsleep) {
+                if (this.canFire) {
+                    if (this.cycle > 120) {
+                        this.cycle = 0
+                        this.canFire = false
+                        // Matter.Body.setAngularVelocity(this, 0.1)
+                        // const forceMag = 0.01 * this.mass;
+                        // const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                        // this.force.x -= 2 * forceMag * Math.cos(angle);
+                        // this.force.y -= 2 * forceMag * Math.sin(angle); // - 0.0007 * this.mass; //antigravity
+                    }
+                    spawn.seeker(this.vertices[this.closestVertex1].x, this.vertices[this.closestVertex1].y, 4)
+                    Matter.Body.setDensity(mob[mob.length - 1], 0.000001); //normal is 0.001
+                    const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[this.closestVertex1])), -10)
+                    Matter.Body.setVelocity(mob[mob.length - 1], {
+                        x: this.velocity.x + velocity.x,
+                        y: this.velocity.y + velocity.y
+                    });
+                    spawn.seeker(this.vertices[this.closestVertex2].x, this.vertices[this.closestVertex2].y, 4)
+                    Matter.Body.setDensity(mob[mob.length - 1], 0.000001); //normal is 0.001
+                    const velocity2 = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[this.closestVertex2])), -10)
+                    Matter.Body.setVelocity(mob[mob.length - 1], {
+                        x: this.velocity.x + velocity2.x,
+                        y: this.velocity.y + velocity2.y
+                    });
+                } else if (this.cycle > 210) {
+                    this.cycle = 0
+                    this.canFire = true
+
+                    //find closest 2 vertexes
+                    let distance2 = Infinity
+                    for (let i = 0; i < this.vertices.length; i++) {
+                        const d = Vector.magnitudeSquared(Vector.sub(this.vertices[i], player.position))
+                        if (d < distance2) {
+                            distance2 = d
+                            this.closestVertex2 = this.closestVertex1
+                            this.closestVertex1 = i
+                        }
+                    }
+                    if (this.closestVertex2 === this.closestVertex1) {
+                        this.closestVertex2++
+                        if (this.closestVertex2 === this.vertices.length) this.closestVertex2 = 0
+                    }
+                }
+            }
+        };
+    },
+    seeker(x, y, radius = 5, sides = 6) {
         //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,255)");
         let me = mob[mob.length - 1];
@@ -2143,10 +2253,10 @@ const spawn = {
         me.onHit = function() {
             this.explode(this.mass * 20);
         };
-        Matter.Body.setDensity(me, 0.00002); //normal is 0.001
+        Matter.Body.setDensity(me, 0.000015); //normal is 0.001
         me.timeLeft = 420 * (0.8 + 0.4 * Math.random());
-        me.accelMag = 0.00017 * (0.8 + 0.4 * Math.random()) * game.accelScale;
-        me.frictionAir = 0.01 * (0.8 + 0.4 * Math.random());
+        me.accelMag = 0.00017 * game.accelScale; //* (0.8 + 0.4 * Math.random())
+        me.frictionAir = 0.01 //* (0.8 + 0.4 * Math.random());
         me.restitution = 0.5;
         me.leaveBody = false;
         me.dropPowerUp = false;
@@ -2190,6 +2300,7 @@ const spawn = {
             //run this function on hitting player
             this.explode();
         };
+        Matter.Body.setDensity(me, 0.0005); //normal is 0.001
         me.g = 0.0001; //required if using 'gravity'
         me.accelMag = 0.0003 * game.accelScale;
         me.memory = 30;

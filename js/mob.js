@@ -481,7 +481,7 @@ const mobs = {
                         }
                     }
                 };
-                if (this.seePlayer.recall) {
+                if (this.seePlayer.recall && !this.isSlowed) {
                     this.torque = this.lookTorque * this.inertia * 2;
 
                     const seeRange = 2500;

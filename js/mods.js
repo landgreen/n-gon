@@ -387,22 +387,6 @@ const mod = {
             }
         },
         {
-            name: "fragmentation",
-            description: "detonation or collisions with mobs eject <strong>nails</strong><br><em>blocks, rail gun, grenades, shotgun slugs</em>",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("rail gun") || (mod.haveGunCheck("shotgun") && mod.isSlugShot) || mod.throwChargeRate > 1
-            },
-            requires: "grenades, rail gun, shotgun slugs, or mass driver",
-            effect() {
-                mod.fragments++
-            },
-            remove() {
-                mod.fragments = 0
-            }
-        },
-        {
             name: "ammonium nitrate",
             description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>20%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>20%</strong>",
             maxCount: 9,
@@ -569,7 +553,7 @@ const mod = {
                 b.nailBot();
             },
             remove() {
-                mod.nailBotCount = 0;
+                mod.nailBotCount -= this.count;
             }
         },
         {
@@ -608,7 +592,7 @@ const mod = {
                 b.foamBot();
             },
             remove() {
-                mod.foamBotCount = 0;
+                mod.foamBotCount -= this.count;
             }
         },
         {
@@ -647,7 +631,7 @@ const mod = {
                 b.boomBot();
             },
             remove() {
-                mod.boomBotCount = 0;
+                mod.boomBotCount -= this.count;
             }
         },
         {
@@ -686,7 +670,7 @@ const mod = {
                 b.laserBot();
             },
             remove() {
-                mod.laserBotCount = 0;
+                mod.laserBotCount -= this.count;
             }
         },
         {
@@ -725,7 +709,7 @@ const mod = {
                 mod.orbitBotCount++;
             },
             remove() {
-                mod.orbitBotCount = 0;
+                mod.orbitBotCount -= this.count;
             }
         },
         {
@@ -1074,9 +1058,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() { //&& (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1)
-                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isRewindGun
             },
-            requires: "standing wave, mass-energy, piezoelectricity, max energy reduction",
+            requires: "not standing wave, mass-energy, piezo, max energy reduction, CPT gun",
             effect() {
                 mod.isRewindAvoidDeath = true;
             },
@@ -1135,13 +1119,13 @@ const mod = {
         },
         {
             name: "ground state",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPiezo && mod.energyRegen !== 0.004
+                return (mod.iceEnergy || mod.isWormholeEnergy || mod.isPiezo || mod.isRailEnergyGain) && mod.energyRegen !== 0.004
             },
-            requires: "piezoelectricity, not time crystals",
+            requires: "piezoelectricity, Penrose, half-wave, or thermoelectric, but not time crystals",
             effect: () => {
                 mod.energyRegen = 0;
                 mech.fieldRegen = mod.energyRegen;
@@ -1157,7 +1141,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyLoss && !mod.isPiezo && !mod.isRewindAvoidDeath && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
+                return !mod.isEnergyLoss && !mod.isPiezo && !mod.isRewindAvoidDeath && !mod.isRewindGun && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
             requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass",
             effect: () => {
@@ -1328,13 +1312,13 @@ const mod = {
         },
         {
             name: "transceiver chip",
-            description: "at the end of each <strong>level</strong><br>gain the full  <strong>effect</strong> of unused <strong>power ups</strong>",
+            description: "unused <strong>power ups</strong> at the end of each <strong>level</strong><br>are still activated <em>(selections are random)</em>",
             maxCount: 1,
             count: 0,
             allowed() {
                 return mod.isArmorFromPowerUps
             },
-            requires: "crystallized armor",
+            requires: "inductive coupling",
             effect() {
                 mod.isEndLevelPowerUp = true;
             },
@@ -1535,7 +1519,7 @@ const mod = {
                     if (mod.mods[i].count > 0) have.push(i)
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
-                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by reallocation`, 300)
+                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by monte carlo experiment`, 300)
                 for (let i = 0; i < mod.mods[choose].count; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
                 }
@@ -1935,10 +1919,50 @@ const mod = {
         //************************************************** 
         //************************************************** gun
         //************************************************** mods
-        //************************************************** 
+        //**************************************************
+        {
+            name: "CPT gun",
+            description: "adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>",
+            isGunMod: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mod.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !mod.isEnergyHealth && !mod.isRewindAvoidDeath
+            },
+            requires: "bots > 5, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
+            effect() {
+                mod.isRewindGun = true
+                b.guns.push(b.gunRewind)
+                b.giveGuns("CPT gun");
+            },
+            remove() {
+                if (mod.isRewindGun) {
+                    for (let i = 0; i < b.guns.length; i++) {
+                        if (b.guns[i].name === "CPT gun") {
+                            for (let j = 0; j < b.inventory.length; j++) {
+                                if (b.inventory[j] === i) {
+                                    b.inventory.splice(j, 1)
+                                    break
+                                }
+                            }
+                            if (b.inventory.length) {
+                                b.activeGun = b.inventory[0];
+                            } else {
+                                b.activeGun = null;
+                            }
+                            game.makeGunHUD();
+
+                            b.guns.splice(i, 1) //also remove CPT gun from gun pool array
+                            break
+                        }
+                    }
+                    mod.isRewindGun = false
+                }
+            }
+        },
         {
             name: "incendiary ammunition",
-            description: "<strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><em style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</em>",
+            description: "some <strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><em style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</em>",
             isGunMod: true,
             maxCount: 1,
             count: 0,
@@ -1954,8 +1978,25 @@ const mod = {
             }
         },
         {
+            name: "fragmentation",
+            description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, rail gun, grenades, missiles, shotgun slugs</em>",
+            isGunMod: true,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("missiles") || mod.haveGunCheck("rail gun") || (mod.haveGunCheck("shotgun") && mod.isSlugShot) || mod.throwChargeRate > 1
+            },
+            requires: "grenades, missiles, rail gun, shotgun slugs, or mass driver",
+            effect() {
+                mod.fragments++
+            },
+            remove() {
+                mod.fragments = 0
+            }
+        },
+        {
             name: "Lorentzian topology",
-            description: "<strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
+            description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
             isGunMod: true,
             maxCount: 3,
             count: 0,
@@ -2783,7 +2824,7 @@ const mod = {
         },
         {
             name: "colloidal foam",
-            description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>40%</strong> faster",
+            description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>366%</strong><br><strong>foam</strong> dissipates <strong>40%</strong> faster",
             isGunMod: true,
             maxCount: 1,
             count: 0,
@@ -3259,8 +3300,8 @@ const mod = {
                     mod.giveMod("orbital-bot upgrade")
                     mod.setModToNonRefundable("orbital-bot upgrade")
                     for (let i = 0; i < 2; i++) {
-                        b.orbitalBot()
-                        mod.orbitalBotCount++;
+                        b.orbitBot()
+                        mod.orbitBotCount++;
                     }
                 })
                 //choose random function from the array and run it
@@ -3370,6 +3411,23 @@ const mod = {
                 mod.isFreezeMobs = false
             }
         },
+        // {
+        //     name: "thermal reservoir",
+        //     description: "increase your <strong class='color-plasma'>plasma</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-plasma'>plasma</strong> temporarily lowers health not <strong class='color-f'>energy</strong>",
+        //     isFieldMod: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" && !mod.isEnergyHealth
+        //     },
+        //     requires: "plasma torch, not mass-energy equivalence",
+        //     effect() {
+        //         mod.isPlasmaRange += 0.27;
+        //     },
+        //     remove() {
+        //         mod.isPlasmaRange = 1;
+        //     }
+        // },
         {
             name: "plasma jet",
             description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
@@ -3874,5 +3932,7 @@ const mod = {
     isRewindBot: null,
     isRewindGrenade: null,
     isExtruder: null,
-    isEndLevelPowerUp: null
+    isEndLevelPowerUp: null,
+    isRewindGun: null
+
 }

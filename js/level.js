@@ -13,16 +13,14 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // game.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(19)
+            // level.difficultyIncrease(1)
             // game.zoomScale = 1000;
             // game.setZoom();
             // mech.setField("plasma torch")
             // b.giveGuns("wave beam")
-            // mod.giveMod("micro-extruder")
-            // mod.giveMod("piezoelectricity")
+            // mod.giveMod("CPT reversal")
+            // mod.giveMod("CPT gun")
             // for (let i = 0; i < 15; i++) mod.giveMod("plasma jet")
-
-
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -163,12 +161,12 @@ const level = {
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
-        spawn.shooter(1700, -120)
+        // spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.spiderBoss(1600, -500)
-        // spawn.laser(1200, -500)
+        spawn.streamBoss(1600, -500)
+        // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeBoss(1200, -500, "launcher")
@@ -793,9 +791,9 @@ const level = {
             powerUps.spawnBossPowerUp(-125, -1760);
         } else {
             if (Math.random() < 0.5) {
-                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss"]);
+                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
             } else {
-                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss"]);
+                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
@@ -942,7 +940,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss"]);
+        if (game.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
     },
     satellite() {
