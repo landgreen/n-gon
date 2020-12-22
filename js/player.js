@@ -7,14 +7,14 @@ const mech = {
         //load player in matter.js physic engine
         // let vector = Vertices.fromPath("0 40  50 40   50 115   0 115   30 130   20 130"); //player as a series of vertices
         let vertices = Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"); //player as a series of vertices
-        playerBody = Matter.Bodies.fromVertices(0, 0, vertices);
+        playerBody = Bodies.fromVertices(0, 0, vertices);
         jumpSensor = Bodies.rectangle(0, 46, 36, 6, {
             //this sensor check if the player is on the ground to enable jumping
             sleepThreshold: 99999999999,
             isSensor: true
         });
         vertices = Vertices.fromPath("16 -82  2 -66  2 -37  43 -37  43 -66  30 -82");
-        playerHead = Matter.Bodies.fromVertices(0, -55, vertices); //this part of the player lowers on crouch
+        playerHead = Bodies.fromVertices(0, -55, vertices); //this part of the player lowers on crouch
         headSensor = Bodies.rectangle(0, -57, 48, 45, {
             //senses if the player's head is empty and can return after crouching
             sleepThreshold: 99999999999,
@@ -172,6 +172,7 @@ const mech = {
             angle: mech.angle,
             health: mech.health,
             energy: mech.energy,
+            activeGun: b.activeGun
         });
         // const back = 59  // 59 looks at 1 second ago //29 looks at 1/2 a second ago
         // historyIndex = (mech.cycle - back) % 60
@@ -198,20 +199,53 @@ const mech = {
         if (!mech.crouch) {
             mech.crouch = true;
             mech.yOffGoal = mech.yOffWhen.crouch;
-            Matter.Body.translate(playerHead, {
-                x: 0,
-                y: 40
-            });
+            if ((playerHead.position.y - player.position.y) < 0) {
+
+                Matter.Body.setPosition(playerHead, {
+                    x: player.position.x,
+                    y: player.position.y + 9.1740767
+                })
+
+
+                // Matter.Body.translate(playerHead, {
+                //     x: 0,
+                //     y: 40
+                // });
+            }
+            // playerHead.collisionFilter.group = -1
+            // playerHead.collisionFilter.category = 0
+            // playerHead.collisionFilter.mask = -1
+            // playerHead.isSensor = true;  //works, but has a 2 second lag...
+            // collisionFilter: {
+            //     group: 0,
+            //     category: cat.player,
+            //     mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
+            // },
         }
     },
     undoCrouch() {
         if (mech.crouch) {
             mech.crouch = false;
             mech.yOffGoal = mech.yOffWhen.stand;
-            Matter.Body.translate(playerHead, {
-                x: 0,
-                y: -40
-            });
+            if ((playerHead.position.y - player.position.y) > 0) {
+                Matter.Body.setPosition(playerHead, {
+                    x: player.position.x,
+                    y: player.position.y - 30.28592321
+                })
+                // Matter.Body.translate(playerHead, {
+                //     x: 0,
+                //     y: -40
+                // });
+            }
+
+            // playerHead.collisionFilter = {
+            //     group: 0,
+            //     category: cat.player,
+            //     mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
+            // }
+            // playerHead.isSensor = false;
+            // playerHead.collisionFilter.category = cat.player
+            // playerHead.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
         }
     },
     hardLandCD: 0,
@@ -498,6 +532,12 @@ const mech = {
         let history = mech.history[(mech.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+        b.activeGun = history.activeGun
+        for (let i = 0; i < b.inventory.length; i++) {
+            if (b.inventory[i] === b.activeGun) b.inventoryGun = i
+        }
+        game.updateGunHUD();
+        game.boldActiveGunHUD();
         // move bots to follow player
         for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType) {

@@ -1,10 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-new level boss that fires 2 streams of small bullets that chase you
-
-mod: add a CPT gun to your inventory that rewinds your history, reverts your health, position, velocity for 10 seconds
-  I expect that spamming rewind has some overpowered combos.
-  Let me know what you find, and your ideas on balance.
+added a crouch check to prevent move the head when it's already out of position
+also using setPosition to move player head instead of translate
   
 
 ******************************************************** BUGS ********************************************************
@@ -40,13 +37,13 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
-mod: laser beams push like plasma torch pushes with directional force
+CPT gun seems a bit weak right now.  How to buff the gun?
 
-mod: worm hole - you move through time instead of space.  (field click to rewind)
-  add support for eating blocks, and damaging mobs that are nearby when you rewind
-    allow those mods
-  mod might not work as is because player needs to be able to pick up and move blocks sometimes
-    what about as a gun that uses energy not bullets?
+mob ability bombs/bullets that suck in player
+
+mod where you can't stop firing,  how to code?
+
+mod: laser beams push like plasma torch pushes with directional force
 
 mechanic: technological dead end - add mods to the mod pool with a dumb effect
   don't show up in custom?
@@ -66,6 +63,10 @@ mechanic: technological dead end - add mods to the mod pool with a dumb effect
     teleport to the start of the level
     remove your bots (requires you to have some bots)
     your bots are changed to random bots
+
+Mod: "Expansion Formula": Permanently increase the size of Negative Mass field by 16%(Max 96%)
+
+Mod: "Circadian Rhythm": Become immune to harm for 1 second every 10 seconds while playing.
 
 Mod: "High Risk": Spawn two bosses per level.
   maybe limit to just the power up boss and spawn it at the exit every time to keep it simple
@@ -386,21 +387,17 @@ AI doesn't know about:
   modern pop culture
   outside the lab
 
-robot AI communication
-  output to
-    bottom left message
-    tab title?
+in game console
+  output all console.log code //find starter code for this at the end of index.js
   style
-    output console.log?
     make it look like a computer terminal
       track multiple lines, like your vocoder program
-      messages about heal, ammo, mods, that just list internal computer code
-        example: a heal would be mech.health += 12
-      mono space font
-      square edges
-      black text on bottom right with no background?
-        or white text, or yellow
-    end each message with a hexadecimal encryption code/hash
+    messages about heal, ammo, mods, that just list internal computer code
+      example: a heal would be mech.health += 12
+    mono space font
+    square edges
+    black text on bottom right with no background?
+      or white text, or yellow
   message after selecting each new (mod / gun / field)
     put messages in (mod / gun / field) method
   at start of run

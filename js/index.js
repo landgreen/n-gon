@@ -203,19 +203,16 @@ const build = {
   </svg>
 
     </div>`;
-        let countGuns = 0
-        let countMods = 0
-        for (let i = 0, len = b.guns.length; i < len; i++) {
-            if (b.guns[i].have) {
-                text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[i].ammo}</span></div> ${b.guns[i].description}</div>`
-                countGuns++
-            }
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+            text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[b.inventory[i]].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
         }
+
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
         text = "";
         text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
+        let countMods = 0
         for (let i = 0, len = mod.mods.length; i < len; i++) {
             if (mod.mods[i].count > 0) {
                 const isCount = mod.mods[i].count > 1 ? `(${mod.mods[i].count}x)` : "";
@@ -248,7 +245,7 @@ const build = {
         el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
-        if (countMods > 5 || countGuns > 6) {
+        if (countMods > 5 || b.inventory.length > 6) {
             document.body.style.overflowY = "scroll";
             document.body.style.overflowX = "hidden";
         }

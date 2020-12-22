@@ -1054,7 +1054,7 @@ const mod = {
         },
         {
             name: "CPT reversal",
-            description: "<strong class='color-rewind'>rewind</strong> <strong>1.5 - 5</strong> seconds to avoid <strong class='color-harm'>harm</strong><br>drains <strong>66 - 220</strong> <strong class='color-f'>energy</strong>",
+            description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-harm'>harm</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() { //&& (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1)
@@ -1406,9 +1406,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return mod.duplicationChance() < 1
             },
-            requires: "",
+            requires: "below 100% duplication chance",
             effect: () => {
                 mod.isBayesian = true
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
@@ -1424,9 +1424,9 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return true
+                return mod.duplicationChance() < 1
             },
-            requires: "",
+            requires: "below 100% duplication chance",
             effect() {
                 mod.duplicateChance += 0.07
                 game.draw.powerUp = game.draw.powerUpBonus //change power up draw
@@ -1442,9 +1442,9 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isDeterminism
+                return mod.duplicationChance() < 1 && !mod.isDeterminism
             },
-            requires: "not determinism",
+            requires: "below 100% duplication chance, not determinism",
             effect() {
                 mod.isCancelDuplication = true
                 mod.cancelCount = 0
@@ -1927,7 +1927,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !mod.isEnergyHealth && !mod.isRewindAvoidDeath
+                return (mod.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !mod.isEnergyHealth && !mod.isRewindAvoidDeath //build.isCustomSelection ||
             },
             requires: "bots > 5, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
             effect() {
@@ -1937,25 +1937,27 @@ const mod = {
             },
             remove() {
                 if (mod.isRewindGun) {
-                    for (let i = 0; i < b.guns.length; i++) {
-                        if (b.guns[i].name === "CPT gun") {
-                            for (let j = 0; j < b.inventory.length; j++) {
-                                if (b.inventory[j] === i) {
-                                    b.inventory.splice(j, 1)
-                                    break
-                                }
-                            }
-                            if (b.inventory.length) {
-                                b.activeGun = b.inventory[0];
-                            } else {
-                                b.activeGun = null;
-                            }
-                            game.makeGunHUD();
+                    b.removeGun("CPT gun", true)
+                    // for (let i = 0; i < b.guns.length; i++) {
+                    //     if (b.guns[i].name === "CPT gun") {
+                    //         b.guns[i].have = false
+                    //         for (let j = 0; j < b.inventory.length; j++) {
+                    //             if (b.inventory[j] === i) {
+                    //                 b.inventory.splice(j, 1)
+                    //                 break
+                    //             }
+                    //         }
+                    //         if (b.inventory.length) {
+                    //             b.activeGun = b.inventory[0];
+                    //         } else {
+                    //             b.activeGun = null;
+                    //         }
+                    //         game.makeGunHUD();
 
-                            b.guns.splice(i, 1) //also remove CPT gun from gun pool array
-                            break
-                        }
-                    }
+                    //         b.guns.splice(i, 1) //also remove CPT gun from gun pool array
+                    //         break
+                    //     }
+                    // }
                     mod.isRewindGun = false
                 }
             }
@@ -2619,7 +2621,7 @@ const mod = {
         },
         {
             name: "railroad ties",
-            description: "<strong>nails</strong> are <strong>50%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>25%</strong>",
+            description: "<strong>nails</strong> are <strong>40%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>20%</strong>",
             isGunMod: true,
             maxCount: 1,
             count: 0,
@@ -2628,7 +2630,7 @@ const mod = {
             },
             requires: "nails",
             effect() {
-                mod.biggerNails += 0.5
+                mod.biggerNails += 0.33
             },
             remove() {
                 mod.biggerNails = 1

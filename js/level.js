@@ -3805,7 +3805,8 @@ const level = {
         }
     },
     nextLevel() {
-        if (level.bossKilled) level.levelsCleared++;
+        // if (level.bossKilled) 
+        level.levelsCleared++;
         // level.difficultyIncrease(game.difficultyMode) //increase difficulty based on modes
 
         //difficulty is increased 5 times when finalBoss dies

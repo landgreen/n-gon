@@ -1853,7 +1853,7 @@ const b = {
         bullet[me].endCycle = game.cycle + 60 + 18 * Math.random();
         bullet[me].dmg = dmg
         bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal mod
-            if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
+            if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.24, 120) // one tick every 30 cycles
             if (mod.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.99) this.dmg *= 5 //crit if hit near center
         };
         bullet[me].do = function() {};
@@ -2482,6 +2482,27 @@ const b = {
         }
         game.makeGunHUD();
     },
+    removeGun(gun, isRemoveSelection = false) {
+        for (let i = 0; i < b.guns.length; i++) {
+            if (b.guns[i].name === gun) {
+                b.guns[i].have = false
+                for (let j = 0; j < b.inventory.length; j++) {
+                    if (b.inventory[j] === i) {
+                        b.inventory.splice(j, 1)
+                        break
+                    }
+                }
+                if (b.inventory.length) {
+                    b.activeGun = b.inventory[0];
+                } else {
+                    b.activeGun = null;
+                }
+                game.makeGunHUD();
+                if (isRemoveSelection) b.guns.splice(i, 1) //also remove gun from gun pool array
+                break
+            }
+        }
+    },
     guns: [{
             name: "nail gun",
             description: "use compressed air to fire a stream of <strong>nails</strong><br><strong>delay</strong> after firing <strong>decreases</strong> as you shoot",
@@ -2550,7 +2571,7 @@ const b = {
                     if (mod.isIceCrystals) {
                         bullet[bullet.length - 1].beforeDmg = function(who) {
                             mobs.statusSlow(who, 30)
-                            if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.22, 120) // one tick every 30 cycles
+                            if (mod.isNailPoison) mobs.statusDoT(who, dmg * 0.24, 120) // one tick every 30 cycles
                             if (mod.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.99) this.dmg *= 5 //crit if hit near center
                         };
 
@@ -3778,18 +3799,19 @@ const b = {
         isRewinding: false,
         lastFireCycle: 0,
         holdCount: 0,
+        activeGunIndex: null,
         fire() {
             if (this.lastFireCycle === mech.cycle - 1) { //button has been held down
-                this.rewindCount += 7;
+                this.rewindCount += 8;
                 const DRAIN = 0.01
-                if (this.rewindCount > 599 || mech.energy < DRAIN) {
+                let history = mech.history[(mech.cycle - this.rewindCount) % 600]
+                if (this.rewindCount > 599 || mech.energy < DRAIN || history.activeGun !== this.activeGunIndex) {
                     this.rewindCount = 0;
                     mech.resetHistory();
-                    mech.fireCDcycle = mech.cycle + Math.floor(60 * b.fireCD); // cool down
+                    mech.fireCDcycle = mech.cycle + Math.floor(120 * b.fireCD); // cool down
                 } else {
                     mech.energy -= DRAIN
-                    mech.immuneCycle = mech.cycle + 5; //player is immune to collision damage for 5 cycles
-                    let history = mech.history[(mech.cycle - this.rewindCount) % 600]
+                    mech.immuneCycle = mech.cycle + 30; //player is immune to collision damage for 5 cycles
                     Matter.Body.setPosition(player, history.position);
                     Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
                     if (mech.health !== history.health) {
@@ -3799,6 +3821,7 @@ const b = {
                 }
             } else { //button is held the first time
                 this.rewindCount = 0;
+                this.activeGunIndex = b.activeGun
             }
             this.lastFireCycle = mech.cycle;
         }
