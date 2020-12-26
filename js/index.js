@@ -155,7 +155,7 @@ const build = {
             for (const property in set) {
                 set[property] = set[property].replace(/%20/g, " ")
                 if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
-                if (property.substring(0, 3) === "tech") tech.giveMod(set[property])
+                if (property.substring(0, 3) === "tech") tech.giveTech(set[property])
                 if (property === "field") mech.setField(set[property])
                 if (property === "difficulty") {
                     simulation.difficultyMode = Number(set[property])
@@ -181,7 +181,7 @@ const build = {
         if (!simulation.isChoosing) text += `<div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
         text += `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
-      <strong class='color-d'>damage</strong> increase: ${((tech.damageFromMods()-1)*100).toFixed(0)}%
+      <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
       <br><strong class='color-harm'>harm</strong> reduction: ${((1-mech.harmReduction())*100).toFixed(0)}%
       <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(0)}%
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
@@ -212,19 +212,19 @@ const build = {
         el.innerHTML = text
         text = "";
         text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
-        let countMods = 0
+        let countTech = 0
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
                 const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
-                if (tech.tech[i].isFieldMod) {
+                if (tech.tech[i].isFieldTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
-                } else if (tech.tech[i].isGunMod) {
+                } else if (tech.tech[i].isGunTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
@@ -232,20 +232,15 @@ const build = {
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
-                // if (tech.tech[i].count === 1) {
-                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
-                // } else {
-                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${tech.tech[i].name} (${tech.tech[i].count}x)</div> ${tech.tech[i].description}</div>`
-                // }
-                countMods++
+                countTech++
             }
         }
         el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
-        if (countMods > 5 || b.inventory.length > 6) {
+        if (countTech > 5 || b.inventory.length > 6) {
             document.body.style.overflowY = "scroll";
             document.body.style.overflowX = "hidden";
         }
@@ -287,9 +282,9 @@ const build = {
         } else if (type === "tech") { //remove tech if you have too many
             if (tech.tech[index].count < tech.tech[index].maxCount) {
                 if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
-                tech.giveMod(index)
+                tech.giveTech(index)
             } else {
-                tech.removeMod(index);
+                tech.removeTech(index);
                 who.classList.remove("build-tech-selected");
             }
         }
@@ -299,7 +294,7 @@ const build = {
             if (!tech.tech[i].isCustomHide) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-                    if (tech.tech[i].isFieldMod) {
+                    if (tech.tech[i].isFieldTech) {
                         techID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
                                                     <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
@@ -310,7 +305,7 @@ const build = {
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
                         // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
                         // border: #fff solid 0px;
-                    } else if (tech.tech[i].isGunMod) {
+                    } else if (tech.tech[i].isGunTech) {
                         techID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
                                                     <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
@@ -331,7 +326,7 @@ const build = {
                         techID.classList.add("build-grid-disabled");
                         techID.onclick = null
                     }
-                    if (tech.tech[i].count > 0) tech.removeMod(i)
+                    if (tech.tech[i].count > 0) tech.removeTech(i)
                     if (techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
                 }
             }
@@ -412,7 +407,7 @@ const build = {
         b.activeGun = null;
         simulation.makeGunHUD();
 
-        tech.setupAllMods();
+        tech.setupAllTech();
         build.populateGrid();
         document.getElementById("field-0").classList.add("build-field-selected");
         document.getElementById("build-grid").style.display = "grid"
@@ -805,7 +800,7 @@ window.addEventListener("keydown", function(event) {
                 mech.energy = mech.maxEnergy;
                 break
             case "y":
-                tech.giveMod()
+                tech.giveTech()
                 break
             case "r":
                 mech.resetHistory();

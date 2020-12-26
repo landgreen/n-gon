@@ -327,17 +327,17 @@ const mech = {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             simulation.isTextLogOpen = false;
             //count tech
-            let totalMods = 0;
+            let totalTech = 0;
             for (let i = 0; i < tech.tech.length; i++) {
-                if (!tech.tech[i].isNonRefundable) totalMods += tech.tech[i].count
+                if (!tech.tech[i].isNonRefundable) totalTech += tech.tech[i].count
             }
-            if (tech.isDeterminism) totalMods -= 3 //remove the bonus tech 
-            if (tech.isSuperDeterminism) totalMods -= 2 //remove the bonus tech 
-            totalMods = totalMods * 1.15 + 1 // a few extra to make it stronger
+            if (tech.isDeterminism) totalTech -= 3 //remove the bonus tech 
+            if (tech.isSuperDeterminism) totalTech -= 2 //remove the bonus tech 
+            totalTech = totalTech * 1.15 + 1 // a few extra to make it stronger
             const totalGuns = b.inventory.length //count guns
 
-            function randomizeMods() {
-                for (let i = 0; i < totalMods; i++) {
+            function randomizeTech() {
+                for (let i = 0; i < totalTech; i++) {
                     //find what tech I don't have
                     let options = [];
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -351,12 +351,12 @@ const mech = {
                     //add a new tech
                     if (options.length > 0) {
                         const choose = Math.floor(Math.random() * options.length)
-                        let newMod = options[choose]
-                        tech.giveMod(newMod)
+                        let newTech = options[choose]
+                        tech.giveTech(newTech)
                         options.splice(choose, 1);
                     }
                 }
-                simulation.updateModHUD();
+                simulation.updateTechHUD();
             }
 
             function randomizeField() {
@@ -398,13 +398,13 @@ const mech = {
                 spawn.setSpawnList(); //new mob types
                 simulation.clearNow = true; //triggers a map reset
 
-                tech.setupAllMods(); //remove all tech
+                tech.setupAllTech(); //remove all tech
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = []; //remove all bullets
                 randomizeHealth()
                 randomizeField()
                 randomizeGuns()
-                randomizeMods()
+                randomizeTech()
             }
 
             randomizeEverything()
@@ -899,7 +899,7 @@ const mech = {
         }
     },
     setMaxEnergy() {
-        mech.maxEnergy = (tech.isMaxEnergyMod ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus
+        mech.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus
     },
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {

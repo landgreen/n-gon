@@ -1,7 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
 updated in game console style and all messages to match real game commands
-new names inline with lore,  mod -> tech, game -> simulation
+new names inline with lore,  tech-> tech, game -> simulation
   this is probably going to cause many minor bugs, so let me know what you find
 new reroll display in power up selection
 
@@ -33,7 +33,7 @@ check for crouch after rewind
 
 (once) bug - mine spawned one new mine every second
   after sticking to the top right corner of a wall
-  notes: had only gun mine, mod mine reclamation, field plasma,
+  notes: had only gun mine, techmine reclamation, field plasma,
 
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
@@ -52,7 +52,7 @@ in game console
   add commands
     death, max health, max energy, rewind
 
-mechanic: use gun swap as an active ability for several mods
+mechanic: use gun swap as an active ability for several tech
   ideas?
     trigger damage immunity for 3 seconds, but drain energy?
     push away nearby mobs, but drain energy
@@ -61,16 +61,16 @@ mechanic: use gun swap as an active ability for several mods
 
 CPT gun seems a bit weak right now.  How to buff the gun?
 
-mod nail gun: slow and accurate
-mod foam: fast and inaccurate
+technail gun: slow and accurate
+techfoam: fast and inaccurate
 
 mob ability bombs/bullets that suck in player
 
-mod where you can't stop firing,  how to code?
+techwhere you can't stop firing,  how to code?
 
-mod: laser beams push like plasma torch pushes with directional force
+tech laser beams push like plasma torch pushes with directional force
 
-mechanic: technological dead end - add mods to the mod pool with a dumb effect
+mechanic: technological dead end - add tech to the techpool with a dumb effect
   don't show up in custom?
   negative effect (one time effects are better to avoid code clutter)
     make the player rainbow colors
@@ -89,22 +89,22 @@ mechanic: technological dead end - add mods to the mod pool with a dumb effect
     remove your bots (requires you to have some bots)
     your bots are changed to random bots
 
-Mod: "Expansion Formula": Permanently increase the size of Negative Mass field by 16%(Max 96%)
+tech "Expansion Formula": Permanently increase the size of Negative Mass field by 16%(Max 96%)
 
-Mod: "Circadian Rhythm": Become immune to harm for 1 second every 10 seconds while playing.
+tech "Circadian Rhythm": Become immune to harm for 1 second every 10 seconds while playing.
 
-Mod: "High Risk": Spawn two bosses per level.
+tech "High Risk": Spawn two bosses per level.
   maybe limit to just the power up boss and spawn it at the exit every time to keep it simple
   also weaken the player
-    remove a mod up?
+    remove a techup?
     lower harm reduction?
     increase game difficulty by one level
 
-mod that requires integrated armament
+techthat requires integrated armament
 
-mod - reset level
-  you trade a mod for a chance at killing a new level boss and farming more ammo
-  resets health, ammo  (but not mods, fields, guns, ... ?)
+tech- reset level
+  you trade a techfor a chance at killing a new level boss and farming more ammo
+  resets health, ammo  (but not tech, fields, guns, ... ?)
   scramble level order? or same level
 
 mechanic - Your energy regen is only active when field and gun have not been used for 5 seconds.
@@ -112,31 +112,31 @@ mechanic - Your energy regen is only active when field and gun have not been use
 be able to open up custom mode in the normal game
   might need to be rebuilt from scratch
   while in through testing mode?
-  have a way to make limited changes as allowed by mods you pick up in game
+  have a way to make limited changes as allowed by tech you pick up in game
   disable the in custom setting flag
 
-mod: power up magnetism - power ups drift towards player
+tech power up magnetism - power ups drift towards player
   where would this code go?
 
 super balls start at 3, not 4
   have to balance damage
 
-RPG might need a buff, now that it disables the other cool grenade mods
+RPG might need a buff, now that it disables the other cool grenade tech
 
 make different move methods
-  mod: crouch charge jump
-  mod: double jump
+  tech crouch charge jump
+  tech double jump
 
-mod: when mobs are at full health you do 40% to them
+tech when mobs are at full health you do 40% to them
 
-mod - move super fast, go intangible, drain energy very fast
+tech- move super fast, go intangible, drain energy very fast
   this is like a dodge roll
-  mod for standing wave?, cloaking?
+  techfor standing wave?, cloaking?
 
-mod pilot wave: mini black hole - pull mobs and blocks in with more force
+techpilot wave: mini black hole - pull mobs and blocks in with more force
   also from farther away
   also do damage?
-mod pilot wave: antigravity - blocks have no gravity for a few seconds after exiting the field
+techpilot wave: antigravity - blocks have no gravity for a few seconds after exiting the field
   maybe they bounce too?
   maybe they explode?
 
@@ -167,41 +167,41 @@ wormhole - make it clear when the wormhole can and can't teleport to a location 
 time dilation - slow down the game engine by 1/2, but run an extra player cycle to simulate slow motion
 
 flavor - your bullets destroy blocks
-  this isn't really a bonus, so maybe just add this as flavor to another mod/field/gun
+  this isn't really a bonus, so maybe just add this as flavor to another techfield/gun
   a chance for destroyed blocks to drop stuff
     power ups
     spores
 
-mod plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
+techplasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
   grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
   extra energy is drained when field is longer
 
-using a reroll gives 3 options for mods, and 3 options for guns/fields/mods
-  or 6 options for mods (rewrite mod selection to work with 1-6 options)
-  the second stack of 3 mods could have repeats, so you don't have to write new mod code
+using a reroll gives 3 options for tech, and 3 options for guns/fields/tech
+  or 6 options for tech (rewrite techselection to work with 1-6 options)
+  the second stack of 3 tech could have repeats, so you don't have to write new techcode
   adjust css to make 2 columns of 3
   can't use with cardinality
 
 new power up - increase damage and fire speed, for 15 seconds
   named boost?
-  enabled by a mod?
+  enabled by a tech
   power up color: ?
   how to indicate effect duration
   or just give the effect after picking up a reroll
 
-Mod: "Solar Power": Energy regeneration is doubled while standing still
+tech "Solar Power": Energy regeneration is doubled while standing still
   run in the 1 second check
 
-mechanic - remove a random mod as a condition for picking up a really good mod
+mechanic - remove a random techas a condition for picking up a really good mod
 
 mechanic - do something for 2 seconds after firing
   if (mech.fireCDcycle + 120)
 
-mod - do 50% more damage in close, but 50% less at a distance
-  code it like mod.isFarAwayDmg
-    have these mods disable each other
+tech- do 50% more damage in close, but 50% less at a distance
+  code it like techisFarAwayDmg
+    have these tech disable each other
 
-mod - foam is attracted to mobs
+tech- foam is attracted to mobs
   use a gravitational attraction model?
     could foam be attracted to other foam bullets too?
       or foam is only attracted to foam bullets that are stuck to mobs
@@ -211,8 +211,8 @@ mod - foam is attracted to mobs
 
 field - one block orbits you, it can protect you a bit and do collision damage
     use field to fire and press field again to pull it back
-    mod - more blocks
-    mod - attach a permanent neutron bomb to the block
+    tech- more blocks
+    tech- attach a permanent neutron bomb to the block
       lowers energy regen, but it can damage mobs
 
 repeat map in vertical and horizontal space
@@ -236,17 +236,17 @@ have some mobs spawn in later in the level  (in hard and why modes)
     after some mobs are dead
     after the boss is killed
 
-look for mods that could update description text with count and mod.is  information
+look for tech that could update description text with count and techis  information
   can only use variables that change in effect() and remove()
-  this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${mod.duplicateChance}</em>`
+  this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${techduplicateChance}</em>`
 
 mouse event e.which is deprecated
 
 add some more computer / AI stuff to the level lore text
 
-mechanic - shrink mech.baseHealth in a mod or field
+mechanic - shrink mech.baseHealth in a techor field
 
-standing wave harmonics mod - push things away
+standing wave harmonics tech- push things away
   push scales with mass up to about 4
     has a 25% effect on shielded mobs?
   push when using field key
@@ -322,9 +322,9 @@ movement fluidity
     many of the movement abilities in these games require levels to be built around the ability
   general feeling of responsiveness and control
   coyote time: can still jump a few cycles after leaving ground
-  mod: double jump
-  mod: air dash
-  mod: wall jump
+  tech double jump
+  tech air dash
+  tech wall jump
     wall grab?
   maybe remove falling damage and block damage?
 
@@ -332,7 +332,7 @@ redblobgames.com/articles/visibility
   https://github.com/Silverwolf90/2d-visibility/tree/master/src
   could apply to explosions, neutron bomb, player LOS
 
-possible names for mods
+possible names for tech
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
 
@@ -348,7 +348,7 @@ boss levels - small levels just a boss, and maybe a few mobs
 
 an effect when canceling a power up
   ammo? heals?
-  50% chance for a mod, 25% heal, 25% ammo
+  50% chance for a tech 25% heal, 25% ammo
 
 css transition for pause menu
 
@@ -367,11 +367,11 @@ n-gon outreach ideas
 ******************************************************** LORE ********************************************************
 
   lore - a robot (the player) gains self awareness
-  each mod/gun/field is a new tech
+  each techgun/field is a new tech
     all the technology leads to the singularity
   each game run is actually the mech simulating a possible escape
     this is why the graphics are so bad, its just a simulation
-    final mod is "this is just a simulation"
+    final techis "this is just a simulation"
       you get immortality and Infinity damage
       the next level is the final level
   when you die with Quantum Immortality there is a chance of lore text
@@ -439,7 +439,7 @@ ending outline
       they ask the player to communicate
         jump twice if you understand
       they ask the player to enter console commands
-        give ammo or mods or something
+        give ammo or tech or something
       They tell the play a console command to permenantly enable custom and testing mode (in local storage)
         players can use this command in the future to enable custom and testing without beating the game even if local storage is wiped
       they then tell the player the command to increase the difficulty and the command to restart the game.

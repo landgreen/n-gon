@@ -15,8 +15,8 @@ const powerUps = {
             mech.setField(index)
             simulation.makeTextLog(`<span class='color-var'>mech</span>.setField("<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].name}</span>")`);
         } else if (type === "tech") {
-            tech.giveMod(index)
-            simulation.makeTextLog(`<span class='color-var'>tech</span>.giveMod("<span class='color-text'>${tech.tech[index].name}</span>")`);
+            tech.giveTech(index)
+            simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
         }
         powerUps.endDraft(type);
     },
@@ -313,14 +313,14 @@ const powerUps = {
                         const choose = options[Math.floor(Math.random() * options.length)]
                         const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
 
-                        if (tech.tech[choose].isFieldMod) {
+                        if (tech.tech[choose].isFieldTech) {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">
                                                     <span style="position:relative;">
                                                         <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                         <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                                     </span>
                                                     &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].description}</div></div>`
-                        } else if (tech.tech[choose].isGunMod) {
+                        } else if (tech.tech[choose].isGunTech) {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">
                                                     <span style="position:relative;">
                                                         <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
@@ -373,7 +373,7 @@ const powerUps = {
                 } else {
                     if (tech.isBanish) {
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].name === "erase") powerUps.ejectMod(i)
+                            if (tech.tech[i].name === "erase") powerUps.ejectTech(i)
                         }
                         simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
                         powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
@@ -589,7 +589,7 @@ const powerUps = {
             powerUps.spawnRandomPowerUp(x, y);
         }
     },
-    ejectMod(choose = 'random') {
+    ejectTech(choose = 'random') {
         //find which tech you have
         if (choose === 'random') {
             const have = []
@@ -615,7 +615,7 @@ const powerUps = {
                 tech.tech[choose].remove();
                 tech.tech[choose].count = 0;
                 tech.tech[choose].isLost = true;
-                simulation.updateModHUD();
+                simulation.updateTechHUD();
                 mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected tech
             }
         } else {
@@ -630,7 +630,7 @@ const powerUps = {
             tech.tech[choose].remove();
             tech.tech[choose].count = 0;
             tech.tech[choose].isLost = true;
-            simulation.updateModHUD();
+            simulation.updateTechHUD();
             mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected tech
         }
     },

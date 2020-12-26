@@ -306,7 +306,7 @@ const simulation = {
         }
         simulation.boldActiveGunHUD();
     },
-    updateModHUD() {
+    updateTechHUD() {
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
             if (tech.tech[i].isLost) {
@@ -515,7 +515,7 @@ const simulation = {
         b.removeAllGuns();
         simulation.isNoPowerUps = false;
 
-        tech.setupAllMods(); //sets tech to default values
+        tech.setupAllTech(); //sets tech to default values
         tech.laserBotCount = 0;
         tech.orbitBotCount = 0;
         tech.nailBotCount = 0;
@@ -524,7 +524,7 @@ const simulation = {
         tech.plasmaBotCount = 0;
 
         b.setFireCD();
-        simulation.updateModHUD();
+        simulation.updateTechHUD();
         powerUps.totalPowerUps = 0;
         powerUps.reroll.rerolls = 0;
         mech.setFillColors();
@@ -650,7 +650,7 @@ const simulation = {
         if (tech.isEndLevelPowerUp) {
             for (let i = 0; i < powerUp.length; i++) {
                 if (powerUp[i].name === "tech") {
-                    tech.giveMod()
+                    tech.giveTech()
                 } else if (powerUp[i].name === "gun") {
                     if (!tech.isOneGun) b.giveGuns("random")
                 } else if (powerUp[i].name === "field") {

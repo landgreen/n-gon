@@ -1,6 +1,6 @@
 const tech = {
     totalCount: null,
-    setupAllMods() {
+    setupAllTech() {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             tech.tech[i].remove();
             tech.tech[i].isLost = false
@@ -14,14 +14,14 @@ const tech = {
         // tech.plasmaBotCount = 0;
         tech.armorFromPowerUps = 0;
         tech.totalCount = 0;
-        simulation.updateModHUD();
+        simulation.updateTechHUD();
     },
-    removeMod(index) {
+    removeTech(index) {
         tech.tech[index].remove();
         tech.tech[index].count = 0;
-        simulation.updateModHUD();
+        simulation.updateTechHUD();
     },
-    giveMod(index = 'random') {
+    giveTech(index = 'random') {
         if (index === 'random') {
             let options = [];
             for (let i = 0; i < tech.tech.length; i++) {
@@ -30,8 +30,8 @@ const tech = {
             }
             // give a random tech from the tech I don't have
             if (options.length > 0) {
-                let newMod = options[Math.floor(Math.random() * options.length)]
-                tech.giveMod(newMod)
+                let newTech = options[Math.floor(Math.random() * options.length)]
+                tech.giveTech(newTech)
             }
         } else {
             if (isNaN(index)) { //find index by name
@@ -49,10 +49,10 @@ const tech = {
             tech.tech[index].effect(); //give specific tech
             tech.tech[index].count++
             tech.totalCount++ //used in power up randomization
-            simulation.updateModHUD();
+            simulation.updateTechHUD();
         }
     },
-    setModToNonRefundable(name) {
+    setTechoNonRefundable(name) {
         for (let i = 0; i < tech.tech.length; i++) {
             if (tech.tech.name === name) {
                 tech.tech[i].isNonRefundable = true;
@@ -60,25 +60,6 @@ const tech = {
             }
         }
     },
-    // giveBasicMod(index = 'random') {
-    //     // if (isNaN(index)) { //find index by name
-    //     //     let found = false;
-    //     //     for (let i = 0; i < tech.tech.length; i++) {
-    //     //         if (index === tech.tech[i].name) {
-    //     //             index = i;
-    //     //             found = true;
-    //     //             break;
-    //     //         }
-    //     //     }
-    //     //     if (!found) return //if name not found don't give any tech
-    //     // }
-
-    //     tech.basicMods[index].effect(); //give specific tech
-    //     tech.tech[index].count++
-    //     tech.totalCount++ //used in power up randomization
-    //     simulation.updateModHUD();
-
-    // },
     haveGunCheck(name) {
         if (
             !build.isCustomSelection &&
@@ -94,11 +75,11 @@ const tech = {
         }
         return false
     },
-    damageFromMods() {
+    damageFromTech() {
         let dmg = mech.fieldDamage
         // if (tech.aimDamage>1)
         if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
-        if (tech.isMaxEnergyMod) dmg *= 1.4
+        if (tech.isMaxEnergyTech) dmg *= 1.4
         if (tech.isEnergyNoAmmo) dmg *= 1.5
         if (tech.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
@@ -179,11 +160,11 @@ const tech = {
             },
             requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
             effect() {
-                tech.isMaxEnergyMod = true;
+                tech.isMaxEnergyTech = true;
                 mech.setMaxEnergy()
             },
             remove() {
-                tech.isMaxEnergyMod = false;
+                tech.isMaxEnergyTech = false;
                 mech.setMaxEnergy()
             }
         },
@@ -1215,7 +1196,7 @@ const tech = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return tech.damageFromMods() > 1
+                return tech.damageFromTech() > 1
             },
             requires: "some increased damage",
             effect() {
@@ -1263,7 +1244,7 @@ const tech = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return !tech.isEnergyHealth && tech.damageFromMods() > 1
+                return !tech.isEnergyHealth && tech.damageFromTech() > 1
             },
             requires: "some increased damage, not mass-energy equivalence",
             effect() {
@@ -1307,7 +1288,7 @@ const tech = {
             },
             remove() {
                 tech.isArmorFromPowerUps = false;
-                // tech.armorFromPowerUps = 0;  //this is now reset in tech.setupAllMods();
+                // tech.armorFromPowerUps = 0;  //this is now reset in tech.setupAllTech();
                 mech.setMaxHealth();
             }
         },
@@ -1499,7 +1480,7 @@ const tech = {
                 tech.tech[choose].count = 0;
                 tech.tech[choose].remove(); // remove a random tech form the list of tech you have
                 tech.tech[choose].isLost = true
-                simulation.updateModHUD();
+                simulation.updateTechHUD();
             },
             remove() {}
         },
@@ -1528,7 +1509,7 @@ const tech = {
                 tech.tech[choose].count = 0;
                 tech.tech[choose].remove(); // remove a random tech form the list of tech you have
                 tech.tech[choose].isLost = true
-                simulation.updateModHUD();
+                simulation.updateTechHUD();
             },
             remove() {}
         },
@@ -1847,7 +1828,7 @@ const tech = {
                 if (tech.isDeterminism) count -= 3 //remove the bonus tech 
                 if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
 
-                tech.setupAllMods(); // remove all tech
+                tech.setupAllTech(); // remove all tech
                 for (let i = 0; i < count; i++) { // spawn new tech power ups
                     powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                 }
@@ -1926,7 +1907,7 @@ const tech = {
         {
             name: "CPT gun",
             description: "adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1968,7 +1949,7 @@ const tech = {
         {
             name: "incendiary ammunition",
             description: "some <strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><em style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</em>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1985,7 +1966,7 @@ const tech = {
         {
             name: "fragmentation",
             description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, rail gun, grenades, missiles, shotgun slugs</em>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2002,7 +1983,7 @@ const tech = {
         {
             name: "Lorentzian topology",
             description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 3,
             count: 0,
             allowed() {
@@ -2019,7 +2000,7 @@ const tech = {
         {
             name: "microstates",
             description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2036,7 +2017,7 @@ const tech = {
         {
             name: "ice crystal nucleation",
             description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2072,7 +2053,7 @@ const tech = {
         {
             name: "critical bifurcation",
             description: "<strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2089,7 +2070,7 @@ const tech = {
         {
             name: "pneumatic actuator",
             description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2106,7 +2087,7 @@ const tech = {
         {
             name: "powder-actuated",
             description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2123,7 +2104,7 @@ const tech = {
         {
             name: "shotgun spin-statistics",
             description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br><strong class='color-g'>ammo</strong> costs are <strong>doubled</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2162,7 +2143,7 @@ const tech = {
         {
             name: "nailshot",
             description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2179,7 +2160,7 @@ const tech = {
         {
             name: "shotgun slug",
             description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2196,7 +2177,7 @@ const tech = {
         {
             name: "Newton's 3rd law",
             description: "the <strong>shotgun</strong> fire <strong><em>delay</em></strong> is <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2213,7 +2194,7 @@ const tech = {
         {
             name: "super duper",
             description: "fire <strong>1</strong> additional <strong>super ball</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2230,7 +2211,7 @@ const tech = {
         {
             name: "super ball",
             description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2247,7 +2228,7 @@ const tech = {
         {
             name: "super sized",
             description: `your <strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2264,7 +2245,7 @@ const tech = {
         {
             name: "flechettes cartridges",
             description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong class='color-g'>ammo</strong> costs are <strong>tripled</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2311,7 +2292,7 @@ const tech = {
         {
             name: "6s half-life",
             description: "<strong>flechette</strong> needles made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2328,7 +2309,7 @@ const tech = {
         {
             name: "1/2s half-life",
             description: "<strong>flechette</strong> needles made of <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2345,7 +2326,7 @@ const tech = {
         {
             name: "supercritical fission",
             description: "<strong>flechettes</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2362,7 +2343,7 @@ const tech = {
         {
             name: "radioactive contamination",
             description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2379,7 +2360,7 @@ const tech = {
         {
             name: "piercing needles",
             description: "<strong>needles</strong> penetrate <strong>mobs</strong> and <strong>blocks</strong><br>potentially hitting <strong>multiple</strong> targets",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2396,7 +2377,7 @@ const tech = {
         {
             name: "wave packet",
             description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2413,7 +2394,7 @@ const tech = {
         {
             name: "phase velocity",
             description: "the <strong>wave beam</strong> propagates faster in solids",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2432,7 +2413,7 @@ const tech = {
         {
             name: "bound state",
             description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>bound</strong> to a <strong>region</strong> around player",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2449,7 +2430,7 @@ const tech = {
         {
             name: "recursion",
             description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong> they have a<br><strong>20%</strong> chance to launch a larger <strong>missile</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 6,
             count: 0,
             allowed() {
@@ -2466,7 +2447,7 @@ const tech = {
         {
             name: "MIRV",
             description: "launch <strong>3</strong> small <strong>missiles</strong> instead of <strong>1</strong> <br><strong>1.5x</strong> increase in <strong><em>delay</em></strong> after firing",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2483,7 +2464,7 @@ const tech = {
         {
             name: "rocket-propelled grenade",
             description: "<strong>grenades</strong> rapidly <strong>accelerate</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2502,7 +2483,7 @@ const tech = {
         {
             name: "vacuum bomb",
             description: "<strong>grenades</strong> fire slower, <strong class='color-e'>explode</strong> bigger<br> and, <strong>suck</strong> everything towards them",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2521,7 +2502,7 @@ const tech = {
         {
             name: "neutron bomb",
             description: "<strong>grenades</strong> are irradiated with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2540,7 +2521,7 @@ const tech = {
         {
             name: "water shielding",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2557,7 +2538,7 @@ const tech = {
         {
             name: "vacuum permittivity",
             description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2574,7 +2555,7 @@ const tech = {
         {
             name: "mine reclamation",
             description: "retrieve <strong class='color-g'>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2591,7 +2572,7 @@ const tech = {
         {
             name: "sentry",
             description: "<strong>mines</strong> <strong>target</strong> mobs with nails over time<br>mines last about <strong>12</strong> seconds",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2608,7 +2589,7 @@ const tech = {
         {
             name: "irradiated nails",
             description: "<strong>nails</strong> are made with a <strong class='color-p'>cobalt-60</strong> alloy<br><strong>85%</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2625,7 +2606,7 @@ const tech = {
         {
             name: "railroad ties",
             description: "<strong>nails</strong> are <strong>40%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>20%</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2642,7 +2623,7 @@ const tech = {
         {
             name: "mycelial fragmentation",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release an extra <strong class='color-p' style='letter-spacing: 2px;'>spore</strong><br> once a <strong>second</strong> during their <strong>growth</strong> phase",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2659,7 +2640,7 @@ const tech = {
         {
             name: "tinsellated flagella",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2677,7 +2658,7 @@ const tech = {
             name: "cryodesiccation",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1</strong> second",
             // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2694,7 +2675,7 @@ const tech = {
         {
             name: "diplochory",
             description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use the player for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2711,7 +2692,7 @@ const tech = {
         {
             name: "mutualism",
             description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong>health</strong> until they <strong>die</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2728,7 +2709,7 @@ const tech = {
         {
             name: "brushless motor",
             description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2745,7 +2726,7 @@ const tech = {
         {
             name: "harvester",
             description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>larger</strong>, <strong>faster</strong>, and very <strong>durable</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2762,7 +2743,7 @@ const tech = {
         {
             name: "superfluidity",
             description: "<strong class='color-s'>freeze</strong> effects apply to mobs near it's target",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2779,7 +2760,7 @@ const tech = {
         {
             name: "heavy water",
             description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>5</strong> seconds",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2796,7 +2777,7 @@ const tech = {
         {
             name: "thermoelectric effect",
             description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>100</strong> <strong class='color-f'>energy</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2813,7 +2794,7 @@ const tech = {
         {
             name: "necrophoresis",
             description: "<strong>foam</strong> bullets grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2830,7 +2811,7 @@ const tech = {
         {
             name: "colloidal foam",
             description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>366%</strong><br><strong>foam</strong> dissipates <strong>40%</strong> faster",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2881,7 +2862,7 @@ const tech = {
         {
             name: "half-wave rectifier",
             description: "charging the <strong>rail gun</strong> gives you <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2898,7 +2879,7 @@ const tech = {
         {
             name: "dielectric polarization",
             description: "firing the <strong>rail gun</strong> <strong class='color-d'>damages</strong> nearby <strong>mobs</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2915,7 +2896,7 @@ const tech = {
         {
             name: "capacitor bank",
             description: "the <strong>rail gun</strong> no longer takes time to <strong>charge</strong><br><strong>rail gun</strong> rods are <strong>66%</strong> less massive",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2932,7 +2913,7 @@ const tech = {
         {
             name: "laser diodes",
             description: "<strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun and laser-bot</em>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2949,7 +2930,7 @@ const tech = {
         {
             name: "specular reflection",
             description: "<strong>laser</strong> beams gain <strong>1</strong> reflection<br>increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2970,7 +2951,7 @@ const tech = {
         {
             name: "diffraction grating",
             description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -2993,7 +2974,7 @@ const tech = {
         {
             name: "diffuse beam",
             description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>175%</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3018,7 +2999,7 @@ const tech = {
         {
             name: "output coupler",
             description: "<strong>widen</strong> diffuse <strong>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3045,7 +3026,7 @@ const tech = {
         {
             name: "slow light propagation",
             description: "",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3070,7 +3051,7 @@ const tech = {
         {
             name: "pulse",
             description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3093,7 +3074,7 @@ const tech = {
         {
             name: "shock wave",
             description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3110,7 +3091,7 @@ const tech = {
         {
             name: "neocognitron",
             description: "<strong>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
-            isGunMod: true,
+            isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3131,7 +3112,7 @@ const tech = {
         {
             name: "bremsstrahlung radiation",
             description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3148,7 +3129,7 @@ const tech = {
         {
             name: "frequency resonance",
             description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>40%</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3167,7 +3148,7 @@ const tech = {
         {
             name: "flux pinning",
             description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>+1</strong> second",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3184,7 +3165,7 @@ const tech = {
         {
             name: "eddy current brake",
             description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3201,7 +3182,7 @@ const tech = {
         {
             name: "fracture analysis",
             description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3218,7 +3199,7 @@ const tech = {
         {
             name: "pair production",
             description: "picking up a <strong>power up</strong> gives you <strong>250</strong> <strong class='color-f'>energy</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3236,7 +3217,7 @@ const tech = {
         {
             name: "bot manufacturing",
             description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>3</strong> random <strong>bots</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -3256,7 +3237,7 @@ const tech = {
         {
             name: "bot prototypes",
             description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all bots of a random type and <strong>build</strong> <strong>2</strong> of that <strong>bot</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -3270,40 +3251,40 @@ const tech = {
                 //fill array of available bots
                 const notUpgradedBots = []
                 if (!tech.isNailBotUpgrade) notUpgradedBots.push(() => {
-                    tech.giveMod("nail-bot upgrade")
-                    tech.setModToNonRefundable("nail-bot upgrade")
+                    tech.giveTech("nail-bot upgrade")
+                    tech.setTechoNonRefundable("nail-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.nailBot()
                         tech.nailBotCount++;
                     }
                 })
                 if (!tech.isFoamBotUpgrade) notUpgradedBots.push(() => {
-                    tech.giveMod("foam-bot upgrade")
-                    tech.setModToNonRefundable("foam-bot upgrade")
+                    tech.giveTech("foam-bot upgrade")
+                    tech.setTechoNonRefundable("foam-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.foamBot()
                         tech.foamBotCount++;
                     }
                 })
                 if (!tech.isBoomBotUpgrade) notUpgradedBots.push(() => {
-                    tech.giveMod("boom-bot upgrade")
-                    tech.setModToNonRefundable("boom-bot upgrade")
+                    tech.giveTech("boom-bot upgrade")
+                    tech.setTechoNonRefundable("boom-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.boomBot()
                         tech.boomBotCount++;
                     }
                 })
                 if (!tech.isLaserBotUpgrade) notUpgradedBots.push(() => {
-                    tech.giveMod("laser-bot upgrade")
-                    tech.setModToNonRefundable("laser-bot upgrade")
+                    tech.giveTech("laser-bot upgrade")
+                    tech.setTechoNonRefundable("laser-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.laserBot()
                         tech.laserBotCount++;
                     }
                 })
                 if (!tech.isOrbitBotUpgrade) notUpgradedBots.push(() => {
-                    tech.giveMod("orbital-bot upgrade")
-                    tech.setModToNonRefundable("orbital-bot upgrade")
+                    tech.giveTech("orbital-bot upgrade")
+                    tech.setTechoNonRefundable("orbital-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.orbitBot()
                         tech.orbitBotCount++;
@@ -3317,7 +3298,7 @@ const tech = {
         {
             name: "mycelium manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3334,7 +3315,7 @@ const tech = {
         {
             name: "missile manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3351,7 +3332,7 @@ const tech = {
         {
             name: "ice IX manufacturing",
             description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to synthesize <strong>ice IX</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3368,7 +3349,7 @@ const tech = {
         {
             name: "degenerate matter",
             description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>while <strong>negative mass field</strong> is active",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3385,7 +3366,7 @@ const tech = {
         {
             name: "annihilation",
             description: "after <strong>touching</strong> mobs, they are <strong>annihilated</strong><br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3402,7 +3383,7 @@ const tech = {
         {
             name: "Bose Einstein condensate",
             description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3419,7 +3400,7 @@ const tech = {
         // {
         //     name: "thermal reservoir",
         //     description: "increase your <strong class='color-plasma'>plasma</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-plasma'>plasma</strong> temporarily lowers health not <strong class='color-f'>energy</strong>",
-        //     isFieldMod: true,
+        //     isFieldTech: true,
         //     maxCount: 1,
         //     count: 0,
         //     allowed() {
@@ -3436,7 +3417,7 @@ const tech = {
         {
             name: "plasma jet",
             description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -3453,7 +3434,7 @@ const tech = {
         {
             name: "plasma-bot",
             description: "a bot uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3471,7 +3452,7 @@ const tech = {
         {
             name: "micro-extruder",
             description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> extrudes a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3488,7 +3469,7 @@ const tech = {
         {
             name: "timelike world line",
             description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3507,7 +3488,7 @@ const tech = {
         {
             name: "Lorentz transformation",
             description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3530,7 +3511,7 @@ const tech = {
         {
             name: "time crystals",
             description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3549,7 +3530,7 @@ const tech = {
         {
             name: "phase decoherence",
             description: "become <strong>intangible</strong> while <strong class='color-cloaked'>cloaked</strong><br>but, passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3566,7 +3547,7 @@ const tech = {
         {
             name: "dazzler",
             description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>30%</strong> of your stored <strong class='color-f'>energy</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3583,7 +3564,7 @@ const tech = {
         {
             name: "discrete optimization",
             description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3602,7 +3583,7 @@ const tech = {
         {
             name: "cosmic string",
             description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3619,7 +3600,7 @@ const tech = {
         {
             name: "Penrose process",
             description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>50</strong> <strong class='color-f'>energy</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3636,7 +3617,7 @@ const tech = {
         {
             name: "transdimensional spores",
             description: "when <strong>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3653,7 +3634,7 @@ const tech = {
         {
             name: "traversable geodesics",
             description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong class='color-g'>ammo</strong>",
-            isFieldMod: true,
+            isFieldTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -3932,7 +3913,7 @@ const tech = {
     isCancelRerolls: null,
     isBotDamage: null,
     isBanish: null,
-    isMaxEnergyMod: null,
+    isMaxEnergyTech: null,
     isLowEnergyDamage: null,
     isRewindBot: null,
     isRewindGrenade: null,

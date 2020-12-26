@@ -564,7 +564,7 @@ const spawn = {
             me.foundPlayer();
         }
         me.onHit = function() { //run this function on hitting player
-            powerUps.ejectMod()
+            powerUps.ejectTech()
             powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
             powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
         };

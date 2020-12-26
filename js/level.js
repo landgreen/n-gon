@@ -18,9 +18,9 @@ const level = {
             // simulation.setZoom();
             // mech.setField("plasma torch")
             // b.giveGuns("wave beam")
-            // tech.giveMod("CPT reversal")
-            // tech.giveMod("CPT gun")
-            // for (let i = 0; i < 15; i++) tech.giveMod("plasma jet")
+            // tech.giveTech("CPT reversal")
+            // tech.giveTech("CPT gun")
+            // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -3834,7 +3834,7 @@ const level = {
             if (tech.tech[i].isLost) tech.tech[i].isLost = false;
         }
         tech.isDeathAvoidedThisLevel = false;
-        simulation.updateModHUD();
+        simulation.updateTechHUD();
         simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
     },
     playerExitCheck() {
