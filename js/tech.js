@@ -1,61 +1,61 @@
-const mod = {
+const tech = {
     totalCount: null,
     setupAllMods() {
-        for (let i = 0, len = mod.mods.length; i < len; i++) {
-            mod.mods[i].remove();
-            mod.mods[i].isLost = false
-            mod.mods[i].count = 0
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            tech.tech[i].remove();
+            tech.tech[i].isLost = false
+            tech.tech[i].count = 0
         }
-        // mod.nailBotCount = 0;
-        // mod.foamBotCount = 0;
-        // mod.boomBotCount = 0;
-        // mod.laserBotCount = 0;
-        // mod.orbitalBotCount = 0;
-        // mod.plasmaBotCount = 0;
-        mod.armorFromPowerUps = 0;
-        mod.totalCount = 0;
-        game.updateModHUD();
+        // tech.nailBotCount = 0;
+        // tech.foamBotCount = 0;
+        // tech.boomBotCount = 0;
+        // tech.laserBotCount = 0;
+        // tech.orbitalBotCount = 0;
+        // tech.plasmaBotCount = 0;
+        tech.armorFromPowerUps = 0;
+        tech.totalCount = 0;
+        simulation.updateModHUD();
     },
     removeMod(index) {
-        mod.mods[index].remove();
-        mod.mods[index].count = 0;
-        game.updateModHUD();
+        tech.tech[index].remove();
+        tech.tech[index].count = 0;
+        simulation.updateModHUD();
     },
     giveMod(index = 'random') {
         if (index === 'random') {
             let options = [];
-            for (let i = 0; i < mod.mods.length; i++) {
-                if (mod.mods[i].count < mod.mods[i].maxCount && mod.mods[i].allowed())
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed())
                     options.push(i);
             }
-            // give a random mod from the mods I don't have
+            // give a random tech from the tech I don't have
             if (options.length > 0) {
                 let newMod = options[Math.floor(Math.random() * options.length)]
-                mod.giveMod(newMod)
+                tech.giveMod(newMod)
             }
         } else {
             if (isNaN(index)) { //find index by name
                 let found = false;
-                for (let i = 0; i < mod.mods.length; i++) {
-                    if (index === mod.mods[i].name) {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (index === tech.tech[i].name) {
                         index = i;
                         found = true;
                         break;
                     }
                 }
-                if (!found) return //if name not found don't give any mod
+                if (!found) return //if name not found don't give any tech
             }
-            if (mod.mods[index].isLost) mod.mods[index].isLost = false; //give specific mod
-            mod.mods[index].effect(); //give specific mod
-            mod.mods[index].count++
-            mod.totalCount++ //used in power up randomization
-            game.updateModHUD();
+            if (tech.tech[index].isLost) tech.tech[index].isLost = false; //give specific tech
+            tech.tech[index].effect(); //give specific tech
+            tech.tech[index].count++
+            tech.totalCount++ //used in power up randomization
+            simulation.updateModHUD();
         }
     },
     setModToNonRefundable(name) {
-        for (let i = 0; i < mod.mods.length; i++) {
-            if (mod.mods.name === name) {
-                mod.mods[i].isNonRefundable = true;
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech.name === name) {
+                tech.tech[i].isNonRefundable = true;
                 return
             }
         }
@@ -63,20 +63,20 @@ const mod = {
     // giveBasicMod(index = 'random') {
     //     // if (isNaN(index)) { //find index by name
     //     //     let found = false;
-    //     //     for (let i = 0; i < mod.mods.length; i++) {
-    //     //         if (index === mod.mods[i].name) {
+    //     //     for (let i = 0; i < tech.tech.length; i++) {
+    //     //         if (index === tech.tech[i].name) {
     //     //             index = i;
     //     //             found = true;
     //     //             break;
     //     //         }
     //     //     }
-    //     //     if (!found) return //if name not found don't give any mod
+    //     //     if (!found) return //if name not found don't give any tech
     //     // }
 
-    //     mod.basicMods[index].effect(); //give specific mod
-    //     mod.mods[index].count++
-    //     mod.totalCount++ //used in power up randomization
-    //     game.updateModHUD();
+    //     tech.basicMods[index].effect(); //give specific tech
+    //     tech.tech[index].count++
+    //     tech.totalCount++ //used in power up randomization
+    //     simulation.updateModHUD();
 
     // },
     haveGunCheck(name) {
@@ -84,7 +84,7 @@ const mod = {
             !build.isCustomSelection &&
             b.inventory.length > 2 &&
             name !== b.guns[b.activeGun].name &&
-            Math.random() > 2 / (b.inventory.length + mod.isGunCycle * 3) //lower chance of mods specific to a gun if you have lots of guns
+            Math.random() > 2 / (b.inventory.length + tech.isGunCycle * 3) //lower chance of tech specific to a gun if you have lots of guns
         ) {
             return false
         }
@@ -96,45 +96,45 @@ const mod = {
     },
     damageFromMods() {
         let dmg = mech.fieldDamage
-        // if (mod.aimDamage>1)
-        if (mod.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
-        if (mod.isMaxEnergyMod) dmg *= 1.4
-        if (mod.isEnergyNoAmmo) dmg *= 1.5
-        if (mod.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
-        if (mod.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
-        if (mod.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
-        if (mod.isEnergyLoss) dmg *= 1.5;
-        if (mod.isAcidDmg && mech.health > 1) dmg *= 1.4;
-        if (mod.restDamage > 1 && player.speed < 1) dmg *= mod.restDamage
-        if (mod.isEnergyDamage) dmg *= 1 + mech.energy / 9;
-        if (mod.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-        if (mod.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
-        if (mod.isOneGun && b.inventory.length < 2) dmg *= 1.25
-        if (mod.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.66
-        if (mod.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
-        if (mod.isBotDamage) dmg *= 1 + 0.02 * mod.totalBots()
-        return dmg * mod.slowFire * mod.aimDamage
+        // if (tech.aimDamage>1)
+        if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
+        if (tech.isMaxEnergyMod) dmg *= 1.4
+        if (tech.isEnergyNoAmmo) dmg *= 1.5
+        if (tech.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
+        if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
+        if (tech.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
+        if (tech.isEnergyLoss) dmg *= 1.5;
+        if (tech.isAcidDmg && mech.health > 1) dmg *= 1.4;
+        if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
+        if (tech.isEnergyDamage) dmg *= 1 + mech.energy / 9;
+        if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
+        if (tech.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
+        if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
+        if (tech.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.66
+        if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
+        if (tech.isBotDamage) dmg *= 1 + 0.02 * tech.totalBots()
+        return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return (mod.isBayesian ? 0.2 : 0) + mod.cancelCount * 0.04 + mod.duplicateChance + mech.duplicateChance
+        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + mech.duplicateChance
     },
     totalBots() {
-        return mod.foamBotCount + mod.nailBotCount + mod.laserBotCount + mod.boomBotCount + mod.plasmaBotCount + mod.orbitBotCount
+        return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.plasmaBotCount + tech.orbitBotCount
     },
-    mods: [{
+    tech: [{
             name: "electrolytes",
             description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.maxEnergy > 1 || mod.isEnergyRecovery || mod.isPiezo || mod.energySiphon > 0
+                return mech.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0
             },
             requires: "increased energy regen or max energy",
             effect: () => {
-                mod.isEnergyDamage = true
+                tech.isEnergyDamage = true
             },
             remove() {
-                mod.isEnergyDamage = false;
+                tech.isEnergyDamage = false;
             }
         },
         {
@@ -143,14 +143,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("nail gun") && mod.isIceCrystals) || mod.haveGunCheck("laser") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+                return (tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
             },
             requires: "energy based damage",
             effect() {
-                mod.isEnergyNoAmmo = true;
+                tech.isEnergyNoAmmo = true;
             },
             remove() {
-                mod.isEnergyNoAmmo = false;
+                tech.isEnergyNoAmmo = false;
             }
         },
         {
@@ -159,14 +159,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.isEnergyLoss = true;
+                tech.isEnergyLoss = true;
             },
             remove() {
-                mod.isEnergyLoss = false;
+                tech.isEnergyLoss = false;
             }
         },
         {
@@ -175,15 +175,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isEnergyLoss && mech.maxEnergy === 1 && !mod.isMissileField && !mod.isSporeField && !mod.isRewindAvoidDeath
+                return tech.isEnergyLoss && mech.maxEnergy === 1 && !tech.isMissileField && !tech.isSporeField && !tech.isRewindAvoidDeath
             },
             requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
             effect() {
-                mod.isMaxEnergyMod = true;
+                tech.isMaxEnergyMod = true;
                 mech.setMaxEnergy()
             },
             remove() {
-                mod.isMaxEnergyMod = false;
+                tech.isMaxEnergyMod = false;
                 mech.setMaxEnergy()
             }
         },
@@ -193,14 +193,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isEnergyLoss && mech.maxEnergy < 1.1
+                return tech.isEnergyLoss && mech.maxEnergy < 1.1
             },
             requires: "exothermic process",
             effect() {
-                mod.isLowEnergyDamage = true;
+                tech.isLowEnergyDamage = true;
             },
             remove() {
-                mod.isLowEnergyDamage = false;
+                tech.isLowEnergyDamage = false;
             }
         },
         {
@@ -213,10 +213,10 @@ const mod = {
             },
             requires: "base movement speed",
             effect: () => {
-                mod.restDamage += 0.25
+                tech.restDamage += 0.25
             },
             remove() {
-                mod.restDamage = 1;
+                tech.restDamage = 1;
             }
         },
         {
@@ -229,10 +229,10 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.isFarAwayDmg = true; //used in mob.damage()
+                tech.isFarAwayDmg = true; //used in mob.damage()
             },
             remove() {
-                mod.isFarAwayDmg = false;
+                tech.isFarAwayDmg = false;
             }
         },
         {
@@ -245,10 +245,10 @@ const mod = {
             },
             requires: "health above 100",
             effect() {
-                mod.isAcidDmg = true;
+                tech.isAcidDmg = true;
             },
             remove() {
-                mod.isAcidDmg = false;
+                tech.isAcidDmg = false;
             }
         },
         {
@@ -261,10 +261,10 @@ const mod = {
             },
             requires: "no more than 1 gun",
             effect() {
-                mod.isOneGun = true;
+                tech.isOneGun = true;
             },
             remove() {
-                mod.isOneGun = false;
+                tech.isOneGun = false;
             }
         },
         {
@@ -277,10 +277,10 @@ const mod = {
             },
             requires: "health below 60",
             effect() {
-                mod.isLowHealthDmg = true; //used in mob.damage()
+                tech.isLowHealthDmg = true; //used in mob.damage()
             },
             remove() {
-                mod.isLowHealthDmg = false;
+                tech.isLowHealthDmg = false;
             }
         },
         {
@@ -293,10 +293,10 @@ const mod = {
             },
             requires: "some harm reduction",
             effect() {
-                mod.isHarmDamage = true;
+                tech.isHarmDamage = true;
             },
             remove() {
-                mod.isHarmDamage = false;
+                tech.isHarmDamage = false;
             }
         },
         {
@@ -309,10 +309,10 @@ const mod = {
             },
             requires: "at least 4 rerolls",
             effect() {
-                mod.isRerollDamage = true;
+                tech.isRerollDamage = true;
             },
             remove() {
-                mod.isRerollDamage = false;
+                tech.isRerollDamage = false;
             }
         },
         {
@@ -324,11 +324,11 @@ const mod = {
                 return true
             },
             effect() {
-                mod.slowFire = 1.2
+                tech.slowFire = 1.2
                 b.setFireCD();
             },
             remove() {
-                mod.slowFire = 1;
+                tech.slowFire = 1;
                 b.setFireCD();
             }
         },
@@ -338,17 +338,17 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls === 0 && !mod.manyWorlds
+                return powerUps.reroll.rerolls === 0 && !tech.manyWorlds
             },
             requires: "no rerolls",
             effect() {
-                mod.isRerollHaste = true;
-                mod.rerollHaste = 0.33;
+                tech.isRerollHaste = true;
+                tech.rerollHaste = 0.33;
                 b.setFireCD();
             },
             remove() {
-                mod.isRerollHaste = false;
-                mod.rerollHaste = 1;
+                tech.isRerollHaste = false;
+                tech.rerollHaste = 1;
                 b.setFireCD();
             }
         },
@@ -362,11 +362,11 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.fireRate *= 0.7
+                tech.fireRate *= 0.7
                 b.setFireCD();
             },
             remove() {
-                mod.fireRate = 1;
+                tech.fireRate = 1;
                 b.setFireCD();
             }
         },
@@ -380,10 +380,10 @@ const mod = {
             },
             requires: "not wormhole",
             effect() {
-                mod.throwChargeRate = 2
+                tech.throwChargeRate = 2
             },
             remove() {
-                mod.throwChargeRate = 1
+                tech.throwChargeRate = 1
             }
         },
         {
@@ -392,14 +392,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
-                mod.explosiveRadius += 0.2;
+                tech.explosiveRadius += 0.2;
             },
             remove() {
-                mod.explosiveRadius = 1;
+                tech.explosiveRadius = 1;
             }
         },
         {
@@ -408,14 +408,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
-                mod.isSmallExplosion = true;
+                tech.isSmallExplosion = true;
             },
             remove() {
-                mod.isSmallExplosion = false;
+                tech.isSmallExplosion = false;
             }
         },
         {
@@ -424,14 +424,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.isFlechetteExplode
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.isFlechetteExplode
             },
             requires: "an explosive damage source",
             effect: () => {
-                mod.isExplosionHarm = true;
+                tech.isExplosionHarm = true;
             },
             remove() {
-                mod.isExplosionHarm = false;
+                tech.isExplosionHarm = false;
             }
         },
         {
@@ -441,14 +441,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isMissileField || mod.isExplodeMob || mod.isFlechetteExplode || mod.isPulseLaser
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isFlechetteExplode || tech.isPulseLaser
             },
             requires: "an explosive damage source",
             effect: () => {
-                mod.isImmuneExplosion = true;
+                tech.isImmuneExplosion = true;
             },
             remove() {
-                mod.isImmuneExplosion = false;
+                tech.isImmuneExplosion = false;
             }
         },
         {
@@ -457,14 +457,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("missiles") || mod.isIncendiary || (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("vacuum bomb") || mod.isPulseLaser || mod.isMissileField || mod.boomBotCount > 1 || mod.isFlechetteExplode) && !mod.sporesOnDeath && !mod.nailsDeathMob && !mod.isBotSpawner
+                return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isFlechetteExplode) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isBotSpawner
             },
-            requires: "an explosive damage source, no other mob death mods",
+            requires: "an explosive damage source, no other mob death tech",
             effect: () => {
-                mod.isExplodeMob = true;
+                tech.isExplodeMob = true;
             },
             remove() {
-                mod.isExplodeMob = false;
+                tech.isExplodeMob = false;
             }
         },
         {
@@ -473,19 +473,19 @@ const mod = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return mod.nailsDeathMob || mod.sporesOnDeath || mod.isExplodeMob || mod.isBotSpawner
+                return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.isBotSpawner
             },
-            requires: "any mob death mod",
+            requires: "any mob death tech",
             effect: () => {
-                mod.mobSpawnWithHealth *= 0.89
+                tech.mobSpawnWithHealth *= 0.89
 
                 //set all mobs at full health to 0.85
                 for (let i = 0; i < mob.length; i++) {
-                    if (mob.health > mod.mobSpawnWithHealth) mob.health = mod.mobSpawnWithHealth
+                    if (mob.health > tech.mobSpawnWithHealth) mob.health = tech.mobSpawnWithHealth
                 }
             },
             remove() {
-                mod.mobSpawnWithHealth = 1;
+                tech.mobSpawnWithHealth = 1;
             }
         },
         {
@@ -494,17 +494,17 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return !mod.nailsDeathMob && !mod.isExplodeMob && !mod.isBotSpawner
+                return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.isBotSpawner
             },
-            requires: "no other mob death mods",
+            requires: "no other mob death tech",
             effect() {
-                mod.sporesOnDeath += 0.09;
+                tech.sporesOnDeath += 0.09;
                 for (let i = 0; i < 8; i++) {
                     b.spore(mech.pos)
                 }
             },
             remove() {
-                mod.sporesOnDeath = 0;
+                tech.sporesOnDeath = 0;
             }
         },
         {
@@ -513,14 +513,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return !mod.sporesOnDeath && !mod.isExplodeMob && !mod.isBotSpawner
+                return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.isBotSpawner
             },
-            requires: "no other mob death mods",
+            requires: "no other mob death tech",
             effect: () => {
-                mod.nailsDeathMob++
+                tech.nailsDeathMob++
             },
             remove() {
-                mod.nailsDeathMob = 0;
+                tech.nailsDeathMob = 0;
             }
         },
         {
@@ -529,14 +529,14 @@ const mod = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return mod.totalBots() > 0 && !mod.sporesOnDeath && !mod.nailsDeathMob && !mod.isExplodeMob
+                return tech.totalBots() > 0 && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob
             },
-            requires: "a bot and no other mob death mods",
+            requires: "a bot and no other mob death tech",
             effect() {
-                mod.isBotSpawner += 0.20;
+                tech.isBotSpawner += 0.20;
             },
             remove() {
-                mod.isBotSpawner = 0;
+                tech.isBotSpawner = 0;
             }
         },
         {
@@ -549,11 +549,11 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.nailBotCount++;
+                tech.nailBotCount++;
                 b.nailBot();
             },
             remove() {
-                mod.nailBotCount -= this.count;
+                tech.nailBotCount -= this.count;
             }
         },
         {
@@ -562,17 +562,17 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.nailBotCount > 1
+                return tech.nailBotCount > 1
             },
             requires: "2 or more nail bots",
             effect() {
-                mod.isNailBotUpgrade = true
+                tech.isNailBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'nail') bullet[i].isUpgraded = true
                 }
             },
             remove() {
-                mod.isNailBotUpgrade = false
+                tech.isNailBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'nail') bullet[i].isUpgraded = false
                 }
@@ -588,11 +588,11 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.foamBotCount++;
+                tech.foamBotCount++;
                 b.foamBot();
             },
             remove() {
-                mod.foamBotCount -= this.count;
+                tech.foamBotCount -= this.count;
             }
         },
         {
@@ -601,17 +601,17 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.foamBotCount > 1
+                return tech.foamBotCount > 1
             },
             requires: "2 or more foam bots",
             effect() {
-                mod.isFoamBotUpgrade = true
+                tech.isFoamBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'foam') bullet[i].isUpgraded = true
                 }
             },
             remove() {
-                mod.isFoamBotUpgrade = false
+                tech.isFoamBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'foam') bullet[i].isUpgraded = false
                 }
@@ -627,11 +627,11 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.boomBotCount++;
+                tech.boomBotCount++;
                 b.boomBot();
             },
             remove() {
-                mod.boomBotCount -= this.count;
+                tech.boomBotCount -= this.count;
             }
         },
         {
@@ -640,17 +640,17 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.boomBotCount > 1
+                return tech.boomBotCount > 1
             },
             requires: "2 or more boom bots",
             effect() {
-                mod.isBoomBotUpgrade = true
+                tech.isBoomBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'boom') bullet[i].isUpgraded = true
                 }
             },
             remove() {
-                mod.isBoomBotUpgrade = false
+                tech.isBoomBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'boom') bullet[i].isUpgraded = false
                 }
@@ -666,11 +666,11 @@ const mod = {
             },
             requires: "maximum energy above 50%",
             effect() {
-                mod.laserBotCount++;
+                tech.laserBotCount++;
                 b.laserBot();
             },
             remove() {
-                mod.laserBotCount -= this.count;
+                tech.laserBotCount -= this.count;
             }
         },
         {
@@ -679,17 +679,17 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.laserBotCount > 1
+                return tech.laserBotCount > 1
             },
             requires: "2 or more laser bots",
             effect() {
-                mod.isLaserBotUpgrade = true
+                tech.isLaserBotUpgrade = true
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'laser') bullet[i].isUpgraded = true
                 }
             },
             remove() {
-                mod.isLaserBotUpgrade = false
+                tech.isLaserBotUpgrade = false
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'laser') bullet[i].isUpgraded = false
                 }
@@ -706,10 +706,10 @@ const mod = {
             requires: "",
             effect() {
                 b.orbitBot();
-                mod.orbitBotCount++;
+                tech.orbitBotCount++;
             },
             remove() {
-                mod.orbitBotCount -= this.count;
+                tech.orbitBotCount -= this.count;
             }
         },
         {
@@ -718,12 +718,12 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.orbitBotCount > 1
+                return tech.orbitBotCount > 1
             },
             requires: "2 or more orbital bots",
             effect() {
-                mod.isOrbitBotUpgrade = true
-                const range = 190 + 60 * mod.isOrbitBotUpgrade
+                tech.isOrbitBotUpgrade = true
+                const range = 190 + 60 * tech.isOrbitBotUpgrade
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'orbit') {
                         bullet[i].isUpgraded = true
@@ -734,8 +734,8 @@ const mod = {
 
             },
             remove() {
-                mod.isOrbitBotUpgrade = false
-                const range = 190 + 60 * mod.isOrbitBotUpgrade
+                tech.isOrbitBotUpgrade = false
+                const range = 190 + 60 * tech.isOrbitBotUpgrade
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType === 'orbit') {
                         bullet[i].range = range
@@ -754,11 +754,12 @@ const mod = {
             },
             requires: "at least 6 rerolls",
             effect() {
-                mod.isRerollBots = true;
+                tech.isRerollBots = true;
                 powerUps.reroll.changeRerolls(0)
+                simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span> <span class='color-symbol'>=</span> 0`)
             },
             remove() {
-                mod.isRerollBots = false;
+                tech.isRerollBots = false;
             }
         },
         {
@@ -767,14 +768,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.totalBots() > 5 && !mod.isEnergyHealth
+                return tech.totalBots() > 5 && !tech.isEnergyHealth
             },
             requires: "5 or more bots",
             effect() {
-                mod.isBotArmor = true
+                tech.isBotArmor = true
             },
             remove() {
-                mod.isBotArmor = false
+                tech.isBotArmor = false
             }
         }, {
             name: "network effect",
@@ -782,14 +783,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.totalBots() > 6
+                return tech.totalBots() > 6
             },
             requires: "6 or more bots",
             effect() {
-                mod.isBotDamage = true
+                tech.isBotDamage = true
             },
             remove() {
-                mod.isBotDamage = false
+                tech.isBotDamage = false
             }
         },
         {
@@ -797,40 +798,40 @@ const mod = {
             description: "<strong class='color-dup'>duplicate</strong> your permanent <strong>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
-            // isNonRefundable: true,
+            isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return mod.totalBots() > 3
+                return tech.totalBots() > 3
             },
             requires: "at least 3 bots",
             effect() {
                 b.removeAllGuns();
-                game.makeGunHUD();
+                simulation.makeGunHUD();
                 //double bots
-                for (let i = 0; i < mod.nailBotCount; i++) {
+                for (let i = 0; i < tech.nailBotCount; i++) {
                     b.nailBot();
                 }
-                mod.nailBotCount *= 2
-                for (let i = 0; i < mod.laserBotCount; i++) {
+                tech.nailBotCount *= 2
+                for (let i = 0; i < tech.laserBotCount; i++) {
                     b.laserBot();
                 }
-                mod.laserBotCount *= 2
-                for (let i = 0; i < mod.foamBotCount; i++) {
+                tech.laserBotCount *= 2
+                for (let i = 0; i < tech.foamBotCount; i++) {
                     b.foamBot();
                 }
-                mod.foamBotCount *= 2
-                for (let i = 0; i < mod.boomBotCount; i++) {
+                tech.foamBotCount *= 2
+                for (let i = 0; i < tech.boomBotCount; i++) {
                     b.boomBot();
                 }
-                mod.boomBotCount *= 2
-                for (let i = 0; i < mod.plasmaBotCount; i++) {
+                tech.boomBotCount *= 2
+                for (let i = 0; i < tech.plasmaBotCount; i++) {
                     b.plasmaBot();
                 }
-                mod.plasmaBotCount *= 2
-                for (let i = 0; i < mod.orbitBotCount; i++) {
+                tech.plasmaBotCount *= 2
+                for (let i = 0; i < tech.orbitBotCount; i++) {
                     b.orbitBot();
                 }
-                mod.orbitBotCount *= 2
+                tech.orbitBotCount *= 2
             },
             remove() {}
         },
@@ -844,13 +845,13 @@ const mod = {
             },
             requires: "some harm reduction",
             effect() {
-                mod.isDroneOnDamage = true;
+                tech.isDroneOnDamage = true;
                 for (let i = 0; i < 4; i++) {
                     b.drone() //spawn drone
                 }
             },
             remove() {
-                mod.isDroneOnDamage = false;
+                tech.isDroneOnDamage = false;
             }
         },
         {
@@ -859,15 +860,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.duplicationChance() > 0
+                return tech.duplicationChance() > 0
             },
             requires: "some power up duplication",
             effect() {
-                mod.isMineDrop = true;
-                if (mod.isMineDrop) b.mine(mech.pos, { x: 0, y: 0 }, 0, mod.isMineAmmoBack)
+                tech.isMineDrop = true;
+                if (tech.isMineDrop) b.mine(mech.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
             },
             remove() {
-                mod.isMineDrop = false;
+                tech.isMineDrop = false;
             }
         },
         {
@@ -880,13 +881,13 @@ const mod = {
             },
             requires: "",
             effect() { // good with melee builds, content skipping builds
-                mod.squirrelFx += 0.2;
-                mod.squirrelJump += 0.09;
+                tech.squirrelFx += 0.2;
+                tech.squirrelJump += 0.09;
                 mech.setMovement()
             },
             remove() {
-                mod.squirrelFx = 1;
-                mod.squirrelJump = 1;
+                tech.squirrelFx = 1;
+                tech.squirrelJump = 1;
                 mech.setMovement()
             }
         },
@@ -896,14 +897,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.Fx > 0.016 && !mod.isEnergyHealth
+                return mech.Fx > 0.016 && !tech.isEnergyHealth
             },
             requires: "speed increase, not mass-energy equivalence",
             effect() {
-                mod.isSpeedHarm = true
+                tech.isSpeedHarm = true
             },
             remove() {
-                mod.isSpeedHarm = false
+                tech.isSpeedHarm = false
             }
         },
         {
@@ -916,10 +917,10 @@ const mod = {
             },
             requires: "speed increase",
             effect() {
-                mod.isSpeedDamage = true
+                tech.isSpeedDamage = true
             },
             remove() {
-                mod.isSpeedDamage = false
+                tech.isSpeedDamage = false
             }
         },
         {
@@ -932,11 +933,11 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.collisionImmuneCycles += 30;
-                mech.immuneCycle = mech.cycle + mod.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                tech.collisionImmuneCycles += 30;
+                mech.immuneCycle = mech.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             },
             remove() {
-                mod.collisionImmuneCycles = 25;
+                tech.collisionImmuneCycles = 25;
             }
         },
         {
@@ -945,14 +946,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.totalBots() > 1 || mod.haveGunCheck("drone") || mod.haveGunCheck("mine") || mod.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") && !mod.isEnergyHealth
+                return (tech.totalBots() > 1 || tech.haveGunCheck("drones") || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
             },
             requires: "drones, spores, mines, or bots",
             effect() {
-                mod.isNoFireDefense = true
+                tech.isNoFireDefense = true
             },
             remove() {
-                mod.isNoFireDefense = false
+                tech.isNoFireDefense = false
             }
         },
         {
@@ -961,14 +962,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isNoFireDefense
+                return tech.isNoFireDefense
             },
             requires: "decorrelation",
             effect() {
-                mod.isNoFireDamage = true
+                tech.isNoFireDamage = true
             },
             remove() {
-                mod.isNoFireDamage = false
+                tech.isNoFireDamage = false
             }
         },
         {
@@ -977,14 +978,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && mech.harmReduction() < 1
+                return !tech.isEnergyHealth && mech.harmReduction() < 1
             },
             requires: "some harm reduction",
             effect() {
-                mod.isHarmArmor = true;
+                tech.isHarmArmor = true;
             },
             remove() {
-                mod.isHarmArmor = false;
+                tech.isHarmArmor = false;
             }
         },
         {
@@ -993,14 +994,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return game.fpsCapDefault > 45 && !mod.isRailTimeSlow
+                return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
             },
             requires: "FPS above 45",
             effect() {
-                mod.isSlowFPS = true;
+                tech.isSlowFPS = true;
             },
             remove() {
-                mod.isSlowFPS = false;
+                tech.isSlowFPS = false;
             }
         },
         {
@@ -1009,14 +1010,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isSlowFPS
+                return tech.isSlowFPS
             },
             requires: "clock gating",
             effect() {
-                mod.isHarmFreeze = true;
+                tech.isHarmFreeze = true;
             },
             remove() {
-                mod.isHarmFreeze = false;
+                tech.isHarmFreeze = false;
             }
         },
 
@@ -1026,14 +1027,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.isPulseStun || mod.oneSuperBall || mod.isHarmFreeze || mod.isIceField || mod.isIceCrystals || mod.isSporeFreeze || mod.isAoESlow || mod.isFreezeMobs || mod.haveGunCheck("ice IX") || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isWormholeDamage
+                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.haveGunCheck("ice IX") || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
             },
             requires: "a freezing or stunning effect",
             effect() {
-                mod.isFreezeHarmImmune = true;
+                tech.isFreezeHarmImmune = true;
             },
             remove() {
-                mod.isFreezeHarmImmune = false;
+                tech.isFreezeHarmImmune = false;
             }
         },
         {
@@ -1042,14 +1043,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isEnergyRecovery || mod.isPiezo || mod.energySiphon > 0 || mod.isRailEnergyGain || mod.isWormholeEnergy || mod.iceEnergy > 0
+                return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0
             },
             requires: "a source of overfilled energy",
             effect() {
-                mod.overfillDrain = 0.85
+                tech.overfillDrain = 0.85
             },
             remove() {
-                mod.overfillDrain = 0.75
+                tech.overfillDrain = 0.75
             }
         },
         {
@@ -1058,14 +1059,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() { //&& (mech.fieldUpgrades[mech.fieldMode].name !== "nano-scale manufacturing" || mech.maxEnergy > 1)
-                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !mod.isEnergyHealth && !mod.isRewindGun
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name !== "standing wave harmonics" && !tech.isEnergyHealth && !tech.isRewindGun
             },
             requires: "not standing wave, mass-energy, piezo, max energy reduction, CPT gun",
             effect() {
-                mod.isRewindAvoidDeath = true;
+                tech.isRewindAvoidDeath = true;
             },
             remove() {
-                mod.isRewindAvoidDeath = false;
+                tech.isRewindAvoidDeath = false;
             }
         },
         {
@@ -1074,14 +1075,14 @@ const mod = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return mod.isRewindAvoidDeath || mod.isRewindEnergy
+                return tech.isRewindAvoidDeath || tech.isRewindEnergy
             },
             requires: "CPT",
             effect() {
-                mod.isRewindBot++;
+                tech.isRewindBot++;
             },
             remove() {
-                mod.isRewindBot = 0;
+                tech.isRewindBot = 0;
             }
         },
         {
@@ -1090,14 +1091,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isRewindAvoidDeath
+                return tech.isRewindAvoidDeath
             },
             requires: "CPT",
             effect() {
-                mod.isRewindGrenade = true;
+                tech.isRewindGrenade = true;
             },
             remove() {
-                mod.isRewindGrenade = false;
+                tech.isRewindGrenade = false;
             }
         },
         {
@@ -1106,15 +1107,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.isPiezo = true;
+                tech.isPiezo = true;
                 mech.energy += 4;
             },
             remove() {
-                mod.isPiezo = false;
+                tech.isPiezo = false;
             }
         },
         {
@@ -1123,16 +1124,16 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.iceEnergy || mod.isWormholeEnergy || mod.isPiezo || mod.isRailEnergyGain) && mod.energyRegen !== 0.004
+                return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain) && tech.energyRegen !== 0.004
             },
             requires: "piezoelectricity, Penrose, half-wave, or thermoelectric, but not time crystals",
             effect: () => {
-                mod.energyRegen = 0;
-                mech.fieldRegen = mod.energyRegen;
+                tech.energyRegen = 0;
+                mech.fieldRegen = tech.energyRegen;
             },
             remove() {
-                mod.energyRegen = 0.001;
-                mech.fieldRegen = mod.energyRegen;
+                tech.energyRegen = 0.001;
+                mech.fieldRegen = tech.energyRegen;
             }
         },
         {
@@ -1141,7 +1142,7 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyLoss && !mod.isPiezo && !mod.isRewindAvoidDeath && !mod.isRewindGun && !mod.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
+                return !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
             },
             requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass",
             effect: () => {
@@ -1150,11 +1151,11 @@ const mod = {
                 document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
                 document.getElementById("dmg").style.backgroundColor = "#0cf";
-                mod.isEnergyHealth = true;
+                tech.isEnergyHealth = true;
                 mech.displayHealth();
             },
             remove() {
-                mod.isEnergyHealth = false;
+                tech.isEnergyHealth = false;
                 document.getElementById("health").style.display = "inline"
                 document.getElementById("health-bg").style.display = "inline"
                 document.getElementById("dmg").style.backgroundColor = "#f67";
@@ -1169,19 +1170,19 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isEnergyHealth
+                return tech.isEnergyHealth
             },
             requires: "mass-energy equivalence",
             effect() {
-                mod.healGiveMaxEnergy = true; //mod.healMaxEnergyBonus given from heal power up
+                tech.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up
                 powerUps.heal.color = "#0ae"
                 for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                     if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
                 }
             },
             remove() {
-                mod.healGiveMaxEnergy = false;
-                mod.healMaxEnergyBonus = 0
+                tech.healGiveMaxEnergy = false;
+                tech.healMaxEnergyBonus = 0
                 powerUps.heal.color = "#0eb"
                 for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                     if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
@@ -1200,11 +1201,11 @@ const mod = {
             effect() {
                 // mech.maxEnergy += 0.5
                 // mech.energy += 0.5
-                mod.bonusEnergy += 0.5
+                tech.bonusEnergy += 0.5
                 mech.setMaxEnergy()
             },
             remove() {
-                mod.bonusEnergy = 0;
+                tech.bonusEnergy = 0;
                 mech.setMaxEnergy()
             }
         },
@@ -1214,14 +1215,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.damageFromMods() > 1
+                return tech.damageFromMods() > 1
             },
             requires: "some increased damage",
             effect() {
-                mod.energySiphon += 0.06;
+                tech.energySiphon += 0.06;
             },
             remove() {
-                mod.energySiphon = 0;
+                tech.energySiphon = 0;
             }
         },
         {
@@ -1234,10 +1235,10 @@ const mod = {
             },
             requires: "max energy >= 1",
             effect() {
-                mod.isEnergyRecovery = true;
+                tech.isEnergyRecovery = true;
             },
             remove() {
-                mod.isEnergyRecovery = false;
+                tech.isEnergyRecovery = false;
             }
         },
         {
@@ -1246,14 +1247,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.isHealthRecovery = true;
+                tech.isHealthRecovery = true;
             },
             remove() {
-                mod.isHealthRecovery = false;
+                tech.isHealthRecovery = false;
             }
         },
         {
@@ -1262,14 +1263,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && mod.damageFromMods() > 1
+                return !tech.isEnergyHealth && tech.damageFromMods() > 1
             },
             requires: "some increased damage, not mass-energy equivalence",
             effect() {
-                mod.healthDrain += 0.01;
+                tech.healthDrain += 0.01;
             },
             remove() {
-                mod.healthDrain = 0;
+                tech.healthDrain = 0;
             }
         },
         {
@@ -1278,16 +1279,16 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.bonusHealth += 0.5
+                tech.bonusHealth += 0.5
                 mech.addHealth(0.50)
                 mech.setMaxHealth();
             },
             remove() {
-                mod.bonusHealth = 0
+                tech.bonusHealth = 0
                 mech.setMaxHealth();
 
             }
@@ -1298,15 +1299,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth
+                return !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.isArmorFromPowerUps = true; //tracked by  mod.armorFromPowerUps
+                tech.isArmorFromPowerUps = true; //tracked by  tech.armorFromPowerUps
             },
             remove() {
-                mod.isArmorFromPowerUps = false;
-                // mod.armorFromPowerUps = 0;  //this is now reset in mod.setupAllMods();
+                tech.isArmorFromPowerUps = false;
+                // tech.armorFromPowerUps = 0;  //this is now reset in tech.setupAllMods();
                 mech.setMaxHealth();
             }
         },
@@ -1316,14 +1317,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isArmorFromPowerUps
+                return tech.isArmorFromPowerUps
             },
             requires: "inductive coupling",
             effect() {
-                mod.isEndLevelPowerUp = true;
+                tech.isEndLevelPowerUp = true;
             },
             remove() {
-                mod.isEndLevelPowerUp = false;
+                tech.isEndLevelPowerUp = false;
             }
         },
         {
@@ -1332,14 +1333,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.maxHealth > 1 || mod.isArmorFromPowerUps
+                return mech.maxHealth > 1 || tech.isArmorFromPowerUps
             },
             requires: "increased max health",
             effect() {
-                mod.isHealLowHealth = true;
+                tech.isHealLowHealth = true;
             },
             remove() {
-                mod.isHealLowHealth = false;
+                tech.isHealLowHealth = false;
             }
         },
         {
@@ -1348,19 +1349,19 @@ const mod = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return (mech.health < 0.7 || build.isCustomSelection) && !mod.isEnergyHealth
+                return (mech.health < 0.7 || build.isCustomSelection) && !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
-                mod.largerHeals++;
+                tech.largerHeals++;
             },
             remove() {
-                mod.largerHeals = 1;
+                tech.largerHeals = 1;
             }
         },
         {
             name: "anthropic principle",
-            nameInfo: "<span id = 'mod-anthropic'></span>",
+            nameInfo: "<span id = 'tech-anthropic'></span>",
             addNameInfo() {
                 setTimeout(function() {
                     powerUps.reroll.changeRerolls(0)
@@ -1374,14 +1375,14 @@ const mod = {
             },
             requires: "at least 1 reroll",
             effect() {
-                mod.isDeathAvoid = true;
-                mod.isDeathAvoidedThisLevel = false;
+                tech.isDeathAvoid = true;
+                tech.isDeathAvoidedThisLevel = false;
                 setTimeout(function() {
                     powerUps.reroll.changeRerolls(0)
                 }, 1000);
             },
             remove() {
-                mod.isDeathAvoid = false;
+                tech.isDeathAvoid = false;
             }
         },
         {
@@ -1394,187 +1395,189 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.isShieldAmmo = true;
+                tech.isShieldAmmo = true;
             },
             remove() {
-                mod.isShieldAmmo = false;
+                tech.isShieldAmmo = false;
             }
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> one of your <strong class='color-m'>mods</strong>",
+            description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> 1 <strong class='color-m'>tech</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.duplicationChance() < 1
+                return tech.duplicationChance() < 1
             },
             requires: "below 100% duplication chance",
             effect: () => {
-                mod.isBayesian = true
-                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
+                tech.isBayesian = true
+                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
             },
             remove() {
-                mod.isBayesian = false
-                if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
+                tech.isBayesian = false
+                if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
             }
         },
         {
             name: "stimulated emission",
-            description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
+            description: "<strong>6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.duplicationChance() < 1
+                return tech.duplicationChance() < 1
             },
             requires: "below 100% duplication chance",
             effect() {
-                mod.duplicateChance += 0.07
-                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
+                tech.duplicateChance += 0.06
+                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
             },
             remove() {
-                mod.duplicateChance = 0
-                if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
+                tech.duplicateChance = 0
+                if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
             }
         },
         {
             name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>increases power up <strong class='color-dup'>duplication</strong> chance by <strong>4%</strong>",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>increases power up <strong class='color-dup'>duplication</strong> chance by <strong>4%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.duplicationChance() < 1 && !mod.isDeterminism
+                return tech.duplicationChance() < 1 && !tech.isDeterminism
             },
             requires: "below 100% duplication chance, not determinism",
             effect() {
-                mod.isCancelDuplication = true
-                mod.cancelCount = 0
-                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
+                tech.isCancelDuplication = true
+                tech.cancelCount = 0
+                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
             },
             remove() {
-                mod.isCancelDuplication = false
-                mod.cancelCount = 0
-                if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
+                tech.isCancelDuplication = false
+                tech.cancelCount = 0
+                if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
             }
         },
         {
             name: "commodities exchange",
-            description: "clicking  <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.duplicationChance() > 0 && !mod.isDeterminism
+                return tech.duplicationChance() > 0 && !tech.isDeterminism
             },
             requires: "a chance to duplicate power ups, not determinism",
             effect() {
-                mod.isCancelRerolls = true
+                tech.isCancelRerolls = true
             },
             remove() {
-                mod.isCancelRerolls = false
+                tech.isCancelRerolls = false
             }
         },
         {
-            name: "reallocation",
-            description: "convert <strong>1</strong> random <strong class='color-m'>mod</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive mods lose all stacks</em>",
+            name: "exchange symmetry",
+            description: "convert <strong>1</strong> a random <strong class='color-m'>tech</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive tech lose all stacks</em>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 3) && !mod.isSuperDeterminism
+                return (tech.totalCount > 3) && !tech.isSuperDeterminism
             },
-            requires: "at least 1 mod, a chance to duplicate power ups",
+            requires: "at least 1 tech, a chance to duplicate power ups",
             effect: () => {
-                const have = [] //find which mods you have
-                for (let i = 0; i < mod.mods.length; i++) {
-                    if (mod.mods[i].count > 0) have.push(i)
+                const have = [] //find which tech you have
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].count > 0) have.push(i)
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
-                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by reallocation`, 300)
-                for (let i = 0; i < mod.mods[choose].count; i++) {
+                simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+                for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                mod.mods[choose].count = 0;
-                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
-                mod.mods[choose].isLost = true
-                game.updateModHUD();
+                tech.tech[choose].count = 0;
+                tech.tech[choose].remove(); // remove a random tech form the list of tech you have
+                tech.tech[choose].isLost = true
+                simulation.updateModHUD();
             },
             remove() {}
         },
         {
             name: "monte carlo experiment",
-            description: "spawn <strong>2</strong> <strong class='color-m'>mods</strong><br><strong>50%</strong> chance to remove <strong>1</strong> random <strong class='color-m'>mod</strong>",
+            description: "spawn <strong>2</strong> <strong class='color-m'>tech</strong><br>remove <strong>1</strong> random <strong class='color-m'>tech</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 3) && !mod.isSuperDeterminism && mod.duplicationChance() > 0
+                return (tech.totalCount > 3) && !tech.isSuperDeterminism && tech.duplicationChance() > 0
             },
-            requires: "at least 1 mod, a chance to duplicate power ups",
+            requires: "at least 1 tech, a chance to duplicate power ups",
             effect: () => {
-                const have = [] //find which mods you have
-                for (let i = 0; i < mod.mods.length; i++) {
-                    if (mod.mods[i].count > 0) have.push(i)
+                const have = [] //find which tech you have
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].count > 0) have.push(i)
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
-                game.makeTextLog(`<div class='circle mod'></div> &nbsp; <strong>${mod.mods[choose].name}</strong> removed by monte carlo experiment`, 300)
-                for (let i = 0; i < mod.mods[choose].count; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+                for (let i = 0; i < tech.tech[choose].count; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                 }
-                powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                mod.mods[choose].count = 0;
-                mod.mods[choose].remove(); // remove a random mod form the list of mods you have
-                mod.mods[choose].isLost = true
-                game.updateModHUD();
+                powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
+                tech.tech[choose].count = 0;
+                tech.tech[choose].remove(); // remove a random tech form the list of tech you have
+                tech.tech[choose].isLost = true
+                simulation.updateModHUD();
             },
             remove() {}
         },
         {
-            name: "exchange symmetry",
-            description: `use a <strong class='color-r'>reroll</strong> to spawn <strong>1</strong> <strong class='color-m'>mod</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
+            name: "strange attractor",
+            description: `use <strong>2</strong> <strong class='color-r'>rerolls</strong> to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !mod.isSuperDeterminism && mod.duplicationChance() > 0 && powerUps.reroll.rerolls > 1
+                return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.reroll.rerolls > 1
             },
-            requires: "at least 1 mod and 1 reroll, a chance to duplicate power ups",
+            requires: "at least 1 tech and 1 reroll, a chance to duplicate power ups",
             effect: () => {
-                powerUps.reroll.changeRerolls(-1)
-                const chanceStore = mod.duplicateChance
-                mod.duplicateChance = (mod.isBayesian ? 0.2 : 0) + mod.cancelCount * 0.04 + mech.duplicateChance + mod.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
-                powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
-                mod.duplicateChance = chanceStore
+                powerUps.reroll.changeRerolls(-2)
+                simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span> <span class='color-symbol'>-=</span> 2
+                <br>${powerUps.reroll.rerolls}`)
+                const chanceStore = tech.duplicateChance
+                tech.duplicateChance = (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + mech.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
+                powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
+                tech.duplicateChance = chanceStore
             },
             remove() {}
         },
         {
             name: "entanglement",
-            nameInfo: "<span id = 'mod-entanglement'></span>",
+            nameInfo: "<span id = 'tech-entanglement'></span>",
             addNameInfo() {
                 setTimeout(function() {
-                    game.boldActiveGunHUD();
+                    simulation.boldActiveGunHUD();
                 }, 1000);
             },
             description: "while your <strong>first</strong> <strong class='color-g'>gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return b.inventory.length > 1 && !mod.isEnergyHealth
+                return b.inventory.length > 1 && !tech.isEnergyHealth
             },
             requires: "at least 2 guns",
             effect() {
-                mod.isEntanglement = true
+                tech.isEntanglement = true
                 setTimeout(function() {
-                    game.boldActiveGunHUD();
+                    simulation.boldActiveGunHUD();
                 }, 1000);
 
             },
             remove() {
-                mod.isEntanglement = false;
+                tech.isEntanglement = false;
             }
         },
         {
@@ -1587,10 +1590,10 @@ const mod = {
             },
             requires: "at least 2 guns",
             effect() {
-                mod.isDamageForGuns = true;
+                tech.isDamageForGuns = true;
             },
             remove() {
-                mod.isDamageForGuns = false;
+                tech.isDamageForGuns = false;
             }
         },
         {
@@ -1600,17 +1603,17 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return mod.isDamageForGuns
+                return tech.isDamageForGuns
             },
             requires: "arsenal",
             effect() {
-                mod.isGunCycle = true;
+                tech.isGunCycle = true;
                 for (let i = 0; i < 5; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
             },
             remove() {
-                mod.isGunCycle = false;
+                tech.isGunCycle = false;
             }
         },
         {
@@ -1619,14 +1622,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyNoAmmo
+                return !tech.isEnergyNoAmmo
             },
             requires: "not exciton-lattice",
             effect() {
-                mod.isAmmoForGun = true;
+                tech.isAmmoForGun = true;
             },
             remove() {
-                mod.isAmmoForGun = false;
+                tech.isAmmoForGun = false;
             }
         },
         {
@@ -1636,14 +1639,14 @@ const mod = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return mod.isAmmoForGun
+                return tech.isAmmoForGun
             },
             requires: "logistics",
             effect() {
                 for (let i = 0; i < b.guns.length; i++) {
                     if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
                 }
-                game.makeGunHUD();
+                simulation.makeGunHUD();
             },
             remove() {}
         },
@@ -1653,14 +1656,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isEnergyHealth && !mod.isEnergyNoAmmo
+                return !tech.isEnergyHealth && !tech.isEnergyNoAmmo
             },
             requires: "not mass-energy equivalence<br>not exciton-lattice",
             effect: () => {
-                mod.isAmmoFromHealth = true;
+                tech.isAmmoFromHealth = true;
             },
             remove() {
-                mod.isAmmoFromHealth = false;
+                tech.isAmmoFromHealth = false;
             }
         },
         {
@@ -1673,10 +1676,10 @@ const mod = {
             },
             requires: "",
             effect() {
-                mod.isCrouchAmmo = true
+                tech.isCrouchAmmo = true
             },
             remove() {
-                mod.isCrouchAmmo = false;
+                tech.isCrouchAmmo = false;
             }
         },
         {
@@ -1685,86 +1688,86 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isCrouchAmmo && !mod.isEnergyHealth
+                return tech.isCrouchAmmo && !tech.isEnergyHealth
             },
             requires: "desublimated ammunition<br>not mass-energy equivalence",
             effect() {
-                mod.isTurret = true
+                tech.isTurret = true
             },
             remove() {
-                mod.isTurret = false;
+                tech.isTurret = false;
             }
         },
         {
             name: "cardinality",
-            description: "<strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
+            description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isDeterminism
+                return !tech.isDeterminism
             },
             requires: "not determinism",
             effect: () => {
-                mod.isExtraChoice = true;
+                tech.isExtraChoice = true;
             },
             remove() {
-                mod.isExtraChoice = false;
+                tech.isExtraChoice = false;
             }
         },
         {
             name: "determinism",
-            description: "spawn <strong>5</strong> <strong class='color-m'>mods</strong><br><strong class='color-m'>mods</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
+            description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return !mod.isExtraChoice && !mod.isCancelDuplication && !mod.isCancelRerolls
+                return !tech.isExtraChoice && !tech.isCancelDuplication && !tech.isCancelRerolls
             },
             requires: "not cardinality, not futures or commodities exchanges",
             effect: () => {
-                mod.isDeterminism = true;
+                tech.isDeterminism = true;
                 for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                 }
             },
             remove() {
-                mod.isDeterminism = false;
+                tech.isDeterminism = false;
             }
         },
         {
             name: "superdeterminism",
-            description: "spawn <strong>7</strong> <strong class='color-m'>mods</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+            description: "spawn <strong>7</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return mod.isDeterminism && !mod.manyWorlds
+                return tech.isDeterminism && !tech.manyWorlds
             },
             requires: "determinism",
             effect: () => {
-                mod.isSuperDeterminism = true;
+                tech.isSuperDeterminism = true;
                 for (let i = 0; i < 7; i++) { //if you change the six also change it in Born rule
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                 }
             },
             remove() {
-                mod.isSuperDeterminism = false;
+                tech.isSuperDeterminism = false;
             }
         },
         {
             name: "many-worlds",
-            description: "after choosing a <strong class='color-m'>mod</strong>, <strong class='color-f'>field</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>rerolls</strong> spawn <strong>2</strong>",
+            description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>rerolls</strong> spawn <strong>2</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls === 0 && !mod.isSuperDeterminism && !mod.isRerollHaste
+                return powerUps.reroll.rerolls === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
             requires: "not superdeterminism or Ψ(t) collapse<br>no rerolls",
             effect: () => {
-                mod.manyWorlds = true;
+                tech.manyWorlds = true;
             },
             remove() {
-                mod.manyWorlds = false;
+                tech.manyWorlds = false;
             }
         },
         {
@@ -1773,34 +1776,34 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.reroll.rerolls > 1 || build.isCustomSelection) && !mod.isSuperDeterminism && !mod.isRerollHaste
+                return (powerUps.reroll.rerolls > 1 || build.isCustomSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
             requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 rerolls",
             effect() {
-                mod.renormalization = true;
+                tech.renormalization = true;
             },
             remove() {
-                mod.renormalization = false;
+                tech.renormalization = false;
             }
         },
         {
             name: "erase",
-            description: "<strong class='color-r'>rerolled</strong> or <strong>canceled</strong> <strong class='color-m'>mods</strong> will not <strong>reoccur</strong> <br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            description: "<strong class='color-r'>rerolled</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> will not <strong>reoccur</strong> <br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.reroll.rerolls > 5 || build.isCustomSelection) && !mod.isDeterminism
+                return (powerUps.reroll.rerolls > 5 || build.isCustomSelection) && !tech.isDeterminism
             },
             requires: "not determinism, at least 4 rerolls",
             effect() {
-                mod.isBanish = true
+                tech.isBanish = true
                 for (let i = 0; i < 4; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
                 }
             },
             remove() {
-                mod.isBanish = false
-                powerUps.mod.banishLog = [] //reset banish log
+                tech.isBanish = false
+                powerUps.tech.banishLog = [] //reset banish log
             }
         },
         {
@@ -1813,40 +1816,40 @@ const mod = {
             },
             requires: "at least 2 rerolls",
             effect() {
-                mod.isImmortal = true;
+                tech.isImmortal = true;
                 for (let i = 0; i < 4; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
                 }
             },
             remove() {
-                mod.isImmortal = false;
+                tech.isImmortal = false;
             }
         },
         {
             name: "Born rule",
-            description: "<strong>remove</strong> all current <strong class='color-m'>mods</strong><br>spawn new <strong class='color-m'>mods</strong> to replace them",
+            description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
             maxCount: 1,
             count: 0,
             // isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return (mod.totalCount > 6)
+                return (tech.totalCount > 6)
             },
-            requires: "more than 6 mods",
+            requires: "more than 6 tech",
             effect: () => {
                 //remove active bullets  //to get rid of bots
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = [];
-                let count = 0 //count mods
-                for (let i = 0, len = mod.mods.length; i < len; i++) { // spawn new mods power ups
-                    if (!mod.mods[i].isNonRefundable) count += mod.mods[i].count
+                let count = 0 //count tech
+                for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
+                    if (!tech.tech[i].isNonRefundable) count += tech.tech[i].count
                 }
-                if (mod.isDeterminism) count -= 3 //remove the bonus mods 
-                if (mod.isSuperDeterminism) count -= 2 //remove the bonus mods 
+                if (tech.isDeterminism) count -= 3 //remove the bonus tech 
+                if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
 
-                mod.setupAllMods(); // remove all mods
-                for (let i = 0; i < count; i++) { // spawn new mods power ups
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "mod");
+                tech.setupAllMods(); // remove all tech
+                for (let i = 0; i < count; i++) { // spawn new tech power ups
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                 }
                 //have state is checked in mech.death()
             },
@@ -1858,14 +1861,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isSuperDeterminism && !mod.isPerpetualHeal && !mod.isPerpetualAmmo && !mod.isPerpetualStun
+                return !tech.isSuperDeterminism && !tech.isPerpetualHeal && !tech.isPerpetualAmmo && !tech.isPerpetualStun
             },
             requires: "only 1 perpetual effect, not superdeterminism",
             effect() {
-                mod.isPerpetualReroll = true
+                tech.isPerpetualReroll = true
             },
             remove() {
-                mod.isPerpetualReroll = false
+                tech.isPerpetualReroll = false
             }
         },
         {
@@ -1874,14 +1877,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPerpetualReroll && !mod.isPerpetualAmmo && !mod.isPerpetualStun
+                return !tech.isPerpetualReroll && !tech.isPerpetualAmmo && !tech.isPerpetualStun
             },
             requires: "only 1 perpetual effect",
             effect() {
-                mod.isPerpetualHeal = true
+                tech.isPerpetualHeal = true
             },
             remove() {
-                mod.isPerpetualHeal = false
+                tech.isPerpetualHeal = false
             }
         },
         {
@@ -1890,14 +1893,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPerpetualReroll && !mod.isPerpetualHeal && !mod.isPerpetualReroll && !mod.isPerpetualStun && !mod.isEnergyNoAmmo
+                return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualReroll && !tech.isPerpetualStun && !tech.isEnergyNoAmmo
             },
             requires: "only 1 perpetual effect, not exciton lattice",
             effect() {
-                mod.isPerpetualAmmo = true
+                tech.isPerpetualAmmo = true
             },
             remove() {
-                mod.isPerpetualAmmo = false
+                tech.isPerpetualAmmo = false
             }
         },
         {
@@ -1906,19 +1909,19 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isPerpetualReroll && !mod.isPerpetualHeal && !mod.isPerpetualAmmo
+                return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualAmmo
             },
             requires: "only 1 perpetual effect",
             effect() {
-                mod.isPerpetualStun = true
+                tech.isPerpetualStun = true
             },
             remove() {
-                mod.isPerpetualStun = false
+                tech.isPerpetualStun = false
             }
         },
         //************************************************** 
         //************************************************** gun
-        //************************************************** mods
+        //************************************************** tech
         //**************************************************
         {
             name: "CPT gun",
@@ -1927,16 +1930,16 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !mod.isEnergyHealth && !mod.isRewindAvoidDeath //build.isCustomSelection ||
+                return (tech.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isCustomSelection ||
             },
             requires: "bots > 5, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
             effect() {
-                mod.isRewindGun = true
+                tech.isRewindGun = true
                 b.guns.push(b.gunRewind)
                 b.giveGuns("CPT gun");
             },
             remove() {
-                if (mod.isRewindGun) {
+                if (tech.isRewindGun) {
                     b.removeGun("CPT gun", true)
                     // for (let i = 0; i < b.guns.length; i++) {
                     //     if (b.guns[i].name === "CPT gun") {
@@ -1952,13 +1955,13 @@ const mod = {
                     //         } else {
                     //             b.activeGun = null;
                     //         }
-                    //         game.makeGunHUD();
+                    //         simulation.makeGunHUD();
 
                     //         b.guns.splice(i, 1) //also remove CPT gun from gun pool array
                     //         break
                     //     }
                     // }
-                    mod.isRewindGun = false
+                    tech.isRewindGun = false
                 }
             }
         },
@@ -1969,14 +1972,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return ((mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)) || mod.haveGunCheck("drones") || mod.haveGunCheck("super balls") || mod.haveGunCheck("nail gun") || mod.haveGunCheck("shotgun")) && !mod.isIceCrystals && !mod.isNailCrit && !mod.isNailShot && !mod.isNailPoison
+                return ((mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("nail gun") || tech.haveGunCheck("shotgun")) && !tech.isIceCrystals && !tech.isNailCrit && !tech.isNailShot && !tech.isNailPoison
             },
             requires: "drones, super balls, nail gun, shotgun",
             effect() {
-                mod.isIncendiary = true
+                tech.isIncendiary = true
             },
             remove() {
-                mod.isIncendiary = false;
+                tech.isIncendiary = false;
             }
         },
         {
@@ -1986,14 +1989,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("grenades") && !mod.isNeutronBomb) || mod.haveGunCheck("missiles") || mod.haveGunCheck("rail gun") || (mod.haveGunCheck("shotgun") && mod.isSlugShot) || mod.throwChargeRate > 1
+                return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
             },
             requires: "grenades, missiles, rail gun, shotgun slugs, or mass driver",
             effect() {
-                mod.fragments++
+                tech.fragments++
             },
             remove() {
-                mod.fragments = 0
+                tech.fragments = 0
             }
         },
         {
@@ -2003,14 +2006,14 @@ const mod = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mod.haveGunCheck("spores") || mod.haveGunCheck("drones") || mod.haveGunCheck("missiles") || mod.haveGunCheck("foam") || mod.haveGunCheck("wave beam") || mod.haveGunCheck("ice IX") || mod.isNeutronBomb
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.haveGunCheck("ice IX") || tech.isNeutronBomb
             },
             requires: "drones, spores, missiles, foam<br>wave beam, ice IX, neutron bomb",
             effect() {
-                mod.isBulletsLastLonger += 0.3
+                tech.isBulletsLastLonger += 0.3
             },
             remove() {
-                mod.isBulletsLastLonger = 1;
+                tech.isBulletsLastLonger = 1;
             }
         },
         {
@@ -2020,14 +2023,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isBulletsLastLonger > 1
+                return tech.isBulletsLastLonger > 1
             },
             requires: "Lorentzian topology",
             effect() {
-                mod.isDamageFromBulletCount = true
+                tech.isDamageFromBulletCount = true
             },
             remove() {
-                mod.isDamageFromBulletCount = false
+                tech.isDamageFromBulletCount = false
             }
         },
         {
@@ -2037,33 +2040,33 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("nail gun") && !mod.nailInstantFireRate && !mod.isIncendiary
+                return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIncendiary
             },
             requires: "nail gun, not incendiary, not powder-actuated",
             effect() {
-                mod.isIceCrystals = true;
+                tech.isIceCrystals = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "nail gun") {
                         b.guns[i].ammoPack = Infinity
                         b.guns[i].recordedAmmo = b.guns[i].ammo
                         b.guns[i].ammo = Infinity
-                        game.updateGunHUD();
+                        simulation.updateGunHUD();
                         break;
                     }
                 }
             },
             remove() {
-                if (mod.isIceCrystals) {
+                if (tech.isIceCrystals) {
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "nail gun") {
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
                             if (b.guns[i].recordedAmmo) b.guns[i].ammo = b.guns[i].recordedAmmo
-                            game.updateGunHUD();
+                            simulation.updateGunHUD();
                             break;
                         }
                     }
                 }
-                mod.isIceCrystals = false;
+                tech.isIceCrystals = false;
             }
         },
         {
@@ -2073,14 +2076,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("nail gun") && !mod.isIncendiary
+                return tech.haveGunCheck("nail gun") && !tech.isIncendiary
             },
             requires: "nail gun, not incendiary",
             effect() {
-                mod.isNailCrit = true
+                tech.isNailCrit = true
             },
             remove() {
-                mod.isNailCrit = false
+                tech.isNailCrit = false
             }
         },
         {
@@ -2090,14 +2093,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("nail gun")
+                return tech.haveGunCheck("nail gun")
             },
             requires: "nail gun",
             effect() {
-                mod.nailFireRate = true
+                tech.nailFireRate = true
             },
             remove() {
-                mod.nailFireRate = false
+                tech.nailFireRate = false
             }
         },
         {
@@ -2107,14 +2110,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("nail gun") && mod.nailFireRate && !mod.isIceCrystals
+                return tech.haveGunCheck("nail gun") && tech.nailFireRate && !tech.isIceCrystals
             },
             requires: "nail gun and pneumatic actuator",
             effect() {
-                mod.nailInstantFireRate = true
+                tech.nailInstantFireRate = true
             },
             remove() {
-                mod.nailInstantFireRate = false
+                tech.nailInstantFireRate = false
             }
         },
         {
@@ -2124,11 +2127,11 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("shotgun")
+                return tech.haveGunCheck("shotgun")
             },
             requires: "shotgun",
             effect() {
-                mod.isShotgunImmune = true;
+                tech.isShotgunImmune = true;
 
                 //cut current ammo by 1/2
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2137,7 +2140,7 @@ const mod = {
                         break;
                     }
                 }
-                game.updateGunHUD();
+                simulation.updateGunHUD();
 
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "shotgun") {
@@ -2147,7 +2150,7 @@ const mod = {
                 }
             },
             remove() {
-                mod.isShotgunImmune = false;
+                tech.isShotgunImmune = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "shotgun") {
                         b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
@@ -2163,14 +2166,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("shotgun") && !mod.isIncendiary && !mod.isSlugShot
+                return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot
             },
             requires: "shotgun",
             effect() {
-                mod.isNailShot = true;
+                tech.isNailShot = true;
             },
             remove() {
-                mod.isNailShot = false;
+                tech.isNailShot = false;
             }
         },
         {
@@ -2180,14 +2183,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("shotgun") && !mod.isNailShot
+                return tech.haveGunCheck("shotgun") && !tech.isNailShot
             },
             requires: "shotgun",
             effect() {
-                mod.isSlugShot = true;
+                tech.isSlugShot = true;
             },
             remove() {
-                mod.isSlugShot = false;
+                tech.isSlugShot = false;
             }
         },
         {
@@ -2197,14 +2200,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("shotgun")
+                return tech.haveGunCheck("shotgun")
             },
             requires: "shotgun",
             effect() {
-                mod.isShotgunRecoil = true;
+                tech.isShotgunRecoil = true;
             },
             remove() {
-                mod.isShotgunRecoil = false;
+                tech.isShotgunRecoil = false;
             }
         },
         {
@@ -2214,14 +2217,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("super balls") && !mod.oneSuperBall
+                return tech.haveGunCheck("super balls") && !tech.oneSuperBall
             },
-            requires: "super balls, but not the mod super ball",
+            requires: "super balls, but not the tech super ball",
             effect() {
-                mod.superBallNumber++
+                tech.superBallNumber++
             },
             remove() {
-                mod.superBallNumber = 4;
+                tech.superBallNumber = 4;
             }
         },
         {
@@ -2231,14 +2234,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("super balls") && mod.superBallNumber === 4
+                return tech.haveGunCheck("super balls") && tech.superBallNumber === 4
             },
             requires: "super balls, but not super duper",
             effect() {
-                mod.oneSuperBall = true;
+                tech.oneSuperBall = true;
             },
             remove() {
-                mod.oneSuperBall = false;
+                tech.oneSuperBall = false;
             }
         },
         {
@@ -2248,14 +2251,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("super balls")
+                return tech.haveGunCheck("super balls")
             },
             requires: "super balls",
             effect() {
-                mod.bulletSize += 0.15
+                tech.bulletSize += 0.15
             },
             remove() {
-                mod.bulletSize = 1;
+                tech.bulletSize = 1;
             }
         },
         {
@@ -2265,11 +2268,11 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes")
+                return tech.haveGunCheck("flechettes")
             },
             requires: "flechettes",
             effect() {
-                mod.isFlechetteMultiShot = true;
+                tech.isFlechetteMultiShot = true;
                 //cut current ammo by 1/3
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "flechettes") {
@@ -2284,10 +2287,10 @@ const mod = {
                         break
                     }
                 }
-                game.updateGunHUD();
+                simulation.updateGunHUD();
             },
             remove() {
-                if (mod.isFlechetteMultiShot) {
+                if (tech.isFlechetteMultiShot) {
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "flechettes") {
                             b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
@@ -2299,10 +2302,10 @@ const mod = {
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
                             break
                         }
-                        game.updateGunHUD();
+                        simulation.updateGunHUD();
                     }
                 }
-                mod.isFlechetteMultiShot = false;
+                tech.isFlechetteMultiShot = false;
             }
         },
         {
@@ -2312,14 +2315,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes") && !mod.isFastDot
+                return tech.haveGunCheck("flechettes") && !tech.isFastDot
             },
             requires: "flechettes",
             effect() {
-                mod.isSlowDot = true;
+                tech.isSlowDot = true;
             },
             remove() {
-                mod.isSlowDot = false;
+                tech.isSlowDot = false;
             }
         },
         {
@@ -2329,14 +2332,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes") && !mod.isSlowDot
+                return tech.haveGunCheck("flechettes") && !tech.isSlowDot
             },
             requires: "flechettes",
             effect() {
-                mod.isFastDot = true;
+                tech.isFastDot = true;
             },
             remove() {
-                mod.isFastDot = false;
+                tech.isFastDot = false;
             }
         },
         {
@@ -2346,14 +2349,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes") && !mod.pierce
+                return tech.haveGunCheck("flechettes") && !tech.pierce
             },
             requires: "flechettes and not piercing needles",
             effect() {
-                mod.isFlechetteExplode = true
+                tech.isFlechetteExplode = true
             },
             remove() {
-                mod.isFlechetteExplode = false
+                tech.isFlechetteExplode = false
             }
         },
         {
@@ -2363,14 +2366,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes") || mod.isNailPoison || mod.isHeavyWater || mod.isWormholeDamage || mod.isNeutronBomb
+                return tech.haveGunCheck("flechettes") || tech.isNailPoison || tech.isHeavyWater || tech.isWormholeDamage || tech.isNeutronBomb
             },
             requires: "radiation damage source",
             effect() {
-                mod.isRadioactive = true
+                tech.isRadioactive = true
             },
             remove() {
-                mod.isRadioactive = false
+                tech.isRadioactive = false
             }
         },
         {
@@ -2380,14 +2383,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("flechettes") && !mod.isFlechetteExplode
+                return tech.haveGunCheck("flechettes") && !tech.isFlechetteExplode
             },
             requires: "flechettes and not supercritical fission",
             effect() {
-                mod.pierce = true;
+                tech.pierce = true;
             },
             remove() {
-                mod.pierce = false;
+                tech.pierce = false;
             }
         },
         {
@@ -2397,14 +2400,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("wave beam") && !mod.isExtruder
+                return tech.haveGunCheck("wave beam") && !tech.isExtruder
             },
             requires: "wave beam",
             effect() {
-                mod.waveHelix = 2
+                tech.waveHelix = 2
             },
             remove() {
-                mod.waveHelix = 1
+                tech.waveHelix = 1
             }
         },
         {
@@ -2414,16 +2417,16 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("wave beam") && !mod.isWaveReflect && !mod.isExtruder
+                return tech.haveGunCheck("wave beam") && !tech.isWaveReflect && !tech.isExtruder
             },
             requires: "wave beam",
             effect() {
-                mod.waveSpeedMap = 3 //needs to be 3 to stop bound state require check
-                mod.waveSpeedBody = 1.9
+                tech.waveSpeedMap = 3 //needs to be 3 to stop bound state require check
+                tech.waveSpeedBody = 1.9
             },
             remove() {
-                mod.waveSpeedMap = 0.08
-                mod.waveSpeedBody = 0.25
+                tech.waveSpeedMap = 0.08
+                tech.waveSpeedBody = 0.25
             }
         },
         {
@@ -2433,14 +2436,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("wave beam") && mod.waveSpeedMap !== 3 && !mod.isExtruder
+                return tech.haveGunCheck("wave beam") && tech.waveSpeedMap !== 3 && !tech.isExtruder
             },
             requires: "wave beam",
             effect() {
-                mod.isWaveReflect = true
+                tech.isWaveReflect = true
             },
             remove() {
-                mod.isWaveReflect = false
+                tech.isWaveReflect = false
             }
         },
         {
@@ -2450,14 +2453,14 @@ const mod = {
             maxCount: 6,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles") || mod.isMissileField
+                return tech.haveGunCheck("missiles") || tech.isMissileField
             },
             requires: "missiles",
             effect() {
-                mod.recursiveMissiles++
+                tech.recursiveMissiles++
             },
             remove() {
-                mod.recursiveMissiles = 0;
+                tech.recursiveMissiles = 0;
             }
         },
         {
@@ -2467,14 +2470,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("missiles")
+                return tech.haveGunCheck("missiles")
             },
             requires: "missiles",
             effect() {
-                mod.is3Missiles = true;
+                tech.is3Missiles = true;
             },
             remove() {
-                mod.is3Missiles = false;
+                tech.is3Missiles = false;
             }
         },
         {
@@ -2484,15 +2487,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isVacuumBomb && !mod.isNeutronBomb
+                return tech.haveGunCheck("grenades")
             },
-            requires: "grenades, not vacuum bomb, neutron",
+            requires: "grenades",
             effect() {
-                mod.isRPG = true;
+                tech.isRPG = true;
                 b.setGrenadeMode()
             },
             remove() {
-                mod.isRPG = false;
+                tech.isRPG = false;
                 b.setGrenadeMode()
             }
         },
@@ -2503,15 +2506,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.isNeutronBomb
+                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb
             },
-            requires: "grenades, not rocket-propelled",
+            requires: "grenades, not neutron bomb",
             effect() {
-                mod.isVacuumBomb = true;
+                tech.isVacuumBomb = true;
                 b.setGrenadeMode()
             },
             remove() {
-                mod.isVacuumBomb = false;
+                tech.isVacuumBomb = false;
                 b.setGrenadeMode()
             }
         },
@@ -2522,15 +2525,15 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("grenades") && !mod.isRPG && !mod.fragments && !mod.isVacuumBomb
+                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb
             },
-            requires: "grenades, not rocket-propelled or fragmentation",
+            requires: "grenades, not fragmentation",
             effect() {
-                mod.isNeutronBomb = true;
+                tech.isNeutronBomb = true;
                 b.setGrenadeMode()
             },
             remove() {
-                mod.isNeutronBomb = false;
+                tech.isNeutronBomb = false;
                 b.setGrenadeMode()
             }
         },
@@ -2541,14 +2544,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isNeutronBomb
+                return tech.isNeutronBomb
             },
             requires: "neutron bomb",
             effect() {
-                mod.isNeutronImmune = true
+                tech.isNeutronImmune = true
             },
             remove() {
-                mod.isNeutronImmune = false
+                tech.isNeutronImmune = false
             }
         },
         {
@@ -2558,14 +2561,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isNeutronBomb
+                return tech.isNeutronBomb
             },
             requires: "neutron bomb",
             effect() {
-                mod.isNeutronSlow = true
+                tech.isNeutronSlow = true
             },
             remove() {
-                mod.isNeutronSlow = false
+                tech.isNeutronSlow = false
             }
         },
         {
@@ -2575,31 +2578,31 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("mine") && !mod.isMineSentry
+                return tech.haveGunCheck("mine") && !tech.isMineSentry
             },
             requires: "mine, not sentry",
             effect() {
-                mod.isMineAmmoBack = true;
+                tech.isMineAmmoBack = true;
             },
             remove() {
-                mod.isMineAmmoBack = false;
+                tech.isMineAmmoBack = false;
             }
         },
         {
             name: "sentry",
-            description: "<strong>mines</strong> are modified to <strong>target</strong> mobs with nails<br>mines last about <strong>12</strong> seconds",
+            description: "<strong>mines</strong> <strong>target</strong> mobs with nails over time<br>mines last about <strong>12</strong> seconds",
             isGunMod: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("mine") && !mod.isMineAmmoBack) || mod.isMineDrop
+                return (tech.haveGunCheck("mine") && !tech.isMineAmmoBack) || tech.isMineDrop
             },
             requires: "mine, not mine reclamation",
             effect() {
-                mod.isMineSentry = true;
+                tech.isMineSentry = true;
             },
             remove() {
-                mod.isMineSentry = false;
+                tech.isMineSentry = false;
             }
         },
         {
@@ -2609,14 +2612,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isMineDrop + mod.nailBotCount + mod.fragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
+                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + (tech.haveGunCheck("mine") + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
-                mod.isNailPoison = true;
+                tech.isNailPoison = true;
             },
             remove() {
-                mod.isNailPoison = false;
+                tech.isNailPoison = false;
             }
         },
         {
@@ -2626,14 +2629,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isMineDrop + mod.nailBotCount + mod.fragments + mod.nailsDeathMob / 2 + (mod.haveGunCheck("mine") + mod.isNailShot + (mod.haveGunCheck("nail gun") && !mod.isIncendiary)) * 2 > 1
+                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + (tech.haveGunCheck("mine") + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
-                mod.biggerNails += 0.33
+                tech.biggerNails += 0.33
             },
             remove() {
-                mod.biggerNails = 1
+                tech.biggerNails = 1
             }
         },
         {
@@ -2643,14 +2646,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("spores")
+                return tech.haveGunCheck("spores")
             },
             requires: "spores",
             effect() {
-                mod.isSporeGrowth = true
+                tech.isSporeGrowth = true
             },
             remove() {
-                mod.isSporeGrowth = false
+                tech.isSporeGrowth = false
             }
         },
         {
@@ -2660,14 +2663,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
             },
             requires: "spores",
             effect() {
-                mod.isFastSpores = true
+                tech.isFastSpores = true
             },
             remove() {
-                mod.isFastSpores = false
+                tech.isFastSpores = false
             }
         },
         {
@@ -2678,14 +2681,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
             },
             requires: "spores",
             effect() {
-                mod.isSporeFreeze = true
+                tech.isSporeFreeze = true
             },
             remove() {
-                mod.isSporeFreeze = false
+                tech.isSporeFreeze = false
             }
         },
         {
@@ -2695,14 +2698,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
             },
             requires: "spores",
             effect() {
-                mod.isSporeFollow = true
+                tech.isSporeFollow = true
             },
             remove() {
-                mod.isSporeFollow = false
+                tech.isSporeFollow = false
             }
         },
         {
@@ -2712,14 +2715,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("spores") || mod.sporesOnDeath > 0 || mod.isSporeField) && !mod.isEnergyHealth
+                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField) && !tech.isEnergyHealth
             },
             requires: "spores",
             effect() {
-                mod.isMutualism = true
+                tech.isMutualism = true
             },
             remove() {
-                mod.isMutualism = false
+                tech.isMutualism = false
             }
         },
         {
@@ -2729,14 +2732,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField))
+                return tech.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
             },
             requires: "drones",
             effect() {
-                mod.isFastDrones = true
+                tech.isFastDrones = true
             },
             remove() {
-                mod.isFastDrones = false
+                tech.isFastDrones = false
             }
         },
         {
@@ -2746,14 +2749,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !mod.isArmorFromPowerUps && (mod.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isIceField)))
+                return !tech.isArmorFromPowerUps && (tech.haveGunCheck("drones") || (mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
             },
             requires: "drones",
             effect() {
-                mod.isDroneGrab = true
+                tech.isDroneGrab = true
             },
             remove() {
-                mod.isDroneGrab = false
+                tech.isDroneGrab = false
             }
         },
         {
@@ -2763,14 +2766,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("ice IX") || mod.isIceCrystals || mod.isSporeFreeze || mod.isIceField
+                return tech.haveGunCheck("ice IX") || tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField
             },
             requires: "a freeze effect",
             effect() {
-                mod.isAoESlow = true
+                tech.isAoESlow = true
             },
             remove() {
-                mod.isAoESlow = false
+                tech.isAoESlow = false
             }
         },
         {
@@ -2780,14 +2783,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("ice IX") || mod.isIceField) && !mod.iceEnergy
+                return (tech.haveGunCheck("ice IX") || tech.isIceField) && !tech.iceEnergy
             },
             requires: "ice IX",
             effect() {
-                mod.isHeavyWater = true
+                tech.isHeavyWater = true
             },
             remove() {
-                mod.isHeavyWater = false;
+                tech.isHeavyWater = false;
             }
         },
         {
@@ -2797,14 +2800,14 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return (mod.haveGunCheck("ice IX") || mod.isIceField) && !mod.isHeavyWater
+                return (tech.haveGunCheck("ice IX") || tech.isIceField) && !tech.isHeavyWater
             },
             requires: "ice IX",
             effect() {
-                mod.iceEnergy++
+                tech.iceEnergy++
             },
             remove() {
-                mod.iceEnergy = 0;
+                tech.iceEnergy = 0;
             }
         },
         {
@@ -2814,14 +2817,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("foam") || mod.foamBotCount > 1
+                return tech.haveGunCheck("foam") || tech.foamBotCount > 1
             },
             requires: "foam",
             effect() {
-                mod.isFoamGrowOnDeath = true
+                tech.isFoamGrowOnDeath = true
             },
             remove() {
-                mod.isFoamGrowOnDeath = false;
+                tech.isFoamGrowOnDeath = false;
             }
         },
         {
@@ -2831,14 +2834,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("foam") || mod.foamBotCount > 2
+                return tech.haveGunCheck("foam") || tech.foamBotCount > 2
             },
             requires: "foam",
             effect() {
-                mod.isFastFoam = true
+                tech.isFastFoam = true
             },
             remove() {
-                mod.isFastFoam = false;
+                tech.isFastFoam = false;
             }
         },
         // {
@@ -2847,14 +2850,14 @@ const mod = {
         //     maxCount: 1,
         //     count: 0,
         //     allowed() {
-        //         return mod.haveGunCheck("foam") || mod.foamBotCount > 2
+        //         return tech.haveGunCheck("foam") || tech.foamBotCount > 2
         //     },
         //     requires: "foam",
         //     effect() {
-        //         mod.isLargeFoam = true
+        //         tech.isLargeFoam = true
         //     },
         //     remove() {
-        //         mod.isLargeFoam = false;
+        //         tech.isLargeFoam = false;
         //     }
         // },
         // {
@@ -2863,16 +2866,16 @@ const mod = {
         //     maxCount: 1,
         //     count: 0,
         //     allowed() {
-        //         return game.fpsCapDefault > 45 && mod.haveGunCheck("rail gun") && !mod.isSlowFPS && !mod.isCapacitor
+        //         return simulation.fpsCapDefault > 45 && tech.haveGunCheck("rail gun") && !tech.isSlowFPS && !tech.isCapacitor
         //     },
         //     requires: "rail gun and FPS above 45",
         //     effect() {
-        //         mod.isRailTimeSlow = true;
+        //         tech.isRailTimeSlow = true;
         //     },
         //     remove() {
-        //         mod.isRailTimeSlow = false;
-        //         game.fpsCap = game.fpsCapDefault
-        //         game.fpsInterval = 1000 / game.fpsCap;
+        //         tech.isRailTimeSlow = false;
+        //         simulation.fpsCap = simulation.fpsCapDefault
+        //         simulation.fpsInterval = 1000 / simulation.fpsCap;
         //     }
         // },
         {
@@ -2882,14 +2885,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("rail gun")
+                return tech.haveGunCheck("rail gun")
             },
             requires: "rail gun",
             effect() {
-                mod.isRailEnergyGain = true;
+                tech.isRailEnergyGain = true;
             },
             remove() {
-                mod.isRailEnergyGain = false;
+                tech.isRailEnergyGain = false;
             }
         },
         {
@@ -2899,14 +2902,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("rail gun")
+                return tech.haveGunCheck("rail gun")
             },
             requires: "rail gun",
             effect() {
-                mod.isRailAreaDamage = true;
+                tech.isRailAreaDamage = true;
             },
             remove() {
-                mod.isRailAreaDamage = false;
+                tech.isRailAreaDamage = false;
             }
         },
         {
@@ -2916,14 +2919,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("rail gun")
+                return tech.haveGunCheck("rail gun")
             },
             requires: "rail gun",
             effect() {
-                mod.isCapacitor = true;
+                tech.isCapacitor = true;
             },
             remove() {
-                mod.isCapacitor = false;
+                tech.isCapacitor = false;
             }
         },
         {
@@ -2933,14 +2936,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") || mod.laserBotCount > 1
+                return tech.haveGunCheck("laser") || tech.laserBotCount > 1
             },
             requires: "laser",
             effect() {
-                mod.isLaserDiode = 0.63; //100%-37%
+                tech.isLaserDiode = 0.63; //100%-37%
             },
             remove() {
-                mod.isLaserDiode = 1;
+                tech.isLaserDiode = 1;
             }
         },
         {
@@ -2950,18 +2953,18 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseLaser && !mod.historyLaser
+                return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
             },
             requires: "laser, not wide beam",
             effect() {
-                mod.laserReflections++;
-                mod.laserDamage += 0.08; //base is 0.12
-                mod.laserFieldDrain += 0.0008 //base is 0.002
+                tech.laserReflections++;
+                tech.laserDamage += 0.08; //base is 0.12
+                tech.laserFieldDrain += 0.0008 //base is 0.002
             },
             remove() {
-                mod.laserReflections = 2;
-                mod.laserDamage = 0.16;
-                mod.laserFieldDrain = 0.0016;
+                tech.laserReflections = 2;
+                tech.laserDamage = 0.16;
+                tech.laserFieldDrain = 0.0016;
             }
         },
         {
@@ -2971,17 +2974,17 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && !mod.isWideLaser && !mod.isPulseAim && !mod.historyLaser
+                return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseAim && !tech.historyLaser
             },
             requires: "laser, not specular reflection",
             effect() {
-                mod.beamSplitter++
+                tech.beamSplitter++
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
-                mod.beamSplitter = 0
+                tech.beamSplitter = 0
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
@@ -2994,19 +2997,19 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isPulseLaser
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser
             },
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
-                if (mod.wideLaser === 0) mod.wideLaser = 3
-                mod.isWideLaser = true;
+                if (tech.wideLaser === 0) tech.wideLaser = 3
+                tech.isWideLaser = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
-                mod.wideLaser = 0
-                mod.isWideLaser = false;
+                tech.wideLaser = 0
+                tech.isWideLaser = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
@@ -3019,20 +3022,20 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.isWideLaser
+                return tech.haveGunCheck("laser") && tech.isWideLaser
             },
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
-                mod.wideLaser = 4
+                tech.wideLaser = 4
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
-                if (mod.isWideLaser) {
-                    mod.wideLaser = 3
+                if (tech.isWideLaser) {
+                    tech.wideLaser = 3
                 } else {
-                    mod.wideLaser = 0
+                    tech.wideLaser = 0
                 }
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -3046,19 +3049,19 @@ const mod = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.beamSplitter && !mod.isPulseLaser
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser
             },
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
                 this.description = `add 10 more <strong>laser</strong> beams into into your past`
-                mod.historyLaser++
+                tech.historyLaser++
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
                 this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total laser <strong class='color-d'>damage</strong> by <strong>200%</strong>"
-                mod.historyLaser = 0
+                tech.historyLaser = 0
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
@@ -3071,17 +3074,17 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.haveGunCheck("laser") && mod.laserReflections < 3 && !mod.isWideLaser && !mod.historyLaser
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && !tech.historyLaser
             },
             requires: "laser, not specular reflection, not diffuse",
             effect() {
-                mod.isPulseLaser = true;
+                tech.isPulseLaser = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
-                mod.isPulseLaser = false;
+                tech.isPulseLaser = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
@@ -3094,14 +3097,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPulseLaser
+                return tech.isPulseLaser
             },
             requires: "pulse",
             effect() {
-                mod.isPulseStun = true;
+                tech.isPulseStun = true;
             },
             remove() {
-                mod.isPulseStun = false;
+                tech.isPulseStun = false;
             }
         },
         {
@@ -3111,19 +3114,19 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isPulseLaser && !mod.beamSplitter
+                return tech.isPulseLaser && !tech.beamSplitter
             },
             requires: "pulse",
             effect() {
-                mod.isPulseAim = true;
+                tech.isPulseAim = true;
             },
             remove() {
-                mod.isPulseAim = false;
+                tech.isPulseAim = false;
             }
         },
         //************************************************** 
         //************************************************** field
-        //************************************************** mods
+        //************************************************** tech
         //************************************************** 
         {
             name: "bremsstrahlung radiation",
@@ -3136,10 +3139,10 @@ const mod = {
             },
             requires: "standing wave harmonics",
             effect() {
-                mod.blockDmg += 0.75 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
+                tech.blockDmg += 0.75 //if you change this value also update the for loop in the electricity graphics in mech.pushMass
             },
             remove() {
-                mod.blockDmg = 0;
+                tech.blockDmg = 0;
             }
         },
         {
@@ -3172,10 +3175,10 @@ const mod = {
             },
             requires: "perfect diamagnetism",
             effect() {
-                mod.isStunField += 60;
+                tech.isStunField += 60;
             },
             remove() {
-                mod.isStunField = 0;
+                tech.isStunField = 0;
             }
         },
         {
@@ -3189,10 +3192,10 @@ const mod = {
             },
             requires: "perfect diamagnetism",
             effect() {
-                mod.isPerfectBrake = true;
+                tech.isPerfectBrake = true;
             },
             remove() {
-                mod.isPerfectBrake = false;
+                tech.isPerfectBrake = false;
             }
         },
         {
@@ -3202,14 +3205,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mod.isStunField || mod.oneSuperBall || mod.isCloakStun || mod.orbitBotCount > 1 || mod.isPerpetualStun
+                return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isPerpetualStun
             },
             requires: "a stun effect",
             effect() {
-                mod.isCrit = true;
+                tech.isCrit = true;
             },
             remove() {
-                mod.isCrit = false;
+                tech.isCrit = false;
             }
         },
         {
@@ -3223,11 +3226,11 @@ const mod = {
             },
             requires: "nano-scale manufacturing",
             effect: () => {
-                mod.isMassEnergy = true // used in mech.grabPowerUp
+                tech.isMassEnergy = true // used in mech.grabPowerUp
                 mech.energy += 3
             },
             remove() {
-                mod.isMassEnergy = false;
+                tech.isMassEnergy = false;
             }
         },
         {
@@ -3259,51 +3262,51 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isNailBotUpgrade && mod.isFoamBotUpgrade && mod.isBoomBotUpgrade && mod.isLaserBotUpgrade && mod.isOrbitBotUpgrade)
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isNailBotUpgrade && tech.isFoamBotUpgrade && tech.isBoomBotUpgrade && tech.isLaserBotUpgrade && tech.isOrbitBotUpgrade)
             },
             requires: "nano-scale manufacturing",
             effect: () => {
                 mech.energy = 0.01;
                 //fill array of available bots
                 const notUpgradedBots = []
-                if (!mod.isNailBotUpgrade) notUpgradedBots.push(() => {
-                    mod.giveMod("nail-bot upgrade")
-                    mod.setModToNonRefundable("nail-bot upgrade")
+                if (!tech.isNailBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveMod("nail-bot upgrade")
+                    tech.setModToNonRefundable("nail-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.nailBot()
-                        mod.nailBotCount++;
+                        tech.nailBotCount++;
                     }
                 })
-                if (!mod.isFoamBotUpgrade) notUpgradedBots.push(() => {
-                    mod.giveMod("foam-bot upgrade")
-                    mod.setModToNonRefundable("foam-bot upgrade")
+                if (!tech.isFoamBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveMod("foam-bot upgrade")
+                    tech.setModToNonRefundable("foam-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.foamBot()
-                        mod.foamBotCount++;
+                        tech.foamBotCount++;
                     }
                 })
-                if (!mod.isBoomBotUpgrade) notUpgradedBots.push(() => {
-                    mod.giveMod("boom-bot upgrade")
-                    mod.setModToNonRefundable("boom-bot upgrade")
+                if (!tech.isBoomBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveMod("boom-bot upgrade")
+                    tech.setModToNonRefundable("boom-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.boomBot()
-                        mod.boomBotCount++;
+                        tech.boomBotCount++;
                     }
                 })
-                if (!mod.isLaserBotUpgrade) notUpgradedBots.push(() => {
-                    mod.giveMod("laser-bot upgrade")
-                    mod.setModToNonRefundable("laser-bot upgrade")
+                if (!tech.isLaserBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveMod("laser-bot upgrade")
+                    tech.setModToNonRefundable("laser-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.laserBot()
-                        mod.laserBotCount++;
+                        tech.laserBotCount++;
                     }
                 })
-                if (!mod.isOrbitBotUpgrade) notUpgradedBots.push(() => {
-                    mod.giveMod("orbital-bot upgrade")
-                    mod.setModToNonRefundable("orbital-bot upgrade")
+                if (!tech.isOrbitBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveMod("orbital-bot upgrade")
+                    tech.setModToNonRefundable("orbital-bot upgrade")
                     for (let i = 0; i < 2; i++) {
                         b.orbitBot()
-                        mod.orbitBotCount++;
+                        tech.orbitBotCount++;
                     }
                 })
                 //choose random function from the array and run it
@@ -3318,14 +3321,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isMissileField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
-                mod.isSporeField = true;
+                tech.isSporeField = true;
             },
             remove() {
-                mod.isSporeField = false;
+                tech.isSporeField = false;
             }
         },
         {
@@ -3335,14 +3338,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isIceField || mod.isFastDrones || mod.isDroneGrab)
+                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
-                mod.isMissileField = true;
+                tech.isMissileField = true;
             },
             remove() {
-                mod.isMissileField = false;
+                tech.isMissileField = false;
             }
         },
         {
@@ -3352,14 +3355,14 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(mod.isSporeField || mod.isMissileField || mod.isFastDrones || mod.isDroneGrab)
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
-                mod.isIceField = true;
+                tech.isIceField = true;
             },
             remove() {
-                mod.isIceField = false;
+                tech.isIceField = false;
             }
         },
         {
@@ -3373,10 +3376,10 @@ const mod = {
             },
             requires: "negative mass field",
             effect() {
-                mod.isHarmReduce = true
+                tech.isHarmReduce = true
             },
             remove() {
-                mod.isHarmReduce = false;
+                tech.isHarmReduce = false;
             }
         },
         {
@@ -3390,10 +3393,10 @@ const mod = {
             },
             requires: "negative mass field",
             effect() {
-                mod.isAnnihilation = true
+                tech.isAnnihilation = true
             },
             remove() {
-                mod.isAnnihilation = false;
+                tech.isAnnihilation = false;
             }
         },
         {
@@ -3407,10 +3410,10 @@ const mod = {
             },
             requires: "pilot wave, negative mass field, time dilation field",
             effect() {
-                mod.isFreezeMobs = true
+                tech.isFreezeMobs = true
             },
             remove() {
-                mod.isFreezeMobs = false
+                tech.isFreezeMobs = false
             }
         },
         // {
@@ -3420,14 +3423,14 @@ const mod = {
         //     maxCount: 1,
         //     count: 0,
         //     allowed() {
-        //         return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" && !mod.isEnergyHealth
+        //         return mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" && !tech.isEnergyHealth
         //     },
         //     requires: "plasma torch, not mass-energy equivalence",
         //     effect() {
-        //         mod.isPlasmaRange += 0.27;
+        //         tech.isPlasmaRange += 0.27;
         //     },
         //     remove() {
-        //         mod.isPlasmaRange = 1;
+        //         tech.isPlasmaRange = 1;
         //     }
         // },
         {
@@ -3441,10 +3444,10 @@ const mod = {
             },
             requires: "plasma torch",
             effect() {
-                mod.isPlasmaRange += 0.27;
+                tech.isPlasmaRange += 0.27;
             },
             remove() {
-                mod.isPlasmaRange = 1;
+                tech.isPlasmaRange = 1;
             }
         },
         {
@@ -3458,11 +3461,11 @@ const mod = {
             },
             requires: "plasma torch",
             effect() {
-                mod.plasmaBotCount++;
+                tech.plasmaBotCount++;
                 b.plasmaBot();
             },
             remove() {
-                mod.plasmaBotCount = 0;
+                tech.plasmaBotCount = 0;
             }
         },
         {
@@ -3476,10 +3479,10 @@ const mod = {
             },
             requires: "plasma torch",
             effect() {
-                mod.isExtruder = true;
+                tech.isExtruder = true;
             },
             remove() {
-                mod.isExtruder = false;
+                tech.isExtruder = false;
             }
         },
         {
@@ -3493,11 +3496,11 @@ const mod = {
             },
             requires: "time dilation field",
             effect() {
-                mod.isTimeSkip = true;
+                tech.isTimeSkip = true;
                 b.setFireCD();
             },
             remove() {
-                mod.isTimeSkip = false;
+                tech.isTimeSkip = false;
                 b.setFireCD();
             }
         },
@@ -3512,14 +3515,14 @@ const mod = {
             },
             requires: "time dilation field",
             effect() {
-                mod.fastTime = 1.40;
-                mod.fastTimeJump = 1.11;
+                tech.fastTime = 1.40;
+                tech.fastTimeJump = 1.11;
                 mech.setMovement();
                 b.setFireCD();
             },
             remove() {
-                mod.fastTime = 1;
-                mod.fastTimeJump = 1;
+                tech.fastTime = 1;
+                tech.fastTimeJump = 1;
                 mech.setMovement();
                 b.setFireCD();
             }
@@ -3531,16 +3534,16 @@ const mod = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (mech.fieldUpgrades[mech.fieldMode].name === "time dilation field" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && mod.energyRegen !== 0;
+                return (mech.fieldUpgrades[mech.fieldMode].name === "time dilation field" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && tech.energyRegen !== 0;
             },
             requires: "time dilation field",
             effect: () => {
-                mod.energyRegen = 0.004;
-                mech.fieldRegen = mod.energyRegen;
+                tech.energyRegen = 0.004;
+                mech.fieldRegen = tech.energyRegen;
             },
             remove() {
-                mod.energyRegen = 0.001;
-                mech.fieldRegen = mod.energyRegen;
+                tech.energyRegen = 0.001;
+                mech.fieldRegen = tech.energyRegen;
             }
         },
         {
@@ -3554,10 +3557,10 @@ const mod = {
             },
             requires: "metamaterial cloaking",
             effect() {
-                mod.isIntangible = true;
+                tech.isIntangible = true;
             },
             remove() {
-                mod.isIntangible = false;
+                tech.isIntangible = false;
             }
         },
         {
@@ -3571,10 +3574,10 @@ const mod = {
             },
             requires: "metamaterial cloaking",
             effect() {
-                mod.isCloakStun = true;
+                tech.isCloakStun = true;
             },
             remove() {
-                mod.isCloakStun = false;
+                tech.isCloakStun = false;
             }
         },
         {
@@ -3588,11 +3591,11 @@ const mod = {
             },
             requires: "metamaterial cloaking",
             effect() {
-                mod.aimDamage = 1.5
+                tech.aimDamage = 1.5
                 b.setFireCD();
             },
             remove() {
-                mod.aimDamage = 1
+                tech.aimDamage = 1
                 b.setFireCD();
             }
         },
@@ -3607,10 +3610,10 @@ const mod = {
             },
             requires: "wormhole",
             effect() {
-                mod.isWormholeDamage = true
+                tech.isWormholeDamage = true
             },
             remove() {
-                mod.isWormholeDamage = false
+                tech.isWormholeDamage = false
             }
         },
         {
@@ -3624,10 +3627,10 @@ const mod = {
             },
             requires: "wormhole",
             effect() {
-                mod.isWormholeEnergy = true
+                tech.isWormholeEnergy = true
             },
             remove() {
-                mod.isWormholeEnergy = false
+                tech.isWormholeEnergy = false
             }
         },
         {
@@ -3641,10 +3644,10 @@ const mod = {
             },
             requires: "wormhole",
             effect() {
-                mod.isWormSpores = true
+                tech.isWormSpores = true
             },
             remove() {
-                mod.isWormSpores = false
+                tech.isWormSpores = false
             }
         },
         {
@@ -3658,12 +3661,12 @@ const mod = {
             },
             requires: "wormhole",
             effect() {
-                mod.isWormBullets = true
+                tech.isWormBullets = true
                 powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
             },
             remove() {
-                mod.isWormBullets = false
+                tech.isWormBullets = false
             }
         },
         {
@@ -3693,7 +3696,7 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !mod.isEnergyNoAmmo
+                return !tech.isEnergyNoAmmo
             },
             requires: "not exciton lattice",
             effect() {
@@ -3712,7 +3715,7 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !mod.isSuperDeterminism
+                return !tech.isSuperDeterminism
             },
             requires: "not superdeterminism",
             effect() {
@@ -3731,7 +3734,7 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !mod.isSuperDeterminism
+                return !tech.isSuperDeterminism
             },
             requires: "not superdeterminism",
             effect() {
@@ -3748,7 +3751,7 @@ const mod = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !mod.isSuperDeterminism
+                return !tech.isSuperDeterminism
             },
             requires: "not superdeterminism",
             effect() {
@@ -3758,7 +3761,7 @@ const mod = {
             remove() {}
         },
     ],
-    //variables use for gun mod upgrades
+    //variables use for gun tech upgrades
     fireRate: null,
     bulletSize: null,
     energySiphon: null,

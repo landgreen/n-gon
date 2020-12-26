@@ -1,15 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-added a crouch check to prevent move the head when it's already out of position
-also using setPosition to move player head instead of translate
-  
+updated in game console style and all messages to match real game commands
+new names inline with lore,  mod -> tech, game -> simulation
+  this is probably going to cause many minor bugs, so let me know what you find
+new reroll display in power up selection
+
+tech: rocket-propelled now works with all grenade tech
 
 ******************************************************** BUGS ********************************************************
 
 check for crouch after rewind
   CPT, tesseract
-
-mod and mob are too similar
 
 (always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
@@ -26,6 +27,7 @@ mod and mob are too similar
       this fix was added and it is working for some cases
         maybe move the fix to once a second?
   bug fix - rewrite crouch to not translate the player height, but instead switch between 2 sensors
+  2nd bug fix, no reports so far!  might be fixed!
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
@@ -37,7 +39,30 @@ mod and mob are too similar
 
 ******************************************************** TODO ********************************************************
 
+rename
+  health > integrity, unity
+  heal > also integrity, unity
+  level > world?
+  reroll > resample, reset, retry, remeasure
+
+in game console
+  make all commands actually work
+    input.key commands don't work
+      rewrite to not be a console command?
+  add commands
+    death, max health, max energy, rewind
+
+mechanic: use gun swap as an active ability for several mods
+  ideas?
+    trigger damage immunity for 3 seconds, but drain energy?
+    push away nearby mobs, but drain energy
+    produce ammo, but take 1 damage
+
+
 CPT gun seems a bit weak right now.  How to buff the gun?
+
+mod nail gun: slow and accurate
+mod foam: fast and inaccurate
 
 mob ability bombs/bullets that suck in player
 
@@ -193,6 +218,8 @@ field - one block orbits you, it can protect you a bit and do collision damage
 repeat map in vertical and horizontal space
   or at least vertical space
   camera looks strange when you teleport player with a high velocity
+new status effect: weakness, mobs do 75% les damage
+  graphic indication?
 
 new status effect: fear - push mob away from player for a time
 
@@ -387,40 +414,36 @@ AI doesn't know about:
   modern pop culture
   outside the lab
 
-in game console
-  output all console.log code //find starter code for this at the end of index.js
-  style
-    make it look like a computer terminal
-      track multiple lines, like your vocoder program
-    messages about heal, ammo, mods, that just list internal computer code
-      example: a heal would be mech.health += 12
-    mono space font
-    square edges
-    black text on bottom right with no background?
-      or white text, or yellow
-  message after selecting each new (mod / gun / field)
-    put messages in (mod / gun / field) method
-  at start of run
-    write custom dialogue for field / guns / mods used in last game
-      you'd have to store an array of guns/fields/mod used last game
-    n-gon escape simulation ${random seed}
-      say something about what mobs types are queued up, and level order
-  **all communication should be from scientists watching the simulation; the robot shouldn't talk**
-    talking about the robot, watching
-    trying to communicate with the robot?  but how
-    lines:
-      I think it's planing to escape
-      Why is it attacking those shapes?
-      Are those shapes supposed to be us?
+scientist console text:
+  2 scientists (each one a different color text)
+  at the start of each level listen to text conversation from the two colors of text strings also
+  talking about the robot, watching
+  trying to communicate with the robot?  but how
+  random lines:
+    say something about what mobs types are queued up, and level order
+    I think it's planing to escape
+    Why is it attacking those shapes?
+    Are those shapes supposed to be us?
 
-
-add an ending to the game
-  maybe the game ending should ask you to open the console and type in some commands like in the end of doki doki
-  mirror ending (if no cheats)
-    level after final boss battle is the intro level, but flipped left right, with a fake player
-      damage the fake player to end the game
-      message about go outside
-  no ending (if cheats)
-    game goes on forever
-    also game goes on if player attacks, the fake player
-  game never ends if you have used cheats
+ending outline
+  if no cheats
+  after final boss is cleared, player enters a level with no mobs
+    level maybe has some environmental damage, so player has an option to die at any time
+  player can see text output between two colors of text strings (scientists)
+    audio.ambient(current time and date)<br> "text"
+  player reads a conversation between the two colors of text
+    first time win on east or normal they talk about:
+      how many runs the player has done
+      they guess why
+      they reveal the player is running simulations, and it isn't real
+      they ask the player to communicate
+        jump twice if you understand
+      they ask the player to enter console commands
+        give ammo or mods or something
+      They tell the play a console command to permenantly enable custom and testing mode (in local storage)
+        players can use this command in the future to enable custom and testing without beating the game even if local storage is wiped
+      they then tell the player the command to increase the difficulty and the command to restart the game.
+    If you win on hard or why:  
+      they give the player and option to exit the simulation and entre the real world
+        simulation.exit()
+        This wipes all local storage, and closes the browser tab

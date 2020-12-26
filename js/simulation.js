@@ -1,12 +1,12 @@
 // game Object ********************************************************
 //*********************************************************************
-const game = {
+const simulation = {
     loop() {}, //main game loop, gets se tto normal or testing loop
     normalLoop() {
-        game.gravity();
-        Engine.update(engine, game.delta);
-        game.wipe();
-        game.textLog();
+        simulation.gravity();
+        Engine.update(engine, simulation.delta);
+        simulation.wipe();
+        simulation.textLog();
         if (mech.onGround) {
             mech.groundControl()
         } else {
@@ -16,17 +16,17 @@ const game = {
         level.checkQuery();
         mech.move();
         mech.look();
-        game.checks();
+        simulation.checks();
         ctx.save();
-        game.camera();
+        simulation.camera();
         level.drawFillBGs();
         level.exit.draw();
         level.enter.draw();
         level.custom();
-        game.draw.powerUp();
+        simulation.draw.powerUp();
         mobs.draw();
-        game.draw.cons();
-        game.draw.body();
+        simulation.draw.cons();
+        simulation.draw.body();
         mobs.loop();
         mobs.healthBar();
         mech.draw();
@@ -34,22 +34,22 @@ const game = {
         // v.draw(); //working on visibility work in progress
         level.drawFills();
         level.customTopLayer();
-        game.draw.drawMapPath();
+        simulation.draw.drawMapPath();
         b.fire();
         b.bulletRemove();
         b.bulletDraw();
         b.bulletDo();
-        game.drawCircle();
-        // game.clip();
+        simulation.drawCircle();
+        // simulation.clip();
         ctx.restore();
-        game.drawCursor();
-        // game.pixelGraphics();
+        simulation.drawCursor();
+        // simulation.pixelGraphics();
     },
     testingLoop() {
-        game.gravity();
-        Engine.update(engine, game.delta);
-        game.wipe();
-        game.textLog();
+        simulation.gravity();
+        Engine.update(engine, simulation.delta);
+        simulation.wipe();
+        simulation.textLog();
         if (mech.onGround) {
             mech.groundControl()
         } else {
@@ -60,28 +60,28 @@ const game = {
         level.checkQuery();
         mech.move();
         mech.look();
-        game.checks();
+        simulation.checks();
         ctx.save();
-        game.camera();
+        simulation.camera();
         mech.draw();
         level.customTopLayer();
-        game.draw.wireFrame();
-        game.draw.cons();
-        game.draw.testing();
-        game.drawCircle();
-        game.constructCycle()
+        simulation.draw.wireFrame();
+        simulation.draw.cons();
+        simulation.draw.testing();
+        simulation.drawCircle();
+        simulation.constructCycle()
         ctx.restore();
-        game.testingOutput();
-        game.drawCursor();
+        simulation.testingOutput();
+        simulation.drawCursor();
     },
     isTimeSkipping: false,
     timeSkip(cycles = 60) {
-        game.isTimeSkipping = true;
+        simulation.isTimeSkipping = true;
         for (let i = 0; i < cycles; i++) {
-            game.cycle++;
+            simulation.cycle++;
             mech.cycle++;
-            game.gravity();
-            Engine.update(engine, game.delta);
+            simulation.gravity();
+            Engine.update(engine, simulation.delta);
             if (mech.onGround) {
                 mech.groundControl()
             } else {
@@ -91,7 +91,7 @@ const game = {
             level.checkZones();
             level.checkQuery();
             mech.move();
-            game.checks();
+            simulation.checks();
             mobs.loop();
             // mech.draw();
             mech.walk_cycle += mech.flipLegs * mech.Vx;
@@ -101,7 +101,7 @@ const game = {
             b.bulletRemove();
             b.bulletDo();
         }
-        game.isTimeSkipping = false;
+        simulation.isTimeSkipping = false;
     },
     mouse: {
         x: canvas.width / 2,
@@ -136,13 +136,13 @@ const game = {
     lookFreqScale: null, //set in levels.setDifficulty
     isNoPowerUps: false,
     // dropFPS(cap = 40, time = 15) {
-    //   game.fpsCap = cap
-    //   game.fpsInterval = 1000 / game.fpsCap;
-    //   game.defaultFPSCycle = game.cycle + time
+    //   simulation.fpsCap = cap
+    //   simulation.fpsInterval = 1000 / simulation.fpsCap;
+    //   simulation.defaultFPSCycle = simulation.cycle + time
     //   const normalFPS = function () {
-    //     if (game.defaultFPSCycle < game.cycle) {
-    //       game.fpsCap = 72
-    //       game.fpsInterval = 1000 / game.fpsCap;
+    //     if (simulation.defaultFPSCycle < simulation.cycle) {
+    //       simulation.fpsCap = 72
+    //       simulation.fpsInterval = 1000 / simulation.fpsCap;
     //     } else {
     //       requestAnimationFrame(normalFPS);
     //     }
@@ -233,10 +233,10 @@ const game = {
     drawCursor() {
         const size = 10;
         ctx.beginPath();
-        ctx.moveTo(game.mouse.x - size, game.mouse.y);
-        ctx.lineTo(game.mouse.x + size, game.mouse.y);
-        ctx.moveTo(game.mouse.x, game.mouse.y - size);
-        ctx.lineTo(game.mouse.x, game.mouse.y + size);
+        ctx.moveTo(simulation.mouse.x - size, simulation.mouse.y);
+        ctx.lineTo(simulation.mouse.x + size, simulation.mouse.y);
+        ctx.moveTo(simulation.mouse.x, simulation.mouse.y - size);
+        ctx.lineTo(simulation.mouse.x, simulation.mouse.y + size);
         ctx.lineWidth = 2;
         ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
         ctx.stroke(); // Draw it
@@ -247,17 +247,17 @@ const game = {
     playerDmgColor: "rgba(0,0,0,0.7)", //used top push into drawList.color
     drawCircle() {
         //draws a circle for two cycles, used for showing damage mostly
-        let i = game.drawList.length;
+        let i = simulation.drawList.length;
         while (i--) {
             ctx.beginPath(); //draw circle
-            ctx.arc(game.drawList[i].x, game.drawList[i].y, game.drawList[i].radius, 0, 2 * Math.PI);
-            ctx.fillStyle = game.drawList[i].color;
+            ctx.arc(simulation.drawList[i].x, simulation.drawList[i].y, simulation.drawList[i].radius, 0, 2 * Math.PI);
+            ctx.fillStyle = simulation.drawList[i].color;
             ctx.fill();
-            if (game.drawList[i].time) {
+            if (simulation.drawList[i].time) {
                 //remove when timer runs out
-                game.drawList[i].time--;
+                simulation.drawList[i].time--;
             } else {
-                game.drawList.splice(i, 1);
+                simulation.drawList.splice(i, 1);
             }
         }
     },
@@ -273,15 +273,15 @@ const game = {
             if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
         }
 
-        if (mod.isEntanglement && document.getElementById("mod-entanglement")) {
+        if (tech.isEntanglement && document.getElementById("tech-entanglement")) {
             if (b.inventory[0] === b.activeGun) {
                 let lessDamage = 1
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
                     lessDamage *= 0.87 // 1 - 0.13
                 }
-                document.getElementById("mod-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
+                document.getElementById("tech-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
             } else {
-                document.getElementById("mod-entanglement").innerHTML = " 0%"
+                document.getElementById("tech-entanglement").innerHTML = " 0%"
             }
         }
     },
@@ -304,115 +304,119 @@ const game = {
             node.appendChild(textnode);
             document.getElementById("guns").appendChild(node);
         }
-        game.boldActiveGunHUD();
+        simulation.boldActiveGunHUD();
     },
     updateModHUD() {
         let text = ""
-        for (let i = 0, len = mod.mods.length; i < len; i++) { //add mods
-            if (mod.mods[i].isLost) {
+        for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+            if (tech.tech[i].isLost) {
                 if (text) text += "<br>" //add a new line, but not on the first line
-                text += `<span style="text-decoration: line-through;">${mod.mods[i].name}</span>`
-            } else if (mod.mods[i].count > 0) {
+                text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+            } else if (tech.tech[i].count > 0) {
                 if (text) text += "<br>" //add a new line, but not on the first line
-                text += mod.mods[i].name
-                if (mod.mods[i].nameInfo) {
-                    text += mod.mods[i].nameInfo
-                    mod.mods[i].addNameInfo();
+                text += tech.tech[i].name
+                if (tech.tech[i].nameInfo) {
+                    text += tech.tech[i].nameInfo
+                    tech.tech[i].addNameInfo();
                 }
-                if (mod.mods[i].count > 1) text += ` (${mod.mods[i].count}x)`
+                if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
             }
         }
-        document.getElementById("mods").innerHTML = text
+        document.getElementById("tech").innerHTML = text
     },
-    replaceTextLog: true,
+    isTextLogOpen: true,
     // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
     // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
     // SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    makeTextLog(text, time = 180) {
-        if (game.replaceTextLog) {
-            document.getElementById("text-log").innerHTML = text;
-            document.getElementById("text-log").style.opacity = 1;
-            game.lastLogTime = mech.cycle + time;
+    // SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
+    makeTextLog(text, time = 120) {
+        if (simulation.isTextLogOpen && !build.isCustomSelection) {
+            if (simulation.lastLogTime > mech.cycle) { //if there is an older message
+                document.getElementById("text-log").innerHTML = document.getElementById("text-log").innerHTML + '<br>' + text;
+                simulation.lastLogTime = mech.cycle + time;
+            } else {
+                document.getElementById("text-log").innerHTML = text;
+                document.getElementById("text-log").style.opacity = 1;
+                simulation.lastLogTime = mech.cycle + time;
+            }
         }
     },
     textLog() {
-        if (game.lastLogTime && game.lastLogTime < mech.cycle) {
-            game.lastLogTime = 0;
-            game.replaceTextLog = true
+        if (simulation.lastLogTime && simulation.lastLogTime < mech.cycle) {
+            simulation.lastLogTime = 0;
             // document.getElementById("text-log").innerHTML = " ";
             document.getElementById("text-log").style.opacity = 0;
         }
     },
     nextGun() {
-        if (b.inventory.length > 0 && !mod.isGunCycle) {
+        if (b.inventory.length > 0 && !tech.isGunCycle) {
             b.inventoryGun++;
             if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
-            game.switchGun();
+            simulation.switchGun();
         }
     },
     previousGun() {
-        if (b.inventory.length > 0 && !mod.isGunCycle) {
+        if (b.inventory.length > 0 && !tech.isGunCycle) {
             b.inventoryGun--;
             if (b.inventoryGun < 0) b.inventoryGun = b.inventory.length - 1;
-            game.switchGun();
+            simulation.switchGun();
         }
     },
     switchGun() {
-        if (mod.isCrouchAmmo) mod.isCrouchAmmo = 1 //this prevents hacking the mod by switching guns
+        if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
         b.activeGun = b.inventory[b.inventoryGun];
-        game.updateGunHUD();
-        game.boldActiveGunHUD();
+        simulation.updateGunHUD();
+        simulation.boldActiveGunHUD();
         // mech.drop();
     },
     zoom: null,
     zoomScale: 1000,
     isAutoZoom: true,
-    setZoom(zoomScale = game.zoomScale) { //use in window resize in index.js
-        game.zoomScale = zoomScale
-        game.zoom = canvas.height / zoomScale; //sets starting zoom scale
+    setZoom(zoomScale = simulation.zoomScale) { //use in window resize in index.js
+        simulation.zoomScale = zoomScale
+        simulation.zoom = canvas.height / zoomScale; //sets starting zoom scale
     },
     zoomTransition(newZoomScale, step = 2) {
-        if (game.isAutoZoom) {
-            const isBigger = (newZoomScale - game.zoomScale > 0) ? true : false;
+        if (simulation.isAutoZoom) {
+            const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
             requestAnimationFrame(zLoop);
             const currentLevel = level.onLevel
 
             function zLoop() {
-                if (currentLevel !== level.onLevel || game.isAutoZoom === false) return //stop the zoom if player goes to a new level
+                if (currentLevel !== level.onLevel || simulation.isAutoZoom === false) return //stop the zoom if player goes to a new level
 
                 if (isBigger) {
-                    game.zoomScale += step
-                    if (game.zoomScale >= newZoomScale) {
-                        game.setZoom(newZoomScale);
+                    simulation.zoomScale += step
+                    if (simulation.zoomScale >= newZoomScale) {
+                        simulation.setZoom(newZoomScale);
                         return
                     }
                 } else {
-                    game.zoomScale -= step
-                    if (game.zoomScale <= newZoomScale) {
-                        game.setZoom(newZoomScale);
+                    simulation.zoomScale -= step
+                    if (simulation.zoomScale <= newZoomScale) {
+                        simulation.setZoom(newZoomScale);
                         return
                     }
                 }
 
-                game.setZoom();
+                simulation.setZoom();
                 requestAnimationFrame(zLoop);
             }
         }
     },
     zoomInFactor: 0,
     startZoomIn(time = 180) {
-        game.zoom = 0;
+        simulation.zoom = 0;
         let count = 0;
         requestAnimationFrame(zLoop);
 
         function zLoop() {
-            game.zoom += canvas.height / game.zoomScale / time;
+            simulation.zoom += canvas.height / simulation.zoomScale / time;
             count++;
             if (count < time) {
                 requestAnimationFrame(zLoop);
             } else {
-                game.setZoom();
+                simulation.setZoom();
             }
         }
     },
@@ -421,27 +425,27 @@ const game = {
         mech.pos.x = player.position.x;
         mech.pos.y = playerBody.position.y - mech.yOff;
         const scale = 0.8;
-        mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
-        mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
+        mech.transSmoothX = canvas.width2 - mech.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+        mech.transSmoothY = canvas.height2 - mech.pos.y - (simulation.mouse.y - canvas.height2) * scale;
         mech.transX += (mech.transSmoothX - mech.transX) * 1;
         mech.transY += (mech.transSmoothY - mech.transY) * 1;
     },
     edgeZoomOutSmooth: 1,
     camera() {
         //zoom out when mouse gets near the edge of the window
-        const dx = game.mouse.x / window.innerWidth - 0.5 //x distance from mouse to window center scaled by window width
-        const dy = game.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
+        const dx = simulation.mouse.x / window.innerWidth - 0.5 //x distance from mouse to window center scaled by window width
+        const dy = simulation.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
         const d = Math.max(dx * dx, dy * dy)
-        game.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.04 + game.edgeZoomOutSmooth * 0.96
+        simulation.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.04 + simulation.edgeZoomOutSmooth * 0.96
 
 
         ctx.save();
         ctx.translate(canvas.width2, canvas.height2); //center
-        ctx.scale(game.zoom / game.edgeZoomOutSmooth, game.zoom / game.edgeZoomOutSmooth); //zoom in once centered
+        ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
         ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
         //calculate in game mouse position by undoing the zoom and translations
-        game.mouseInGame.x = (game.mouse.x - canvas.width2) / game.zoom * game.edgeZoomOutSmooth + canvas.width2 - mech.transX;
-        game.mouseInGame.y = (game.mouse.y - canvas.height2) / game.zoom * game.edgeZoomOutSmooth + canvas.height2 - mech.transY;
+        simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - mech.transX;
+        simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - mech.transY;
     },
     restoreCamera() {
         ctx.restore();
@@ -455,15 +459,15 @@ const game = {
                 bodies[i].force.y += bodies[i].mass * magnitude;
             }
         }
-        addGravity(powerUp, game.g);
-        addGravity(body, game.g);
-        player.force.y += player.mass * game.g;
+        addGravity(powerUp, simulation.g);
+        addGravity(body, simulation.g);
+        player.force.y += player.mass * simulation.g;
     },
     firstRun: true,
     splashReturn() {
-        game.onTitlePage = true;
+        simulation.onTitlePage = true;
         document.getElementById("splash").onclick = function() {
-            game.startGame();
+            simulation.startGame();
         };
         document.getElementById("choose-grid").style.display = "none"
         document.getElementById("info").style.display = "inline";
@@ -483,7 +487,7 @@ const game = {
             document.body.style.cursor = "none";
             document.body.style.overflow = "hidden"
         }
-        game.onTitlePage = false;
+        simulation.onTitlePage = false;
         document.getElementById("choose-grid").style.display = "none"
         document.getElementById("build-grid").style.display = "none"
         document.getElementById("info").style.display = "none";
@@ -496,7 +500,7 @@ const game = {
         mech.spawn(); //spawns the player
 
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
-        if (game.isCommunityMaps) {
+        if (simulation.isCommunityMaps) {
             level.levels.push("stronghold");
             level.levels.push("basement");
             level.levels.push("detours");
@@ -505,14 +509,22 @@ const game = {
         level.levels = shuffle(level.levels); //shuffles order of maps
         level.levels.unshift("intro"); //add level to the start of the randomized levels list
         level.levels.push("gauntlet"); //add level to the end of the randomized levels list
-        level.levels.push("finalBoss"); //add level to the end of the randomized levels list
+        level.levels.push("final"); //add level to the end of the randomized levels list
 
         input.endKeySensing();
         b.removeAllGuns();
-        game.isNoPowerUps = false;
-        mod.setupAllMods(); //sets mods to default values
+        simulation.isNoPowerUps = false;
+
+        tech.setupAllMods(); //sets tech to default values
+        tech.laserBotCount = 0;
+        tech.orbitBotCount = 0;
+        tech.nailBotCount = 0;
+        tech.foamBotCount = 0;
+        tech.boomBotCount = 0;
+        tech.plasmaBotCount = 0;
+
         b.setFireCD();
-        game.updateModHUD();
+        simulation.updateModHUD();
         powerUps.totalPowerUps = 0;
         powerUps.reroll.rerolls = 0;
         mech.setFillColors();
@@ -520,11 +532,11 @@ const game = {
         mech.maxEnergy = 1
         mech.energy = 1
         mech.hole.isOn = false
-        game.paused = false;
+        simulation.paused = false;
         engine.timing.timeScale = 1;
-        game.fpsCap = game.fpsCapDefault;
-        game.isAutoZoom = true;
-        game.makeGunHUD();
+        simulation.fpsCap = simulation.fpsCapDefault;
+        simulation.isAutoZoom = true;
+        simulation.makeGunHUD();
         mech.drop();
         mech.holdingTarget = null
         mech.health = 0.25;
@@ -534,58 +546,98 @@ const game = {
         level.levelsCleared = 0;
 
         //resetting difficulty
-        game.dmgScale = 0; //increases in level.difficultyIncrease
+        simulation.dmgScale = 0; //increases in level.difficultyIncrease
         b.dmgScale = 1; //decreases in level.difficultyIncrease
-        game.accelScale = 1;
-        game.lookFreqScale = 1;
-        game.CDScale = 1;
-        game.difficulty = 0;
-        game.difficultyMode = Number(document.getElementById("difficulty-select").value)
+        simulation.accelScale = 1;
+        simulation.lookFreqScale = 1;
+        simulation.CDScale = 1;
+        simulation.difficulty = 0;
+        simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
         build.isCustomSelection = false;
 
-        game.clearNow = true;
+        simulation.clearNow = true;
         document.getElementById("text-log").style.opacity = 0;
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
         //set to default field
         mech.fieldMode = 0;
-        game.replaceTextLog = true;
-        game.makeTextLog(`${game.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
+        // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
+        // simulation.makeTextLog(`
+        // input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]
+        // <br>input.key.left <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]
+        // <br>input.key.down <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]
+        // <br>input.key.right <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]
+        // <br>
+        // <br><span class='color-var'>mech</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].name}</span>"
+        // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
+        // <br><span class='color-var'>mech</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].description}</span>"
+        // `, 800);
+        let delay = 500
+        const step = 150
+        setTimeout(function() {
+            simulation.makeTextLog(`input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
+        }, delay);
+        delay += step
+        setTimeout(function() {
+            simulation.makeTextLog(`input.key.left <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
+        }, delay);
+        delay += step
+        setTimeout(function() {
+            simulation.makeTextLog(`input.key.down <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
+        }, delay);
+        delay += step
+        setTimeout(function() {
+            simulation.makeTextLog(`input.key.right <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
+        }, delay);
+        delay += 1000
+        setTimeout(function() {
+            simulation.makeTextLog(`<br><span class='color-var'>mech</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].name}</span>"`);
+        }, delay);
+        delay += step
+        setTimeout(function() {
+            simulation.makeTextLog(`input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
+        }, delay);
+        // delay += step
+        // setTimeout(function() {
+        //     simulation.makeTextLog(`<span class='color-var'>mech</span>.field.description<br>"<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].description}</span>"`);
+        // }, delay);
+
+
         mech.setField(mech.fieldMode)
         //exit testing
-        if (game.testing) {
-            game.testing = false;
-            game.loop = game.normalLoop
-            if (game.isConstructionMode) {
+        if (simulation.testing) {
+            simulation.testing = false;
+            simulation.loop = simulation.normalLoop
+            if (simulation.isConstructionMode) {
                 document.getElementById("construct").style.display = 'none'
             }
         }
-        game.isCheating = false
-        game.firstRun = false;
+        simulation.isCheating = false
+        simulation.firstRun = false;
 
         //setup FPS cap
-        game.fpsInterval = 1000 / game.fpsCap;
-        game.then = Date.now();
+        simulation.fpsInterval = 1000 / simulation.fpsCap;
+        simulation.then = Date.now();
         requestAnimationFrame(cycle); //starts game loop
     },
     clearNow: false,
     clearMap() {
-        if (mod.isMineAmmoBack) {
+        if (tech.isMineAmmoBack) {
             let count = 0;
             for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
                 if (bullet[i].bulletType === "mine") count++
             }
             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
                 if (b.guns[i].name === "mine") {
-                    if (mod.isCrouchAmmo) count = Math.ceil(count / 2)
+                    if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
                     b.guns[i].ammo += count
-                    game.updateGunHUD();
+                    simulation.updateGunHUD();
                     break;
                 }
             }
         }
 
-        if (mod.isMutualism && !mod.isEnergyHealth) {
+        if (tech.isMutualism && !tech.isEnergyHealth) {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].isMutualismActive) {
                     mech.health += 0.005
@@ -595,12 +647,12 @@ const game = {
             }
         }
 
-        if (mod.isEndLevelPowerUp) {
+        if (tech.isEndLevelPowerUp) {
             for (let i = 0; i < powerUp.length; i++) {
-                if (powerUp[i].name === "mod") {
-                    mod.giveMod()
+                if (powerUp[i].name === "tech") {
+                    tech.giveMod()
                 } else if (powerUp[i].name === "gun") {
-                    if (!mod.isOneGun) b.giveGuns("random")
+                    if (!tech.isOneGun) b.giveGuns("random")
                 } else if (powerUp[i].name === "field") {
                     if (mech.fieldMode === 0) mech.setField(Math.ceil(Math.random() * (mech.fieldUpgrades.length - 1))) //pick a random field, but not field 0
                 } else {
@@ -620,7 +672,7 @@ const game = {
         level.fillBG = [];
         level.zones = [];
         level.queryList = [];
-        game.drawList = [];
+        simulation.drawList = [];
 
         function removeAll(array) {
             for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
@@ -656,8 +708,8 @@ const game = {
             mech.holdingTarget.collisionFilter.mask = 0;
         }
         //set fps back to default
-        game.fpsCap = game.fpsCapDefault
-        game.fpsInterval = 1000 / game.fpsCap;
+        simulation.fpsCap = simulation.fpsCapDefault
+        simulation.fpsInterval = 1000 / simulation.fpsCap;
     },
     // getCoords: {
     //   //used when building maps, outputs a draw rect command to console, only works in testing mode
@@ -671,20 +723,20 @@ const game = {
     //   },
     //   out() {
     //     if (keys[49]) {
-    //       game.getCoords.pos1.x = Math.round(game.mouseInGame.x / 25) * 25;
-    //       game.getCoords.pos1.y = Math.round(game.mouseInGame.y / 25) * 25;
+    //       simulation.getCoords.pos1.x = Math.round(simulation.mouseInGame.x / 25) * 25;
+    //       simulation.getCoords.pos1.y = Math.round(simulation.mouseInGame.y / 25) * 25;
     //     }
     //     if (keys[50]) {
     //       //press 1 in the top left; press 2 in the bottom right;copy command from console
-    //       game.getCoords.pos2.x = Math.round(game.mouseInGame.x / 25) * 25;
-    //       game.getCoords.pos2.y = Math.round(game.mouseInGame.y / 25) * 25;
+    //       simulation.getCoords.pos2.x = Math.round(simulation.mouseInGame.x / 25) * 25;
+    //       simulation.getCoords.pos2.y = Math.round(simulation.mouseInGame.y / 25) * 25;
     //       window.getSelection().removeAllRanges();
     //       var range = document.createRange();
     //       range.selectNode(document.getElementById("test"));
     //       window.getSelection().addRange(range);
     //       document.execCommand("copy");
     //       window.getSelection().removeAllRanges();
-    //       console.log(`spawn.mapRect(${game.getCoords.pos1.x}, ${game.getCoords.pos1.y}, ${game.getCoords.pos2.x - game.getCoords.pos1.x}, ${game.getCoords.pos2.y - game.getCoords.pos1.y}); //`);
+    //       console.log(`spawn.mapRect(${simulation.getCoords.pos1.x}, ${simulation.getCoords.pos1.y}, ${simulation.getCoords.pos2.x - simulation.getCoords.pos1.x}, ${simulation.getCoords.pos2.y - simulation.getCoords.pos1.y}); //`);
     //     }
     //   }
     // },
@@ -692,9 +744,9 @@ const game = {
         if (!(mech.cycle % 60)) { //once a second
 
             //energy overfill 
-            if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy + (mech.energy - mech.maxEnergy) * mod.overfillDrain //every second energy above max energy loses 25%
+            if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy + (mech.energy - mech.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
 
-            if (mech.pos.y > game.fallHeight) { // if 4000px deep
+            if (mech.pos.y > simulation.fallHeight) { // if 4000px deep
                 Matter.Body.setVelocity(player, {
                     x: 0,
                     y: 0
@@ -716,31 +768,31 @@ const game = {
                         });
                     }
                 }
-                mech.damage(0.1 * game.difficultyMode);
-                mech.energy -= 0.1 * game.difficultyMode
+                mech.damage(0.1 * simulation.difficultyMode);
+                mech.energy -= 0.1 * simulation.difficultyMode
             }
 
-            // if (mod.isEnergyDamage) {
-            //   document.getElementById("mod-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
+            // if (tech.isEnergyDamage) {
+            //   document.getElementById("tech-capacitor").innerHTML = `(+${(mech.energy/0.05).toFixed(0)}%)`
             // }
-            // if (mod.restDamage) {
+            // if (tech.restDamage) {
             //   if (player.speed < 1) {
-            //     document.getElementById("mod-rest").innerHTML = `(+20%)`
+            //     document.getElementById("tech-rest").innerHTML = `(+20%)`
             //   } else {
-            //     document.getElementById("mod-rest").innerHTML = `(+0%)`
+            //     document.getElementById("tech-rest").innerHTML = `(+0%)`
             //   }
             // }
 
             if (mech.lastKillCycle + 300 > mech.cycle) { //effects active for 5 seconds after killing a mob
-                if (mod.isEnergyRecovery) mech.energy += mech.maxEnergy * 0.05
-                if (mod.isHealthRecovery) mech.addHealth(0.01 * mech.maxHealth)
+                if (tech.isEnergyRecovery) mech.energy += mech.maxEnergy * 0.05
+                if (tech.isHealthRecovery) mech.addHealth(0.01 * mech.maxHealth)
             }
 
-            if (!(game.cycle % 420)) { //once every 7 seconds
+            if (!(simulation.cycle % 420)) { //once every 7 seconds
                 fallCheck = function(who, save = false) {
                     let i = who.length;
                     while (i--) {
-                        if (who[i].position.y > game.fallHeight) {
+                        if (who[i].position.y > simulation.fallHeight) {
                             if (save) {
                                 Matter.Body.setVelocity(who[i], {
                                     x: 0,
@@ -766,49 +818,30 @@ const game = {
                 //crouch playerHead.position.y - player.position.y = 9.7  //positive
                 //standing playerHead.position.y - player.position.y = -30 //negative
                 // mech.undoCrouch()
-                if (!mech.crouch && ((playerHead.position.y - player.position.y) > 0)) {
-                    Matter.Body.translate(playerHead, {
-                        x: 0,
-                        y: 40
-                    });
-                    // if ((playerHead.position.y - player.position.y) > 0) {
-                    //     Matter.Body.translate(playerHead, {
-                    //         x: 0,
-                    //         y: 40
-                    //     });
-                    //     if ((playerHead.position.y - player.position.y) > 0) {
-                    //         Matter.Body.translate(playerHead, {
-                    //             x: 0,
-                    //             y: 40
-                    //         });
-                    //         if ((playerHead.position.y - player.position.y) > 0) {
-                    //             Matter.Body.translate(playerHead, {
-                    //                 x: 0,
-                    //                 y: 40
-                    //             });
-                    //         }
-                    //     }
-                    // }
-                } else if (mech.crouch && ((playerHead.position.y - player.position.y) > 10)) {
-                    Matter.Body.translate(playerHead, {
-                        x: 0,
-                        y: 40
-                    });
-                }
-                // else if (mech.crouch && ((playerHead.position.y - player.position.y) < 0)) {}
+                // if (!mech.crouch && ((playerHead.position.y - player.position.y) > 0)) {
+                //     Matter.Body.translate(playerHead, {
+                //         x: 0,
+                //         y: 40
+                //     });
+                // } else if (mech.crouch && ((playerHead.position.y - player.position.y) > 10)) {
+                //     Matter.Body.translate(playerHead, {
+                //         x: 0,
+                //         y: 40
+                //     });
+                // }
             }
         }
     },
     testingOutput() {
         ctx.fillStyle = "#000";
-        if (!game.isConstructionMode) {
+        if (!simulation.isConstructionMode) {
             // ctx.textAlign = "right";
             ctx.fillText("T: exit testing mode", canvas.width / 2, canvas.height - 10);
             // let line = 500;
             // const x = canvas.width - 5;
             // ctx.fillText("T: exit testing mode", x, line);
             // line += 20;
-            // ctx.fillText("Y: give all mods", x, line);
+            // ctx.fillText("Y: give all tech", x, line);
             // line += 20;
             // ctx.fillText("R: teleport to mouse", x, line);
             // line += 20;
@@ -823,10 +856,10 @@ const game = {
             // ctx.fillText("1-7: spawn things", x, line);
         }
         ctx.textAlign = "center";
-        ctx.fillText(`(${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)})`, game.mouse.x, game.mouse.y - 20);
+        ctx.fillText(`(${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})`, simulation.mouse.x, simulation.mouse.y - 20);
     },
     draw: {
-        powerUp() { //is set by Bayesian mod
+        powerUp() { //is set by Bayesian tech
             // ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
             // for (let i = 0, len = powerUp.length; i < len; ++i) {
             //   ctx.beginPath();
@@ -899,22 +932,22 @@ const game = {
         mapPath: null, //holds the path for the map to speed up drawing
         setPaths() {
             //runs at each new level to store the path for the map since the map doesn't change
-            game.draw.mapPath = new Path2D();
+            simulation.draw.mapPath = new Path2D();
             for (let i = 0, len = map.length; i < len; ++i) {
                 let vertices = map[i].vertices;
-                game.draw.mapPath.moveTo(vertices[0].x, vertices[0].y);
+                simulation.draw.mapPath.moveTo(vertices[0].x, vertices[0].y);
                 for (let j = 1; j < vertices.length; j += 1) {
-                    game.draw.mapPath.lineTo(vertices[j].x, vertices[j].y);
+                    simulation.draw.mapPath.lineTo(vertices[j].x, vertices[j].y);
                 }
-                game.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
+                simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
             }
         },
         mapFill: "#444",
         bodyFill: "rgba(140,140,140,0.85)", //"#999",
         bodyStroke: "#222",
         drawMapPath() {
-            ctx.fillStyle = game.draw.mapFill;
-            ctx.fill(game.draw.mapPath);
+            ctx.fillStyle = simulation.draw.mapFill;
+            ctx.fill(simulation.draw.mapPath);
         },
         body() {
             ctx.beginPath();
@@ -927,9 +960,9 @@ const game = {
                 ctx.lineTo(vertices[0].x, vertices[0].y);
             }
             ctx.lineWidth = 2;
-            ctx.fillStyle = game.draw.bodyFill;
+            ctx.fillStyle = simulation.draw.bodyFill;
             ctx.fill();
-            ctx.strokeStyle = game.draw.bodyStroke;
+            ctx.strokeStyle = simulation.draw.bodyStroke;
             ctx.stroke();
         },
         cons() {
@@ -1098,14 +1131,14 @@ const game = {
     },
     constructMapString: [],
     constructCycle() {
-        if (game.isConstructionMode && game.constructMouseDownPosition) {
+        if (simulation.isConstructionMode && simulation.constructMouseDownPosition) {
             function round(num, round = 25) {
                 return Math.ceil(num / round) * round;
             }
-            const x = round(game.constructMouseDownPosition.x)
-            const y = round(game.constructMouseDownPosition.y)
-            const dx = Math.max(25, round(game.mouseInGame.x) - x)
-            const dy = Math.max(25, round(game.mouseInGame.y) - y)
+            const x = round(simulation.constructMouseDownPosition.x)
+            const y = round(simulation.constructMouseDownPosition.y)
+            const dx = Math.max(25, round(simulation.mouseInGame.x) - x)
+            const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
 
             ctx.strokeStyle = "#000"
             ctx.lineWidth = 2;
@@ -1113,39 +1146,39 @@ const game = {
         }
     },
     outputMapString(string) {
-        if (string) game.constructMapString.push(string) //store command as a string in the next element of an array
+        if (string) simulation.constructMapString.push(string) //store command as a string in the next element of an array
         let out = "" //combine set of map strings to one string
         let outHTML = ""
-        for (let i = 0, len = game.constructMapString.length; i < len; i++) {
-            out += game.constructMapString[i];
-            outHTML += "<div>" + game.constructMapString[i] + "</div>"
+        for (let i = 0, len = simulation.constructMapString.length; i < len; i++) {
+            out += simulation.constructMapString[i];
+            outHTML += "<div>" + simulation.constructMapString[i] + "</div>"
         }
         console.log(out)
-        game.copyToClipBoard(out)
+        simulation.copyToClipBoard(out)
         document.getElementById("construct").innerHTML = outHTML
     },
     enableConstructMode() {
-        game.isConstructionMode = true;
-        game.isAutoZoom = false;
-        game.zoomScale = 2600;
-        game.setZoom();
+        simulation.isConstructionMode = true;
+        simulation.isAutoZoom = false;
+        simulation.zoomScale = 2600;
+        simulation.setZoom();
 
         document.body.addEventListener("mouseup", (e) => {
-            if (game.testing && game.constructMouseDownPosition) {
+            if (simulation.testing && simulation.constructMouseDownPosition) {
                 function round(num, round = 25) {
                     return Math.ceil(num / round) * round;
                 }
                 //clean up positions
-                const x = round(game.constructMouseDownPosition.x)
-                const y = round(game.constructMouseDownPosition.y)
-                const dx = Math.max(25, round(game.mouseInGame.x) - x)
-                const dy = Math.max(25, round(game.mouseInGame.y) - y)
+                const x = round(simulation.constructMouseDownPosition.x)
+                const y = round(simulation.constructMouseDownPosition.y)
+                const dx = Math.max(25, round(simulation.mouseInGame.x) - x)
+                const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
 
                 if (e.which === 2) {
-                    game.outputMapString(`spawn.randomMob(${x}, ${y},0.5);`);
-                } else if (game.mouseInGame.x > game.constructMouseDownPosition.x && game.mouseInGame.y > game.constructMouseDownPosition.y) { //make sure that the width and height are positive
+                    simulation.outputMapString(`spawn.randomMob(${x}, ${y},0.5);`);
+                } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
                     if (e.which === 1) { //add map
-                        game.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`);
+                        simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`);
 
                         //see map in world
                         spawn.mapRect(x, y, dx, dy);
@@ -1155,9 +1188,9 @@ const game = {
                         Matter.Body.setStatic(map[len], true); //make static
                         World.add(engine.world, map[len]); //add to world
 
-                        game.draw.setPaths() //update map graphics
+                        simulation.draw.setPaths() //update map graphics
                     } else if (e.which === 3) { //add body
-                        game.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
+                        simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
 
                         //see map in world
                         spawn.bodyRect(x, y, dx, dy);
@@ -1169,32 +1202,32 @@ const game = {
                     }
                 }
             }
-            game.constructMouseDownPosition.x = undefined
-            game.constructMouseDownPosition.y = undefined
+            simulation.constructMouseDownPosition.x = undefined
+            simulation.constructMouseDownPosition.y = undefined
         });
-        game.constructMouseDownPosition.x = undefined
-        game.constructMouseDownPosition.y = undefined
+        simulation.constructMouseDownPosition.x = undefined
+        simulation.constructMouseDownPosition.y = undefined
         document.body.addEventListener("mousedown", (e) => {
-            if (game.testing) {
-                game.constructMouseDownPosition.x = game.mouseInGame.x
-                game.constructMouseDownPosition.y = game.mouseInGame.y
+            if (simulation.testing) {
+                simulation.constructMouseDownPosition.x = simulation.mouseInGame.x
+                simulation.constructMouseDownPosition.y = simulation.mouseInGame.y
             }
         });
 
         document.body.addEventListener("keydown", (e) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
-            if (game.testing && e.keyCode === 90 && game.constructMapString.length) {
-                if (game.constructMapString[game.constructMapString.length - 1][6] === 'm') { //remove map from current level
+            if (simulation.testing && e.keyCode === 90 && simulation.constructMapString.length) {
+                if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'm') { //remove map from current level
                     const index = map.length - 1
                     Matter.World.remove(engine.world, map[index]);
                     map.splice(index, 1);
-                    game.draw.setPaths() //update map graphics  
-                } else if (game.constructMapString[game.constructMapString.length - 1][6] === 'b') { //remove body from current level
+                    simulation.draw.setPaths() //update map graphics  
+                } else if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'b') { //remove body from current level
                     const index = body.length - 1
                     Matter.World.remove(engine.world, body[index]);
                     body.splice(index, 1);
                 }
-                game.constructMapString.pop();
-                game.outputMapString();
+                simulation.constructMapString.pop();
+                simulation.outputMapString();
             }
         });
     }

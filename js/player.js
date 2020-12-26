@@ -80,8 +80,8 @@ const mech = {
     Fx: 0.016, //run Force on ground //
     jumpForce: 0.42,
     setMovement() {
-        mech.Fx = 0.016 * mod.squirrelFx * mod.fastTime;
-        mech.jumpForce = 0.42 * mod.squirrelJump * mod.fastTimeJump;
+        mech.Fx = 0.016 * tech.squirrelFx * tech.fastTime;
+        mech.jumpForce = 0.42 * tech.squirrelJump * tech.fastTimeJump;
     },
     FxAir: 0.016, // 0.4/5/5  run Force in Air
     yOff: 70,
@@ -184,13 +184,13 @@ const mech = {
     look() {
         //always on mouse look
         mech.angle = Math.atan2(
-            game.mouseInGame.y - mech.pos.y,
-            game.mouseInGame.x - mech.pos.x
+            simulation.mouseInGame.y - mech.pos.y,
+            simulation.mouseInGame.x - mech.pos.x
         );
         //smoothed mouse look translations
         const scale = 0.8;
-        mech.transSmoothX = canvas.width2 - mech.pos.x - (game.mouse.x - canvas.width2) * scale;
-        mech.transSmoothY = canvas.height2 - mech.pos.y - (game.mouse.y - canvas.height2) * scale;
+        mech.transSmoothX = canvas.width2 - mech.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+        mech.transSmoothY = canvas.height2 - mech.pos.y - (simulation.mouse.y - canvas.height2) * scale;
 
         mech.transX += (mech.transSmoothX - mech.transX) * 0.07;
         mech.transY += (mech.transSmoothY - mech.transY) * 0.07;
@@ -324,38 +324,39 @@ const mech = {
     },
     alive: false,
     death() {
-        if (mod.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
-            //count mods
+        if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
+            simulation.isTextLogOpen = false;
+            //count tech
             let totalMods = 0;
-            for (let i = 0; i < mod.mods.length; i++) {
-                if (!mod.mods[i].isNonRefundable) totalMods += mod.mods[i].count
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (!tech.tech[i].isNonRefundable) totalMods += tech.tech[i].count
             }
-            if (mod.isDeterminism) totalMods -= 3 //remove the bonus mods 
-            if (mod.isSuperDeterminism) totalMods -= 2 //remove the bonus mods 
+            if (tech.isDeterminism) totalMods -= 3 //remove the bonus tech 
+            if (tech.isSuperDeterminism) totalMods -= 2 //remove the bonus tech 
             totalMods = totalMods * 1.15 + 1 // a few extra to make it stronger
             const totalGuns = b.inventory.length //count guns
 
             function randomizeMods() {
                 for (let i = 0; i < totalMods; i++) {
-                    //find what mods I don't have
+                    //find what tech I don't have
                     let options = [];
-                    for (let i = 0, len = mod.mods.length; i < len; i++) {
-                        if (mod.mods[i].count < mod.mods[i].maxCount &&
-                            !mod.mods[i].isNonRefundable &&
-                            mod.mods[i].name !== "quantum immortality" &&
-                            mod.mods[i].name !== "Born rule" &&
-                            mod.mods[i].allowed()
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].count < tech.tech[i].maxCount &&
+                            !tech.tech[i].isNonRefundable &&
+                            tech.tech[i].name !== "quantum immortality" &&
+                            tech.tech[i].name !== "Born rule" &&
+                            tech.tech[i].allowed()
                         ) options.push(i);
                     }
-                    //add a new mod
+                    //add a new tech
                     if (options.length > 0) {
                         const choose = Math.floor(Math.random() * options.length)
                         let newMod = options[choose]
-                        mod.giveMod(newMod)
+                        tech.giveMod(newMod)
                         options.splice(choose, 1);
                     }
                 }
-                game.updateModHUD();
+                simulation.updateModHUD();
             }
 
             function randomizeField() {
@@ -385,19 +386,19 @@ const mech = {
                         b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(6 * b.guns[b.inventory[i]].ammo * Math.sqrt(Math.random())))
                     }
                 }
-                game.makeGunHUD(); //update gun HUD
+                simulation.makeGunHUD(); //update gun HUD
             }
 
-            game.wipe = function() { //set wipe to have trails
+            simulation.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
             function randomizeEverything() {
                 spawn.setSpawnList(); //new mob types
-                game.clearNow = true; //triggers a map reset
+                simulation.clearNow = true; //triggers a map reset
 
-                mod.setupAllMods(); //remove all mods
+                tech.setupAllMods(); //remove all tech
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = []; //remove all bullets
                 randomizeHealth()
@@ -411,9 +412,10 @@ const mech = {
             for (let i = 0, len = 5; i < len; i++) {
                 setTimeout(function() {
                     randomizeEverything()
-                    game.replaceTextLog = true;
-                    game.makeTextLog(`probability amplitude will synchronize in ${len-i-1} seconds`, swapPeriod);
-                    game.wipe = function() { //set wipe to have trails
+                    simulation.isTextLogOpen = true;
+                    simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> 0.${len-i-1}`, swapPeriod);
+                    simulation.isTextLogOpen = false;
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.006})`;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         // pixelWindows()
@@ -422,16 +424,17 @@ const mech = {
             }
 
             setTimeout(function() {
-                game.wipe = function() { //set wipe to normal
+                simulation.wipe = function() { //set wipe to normal
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
-                game.replaceTextLog = true;
-                game.makeTextLog("your quantum probability has stabilized", 1000);
+                simulation.isTextLogOpen = true;
+                simulation.makeTextLog("simulation.amplitude <span class='color-symbol'>=</span> null");
+
             }, 6 * swapPeriod);
 
         } else if (mech.alive) { //normal death code here
             mech.alive = false;
-            game.paused = true;
+            simulation.paused = true;
             mech.health = 0;
             mech.displayHealth();
             document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
@@ -440,12 +443,12 @@ const mech = {
             setTimeout(function() {
                 World.clear(engine.world);
                 Engine.clear(engine);
-                game.splashReturn();
+                simulation.splashReturn();
             }, 3000);
         }
     },
     health: 0,
-    maxHealth: 1, //set in game.reset()
+    maxHealth: 1, //set in simulation.reset()
     drawHealth() {
         if (mech.health < 1) {
             ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
@@ -471,15 +474,15 @@ const mech = {
         }
     },
     addHealth(heal) {
-        if (!mod.isEnergyHealth) {
-            mech.health += heal * game.healScale;
+        if (!tech.isEnergyHealth) {
+            mech.health += heal * simulation.healScale;
             if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
             mech.displayHealth();
         }
     },
     baseHealth: 1,
     setMaxHealth() {
-        mech.maxHealth = mech.baseHealth + mod.bonusHealth + mod.armorFromPowerUps
+        mech.maxHealth = mech.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
         if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
         mech.displayHealth();
     },
@@ -489,33 +492,33 @@ const mech = {
     harmReduction() {
         let dmg = 1
         dmg *= mech.fieldHarmReduction
-        if (mod.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
-        if (mod.isSlowFPS) dmg *= 0.85
-        if (mod.isPiezo) dmg *= 0.85
-        if (mod.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
-        if (mod.isBotArmor) dmg *= 0.97 ** mod.totalBots()
-        if (mod.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.33;
-        if (mod.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
-        if (mod.energyRegen === 0) dmg *= 0.4
-        if (mod.isTurret && mech.crouch) dmg *= 0.5;
-        if (mod.isEntanglement && b.inventory[0] === b.activeGun) {
+        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
+        if (tech.isSlowFPS) dmg *= 0.85
+        if (tech.isPiezo) dmg *= 0.85
+        if (tech.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
+        if (tech.isBotArmor) dmg *= 0.97 ** tech.totalBots()
+        if (tech.isHarmArmor && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 0.33;
+        if (tech.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
+        if (tech.energyRegen === 0) dmg *= 0.4
+        if (tech.isTurret && mech.crouch) dmg *= 0.5;
+        if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
         return dmg
     },
     rewind(steps) { // mech.rewind(Math.floor(Math.min(599, 137 * mech.energy)))
-        if (mod.isRewindGrenade) {
+        if (tech.isRewindGrenade) {
             for (let i = 1, len = Math.floor(2 + steps / 40); i < len; i++) {
                 b.grenade(Vector.add(mech.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
                 const who = bullet[bullet.length - 1]
-                if (mod.isVacuumBomb) {
+                if (tech.isVacuumBomb) {
                     Matter.Body.setVelocity(who, {
                         x: who.velocity.x * 0.5,
                         y: who.velocity.y * 0.5
                     });
-                } else if (mod.isRPG) {
-                    who.endCycle = (who.endCycle - game.cycle) * 0.2 + game.cycle
-                } else if (mod.isNeutronBomb) {
+                } else if (tech.isRPG) {
+                    who.endCycle = (who.endCycle - simulation.cycle) * 0.2 + simulation.cycle
+                } else if (tech.isNeutronBomb) {
                     Matter.Body.setVelocity(who, {
                         x: who.velocity.x * 0.3,
                         y: who.velocity.y * 0.3
@@ -525,19 +528,21 @@ const mech = {
                         x: who.velocity.x * 0.5,
                         y: who.velocity.y * 0.5
                     });
-                    who.endCycle = (who.endCycle - game.cycle) * 0.5 + game.cycle
+                    who.endCycle = (who.endCycle - simulation.cycle) * 0.5 + simulation.cycle
                 }
             }
         }
         let history = mech.history[(mech.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
-        b.activeGun = history.activeGun
-        for (let i = 0; i < b.inventory.length; i++) {
-            if (b.inventory[i] === b.activeGun) b.inventoryGun = i
-        }
-        game.updateGunHUD();
-        game.boldActiveGunHUD();
+
+        // b.activeGun = history.activeGun
+        // for (let i = 0; i < b.inventory.length; i++) {
+        //     if (b.inventory[i] === b.activeGun) b.inventoryGun = i
+        // }
+        // simulation.updateGunHUD();
+        // simulation.boldActiveGunHUD();
+
         // move bots to follow player
         for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType) {
@@ -557,8 +562,8 @@ const mech = {
         let isDrawPlayer = true
         const shortPause = function() {
             if (mech.defaultFPSCycle < mech.cycle) { //back to default values
-                game.fpsCap = game.fpsCapDefault
-                game.fpsInterval = 1000 / game.fpsCap;
+                simulation.fpsCap = simulation.fpsCapDefault
+                simulation.fpsInterval = 1000 / simulation.fpsCap;
                 document.getElementById("dmg").style.transition = "opacity 1s";
                 document.getElementById("dmg").style.opacity = "0";
             } else {
@@ -567,7 +572,7 @@ const mech = {
                     isDrawPlayer = false
                     ctx.save();
                     ctx.translate(canvas.width2, canvas.height2); //center
-                    ctx.scale(game.zoom / game.edgeZoomOutSmooth, game.zoom / game.edgeZoomOutSmooth); //zoom in once centered
+                    ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
                     ctx.translate(-canvas.width2 + mech.transX, -canvas.height2 + mech.transY); //translate
                     for (let i = 1; i < steps; i++) {
                         history = mech.history[(mech.cycle - i) % 600]
@@ -582,52 +587,53 @@ const mech = {
         };
 
         if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
-        game.fpsCap = 3 //1 is longest pause, 4 is standard
-        game.fpsInterval = 1000 / game.fpsCap;
+        simulation.fpsCap = 3 //1 is longest pause, 4 is standard
+        simulation.fpsInterval = 1000 / simulation.fpsCap;
         mech.defaultFPSCycle = mech.cycle
-        if (mod.isRewindBot) {
-            const len = steps * 0.042 * mod.isRewindBot
+        if (tech.isRewindBot) {
+            const len = steps * 0.042 * tech.isRewindBot
             for (let i = 0; i < len; i++) {
                 const where = mech.history[Math.abs(mech.cycle - i * 40) % 600].position //spread out spawn locations along past history
                 b.randomBot({
                     x: where.x + 100 * (Math.random() - 0.5),
                     y: where.y + 100 * (Math.random() - 0.5)
                 }, false, false)
-                bullet[bullet.length - 1].endCycle = game.cycle + 360 + Math.floor(180 * Math.random()) //6-9 seconds
+                bullet[bullet.length - 1].endCycle = simulation.cycle + 360 + Math.floor(180 * Math.random()) //6-9 seconds
             }
         }
     },
     damage(dmg) {
-        if (mod.isRewindAvoidDeath && mech.energy > 0.66) {
+        if (tech.isRewindAvoidDeath && mech.energy > 0.66) {
             mech.rewind(Math.floor(Math.min(299, 137 * mech.energy)))
             return
         }
         mech.lastHarmCycle = mech.cycle
-        if (mod.isDroneOnDamage) { //chance to build a drone on damage  from mod
+        if (tech.isDroneOnDamage) { //chance to build a drone on damage  from tech
             const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40)
             for (let i = 0; i < len; i++) {
                 if (Math.random() < 0.5) b.drone() //spawn drone
             }
         }
 
-        if (mod.isEnergyHealth) {
+        if (tech.isEnergyHealth) {
             mech.energy -= dmg;
             if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
-                if (mod.isDeathAvoid && powerUps.reroll.rerolls && !mod.isDeathAvoidedThisLevel) {
-                    mod.isDeathAvoidedThisLevel = true
+                if (tech.isDeathAvoid && powerUps.reroll.rerolls && !tech.isDeathAvoidedThisLevel) {
+                    tech.isDeathAvoidedThisLevel = true
                     powerUps.reroll.changeRerolls(-1)
-                    game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> left</span>`, 420)
+                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span><span class='color-symbol'>--</span>
+                    <br>${powerUps.reroll.rerolls}`)
                     for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
                     mech.energy = mech.maxEnergy
                     mech.immuneCycle = mech.cycle + 360 //disable this.immuneCycle bonus seconds
-                    game.wipe = function() { //set wipe to have trails
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     setTimeout(function() {
-                        game.wipe = function() { //set wipe to normal
+                        simulation.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
@@ -643,23 +649,22 @@ const mech = {
             dmg *= mech.harmReduction()
             mech.health -= dmg;
             if (mech.health < 0 || isNaN(mech.health)) {
-                if (mod.isDeathAvoid && powerUps.reroll.rerolls > 0 && !mod.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
-                    mod.isDeathAvoidedThisLevel = true
+                if (tech.isDeathAvoid && powerUps.reroll.rerolls > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
+                    tech.isDeathAvoidedThisLevel = true
                     mech.health = 0.05
                     powerUps.reroll.changeRerolls(-1)
-                    game.makeTextLog(`<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>${powerUps.reroll.rerolls}</strong> <strong class='color-r'>rerolls</strong> left</span>`, 420)
+                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span><span class='color-symbol'>--</span>
+                    <br>${powerUps.reroll.rerolls}`)
                     for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
                     mech.immuneCycle = mech.cycle + 360 //disable this.immuneCycle bonus seconds
-                    // game.makeTextLog("<span style='font-size:115%;'> <strong>death</strong> avoided<br><strong>1</strong> <strong class='color-r'>reroll</strong> consumed</span>", 420)
-
-                    game.wipe = function() { //set wipe to have trails
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     setTimeout(function() {
-                        game.wipe = function() { //set wipe to normal
+                        simulation.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
@@ -677,8 +682,8 @@ const mech = {
         if (dmg > 0.06 / mech.holdingMassScale) mech.drop(); //drop block if holding
         const normalFPS = function() {
             if (mech.defaultFPSCycle < mech.cycle) { //back to default values
-                game.fpsCap = game.fpsCapDefault
-                game.fpsInterval = 1000 / game.fpsCap;
+                simulation.fpsCap = simulation.fpsCapDefault
+                simulation.fpsInterval = 1000 / simulation.fpsCap;
                 document.getElementById("dmg").style.transition = "opacity 1s";
                 document.getElementById("dmg").style.opacity = "0";
             } else {
@@ -687,23 +692,23 @@ const mech = {
         };
 
         if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(normalFPS);
-        if (mod.isSlowFPS) { // slow game 
-            game.fpsCap = 30 //new fps
-            game.fpsInterval = 1000 / game.fpsCap;
+        if (tech.isSlowFPS) { // slow game 
+            simulation.fpsCap = 30 //new fps
+            simulation.fpsInterval = 1000 / simulation.fpsCap;
             //how long to wait to return to normal fps
             mech.defaultFPSCycle = mech.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
-            if (mod.isHarmFreeze) { //freeze all mobs
+            if (tech.isHarmFreeze) { //freeze all mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
                     mobs.statusSlow(mob[i], 300)
                 }
             }
         } else {
             if (dmg > 0.05) { // freeze game for high damage hits
-                game.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
-                game.fpsInterval = 1000 / game.fpsCap;
+                simulation.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
+                simulation.fpsInterval = 1000 / simulation.fpsCap;
             } else {
-                game.fpsCap = game.fpsCapDefault
-                game.fpsInterval = 1000 / game.fpsCap;
+                simulation.fpsCap = simulation.fpsCapDefault
+                simulation.fpsInterval = 1000 / simulation.fpsCap;
             }
             mech.defaultFPSCycle = mech.cycle
         }
@@ -718,7 +723,7 @@ const mech = {
     },
     buttonCD: 0, //cool down for player buttons
     drawLeg(stroke) {
-        // if (game.mouseInGame.x > mech.pos.x) {
+        // if (simulation.mouseInGame.x > mech.pos.x) {
         if (mech.angle > -Math.PI / 2 && mech.angle < Math.PI / 2) {
             mech.flipLegs = 1;
         } else {
@@ -822,7 +827,7 @@ const mech = {
     fireCDcycle: 0,
     fieldCDcycle: 0,
     fieldMode: 0, //basic field mode before upgrades
-    maxEnergy: 1, //can be increased by a mod
+    maxEnergy: 1, //can be increased by a tech
     holdingTarget: null,
     timeSkipLastCycle: 0,
     // these values are set on reset by setHoldDefaults()
@@ -857,14 +862,14 @@ const mech = {
     },
     setHoldDefaults() {
         if (mech.energy < mech.maxEnergy) mech.energy = mech.maxEnergy;
-        mech.fieldRegen = mod.energyRegen; //0.001
+        mech.fieldRegen = tech.energyRegen; //0.001
         mech.fieldMeterColor = "#0cf"
         mech.fieldShieldingScale = 1;
         mech.fieldBlockCD = 10;
         mech.fieldHarmReduction = 1;
         mech.fieldDamage = 1
         mech.duplicateChance = 0
-        if (mod.duplicationChance() === 0) game.draw.powerUp = game.draw.powerUpNormal
+        if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
         mech.grabPowerUpRange2 = 156000;
         mech.fieldRange = 155;
         mech.fieldFire = false;
@@ -894,7 +899,7 @@ const mech = {
         }
     },
     setMaxEnergy() {
-        mech.maxEnergy = (mod.isMaxEnergyMod ? 0.5 : 1) + mod.bonusEnergy + mod.healMaxEnergyBonus
+        mech.maxEnergy = (tech.isMaxEnergyMod ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus
     },
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
@@ -950,7 +955,7 @@ const mech = {
     definePlayerMass(mass = mech.defaultMass) {
         Matter.Body.setMass(player, mass);
         //reduce air and ground move forces
-        mech.Fx = 0.08 / mass * mod.squirrelFx //base player mass is 5
+        mech.Fx = 0.08 / mass * tech.squirrelFx //base player mass is 5
         mech.FxAir = 0.4 / mass / mass //base player mass is 5
         //make player stand a bit lower when holding heavy masses
         mech.yOffWhen.stand = Math.max(mech.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
@@ -1005,8 +1010,8 @@ const mech = {
             if (input.field) {
                 if (mech.energy > 0.001) {
                     if (mech.fireCDcycle < mech.cycle) mech.fireCDcycle = mech.cycle
-                    mech.energy -= 0.001 / mod.throwChargeRate;
-                    mech.throwCharge += 0.5 * mod.throwChargeRate / mech.holdingTarget.mass
+                    mech.energy -= 0.001 / tech.throwChargeRate;
+                    mech.throwCharge += 0.5 * tech.throwChargeRate / mech.holdingTarget.mass
                     //draw charge
                     const x = mech.pos.x + 15 * Math.cos(mech.angle);
                     const y = mech.pos.y + 15 * Math.sin(mech.angle);
@@ -1086,7 +1091,7 @@ const mech = {
             ctx.fillStyle = "rgba(110,170,200," + (0.02 + mech.energy * (0.15 + 0.15 * Math.random())) + ")";
             ctx.strokeStyle = "rgba(110, 200, 235, " + (0.6 + 0.2 * Math.random()) + ")" //"#9bd" //"rgba(110, 200, 235, " + (0.5 + 0.1 * Math.random()) + ")"
         }
-        // const off = 2 * Math.cos(game.cycle * 0.1)
+        // const off = 2 * Math.cos(simulation.cycle * 0.1)
         const range = mech.fieldRange;
         ctx.beginPath();
         ctx.arc(mech.pos.x, mech.pos.y, range, mech.angle - Math.PI * mech.fieldArc, mech.angle + Math.PI * mech.fieldArc, false);
@@ -1129,13 +1134,13 @@ const mech = {
                 Matter.Query.ray(map, powerUp[i].position, mech.pos).length === 0
             ) {
                 powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
-                powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+                powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                 //extra friction
                 Matter.Body.setVelocity(powerUp[i], {
                     x: powerUp[i].velocity.x * 0.11,
                     y: powerUp[i].velocity.y * 0.11
                 });
-                if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
+                if (dist2 < 5000 && !simulation.isChoosing) { //use power up if it is close enough
                     powerUps.onPickUp(mech.pos);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
                         x: player.velocity.x + powerUp[i].velocity.x / player.mass * 5,
@@ -1161,12 +1166,12 @@ const mech = {
             }
             // if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy;
 
-            if (mod.blockDmg) {
-                who.damage(mod.blockDmg * b.dmgScale)
+            if (tech.blockDmg) {
+                who.damage(tech.blockDmg * b.dmgScale)
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
-                for (let i = 0, len = 2.5 * mod.blockDmg; i < len; i++) {
+                for (let i = 0, len = 2.5 * tech.blockDmg; i < len; i++) {
                     let x = mech.pos.x - 20 * unit.x;
                     let y = mech.pos.y - 20 * unit.y;
                     ctx.moveTo(x, y);
@@ -1182,7 +1187,7 @@ const mech = {
             } else {
                 mech.drawHold(who);
             }
-            // if (mod.isFreezeMobs) mobs.statusSlow(who, 60) //this works but doesn't have a fun effect
+            // if (tech.isFreezeMobs) mobs.statusSlow(who, 60) //this works but doesn't have a fun effect
 
             // mech.holdingTarget = null
             //knock backs
@@ -1205,8 +1210,8 @@ const mech = {
                     });
                 }
             } else {
-                if (mod.isStunField && mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism") mobs.statusStun(who, mod.isStunField)
-                // mobs.statusSlow(who, mod.isStunField)
+                if (tech.isStunField && mech.fieldUpgrades[mech.fieldMode].name === "perfect diamagnetism") mobs.statusStun(who, tech.isStunField)
+                // mobs.statusSlow(who, tech.isStunField)
                 const massRoot = Math.sqrt(Math.max(0.15, who.mass)); // masses above 12 can start to overcome the push back
                 Matter.Body.setVelocity(who, {
                     x: player.velocity.x - (20 * unit.x) / massRoot,
@@ -1314,7 +1319,7 @@ const mech = {
                     }
                 }
             }
-            if (mod.isFreezeMobs) {
+            if (tech.isFreezeMobs) {
                 for (let i = 0, len = mob.length; i < len; ++i) {
                     Matter.Sleeping.set(mob[i], false)
                     mobs.statusSlow(mob[i], 60)
@@ -1352,9 +1357,8 @@ const mech = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            description: "using the field drains <strong class='color-f'>energy</strong><br><strong>block</strong> mobs, <strong>grab</strong> power ups<br><strong>pick up</strong> and <strong>throw</strong> blocks",
+            description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> blocks",
             effect: () => {
-                game.replaceTextLog = true; //allow text over write
                 mech.hold = function() {
                     if (mech.isHolding) {
                         mech.drawHold(mech.holdingTarget);
@@ -1470,7 +1474,7 @@ const mech = {
                     }
                     mech.drawFieldMeter()
 
-                    if (mod.isPerfectBrake) { //cap mob speed around player
+                    if (tech.isPerfectBrake) { //cap mob speed around player
                         const range = 160 + 140 * wave + 150 * mech.energy
                         for (let i = 0; i < mob.length; i++) {
                             const distance = Vector.magnitude(Vector.sub(mech.pos, mob[i].position))
@@ -1495,16 +1499,16 @@ const mech = {
             effect: () => {
                 mech.hold = function() {
                     if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && !input.field) {
-                        if (mod.isSporeField) {
+                        if (tech.isSporeField) {
                             const len = Math.floor(5 + 4 * Math.random())
                             mech.energy -= len * 0.105;
                             for (let i = 0; i < len; i++) {
                                 b.spore(mech.pos)
                             }
-                        } else if (mod.isMissileField) {
+                        } else if (tech.isMissileField) {
                             mech.energy -= 0.55;
-                            b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1, mod.recursiveMissiles)
-                        } else if (mod.isIceField) {
+                            b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1, tech.recursiveMissiles)
+                        } else if (tech.isIceField) {
                             mech.energy -= 0.057;
                             b.iceIX(1)
                         } else {
@@ -1558,7 +1562,7 @@ const mech = {
                         mech.lookForPickUp();
                         const DRAIN = 0.00035
                         if (mech.energy > DRAIN) {
-                            mech.isFieldActive = true; //used with mod.isHarmReduce
+                            mech.isFieldActive = true; //used with tech.isHarmReduce
                             mech.airSpeedLimit = 400 // 7* player.mass * player.mass
                             mech.FxAir = 0.005
                             // mech.pushMobs360();
@@ -1579,7 +1583,7 @@ const mech = {
                                     sub = Vector.sub(who[i].position, mech.pos);
                                     dist = Vector.magnitude(sub);
                                     if (dist < range) {
-                                        who[i].force.y -= who[i].mass * (game.g * mag); //add a bit more then standard gravity
+                                        who[i].force.y -= who[i].mass * (simulation.g * mag); //add a bit more then standard gravity
                                     }
                                 }
                             }
@@ -1587,20 +1591,20 @@ const mech = {
                             // zeroG(mob);  //mobs are too irregular to make this work?
 
                             if (input.down) { //down
-                                player.force.y -= 0.5 * player.mass * game.g;
+                                player.force.y -= 0.5 * player.mass * simulation.g;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 400 * 0.03;
                                 zeroG(powerUp, this.fieldDrawRadius, 0.7);
                                 zeroG(body, this.fieldDrawRadius, 0.7);
                             } else if (input.up) { //up
                                 mech.energy -= 5 * DRAIN;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
-                                player.force.y -= 1.45 * player.mass * game.g;
+                                player.force.y -= 1.45 * player.mass * simulation.g;
                                 zeroG(powerUp, this.fieldDrawRadius, 1.38);
                                 zeroG(body, this.fieldDrawRadius, 1.38);
                             } else {
                                 mech.energy -= DRAIN;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 650 * 0.03;
-                                player.force.y -= 1.07 * player.mass * game.g; // slow upward drift
+                                player.force.y -= 1.07 * player.mass * simulation.g; // slow upward drift
                                 zeroG(powerUp, this.fieldDrawRadius);
                                 zeroG(body, this.fieldDrawRadius);
                             }
@@ -1620,7 +1624,7 @@ const mech = {
                                     y: player.velocity.y * 0.98
                                 });
                             }
-                            if (mod.isFreezeMobs) {
+                            if (tech.isFreezeMobs) {
                                 const ICE_DRAIN = 0.0005
                                 for (let i = 0, len = mob.length; i < len; i++) {
                                     if (mob[i].distanceToPlayer() + mob[i].radius < this.fieldDrawRadius && !mob[i].shield && !mob[i].isShielded) {
@@ -1668,7 +1672,7 @@ const mech = {
                     } else if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
                         mech.grabPowerUp();
                         mech.lookForPickUp();
-                        if (mod.isExtruder) {
+                        if (tech.isExtruder) {
                             b.extruder();
                         } else {
                             b.plasma();
@@ -1680,7 +1684,7 @@ const mech = {
                     }
                     mech.drawFieldMeter("rgba(0, 0, 0, 0.2)")
 
-                    if (mod.isExtruder) {
+                    if (tech.isExtruder) {
                         if (input.field) {
                             b.wasExtruderOn = true
                         } else {
@@ -1759,17 +1763,17 @@ const mech = {
                                 }
                             }
 
-                            game.cycle--; //pause all functions that depend on game cycle increasing
-                            if (mod.isTimeSkip) {
+                            simulation.cycle--; //pause all functions that depend on game cycle increasing
+                            if (tech.isTimeSkip) {
                                 mech.immuneCycle = mech.cycle + 10;
-                                game.isTimeSkipping = true;
+                                simulation.isTimeSkipping = true;
                                 mech.cycle++;
-                                game.gravity();
-                                Engine.update(engine, game.delta);
+                                simulation.gravity();
+                                Engine.update(engine, simulation.delta);
                                 // level.checkZones();
                                 // level.checkQuery();
                                 mech.move();
-                                game.checks();
+                                simulation.checks();
                                 // mobs.loop();
                                 // mech.draw();
                                 mech.walk_cycle += mech.flipLegs * mech.Vx;
@@ -1778,11 +1782,11 @@ const mech = {
                                 b.fire();
                                 // b.bulletRemove();
                                 b.bulletDo();
-                                game.isTimeSkipping = false;
+                                simulation.isTimeSkipping = false;
                             }
-                            // game.cycle--; //pause all functions that depend on game cycle increasing
-                            // if (mod.isTimeSkip && !game.isTimeSkipping) { //speed up the rate of time
-                            //   game.timeSkip(1)
+                            // simulation.cycle--; //pause all functions that depend on game cycle increasing
+                            // if (tech.isTimeSkip && !simulation.isTimeSkipping) { //speed up the rate of time
+                            //   simulation.timeSkip(1)
                             //   mech.energy += 1.5 * DRAIN; //x1 to undo the energy drain from time speed up, x1.5 to cut energy drain in half
                             // }
                         }
@@ -1828,7 +1832,7 @@ const mech = {
                     if (mech.fireCDcycle + 50 < mech.cycle) {
                         if (!mech.isCloak) {
                             mech.isCloak = true //enter cloak
-                            if (mod.isIntangible) {
+                            if (tech.isIntangible) {
                                 for (let i = 0; i < bullet.length; i++) {
                                     if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
                                 }
@@ -1836,12 +1840,12 @@ const mech = {
                         }
                     } else if (mech.isCloak) { //exit cloak
                         mech.isCloak = false
-                        if (mod.isIntangible) {
+                        if (tech.isIntangible) {
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
                             }
                         }
-                        if (mod.isCloakStun) { //stun nearby mobs after exiting cloak
+                        if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
                             const stunRange = mech.fieldDrawRadius * 1.15
                             const drain = 0.3 * mech.energy
@@ -1856,7 +1860,7 @@ const mech = {
                             }
                             if (isMobsAround && mech.energy > drain) {
                                 mech.energy -= drain
-                                game.drawList.push({
+                                simulation.drawList.push({
                                     x: mech.pos.x,
                                     y: mech.pos.y,
                                     radius: stunRange,
@@ -1900,7 +1904,7 @@ const mech = {
                             drawField()
                         }
                     }
-                    if (mod.isIntangible) {
+                    if (tech.isIntangible) {
                         if (mech.isCloak) {
                             player.collisionFilter.mask = cat.map
                             let inPlayer = Matter.Query.region(mob, player.bounds)
@@ -1981,8 +1985,8 @@ const mech = {
         //         mech.lookForPickUp();
 
         //         if (mech.fieldCDcycle < mech.cycle) {
-        //           // game.draw.bodyFill = "transparent"
-        //           // game.draw.bodyStroke = "transparent"
+        //           // simulation.draw.bodyFill = "transparent"
+        //           // simulation.draw.bodyStroke = "transparent"
 
         //           const DRAIN = 0.00013 + (mech.fireCDcycle > mech.cycle ? 0.005 : 0)
         //           if (mech.energy > DRAIN) {
@@ -2007,7 +2011,7 @@ const mech = {
         //                   //draw outline of shield
         //                   ctx.fillStyle = `rgba(140,217,255,0.5)`
         //                   ctx.fill()
-        //                 } else if (mod.superposition && inPlayer[i].dropPowerUp) {
+        //                 } else if (tech.superposition && inPlayer[i].dropPowerUp) {
         //                   // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
         //                   // mech.energy += 0.005;
 
@@ -2073,17 +2077,16 @@ const mech = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br>allows <strong class='color-m'>mods</strong> that normally require other <strong class='color-f'>fields</strong>",
+            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br>allows <strong class='color-m'>tech</strong> that normally require other <strong class='color-f'>fields</strong>",
             effect: () => {
-                game.replaceTextLog = true; //allow text over write
                 mech.fieldPhase = 0;
                 mech.fieldPosition = {
-                    x: game.mouseInGame.x,
-                    y: game.mouseInGame.y
+                    x: simulation.mouseInGame.x,
+                    y: simulation.mouseInGame.y
                 }
                 mech.lastFieldPosition = {
-                    x: game.mouseInGame.x,
-                    y: game.mouseInGame.y
+                    x: simulation.mouseInGame.x,
+                    y: simulation.mouseInGame.y
                 }
                 mech.fieldOn = false;
                 mech.fieldRadius = 0;
@@ -2108,8 +2111,8 @@ const mech = {
                             if (!mech.fieldOn) { // if field was off, and it starting up, teleport to new mouse location
                                 mech.fieldOn = true;
                                 mech.fieldPosition = { //smooth the mouse position
-                                    x: game.mouseInGame.x,
-                                    y: game.mouseInGame.y
+                                    x: simulation.mouseInGame.x,
+                                    y: simulation.mouseInGame.y
                                 }
                                 mech.lastFieldPosition = { //used to find velocity of field changes
                                     x: mech.fieldPosition.x,
@@ -2122,8 +2125,8 @@ const mech = {
                                 }
                                 const smooth = isInMap ? 0.985 : 0.96;
                                 mech.fieldPosition = { //smooth the mouse position
-                                    x: mech.fieldPosition.x * smooth + game.mouseInGame.x * (1 - smooth),
-                                    y: mech.fieldPosition.y * smooth + game.mouseInGame.y * (1 - smooth),
+                                    x: mech.fieldPosition.x * smooth + simulation.mouseInGame.x * (1 - smooth),
+                                    y: mech.fieldPosition.y * smooth + simulation.mouseInGame.y * (1 - smooth),
                                 }
                             }
 
@@ -2135,13 +2138,13 @@ const mech = {
                                 // float towards field  if looking at and in range  or  if very close to player
                                 if (dist2 < mech.fieldRadius * mech.fieldRadius && (mech.lookingAt(powerUp[i]) || dist2 < 16000) && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
                                     powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
-                                    powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+                                    powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                                     //extra friction
                                     Matter.Body.setVelocity(powerUp[i], {
                                         x: powerUp[i].velocity.x * 0.11,
                                         y: powerUp[i].velocity.y * 0.11
                                     });
-                                    if (dist2 < 5000 && !game.isChoosing) { //use power up if it is close enough
+                                    if (dist2 < 5000 && !simulation.isChoosing) { //use power up if it is close enough
                                         powerUps.onPickUp(powerUp[i].position);
                                         powerUp[i].effect();
                                         Matter.World.remove(engine.world, powerUp[i]);
@@ -2176,12 +2179,12 @@ const mech = {
                                             mech.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
                                             Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0.8)
-                                            // body[i].force.y -= body[i].mass * game.g; //remove gravity effects
+                                            // body[i].force.y -= body[i].mass * simulation.g; //remove gravity effects
                                             //blocks drift towards center of pilot wave
                                             const sub = Vector.sub(mech.fieldPosition, body[i].position)
                                             const unit = Vector.mult(Vector.normalise(sub), 0.00005 * Vector.magnitude(sub))
                                             body[i].force.x += unit.x
-                                            body[i].force.y += unit.y - body[i].mass * game.g //remove gravity effects
+                                            body[i].force.y += unit.y - body[i].mass * simulation.g //remove gravity effects
                                         } else {
                                             mech.fieldCDcycle = mech.cycle + 120;
                                             mech.fieldOn = false
@@ -2191,7 +2194,7 @@ const mech = {
                                     }
                                 }
 
-                                if (mod.isFreezeMobs) {
+                                if (tech.isFreezeMobs) {
                                     for (let i = 0, len = mob.length; i < len; ++i) {
                                         if (Vector.magnitude(Vector.sub(mob[i].position, mech.fieldPosition)) < mech.fieldRadius) {
                                             mobs.statusSlow(mob[i], 120)
@@ -2235,12 +2238,11 @@ const mech = {
             name: "wormhole",
             description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups<br><strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
-                game.replaceTextLog = true; //allow text over write
                 mech.drop();
                 mech.duplicateChance = 0.1
-                game.draw.powerUp = game.draw.powerUpBonus //change power up draw
+                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
 
-                // if (mod.isRewindGun) {
+                // if (tech.isRewindGun) {
                 //     mech.hold = this.rewind
                 // } else {
                 mech.hold = this.teleport
@@ -2258,8 +2260,8 @@ const mech = {
             //                 if (this.rewindCount === 0) {
             //                     const shortPause = function() {
             //                         if (mech.defaultFPSCycle < mech.cycle) { //back to default values
-            //                             game.fpsCap = game.fpsCapDefault
-            //                             game.fpsInterval = 1000 / game.fpsCap;
+            //                             simulation.fpsCap = simulation.fpsCapDefault
+            //                             simulation.fpsInterval = 1000 / simulation.fpsCap;
             //                             // document.getElementById("dmg").style.transition = "opacity 1s";
             //                             // document.getElementById("dmg").style.opacity = "0";
             //                         } else {
@@ -2267,14 +2269,14 @@ const mech = {
             //                         }
             //                     };
             //                     if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
-            //                     game.fpsCap = 4 //1 is longest pause, 4 is standard
-            //                     game.fpsInterval = 1000 / game.fpsCap;
+            //                     simulation.fpsCap = 4 //1 is longest pause, 4 is standard
+            //                     simulation.fpsInterval = 1000 / simulation.fpsCap;
             //                     mech.defaultFPSCycle = mech.cycle
             //                 }
 
 
             //                 this.rewindCount += 10;
-            //                 game.wipe = function() { //set wipe to have trails
+            //                 simulation.wipe = function() { //set wipe to have trails
             //                     // ctx.fillStyle = "rgba(255,255,255,0)";
             //                     ctx.fillStyle = `rgba(221,221,221,${0.004})`;
             //                     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2290,15 +2292,15 @@ const mech = {
             //                 for (let i = 0, len = powerUp.length; i < len; ++i) {
             //                     const dxP = player.position.x - powerUp[i].position.x;
             //                     const dyP = player.position.y - powerUp[i].position.y;
-            //                     if (dxP * dxP + dyP * dyP < 50000 && !game.isChoosing && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
+            //                     if (dxP * dxP + dyP * dyP < 50000 && !simulation.isChoosing && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
             //                         powerUps.onPickUp(player.position);
             //                         powerUp[i].effect();
             //                         Matter.World.remove(engine.world, powerUp[i]);
             //                         powerUp.splice(i, 1);
             //                         const shortPause = function() {
             //                             if (mech.defaultFPSCycle < mech.cycle) { //back to default values
-            //                                 game.fpsCap = game.fpsCapDefault
-            //                                 game.fpsInterval = 1000 / game.fpsCap;
+            //                                 simulation.fpsCap = simulation.fpsCapDefault
+            //                                 simulation.fpsInterval = 1000 / simulation.fpsCap;
             //                                 // document.getElementById("dmg").style.transition = "opacity 1s";
             //                                 // document.getElementById("dmg").style.opacity = "0";
             //                             } else {
@@ -2306,8 +2308,8 @@ const mech = {
             //                             }
             //                         };
             //                         if (mech.defaultFPSCycle < mech.cycle) requestAnimationFrame(shortPause);
-            //                         game.fpsCap = 3 //1 is longest pause, 4 is standard
-            //                         game.fpsInterval = 1000 / game.fpsCap;
+            //                         simulation.fpsCap = 3 //1 is longest pause, 4 is standard
+            //                         simulation.fpsInterval = 1000 / simulation.fpsCap;
             //                         mech.defaultFPSCycle = mech.cycle
             //                         break; //because the array order is messed up after splice
             //                     }
@@ -2322,7 +2324,7 @@ const mech = {
             //                 mech.fieldCDcycle = mech.cycle + 30;
             //                 mech.resetHistory();
             //                 this.rewindCount = 0;
-            //                 game.wipe = function() { //set wipe to normal
+            //                 simulation.wipe = function() { //set wipe to normal
             //                     ctx.clearRect(0, 0, canvas.width, canvas.height);
             //                 }
             //             }
@@ -2342,7 +2344,7 @@ const mech = {
                 // }
                 if (mech.hole.isOn) {
                     // draw holes
-                    mech.fieldRange = 0.97 * mech.fieldRange + 0.03 * (50 + 10 * Math.sin(game.cycle * 0.025))
+                    mech.fieldRange = 0.97 * mech.fieldRange + 0.03 * (50 + 10 * Math.sin(simulation.cycle * 0.025))
                     const semiMajorAxis = mech.fieldRange + 30
                     const edge1a = Vector.add(Vector.mult(mech.hole.unit, semiMajorAxis), mech.hole.pos1)
                     const edge1b = Vector.add(Vector.mult(mech.hole.unit, -semiMajorAxis), mech.hole.pos1)
@@ -2379,12 +2381,12 @@ const mech = {
                         dist2 = dxP * dxP + dyP * dyP;
                         if (dist2 < 600000 && !(mech.health === mech.maxHealth && powerUp[i].name === "heal")) {
                             powerUp[i].force.x += 4 * (dxP / dist2) * powerUp[i].mass; // float towards hole
-                            powerUp[i].force.y += 4 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * game.g; //negate gravity
+                            powerUp[i].force.y += 4 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                             Matter.Body.setVelocity(powerUp[i], { //extra friction
                                 x: powerUp[i].velocity.x * 0.05,
                                 y: powerUp[i].velocity.y * 0.05
                             });
-                            if (dist2 < 1000 && !game.isChoosing) { //use power up if it is close enough
+                            if (dist2 < 1000 && !simulation.isChoosing) { //use power up if it is close enough
                                 mech.fieldRange *= 0.8
                                 powerUps.onPickUp(powerUp[i].position);
                                 powerUp[i].effect();
@@ -2415,8 +2417,8 @@ const mech = {
                                             Matter.World.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             mech.fieldRange *= 0.8
-                                            if (mod.isWormholeEnergy) mech.energy += 0.5
-                                            if (mod.isWormSpores) { //pandimensionalspermia
+                                            if (tech.isWormholeEnergy) mech.energy += 0.5
+                                            if (tech.isWormSpores) { //pandimensionalspermia
                                                 for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
                                                     b.spore(Vector.add(mech.hole.pos2, Vector.rotate({
                                                         x: mech.fieldRange * 0.4,
@@ -2440,9 +2442,9 @@ const mech = {
                                         Matter.World.remove(engine.world, body[i]);
                                         body.splice(i, 1);
                                         mech.fieldRange *= 0.8
-                                        // if (mod.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
-                                        if (mod.isWormholeEnergy) mech.energy += 0.5
-                                        if (mod.isWormSpores) { //pandimensionalspermia
+                                        // if (tech.isWormholeEnergy && mech.energy < mech.maxEnergy * 2) mech.energy = mech.maxEnergy * 2
+                                        if (tech.isWormholeEnergy) mech.energy += 0.5
+                                        if (tech.isWormSpores) { //pandimensionalspermia
                                             for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
                                                 b.spore(Vector.add(mech.hole.pos1, Vector.rotate({
                                                     x: mech.fieldRange * 0.4,
@@ -2457,7 +2459,7 @@ const mech = {
                             }
                         }
                     }
-                    if (mod.isWormBullets) {
+                    if (tech.isWormBullets) {
                         //teleport bullets
                         for (let i = 0, len = bullet.length; i < len; ++i) { //teleport bullets from hole1 to hole2
                             if (!bullet[i].botType && !bullet[i].isInHole) { //don't teleport bots
@@ -2487,35 +2489,35 @@ const mech = {
                 }
 
                 if (input.field && mech.fieldCDcycle < mech.cycle) { //not hold but field button is pressed
-                    const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(game.mouseInGame, mech.pos)), 50), game.mouseInGame)
+                    const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, mech.pos)), 50), simulation.mouseInGame)
                     const scale = 60
                     // console.log(Matter.Query.region(map, bounds))
                     if (mech.hole.isReady &&
                         (
                             Matter.Query.region(map, {
                                 min: {
-                                    x: game.mouseInGame.x - scale,
-                                    y: game.mouseInGame.y - scale
+                                    x: simulation.mouseInGame.x - scale,
+                                    y: simulation.mouseInGame.y - scale
                                 },
                                 max: {
-                                    x: game.mouseInGame.x + scale,
-                                    y: game.mouseInGame.y + scale
+                                    x: simulation.mouseInGame.x + scale,
+                                    y: simulation.mouseInGame.y + scale
                                 }
                             }).length === 0 &&
                             Matter.Query.ray(map, mech.pos, justPastMouse).length === 0
-                            // Matter.Query.ray(map, mech.pos, game.mouseInGame).length === 0 &&
-                            // Matter.Query.ray(map, player.position, game.mouseInGame).length === 0 &&
+                            // Matter.Query.ray(map, mech.pos, simulation.mouseInGame).length === 0 &&
+                            // Matter.Query.ray(map, player.position, simulation.mouseInGame).length === 0 &&
                             // Matter.Query.ray(map, player.position, justPastMouse).length === 0
                         )
                     ) {
-                        const sub = Vector.sub(game.mouseInGame, mech.pos)
+                        const sub = Vector.sub(simulation.mouseInGame, mech.pos)
                         const mag = Vector.magnitude(sub)
                         const drain = 0.03 + 0.005 * Math.sqrt(mag)
                         if (mech.energy > drain && mag > 300) {
                             mech.energy -= drain
                             mech.hole.isReady = false;
                             mech.fieldRange = 0
-                            Matter.Body.setPosition(player, game.mouseInGame);
+                            Matter.Body.setPosition(player, simulation.mouseInGame);
                             mech.buttonCD_jump = 0 //this might fix a bug with jumping
                             const velocity = Vector.mult(Vector.normalise(sub), 18)
                             Matter.Body.setVelocity(player, {
@@ -2546,8 +2548,8 @@ const mech = {
                             mech.hole.angle = Math.atan2(sub.y, sub.x)
                             mech.hole.unit = Vector.perp(Vector.normalise(sub))
 
-                            if (mod.isWormholeDamage) {
-                                who = Matter.Query.ray(mob, mech.pos, game.mouseInGame, 80)
+                            if (tech.isWormholeDamage) {
+                                who = Matter.Query.ray(mob, mech.pos, simulation.mouseInGame, 80)
                                 for (let i = 0; i < who.length; i++) {
                                     if (who[i].body.alive) {
                                         mobs.statusDoT(who[i].body, 0.6, 420)

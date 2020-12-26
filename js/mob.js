@@ -46,12 +46,12 @@ const mobs = {
     statusSlow(who, cycles = 60) {
         applySlow(who)
         //look for mobs near the target
-        if (mod.isAoESlow) {
+        if (tech.isAoESlow) {
             const range = (320 + 150 * Math.random()) ** 2
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range) applySlow(mob[i])
             }
-            game.drawList.push({
+            simulation.drawList.push({
                 x: who.position.x,
                 y: who.position.y,
                 radius: Math.sqrt(range),
@@ -93,7 +93,7 @@ const mobs = {
                         who.isSlowed = false;
                     },
                     type: "slow",
-                    endCycle: game.cycle + cycles,
+                    endCycle: simulation.cycle + cycles,
                 })
             }
         }
@@ -145,7 +145,7 @@ const mobs = {
                     who.isStunned = false
                 },
                 type: "stun",
-                endCycle: game.cycle + cycles * (who.isBoss ? 0.2 : 1),
+                endCycle: simulation.cycle + cycles * (who.isBoss ? 0.2 : 1),
             })
         }
     },
@@ -153,15 +153,15 @@ const mobs = {
         if (!who.isShielded && !mech.isBodiesAsleep && who.alive) {
             who.status.push({
                 effect() {
-                    if ((game.cycle - this.startCycle) % 30 === 0) {
+                    if ((simulation.cycle - this.startCycle) % 30 === 0) {
                         let dmg = b.dmgScale * this.dmg
                         who.damage(dmg);
-                        game.drawList.push({ //add dmg to draw queue
+                        simulation.drawList.push({ //add dmg to draw queue
                             x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
                             y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
                             radius: Math.log(2 * dmg + 1.1) * 40,
                             color: "rgba(0,80,80,0.9)",
-                            time: game.drawTime
+                            time: simulation.drawTime
                         });
                     }
                     if (true) {
@@ -172,8 +172,8 @@ const mobs = {
                 endEffect() {},
                 dmg: tickDamage,
                 type: "dot",
-                endCycle: game.cycle + cycles,
-                startCycle: game.cycle
+                endCycle: simulation.cycle + cycles,
+                startCycle: simulation.cycle
             })
         }
     },
@@ -186,21 +186,21 @@ const mobs = {
     //     }
     //     who.status.push({
     //       effect() {
-    //         if ((game.cycle - this.startCycle) % 15 === 0) {
+    //         if ((simulation.cycle - this.startCycle) % 15 === 0) {
     //           let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
     //           who.damage(dmg);
-    //           game.drawList.push({ //add dmg to draw queue
+    //           simulation.drawList.push({ //add dmg to draw queue
     //             x: who.position.x,
     //             y: who.position.y,
     //             radius: Math.log(2 * dmg + 1.1) * 40,
     //             color: `rgba(255,${Math.floor(200*Math.random())},0,0.9)`,
-    //             time: game.drawTime
+    //             time: simulation.drawTime
     //           });
     //         }
     //       },
     //       type: "burn",
-    //       endCycle: game.cycle + cycles,
-    //       startCycle: game.cycle
+    //       endCycle: simulation.cycle + cycles,
+    //       startCycle: simulation.cycle
     //     })
     //   }
     // },
@@ -225,9 +225,9 @@ const mobs = {
             onHit: undefined,
             alive: true,
             index: i,
-            health: mod.mobSpawnWithHealth,
+            health: tech.mobSpawnWithHealth,
             showHealthBar: true,
-            accelMag: 0.001 * game.accelScale,
+            accelMag: 0.001 * simulation.accelScale,
             cd: 0, //game cycle when cooldown will be over
             delay: 60, //static: time between cooldowns
             fill: color,
@@ -250,7 +250,7 @@ const mobs = {
                 let j = this.status.length;
                 while (j--) {
                     this.status[j].effect();
-                    if (this.status[j].endCycle < game.cycle) {
+                    if (this.status[j].endCycle < simulation.cycle) {
                         this.status[j].endEffect();
                         this.status.splice(j, 1);
                     }
@@ -272,7 +272,7 @@ const mobs = {
             gravity() {
                 this.force.y += this.mass * this.g;
             },
-            seePlayerFreq: Math.floor((30 + 30 * Math.random()) * game.lookFreqScale), //how often NPC checks to see where player is, lower numbers have better vision
+            seePlayerFreq: Math.floor((30 + 30 * Math.random()) * simulation.lookFreqScale), //how often NPC checks to see where player is, lower numbers have better vision
             foundPlayer() {
                 this.locatePlayer();
                 if (!this.seePlayer.yes) {
@@ -307,7 +307,7 @@ const mobs = {
                 }
             },
             seePlayerCheck() {
-                if (!(game.cycle % this.seePlayerFreq)) {
+                if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
                         Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
@@ -321,7 +321,7 @@ const mobs = {
                 }
             },
             seePlayerCheckByDistance() {
-                if (!(game.cycle % this.seePlayerFreq)) {
+                if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (this.distanceToPlayer2() < this.seeAtDistance2 && !mech.isCloak) {
                         this.foundPlayer();
                     } else if (this.seePlayer.recall) {
@@ -330,7 +330,7 @@ const mobs = {
                 }
             },
             seePlayerByDistOrLOS() {
-                if (!(game.cycle % this.seePlayerFreq)) {
+                if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
                         (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0)) &&
                         !mech.isCloak
@@ -360,7 +360,7 @@ const mobs = {
             lookRange: 0.2 + Math.random() * 0.2,
             lookTorque: 0.0000004 * (Math.random() > 0.5 ? -1 : 1),
             seePlayerByLookingAt() {
-                if (!(game.cycle % this.seePlayerFreq) && (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange))) {
+                if (!(simulation.cycle % this.seePlayerFreq) && (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange))) {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
                         Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
@@ -392,7 +392,7 @@ const mobs = {
             },
             // hacked() { //set this.hackedTarget variable before running this method
             //   //find a new target
-            //   if (!(game.cycle % this.seePlayerFreq)) {
+            //   if (!(simulation.cycle % this.seePlayerFreq)) {
             //     this.hackedTarget = null
             //     for (let i = 0, len = mob.length; i < len; i++) {
             //       if (mob[i] !== this) {
@@ -410,11 +410,11 @@ const mobs = {
             //   }
             // },
             laserBeam() {
-                if (game.cycle % 7 && this.seePlayer.yes) {
+                if (simulation.cycle % 7 && this.seePlayer.yes) {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
-                    // ctx.lineDashOffset = 6*(game.cycle % 215);
+                    // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer() < this.laserRange) {
-                        if (mech.immuneCycle < mech.cycle) mech.damage(0.0003 * game.dmgScale);
+                        if (mech.immuneCycle < mech.cycle) mech.damage(0.0003 * simulation.dmgScale);
                         if (mech.energy > 0.1) mech.energy -= 0.003
                         ctx.beginPath();
                         ctx.moveTo(this.position.x, this.position.y);
@@ -446,7 +446,7 @@ const mobs = {
                         let vertices = domain[i].vertices;
                         const len = vertices.length - 1;
                         for (let j = 0; j < len; j++) {
-                            results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
                             if (results.onLine1 && results.onLine2) {
                                 const dx = v1.x - results.x;
                                 const dy = v1.y - results.y;
@@ -463,7 +463,7 @@ const mobs = {
                                 }
                             }
                         }
-                        results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
                         if (results.onLine1 && results.onLine2) {
                             const dx = v1.x - results.x;
                             const dy = v1.y - results.y;
@@ -503,7 +503,7 @@ const mobs = {
                     // hitting player
                     if (best.who === player) {
                         if (mech.immuneCycle < mech.cycle) {
-                            const dmg = 0.0012 * game.dmgScale;
+                            const dmg = 0.0012 * simulation.dmgScale;
                             mech.damage(dmg);
                             //draw damage
                             ctx.fillStyle = "#f00";
@@ -534,7 +534,7 @@ const mobs = {
                 ctx.fillStyle = "#222";
                 ctx.fill();
 
-                if (!(game.cycle % this.seePlayerFreq)) {
+                if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
                         (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange)) &&
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
@@ -552,7 +552,7 @@ const mobs = {
                 // set new values of the ends of the spring constraints
                 const stepRange = 600
                 if (this.seePlayer.recall && Matter.Query.ray(map, this.position, player.position).length === 0) {
-                    if (!(game.cycle % (this.seePlayerFreq * 2))) {
+                    if (!(simulation.cycle % (this.seePlayerFreq * 2))) {
                         const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
                         const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
                         this.springTarget.x = goal.x;
@@ -561,7 +561,7 @@ const mobs = {
                         // this.springTarget.y = this.seePlayer.position.y;
                         this.cons.length = -200;
                         this.cons2.length = 100 + 1.5 * this.radius;
-                    } else if (!(game.cycle % this.seePlayerFreq)) {
+                    } else if (!(simulation.cycle % this.seePlayerFreq)) {
                         const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
                         const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
                         this.springTarget2.x = goal.x;
@@ -586,7 +586,7 @@ const mobs = {
                             let vertices = domain[i].vertices;
                             const len = vertices.length - 1;
                             for (let j = 0; j < len; j++) {
-                                results = game.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                                results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
                                 if (results.onLine1 && results.onLine2) {
                                     const dx = v1.x - results.x;
                                     const dy = v1.y - results.y;
@@ -603,7 +603,7 @@ const mobs = {
                                     }
                                 }
                             }
-                            results = game.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
                             if (results.onLine1 && results.onLine2) {
                                 const dx = v1.x - results.x;
                                 const dy = v1.y - results.y;
@@ -622,7 +622,7 @@ const mobs = {
                         }
                     };
                     //move to a random location
-                    if (!(game.cycle % (this.seePlayerFreq * 5))) {
+                    if (!(simulation.cycle % (this.seePlayerFreq * 5))) {
                         best = {
                             x: null,
                             y: null,
@@ -661,7 +661,7 @@ const mobs = {
                                 x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
                                 y: array[i].velocity.y * 0.94 + curlVector.y * 0.06
                             })
-                            if (isAntiGravity) array[i].force.y -= 0.8 * game.g * array[i].mass
+                            if (isAntiGravity) array[i].force.y -= 0.8 * simulation.g * array[i].mass
                             // //draw curl, for debugging
                             // ctx.beginPath();
                             // ctx.moveTo(array[i].position.x, array[i].position.y);
@@ -687,8 +687,8 @@ const mobs = {
             pullPlayer() {
                 if (this.seePlayer.yes && Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < 1000000) {
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-                    player.force.x -= game.accelScale * 0.00113 * player.mass * Math.cos(angle) * (mech.onGround ? 2 : 1);
-                    player.force.y -= game.accelScale * 0.00084 * player.mass * Math.sin(angle);
+                    player.force.x -= simulation.accelScale * 0.00113 * player.mass * Math.cos(angle) * (mech.onGround ? 2 : 1);
+                    player.force.y -= simulation.accelScale * 0.00084 * player.mass * Math.sin(angle);
 
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
@@ -715,7 +715,7 @@ const mobs = {
                             ctx.moveTo(this.position.x, this.position.y);
                             ctx.lineTo(bullet[i].position.x, bullet[i].position.y);
                             const angle = Math.atan2(dy, dx);
-                            const mag = (1500 * bullet[i].mass * game.g) / dist;
+                            const mag = (1500 * bullet[i].mass * simulation.g) / dist;
                             bullet[i].force.x += mag * Math.cos(angle);
                             bullet[i].force.y += mag * Math.sin(angle);
                         }
@@ -815,14 +815,14 @@ const mobs = {
                         newTarget(this);
                     }
                     //switch to a new target after a while
-                    if (!(game.cycle % (this.seePlayerFreq * 15))) {
+                    if (!(simulation.cycle % (this.seePlayerFreq * 15))) {
                         newTarget(this);
                     }
                 }
             },
             blink() {
                 //teleport towards player as a way to move
-                if (this.seePlayer.recall && !(game.cycle % this.blinkRate)) {
+                if (this.seePlayer.recall && !(simulation.cycle % this.blinkRate)) {
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
                     const dist = Vector.sub(this.seePlayer.position, this.position);
@@ -842,7 +842,7 @@ const mobs = {
             },
             drift() {
                 //teleport towards player as a way to move
-                if (this.seePlayer.recall && !(game.cycle % this.blinkRate)) {
+                if (this.seePlayer.recall && !(simulation.cycle % this.blinkRate)) {
                     // && !mech.lookingAtMob(this,0.5)){
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
@@ -869,7 +869,7 @@ const mobs = {
             bomb() {
                 //throw a mob/bullet at player
                 if (
-                    !(game.cycle % this.fireFreq) &&
+                    !(simulation.cycle % this.fireFreq) &&
                     Math.abs(this.position.x - this.seePlayer.position.x) < 400 && //above player
                     Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 && //see player
                     Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0
@@ -895,7 +895,7 @@ const mobs = {
                     //throw a mob/bullet at player
                     if (this.seePlayer.recall) {
                         //set direction to turn to fire
-                        if (!(game.cycle % this.seePlayerFreq)) {
+                        if (!(simulation.cycle % this.seePlayerFreq)) {
                             this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
                             this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 2500; //gives the bullet an arc  //was    / 1600
                         }
@@ -971,7 +971,7 @@ const mobs = {
             },
             explode(mass = this.mass) {
                 if (mech.immuneCycle < mech.cycle) {
-                    mech.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * game.dmgScale);
+                    mech.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * simulation.dmgScale);
                     this.dropPowerUp = false;
                     this.death(); //death with no power up or body
                 }
@@ -999,18 +999,18 @@ const mobs = {
             },
             damage(dmg, isBypassShield = false) {
                 if ((!this.isShielded || isBypassShield) && this.alive) {
-                    dmg *= mod.damageFromMods()
+                    dmg *= tech.damageFromMods()
                     //mobs specific damage changes
-                    if (mod.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
+                    if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
                     if (this.shield) dmg *= 0.075
 
                     //energy and heal drain should be calculated after damage boosts
-                    if (mod.energySiphon && dmg !== Infinity && this.dropPowerUp) {
-                        mech.energy += Math.min(this.health, dmg) * mod.energySiphon
+                    if (tech.energySiphon && dmg !== Infinity && this.dropPowerUp) {
+                        mech.energy += Math.min(this.health, dmg) * tech.energySiphon
                         // if (mech.energy > mech.maxEnergy) mech.energy = mech.maxEnergy
                     }
-                    if (mod.healthDrain && dmg !== Infinity && this.dropPowerUp) {
-                        mech.addHealth(Math.min(this.health, dmg) * mod.healthDrain)
+                    if (tech.healthDrain && dmg !== Infinity && this.dropPowerUp) {
+                        mech.addHealth(Math.min(this.health, dmg) * tech.healthDrain)
                         if (mech.health > mech.maxHealth) mech.health = mech.maxHealth
                     }
                     dmg /= Math.sqrt(this.mass)
@@ -1035,40 +1035,40 @@ const mobs = {
                 this.removeConsBB();
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
                 if (this.dropPowerUp) {
-                    if (mod.isEnergyLoss) mech.energy *= 0.75;
+                    if (tech.isEnergyLoss) mech.energy *= 0.75;
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
-                    mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in game.checks()
-                    if (Math.random() < mod.sporesOnDeath) {
+                    mech.lastKillCycle = mech.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
+                    if (Math.random() < tech.sporesOnDeath) {
                         const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))
                         for (let i = 0; i < len; i++) {
                             b.spore(this.position)
                         }
-                    } else if (mod.isExplodeMob) {
+                    } else if (tech.isExplodeMob) {
                         b.explosion(this.position, Math.min(600, Math.sqrt(this.mass + 2.75) * 55))
-                    } else if (mod.nailsDeathMob) {
-                        b.targetedNail(this.position, mod.nailsDeathMob, 39 + 6 * Math.random())
+                    } else if (tech.nailsDeathMob) {
+                        b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
                     }
-                    if (Math.random() < mod.isBotSpawner) {
+                    if (Math.random() < tech.isBotSpawner) {
                         b.randomBot(this.position, false)
-                        bullet[bullet.length - 1].endCycle = game.cycle + 1000 + Math.floor(400 * Math.random())
+                        bullet[bullet.length - 1].endCycle = simulation.cycle + 1000 + Math.floor(400 * Math.random())
                         this.leaveBody = false; // no body since it turned into the bot
                     }
-                } else if (mod.isShieldAmmo && this.shield) {
-                    let type = mod.isEnergyNoAmmo ? "heal" : "ammo"
+                } else if (tech.isShieldAmmo && this.shield) {
+                    let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"
-                    } else if (Math.random() < 0.3 && !mod.isSuperDeterminism) {
+                    } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
                         type = "reroll"
                     }
                     for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
                         powerUps.spawn(this.position.x, this.position.y, type);
                     }
                 }
-                if (mod.isRadioactive) {
+                if (tech.isRadioactive) {
                     //look for dots and spread them
                     let dmgTotal = 0
                     for (let i = 0, len = this.status.length; i < len; i++) {
-                        if (this.status[i].type === "dot") dmgTotal += this.status[i].dmg * (this.status[i].endCycle - game.cycle)
+                        if (this.status[i].type === "dot") dmgTotal += this.status[i].dmg * (this.status[i].endCycle - simulation.cycle)
                     }
                     if (dmgTotal > 0) { //look for closest mob
                         let closestRadius = 500;
@@ -1090,7 +1090,7 @@ const mobs = {
                             ctx.stroke();
                         }
                         //draw AOE
-                        // game.drawList.push({ //add dmg to draw queue
+                        // simulation.drawList.push({ //add dmg to draw queue
                         //     x: this.position.x,
                         //     y: this.position.y,
                         //     radius: radius,

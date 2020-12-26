@@ -33,7 +33,7 @@
     <!-- <body oncontextmenu="return false"> -->
     <div id='guns'></div>
     <div id='field'></div>
-    <div id='mods'></div>
+    <div id='tech'></div>
     <div id="text-log"></div>
     <div id="fade-out"></div>
     <div id="health-bg"></div>
@@ -327,7 +327,7 @@
             animation: dash 5s ease-in forwards;
         }
     </style>
-    <svg id='splash' class="intro" viewBox="0 0 800 800" onclick="game.startGame()">
+    <svg id='splash' class="intro" viewBox="0 0 800 800" onclick="simulation.startGame()">
         <!-- title -->
         <!-- <g class="fade-in" transform="translate(100,210) scale(34)" fill='#bbb' stroke='none'>
 			<path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" fill="rgb(50,200,255)" />
@@ -553,10 +553,10 @@
     <script src='lib/matter.min.js'></script>
     <script src='lib/decomp.min.js'></script>
     <script src='lib/randomColor.min.js'></script>
-    <script src="js/game.js"></script>
+    <script src="js/simulation.js"></script>
     <script src="js/player.js"></script>
     <script src="js/powerup.js"></script>
-    <script src="js/mods.js"></script>
+    <script src="js/tech.js"></script>
     <script src="js/bullet.js"></script>
     <script src="js/mob.js"></script>
     <script src="js/spawn.js"></script>

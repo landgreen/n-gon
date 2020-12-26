@@ -42,6 +42,10 @@ a {
     color: #08c;
 }
 
+em {
+    opacity: 0.7;
+}
+
 #splash {
     user-select: none;
     position: absolute;
@@ -272,11 +276,11 @@ summary {
     background-color: hsl(218, 100%, 76%);
 }
 
-.build-mod-selected {
+.build-tech-selected {
     background-color: hsl(253, 100%, 84%);
 }
 
-.build-mod-selected:hover {
+.build-tech-selected:hover {
     background-color: hsl(253, 100%, 81%);
 }
 
@@ -313,7 +317,7 @@ summary {
     width: 100%;
     height: 100%;
     display: none;
-    /* background-color also set in mass-energy mod */
+    /* background-color also set in mass-energy tech */
     background-color: #f67;
     opacity: 0;
     transition: opacity 1s;
@@ -376,8 +380,9 @@ summary {
     left: 15px;
     z-index: 2;
     font-size: 23px;
-    color: #111;
+    color: #222;
     background-color: rgba(255, 255, 255, 0.4);
+    line-height: 120%;
     user-select: none;
     pointer-events: none;
     padding: 0px 5px 0px 5px;
@@ -394,7 +399,7 @@ summary {
     color: #000;
     text-align: right;
     opacity: 0.7;
-    line-height: 140%;
+    /* line-height: 140%;    */
     background-color: rgba(190, 210, 245, 0.25);
     user-select: none;
     pointer-events: none;
@@ -403,16 +408,16 @@ summary {
     /*border: 2px solid rgba(0, 0, 0, 0.4);*/
 }
 
-#mods {
+#tech {
     position: absolute;
     top: 60px;
     right: 15px;
     z-index: 2;
     font-size: 20px;
-    color: #000;
+    color: #222;
     text-align: right;
     opacity: 0.35;
-    line-height: 140%;
+    line-height: 130%;
     background-color: rgba(255, 255, 255, 0.4);
     user-select: none;
     pointer-events: none;
@@ -424,27 +429,66 @@ summary {
 #text-log {
     z-index: 2;
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    bottom: 10px;
+    left: 10px;
     padding: 10px;
-    border-radius: 10px;
-    line-height: 150%;
-    font-size: 1.25em;
-    color: #000;
-    background-color: rgba(255, 255, 255, 0.23);
-    opacity: 0;
+    border-radius: 4px;
+    line-height: 140%;
+    font-size: 1.15em;
+    color: #555;
+    background-color: rgba(255, 255, 255, 0.5);
     transition: opacity 0.5s;
     pointer-events: none;
     user-select: none;
 }
 
-em {
-    opacity: 0.7;
+/* color for in game console output */
+
+.color-text {
+    color: #000;
 }
 
-.mouse-icon {
-    margin-bottom: -20px;
+.color-var {
+    color: hsl(253, 100%, 58%);
 }
+
+.color-symbol {
+    color: hsl(290, 100%, 40%);
+}
+
+.color-gun {
+    color: hsl(218, 100%, 58%);
+}
+
+/* colors for pause, selection and custom */
+
+/* #text-log {
+    z-index: 2;
+    position: absolute;
+    bottom: 4px;
+    left: 6px;
+    line-height: 130%;
+    font-size: 1.2em;
+    color: rgb(237, 15, 148);
+    transition: opacity 1s;
+    pointer-events: none;
+    user-select: none;
+}
+
+.color-text {
+    color: rgb(0, 164, 164);
+}
+
+.color-symbol {
+    color: #fff;
+}
+
+.color-gun {
+    color: hsl(218, 100%, 70%);
+} */
+
+
+
 
 .color-f {
     color: #0ad;
@@ -565,7 +609,7 @@ em {
     margin-bottom: -15px;
 }
 
-.circle-gun-mod {
+.circle-gun-tech {
     box-shadow: 0 0 0 3px #025;
 }
 
@@ -583,7 +627,7 @@ em {
     background: #0cf;
 }
 
-.mod {
+.tech {
     /* background: rgb(116, 102, 238); */
     /* background: hsl(253, 57%, 52%); */
     background: hsl(255, 100%, 71%);
@@ -607,9 +651,7 @@ em {
     background: #f7b;
 }
 
-.dice {
-    font-size: 45px;
-    vertical-align: -5px;
+.reroll-select {
     float: right;
 }
 

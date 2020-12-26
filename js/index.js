@@ -43,10 +43,10 @@ if (screen.height < 800) {
 
 //example  https://landgreen.github.io/sidescroller/index.html?
 //          &gun1=minigun&gun2=laser
-//          &mod1=laser-bot&mod2=mass%20driver&mod3=overcharge&mod4=laser-bot&mod5=laser-bot&field=phase%20decoherence%20field&difficulty=2
+//          &tech1=laser-bot&tech2=mass%20driver&tech3=overcharge&tech4=laser-bot&tech5=laser-bot&field=phase%20decoherence%20field&difficulty=2
 //add ? to end of url then for each power up add
 // &gun1=name&gun2=name
-// &mod1=laser-bot&mod2=mass%20driver&mod3=overcharge&mod4=laser-bot&mod5=laser-bot
+// &tech1=laser-bot&tech2=mass%20driver&tech3=overcharge&tech4=laser-bot&tech5=laser-bot
 // &field=phase%20decoherence%20field
 // &difficulty=2
 //use %20 for spaces
@@ -90,16 +90,16 @@ window.addEventListener('load', (event) => {
                 }
                 if (found) build.choosePowerUp(document.getElementById(`gun-${index}`), index, 'gun')
             }
-            if (property.substring(0, 3) === "mod") {
-                for (let i = 0; i < mod.mods.length; i++) {
-                    if (set[property] === mod.mods[i].name) {
-                        build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod', true)
+            if (property.substring(0, 4) === "tech") {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (set[property] === tech.tech[i].name) {
+                        build.choosePowerUp(document.getElementById(`tech-${i}`), i, 'tech', true)
                         break;
                     }
                 }
             }
             if (property === "difficulty") {
-                game.difficultyMode = Number(set[property])
+                simulation.difficultyMode = Number(set[property])
                 document.getElementById("difficulty-select-custom").value = Number(set[property])
             }
             if (property === "level") {
@@ -138,7 +138,7 @@ function setupCanvas() {
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     // ctx.lineCap='square';
-    game.setZoom();
+    simulation.setZoom();
 }
 setupCanvas();
 window.onresize = () => {
@@ -155,47 +155,47 @@ const build = {
             for (const property in set) {
                 set[property] = set[property].replace(/%20/g, " ")
                 if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
-                if (property.substring(0, 3) === "mod") mod.giveMod(set[property])
+                if (property.substring(0, 3) === "tech") tech.giveMod(set[property])
                 if (property === "field") mech.setField(set[property])
                 if (property === "difficulty") {
-                    game.difficultyMode = Number(set[property])
+                    simulation.difficultyMode = Number(set[property])
                     document.getElementById("difficulty-select").value = Number(set[property])
                 }
                 if (property === "level") {
                     level.levelsCleared += Number(set[property]);
-                    level.difficultyIncrease(Number(set[property]) * game.difficultyMode) //increase difficulty based on modes
+                    level.difficultyIncrease(Number(set[property]) * simulation.difficultyMode) //increase difficulty based on modes
                     spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
                     level.onLevel++
                 }
             }
             for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-            bullet = []; //remove any bullets that might have spawned from mods
+            bullet = []; //remove any bullets that might have spawned from tech
             if (b.inventory.length > 0) {
                 b.activeGun = b.inventory[0] //set first gun to active gun
-                game.makeGunHUD();
+                simulation.makeGunHUD();
             }
         }
     },
     pauseGrid() {
         let text = ""
-        if (!game.isChoosing) text += `<div class="pause-grid-module">
+        if (!simulation.isChoosing) text += `<div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
         text += `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
-      <strong class='color-d'>damage</strong> increase: ${((mod.damageFromMods()-1)*100).toFixed(0)}%
+      <strong class='color-d'>damage</strong> increase: ${((tech.damageFromMods()-1)*100).toFixed(0)}%
       <br><strong class='color-harm'>harm</strong> reduction: ${((1-mech.harmReduction())*100).toFixed(0)}%
       <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(0)}%
-      <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,mod.duplicationChance())*100).toFixed(0)}%
+      <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
       <br>
       <br><strong class='color-r'>rerolls</strong>: ${powerUps.reroll.rerolls}
       <br><strong class='color-h'>health</strong>: (${(mech.health*100).toFixed(0)} / ${(mech.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(mech.energy*100).toFixed(0)} / ${(mech.maxEnergy*100).toFixed(0)})
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
-      <br>mouse: (${game.mouseInGame.x.toFixed(1)}, ${game.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
+      <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
       <br>
       <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${mech.cycle} cycles
       <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups      
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
-      <br>harm difficulty scale: ${(game.dmgScale*100).toFixed(0)}%
-      <br>heal difficulty scale: ${(game.healScale*100).toFixed(1)}%
+      <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
+      <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
       <br><svg class="SVG-button" onclick="build.shareURL(false)" width="110" height="25" style="padding:2px; margin: 10px;">
       <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
           <text x="5" y="18">copy build url</text>
@@ -213,31 +213,31 @@ const build = {
         text = "";
         text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
         let countMods = 0
-        for (let i = 0, len = mod.mods.length; i < len; i++) {
-            if (mod.mods[i].count > 0) {
-                const isCount = mod.mods[i].count > 1 ? `(${mod.mods[i].count}x)` : "";
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            if (tech.tech[i].count > 0) {
+                const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
-                if (mod.mods[i].isFieldMod) {
+                if (tech.tech[i].isFieldMod) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
-                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
-                } else if (mod.mods[i].isGunMod) {
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                } else if (tech.tech[i].isGunMod) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
-                                                <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
-                // if (mod.mods[i].count === 1) {
-                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+                // if (tech.tech[i].count === 1) {
+                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                 // } else {
-                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
+                //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${tech.tech[i].name} (${tech.tech[i].count}x)</div> ${tech.tech[i].description}</div>`
                 // }
                 countMods++
             }
@@ -270,7 +270,7 @@ const build = {
                     b.guns[index].have = false;
                     if (b.guns[index].ammo != Infinity) b.guns[index].ammo = 0;
                     if (b.inventory.length === 0) b.activeGun = null;
-                    game.makeGunHUD();
+                    simulation.makeGunHUD();
                     break
                 }
             }
@@ -284,55 +284,55 @@ const build = {
                 mech.setField(index)
                 who.classList.add("build-field-selected");
             }
-        } else if (type === "mod") { //remove mod if you have too many
-            if (mod.mods[index].count < mod.mods[index].maxCount) {
-                if (!who.classList.contains("build-mod-selected")) who.classList.add("build-mod-selected");
-                mod.giveMod(index)
+        } else if (type === "tech") { //remove tech if you have too many
+            if (tech.tech[index].count < tech.tech[index].maxCount) {
+                if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
+                tech.giveMod(index)
             } else {
-                mod.removeMod(index);
-                who.classList.remove("build-mod-selected");
+                tech.removeMod(index);
+                who.classList.remove("build-tech-selected");
             }
         }
-        //update mod text //disable not allowed mods
-        for (let i = 0, len = mod.mods.length; i < len; i++) {
-            const modID = document.getElementById("mod-" + i)
-            if (!mod.mods[i].isCustomHide) {
-                if (mod.mods[i].allowed() || isAllowed || mod.mods[i].count > 0) {
-                    const isCount = mod.mods[i].count > 1 ? `(${mod.mods[i].count}x)` : "";
-                    if (mod.mods[i].isFieldMod) {
-                        modID.innerHTML = ` <div class="grid-title">
+        //update tech text //disable not allowed tech
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            const techID = document.getElementById("tech-" + i)
+            if (!tech.tech[i].isCustomHide) {
+                if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
+                    const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
+                    if (tech.tech[i].isFieldMod) {
+                        techID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
-                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                     <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                                 </span>
-                                                &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
+                                                &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
 
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
-                        // <div class="circle-grid mod" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
+                        // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
                         // border: #fff solid 0px;
-                    } else if (mod.mods[i].isGunMod) {
-                        modID.innerHTML = ` <div class="grid-title">
+                    } else if (tech.tech[i].isGunMod) {
+                        techID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
-                                                    <div class="circle-grid mod" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                     <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                                 </span>
-                                                &nbsp; &nbsp; &nbsp; &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
+                                                &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     } else {
-                        modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} ${isCount}</div>${mod.mods[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     }
 
-                    if (modID.classList.contains("build-grid-disabled")) {
-                        modID.classList.remove("build-grid-disabled");
-                        modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
+                    if (techID.classList.contains("build-grid-disabled")) {
+                        techID.classList.remove("build-grid-disabled");
+                        techID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'tech')`);
                     }
                 } else {
-                    modID.innerHTML = `<div class="grid-title"> ${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
-                    if (!modID.classList.contains("build-grid-disabled")) {
-                        modID.classList.add("build-grid-disabled");
-                        modID.onclick = null
+                    techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    if (!techID.classList.contains("build-grid-disabled")) {
+                        techID.classList.add("build-grid-disabled");
+                        techID.onclick = null
                     }
-                    if (mod.mods[i].count > 0) mod.removeMod(i)
-                    if (modID.classList.contains("build-mod-selected")) modID.classList.remove("build-mod-selected");
+                    if (tech.tech[i].count > 0) tech.removeMod(i)
+                    if (techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
                 }
             }
         }
@@ -368,7 +368,7 @@ const build = {
       </select>
     </div>
     <div>
-      <label for="no-power-ups" title="no mods, fields, or guns will spawn during the game">no power ups:</label>
+      <label for="no-power-ups" title="no tech, fields, or guns will spawn">no power ups:</label>
       <input type="checkbox" id="no-power-ups" name="no-power-ups" style="width:17px; height:17px;">
     </div>
   </div>`
@@ -379,21 +379,21 @@ const build = {
             text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
         }
 
-        for (let i = 0, len = mod.mods.length; i < len; i++) {
-            if (!mod.mods[i].isCustomHide) {
-                if (!mod.mods[i].allowed()) { // || mod.mods[i].name === "+1 cardinality") { //|| mod.mods[i].name === "leveraged investment"
-                    text += `<div id="mod-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title">${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
-                    // } else if (mod.mods[i].count > 1) {
-                    //     text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div> ${mod.mods[i].description}</div>`
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            if (!tech.tech[i].isCustomHide) {
+                if (!tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+                    text += `<div id="tech-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    // } else if (tech.tech[i].count > 1) {
+                    //     text += `<div id="tech-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} (${tech.tech[i].count}x)</div> ${tech.tech[i].description}</div>`
                 } else {
-                    text += `<div id="mod-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'mod')"><div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div> ${mod.mods[i].description}</div>`
+                    text += `<div id="tech-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                 }
             }
         }
         document.getElementById("build-grid").innerHTML = text
         document.getElementById("difficulty-select-custom").value = document.getElementById("difficulty-select").value
         document.getElementById("difficulty-select-custom").addEventListener("input", () => {
-            game.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
+            simulation.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
             localSettings.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
             document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -410,9 +410,9 @@ const build = {
             if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
         }
         b.activeGun = null;
-        game.makeGunHUD();
+        simulation.makeGunHUD();
 
-        mod.setupAllMods();
+        tech.setupAllMods();
         build.populateGrid();
         document.getElementById("field-0").classList.add("build-field-selected");
         document.getElementById("build-grid").style.display = "grid"
@@ -429,24 +429,24 @@ const build = {
         }
 
         count = 0;
-        for (let i = 0; i < mod.mods.length; i++) {
-            for (let j = 0; j < mod.mods[i].count; j++) {
-                url += `&mod${count}=${encodeURIComponent(mod.mods[i].name.trim())}`
+        for (let i = 0; i < tech.tech.length; i++) {
+            for (let j = 0; j < tech.tech[i].count; j++) {
+                url += `&tech${count}=${encodeURIComponent(tech.tech[i].name.trim())}`
                 count++
             }
         }
         url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
-        url += `&difficulty=${game.difficultyMode}`
+        url += `&difficulty=${simulation.difficultyMode}`
         if (isCustom) {
             url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
             url += `&noPower=${Number(document.getElementById("no-power-ups").checked)}`
             alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         } else {
-            game.makeTextLog("n-gon build URL copied to clipboard.<br>Paste into browser address bar.", 300)
+            simulation.makeTextLog("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
-        game.copyToClipBoard(url)
+        simulation.copyToClipBoard(url)
     },
     startBuildRun() {
         build.isCustomSelection = false;
@@ -454,18 +454,18 @@ const build = {
         spawn.setSpawnList();
         if (b.inventory.length > 0) {
             b.activeGun = b.inventory[0] //set first gun to active gun
-            game.makeGunHUD();
+            simulation.makeGunHUD();
         }
         for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-        bullet = []; //remove any bullets that might have spawned from mods
+        bullet = []; //remove any bullets that might have spawned from tech
         const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value))
-        level.difficultyIncrease(Math.min(99, levelsCleared * game.difficultyMode)) //increase difficulty based on modes
+        level.difficultyIncrease(Math.min(99, levelsCleared * simulation.difficultyMode)) //increase difficulty based on modes
         level.levelsCleared += levelsCleared;
-        game.isNoPowerUps = document.getElementById("no-power-ups").checked
-        if (game.isNoPowerUps) { //remove mods, guns, and fields
+        simulation.isNoPowerUps = document.getElementById("no-power-ups").checked
+        if (simulation.isNoPowerUps) { //remove tech, guns, and fields
             function removeOne() { //recursive remove one at a time to avoid array problems
                 for (let i = 0; i < powerUp.length; i++) {
-                    if (powerUp[i].name === "mod" || powerUp[i].name === "gun" || powerUp[i].name === "field") {
+                    if (powerUp[i].name === "tech" || powerUp[i].name === "gun" || powerUp[i].name === "field") {
                         Matter.World.remove(engine.world, powerUp[i]);
                         powerUp.splice(i, 1);
                         removeOne();
@@ -475,11 +475,11 @@ const build = {
             }
             removeOne();
         }
-        game.isCheating = true;
+        simulation.isCheating = true;
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
         document.getElementById("build-grid").style.display = "none"
-        game.paused = false;
+        simulation.paused = false;
         requestAnimationFrame(cycle);
     }
 }
@@ -491,9 +491,9 @@ function openCustomBuildMenu() {
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
-    game.startGame(true); //starts game, but pauses it
+    simulation.startGame(true); //starts game, but pauses it
     build.isCustomSelection = true;
-    game.paused = true;
+    simulation.paused = true;
     build.reset();
 }
 
@@ -501,49 +501,15 @@ function openCustomBuildMenu() {
 document.getElementById("build-button").addEventListener("click", () => { //setup build run
     let field = 0;
     let inventory = [];
-    let modList = [];
-    if (!game.firstRun) {
+    let techList = [];
+    if (!simulation.firstRun) {
         field = mech.fieldMode
         inventory = [...b.inventory]
-        for (let i = 0; i < mod.mods.length; i++) {
-            modList.push(mod.mods[i].count)
+        for (let i = 0; i < tech.tech.length; i++) {
+            techList.push(tech.tech[i].count)
         }
     }
     openCustomBuildMenu();
-    // if (!game.firstRun) { //if player has already died once load that previous build
-    //     build.choosePowerUp(document.getElementById(`field-${field}`), field, 'field')
-    //     for (let i = 0; i < inventory.length; i++) {
-    //         build.choosePowerUp(document.getElementById(`gun-${inventory[i]}`), inventory[i], 'gun')
-    //     }
-    //     for (let i = 0; i < modList.length; i++) {
-    //         for (let j = 0; j < modList[i]; j++) {
-    //             build.choosePowerUp(document.getElementById(`mod-${i}`), i, 'mod', true)
-    //         }
-    //     }
-    //     //update mod text //disable not allowed mods  
-    //     for (let i = 0, len = mod.mods.length; i < len; i++) {
-    //         const modID = document.getElementById("mod-" + i)
-    //         if (!mod.mods[i].isCustomHide) {
-    //             if (mod.mods[i].allowed() || mod.mods[i].count > 0) {
-    //                 if (mod.mods[i].count > 1) {
-    //                     modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name} (${mod.mods[i].count}x)</div>${mod.mods[i].description}</div>`
-    //                 } else {
-    //                     modID.innerHTML = `<div class="grid-title"><div class="circle-grid mod"></div> &nbsp; ${mod.mods[i].name}</div>${mod.mods[i].description}</div>`
-    //                 }
-    //                 if (modID.classList.contains("build-grid-disabled")) {
-    //                     modID.classList.remove("build-grid-disabled");
-    //                     modID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'mod')`);
-    //                 }
-    //             } else {
-    //                 modID.innerHTML = `<div class="grid-title">${mod.mods[i].name}</div><span style="color:#666;">requires: ${mod.mods[i].requires}</span></div>`
-    //                 if (!modID.classList.contains("build-grid-disabled")) {
-    //                     modID.classList.add("build-grid-disabled");
-    //                     modID.onclick = null
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 });
 
 // ************************************************************************************************
@@ -739,26 +705,25 @@ window.addEventListener("keydown", function(event) {
             input.field = true
             break
         case input.key.nextGun:
-            game.nextGun();
+            simulation.nextGun();
             break
         case input.key.previousGun:
-            game.previousGun();
+            simulation.previousGun();
             break
         case input.key.pause:
-            if (!game.isChoosing && input.isPauseKeyReady && mech.alive) {
+            if (!simulation.isChoosing && input.isPauseKeyReady && mech.alive) {
                 input.isPauseKeyReady = false
                 setTimeout(function() {
                     input.isPauseKeyReady = true
                 }, 300);
-                if (game.paused) {
+                if (simulation.paused) {
                     build.unPauseGrid()
-                    game.paused = false;
+                    simulation.paused = false;
                     level.levelAnnounce();
                     document.body.style.cursor = "none";
                     requestAnimationFrame(cycle);
                 } else {
-                    game.paused = true;
-                    game.replaceTextLog = true;
+                    simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
                 }
@@ -766,56 +731,56 @@ window.addEventListener("keydown", function(event) {
             break
         case input.key.testing:
             if (mech.alive) {
-                if (game.testing) {
-                    game.testing = false;
-                    game.loop = game.normalLoop
-                    if (game.isConstructionMode) {
+                if (simulation.testing) {
+                    simulation.testing = false;
+                    simulation.loop = simulation.normalLoop
+                    if (simulation.isConstructionMode) {
                         document.getElementById("construct").style.display = 'none'
                     }
                 } else { //if (keys[191])
-                    game.testing = true;
-                    game.isCheating = true;
-                    if (game.isConstructionMode) {
+                    simulation.testing = true;
+                    simulation.isCheating = true;
+                    if (simulation.isConstructionMode) {
                         document.getElementById("construct").style.display = 'inline'
                     }
-                    game.loop = game.testingLoop
+                    simulation.loop = simulation.testingLoop
                 }
             }
             break
     }
-    if (game.testing) {
+    if (simulation.testing) {
         switch (event.key.toLowerCase()) {
             case "o":
-                game.isAutoZoom = false;
-                game.zoomScale /= 0.9;
-                game.setZoom();
+                simulation.isAutoZoom = false;
+                simulation.zoomScale /= 0.9;
+                simulation.setZoom();
                 break;
             case "i":
-                game.isAutoZoom = false;
-                game.zoomScale *= 0.9;
-                game.setZoom();
+                simulation.isAutoZoom = false;
+                simulation.zoomScale *= 0.9;
+                simulation.setZoom();
                 break
             case "`":
-                powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "reroll");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "reroll");
                 break
             case "1":
-                powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "heal");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "heal");
                 break
             case "2":
-                powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "ammo");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "ammo");
                 break
             case "3":
-                powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "gun");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "gun");
                 break
             case "4":
-                powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "field");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "field");
                 break
             case "5":
-                powerUps.directSpawn(game.mouseInGame.x, game.mouseInGame.y, "mod");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
                 break
             case "6":
                 const index = body.length
-                spawn.bodyRect(game.mouseInGame.x, game.mouseInGame.y, 50, 50);
+                spawn.bodyRect(simulation.mouseInGame.x, simulation.mouseInGame.y, 50, 50);
                 body[index].collisionFilter.category = cat.body;
                 body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                 body[index].classType = "body";
@@ -823,10 +788,10 @@ window.addEventListener("keydown", function(event) {
                 break
             case "7":
                 const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-                spawn[pick](game.mouseInGame.x, game.mouseInGame.y);
+                spawn[pick](simulation.mouseInGame.x, simulation.mouseInGame.y);
                 break
             case "8":
-                spawn.randomLevelBoss(game.mouseInGame.x, game.mouseInGame.y);
+                spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y);
                 break
             case "f":
                 const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
@@ -840,11 +805,11 @@ window.addEventListener("keydown", function(event) {
                 mech.energy = mech.maxEnergy;
                 break
             case "y":
-                mod.giveMod()
+                tech.giveMod()
                 break
             case "r":
                 mech.resetHistory();
-                Matter.Body.setPosition(player, game.mouseInGame);
+                Matter.Body.setPosition(player, simulation.mouseInGame);
                 Matter.Body.setVelocity(player, {
                     x: 0,
                     y: 0
@@ -875,8 +840,8 @@ window.addEventListener("keydown", function(event) {
 });
 //mouse move input
 document.body.addEventListener("mousemove", (e) => {
-    game.mouse.x = e.clientX;
-    game.mouse.y = e.clientY;
+    simulation.mouse.x = e.clientX;
+    simulation.mouse.y = e.clientY;
 });
 
 document.body.addEventListener("mouseup", (e) => {
@@ -925,11 +890,11 @@ document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting s
 });
 
 document.body.addEventListener("wheel", (e) => {
-    if (!game.paused) {
+    if (!simulation.paused) {
         if (e.deltaY > 0) {
-            game.nextGun();
+            simulation.nextGun();
         } else {
-            game.previousGun();
+            simulation.previousGun();
         }
     }
 }, {
@@ -948,14 +913,14 @@ if (localSettings) {
     }
 
 
-    game.isCommunityMaps = localSettings.isCommunityMaps
+    simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
-    game.difficultyMode = localSettings.difficultyMode
+    simulation.difficultyMode = localSettings.difficultyMode
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
     if (localSettings.fpsCapDefault === 'max') {
-        game.fpsCapDefault = 999999999;
+        simulation.fpsCapDefault = 999999999;
     } else {
-        game.fpsCapDefault = Number(localSettings.fpsCapDefault)
+        simulation.fpsCapDefault = Number(localSettings.fpsCapDefault)
     }
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 } else {
@@ -970,7 +935,7 @@ if (localSettings) {
     input.setDefault()
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
-    game.isCommunityMaps = localSettings.isCommunityMaps
+    simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }
@@ -982,24 +947,24 @@ input.controlTextUpdate()
 document.getElementById("fps-select").addEventListener("input", () => {
     let value = document.getElementById("fps-select").value
     if (value === 'max') {
-        game.fpsCapDefault = 999999999;
+        simulation.fpsCapDefault = 999999999;
     } else {
-        game.fpsCapDefault = Number(value)
+        simulation.fpsCapDefault = Number(value)
     }
     localSettings.fpsCapDefault = value
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 document.getElementById("community-maps").addEventListener("input", () => {
-    game.isCommunityMaps = document.getElementById("community-maps").checked
-    localSettings.isCommunityMaps = game.isCommunityMaps
+    simulation.isCommunityMaps = document.getElementById("community-maps").checked
+    localSettings.isCommunityMaps = simulation.isCommunityMaps
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 // difficulty-select-custom event listener is set in build.makeGrid
 document.getElementById("difficulty-select").addEventListener("input", () => {
-    game.difficultyMode = Number(document.getElementById("difficulty-select").value)
-    localSettings.difficultyMode = game.difficultyMode
+    simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
+    localSettings.difficultyMode = simulation.difficultyMode
     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
@@ -1048,28 +1013,27 @@ document.getElementById("updates").addEventListener("toggle", function() {
 //**********************************************************************
 // main loop 
 //**********************************************************************
-game.loop = game.normalLoop;
+simulation.loop = simulation.normalLoop;
 
 function cycle() {
-    if (!game.paused) requestAnimationFrame(cycle);
+    if (!simulation.paused) requestAnimationFrame(cycle);
     const now = Date.now();
-    const elapsed = now - game.then; // calc elapsed time since last loop
-    if (elapsed > game.fpsInterval) { // if enough time has elapsed, draw the next frame
-        game.then = now - (elapsed % game.fpsInterval); // Get ready for next frame by setting then=now.   Also, adjust for fpsInterval not being multiple of 16.67
+    const elapsed = now - simulation.then; // calc elapsed time since last loop
+    if (elapsed > simulation.fpsInterval) { // if enough time has elapsed, draw the next frame
+        simulation.then = now - (elapsed % simulation.fpsInterval); // Get ready for next frame by setting then=now.   Also, adjust for fpsInterval not being multiple of 16.67
 
-        game.cycle++; //tracks game cycles
+        simulation.cycle++; //tracks game cycles
         mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
-        if (game.clearNow) {
-            game.clearNow = false;
-            game.clearMap();
+        if (simulation.clearNow) {
+            simulation.clearNow = false;
+            simulation.clearMap();
             level.start();
         }
 
-        game.loop();
+        simulation.loop();
         // if (isNaN(mech.health) || isNaN(mech.energy)) {
         //   console.log(`mech.health = ${mech.health}`)
-        //   game.paused = true;
-        //   game.replaceTextLog = true;
+        //   simulation.paused = true;
         //   build.pauseGrid()
         //   document.body.style.cursor = "auto";
         //   alert("health is NaN, please report this bug to the discord  \n https://discordapp.com/invite/2eC9pgJ")
@@ -1079,23 +1043,3 @@ function cycle() {
         // }
     }
 }
-
-
-
-//display console logs in game
-
-// function proxy(context, method, message) {
-//     return function() {
-//         // method.apply(context, [message].concat(Array.prototype.slice.apply(arguments)))
-//         game.makeTextLog(arguments[0], 300)
-//     }
-// }
-
-// console.log = proxy(console, console.log, 'n-gon: ')
-// console.error = proxy(console, console.error, 'Error:')
-// console.warn = proxy(console, console.warn, 'Warning:')
-
-// let's test
-// console.log('im from console.log', level, 2, 3);
-//   console.error('im from console.error', 1, 2, 3);
-//   console.warn('im from console.warn', 1, 2, 3);
