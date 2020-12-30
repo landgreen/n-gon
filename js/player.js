@@ -1507,7 +1507,7 @@ const mech = {
                             }
                         } else if (tech.isMissileField) {
                             mech.energy -= 0.55;
-                            b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1, tech.recursiveMissiles)
+                            b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1)
                         } else if (tech.isIceField) {
                             mech.energy -= 0.057;
                             b.iceIX(1)
@@ -1540,13 +1540,13 @@ const mech = {
         },
         {
             name: "negative mass field",
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>45%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
             effect: () => {
                 mech.fieldFire = true;
                 mech.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
                 mech.fieldMeterColor = "#000"
-                mech.fieldHarmReduction = 0.6;
+                mech.fieldHarmReduction = 0.55;
                 mech.fieldDrawRadius = 0;
 
                 mech.hold = function() {

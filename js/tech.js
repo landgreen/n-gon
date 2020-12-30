@@ -83,7 +83,7 @@ const tech = {
         if (tech.isEnergyNoAmmo) dmg *= 1.5
         if (tech.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
-        if (tech.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 2;
+        if (tech.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 3;
         if (tech.isEnergyLoss) dmg *= 1.5;
         if (tech.isAcidDmg && mech.health > 1) dmg *= 1.4;
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
@@ -100,7 +100,7 @@ const tech = {
         return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + mech.duplicateChance
     },
     totalBots() {
-        return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.plasmaBotCount + tech.orbitBotCount
+        return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
     },
     tech: [{
             name: "electrolytes",
@@ -136,7 +136,7 @@ const tech = {
         },
         {
             name: "exothermic process",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain stored <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -250,7 +250,7 @@ const tech = {
         },
         {
             name: "negative feedback",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> missing base <strong>health</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong>health</strong> below <strong>100</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -266,7 +266,7 @@ const tech = {
         },
         {
             name: "radiative equilibrium",
-            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -561,7 +561,7 @@ const tech = {
         },
         {
             name: "foam-bot",
-            description: "a bot fires <strong>foam</strong> at targets in line of sight",
+            description: "a bot fires <strong>foam</strong> at nearby targets",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -805,14 +805,18 @@ const tech = {
                     b.boomBot();
                 }
                 tech.boomBotCount *= 2
-                for (let i = 0; i < tech.plasmaBotCount; i++) {
-                    b.plasmaBot();
-                }
-                tech.plasmaBotCount *= 2
                 for (let i = 0; i < tech.orbitBotCount; i++) {
                     b.orbitBot();
                 }
                 tech.orbitBotCount *= 2
+                for (let i = 0; i < tech.plasmaBotCount; i++) {
+                    b.plasmaBot();
+                }
+                tech.plasmaBotCount *= 2
+                for (let i = 0; i < tech.missileBotCount; i++) {
+                    b.missileBot();
+                }
+                tech.missileBotCount *= 2
             },
             remove() {}
         },
@@ -906,7 +910,7 @@ const tech = {
         },
         {
             name: "Pauli exclusion",
-            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>0.5</strong> seconds longer<br>after receiving <strong class='color-harm'>harm</strong> from a collision`,
+            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong>`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -914,7 +918,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.collisionImmuneCycles += 30;
+                tech.collisionImmuneCycles += 45;
                 mech.immuneCycle = mech.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
             },
             remove() {
@@ -1384,7 +1388,7 @@ const tech = {
         },
         {
             name: "Bayesian statistics",
-            description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, <strong>eject</strong> 1 <strong class='color-m'>tech</strong>",
+            description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, eject <strong>1</strong> <strong class='color-m'>tech</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1773,9 +1777,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.reroll.rerolls > 5 || build.isCustomSelection) && !tech.isDeterminism
+                return (powerUps.reroll.rerolls > 2 || build.isCustomSelection) && !tech.isDeterminism
             },
-            requires: "not determinism, at least 4 rerolls",
+            requires: "not determinism, at least 3 rerolls",
             effect() {
                 tech.isBanish = true
                 for (let i = 0; i < 4; i++) {
@@ -2052,7 +2056,7 @@ const tech = {
         },
         {
             name: "critical bifurcation",
-            description: "<strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
+            description: "nail gun <strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2428,25 +2432,42 @@ const tech = {
             }
         },
         {
-            name: "recursion",
-            description: "after <strong>missiles</strong> <strong class='color-e'>explode</strong> they have a<br><strong>20%</strong> chance to launch a larger <strong>missile</strong>",
+            name: "cruise missile",
+            description: "<strong>missiles</strong> travel <strong>50%</strong> slower,<br>but have a <strong>50%</strong> larger <strong class='color-e'>explosive</strong> payload",
             isGunTech: true,
-            maxCount: 6,
+            maxCount: 1,
             count: 0,
             allowed() {
                 return tech.haveGunCheck("missiles") || tech.isMissileField
             },
             requires: "missiles",
             effect() {
-                tech.recursiveMissiles++
+                tech.missileSize = true
             },
             remove() {
-                tech.recursiveMissiles = 0;
+                tech.missileSize = false
             }
         },
         {
             name: "MIRV",
-            description: "launch <strong>3</strong> small <strong>missiles</strong> instead of <strong>1</strong> <br><strong>1.5x</strong> increase in <strong><em>delay</em></strong> after firing",
+            description: "launch <strong>+1</strong> <strong>missile</strong> at a time<br>decrease <strong>size</strong> and <strong>fire rate</strong> by <strong>10%</strong>",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("missiles")
+            },
+            requires: "missiles",
+            effect() {
+                tech.missileCount++;
+            },
+            remove() {
+                tech.missileCount = 1;
+            }
+        },
+        {
+            name: "missile-bot",
+            description: "a bot fires <strong>missiles</strong> at far away targets",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2455,10 +2476,11 @@ const tech = {
             },
             requires: "missiles",
             effect() {
-                tech.is3Missiles = true;
+                tech.missileBotCount++;
+                b.missileBot();
             },
             remove() {
-                tech.is3Missiles = false;
+                tech.missileBotCount = 0;
             }
         },
         {
@@ -2776,7 +2798,7 @@ const tech = {
         },
         {
             name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>100</strong> <strong class='color-f'>energy</strong>",
+            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>80</strong> <strong class='color-f'>energy</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -3034,14 +3056,14 @@ const tech = {
             },
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
-                this.description = `add 10 more <strong>laser</strong> beams into into your past`
+                this.description = `add 5 more <strong>laser</strong> beams into into your past`
                 tech.historyLaser++
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
-                this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total laser <strong class='color-d'>damage</strong> by <strong>200%</strong>"
+                this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>"
                 tech.historyLaser = 0
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -3050,7 +3072,7 @@ const tech = {
         },
         {
             name: "pulse",
-            description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>instantly initiates a fusion <strong class='color-e'>explosion</strong>",
+            description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>that instantly initiates a fusion <strong class='color-e'>explosion</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3769,6 +3791,7 @@ const tech = {
     foamBotCount: null,
     boomBotCount: null,
     plasmaBotCount: null,
+    missileBotCount: null,
     orbitBotCount: null,
     collisionImmuneCycles: null,
     blockDmg: null,
@@ -3796,7 +3819,6 @@ const tech = {
     isMineAmmoBack: null,
     isPlasmaRange: null,
     isFreezeMobs: null,
-    recursiveMissiles: null,
     isIceCrystals: null,
     throwChargeRate: null,
     isBlockStun: null,
@@ -3816,7 +3838,7 @@ const tech = {
     isPulseStun: null,
     restDamage: null,
     isRPG: null,
-    is3Missiles: null,
+    missileCount: null,
     isDeterminism: null,
     isSuperDeterminism: null,
     isHarmReduce: null,
@@ -3919,6 +3941,7 @@ const tech = {
     isRewindGrenade: null,
     isExtruder: null,
     isEndLevelPowerUp: null,
-    isRewindGun: null
+    isRewindGun: null,
+    missileSize: null
 
 }

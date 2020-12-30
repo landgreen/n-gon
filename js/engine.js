@@ -123,7 +123,7 @@ function collisionChecks(event) {
                             y: mob[k].velocity.y - 8 * Math.sin(angle)
                         });
 
-                        if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mech.energy > 0.34 * mech.maxEnergy) {
+                        if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mob[k].dropPowerUp && mech.energy > 0.34 * mech.maxEnergy) {
                             mech.energy -= 0.33 * mech.maxEnergy
                             mech.immuneCycle = 0; //player doesn't go immune to collision damage
                             mob[k].death();

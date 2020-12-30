@@ -522,6 +522,7 @@ const simulation = {
         tech.foamBotCount = 0;
         tech.boomBotCount = 0;
         tech.plasmaBotCount = 0;
+        tech.missileBotCount = 0;
 
         b.setFireCD();
         simulation.updateTechHUD();

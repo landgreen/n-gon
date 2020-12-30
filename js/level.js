@@ -13,13 +13,14 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(1)
+            // level.difficultyIncrease(20)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("wave beam")
+            // b.giveGuns("missiles")
             // tech.giveTech("CPT reversal")
-            // tech.giveTech("CPT gun")
+            // tech.giveTech("missile-bot")
+            // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
 
             level.intro(); //starting level
@@ -62,8 +63,7 @@ const level = {
             tech.armorFromPowerUps += gain
             mech.setMaxHealth();
             // if (powerUps.totalPowerUps) simulation.makeTextLog("<span style='font-size:115%;'> max health increased by " + (gain * 100).toFixed(0) + "%</span>", 300)
-            simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>+=</span> ${(gain).toFixed(3)}
-                    <br>${mech.maxHealth.toFixed(3)}`)
+            simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>+=</span> ${(gain).toFixed(2)}`)
         }
         if (tech.isHealLowHealth) {
             const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
@@ -146,7 +146,7 @@ const level = {
                 spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
             }
         }
-        blockDoor(710, -710);
+        // blockDoor(710, -710);
         spawn.mapRect(2500, -1200, 200, 750); //right wall
         blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall
@@ -159,7 +159,7 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        // spawn.starter(1900, -500, 200)  //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.exploder(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)

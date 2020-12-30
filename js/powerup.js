@@ -53,7 +53,7 @@ const powerUps = {
                         powerUps.tech.banishLog.push(powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i])
                     }
                 }
-                simulation.makeTextLog(`${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)} estimated <strong class='color-m'>tech</strong> choices remaining`)
+                simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
             }
         }
         if (tech.manyWorlds && powerUps.reroll.rerolls === 0) {
@@ -127,7 +127,8 @@ const powerUps = {
                         powerUps.tech.banishLog.push(powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i])
                     }
                 }
-                simulation.makeTextLog(`${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)} estimated <strong class='color-m'>tech</strong> choices remaining`)
+                // simulation.makeTextLog(`${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)} estimated <strong class='color-m'>tech</strong> choices remaining`)
+                simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
             }
             powerUps[type].effect();
         },
@@ -168,26 +169,23 @@ const powerUps = {
             return 17;
         },
         effect() {
-            //give ammo to all guns in inventory
-            if (tech.isAmmoForGun && b.inventory.length > 0) {
+            if (tech.isAmmoForGun && b.inventory.length > 0 && b.activeGun) {
                 const target = b.guns[b.activeGun]
-                const ammoAdded = Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
-                target.ammo += ammoAdded
-                // simulation.makeTextLog(`<div class='circle gun'></div> &nbsp; ${ammoAdded} ammo added`, 300)
-                simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}
-                    <br>${target.ammo}`)
-            } else {
-                let text = '';
+                if (target.ammo !== Infinity) {
+                    const ammoAdded = Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
+                    target.ammo += ammoAdded
+                    simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                }
+            } else { //give ammo to all guns in inventory
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
                     const target = b.guns[b.inventory[i]]
                     if (target.ammo !== Infinity) {
                         const ammoAdded = Math.ceil(Math.random() * target.ammoPack)
                         target.ammo += ammoAdded
-                        if (i !== 0) text += "<br>"
-                        text += `${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`
+                        simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                     }
                 }
-                simulation.makeTextLog(text)
+
             }
             simulation.updateGunHUD();
         }
@@ -375,7 +373,8 @@ const powerUps = {
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
                             if (tech.tech[i].name === "erase") powerUps.ejectTech(i)
                         }
-                        simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
+                        // simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
+                        simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
                         powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                         powerUps.endDraft("tech");
                     } else {
