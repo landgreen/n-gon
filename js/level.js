@@ -17,9 +17,9 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("mine")
+            // b.giveGuns("foam")
             // tech.isMineSentry = true
-            // tech.giveTech("CPT reversal")
+            // tech.giveTech("foam fractionation")
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")

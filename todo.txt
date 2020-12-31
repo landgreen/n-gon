@@ -1,8 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: laser-mines - a floating triangle spins around with lasers coming from it's points
+foam dissipates a bit faster, has less ammo, and does 60% more damage per second
+tech: foam fractionation - foam is 100% bigger when you are below 200 ammo
+
+difficulty now increases linearly, even after beating the final boss
 
 ******************************************************** BUGS ********************************************************
+
+(once) negative mass field freeze tech doesn't seem to slow down bullets
+  can't figure out why
 
 CPT check for crouch after rewind
   
@@ -10,18 +16,6 @@ CPT check for crouch after rewind
 
 (always) is there a way to check if the player is stuck inside the map or block
   trigger a short term non-collide if that occurs
-
-(12+ reports) bug - crouch and worm hole? -> crouch locked in
-  ***try checking the date of the first bug, and then look at what patches came out right before that***
-  doesn't occur on my computer? but it does occur on fast computers
-  you can spoof it with mech.crouch = true in console
-  players have extra gravity
-    might be from the short jump code
-    add in a check every 7 seconds to try and fix it
-      this fix was added and it is working for some cases
-        maybe move the fix to once a second?
-  bug fix - rewrite crouch to not translate the player height, but instead switch between 2 sensors
-  2nd bug fix, no reports so far!  might be fixed!
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
@@ -49,11 +43,8 @@ in game console
   add commands
     death, max health, max energy, rewind
 
-mine tech: laser mines - mines hover in the air
-  unlock specular reflection and laser diodes
-  with tech:sentry the mines spin immediately, and spin 2x times longer?
-
 mechanic: use gun swap as an active ability
+  this effect is spammable, so it needs a cost or a cooldown
   ideas?
     trigger damage immunity for 3 seconds, but drain ammo
     push away nearby mobs, but drain energy

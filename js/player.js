@@ -1627,7 +1627,7 @@ const mech = {
                             if (tech.isFreezeMobs) {
                                 const ICE_DRAIN = 0.0005
                                 for (let i = 0, len = mob.length; i < len; i++) {
-                                    if (mob[i].distanceToPlayer() + mob[i].radius < this.fieldDrawRadius && !mob[i].shield && !mob[i].isShielded) {
+                                    if (((mob[i].distanceToPlayer() + mob[i].radius) < this.fieldDrawRadius) && !mob[i].shield && !mob[i].isShielded) {
                                         if (mech.energy > ICE_DRAIN * 2) {
                                             mech.energy -= ICE_DRAIN;
                                             this.fieldDrawRadius -= 2;

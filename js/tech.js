@@ -1985,7 +1985,7 @@ const tech = {
             }
         },
         {
-            name: "Lorentzian topology",
+            name: "anti-shear topology",
             description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
             isGunTech: true,
             maxCount: 3,
@@ -2832,7 +2832,7 @@ const tech = {
         },
         {
             name: "necrophoresis",
-            description: "<strong>foam</strong> bullets grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
+            description: "<strong>foam</strong> bubbles grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2849,7 +2849,7 @@ const tech = {
         },
         {
             name: "colloidal foam",
-            description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>366%</strong><br><strong>foam</strong> dissipates <strong>40%</strong> faster",
+            description: "<strong>foam</strong> bubbles dissipate <strong>40%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>300%</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2862,6 +2862,23 @@ const tech = {
             },
             remove() {
                 tech.isFastFoam = false;
+            }
+        },
+        {
+            name: "foam fractionation",
+            description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>200</strong> <strong class='color-g'>ammo</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("foam") || tech.foamBotCount > 2
+            },
+            requires: "foam",
+            effect() {
+                tech.isAmmoFoamSize = true
+            },
+            remove() {
+                tech.isAmmoFoamSize = false;
             }
         },
         // {
@@ -3064,7 +3081,7 @@ const tech = {
         },
         {
             name: "slow light propagation",
-            description: "",
+            description: "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -3073,14 +3090,14 @@ const tech = {
             },
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
-                this.description = `add 5 more <strong>laser</strong> beams into into your past`
+                // this.description = `add 5 more <strong>laser</strong> beams into into your past`
                 tech.historyLaser++
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
             },
             remove() {
-                this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>"
+                // this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>"
                 tech.historyLaser = 0
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -3960,5 +3977,6 @@ const tech = {
     isEndLevelPowerUp: null,
     isRewindGun: null,
     missileSize: null,
-    isLaserMine: null
+    isLaserMine: null,
+    isAmmoFoamSize: null
 }

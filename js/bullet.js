@@ -1771,13 +1771,14 @@ const b = {
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
             // angle: 0,
-            density: 0.00005, //  0.001 is normal density
+            density: 0.000001, //  0.001 is normal density
             inertia: Infinity,
             frictionAir: 0.003,
             // friction: 0.2,
             // restitution: 0.2,
-            dmg: tech.isFastFoam ? 0.02 : 0.0055, //damage done in addition to the damage from momentum
-            scale: 1 - 0.005 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.6 : 1),
+            dmg: 0, //damage on impact
+            damage: tech.isFastFoam ? 0.048 : 0.012, //damage done over time
+            scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.6 : 1),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -1847,13 +1848,13 @@ const b = {
 
                         // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
                         if (this.target.isShielded) {
-                            this.target.damage(b.dmgScale * this.dmg, true); //shield damage bypass
+                            this.target.damage(b.dmgScale * this.damage, true); //shield damage bypass
                             //shrink if mob is shielded
-                            const SCALE = 1 - 0.018 / tech.isBulletsLastLonger
+                            const SCALE = 1 - 0.014 / tech.isBulletsLastLonger
                             Matter.Body.scale(this, SCALE, SCALE);
                             this.radius *= SCALE;
                         } else {
-                            this.target.damage(b.dmgScale * this.dmg);
+                            this.target.damage(b.dmgScale * this.damage);
                         }
                     } else if (this.target !== null) { //look for a new target
                         this.target = null
@@ -3303,7 +3304,7 @@ const b = {
                         classType: "bullet",
                         collisionFilter: {
                             category: cat.bullet,
-                            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
+                            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
                         },
                         beforeDmg() {},
                         onEnd() {
@@ -3362,7 +3363,7 @@ const b = {
                     //     bullet[me].endCycle = simulation.cycle + 480
                     //     bullet[me].do = bullet[me].laserSpin
                     //     bullet[me].isArmed = true
-                    //     // Matter.Body.setAngularVelocity(bullet[me], 3000 * bullet[me].torqueMagnitude);
+                    //     Matter.Body.setAngularVelocity(bullet[me], 3000 * bullet[me].torqueMagnitude);
                     // }
                     let speed = mech.crouch ? 50 : 20
                     Matter.Body.setVelocity(bullet[me], {
@@ -3554,17 +3555,17 @@ const b = {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 40,
+            ammoPack: 30,
             have: false,
             fire() {
                 mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
-                const radius = (mech.crouch ? 10 + 7 * Math.random() : 4 + 6 * Math.random())
+                const radius = (mech.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 200) * 9
                 const dir = mech.angle + 0.2 * (Math.random() - 0.5)
                 const position = {
                     x: mech.pos.x + 30 * Math.cos(mech.angle),
                     y: mech.pos.y + 30 * Math.sin(mech.angle)
                 }
-                const SPEED = 21 - radius * 0.7; //(mech.crouch ? 32 : 20) - radius * 0.7;
+                const SPEED = 19 - radius * 0.5;
                 const velocity = {
                     x: SPEED * Math.cos(dir),
                     y: SPEED * Math.sin(dir)

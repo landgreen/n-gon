@@ -102,7 +102,7 @@ const spawn = {
             level.exit.x = 5500;
             level.exit.y = -330;
             //ramp up damage
-            for (let i = 0; i < 4; i++) level.difficultyIncrease(simulation.difficultyMode)
+            for (let i = 0; i < 2; i++) level.difficultyIncrease(simulation.difficultyMode)
 
 
             //pull in particles
