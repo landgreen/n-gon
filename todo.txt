@@ -1,14 +1,6 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-fixed some math on laser tech: diffraction grating and slow light propagation
-  they were giving too much damage
-
-flechettes are slightly improved in: ammo, damage, fire rate
-
-tech - MIRV can now stack up to 9 bonus missiles
-removed tech - recursive missiles
-tech: cruise missile - 50% larger size, but travels 50% slower
-tech: missileBot - requires gun: missiles
+tech: laser-mines - a floating triangle spins around with lasers coming from it's points
 
 ******************************************************** BUGS ********************************************************
 
@@ -58,8 +50,7 @@ in game console
     death, max health, max energy, rewind
 
 mine tech: laser mines - mines hover in the air
-  maybe they can be thrown a short distance, but they have no gravity and high friction, so they hover
-  when a mob gets close they spin and fire 3 unaimed lasers from their vertexes
+  unlock specular reflection and laser diodes
   with tech:sentry the mines spin immediately, and spin 2x times longer?
 
 mechanic: use gun swap as an active ability

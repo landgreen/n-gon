@@ -2222,8 +2222,8 @@ const b = {
                 }
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && mech.energy > this.drainThreshold) {
-                    mech.energy -= 0.0012 * tech.isLaserDiode
-                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.06 + 0.15 * this.isUpgraded))
+                    mech.energy -= tech.laserFieldDrain * tech.isLaserDiode
+                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.21)) //tech.laserDamage = 0.16
                 }
             }
         })
@@ -3283,18 +3283,107 @@ const b = {
             ammoPack: 2.7,
             have: false,
             fire() {
-                const pos = {
-                    x: mech.pos.x + 30 * Math.cos(mech.angle),
-                    y: mech.pos.y + 30 * Math.sin(mech.angle)
+                if (tech.isLaserMine) { //laser mine
+                    const me = bullet.length;
+                    const position = mech.pos
+                    bullet[me] = Bodies.polygon(position.x, position.y, 3, 25, {
+                        bulletType: "mine",
+                        angle: mech.angle,
+                        friction: 0,
+                        frictionAir: 0.05,
+                        restitution: 0.5,
+                        dmg: 0, // 0.14   //damage done in addition to the damage from momentum
+                        minDmgSpeed: 2,
+                        lookFrequency: 60 + Math.floor(7 * Math.random()),
+                        drain: tech.isLaserDiode * tech.laserFieldDrain,
+                        isArmed: false,
+                        torqueMagnitude: (Math.random() > 0.5 ? 1 : -1) * 0.000003,
+                        range: 1500,
+                        endCycle: Infinity,
+                        classType: "bullet",
+                        collisionFilter: {
+                            category: cat.bullet,
+                            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet
+                        },
+                        beforeDmg() {},
+                        onEnd() {
+                            if (tech.isMineAmmoBack && (!this.isArmed || Math.random() < 0.2)) { //get ammo back from tech.isMineAmmoBack
+                                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+                                    if (b.guns[i].name === "mine") {
+                                        b.guns[i].ammo++
+                                        simulation.updateGunHUD();
+                                        break;
+                                    }
+                                }
+                            }
+                        },
+                        do() {
+                            if (!(simulation.cycle % this.lookFrequency) && mech.energy > this.drain) { //find mob targets
+                                for (let i = 0, len = mob.length; i < len; ++i) {
+                                    if (
+                                        Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 2000000 &&
+                                        mob[i].dropPowerUp &&
+                                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                                    ) {
+                                        this.do = this.laserSpin
+                                        this.endCycle = simulation.cycle + 300
+                                        this.torqueMagnitude *= 2
+                                        this.torque += this.inertia * this.torqueMagnitude * 30 //spin
+                                        this.isArmed = true
+                                    }
+                                }
+                            }
+                        },
+                        reflections: Math.max(0, tech.laserReflections - 2),
+                        laserSpin() {
+                            //drain energy
+                            if (mech.energy > this.drain) {
+                                mech.energy -= this.drain
+                                if (this.angularSpeed < 0.02) this.torque += this.inertia * this.torqueMagnitude //spin
+
+                                //fire lasers
+                                ctx.strokeStyle = "#f00";
+                                ctx.lineWidth = 1.5
+                                // ctx.globalAlpha = 1;
+                                ctx.beginPath();
+                                for (let i = 0; i < 3; i++) {
+                                    const where = this.vertices[i]
+                                    const endPoint = Vector.add(where, Vector.mult(Vector.normalise(Vector.sub(where, this.position)), 2500))
+                                    b.laser(where, endPoint, tech.laserDamage * 10, this.reflections, true)
+                                }
+                                ctx.stroke();
+                                // ctx.globalAlpha = 1;
+                            }
+                        }
+                    })
+
+                    // if (tech.isMineSentry) {
+                    //     bullet[me].endCycle = simulation.cycle + 480
+                    //     bullet[me].do = bullet[me].laserSpin
+                    //     bullet[me].isArmed = true
+                    //     // Matter.Body.setAngularVelocity(bullet[me], 3000 * bullet[me].torqueMagnitude);
+                    // }
+                    let speed = mech.crouch ? 50 : 20
+                    Matter.Body.setVelocity(bullet[me], {
+                        x: speed * Math.cos(mech.angle),
+                        y: speed * Math.sin(mech.angle)
+                    });
+                    World.add(engine.world, bullet[me]); //add bullet to world
+                } else { //normal mines
+                    const pos = {
+                        x: mech.pos.x + 30 * Math.cos(mech.angle),
+                        y: mech.pos.y + 30 * Math.sin(mech.angle)
+                    }
+                    let speed = mech.crouch ? 36 : 22
+                    if (Matter.Query.point(map, pos).length > 0) { //don't fire if mine will spawn inside map
+                        speed = -2
+                    }
+                    b.mine(pos, {
+                        x: speed * Math.cos(mech.angle),
+                        y: speed * Math.sin(mech.angle)
+                    }, 0, tech.isMineAmmoBack)
                 }
-                let speed = mech.crouch ? 36 : 22
-                if (Matter.Query.point(map, pos).length > 0) { //don't fire if mine will spawn inside map
-                    speed = -2
-                }
-                b.mine(pos, {
-                    x: speed * Math.cos(mech.angle),
-                    y: speed * Math.sin(mech.angle)
-                }, 0, tech.isMineAmmoBack)
                 mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 50 : 25) * b.fireCD); // cool down
             }
         },

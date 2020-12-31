@@ -2575,6 +2575,23 @@ const tech = {
             }
         },
         {
+            name: "laser-mines",
+            description: "<strong>mines</strong> hover in place until <strong>mobs</strong> get in range<br><strong>mines</strong> use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong>lasers</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (tech.haveGunCheck("mine") || tech.isMineDrop) && !tech.isMineSentry
+            },
+            requires: "mines, not sentry",
+            effect() {
+                tech.isLaserMine = true;
+            },
+            remove() {
+                tech.isLaserMine = false;
+            }
+        },
+        {
             name: "mine reclamation",
             description: "retrieve <strong class='color-g'>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
             isGunTech: true,
@@ -2598,9 +2615,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.haveGunCheck("mine") && !tech.isMineAmmoBack) || tech.isMineDrop
+                return (tech.haveGunCheck("mine") && !tech.isMineAmmoBack && !tech.isLaserMine) || tech.isMineDrop
             },
-            requires: "mine, not mine reclamation",
+            requires: "mine, not mine reclamation, not laser-mines",
             effect() {
                 tech.isMineSentry = true;
             },
@@ -2615,7 +2632,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + (tech.haveGunCheck("mine") + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
+                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2632,7 +2649,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + (tech.haveGunCheck("mine") + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
+                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
             },
             requires: "nails",
             effect() {
@@ -2934,12 +2951,12 @@ const tech = {
         },
         {
             name: "laser diodes",
-            description: "<strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun and laser-bot</em>",
+            description: "all <strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("laser") || tech.laserBotCount > 1
+                return tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine
             },
             requires: "laser",
             effect() {
@@ -2951,12 +2968,12 @@ const tech = {
         },
         {
             name: "specular reflection",
-            description: "<strong>laser</strong> beams gain <strong>1</strong> reflection<br>increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong>",
+            description: "increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong><br>and <strong>+1</strong> reflection for all <strong>lasers</strong> <em>(gun, bot, mine)</em>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
+                return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
             },
             requires: "laser, not wide beam",
             effect() {
@@ -3942,6 +3959,6 @@ const tech = {
     isExtruder: null,
     isEndLevelPowerUp: null,
     isRewindGun: null,
-    missileSize: null
-
+    missileSize: null,
+    isLaserMine: null
 }

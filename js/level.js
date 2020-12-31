@@ -17,7 +17,8 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("missiles")
+            // b.giveGuns("mine")
+            // tech.isMineSentry = true
             // tech.giveTech("CPT reversal")
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
@@ -3824,8 +3825,9 @@ const level = {
         // level.difficultyIncrease(simulation.difficultyMode) //increase difficulty based on modes
 
         //difficulty is increased 5 times when finalBoss dies
-        const len = level.levelsCleared / level.levels.length //add 1 extra difficulty step for each time you have cleared all the levels
-        for (let i = 0; i < len; i++) level.difficultyIncrease(simulation.difficultyMode)
+        // const len = level.levelsCleared / level.levels.length //add 1 extra difficulty step for each time you have cleared all the levels
+        // for (let i = 0; i < len; i++) 
+        level.difficultyIncrease(simulation.difficultyMode)
 
         level.onLevel++; //cycles map to next level
         if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
