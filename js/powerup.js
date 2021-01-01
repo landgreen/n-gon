@@ -508,8 +508,6 @@ const powerUps = {
     },
     randomPowerUpCounter: 0,
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
-        level.bossKilled = true;
-
         if (mech.fieldMode === 0) {
             powerUps.spawn(x, y, "field")
         } else {

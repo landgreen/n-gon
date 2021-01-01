@@ -1,14 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-foam dissipates a bit faster, has less ammo, and does 60% more damage per second
-tech: foam fractionation - foam is 100% bigger when you are below 200 ammo
-
-difficulty now increases linearly, even after beating the final boss
+beating the final boss automatically increases the difficulty mode for this run and future runs
+some foam balancing, mostly buffs
+standing wave harmonics gets 15% harm reduction again
 
 ******************************************************** BUGS ********************************************************
-
-(once) negative mass field freeze tech doesn't seem to slow down bullets
-  can't figure out why
 
 CPT check for crouch after rewind
   
@@ -26,6 +22,12 @@ CPT check for crouch after rewind
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+tech: dodge chance for cloaking, harmonic fields, also pilot wave
+  20% chance up to 3 stacks, not additive
+    0.8^count
+  set to 100% harm reduction randomly
+    if (Math.random() < 0.2)  damage *= 0;
 
 rename
   health > integrity, unity

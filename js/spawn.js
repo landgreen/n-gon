@@ -98,12 +98,19 @@ const spawn = {
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
-            level.bossKilled = true;
             level.exit.x = 5500;
             level.exit.y = -330;
             //ramp up damage
             for (let i = 0; i < 2; i++) level.difficultyIncrease(simulation.difficultyMode)
 
+            //set game to the next highest difficulty level if not on why
+            if (simulation.difficultyMode < 6) {
+                simulation.difficultyMode++
+                document.getElementById("difficulty-select").value = simulation.difficultyMode
+                localSettings.difficultyMode = simulation.difficultyMode
+                localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                simulation.makeTextLog(`<span class='color-var'>simulation</span>.difficultyMode<span class='color-symbol'>++</span>`);
+            }
 
             //pull in particles
             for (let i = 0, len = body.length; i < len; ++i) {

@@ -249,6 +249,42 @@ const tech = {
             }
         },
         {
+            name: "arsenal",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1
+            },
+            requires: "at least 2 guns",
+            effect() {
+                tech.isDamageForGuns = true;
+            },
+            remove() {
+                tech.isDamageForGuns = false;
+            }
+        },
+        {
+            name: "generalist",
+            description: "<strong>spawn</strong> 5 <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return tech.isDamageForGuns
+            },
+            requires: "arsenal",
+            effect() {
+                tech.isGunCycle = true;
+                for (let i = 0; i < 5; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
+                }
+            },
+            remove() {
+                tech.isGunCycle = false;
+            }
+        },
+        {
             name: "negative feedback",
             description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong>health</strong> below <strong>100</strong>",
             maxCount: 1,
@@ -821,42 +857,6 @@ const tech = {
             remove() {}
         },
         {
-            name: "ablative drones",
-            description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after receiving <strong class='color-harm'>harm</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.harmReduction() < 1
-            },
-            requires: "some harm reduction",
-            effect() {
-                tech.isDroneOnDamage = true;
-                for (let i = 0; i < 4; i++) {
-                    b.drone() //spawn drone
-                }
-            },
-            remove() {
-                tech.isDroneOnDamage = false;
-            }
-        },
-        {
-            name: "mine synthesis",
-            description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.duplicationChance() > 0
-            },
-            requires: "some power up duplication",
-            effect() {
-                tech.isMineDrop = true;
-                if (tech.isMineDrop) b.mine(mech.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
-            },
-            remove() {
-                tech.isMineDrop = false;
-            }
-        },
-        {
             name: "squirrel-cage rotor",
             description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
             maxCount: 9,
@@ -909,23 +909,6 @@ const tech = {
             }
         },
         {
-            name: "Pauli exclusion",
-            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong>`,
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.collisionImmuneCycles += 45;
-                mech.immuneCycle = mech.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
-            },
-            remove() {
-                tech.collisionImmuneCycles = 25;
-            }
-        },
-        {
             name: "decorrelation",
             description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
             maxCount: 1,
@@ -955,6 +938,68 @@ const tech = {
             },
             remove() {
                 tech.isNoFireDamage = false
+            }
+        },
+        {
+            name: "Pauli exclusion",
+            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong>`,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.collisionImmuneCycles += 45;
+                mech.immuneCycle = mech.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+            },
+            remove() {
+                tech.collisionImmuneCycles = 25;
+            }
+        },
+        {
+            name: "entanglement",
+            nameInfo: "<span id = 'tech-entanglement'></span>",
+            addNameInfo() {
+                setTimeout(function() {
+                    simulation.boldActiveGunHUD();
+                }, 1000);
+            },
+            description: "while your <strong>first</strong> <strong class='color-g'>gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1 && !tech.isEnergyHealth
+            },
+            requires: "at least 2 guns",
+            effect() {
+                tech.isEntanglement = true
+                setTimeout(function() {
+                    simulation.boldActiveGunHUD();
+                }, 1000);
+
+            },
+            remove() {
+                tech.isEntanglement = false;
+            }
+        },
+        {
+            name: "ablative drones",
+            description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after receiving <strong class='color-harm'>harm</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.harmReduction() < 1
+            },
+            requires: "some harm reduction",
+            effect() {
+                tech.isDroneOnDamage = true;
+                for (let i = 0; i < 4; i++) {
+                    b.drone() //spawn drone
+                }
+            },
+            remove() {
+                tech.isDroneOnDamage = false;
             }
         },
         {
@@ -1020,22 +1065,6 @@ const tech = {
             },
             remove() {
                 tech.isFreezeHarmImmune = false;
-            }
-        },
-        {
-            name: "supercapacitor",
-            description: "<strong class='color-f'>energy</strong> above your max decays <strong>60%</strong> slower",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0
-            },
-            requires: "a source of overfilled energy",
-            effect() {
-                tech.overfillDrain = 0.85
-            },
-            remove() {
-                tech.overfillDrain = 0.75
             }
         },
         {
@@ -1192,6 +1221,22 @@ const tech = {
             remove() {
                 tech.bonusEnergy = 0;
                 mech.setMaxEnergy()
+            }
+        },
+        {
+            name: "supercapacitor",
+            description: "<strong class='color-f'>energy</strong> above your max decays <strong>60%</strong> slower",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0
+            },
+            requires: "a source of overfilled energy",
+            effect() {
+                tech.overfillDrain = 0.85
+            },
+            remove() {
+                tech.overfillDrain = 0.75
             }
         },
         {
@@ -1371,6 +1416,25 @@ const tech = {
             }
         },
         {
+            name: "quantum immortality",
+            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.reroll.rerolls > 1 || build.isCustomSelection
+            },
+            requires: "at least 2 rerolls",
+            effect() {
+                tech.isImmortal = true;
+                for (let i = 0; i < 4; i++) {
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                }
+            },
+            remove() {
+                tech.isImmortal = false;
+            }
+        },
+        {
             name: "bubble fusion",
             description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
             maxCount: 1,
@@ -1540,65 +1604,20 @@ const tech = {
             remove() {}
         },
         {
-            name: "entanglement",
-            nameInfo: "<span id = 'tech-entanglement'></span>",
-            addNameInfo() {
-                setTimeout(function() {
-                    simulation.boldActiveGunHUD();
-                }, 1000);
-            },
-            description: "while your <strong>first</strong> <strong class='color-g'>gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
+            name: "mine synthesis",
+            description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return b.inventory.length > 1 && !tech.isEnergyHealth
+                return tech.duplicationChance() > 0
             },
-            requires: "at least 2 guns",
+            requires: "some power up duplication",
             effect() {
-                tech.isEntanglement = true
-                setTimeout(function() {
-                    simulation.boldActiveGunHUD();
-                }, 1000);
-
+                tech.isMineDrop = true;
+                if (tech.isMineDrop) b.mine(mech.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
             },
             remove() {
-                tech.isEntanglement = false;
-            }
-        },
-        {
-            name: "arsenal",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return b.inventory.length > 1
-            },
-            requires: "at least 2 guns",
-            effect() {
-                tech.isDamageForGuns = true;
-            },
-            remove() {
-                tech.isDamageForGuns = false;
-            }
-        },
-        {
-            name: "generalist",
-            description: "<strong>spawn</strong> 5 <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
-            maxCount: 1,
-            count: 0,
-            isNonRefundable: true,
-            allowed() {
-                return tech.isDamageForGuns
-            },
-            requires: "arsenal",
-            effect() {
-                tech.isGunCycle = true;
-                for (let i = 0; i < 5; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                }
-            },
-            remove() {
-                tech.isGunCycle = false;
+                tech.isMineDrop = false;
             }
         },
         {
@@ -1789,25 +1808,6 @@ const tech = {
             remove() {
                 tech.isBanish = false
                 powerUps.tech.banishLog = [] //reset banish log
-            }
-        },
-        {
-            name: "quantum immortality",
-            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return powerUps.reroll.rerolls > 1 || build.isCustomSelection
-            },
-            requires: "at least 2 rerolls",
-            effect() {
-                tech.isImmortal = true;
-                for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
-                }
-            },
-            remove() {
-                tech.isImmortal = false;
             }
         },
         {
@@ -2866,7 +2866,7 @@ const tech = {
         },
         {
             name: "foam fractionation",
-            description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>200</strong> <strong class='color-g'>ammo</strong>",
+            description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong class='color-g'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,

@@ -26,6 +26,7 @@ const level = {
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
+            // level.escape() //after the final boss, ending
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
             // level.testChamber() //less mobs, more puzzle
@@ -97,6 +98,47 @@ const level = {
     //******************************************************************************************************************
     //******************************************************************************************************************
     //******************************************************************************************************************
+    escape() {
+        const hazard = level.hazard(-1775, 150, 3575, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
+        // level.bossKilled = false;  // if a boss needs to be killed
+        level.custom = () => {
+            // level.playerExitCheck();
+            hazard.query();
+            // hazard.level(true)
+        };
+        level.customTopLayer = () => {
+            hazard.draw();
+
+        };
+        level.setPosToSpawn(0, -50); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.exit.x = 0;
+        level.exit.y = 200;
+        level.defaultZoom = 1000
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#aaa";
+        // level.fill.push({     //foreground
+        //   x: 2500,
+        //   y: -1100,
+        //   width: 450,
+        //   height: 250,
+        //   color: "rgba(0,0,0,0.1)"
+        // });
+        // level.fillBG.push({     //background
+        //   x: 1300,
+        //   y: -1800,
+        //   width: 750,
+        //   height: 1800,
+        //   color: "#d4d4d7"
+        // });
+
+        spawn.mapRect(-500, 0, 1000, 1000); //center platform
+        spawn.mapRect(-2000, 800, 4000, 200); //base
+        spawn.mapRect(-2000, -1000, 4000, 200); //ceiling
+        spawn.mapRect(-2000, -1000, 225, 2000); //left
+        spawn.mapRect(1800, -1000, 200, 2000); //right
+        // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
+    },
     testing() {
         const button = level.button(200, -700)
         level.custom = () => {
@@ -160,16 +202,16 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.exploder(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
-        // spawn.shooter(1700, -120)
+        spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.streamBoss(1600, -500)
+        spawn.streamBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
@@ -179,7 +221,6 @@ const level = {
         // spawn.randomMob(1600, -500)
     },
     template() {
-        // level.bossKilled = false;  // if a boss needs to be killed
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -2121,7 +2162,6 @@ const level = {
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
     },
     office() {
-        level.bossKilled = false; // if a boss needs to be killed
         let button, door
         if (Math.random() < 0.75) { //normal direction start in top left
             button = level.button(525, 0)
@@ -3820,7 +3860,6 @@ const level = {
         // `, 1200);
     },
     nextLevel() {
-        // if (level.bossKilled) 
         level.levelsCleared++;
         // level.difficultyIncrease(simulation.difficultyMode) //increase difficulty based on modes
 

@@ -3298,7 +3298,7 @@ const b = {
                         lookFrequency: 60 + Math.floor(7 * Math.random()),
                         drain: tech.isLaserDiode * tech.laserFieldDrain,
                         isArmed: false,
-                        torqueMagnitude: (Math.random() > 0.5 ? 1 : -1) * 0.000003,
+                        torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
                         range: 1500,
                         endCycle: Infinity,
                         classType: "bullet",
@@ -3329,8 +3329,7 @@ const b = {
                                     ) {
                                         this.do = this.laserSpin
                                         this.endCycle = simulation.cycle + 300
-                                        this.torqueMagnitude *= 2
-                                        this.torque += this.inertia * this.torqueMagnitude * 30 //spin
+                                        // if (this.angularSpeed < 0.01) this.torque += this.inertia * this.torqueMagnitude * 5 //spin
                                         this.isArmed = true
                                     }
                                 }
@@ -3555,20 +3554,20 @@ const b = {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 30,
+            ammoPack: 35,
             have: false,
             fire() {
                 mech.fireCDcycle = mech.cycle + Math.floor((mech.crouch ? 20 : 6) * b.fireCD); // cool down
-                const radius = (mech.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 200) * 9
+                const radius = (mech.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                const SPEED = 18 - radius * 0.4;
                 const dir = mech.angle + 0.2 * (Math.random() - 0.5)
-                const position = {
-                    x: mech.pos.x + 30 * Math.cos(mech.angle),
-                    y: mech.pos.y + 30 * Math.sin(mech.angle)
-                }
-                const SPEED = 19 - radius * 0.5;
                 const velocity = {
                     x: SPEED * Math.cos(dir),
                     y: SPEED * Math.sin(dir)
+                }
+                const position = {
+                    x: mech.pos.x + 30 * Math.cos(mech.angle),
+                    y: mech.pos.y + 30 * Math.sin(mech.angle)
                 }
                 b.foam(position, velocity, radius)
             }

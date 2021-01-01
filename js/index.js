@@ -714,7 +714,7 @@ window.addEventListener("keydown", function(event) {
                 if (simulation.paused) {
                     build.unPauseGrid()
                     simulation.paused = false;
-                    level.levelAnnounce();
+                    // level.levelAnnounce();
                     document.body.style.cursor = "none";
                     requestAnimationFrame(cycle);
                 } else {
@@ -824,7 +824,6 @@ window.addEventListener("keydown", function(event) {
                 }
                 break
             case "u":
-                level.bossKilled = true; //if there is no boss this needs to be true to increase levels
                 level.nextLevel();
                 break
             case "X": //capital X to make it hard to die

@@ -1382,10 +1382,11 @@ const mech = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>cool down</strong>",
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
             effect: () => {
                 // mech.fieldHarmReduction = 0.80;
                 mech.fieldBlockCD = 0;
+                mech.fieldHarmReduction = 0.85;
                 mech.hold = function() {
                     if (mech.isHolding) {
                         mech.drawHold(mech.holdingTarget);
