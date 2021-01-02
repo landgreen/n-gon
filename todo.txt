@@ -1,8 +1,6 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-beating the final boss automatically increases the difficulty mode for this run and future runs
-some foam balancing, mostly buffs
-standing wave harmonics gets 15% harm reduction again
+
 
 ******************************************************** BUGS ********************************************************
 
@@ -23,6 +21,17 @@ CPT check for crouch after rewind
 
 ******************************************************** TODO ********************************************************
 
+bot that follows the players history
+  could have the same shape as the mech circle head
+  1st bot is at 5s, 2nd is at 4.5s, ...
+  bots don't get too close to player
+    run smoothing on position update, don't update if close to player, based on ordering
+  effect: (one of these can be the upgrade effect)
+    give player energy overfill
+    AOE damage to mobs
+    push away mobs
+    wen close to player: damage bonus    damage reduction
+
 tech: dodge chance for cloaking, harmonic fields, also pilot wave
   20% chance up to 3 stacks, not additive
     0.8^count
@@ -33,7 +42,7 @@ rename
   health > integrity, unity
   heal > also integrity, unity
   level > world?
-  reroll > resample, reset, retry, remeasure
+  reroll > research
 
 in game console
   set highlighting rules
@@ -140,15 +149,6 @@ bullet mechanic - a bullet that swims through the air
 
 in custom make a top bar that is fixed
   use media rules to make the layout look nice
-
-bot that follows the players history
-  1st bot is at 5s, 2nd is at 4.5s, ...
-  bots don't get too close to player
-    run smoothing on position update, don't update if close to player, based on ordering
-  effect:
-    give player energy overfill
-    damage mobs on contact
-    damage bonus    damage reduction    push away mobs
 
 mob vision: look at player history
     build a new type of attraction for mobs

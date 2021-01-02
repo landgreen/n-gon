@@ -105,7 +105,15 @@ const spawn = {
 
             //set game to the next highest difficulty level if not on why
             if (simulation.difficultyMode < 6) {
-                simulation.difficultyMode++
+                if (simulation.difficultyMode === 0) {
+                    simulation.difficultyMode = 1
+                } else if (simulation.difficultyMode === 1) {
+                    simulation.difficultyMode = 2
+                } else if (simulation.difficultyMode === 2) {
+                    simulation.difficultyMode = 4
+                } else {
+                    simulation.difficultyMode = 6
+                }
                 document.getElementById("difficulty-select").value = simulation.difficultyMode
                 localSettings.difficultyMode = simulation.difficultyMode
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

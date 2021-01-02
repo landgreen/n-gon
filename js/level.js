@@ -17,7 +17,7 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("foam")
+            // b.giveGuns("missiles")
             // tech.isMineSentry = true
             // tech.giveTech("foam fractionation")
             // tech.giveTech("missile-bot")
@@ -99,15 +99,21 @@ const level = {
     //******************************************************************************************************************
     //******************************************************************************************************************
     escape() {
-        const hazard = level.hazard(-1775, 150, 3575, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
-        // level.bossKilled = false;  // if a boss needs to be killed
+        const hazardSlime = level.hazard(-1775, 150, 3575, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
+        // const hazardLaser1 = level.hazard(-475, -800, 1, 800, 0.4, "#50f", true) //laser
+        // const hazardLaser2 = level.hazard(475, -800, 1, 800, 0.4, "#50f", true) //laser
+
         level.custom = () => {
             // level.playerExitCheck();
-            hazard.query();
+            hazardSlime.query();
+            // hazardLaser1.query();
+            // hazardLaser2.query();
             // hazard.level(true)
         };
         level.customTopLayer = () => {
-            hazard.draw();
+            hazardSlime.drawTides();
+            // hazardLaser1.draw();
+            // hazardLaser2.draw();
 
         };
         level.setPosToSpawn(0, -50); //normal spawn
@@ -116,14 +122,16 @@ const level = {
         level.exit.y = 200;
         level.defaultZoom = 1000
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#aaa";
-        // level.fill.push({     //foreground
-        //   x: 2500,
-        //   y: -1100,
-        //   width: 450,
-        //   height: 250,
-        //   color: "rgba(0,0,0,0.1)"
-        // });
+        // document.body.style.backgroundColor = "#aaa";
+        document.body.style.backgroundColor = "#ddd";
+
+        level.fill.push({ //foreground
+            x: -1950,
+            y: -950,
+            width: 3900,
+            height: 1900,
+            color: "rgba(0,0,0,0.1)"
+        });
         // level.fillBG.push({     //background
         //   x: 1300,
         //   y: -1800,
@@ -137,7 +145,16 @@ const level = {
         spawn.mapRect(-2000, -1000, 4000, 200); //ceiling
         spawn.mapRect(-2000, -1000, 225, 2000); //left
         spawn.mapRect(1800, -1000, 200, 2000); //right
+        spawn.mapRect(-500, -5, 25, 50); //edge shelf
+        spawn.mapRect(475, -5, 25, 50); //edge shelf
+        // spawn.mapRect(-500, -820, 50, 25); //edge shelf ceiling
+        // spawn.mapRect(450, -820, 50, 25); //edge shelf ceiling
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
+
+        setTimeout(() => { simulation.makeTextLog(`test`) }, 3000);
+
+
+
     },
     testing() {
         const button = level.button(200, -700)
@@ -4493,6 +4510,13 @@ const level = {
                 if (this.isOn) {
                     ctx.fillStyle = color
                     ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
+                }
+            },
+            drawTides() {
+                if (this.isOn) {
+                    ctx.fillStyle = color
+                    const offset = 10 * Math.sin(simulation.cycle * 0.015)
+                    ctx.fillRect(this.min.x, this.min.y + offset, this.width, this.height - offset)
                 }
             },
             level(isFill) {

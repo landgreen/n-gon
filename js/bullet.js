@@ -3221,6 +3221,8 @@ const b = {
                         bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
                     }
                 }
+
+
                 // if (tech.missileCount) {
                 //     if (mech.crouch) {
                 //         for (let i = 0; i < 3; i++) {
