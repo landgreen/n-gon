@@ -527,7 +527,7 @@ const simulation = {
         b.setFireCD();
         simulation.updateTechHUD();
         powerUps.totalPowerUps = 0;
-        powerUps.reroll.rerolls = 0;
+        powerUps.research.research = 0;
         mech.setFillColors();
         mech.maxHealth = 1
         mech.maxEnergy = 1

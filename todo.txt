@@ -1,6 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+reroll renamed -> research
 
+spore damage increased 25%
+
+ice IX has it's damage buffed by 50%, and freeze effect lasts 2s (up from 1s)
+ice IX is no longer a gun
+  but you can still get it for nano-scale field (and it's pretty strong)
+tech: heavy water was removed
+
+tech: correlated damage - duplication chance also gives % damage
+(also added some minor nerfs to other duplication tech for balance)
 
 ******************************************************** BUGS ********************************************************
 
@@ -41,8 +51,6 @@ tech: dodge chance for cloaking, harmonic fields, also pilot wave
 rename
   health > integrity, unity
   heal > also integrity, unity
-  level > world?
-  reroll > research
 
 in game console
   set highlighting rules
@@ -416,11 +424,13 @@ scientist console text:
   at the start of each level listen to text conversation from the two colors of text strings also
   talking about the robot, watching
   trying to communicate with the robot?  but how
-  random lines:
-    say something about what mobs types are queued up, and level order
-    I think it's planing to escape
-    Why is it attacking those shapes?
-    Are those shapes supposed to be us?
+  random lines when:
+    at start of level, about: what mobs types are queued up, and level order
+    when player gets a cool tech combination
+    at random times:
+      I think it's planing to escape
+      Why is it attacking those shapes?
+      Are those shapes supposed to be us?
 
 ending outline
   if no cheats

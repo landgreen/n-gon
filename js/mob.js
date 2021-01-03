@@ -1058,7 +1058,7 @@ const mobs = {
                     if (Math.random() < 0.4) {
                         type = "heal"
                     } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
-                        type = "reroll"
+                        type = "research"
                     }
                     for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {
                         powerUps.spawn(this.position.x, this.position.y, type);

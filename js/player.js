@@ -158,7 +158,7 @@ const mech = {
         mech.Vx = player.velocity.x;
         mech.Vy = player.velocity.y;
 
-        //tracks the last second of player information
+        //tracks the last 10s of player information
         // console.log(mech.history)
         mech.history.splice(mech.cycle % 600, 1, {
             position: {
@@ -175,7 +175,7 @@ const mech = {
             activeGun: b.activeGun
         });
         // const back = 59  // 59 looks at 1 second ago //29 looks at 1/2 a second ago
-        // historyIndex = (mech.cycle - back) % 60
+        // historyIndex = (mech.cycle - back) % 600
     },
     transSmoothX: 0,
     transSmoothY: 0,
@@ -618,11 +618,11 @@ const mech = {
         if (tech.isEnergyHealth) {
             mech.energy -= dmg;
             if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
-                if (tech.isDeathAvoid && powerUps.reroll.rerolls && !tech.isDeathAvoidedThisLevel) {
+                if (tech.isDeathAvoid && powerUps.research.research && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
-                    powerUps.reroll.changeRerolls(-1)
-                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span><span class='color-symbol'>--</span>
-                    <br>${powerUps.reroll.rerolls}`)
+                    powerUps.research.changeRerolls(-1)
+                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
+                    <br>${powerUps.research.research}`)
                     for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
@@ -649,12 +649,12 @@ const mech = {
             dmg *= mech.harmReduction()
             mech.health -= dmg;
             if (mech.health < 0 || isNaN(mech.health)) {
-                if (tech.isDeathAvoid && powerUps.reroll.rerolls > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
+                if (tech.isDeathAvoid && powerUps.research.research > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
                     tech.isDeathAvoidedThisLevel = true
                     mech.health = 0.05
-                    powerUps.reroll.changeRerolls(-1)
-                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span><span class='color-symbol'>--</span>
-                    <br>${powerUps.reroll.rerolls}`)
+                    powerUps.research.changeRerolls(-1)
+                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
+                    <br>${powerUps.research.research}`)
                     for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
@@ -1499,13 +1499,11 @@ const mech = {
             description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
             effect: () => {
                 mech.hold = function() {
-                    if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && !input.field) {
+                    if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && !input.field && bullet.length < 200) {
                         if (tech.isSporeField) {
                             const len = Math.floor(5 + 4 * Math.random())
                             mech.energy -= len * 0.105;
-                            for (let i = 0; i < len; i++) {
-                                b.spore(mech.pos)
-                            }
+                            for (let i = 0; i < len; i++) b.spore(mech.pos)
                         } else if (tech.isMissileField) {
                             mech.energy -= 0.55;
                             b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1)

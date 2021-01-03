@@ -77,7 +77,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = mech.fieldDamage
-        // if (tech.aimDamage>1)
+        if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
         if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
         if (tech.isMaxEnergyTech) dmg *= 1.4
         if (tech.isEnergyNoAmmo) dmg *= 1.5
@@ -89,7 +89,7 @@ const tech = {
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isEnergyDamage) dmg *= 1 + mech.energy / 9;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-        if (tech.isRerollDamage) dmg *= 1 + 0.04 * powerUps.reroll.rerolls
+        if (tech.isRerollDamage) dmg *= 1 + 0.035 * powerUps.research.research
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.66
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
@@ -97,7 +97,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + mech.duplicateChance
+        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.035 + tech.duplicateChance + mech.duplicateChance
     },
     totalBots() {
         return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
@@ -156,7 +156,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isEnergyLoss && mech.maxEnergy === 1 && !tech.isMissileField && !tech.isSporeField && !tech.isRewindAvoidDeath
+                return tech.isEnergyLoss && mech.maxEnergy < 1.1 && !tech.isMissileField && !tech.isSporeField && !tech.isRewindAvoidDeath
             },
             requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
             effect() {
@@ -176,7 +176,7 @@ const tech = {
             allowed() {
                 return tech.isEnergyLoss && mech.maxEnergy < 1.1
             },
-            requires: "exothermic process",
+            requires: "exothermic process, not max energy increase",
             effect() {
                 tech.isLowEnergyDamage = true;
             },
@@ -214,22 +214,6 @@ const tech = {
             },
             remove() {
                 tech.isFarAwayDmg = false;
-            }
-        },
-        {
-            name: "fluoroantimonic acid",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong>health</strong> is above <strong>100</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.maxHealth > 1;
-            },
-            requires: "health above 100",
-            effect() {
-                tech.isAcidDmg = true;
-            },
-            remove() {
-                tech.isAcidDmg = false;
             }
         },
         {
@@ -285,6 +269,22 @@ const tech = {
             }
         },
         {
+            name: "fluoroantimonic acid",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong>health</strong> is above <strong>100</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.maxHealth > 1;
+            },
+            requires: "health above 100",
+            effect() {
+                tech.isAcidDmg = true;
+            },
+            remove() {
+                tech.isAcidDmg = false;
+            }
+        },
+        {
             name: "negative feedback",
             description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong>health</strong> below <strong>100</strong>",
             maxCount: 1,
@@ -317,19 +317,55 @@ const tech = {
             }
         },
         {
-            name: "perturbation theory",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each of your <strong class='color-r'>rerolls</strong>",
+            name: "correlated damage",
+            description: "your chance to <strong class='color-dup'>duplicate</strong> power ups<br>increases your <strong class='color-d'>damage</strong> by the same percent",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 3 || build.isCustomSelection
+                return tech.duplicationChance() > 0
             },
-            requires: "at least 4 rerolls",
+            requires: "some duplication chance",
+            effect() {
+                tech.isDupDamage = true;
+            },
+            remove() {
+                tech.isDupDamage = false;
+            }
+        },
+        {
+            name: "perturbation theory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>3.5%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.research.research > 4 || build.isCustomSelection
+            },
+            requires: "at least 5 research",
             effect() {
                 tech.isRerollDamage = true;
             },
             remove() {
                 tech.isRerollDamage = false;
+            }
+        },
+        {
+            name: "Ψ(t) collapse",
+            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.research.research === 0 && !tech.manyWorlds
+            },
+            requires: "no research",
+            effect() {
+                tech.isRerollHaste = true;
+                tech.researchHaste = 0.33;
+                b.setFireCD();
+            },
+            remove() {
+                tech.isRerollHaste = false;
+                tech.researchHaste = 1;
+                b.setFireCD();
             }
         },
         {
@@ -346,26 +382,6 @@ const tech = {
             },
             remove() {
                 tech.slowFire = 1;
-                b.setFireCD();
-            }
-        },
-        {
-            name: "Ψ(t) collapse",
-            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>rerolls</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return powerUps.reroll.rerolls === 0 && !tech.manyWorlds
-            },
-            requires: "no rerolls",
-            effect() {
-                tech.isRerollHaste = true;
-                tech.rerollHaste = 0.33;
-                b.setFireCD();
-            },
-            remove() {
-                tech.isRerollHaste = false;
-                tech.rerollHaste = 1;
                 b.setFireCD();
             }
         },
@@ -763,17 +779,17 @@ const tech = {
         },
         {
             name: "bot fabrication",
-            description: "anytime you collect <strong>5</strong> <strong class='color-r'>rerolls</strong><br>use them to build a <strong>random bot</strong>",
+            description: "anytime you collect <strong>5</strong> <strong class='color-r'>research</strong><br>use them to build a <strong>random bot</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 5 || build.isCustomSelection
+                return powerUps.research.research > 5 || build.isCustomSelection
             },
-            requires: "at least 6 rerolls",
+            requires: "at least 6 research",
             effect() {
                 tech.isRerollBots = true;
-                powerUps.reroll.changeRerolls(0)
-                simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span> <span class='color-symbol'>=</span> 0`)
+                powerUps.research.changeRerolls(0)
+                simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span> <span class='color-symbol'>=</span> 0`)
             },
             remove() {
                 tech.isRerollBots = false;
@@ -1057,7 +1073,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.haveGunCheck("ice IX") || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
             },
             requires: "a freezing or stunning effect",
             effect() {
@@ -1325,7 +1341,7 @@ const tech = {
         },
         {
             name: "inductive coupling",
-            description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 4 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 44 health per level)</em>",
+            description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 4 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 40 health per level)</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1394,21 +1410,21 @@ const tech = {
             nameInfo: "<span id = 'tech-anthropic'></span>",
             addNameInfo() {
                 setTimeout(function() {
-                    powerUps.reroll.changeRerolls(0)
+                    powerUps.research.changeRerolls(0)
                 }, 1000);
             },
-            description: "consume a <strong class='color-r'>reroll</strong> to avoid <strong>dying</strong> once a level <br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
+            description: "use a <strong class='color-r'>research</strong> to avoid <strong>dying</strong> once a level <br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 0 || build.isCustomSelection
+                return powerUps.research.research > 0 || build.isCustomSelection
             },
-            requires: "at least 1 reroll",
+            requires: "at least 1 research",
             effect() {
                 tech.isDeathAvoid = true;
                 tech.isDeathAvoidedThisLevel = false;
                 setTimeout(function() {
-                    powerUps.reroll.changeRerolls(0)
+                    powerUps.research.changeRerolls(0)
                 }, 1000);
             },
             remove() {
@@ -1417,17 +1433,17 @@ const tech = {
         },
         {
             name: "quantum immortality",
-            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>4</strong> <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls > 1 || build.isCustomSelection
+                return powerUps.research.research > 1 || build.isCustomSelection
             },
-            requires: "at least 2 rerolls",
+            requires: "at least 2 research",
             effect() {
                 tech.isImmortal = true;
                 for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "research", false);
                 }
             },
             remove() {
@@ -1436,7 +1452,7 @@ const tech = {
         },
         {
             name: "bubble fusion",
-            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1470,7 +1486,7 @@ const tech = {
         },
         {
             name: "stimulated emission",
-            description: "<strong>6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
+            description: "<strong>6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><em>duplication chance can't exceed 100%</em>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1488,7 +1504,7 @@ const tech = {
         },
         {
             name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>increases power up <strong class='color-dup'>duplication</strong> chance by <strong>4%</strong>",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>3.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1508,7 +1524,7 @@ const tech = {
         },
         {
             name: "commodities exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>rerolls</strong>",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1583,19 +1599,19 @@ const tech = {
         },
         {
             name: "strange attractor",
-            description: `use <strong>2</strong> <strong class='color-r'>rerolls</strong> to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
+            description: `use <strong>2</strong> <strong class='color-r'>research</strong> to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.reroll.rerolls > 1
+                return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.research > 1
             },
-            requires: "at least 1 tech and 1 reroll, a chance to duplicate power ups",
+            requires: "at least 1 tech and 1 research, a chance to duplicate power ups",
             effect: () => {
-                powerUps.reroll.changeRerolls(-2)
-                simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span> <span class='color-symbol'>-=</span> 2
-                <br>${powerUps.reroll.rerolls}`)
+                powerUps.research.changeRerolls(-2)
+                simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2
+                <br>${powerUps.research.research}`)
                 const chanceStore = tech.duplicateChance
                 tech.duplicateChance = (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + mech.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                 powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
@@ -1740,7 +1756,7 @@ const tech = {
         },
         {
             name: "superdeterminism",
-            description: "spawn <strong>7</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>rerolls</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+            description: "spawn <strong>7</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>research</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -1760,13 +1776,13 @@ const tech = {
         },
         {
             name: "many-worlds",
-            description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>rerolls</strong> spawn <strong>2</strong>",
+            description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.reroll.rerolls === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
+                return powerUps.research.research === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
-            requires: "not superdeterminism or Ψ(t) collapse<br>no rerolls",
+            requires: "not superdeterminism or Ψ(t) collapse<br>no research",
             effect: () => {
                 tech.manyWorlds = true;
             },
@@ -1776,13 +1792,13 @@ const tech = {
         },
         {
             name: "renormalization",
-            description: "consuming a <strong class='color-r'>reroll</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>reroll</strong>",
+            description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.reroll.rerolls > 1 || build.isCustomSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                return (powerUps.research.research > 1 || build.isCustomSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
-            requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 rerolls",
+            requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 research",
             effect() {
                 tech.renormalization = true;
             },
@@ -1792,17 +1808,17 @@ const tech = {
         },
         {
             name: "erase",
-            description: "<strong class='color-r'>rerolled</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> will not <strong>reoccur</strong> <br>spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>4</strong> <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.reroll.rerolls > 2 || build.isCustomSelection) && !tech.isDeterminism
+                return (powerUps.research.research > 2 || build.isCustomSelection) && !tech.isDeterminism
             },
-            requires: "not determinism, at least 3 rerolls",
+            requires: "not determinism, at least 3 research",
             effect() {
                 tech.isBanish = true
                 for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll", false);
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "research", false);
                 }
             },
             remove() {
@@ -1841,8 +1857,8 @@ const tech = {
             remove() {}
         },
         {
-            name: "perpetual rerolls",
-            description: "find <strong>1</strong> <strong class='color-r'>reroll</strong> at the start of each <strong>level</strong>",
+            name: "perpetual research",
+            description: "find <strong>1</strong> <strong class='color-r'>research</strong> at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1985,15 +2001,32 @@ const tech = {
             }
         },
         {
+            name: "superfluidity",
+            description: "<strong class='color-s'>freeze</strong> effects are applied to a small area",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField
+            },
+            requires: "a freeze effect",
+            effect() {
+                tech.isAoESlow = true
+            },
+            remove() {
+                tech.isAoESlow = false
+            }
+        },
+        {
             name: "anti-shear topology",
-            description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, ice IX, neutron</em>",
+            description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
             isGunTech: true,
             maxCount: 3,
             count: 0,
             allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.haveGunCheck("ice IX") || tech.isNeutronBomb
+                return mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb
             },
-            requires: "drones, spores, missiles, foam<br>wave beam, ice IX, neutron bomb",
+            requires: "drones, spores, missiles, foam<br>wave beam, neutron bomb",
             effect() {
                 tech.isBulletsLastLonger += 0.3
             },
@@ -2351,7 +2384,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("flechettes") || tech.isNailPoison || tech.isHeavyWater || tech.isWormholeDamage || tech.isNeutronBomb
+                return tech.haveGunCheck("flechettes") || tech.isNailPoison || tech.isWormholeDamage || tech.isNeutronBomb
             },
             requires: "radiation damage source",
             effect() {
@@ -2777,57 +2810,6 @@ const tech = {
             },
             remove() {
                 tech.isDroneGrab = false
-            }
-        },
-        {
-            name: "superfluidity",
-            description: "<strong class='color-s'>freeze</strong> effects apply to mobs near it's target",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("ice IX") || tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField
-            },
-            requires: "a freeze effect",
-            effect() {
-                tech.isAoESlow = true
-            },
-            remove() {
-                tech.isAoESlow = false
-            }
-        },
-        {
-            name: "heavy water",
-            description: "<strong>ice IX</strong> is synthesized with an extra neutron<br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>5</strong> seconds",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return (tech.haveGunCheck("ice IX") || tech.isIceField) && !tech.iceEnergy
-            },
-            requires: "ice IX",
-            effect() {
-                tech.isHeavyWater = true
-            },
-            remove() {
-                tech.isHeavyWater = false;
-            }
-        },
-        {
-            name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>80</strong> <strong class='color-f'>energy</strong>",
-            isGunTech: true,
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return (tech.haveGunCheck("ice IX") || tech.isIceField) && !tech.isHeavyWater
-            },
-            requires: "ice IX",
-            effect() {
-                tech.iceEnergy++
-            },
-            remove() {
-                tech.iceEnergy = 0;
             }
         },
         {
@@ -3387,7 +3369,7 @@ const tech = {
         },
         {
             name: "ice IX manufacturing",
-            description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to synthesize <strong>ice IX</strong>",
+            description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to synthesize <strong class='color-s'>ice IX</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -3400,6 +3382,23 @@ const tech = {
             },
             remove() {
                 tech.isIceField = false;
+            }
+        },
+        {
+            name: "thermoelectric effect",
+            description: "<strong>killing</strong> mobs with <strong class='color-s'>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>80</strong> <strong class='color-f'>energy</strong>",
+            isFieldTech: true,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return tech.isIceField
+            },
+            requires: "ice IX",
+            effect() {
+                tech.iceEnergy++
+            },
+            remove() {
+                tech.iceEnergy = 0;
             }
         },
         {
@@ -3745,8 +3744,8 @@ const tech = {
             remove() {}
         },
         {
-            name: "rerolls",
-            description: "spawn <strong>4</strong> <strong class='color-r'>rerolls</strong>",
+            name: "research",
+            description: "spawn <strong>4</strong> <strong class='color-r'>research</strong>",
             maxCount: 9,
             count: 0,
             isNonRefundable: true,
@@ -3757,7 +3756,7 @@ const tech = {
             requires: "not superdeterminism",
             effect() {
                 for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+                    powerUps.spawn(mech.pos.x, mech.pos.y, "research");
                 }
                 this.count--
             },
@@ -3858,7 +3857,6 @@ const tech = {
     isBlockStun: null,
     isStunField: null,
     isHarmDamage: null,
-    isHeavyWater: null,
     energyRegen: null,
     isVacuumBomb: null,
     renormalization: null,
@@ -3902,7 +3900,7 @@ const tech = {
     isHarmFreeze: null,
     isBotArmor: null,
     isRerollHaste: null,
-    rerollHaste: null,
+    researchHaste: null,
     isMineDrop: null,
     isRerollBots: null,
     isRailTimeSlow: null,
@@ -3978,5 +3976,7 @@ const tech = {
     isRewindGun: null,
     missileSize: null,
     isLaserMine: null,
-    isAmmoFoamSize: null
+    isAmmoFoamSize: null,
+    isIceIX: null,
+    isDupDamage: null
 }

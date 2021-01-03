@@ -88,7 +88,7 @@ const b = {
     },
     fireCD: 1,
     setFireCD() {
-        b.fireCD = tech.fireRate * tech.slowFire * tech.rerollHaste * tech.aimDamage / tech.fastTime
+        b.fireCD = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -1452,14 +1452,14 @@ const b = {
             friction: 0,
             frictionAir: 0.025,
             thrust: (tech.isFastSpores ? 0.001 : 0.0004) * (1 + 0.3 * (Math.random() - 0.5)),
-            dmg: tech.isMutualism ? 6 : 3, //2x bonus damage from tech.isMutualism
-            lookFrequency: 97 + Math.floor(117 * Math.random()),
+            dmg: tech.isMutualism ? 8 : 4, //2x bonus damage from tech.isMutualism
+            lookFrequency: 100 + Math.floor(117 * Math.random()),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
                 mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
             },
-            endCycle: simulation.cycle + Math.floor((540 + Math.floor(Math.random() * 360)) * tech.isBulletsLastLonger),
+            endCycle: simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger),
             minDmgSpeed: 0,
             playerOffPosition: { //used when following player to keep spores separate
                 x: 100 * (Math.random() - 0.5),
@@ -1568,8 +1568,8 @@ const b = {
             friction: 0,
             frictionAir: 0.10,
             restitution: 0.3,
-            dmg: 0.15, //damage done in addition to the damage from momentum
-            lookFrequency: 10 + Math.floor(7 * Math.random()),
+            dmg: 0.29, //damage done in addition to the damage from momentum
+            lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 120 * tech.isBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * tech.isBulletsLastLonger),
             classType: "bullet",
             collisionFilter: {
@@ -1580,9 +1580,9 @@ const b = {
             lockedOn: null,
             isFollowMouse: true,
             beforeDmg(who) {
-                mobs.statusSlow(who, 60)
+                mobs.statusSlow(who, 120)
                 this.endCycle = simulation.cycle
-                if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
+                // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
                 if (tech.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && who.alive) {
                     setTimeout(function() {
                         if (!who.alive) {
@@ -1597,7 +1597,7 @@ const b = {
                 // this.force.y += this.mass * 0.0002;
                 //find mob targets
                 if (!(simulation.cycle % this.lookFrequency)) {
-                    const scale = 1 - 0.09 / tech.isBulletsLastLonger //0.9 * tech.isBulletsLastLonger;
+                    const scale = 1 - 0.08 / tech.isBulletsLastLonger //0.9 * tech.isBulletsLastLonger;
                     Matter.Body.scale(this, scale, scale);
                     this.lockedOn = null;
                     let closeDist = Infinity;
@@ -3535,23 +3535,23 @@ const b = {
                 }
             }
         },
-        {
-            name: "ice IX",
-            description: "synthesize <strong>short-lived</strong> ice crystals<br>crystals <strong>seek</strong> out and <strong class='color-s'>freeze</strong> mobs",
-            ammo: 0,
-            ammoPack: 64,
-            have: false,
-            fire() {
-                if (mech.crouch) {
-                    b.iceIX(10, 0.3)
-                    mech.fireCDcycle = mech.cycle + Math.floor(8 * b.fireCD); // cool down
-                } else {
-                    b.iceIX(2)
-                    mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
-                }
+        // {
+        //     name: "ice IX",
+        //     description: "synthesize <strong>short-lived</strong> ice crystals<br>crystals <strong>seek</strong> out and <strong class='color-s'>freeze</strong> mobs",
+        //     ammo: 0,
+        //     ammoPack: 64,
+        //     have: false,
+        //     fire() {
+        //         if (mech.crouch) {
+        //             b.iceIX(10, 0.3)
+        //             mech.fireCDcycle = mech.cycle + Math.floor(8 * b.fireCD); // cool down
+        //         } else {
+        //             b.iceIX(2)
+        //             mech.fireCDcycle = mech.cycle + Math.floor(3 * b.fireCD); // cool down
+        //         }
 
-            }
-        },
+        //     }
+        // },
         {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",

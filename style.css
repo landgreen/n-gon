@@ -646,12 +646,12 @@ summary {
     background: #0d9;
 }
 
-.reroll {
+.research {
     /* #f84  #f99*/
     background: #f7b;
 }
 
-.reroll-select {
+.research-select {
     float: right;
 }
 
@@ -677,3 +677,14 @@ summary {
 .right {
     text-align: right;
 }
+
+/* #console {
+    font-family: monospace;
+    font-size: 1.5em;
+    width: 300px;
+    height: 50px;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 3;
+} */

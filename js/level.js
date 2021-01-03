@@ -61,7 +61,7 @@ const level = {
         b.respawnBots();
         mech.resetHistory();
         if (tech.isArmorFromPowerUps) {
-            const gain = Math.min(0.04 * powerUps.totalPowerUps, 0.44)
+            const gain = Math.min(0.04 * powerUps.totalPowerUps, 0.40)
             tech.armorFromPowerUps += gain
             mech.setMaxHealth();
             // if (powerUps.totalPowerUps) simulation.makeTextLog("<span style='font-size:115%;'> max health increased by " + (gain * 100).toFixed(0) + "%</span>", 300)
@@ -74,7 +74,7 @@ const level = {
                 // powerUps.heal.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), 50);
             }
         }
-        if (tech.isPerpetualReroll) powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "reroll", false);
+        if (tech.isPerpetualReroll) powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "research", false);
         if (tech.isPerpetualAmmo) {
             powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
             powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
@@ -115,6 +115,20 @@ const level = {
             // hazardLaser1.draw();
             // hazardLaser2.draw();
 
+            //draw wires
+            ctx.beginPath();
+            ctx.moveTo(-525, -800);
+            ctx.quadraticCurveTo(-800, -100, -1775, -375);
+
+            ctx.moveTo(-600, -800);
+            ctx.quadraticCurveTo(-800, -200, -1775, -325);
+
+            // ctx.moveTo(-525, -800);
+            // ctx.quadraticCurveTo(-800, -100, -1825, -450);
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#234";
+            ctx.stroke();
         };
         level.setPosToSpawn(0, -50); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -145,8 +159,8 @@ const level = {
         spawn.mapRect(-2000, -1000, 4000, 200); //ceiling
         spawn.mapRect(-2000, -1000, 225, 2000); //left
         spawn.mapRect(1800, -1000, 200, 2000); //right
-        spawn.mapRect(-500, -5, 25, 50); //edge shelf
-        spawn.mapRect(475, -5, 25, 50); //edge shelf
+        spawn.mapRect(-500, -25, 25, 50); //edge shelf
+        spawn.mapRect(475, -25, 25, 50); //edge shelf
         // spawn.mapRect(-500, -820, 50, 25); //edge shelf ceiling
         // spawn.mapRect(450, -820, 50, 25); //edge shelf ceiling
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
@@ -196,7 +210,7 @@ const level = {
         spawn.mapRect(-250, -700, 1000, 900); // shelf
         spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
         // powerUps.spawnStartingPowerUps(600, -800);
-        // for (let i = 0; i < 50; ++i) powerUps.spawn(550, -800, "reroll", false);
+        // for (let i = 0; i < 50; ++i) powerUps.spawn(550, -800, "research", false);
         // powerUps.spawn(350, -800, "gun", false);
 
         function blockDoor(x, y, blockSize = 58) {

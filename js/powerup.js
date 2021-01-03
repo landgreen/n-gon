@@ -42,11 +42,11 @@ const powerUps = {
                 if (Math.random() < 0.33) {
                     spawnType = "heal"
                 } else if (Math.random() < 0.5 && !tech.isSuperDeterminism) {
-                    spawnType = "reroll"
+                    spawnType = "research"
                 }
                 for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
             }
-            if (tech.isBanish && type === 'tech') { // banish rerolled tech by adding them to the list of banished tech
+            if (tech.isBanish && type === 'tech') { // banish researched tech by adding them to the list of banished tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
                 if (powerUps.tech.choiceLog.length > banishLength || powerUps.tech.choiceLog.length === banishLength) { //I'm not sure this check is needed
                     for (let i = 0; i < banishLength; i++) {
@@ -56,8 +56,8 @@ const powerUps = {
                 simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
             }
         }
-        if (tech.manyWorlds && powerUps.reroll.rerolls === 0) {
-            for (let i = 0; i < 2; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "reroll", false);
+        if (tech.manyWorlds && powerUps.research.research === 0) {
+            for (let i = 0; i < 2; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
         document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-background").style.display = "none"
@@ -69,58 +69,58 @@ const powerUps = {
         build.unPauseGrid()
         requestAnimationFrame(cycle);
     },
-    reroll: {
-        rerolls: 0,
-        name: "reroll",
+    research: {
+        research: 0,
+        name: "research",
         color: "#f7b",
         size() {
             return 20;
         },
         effect() {
-            powerUps.reroll.changeRerolls(1)
+            powerUps.research.changeRerolls(1)
         },
         changeRerolls(amount) {
-            powerUps.reroll.rerolls += amount
-            if (powerUps.reroll.rerolls < 0) {
-                powerUps.reroll.rerolls = 0
+            powerUps.research.research += amount
+            if (powerUps.research.research < 0) {
+                powerUps.research.research = 0
             } else {
-                simulation.makeTextLog(`powerUps.reroll.rerolls <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.reroll.rerolls}
+                simulation.makeTextLog(`powerUps.research.research <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.research}
             }
 
 
             if (tech.isRerollBots) {
                 const limit = 5
-                for (; powerUps.reroll.rerolls > limit - 1; powerUps.reroll.rerolls -= limit) {
+                for (; powerUps.research.research > limit - 1; powerUps.research.research -= limit) {
                     b.randomBot()
                     if (tech.renormalization) {
                         for (let i = 0; i < limit; i++) {
                             if (Math.random() < 0.37) {
                                 mech.fieldCDcycle = mech.cycle + 30;
-                                powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+                                powerUps.spawn(mech.pos.x, mech.pos.y, "research");
                             }
                         }
                     }
                 }
             }
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
-                document.getElementById("tech-anthropic").innerHTML = `-${powerUps.reroll.rerolls}`
+                document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.research}`
             }
-            if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(mech.pos.x, mech.pos.y, "reroll");
+            if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(mech.pos.x, mech.pos.y, "research");
             if (tech.isRerollHaste) {
-                if (powerUps.reroll.rerolls === 0) {
-                    tech.rerollHaste = 0.66;
+                if (powerUps.research.research === 0) {
+                    tech.researchHaste = 0.66;
                     b.setFireCD();
                 } else {
-                    tech.rerollHaste = 1;
+                    tech.researchHaste = 1;
                     b.setFireCD();
                 }
             }
         },
-        use(type) { //runs when you actually reroll a list of selections, type can be field, gun, or tech
-            powerUps.reroll.changeRerolls(-1)
-            // simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>rerolls</span><span class='color-symbol'>--</span>
-            // <br>${powerUps.reroll.rerolls}`)
-            if (tech.isBanish && type === 'tech') { // banish rerolled tech
+        use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
+            powerUps.research.changeRerolls(-1)
+            // simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
+            // <br>${powerUps.research.research}`)
+            if (tech.isBanish && type === 'tech') { // banish researched tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
                 if (powerUps.tech.choiceLog.length > banishLength || powerUps.tech.choiceLog.length === banishLength) { //I'm not sure this check is needed
                     for (let i = 0; i < banishLength; i++) {
@@ -248,12 +248,12 @@ const powerUps = {
                 powerUps.field.choiceLog.push(choice2)
                 powerUps.field.choiceLog.push(choice3)
 
-                if (powerUps.reroll.rerolls) {
-                    text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('field')"><div class="grid-title"> <span style="position:relative;">`
-                    for (let i = 0, len = Math.min(powerUps.reroll.rerolls, 30); i < len; i++) text += `<div class="circle-grid reroll" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
-                    text += `</span><span class='reroll-select'>reroll</span></div></div>`
+                if (powerUps.research.research) {
+                    text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
+                    for (let i = 0, len = Math.min(powerUps.research.research, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                    text += `</span><span class='research-select'>research</span></div></div>`
                 }
-                //(${powerUps.reroll.rerolls})
+                //(${powerUps.research.research})
                 // text += `<div style = 'color:#fff'>${simulation.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
@@ -358,12 +358,12 @@ const powerUps = {
                     powerUps.tech.choiceLog.push(choice1)
                     powerUps.tech.choiceLog.push(choice2)
                     powerUps.tech.choiceLog.push(choice3)
-                    // if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('tech')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class="reroll-select">${powerUps.reroll.rerolls}</span></div></div>`
+                    // if (powerUps.research.research) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.research}</span></div></div>`
 
-                    if (powerUps.reroll.rerolls) {
-                        text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('tech')"><div class="grid-title"> <span style="position:relative;">`
-                        for (let i = 0, len = Math.min(powerUps.reroll.rerolls, 30); i < len; i++) text += `<div class="circle-grid reroll" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
-                        text += `</span><span class='reroll-select'>reroll</span></div></div>`
+                    if (powerUps.research.research) {
+                        text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
+                        for (let i = 0, len = Math.min(powerUps.research.research, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                        text += `</span><span class='research-select'>research</span></div></div>`
                     }
 
                     document.getElementById("choose-grid").innerHTML = text
@@ -445,11 +445,11 @@ const powerUps = {
                 powerUps.gun.choiceLog.push(choice1)
                 powerUps.gun.choiceLog.push(choice2)
                 powerUps.gun.choiceLog.push(choice3)
-                // if (powerUps.reroll.rerolls) text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('gun')"><div class="grid-title"><div class="circle-grid reroll"></div> &nbsp; reroll <span class="reroll-select">${powerUps.reroll.rerolls}</span></div></div>`
-                if (powerUps.reroll.rerolls) {
-                    text += `<div class="choose-grid-module" onclick="powerUps.reroll.use('gun')"><div class="grid-title"> <span style="position:relative;">`
-                    for (let i = 0, len = Math.min(powerUps.reroll.rerolls, 30); i < len; i++) text += `<div class="circle-grid reroll" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
-                    text += `</span><span class='reroll-select'>reroll</span></div></div>`
+                // if (powerUps.research.research) text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.research}</span></div></div>`
+                if (powerUps.research.research) {
+                    text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
+                    for (let i = 0, len = Math.min(powerUps.research.research, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                    text += `</span><span class='research-select'>research</span></div></div>`
                 }
                 // console.log(powerUps.gun.choiceLog)
                 // console.log(choice1, choice2, choice3)
@@ -502,7 +502,7 @@ const powerUps = {
             return;
         }
         // if (Math.random() < 0.01) {
-        //   powerUps.spawn(x, y, "reroll");
+        //   powerUps.spawn(x, y, "research");
         //   return;
         // }
     },
@@ -543,10 +543,10 @@ const powerUps = {
             powerUps.spawn(x, y, "ammo", false);
         }
     },
-    addRerollToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed reroll
+    addRerollToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed research
         if (mob.length && Math.random() < 0.8) { // 80% chance
             const index = Math.floor(Math.random() * mob.length)
-            powerUps.spawn(mob[index].position.x, mob[index].position.y, "reroll");
+            powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
         }
     },
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
@@ -664,7 +664,7 @@ const powerUps = {
         if (
             (!tech.isSuperDeterminism || (target === 'tech' || target === 'heal' || target === 'ammo')) &&
             !(tech.isEnergyNoAmmo && target === 'ammo') &&
-            (!simulation.isNoPowerUps || (target === 'reroll' || target === 'heal' || target === 'ammo'))
+            (!simulation.isNoPowerUps || (target === 'research' || target === 'heal' || target === 'ammo'))
         ) {
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < tech.duplicationChance()) {

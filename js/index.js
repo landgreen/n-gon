@@ -186,7 +186,7 @@ const build = {
       <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(0)}%
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
       <br>
-      <br><strong class='color-r'>rerolls</strong>: ${powerUps.reroll.rerolls}
+      <br><strong class='color-r'>research</strong>: ${powerUps.research.research}
       <br><strong class='color-h'>health</strong>: (${(mech.health*100).toFixed(0)} / ${(mech.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(mech.energy*100).toFixed(0)} / ${(mech.maxEnergy*100).toFixed(0)})
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
       <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
@@ -756,7 +756,7 @@ window.addEventListener("keydown", function(event) {
                 simulation.setZoom();
                 break
             case "`":
-                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "reroll");
+                powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "research");
                 break
             case "1":
                 powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "heal");
