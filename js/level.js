@@ -17,7 +17,7 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("missiles")
+            b.giveGuns("laser")
             // tech.isMineSentry = true
             // tech.giveTech("foam fractionation")
             // tech.giveTech("missile-bot")

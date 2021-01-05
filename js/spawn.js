@@ -2269,7 +2269,7 @@ const spawn = {
             this.explode(this.mass * 20);
         };
         Matter.Body.setDensity(me, 0.000015); //normal is 0.001
-        me.timeLeft = 420 * (0.8 + 0.4 * Math.random());
+        me.timeLeft = 420 //* (0.8 + 0.4 * Math.random());
         me.accelMag = 0.00017 * simulation.accelScale; //* (0.8 + 0.4 * Math.random())
         me.frictionAir = 0.01 //* (0.8 + 0.4 * Math.random());
         me.restitution = 0.5;

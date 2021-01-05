@@ -81,7 +81,7 @@ const tech = {
         if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
         if (tech.isMaxEnergyTech) dmg *= 1.4
         if (tech.isEnergyNoAmmo) dmg *= 1.5
-        if (tech.isDamageForGuns) dmg *= 1 + 0.07 * b.inventory.length
+        if (tech.isDamageForGuns) dmg *= 1 + 0.1 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
         if (tech.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 3;
         if (tech.isEnergyLoss) dmg *= 1.5;
@@ -103,120 +103,6 @@ const tech = {
         return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
     },
     tech: [{
-            name: "electrolytes",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0
-            },
-            requires: "increased energy regen or max energy",
-            effect: () => {
-                tech.isEnergyDamage = true
-            },
-            remove() {
-                tech.isEnergyDamage = false;
-            }
-        },
-        {
-            name: "exciton-lattice",
-            description: `increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return (tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
-            },
-            requires: "energy based damage",
-            effect() {
-                tech.isEnergyNoAmmo = true;
-            },
-            remove() {
-                tech.isEnergyNoAmmo = false;
-            }
-        },
-        {
-            name: "exothermic process",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !tech.isEnergyHealth
-            },
-            requires: "not mass-energy equivalence",
-            effect() {
-                tech.isEnergyLoss = true;
-            },
-            remove() {
-                tech.isEnergyLoss = false;
-            }
-        },
-        {
-            name: "heat engine",
-            description: `increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br>reduce maximum <strong class='color-f'>energy</strong> by <strong>50</strong>`,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isEnergyLoss && mech.maxEnergy < 1.1 && !tech.isMissileField && !tech.isSporeField && !tech.isRewindAvoidDeath
-            },
-            requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
-            effect() {
-                tech.isMaxEnergyTech = true;
-                mech.setMaxEnergy()
-            },
-            remove() {
-                tech.isMaxEnergyTech = false;
-                mech.setMaxEnergy()
-            }
-        },
-        {
-            name: "Gibbs free energy",
-            description: `increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> <strong class='color-f'>energy</strong> below <strong>100</strong>`,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isEnergyLoss && mech.maxEnergy < 1.1
-            },
-            requires: "exothermic process, not max energy increase",
-            effect() {
-                tech.isLowEnergyDamage = true;
-            },
-            remove() {
-                tech.isLowEnergyDamage = false;
-            }
-        },
-        {
-            name: "rest frame",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>when not <strong>moving</strong>",
-            maxCount: 6,
-            count: 0,
-            allowed() {
-                return mech.Fx === 0.016
-            },
-            requires: "base movement speed",
-            effect: () => {
-                tech.restDamage += 0.25
-            },
-            remove() {
-                tech.restDamage = 1;
-            }
-        },
-        {
-            name: "kinetic bombardment",
-            description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.isFarAwayDmg = true; //used in mob.damage()
-            },
-            remove() {
-                tech.isFarAwayDmg = false;
-            }
-        },
-        {
             name: "integrated armament",
             description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
             maxCount: 1,
@@ -233,8 +119,34 @@ const tech = {
             }
         },
         {
+            name: "entanglement",
+            nameInfo: "<span id = 'tech-entanglement'></span>",
+            addNameInfo() {
+                setTimeout(function() {
+                    simulation.boldActiveGunHUD();
+                }, 1000);
+            },
+            description: "while your <strong>first</strong> <strong class='color-g'>gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1 && !tech.isEnergyHealth
+            },
+            requires: "at least 2 guns",
+            effect() {
+                tech.isEntanglement = true
+                setTimeout(function() {
+                    simulation.boldActiveGunHUD();
+                }, 1000);
+
+            },
+            remove() {
+                tech.isEntanglement = false;
+            }
+        },
+        {
             name: "arsenal",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>10%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -250,7 +162,7 @@ const tech = {
         },
         {
             name: "generalist",
-            description: "<strong>spawn</strong> 5 <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
+            description: "<strong>spawn</strong> 6 <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
@@ -260,7 +172,7 @@ const tech = {
             requires: "arsenal",
             effect() {
                 tech.isGunCycle = true;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 6; i++) {
                     powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
                 }
             },
@@ -269,103 +181,101 @@ const tech = {
             }
         },
         {
-            name: "fluoroantimonic acid",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong>health</strong> is above <strong>100</strong>",
+            name: "logistics",
+            description: "<strong class='color-g'>ammo</strong> power ups give <strong>200%</strong> <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your <strong>current gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.maxHealth > 1;
+                return !tech.isEnergyNoAmmo
             },
-            requires: "health above 100",
+            requires: "not exciton-lattice",
             effect() {
-                tech.isAcidDmg = true;
+                tech.isAmmoForGun = true;
             },
             remove() {
-                tech.isAcidDmg = false;
+                tech.isAmmoForGun = false;
             }
         },
         {
-            name: "negative feedback",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong>health</strong> below <strong>100</strong>",
+            name: "supply chain",
+            description: "double your current <strong class='color-g'>ammo</strong> for all <strong class='color-g'>guns</strong>",
+            maxCount: 9,
+            count: 0,
+            isNonRefundable: true,
+            allowed() {
+                return tech.isAmmoForGun
+            },
+            requires: "logistics",
+            effect() {
+                for (let i = 0; i < b.guns.length; i++) {
+                    if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
+                }
+                simulation.makeGunHUD();
+            },
+            remove() {}
+        },
+        {
+            name: "catabolism",
+            description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>3</strong> <strong class='color-g'>ammo</strong>, but lose <strong>5</strong> <strong class='color-h'>health</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.health < 0.6 || build.isCustomSelection
+                return !tech.isEnergyHealth && !tech.isEnergyNoAmmo
             },
-            requires: "health below 60",
-            effect() {
-                tech.isLowHealthDmg = true; //used in mob.damage()
+            requires: "not mass-energy equivalence<br>not exciton-lattice",
+            effect: () => {
+                tech.isAmmoFromHealth = true;
             },
             remove() {
-                tech.isLowHealthDmg = false;
+                tech.isAmmoFromHealth = false;
             }
         },
         {
-            name: "radiative equilibrium",
-            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
+            name: "perpetual ammo",
+            description: "find <strong>2</strong> <strong class='color-g'>ammo</strong> at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.harmReduction() < 1
+                return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualReroll && !tech.isPerpetualStun && !tech.isEnergyNoAmmo
             },
-            requires: "some harm reduction",
+            requires: "only 1 perpetual effect, not exciton lattice",
             effect() {
-                tech.isHarmDamage = true;
+                tech.isPerpetualAmmo = true
             },
             remove() {
-                tech.isHarmDamage = false;
+                tech.isPerpetualAmmo = false
             }
         },
         {
-            name: "correlated damage",
-            description: "your chance to <strong class='color-dup'>duplicate</strong> power ups<br>increases your <strong class='color-d'>damage</strong> by the same percent",
+            name: "desublimated ammunition",
+            description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() > 0
+                return true
             },
-            requires: "some duplication chance",
+            requires: "",
             effect() {
-                tech.isDupDamage = true;
+                tech.isCrouchAmmo = true
             },
             remove() {
-                tech.isDupDamage = false;
+                tech.isCrouchAmmo = false;
             }
         },
         {
-            name: "perturbation theory",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>3.5%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+            name: "gun turret",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research > 4 || build.isCustomSelection
+                return tech.isCrouchAmmo && !tech.isEnergyHealth
             },
-            requires: "at least 5 research",
+            requires: "desublimated ammunition<br>not mass-energy equivalence",
             effect() {
-                tech.isRerollDamage = true;
+                tech.isTurret = true
             },
             remove() {
-                tech.isRerollDamage = false;
-            }
-        },
-        {
-            name: "Ψ(t) collapse",
-            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return powerUps.research.research === 0 && !tech.manyWorlds
-            },
-            requires: "no research",
-            effect() {
-                tech.isRerollHaste = true;
-                tech.researchHaste = 0.33;
-                b.setFireCD();
-            },
-            remove() {
-                tech.isRerollHaste = false;
-                tech.researchHaste = 1;
-                b.setFireCD();
+                tech.isTurret = false;
             }
         },
         {
@@ -401,22 +311,6 @@ const tech = {
             remove() {
                 tech.fireRate = 1;
                 b.setFireCD();
-            }
-        },
-        {
-            name: "mass driver",
-            description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.fieldUpgrades[mech.fieldMode].name !== "wormhole"
-            },
-            requires: "not wormhole",
-            effect() {
-                tech.throwChargeRate = 2
-            },
-            remove() {
-                tech.throwChargeRate = 1
             }
         },
         {
@@ -501,27 +395,6 @@ const tech = {
             }
         },
         {
-            name: "reaction inhibitor",
-            description: "mobs spawn with <strong>11%</strong> less <strong>health</strong>",
-            maxCount: 3,
-            count: 0,
-            allowed() {
-                return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.isBotSpawner
-            },
-            requires: "any mob death tech",
-            effect: () => {
-                tech.mobSpawnWithHealth *= 0.89
-
-                //set all mobs at full health to 0.85
-                for (let i = 0; i < mob.length; i++) {
-                    if (mob.health > tech.mobSpawnWithHealth) mob.health = tech.mobSpawnWithHealth
-                }
-            },
-            remove() {
-                tech.mobSpawnWithHealth = 1;
-            }
-        },
-        {
             name: "zoospore vector",
             description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>9%</strong> chance",
             maxCount: 9,
@@ -554,6 +427,59 @@ const tech = {
             },
             remove() {
                 tech.nailsDeathMob = 0;
+            }
+        },
+        {
+            name: "reaction inhibitor",
+            description: "mobs spawn with <strong>11%</strong> less <strong>health</strong>",
+            maxCount: 3,
+            count: 0,
+            allowed() {
+                return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.isBotSpawner
+            },
+            requires: "any mob death tech",
+            effect: () => {
+                tech.mobSpawnWithHealth *= 0.89
+
+                //set all mobs at full health to 0.85
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob.health > tech.mobSpawnWithHealth) mob.health = tech.mobSpawnWithHealth
+                }
+            },
+            remove() {
+                tech.mobSpawnWithHealth = 1;
+            }
+        },
+        {
+            name: "decorrelation",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (tech.totalBots() > 1 || tech.haveGunCheck("drones") || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
+            },
+            requires: "drones, spores, mines, or bots",
+            effect() {
+                tech.isNoFireDefense = true
+            },
+            remove() {
+                tech.isNoFireDefense = false
+            }
+        },
+        {
+            name: "anticorrelation",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isNoFireDefense
+            },
+            requires: "decorrelation",
+            effect() {
+                tech.isNoFireDamage = true
+            },
+            remove() {
+                tech.isNoFireDamage = false
             }
         },
         {
@@ -691,7 +617,7 @@ const tech = {
         },
         {
             name: "laser-bot",
-            description: "a bot uses <strong class='color-f'>energy</strong> to emit a <strong>laser</strong><br>targeting nearby mobs",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit a <strong class='color-laser'>laser</strong><br>targeting nearby mobs",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -708,7 +634,7 @@ const tech = {
         },
         {
             name: "laser-bot upgrade",
-            description: "<strong>350%</strong> increased laser <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
+            description: "<strong>350%</strong> increased <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong><br><em>applies to all current and future laser-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -873,6 +799,38 @@ const tech = {
             remove() {}
         },
         {
+            name: "rest frame",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>when not <strong>moving</strong>",
+            maxCount: 6,
+            count: 0,
+            allowed() {
+                return mech.Fx === 0.016
+            },
+            requires: "base movement speed",
+            effect: () => {
+                tech.restDamage += 0.25
+            },
+            remove() {
+                tech.restDamage = 1;
+            }
+        },
+        {
+            name: "kinetic bombardment",
+            description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isFarAwayDmg = true; //used in mob.damage()
+            },
+            remove() {
+                tech.isFarAwayDmg = false;
+            }
+        },
+        {
             name: "squirrel-cage rotor",
             description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
             maxCount: 9,
@@ -925,35 +883,51 @@ const tech = {
             }
         },
         {
-            name: "decorrelation",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>40%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            name: "mass driver",
+            description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.totalBots() > 1 || tech.haveGunCheck("drones") || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
+                return mech.fieldUpgrades[mech.fieldMode].name !== "wormhole"
             },
-            requires: "drones, spores, mines, or bots",
+            requires: "not wormhole",
             effect() {
-                tech.isNoFireDefense = true
+                tech.throwChargeRate = 2
             },
             remove() {
-                tech.isNoFireDefense = false
+                tech.throwChargeRate = 1
             }
         },
         {
-            name: "anticorrelation",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            name: "perpetual stun",
+            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds<br>at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isNoFireDefense
+                return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualAmmo
             },
-            requires: "decorrelation",
+            requires: "only 1 perpetual effect",
             effect() {
-                tech.isNoFireDamage = true
+                tech.isPerpetualStun = true
             },
             remove() {
-                tech.isNoFireDamage = false
+                tech.isPerpetualStun = false
+            }
+        },
+        {
+            name: "osmoprotectant",
+            description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+            },
+            requires: "a freezing or stunning effect",
+            effect() {
+                tech.isFreezeHarmImmune = true;
+            },
+            remove() {
+                tech.isFreezeHarmImmune = false;
             }
         },
         {
@@ -971,32 +945,6 @@ const tech = {
             },
             remove() {
                 tech.collisionImmuneCycles = 25;
-            }
-        },
-        {
-            name: "entanglement",
-            nameInfo: "<span id = 'tech-entanglement'></span>",
-            addNameInfo() {
-                setTimeout(function() {
-                    simulation.boldActiveGunHUD();
-                }, 1000);
-            },
-            description: "while your <strong>first</strong> <strong class='color-g'>gun</strong> is equipped<br>reduce <strong class='color-harm'>harm</strong> by <strong>13%</strong> for each of your <strong class='color-g'>guns</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return b.inventory.length > 1 && !tech.isEnergyHealth
-            },
-            requires: "at least 2 guns",
-            effect() {
-                tech.isEntanglement = true
-                setTimeout(function() {
-                    simulation.boldActiveGunHUD();
-                }, 1000);
-
-            },
-            remove() {
-                tech.isEntanglement = false;
             }
         },
         {
@@ -1035,19 +983,19 @@ const tech = {
             }
         },
         {
-            name: "clock gating",
-            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
+            name: "radiative equilibrium",
+            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
+                return mech.harmReduction() < 1
             },
-            requires: "FPS above 45",
+            requires: "some harm reduction",
             effect() {
-                tech.isSlowFPS = true;
+                tech.isHarmDamage = true;
             },
             remove() {
-                tech.isSlowFPS = false;
+                tech.isHarmDamage = false;
             }
         },
         {
@@ -1068,19 +1016,19 @@ const tech = {
         },
 
         {
-            name: "osmoprotectant",
-            description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
+            name: "clock gating",
+            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+                return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
             },
-            requires: "a freezing or stunning effect",
+            requires: "FPS above 45",
             effect() {
-                tech.isFreezeHarmImmune = true;
+                tech.isSlowFPS = true;
             },
             remove() {
-                tech.isFreezeHarmImmune = false;
+                tech.isSlowFPS = false;
             }
         },
         {
@@ -1168,11 +1116,11 @@ const tech = {
         },
         {
             name: "mass-energy equivalence",
-            description: "<strong class='color-f'>energy</strong> protects you instead of <strong>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
             maxCount: 1,
             count: 0,
             allowed() {
-                return !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field"
+                return !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth
             },
             requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass",
             effect: () => {
@@ -1217,6 +1165,88 @@ const tech = {
                 for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                     if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
                 }
+            }
+        },
+        {
+            name: "electrolytes",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0
+            },
+            requires: "increased energy regen or max energy",
+            effect: () => {
+                tech.isEnergyDamage = true
+            },
+            remove() {
+                tech.isEnergyDamage = false;
+            }
+        },
+        {
+            name: "exciton-lattice",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave"
+            },
+            requires: "energy based damage",
+            effect() {
+                tech.isEnergyNoAmmo = true;
+            },
+            remove() {
+                tech.isEnergyNoAmmo = false;
+            }
+        },
+        {
+            name: "exothermic process",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !tech.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect() {
+                tech.isEnergyLoss = true;
+            },
+            remove() {
+                tech.isEnergyLoss = false;
+            }
+        },
+        {
+            name: "heat engine",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br>reduce maximum <strong class='color-f'>energy</strong> by <strong>50</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isEnergyLoss && mech.maxEnergy < 1.1 && !tech.isMissileField && !tech.isSporeField && !tech.isRewindAvoidDeath
+            },
+            requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
+            effect() {
+                tech.isMaxEnergyTech = true;
+                mech.setMaxEnergy()
+            },
+            remove() {
+                tech.isMaxEnergyTech = false;
+                mech.setMaxEnergy()
+            }
+        },
+        {
+            name: "Gibbs free energy",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> <strong class='color-f'>energy</strong> below <strong>100</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isEnergyLoss && mech.maxEnergy < 1.1
+            },
+            requires: "exothermic process, not max energy increase",
+            effect() {
+                tech.isLowEnergyDamage = true;
+            },
+            remove() {
+                tech.isLowEnergyDamage = false;
             }
         },
         {
@@ -1304,6 +1334,22 @@ const tech = {
             }
         },
         {
+            name: "negative feedback",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong class='color-h'>health</strong> below <strong>100</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.health < 0.6 || build.isCustomSelection
+            },
+            requires: "health below 60",
+            effect() {
+                tech.isLowHealthDmg = true; //used in mob.damage()
+            },
+            remove() {
+                tech.isLowHealthDmg = false;
+            }
+        },
+        {
             name: "entropy exchange",
             description: "<strong class='color-h'>heal</strong> for <strong>1%</strong> of <strong class='color-d'>damage</strong> done",
             maxCount: 9,
@@ -1317,6 +1363,22 @@ const tech = {
             },
             remove() {
                 tech.healthDrain = 0;
+            }
+        },
+        {
+            name: "fluoroantimonic acid",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong class='color-h'>health</strong> is above <strong>100</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.maxHealth > 1;
+            },
+            requires: "health above 100",
+            effect() {
+                tech.isAcidDmg = true;
+            },
+            remove() {
+                tech.isAcidDmg = false;
             }
         },
         {
@@ -1406,6 +1468,22 @@ const tech = {
             }
         },
         {
+            name: "perpetual heals",
+            description: "find <strong>2</strong> <strong class='color-h'>heals</strong> at the start of each <strong>level</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return !tech.isPerpetualReroll && !tech.isPerpetualAmmo && !tech.isPerpetualStun
+            },
+            requires: "only 1 perpetual effect",
+            effect() {
+                tech.isPerpetualHeal = true
+            },
+            remove() {
+                tech.isPerpetualHeal = false
+            }
+        },
+        {
             name: "anthropic principle",
             nameInfo: "<span id = 'tech-anthropic'></span>",
             addNameInfo() {
@@ -1413,7 +1491,7 @@ const tech = {
                     powerUps.research.changeRerolls(0)
                 }, 1000);
             },
-            description: "use a <strong class='color-r'>research</strong> to avoid <strong>dying</strong> once a level <br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
+            description: "once per level use <strong>1</strong> <strong class='color-r'>research</strong> to avoid <strong>dying</strong><br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1500,6 +1578,22 @@ const tech = {
             remove() {
                 tech.duplicateChance = 0
                 if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+            }
+        },
+        {
+            name: "correlated damage",
+            description: "your chance to <strong class='color-dup'>duplicate</strong> power ups<br>increases your <strong class='color-d'>damage</strong> by the same percent",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.duplicationChance() > 0
+            },
+            requires: "some duplication chance",
+            effect() {
+                tech.isDupDamage = true;
+            },
+            remove() {
+                tech.isDupDamage = false;
             }
         },
         {
@@ -1637,88 +1731,6 @@ const tech = {
             }
         },
         {
-            name: "logistics",
-            description: "<strong class='color-g'>ammo</strong> power ups give <strong>200%</strong> <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your <strong>current gun</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !tech.isEnergyNoAmmo
-            },
-            requires: "not exciton-lattice",
-            effect() {
-                tech.isAmmoForGun = true;
-            },
-            remove() {
-                tech.isAmmoForGun = false;
-            }
-        },
-        {
-            name: "supply chain",
-            description: "double your current <strong class='color-g'>ammo</strong> for all <strong class='color-g'>guns</strong>",
-            maxCount: 9,
-            count: 0,
-            isNonRefundable: true,
-            allowed() {
-                return tech.isAmmoForGun
-            },
-            requires: "logistics",
-            effect() {
-                for (let i = 0; i < b.guns.length; i++) {
-                    if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
-                }
-                simulation.makeGunHUD();
-            },
-            remove() {}
-        },
-        {
-            name: "catabolism",
-            description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>3</strong> <strong class='color-g'>ammo</strong>, but lose <strong>5</strong> <strong>health</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !tech.isEnergyHealth && !tech.isEnergyNoAmmo
-            },
-            requires: "not mass-energy equivalence<br>not exciton-lattice",
-            effect: () => {
-                tech.isAmmoFromHealth = true;
-            },
-            remove() {
-                tech.isAmmoFromHealth = false;
-            }
-        },
-        {
-            name: "desublimated ammunition",
-            description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.isCrouchAmmo = true
-            },
-            remove() {
-                tech.isCrouchAmmo = false;
-            }
-        },
-        {
-            name: "gun turret",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when <strong>crouching</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isCrouchAmmo && !tech.isEnergyHealth
-            },
-            requires: "desublimated ammunition<br>not mass-energy equivalence",
-            effect() {
-                tech.isTurret = true
-            },
-            remove() {
-                tech.isTurret = false;
-            }
-        },
-        {
             name: "cardinality",
             description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
             maxCount: 1,
@@ -1775,6 +1787,26 @@ const tech = {
             }
         },
         {
+            name: "Ψ(t) collapse",
+            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.research.research === 0 && !tech.manyWorlds
+            },
+            requires: "no research",
+            effect() {
+                tech.isRerollHaste = true;
+                tech.researchHaste = 0.33;
+                b.setFireCD();
+            },
+            remove() {
+                tech.isRerollHaste = false;
+                tech.researchHaste = 1;
+                b.setFireCD();
+            }
+        },
+        {
             name: "many-worlds",
             description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
             maxCount: 1,
@@ -1827,6 +1859,22 @@ const tech = {
             }
         },
         {
+            name: "perturbation theory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>3.5%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return powerUps.research.research > 4 || build.isCustomSelection
+            },
+            requires: "at least 5 research",
+            effect() {
+                tech.isRerollDamage = true;
+            },
+            remove() {
+                tech.isRerollDamage = false;
+            }
+        },
+        {
             name: "Born rule",
             description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
             maxCount: 1,
@@ -1870,54 +1918,6 @@ const tech = {
             },
             remove() {
                 tech.isPerpetualReroll = false
-            }
-        },
-        {
-            name: "perpetual heals",
-            description: "find <strong>2</strong> <strong class='color-h'>heals</strong> at the start of each <strong>level</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !tech.isPerpetualReroll && !tech.isPerpetualAmmo && !tech.isPerpetualStun
-            },
-            requires: "only 1 perpetual effect",
-            effect() {
-                tech.isPerpetualHeal = true
-            },
-            remove() {
-                tech.isPerpetualHeal = false
-            }
-        },
-        {
-            name: "perpetual ammo",
-            description: "find <strong>2</strong> <strong class='color-g'>ammo</strong> at the start of each <strong>level</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualReroll && !tech.isPerpetualStun && !tech.isEnergyNoAmmo
-            },
-            requires: "only 1 perpetual effect, not exciton lattice",
-            effect() {
-                tech.isPerpetualAmmo = true
-            },
-            remove() {
-                tech.isPerpetualAmmo = false
-            }
-        },
-        {
-            name: "perpetual stun",
-            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds<br>at the start of each <strong>level</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualAmmo
-            },
-            requires: "only 1 perpetual effect",
-            effect() {
-                tech.isPerpetualStun = true
-            },
-            remove() {
-                tech.isPerpetualStun = false
             }
         },
         //************************************************** 
@@ -2609,7 +2609,7 @@ const tech = {
         },
         {
             name: "laser-mines",
-            description: "<strong>mines</strong> hover in place until <strong>mobs</strong> get in range<br><strong>mines</strong> use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong>lasers</strong>",
+            description: "<strong>mines</strong> hover in place until <strong>mobs</strong> get in range<br><strong>mines</strong> use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong class='color-laser'>lasers</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2650,7 +2650,7 @@ const tech = {
             allowed() {
                 return (tech.haveGunCheck("mine") && !tech.isMineAmmoBack && !tech.isLaserMine) || tech.isMineDrop
             },
-            requires: "mine, not mine reclamation, not laser-mines",
+            requires: "mines, not mine reclamation, laser-mines",
             effect() {
                 tech.isMineSentry = true;
             },
@@ -2763,7 +2763,7 @@ const tech = {
         },
         {
             name: "mutualism",
-            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong>health</strong> until they <strong>die</strong>",
+            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2950,7 +2950,7 @@ const tech = {
         },
         {
             name: "laser diodes",
-            description: "all <strong>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
+            description: "all <strong class='color-laser'>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -2966,8 +2966,26 @@ const tech = {
             }
         },
         {
+            name: "relativistic momentum",
+            description: "all <strong class='color-laser'>lasers</strong> push mobs away<br><em>effects laser-gun, laser-bot, and laser-mines</em>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("laser") || tech.laserBotCount > 1
+            },
+            requires: "laser",
+            effect() {
+                tech.isLaserPush = true;
+            },
+            remove() {
+                tech.isLaserPush = false;
+            }
+        },
+
+        {
             name: "specular reflection",
-            description: "increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong><br>and <strong>+1</strong> reflection for all <strong>lasers</strong> <em>(gun, bot, mine)</em>",
+            description: "increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong><br>and <strong>+1</strong> reflection for all <strong class='color-laser'>lasers</strong> <em>(gun, bot, mine)</em>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -2988,7 +3006,7 @@ const tech = {
         },
         {
             name: "diffraction grating",
-            description: `your <strong>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
+            description: `your <strong class='color-laser'>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -3011,7 +3029,7 @@ const tech = {
         },
         {
             name: "diffuse beam",
-            description: "<strong>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>175%</strong>",
+            description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>175%</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3036,7 +3054,7 @@ const tech = {
         },
         {
             name: "output coupler",
-            description: "<strong>widen</strong> diffuse <strong>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
+            description: "<strong>widen</strong> diffuse <strong class='color-laser'>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3063,7 +3081,7 @@ const tech = {
         },
         {
             name: "slow light propagation",
-            description: "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>",
+            description: "<strong class='color-laser'>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -3088,7 +3106,7 @@ const tech = {
         },
         {
             name: "pulse",
-            description: "convert <strong>25%</strong> of your <strong class='color-f'>energy</strong> into a pulsed laser<br>that instantly initiates a fusion <strong class='color-e'>explosion</strong>",
+            description: "use <strong>25%</strong> of your <strong class='color-f'>energy</strong> in a pulsed <strong class='color-laser'>laser</strong><br>that instantly initiates a fusion <strong class='color-e'>explosion</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3111,7 +3129,7 @@ const tech = {
         },
         {
             name: "shock wave",
-            description: "mobs caught in <strong>pulse's</strong> explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
+            description: "mobs caught in <strong class='color-laser'>pulse</strong>'s explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3128,7 +3146,7 @@ const tech = {
         },
         {
             name: "neocognitron",
-            description: "<strong>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
+            description: "<strong class='color-laser'>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
             isGunTech: true,
             maxCount: 1,
             count: 0,

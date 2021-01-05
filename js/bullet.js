@@ -1125,7 +1125,7 @@ const b = {
     }, whereEnd = {
         x: where.x + 3000 * Math.cos(mech.angle),
         y: where.y + 3000 * Math.sin(mech.angle)
-    }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false) {
+    }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
         const reflectivity = 1 - 1 / (reflections * 1.5)
         let damage = b.dmgScale * dmg
         let best = {
@@ -1211,6 +1211,21 @@ const b = {
                     color: "rgba(255,0,0,0.5)",
                     time: simulation.drawTime
                 });
+
+                if (tech.isLaserPush) { //push mobs away
+                    console.log(-0.003 * Math.min(4, best.who.mass), dmg)
+                    const index = path.length - 1
+                    // const force = Vector.mult(Vector.normalise(Vector.sub(path[Math.max(0, index - 1)], path[index])), -0.003 * Math.min(4, best.who.mass))
+                    // const push = -0.004 / (1 + tech.beamSplitter + tech.wideLaser + tech.historyLaser)
+                    // console.log(push)
+                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.004 * push * Math.min(4, best.who.mass))
+                    Matter.Body.applyForce(best.who, path[index], force)
+                    // Matter.Body.setVelocity(best.who, { //friction
+                    //     x: best.who.velocity.x * 0.7,
+                    //     y: best.who.velocity.y * 0.7
+                    // });
+                }
+
             }
             // ctx.fillStyle = color; //draw mob damage circle
             // ctx.beginPath();
@@ -2224,7 +2239,14 @@ const b = {
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && mech.energy > this.drainThreshold) {
                     mech.energy -= tech.laserFieldDrain * tech.isLaserDiode
-                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.21)) //tech.laserDamage = 0.16
+                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.21), tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
+                    // laser(where = {
+                    //     x: mech.pos.x + 20 * Math.cos(mech.angle),
+                    //     y: mech.pos.y + 20 * Math.sin(mech.angle)
+                    // }, whereEnd = {
+                    //     x: where.x + 3000 * Math.cos(mech.angle),
+                    //     y: where.y + 3000 * Math.sin(mech.angle)
+                    // }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
                 }
             }
         })
@@ -3908,7 +3930,7 @@ const b = {
         },
         {
             name: "laser",
-            description: "emit a <strong>beam</strong> of collimated coherent <strong>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
+            description: "emit a <strong>beam</strong> of collimated coherent <strong class='color-laser'>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammunition",
             ammo: 0,
             ammoPack: Infinity,
             have: false,
@@ -3938,6 +3960,14 @@ const b = {
                     b.laser();
                 }
             },
+
+            // laser(where = {
+            //     x: mech.pos.x + 20 * Math.cos(mech.angle),
+            //     y: mech.pos.y + 20 * Math.sin(mech.angle)
+            // }, whereEnd = {
+            //     x: where.x + 3000 * Math.cos(mech.angle),
+            //     y: where.y + 3000 * Math.sin(mech.angle)
+            // }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
             fireSplit() {
                 if (mech.energy < tech.laserFieldDrain) {
                     mech.fireCDcycle = mech.cycle + 100; // cool down if out of energy
@@ -3945,7 +3975,9 @@ const b = {
                     mech.fireCDcycle = mech.cycle
                     mech.energy -= mech.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
                     const divergence = mech.crouch ? 0.15 : 0.2
-                    let dmg = tech.laserDamage * Math.pow(0.9, tech.beamSplitter) //Math.pow(0.9, tech.laserDamage)
+                    const scale = Math.pow(0.9, tech.beamSplitter)
+                    const pushScale = scale * scale
+                    let dmg = tech.laserDamage * scale //Math.pow(0.9, tech.laserDamage)
                     const where = {
                         x: mech.pos.x + 20 * Math.cos(mech.angle),
                         y: mech.pos.y + 20 * Math.sin(mech.angle)
@@ -3953,16 +3985,16 @@ const b = {
                     b.laser(where, {
                         x: where.x + 3000 * Math.cos(mech.angle),
                         y: where.y + 3000 * Math.sin(mech.angle)
-                    }, dmg)
+                    }, dmg, tech.laserReflections, false, pushScale)
                     for (let i = 1; i < 1 + tech.beamSplitter; i++) {
                         b.laser(where, {
                             x: where.x + 3000 * Math.cos(mech.angle + i * divergence),
                             y: where.y + 3000 * Math.sin(mech.angle + i * divergence)
-                        }, dmg)
+                        }, dmg, tech.laserReflections, false, pushScale)
                         b.laser(where, {
                             x: where.x + 3000 * Math.cos(mech.angle - i * divergence),
                             y: where.y + 3000 * Math.sin(mech.angle - i * divergence)
-                        }, dmg)
+                        }, dmg, tech.laserReflections, false, pushScale)
                     }
                 }
             },
@@ -3985,7 +4017,7 @@ const b = {
                         b.laser(where, {
                             x: where.x + 3000 * Math.cos(angle),
                             y: where.y + 3000 * Math.sin(angle)
-                        }, dmg, 0, true)
+                        }, dmg, 0, true, 0.4)
                         for (let i = 1; i < tech.wideLaser; i++) {
                             let whereOff = Vector.add(where, {
                                 x: i * off * Math.cos(angle + Math.PI / 2),
@@ -3994,7 +4026,7 @@ const b = {
                             b.laser(whereOff, {
                                 x: whereOff.x + 3000 * Math.cos(angle),
                                 y: whereOff.y + 3000 * Math.sin(angle)
-                            }, dmg, 0, true)
+                            }, dmg, 0, true, 0.4)
                             whereOff = Vector.add(where, {
                                 x: i * off * Math.cos(angle - Math.PI / 2),
                                 y: i * off * Math.sin(angle - Math.PI / 2)
@@ -4002,7 +4034,7 @@ const b = {
                             b.laser(whereOff, {
                                 x: whereOff.x + 3000 * Math.cos(angle),
                                 y: whereOff.y + 3000 * Math.sin(angle)
-                            }, dmg, 0, true)
+                            }, dmg, 0, true, 0.4)
                         }
                         ctx.stroke();
                         ctx.globalAlpha = 1;
@@ -4039,7 +4071,7 @@ const b = {
                     }, {
                         x: mech.pos.x + 3000 * Math.cos(mech.angle),
                         y: mech.pos.y + 3000 * Math.sin(mech.angle)
-                    }, dmg, 0, true);
+                    }, dmg, 0, true, 0.3);
                     for (let i = 1; i < len; i++) {
                         const history = mech.history[(mech.cycle - i * spacing) % 600]
                         b.laser({
@@ -4048,7 +4080,7 @@ const b = {
                         }, {
                             x: history.position.x + 3000 * Math.cos(history.angle),
                             y: history.position.y + 3000 * Math.sin(history.angle) - mech.yPosDifference
-                        }, dmg, 0, true);
+                        }, dmg, 0, true, 0.3);
                     }
                     ctx.stroke();
                 }
