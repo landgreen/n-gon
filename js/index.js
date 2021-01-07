@@ -201,8 +201,7 @@ const build = {
           <text x="5" y="18">copy build url</text>
       </g>
   </svg>
-
-    </div>`;
+</div>`;
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[b.inventory[i]].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
         }
@@ -744,6 +743,7 @@ window.addEventListener("keydown", function(event) {
             break
     }
     if (simulation.testing) {
+        if (event.key === "X") mech.death(); //only uppercase
         switch (event.key.toLowerCase()) {
             case "o":
                 simulation.isAutoZoom = false;
@@ -825,9 +825,6 @@ window.addEventListener("keydown", function(event) {
                 break
             case "u":
                 level.nextLevel();
-                break
-            case "X": //capital X to make it hard to die
-                mech.death();
                 break
         }
     }

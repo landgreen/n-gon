@@ -576,19 +576,19 @@ const simulation = {
         let delay = 500
         const step = 150
         setTimeout(function() {
-            simulation.makeTextLog(`input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
+            simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
         }, delay);
         delay += step
         setTimeout(function() {
-            simulation.makeTextLog(`input.key.left <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
+            simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
         }, delay);
         delay += step
         setTimeout(function() {
-            simulation.makeTextLog(`input.key.down <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
+            simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
         }, delay);
         delay += step
         setTimeout(function() {
-            simulation.makeTextLog(`input.key.right <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
+            simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
         }, delay);
         delay += 1000
         setTimeout(function() {
@@ -596,7 +596,7 @@ const simulation = {
         }, delay);
         delay += step
         setTimeout(function() {
-            simulation.makeTextLog(`input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
+            simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
         }, delay);
         // delay += step
         // setTimeout(function() {
@@ -790,6 +790,9 @@ const simulation = {
             }
 
             if (!(simulation.cycle % 420)) { //once every 7 seconds
+
+                if (tech.cyclicImmunity && mech.immuneCycle < mech.cycle + tech.cyclicImmunity) mech.immuneCycle = mech.cycle + tech.cyclicImmunity; //player is immune to collision damage for 60 cycles
+
                 fallCheck = function(who, save = false) {
                     let i = who.length;
                     while (i--) {

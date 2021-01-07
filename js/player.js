@@ -429,7 +429,6 @@ const mech = {
                 }
                 simulation.isTextLogOpen = true;
                 simulation.makeTextLog("simulation.amplitude <span class='color-symbol'>=</span> null");
-
             }, 6 * swapPeriod);
 
         } else if (mech.alive) { //normal death code here
@@ -482,8 +481,10 @@ const mech = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        mech.maxHealth = mech.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
-        if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+        const set = mech.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
+        simulation.makeTextLog(`<span class='color-var'>mech</span>.maxHealth <span class='color-symbol'>=</span> ${set}`)
+        mech.maxHealth = set
+        if(mech.health > mech.maxHealth) mech.health = mech.maxHealth;
         mech.displayHealth();
     },
 
@@ -604,7 +605,9 @@ const mech = {
     },
     damage(dmg) {
         if (tech.isRewindAvoidDeath && mech.energy > 0.66) {
-            mech.rewind(Math.floor(Math.min(299, 137 * mech.energy)))
+            const steps = Math.floor(Math.min(299, 137 * mech.energy))
+            simulation.makeTextLog(`<span class='color-var'>mech</span>.rewind(${steps})`)
+            mech.rewind(steps)
             return
         }
         mech.lastHarmCycle = mech.cycle
@@ -621,8 +624,7 @@ const mech = {
                 if (tech.isDeathAvoid && powerUps.research.research && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
-                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
-                    <br>${powerUps.research.research}`)
+                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.research}`)
                     for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
@@ -655,9 +657,7 @@ const mech = {
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.research}`)
-                    for (let i = 0; i < 6; i++) {
-                        powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
-                    }
+                    for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "heal", false);
                     mech.immuneCycle = mech.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -900,6 +900,7 @@ const mech = {
     },
     setMaxEnergy() {
         mech.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus
+        simulation.makeTextLog(`<span class='color-var'>mech</span>.maxEnergy <span class='color-symbol'>=</span> ${mech.maxEnergy}`)
     },
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {

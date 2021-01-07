@@ -6,10 +6,10 @@ const powerUps = {
         if (type === "gun") {
             b.giveGuns(index)
             let text = `b.giveGuns("<span class='color-text'>${b.guns[index].name}</span>")`
-            if (b.inventory.length === 1) text += `<br>input.key.gun <span class='color-symbol'>=</span> ["<span class='color-text'>MouseLeft</span>"]`
+            if (b.inventory.length === 1) text += `<br>input.key.gun<span class='color-symbol'>:</span> ["<span class='color-text'>MouseLeft</span>"]`
             if (b.inventory.length === 2) text += `
-            <br>input.key.nextGun <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.nextGun}</span>","<span class='color-text'>MouseWheel</span>"]
-            <br>input.key.previousGun <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.previousGun}</span>","<span class='color-text'>MouseWheel</span>"]`
+            <br>input.key.nextGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.nextGun}</span>","<span class='color-text'>MouseWheel</span>"]
+            <br>input.key.previousGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.previousGun}</span>","<span class='color-text'>MouseWheel</span>"]`
             simulation.makeTextLog(text);
         } else if (type === "field") {
             mech.setField(index)
@@ -489,7 +489,7 @@ const powerUps = {
             powerUps.spawn(x, y, "ammo");
             return;
         }
-        if (Math.random() < 0.0015 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
+        if (Math.random() < 0.001 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
             powerUps.spawn(x, y, "gun");
             return;
         }
@@ -520,7 +520,7 @@ const powerUps = {
         function powerUpChance(chanceToFail) {
             if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
                 powerUps.randomPowerUpCounter = 0;
-                if (Math.random() < 0.95) {
+                if (Math.random() < 0.97) {
                     powerUps.spawn(x, y, "tech")
                 } else {
                     powerUps.spawn(x, y, "gun")
@@ -565,25 +565,17 @@ const powerUps = {
                 powerUps.spawn(x, y, "gun", false); //first gun
             } else if (tech.totalCount === 0) { //first tech
                 powerUps.spawn(x, y, "tech", false);
-            } else if (b.inventory.length < 2) { //second gun or extra ammo
-                if (Math.random() < 0.5) {
+            } else if (b.inventory.length === 1) { //second gun or extra ammo
+                if (Math.random() < 0.4) {
                     powerUps.spawn(x, y, "gun", false);
                 } else {
-                    powerUps.spawn(x, y, "ammo", false);
-                    powerUps.spawn(x, y, "ammo", false);
-                    powerUps.spawn(x, y, "ammo", false);
-                    powerUps.spawn(x, y, "ammo", false);
+                    for (let i = 0; i < 5; i++) powerUps.spawn(x, y, "ammo", false);
                 }
             } else {
-                powerUps.spawnRandomPowerUp(x, y);
-                powerUps.spawnRandomPowerUp(x, y);
-                powerUps.spawnRandomPowerUp(x, y);
-                powerUps.spawnRandomPowerUp(x, y);
+                for (let i = 0; i < 4; i++) powerUps.spawnRandomPowerUp(x, y);
             }
         } else {
-            powerUps.spawnRandomPowerUp(x, y);
-            powerUps.spawnRandomPowerUp(x, y);
-            powerUps.spawnRandomPowerUp(x, y);
+            for (let i = 0; i < 3; i++) powerUps.spawnRandomPowerUp(x, y);
         }
     },
     ejectTech(choose = 'random') {

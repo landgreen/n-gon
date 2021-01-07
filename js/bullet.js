@@ -36,6 +36,68 @@ const b = {
             if (mech.holdingTarget) mech.drop();
         }
     },
+    giveGuns(gun = "random", ammoPacks = 10) {
+        if (tech.isOneGun) b.removeAllGuns();
+        if (gun === "random") {
+            //find what guns player doesn't have
+            options = []
+            for (let i = 0, len = b.guns.length; i < len; i++) {
+                if (!b.guns[i].have) options.push(i)
+            }
+            if (options.length === 0) return
+            //randomly pick from list of possible guns
+            gun = options[Math.floor(Math.random() * options.length)]
+        }
+        if (gun === "all") {
+            b.activeGun = 0;
+            b.inventoryGun = 0;
+            for (let i = 0; i < b.guns.length; i++) {
+                b.inventory[i] = i;
+                b.guns[i].have = true;
+                b.guns[i].ammo = Math.floor(b.guns[i].ammoPack * ammoPacks);
+            }
+        } else {
+            if (isNaN(gun)) { //find gun by name
+                let found = false;
+                for (let i = 0; i < b.guns.length; i++) {
+                    if (gun === b.guns[i].name) {
+                        gun = i
+                        found = true;
+                        break
+                    }
+                }
+                if (!found) return //if no gun found don't give a gun
+            }
+            if (!b.guns[gun].have) b.inventory.push(gun);
+            b.guns[gun].have = true;
+            b.guns[gun].ammo = Math.floor(b.guns[gun].ammoPack * ammoPacks);
+            if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
+        }
+        simulation.makeGunHUD();
+        b.setFireCD();
+    },
+    removeGun(gun, isRemoveSelection = false) {
+        for (let i = 0; i < b.guns.length; i++) {
+            if (b.guns[i].name === gun) {
+                b.guns[i].have = false
+                for (let j = 0; j < b.inventory.length; j++) {
+                    if (b.inventory[j] === i) {
+                        b.inventory.splice(j, 1)
+                        break
+                    }
+                }
+                if (b.inventory.length) {
+                    b.activeGun = b.inventory[0];
+                } else {
+                    b.activeGun = null;
+                }
+                simulation.makeGunHUD();
+                if (isRemoveSelection) b.guns.splice(i, 1) //also remove gun from gun pool array
+                break
+            }
+        }
+        b.setFireCD();
+    },
     removeAllGuns() {
         b.inventory = []; //removes guns and ammo  
         for (let i = 0, len = b.guns.length; i < len; ++i) {
@@ -89,6 +151,7 @@ const b = {
     fireCD: 1,
     setFireCD() {
         b.fireCD = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
+        if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.85, b.inventory.length)
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -1213,12 +1276,12 @@ const b = {
                 });
 
                 if (tech.isLaserPush) { //push mobs away
-                    console.log(-0.003 * Math.min(4, best.who.mass), dmg)
+                    // console.log(-0.003 * Math.min(4, best.who.mass), dmg)
                     const index = path.length - 1
                     // const force = Vector.mult(Vector.normalise(Vector.sub(path[Math.max(0, index - 1)], path[index])), -0.003 * Math.min(4, best.who.mass))
                     // const push = -0.004 / (1 + tech.beamSplitter + tech.wideLaser + tech.historyLaser)
                     // console.log(push)
-                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.004 * push * Math.min(4, best.who.mass))
+                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                     // Matter.Body.setVelocity(best.who, { //friction
                     //     x: best.who.velocity.x * 0.7,
@@ -1975,13 +2038,13 @@ const b = {
     // **************************************************************************************************
     // **************************************************************************************************
     respawnBots() {
-        for (let i = 0; i < tech.laserBotCount; i++) b.laserBot()
-        for (let i = 0; i < tech.nailBotCount; i++) b.nailBot()
-        for (let i = 0; i < tech.foamBotCount; i++) b.foamBot()
-        for (let i = 0; i < tech.boomBotCount; i++) b.boomBot()
-        for (let i = 0; i < tech.orbitBotCount; i++) b.orbitBot()
-        for (let i = 0; i < tech.plasmaBotCount; i++) b.plasmaBot()
-        for (let i = 0; i < tech.missileBotCount; i++) b.missileBot()
+        for (let i = 0; i < tech.laserBotCount; i++) b.laserBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.nailBotCount; i++) b.nailBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.foamBotCount; i++) b.foamBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.boomBotCount; i++) b.boomBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.orbitBotCount; i++) b.orbitBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.plasmaBotCount; i++) b.plasmaBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.missileBotCount; i++) b.missileBot({ x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, false)
         if (tech.isIntangible && mech.isCloak) {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
@@ -1993,7 +2056,7 @@ const b = {
             b.laserBot(where)
             if (isKeep) tech.laserBotCount++;
         } else if (Math.random() < 0.25 && isAll) {
-            b.orbitBot();
+            b.orbitBot(where);
             if (isKeep) tech.orbitBotCount++;
         } else if (Math.random() < 0.33) {
             b.nailBot(where)
@@ -2006,8 +2069,8 @@ const b = {
             if (isKeep) tech.boomBotCount++;
         }
     },
-    nailBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.nailBot()`);
+    nailBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.nailBot()`);
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (12 + 4 * Math.random())
@@ -2062,8 +2125,8 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    missileBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.missileBot()`);
+    missileBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.missileBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(position.x, position.y, 28, 11, {
             botType: "foam",
@@ -2112,8 +2175,8 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    foamBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.foamBot()`);
+    foamBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.foamBot()`);
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (10 + 5 * Math.random())
@@ -2167,8 +2230,8 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    laserBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.laserBot()`);
+    laserBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.laserBot()`);
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (14 + 6 * Math.random())
@@ -2252,8 +2315,8 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    boomBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);
+    boomBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = (7 + 2 * Math.random())
@@ -2331,8 +2394,8 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    plasmaBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.plasmaBot()`);
+    plasmaBot(position = { x: mech.pos.x + 50 * (Math.random() - 0.5), y: mech.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.plasmaBot()`);
         const me = bullet.length;
         const dir = mech.angle;
         const RADIUS = 21
@@ -2516,8 +2579,8 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    orbitBot(position = mech.pos) {
-        simulation.makeTextLog(`<span class='color-var'>b</span>.orbitBot()`);
+    orbitBot(position = mech.pos, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.orbitBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 9, 12, {
             isUpgraded: tech.isOrbitBotUpgrade,
@@ -2616,66 +2679,6 @@ const b = {
     // ********************************         Guns        *********************************************
     // **************************************************************************************************
     // **************************************************************************************************
-    giveGuns(gun = "random", ammoPacks = 10) {
-        if (tech.isOneGun) b.removeAllGuns();
-        if (gun === "random") {
-            //find what guns player doesn't have
-            options = []
-            for (let i = 0, len = b.guns.length; i < len; i++) {
-                if (!b.guns[i].have) options.push(i)
-            }
-            if (options.length === 0) return
-            //randomly pick from list of possible guns
-            gun = options[Math.floor(Math.random() * options.length)]
-        }
-        if (gun === "all") {
-            b.activeGun = 0;
-            b.inventoryGun = 0;
-            for (let i = 0; i < b.guns.length; i++) {
-                b.inventory[i] = i;
-                b.guns[i].have = true;
-                b.guns[i].ammo = Math.floor(b.guns[i].ammoPack * ammoPacks);
-            }
-        } else {
-            if (isNaN(gun)) { //find gun by name
-                let found = false;
-                for (let i = 0; i < b.guns.length; i++) {
-                    if (gun === b.guns[i].name) {
-                        gun = i
-                        found = true;
-                        break
-                    }
-                }
-                if (!found) return //if no gun found don't give a gun
-            }
-            if (!b.guns[gun].have) b.inventory.push(gun);
-            b.guns[gun].have = true;
-            b.guns[gun].ammo = Math.floor(b.guns[gun].ammoPack * ammoPacks);
-            if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
-        }
-        simulation.makeGunHUD();
-    },
-    removeGun(gun, isRemoveSelection = false) {
-        for (let i = 0; i < b.guns.length; i++) {
-            if (b.guns[i].name === gun) {
-                b.guns[i].have = false
-                for (let j = 0; j < b.inventory.length; j++) {
-                    if (b.inventory[j] === i) {
-                        b.inventory.splice(j, 1)
-                        break
-                    }
-                }
-                if (b.inventory.length) {
-                    b.activeGun = b.inventory[0];
-                } else {
-                    b.activeGun = null;
-                }
-                simulation.makeGunHUD();
-                if (isRemoveSelection) b.guns.splice(i, 1) //also remove gun from gun pool array
-                break
-            }
-        }
-    },
     guns: [{
             name: "nail gun",
             description: "use compressed air to fire a stream of <strong>nails</strong><br><strong>delay</strong> after firing <strong>decreases</strong> as you shoot",
@@ -4017,7 +4020,7 @@ const b = {
                         b.laser(where, {
                             x: where.x + 3000 * Math.cos(angle),
                             y: where.y + 3000 * Math.sin(angle)
-                        }, dmg, 0, true, 0.4)
+                        }, dmg, 0, true, 0.3)
                         for (let i = 1; i < tech.wideLaser; i++) {
                             let whereOff = Vector.add(where, {
                                 x: i * off * Math.cos(angle + Math.PI / 2),
@@ -4026,7 +4029,7 @@ const b = {
                             b.laser(whereOff, {
                                 x: whereOff.x + 3000 * Math.cos(angle),
                                 y: whereOff.y + 3000 * Math.sin(angle)
-                            }, dmg, 0, true, 0.4)
+                            }, dmg, 0, true, 0.3)
                             whereOff = Vector.add(where, {
                                 x: i * off * Math.cos(angle - Math.PI / 2),
                                 y: i * off * Math.sin(angle - Math.PI / 2)
@@ -4034,7 +4037,7 @@ const b = {
                             b.laser(whereOff, {
                                 x: whereOff.x + 3000 * Math.cos(angle),
                                 y: whereOff.y + 3000 * Math.sin(angle)
-                            }, dmg, 0, true, 0.4)
+                            }, dmg, 0, true, 0.3)
                         }
                         ctx.stroke();
                         ctx.globalAlpha = 1;
@@ -4071,7 +4074,7 @@ const b = {
                     }, {
                         x: mech.pos.x + 3000 * Math.cos(mech.angle),
                         y: mech.pos.y + 3000 * Math.sin(mech.angle)
-                    }, dmg, 0, true, 0.3);
+                    }, dmg, 0, true, 0.2);
                     for (let i = 1; i < len; i++) {
                         const history = mech.history[(mech.cycle - i * spacing) % 600]
                         b.laser({
@@ -4080,7 +4083,7 @@ const b = {
                         }, {
                             x: history.position.x + 3000 * Math.cos(history.angle),
                             y: history.position.y + 3000 * Math.sin(history.angle) - mech.yPosDifference
-                        }, dmg, 0, true, 0.3);
+                        }, dmg, 0, true, 0.2);
                     }
                     ctx.stroke();
                 }

@@ -61,7 +61,7 @@ const level = {
         b.respawnBots();
         mech.resetHistory();
         if (tech.isArmorFromPowerUps) {
-            const gain = Math.min(0.04 * powerUps.totalPowerUps, 0.40)
+            const gain = Math.min(0.03 * powerUps.totalPowerUps, 0.42)
             tech.armorFromPowerUps += gain
             mech.setMaxHealth();
             // if (powerUps.totalPowerUps) simulation.makeTextLog("<span style='font-size:115%;'> max health increased by " + (gain * 100).toFixed(0) + "%</span>", 300)

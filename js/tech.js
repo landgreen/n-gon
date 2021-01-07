@@ -81,7 +81,7 @@ const tech = {
         if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
         if (tech.isMaxEnergyTech) dmg *= 1.4
         if (tech.isEnergyNoAmmo) dmg *= 1.5
-        if (tech.isDamageForGuns) dmg *= 1 + 0.1 * b.inventory.length
+        if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - mech.health)
         if (tech.isHarmDamage && mech.lastHarmCycle + 600 > mech.cycle) dmg *= 3;
         if (tech.isEnergyLoss) dmg *= 1.5;
@@ -146,7 +146,7 @@ const tech = {
         },
         {
             name: "arsenal",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>10%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>13%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -161,24 +161,69 @@ const tech = {
             }
         },
         {
+            name: "active cooling",
+            description: "<strong>15%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return b.inventory.length > 1
+            },
+            requires: "at least 2 guns",
+            effect() {
+                tech.isFireRateForGuns = true;
+                b.setFireCD();
+            },
+            remove() {
+                tech.isFireRateForGuns = false;
+                b.setFireCD();
+            }
+        },
+        {
             name: "generalist",
-            description: "<strong>spawn</strong> 6 <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
+            description: "spawn <strong>6</strong> <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return tech.isDamageForGuns
+                return tech.isDamageForGuns || tech.isFireRateForGuns
             },
-            requires: "arsenal",
+            requires: "arsenal or cyclic rate boost",
             effect() {
                 tech.isGunCycle = true;
-                for (let i = 0; i < 6; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "gun");
-                }
+                for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "gun");
             },
             remove() {
                 tech.isGunCycle = false;
             }
+        },
+        {
+            name: "specialist",
+            description: "for every <strong class='color-g'>gun</strong> in your inventory spawn a<br><strong class='color-h'>heal</strong>, <strong class='color-r'>research</strong>, <strong class='color-f'>field</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-m'>tech</strong>",
+            maxCount: 1, //random power up
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            allowed() {
+                return tech.isGunCycle
+            },
+            requires: "generalist",
+            effect() {
+                for (let i = 0; i < b.inventory.length; i++) {
+                    if (Math.random() < 0.2) {
+                        powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "tech");
+                    } else if (Math.random() < 0.25) {
+                        powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "field");
+                    } else if (Math.random() < 0.33) {
+                        powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "heal");
+                    } else if (Math.random() < 0.5) {
+                        powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "ammo");
+                    } else {
+                        powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "research");
+                    }
+
+                }
+            },
+            remove() {}
         },
         {
             name: "logistics",
@@ -617,7 +662,7 @@ const tech = {
         },
         {
             name: "laser-bot",
-            description: "a bot uses <strong class='color-f'>energy</strong> to emit a <strong class='color-laser'>laser</strong><br>targeting nearby mobs",
+            description: "a bot uses <strong class='color-f'>energy</strong> to emit a <strong class='color-laser'>laser</strong> beam<br>that targets nearby mobs",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -932,7 +977,7 @@ const tech = {
         },
         {
             name: "Pauli exclusion",
-            description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong>`,
+            description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds`,
             maxCount: 9,
             count: 0,
             allowed() {
@@ -945,6 +990,22 @@ const tech = {
             },
             remove() {
                 tech.collisionImmuneCycles = 25;
+            }
+        },
+        {
+            name: "complex spin-statistics",
+            description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>+1</strong> second<br>once every <strong>7</strong> seconds`,
+            maxCount: 3,
+            count: 0,
+            allowed() {
+                return true //tech.collisionImmuneCycles > 30
+            },
+            requires: "",
+            effect() {
+                tech.cyclicImmunity += 60 - this.count * 6;
+            },
+            remove() {
+                tech.cyclicImmunity = 0;
             }
         },
         {
@@ -1102,7 +1163,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain) && tech.energyRegen !== 0.004
+                return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
             },
             requires: "piezoelectricity, Penrose, half-wave, or thermoelectric, but not time crystals",
             effect: () => {
@@ -1403,7 +1464,7 @@ const tech = {
         },
         {
             name: "inductive coupling",
-            description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 4 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 40 health per level)</em>",
+            description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 3 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 42 health per level)</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1520,9 +1581,7 @@ const tech = {
             requires: "at least 2 research",
             effect() {
                 tech.isImmortal = true;
-                for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "research", false);
-                }
+                for (let i = 0; i < 4; i++) powerUps.spawn(mech.pos.x + Math.random() * 10, mech.pos.y + Math.random() * 10, "research", false);
             },
             remove() {
                 tech.isImmortal = false;
@@ -3996,5 +4055,7 @@ const tech = {
     isLaserMine: null,
     isAmmoFoamSize: null,
     isIceIX: null,
-    isDupDamage: null
+    isDupDamage: null,
+    isFireRateForGuns: null,
+    cyclicImmunity: null
 }

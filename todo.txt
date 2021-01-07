@@ -1,6 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: relativistic momentum - laser beams push mobs away
+tech: active cooling - 15% faster fire rate for each gun in your inventory
+tech: specialist - spawn a random power up for each gun in your inventory
+  (not available in custom, requires tech: generalist)
+tech: complex spin-statistics - become immune to harm for 1s every 7s
+  requires Pauli exclusion
+
+even less difficulty ramp after killing final boss
 
 ******************************************************** BUGS ********************************************************
 
@@ -20,6 +26,9 @@ CPT check for crouch after rewind
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+tech "Circadian Rhythm": Become immune to harm for 1 second every 10 seconds while playing.
+
 
 bot that follows the players history
   could have the same shape as the mech circle head
@@ -46,11 +55,6 @@ in game console
   set highlighting rules
     mech, tech, level are all highlighted
     maybe the first term in each variable should get a highlight
-  make all commands actually work
-    input.key commands don't work
-      rewrite to not be a console command?
-  add commands
-    death, max health, max energy, rewind
 
 mechanic: use gun swap as an active ability
   this effect is spammable, so it needs a cost or a cooldown
@@ -63,13 +67,9 @@ tech: time dilation - when you exit time dilation rewind to the state you entere
   position, velocity, and health
   no energy cost
 
-CPT gun seems a bit weak right now.  How to buff the gun?
-
 mob ability bombs/bullets that suck in player
 
 tech where you can't stop firing,  how to code?
-
-tech: translational invariance - laser beams push like plasma torch pushes with directional force
 
 mechanic: technological dead end - add tech to the tech pool with a dumb effect
   don't show up in custom?
@@ -92,7 +92,6 @@ mechanic: technological dead end - add tech to the tech pool with a dumb effect
 
 tech "Expansion Formula": Permanently increase the size of Negative Mass field by 16%(Max 96%)
 
-tech "Circadian Rhythm": Become immune to harm for 1 second every 10 seconds while playing.
 
 tech "High Risk": Spawn two bosses per level.
   maybe limit to just the power up boss and spawn it at the exit every time to keep it simple
