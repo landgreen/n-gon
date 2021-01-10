@@ -1358,6 +1358,81 @@ const b = {
             ctx.globalAlpha = 1;
         }
     },
+    laserMine(position, velocity = { x: 0, y: -8 }) {
+        const me = bullet.length;
+        bullet[me] = Bodies.polygon(position.x, position.y, 3, 25, {
+            bulletType: "mine",
+            angle: mech.angle,
+            friction: 0,
+            frictionAir: 0.05,
+            restitution: 0.5,
+            dmg: 0, // 0.14   //damage done in addition to the damage from momentum
+            minDmgSpeed: 2,
+            lookFrequency: 60 + Math.floor(7 * Math.random()),
+            drain: tech.isLaserDiode * tech.laserFieldDrain,
+            isArmed: false,
+            torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
+            range: 1500,
+            endCycle: Infinity,
+            classType: "bullet",
+            collisionFilter: {
+                category: cat.bullet,
+                mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
+            },
+            beforeDmg() {},
+            onEnd() {
+                if (tech.isMineAmmoBack && (!this.isArmed || Math.random() < 0.2)) { //get ammo back from tech.isMineAmmoBack
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+                        if (b.guns[i].name === "mine") {
+                            b.guns[i].ammo++
+                            simulation.updateGunHUD();
+                            break;
+                        }
+                    }
+                }
+            },
+            do() {
+                if (!(simulation.cycle % this.lookFrequency) && mech.energy > this.drain) { //find mob targets
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (
+                            Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 2000000 &&
+                            mob[i].dropPowerUp &&
+                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                        ) {
+                            this.do = this.laserSpin
+                            this.endCycle = simulation.cycle + 300
+                            // if (this.angularSpeed < 0.01) this.torque += this.inertia * this.torqueMagnitude * 5 //spin
+                            this.isArmed = true
+                        }
+                    }
+                }
+            },
+            reflections: Math.max(0, tech.laserReflections - 2),
+            laserSpin() {
+                //drain energy
+                if (mech.energy > this.drain) {
+                    mech.energy -= this.drain
+                    if (this.angularSpeed < 0.02) this.torque += this.inertia * this.torqueMagnitude //spin
+
+                    //fire lasers
+                    ctx.strokeStyle = "#f00";
+                    ctx.lineWidth = 1.5
+                    // ctx.globalAlpha = 1;
+                    ctx.beginPath();
+                    for (let i = 0; i < 3; i++) {
+                        const where = this.vertices[i]
+                        const endPoint = Vector.add(where, Vector.mult(Vector.normalise(Vector.sub(where, this.position)), 2500))
+                        b.laser(where, endPoint, tech.laserDamage * 10, this.reflections, true)
+                    }
+                    ctx.stroke();
+                    // ctx.globalAlpha = 1;
+                }
+            }
+        })
+        Matter.Body.setVelocity(bullet[me], velocity);
+        World.add(engine.world, bullet[me]); //add bullet to world
+    },
     mine(where, velocity, angle = 0, isAmmoBack = false) {
         const bIndex = bullet.length;
         bullet[bIndex] = Bodies.rectangle(where.x, where.y, 45, 16, {
@@ -1530,7 +1605,7 @@ const b = {
             friction: 0,
             frictionAir: 0.025,
             thrust: (tech.isFastSpores ? 0.001 : 0.0004) * (1 + 0.3 * (Math.random() - 0.5)),
-            dmg: tech.isMutualism ? 8 : 4, //2x bonus damage from tech.isMutualism
+            dmg: tech.isMutualism ? 10 : 4, //2x bonus damage from tech.isMutualism
             lookFrequency: 100 + Math.floor(117 * Math.random()),
             classType: "bullet",
             collisionFilter: {
@@ -1793,7 +1868,7 @@ const b = {
                                 ) {
                                     //pick up nearby power ups
                                     if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 && !simulation.isChoosing) {
-                                        powerUps.onPickUp(this.position);
+                                        powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();
                                         Matter.World.remove(engine.world, powerUp[i]);
                                         powerUp.splice(i, 1);
@@ -3312,91 +3387,9 @@ const b = {
             have: false,
             fire() {
                 if (tech.isLaserMine) { //laser mine
-                    const me = bullet.length;
-                    const position = mech.pos
-                    bullet[me] = Bodies.polygon(position.x, position.y, 3, 25, {
-                        bulletType: "mine",
-                        angle: mech.angle,
-                        friction: 0,
-                        frictionAir: 0.05,
-                        restitution: 0.5,
-                        dmg: 0, // 0.14   //damage done in addition to the damage from momentum
-                        minDmgSpeed: 2,
-                        lookFrequency: 60 + Math.floor(7 * Math.random()),
-                        drain: tech.isLaserDiode * tech.laserFieldDrain,
-                        isArmed: false,
-                        torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
-                        range: 1500,
-                        endCycle: Infinity,
-                        classType: "bullet",
-                        collisionFilter: {
-                            category: cat.bullet,
-                            mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-                        },
-                        beforeDmg() {},
-                        onEnd() {
-                            if (tech.isMineAmmoBack && (!this.isArmed || Math.random() < 0.2)) { //get ammo back from tech.isMineAmmoBack
-                                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                                    if (b.guns[i].name === "mine") {
-                                        b.guns[i].ammo++
-                                        simulation.updateGunHUD();
-                                        break;
-                                    }
-                                }
-                            }
-                        },
-                        do() {
-                            if (!(simulation.cycle % this.lookFrequency) && mech.energy > this.drain) { //find mob targets
-                                for (let i = 0, len = mob.length; i < len; ++i) {
-                                    if (
-                                        Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 2000000 &&
-                                        mob[i].dropPowerUp &&
-                                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
-                                    ) {
-                                        this.do = this.laserSpin
-                                        this.endCycle = simulation.cycle + 300
-                                        // if (this.angularSpeed < 0.01) this.torque += this.inertia * this.torqueMagnitude * 5 //spin
-                                        this.isArmed = true
-                                    }
-                                }
-                            }
-                        },
-                        reflections: Math.max(0, tech.laserReflections - 2),
-                        laserSpin() {
-                            //drain energy
-                            if (mech.energy > this.drain) {
-                                mech.energy -= this.drain
-                                if (this.angularSpeed < 0.02) this.torque += this.inertia * this.torqueMagnitude //spin
-
-                                //fire lasers
-                                ctx.strokeStyle = "#f00";
-                                ctx.lineWidth = 1.5
-                                // ctx.globalAlpha = 1;
-                                ctx.beginPath();
-                                for (let i = 0; i < 3; i++) {
-                                    const where = this.vertices[i]
-                                    const endPoint = Vector.add(where, Vector.mult(Vector.normalise(Vector.sub(where, this.position)), 2500))
-                                    b.laser(where, endPoint, tech.laserDamage * 10, this.reflections, true)
-                                }
-                                ctx.stroke();
-                                // ctx.globalAlpha = 1;
-                            }
-                        }
-                    })
-
-                    // if (tech.isMineSentry) {
-                    //     bullet[me].endCycle = simulation.cycle + 480
-                    //     bullet[me].do = bullet[me].laserSpin
-                    //     bullet[me].isArmed = true
-                    //     Matter.Body.setAngularVelocity(bullet[me], 3000 * bullet[me].torqueMagnitude);
-                    // }
-                    let speed = mech.crouch ? 50 : 20
-                    Matter.Body.setVelocity(bullet[me], {
-                        x: speed * Math.cos(mech.angle),
-                        y: speed * Math.sin(mech.angle)
-                    });
-                    World.add(engine.world, bullet[me]); //add bullet to world
+                    const speed = mech.crouch ? 50 : 20
+                    const velocity = { x: speed * Math.cos(mech.angle), y: speed * Math.sin(mech.angle) }
+                    b.laserMine(mech.pos, velocity)
                 } else { //normal mines
                     const pos = {
                         x: mech.pos.x + 30 * Math.cos(mech.angle),
@@ -4008,9 +4001,13 @@ const b = {
                     mech.fireCDcycle = mech.cycle
                     mech.energy -= mech.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
                     const dmg = 0.55 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const eye = {
+                        x: mech.pos.x + 16 * Math.cos(mech.angle),
+                        y: mech.pos.y + 16 * Math.sin(mech.angle)
+                    }
                     const wideLaser = function(where = {
-                        x: mech.pos.x + 20 * Math.cos(mech.angle),
-                        y: mech.pos.y + 20 * Math.sin(mech.angle)
+                        x: mech.pos.x + 30 * Math.cos(mech.angle),
+                        y: mech.pos.y + 30 * Math.sin(mech.angle)
                     }, angle = mech.angle) {
                         ctx.strokeStyle = "#f00";
                         ctx.lineWidth = 8
@@ -4018,26 +4015,35 @@ const b = {
                         ctx.beginPath();
                         const off = 7.5
                         b.laser(where, {
-                            x: where.x + 3000 * Math.cos(angle),
-                            y: where.y + 3000 * Math.sin(angle)
+                            x: eye.x + 3000 * Math.cos(angle),
+                            y: eye.y + 3000 * Math.sin(angle)
                         }, dmg, 0, true, 0.3)
+
                         for (let i = 1; i < tech.wideLaser; i++) {
                             let whereOff = Vector.add(where, {
                                 x: i * off * Math.cos(angle + Math.PI / 2),
                                 y: i * off * Math.sin(angle + Math.PI / 2)
                             })
-                            b.laser(whereOff, {
-                                x: whereOff.x + 3000 * Math.cos(angle),
-                                y: whereOff.y + 3000 * Math.sin(angle)
-                            }, dmg, 0, true, 0.3)
+                            if (Matter.Query.ray(map, eye, whereOff).length === 0) {
+                                ctx.moveTo(eye.x, eye.y)
+                                ctx.lineTo(whereOff.x, whereOff.y)
+                                b.laser(whereOff, {
+                                    x: whereOff.x + 3000 * Math.cos(angle),
+                                    y: whereOff.y + 3000 * Math.sin(angle)
+                                }, dmg, 0, true, 0.3)
+                            }
                             whereOff = Vector.add(where, {
                                 x: i * off * Math.cos(angle - Math.PI / 2),
                                 y: i * off * Math.sin(angle - Math.PI / 2)
                             })
-                            b.laser(whereOff, {
-                                x: whereOff.x + 3000 * Math.cos(angle),
-                                y: whereOff.y + 3000 * Math.sin(angle)
-                            }, dmg, 0, true, 0.3)
+                            if (Matter.Query.ray(map, eye, whereOff).length === 0) {
+                                ctx.moveTo(eye.x, eye.y)
+                                ctx.lineTo(whereOff.x, whereOff.y)
+                                b.laser(whereOff, {
+                                    x: whereOff.x + 3000 * Math.cos(angle),
+                                    y: whereOff.y + 3000 * Math.sin(angle)
+                                }, dmg, 0, true, 0.3)
+                            }
                         }
                         ctx.stroke();
                         ctx.globalAlpha = 1;
@@ -4052,21 +4058,7 @@ const b = {
                     mech.fireCDcycle = mech.cycle
                     mech.energy -= mech.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
                     const dmg = 0.4 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
-                    ctx.strokeStyle = "#f00";
-                    let spacing, len
-                    if (tech.wideLaser === 3) {
-                        ctx.lineWidth = 2
-                        spacing = 2
-                        len = 10 + tech.historyLaser * 5
-                    } else if (tech.wideLaser === 4) {
-                        ctx.lineWidth = 3
-                        spacing = 1
-                        len = 15 + tech.historyLaser * 5
-                    } else {
-                        ctx.lineWidth = 1
-                        spacing = 5
-                        len = 5 + tech.historyLaser * 5
-                    }
+                    const spacing = Math.ceil(5.2 - 0.2 * tech.historyLaser)
                     ctx.beginPath();
                     b.laser({
                         x: mech.pos.x + 20 * Math.cos(mech.angle),
@@ -4075,7 +4067,7 @@ const b = {
                         x: mech.pos.x + 3000 * Math.cos(mech.angle),
                         y: mech.pos.y + 3000 * Math.sin(mech.angle)
                     }, dmg, 0, true, 0.2);
-                    for (let i = 1; i < len; i++) {
+                    for (let i = 1, len = 5 + tech.historyLaser * 5; i < len; i++) {
                         const history = mech.history[(mech.cycle - i * spacing) % 600]
                         b.laser({
                             x: history.position.x + 20 * Math.cos(history.angle),
@@ -4085,6 +4077,8 @@ const b = {
                             y: history.position.y + 3000 * Math.sin(history.angle) - mech.yPosDifference
                         }, dmg, 0, true, 0.2);
                     }
+                    ctx.strokeStyle = "#f00";
+                    ctx.lineWidth = 1
                     ctx.stroke();
                 }
             },

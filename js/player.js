@@ -481,10 +481,9 @@ const mech = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        const set = mech.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
-        simulation.makeTextLog(`<span class='color-var'>mech</span>.maxHealth <span class='color-symbol'>=</span> ${set}`)
-        mech.maxHealth = set
-        if(mech.health > mech.maxHealth) mech.health = mech.maxHealth;
+        mech.maxHealth = mech.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
+        simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${mech.maxHealth.toFixed(2)}`)
+        if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
         mech.displayHealth();
     },
 
@@ -900,19 +899,19 @@ const mech = {
     },
     setMaxEnergy() {
         mech.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus
-        simulation.makeTextLog(`<span class='color-var'>mech</span>.maxEnergy <span class='color-symbol'>=</span> ${mech.maxEnergy}`)
+        simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(mech.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
         if (mech.energy < mech.maxEnergy) {
             mech.energy += mech.fieldRegen;
+            if (mech.energy < 0) mech.energy = 0
             ctx.fillStyle = bgColor;
             const xOff = mech.pos.x - mech.radius * mech.maxEnergy
             const yOff = mech.pos.y - 50
             ctx.fillRect(xOff, yOff, range * mech.maxEnergy, 10);
             ctx.fillStyle = mech.fieldMeterColor;
             ctx.fillRect(xOff, yOff, range * mech.energy, 10);
-            if (mech.energy < 0) mech.energy = 0
         } else if (mech.energy > mech.maxEnergy + 0.05) {
             ctx.fillStyle = bgColor;
             const xOff = mech.pos.x - mech.radius * mech.energy
@@ -1142,7 +1141,7 @@ const mech = {
                     y: powerUp[i].velocity.y * 0.11
                 });
                 if (dist2 < 5000 && !simulation.isChoosing) { //use power up if it is close enough
-                    powerUps.onPickUp(mech.pos);
+                    powerUps.onPickUp(powerUp[i]);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
                         x: player.velocity.x + powerUp[i].velocity.x / player.mass * 5,
                         y: player.velocity.y + powerUp[i].velocity.y / player.mass * 5
@@ -1502,11 +1501,12 @@ const mech = {
                 mech.hold = function() {
                     if (mech.energy > mech.maxEnergy - 0.02 && mech.fieldCDcycle < mech.cycle && !input.field && bullet.length < 200) {
                         if (tech.isSporeField) {
-                            const len = Math.floor(5 + 4 * Math.random())
-                            mech.energy -= len * 0.105;
+                            // const len = Math.floor(5 + 4 * Math.random())
+                            const len = Math.ceil(mech.energy * 10)
+                            mech.energy = 0;
                             for (let i = 0; i < len; i++) b.spore(mech.pos)
                         } else if (tech.isMissileField) {
-                            mech.energy -= 0.55;
+                            mech.energy -= 0.5;
                             b.missile({ x: mech.pos.x, y: mech.pos.y - 40 }, -Math.PI / 2, 0, 1)
                         } else if (tech.isIceField) {
                             mech.energy -= 0.057;
@@ -1926,6 +1926,7 @@ const mech = {
 
                     if (mech.energy < mech.maxEnergy) { // replaces mech.drawFieldMeter() with custom code
                         mech.energy += mech.fieldRegen;
+                        if (mech.energy < 0) mech.energy = 0
                         const xOff = mech.pos.x - mech.radius * mech.maxEnergy
                         const yOff = mech.pos.y - 50
                         ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
@@ -2145,7 +2146,7 @@ const mech = {
                                         y: powerUp[i].velocity.y * 0.11
                                     });
                                     if (dist2 < 5000 && !simulation.isChoosing) { //use power up if it is close enough
-                                        powerUps.onPickUp(powerUp[i].position);
+                                        powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();
                                         Matter.World.remove(engine.world, powerUp[i]);
                                         powerUp.splice(i, 1);
@@ -2388,7 +2389,7 @@ const mech = {
                             });
                             if (dist2 < 1000 && !simulation.isChoosing) { //use power up if it is close enough
                                 mech.fieldRange *= 0.8
-                                powerUps.onPickUp(powerUp[i].position);
+                                powerUps.onPickUp(powerUp[i]);
                                 powerUp[i].effect();
                                 Matter.World.remove(engine.world, powerUp[i]);
                                 powerUp.splice(i, 1);

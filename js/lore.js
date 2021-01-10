@@ -1,5 +1,28 @@
 const lore = {
-
+    alfie: {
+        color: "#e06",
+        text: function(say, isSpeech = false) {
+            simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+            if (isSpeech) this.speech(say)
+        },
+        speech: function(say) {
+            var utterance = new SpeechSynthesisUtterance(say);
+            utterance.lang = "en-GB";
+            speechSynthesis.speak(utterance);
+        }
+    },
+    zoe: {
+        color: "#f50",
+        text: function(say, isSpeech = false) {
+            simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+            if (isSpeech) this.speech(say)
+        },
+        speech: function(say) {
+            var utterance = new SpeechSynthesisUtterance(say);
+            utterance.lang = "en-AU";
+            speechSynthesis.speak(utterance);
+        }
+    },
     dialogue: [
         ``,
         ``,
@@ -8,27 +31,18 @@ const lore = {
 
     }
 }
-/*   ending outline
-  if no cheats
-  after final boss is cleared, player enters a level with no mobs
-    level maybe has some environmental damage, so player has an option to die at any time
-  player can see text output between two colors of text strings (scientists)
-    audio.ambient(current time and date)<br> "text"
-  player reads a conversation between the two colors of text
-    first time win on east or normal they talk about:
-      how many runs the player has done
-      they guess why
-    player is asked to stand on an in game button to enable the vocoder
-      they reveal the player is running simulations, and it isn't real
-      they ask the player to communicate
-        jump twice if you understand
-      they ask the player to enter console commands
-        give ammo or tech or something
-      They tell the play a console command to permanently enable custom and testing mode (in local storage)
-        players can use this command in the future to enable custom and testing without beating the game even if local storage is wiped
-      they then tell the player the command to increase the difficulty and the command to restart the game.
-    If you win on hard or why:  
-      they give the player and option to exit the simulation and entre the real world
-        simulation.exit()
-        This wipes all local storage, and closes the browser tab
-*/
+
+
+// speech: function(say) {
+//   var utterance = new SpeechSynthesisUtterance(say);
+//   //msg.voice = voices[10]; // Note: some voices don't support altering params
+//   //msg.voiceURI = 'native';
+//   //utterance.volume = 1; // 0 to 1
+//   //utterance.rate = 1; // 0.1 to 10
+//   //utterance.pitch = 1; //0 to 2
+//   //utterance.text = 'Hello World';
+//   //http://stackoverflow.com/questions/14257598/what-are-language-codes-for-voice-recognition-languages-in-chromes-implementati
+//   //de-DE  en-GB  fr-FR  en-US en-AU
+//   utterance.lang = "en-GB";
+//   speechSynthesis.speak(utterance);
+// }

@@ -77,6 +77,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = mech.fieldDamage
+        if (tech.isTechDamage) dmg *= 2
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
         if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - mech.energy) * 0.5
         if (tech.isMaxEnergyTech) dmg *= 1.4
@@ -185,7 +186,7 @@ const tech = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return tech.isDamageForGuns || tech.isFireRateForGuns
+                return (tech.isDamageForGuns || tech.isFireRateForGuns) && (b.inventory.length + 5) < b.guns.length
             },
             requires: "arsenal or cyclic rate boost",
             effect() {
@@ -1181,9 +1182,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth
+                return !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && mech.fieldUpgrades[mech.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth && !tech.isTechDamage
             },
-            requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass",
+            requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass , ...",
             effect: () => {
                 mech.health = 0
                 // mech.displayHealth();
@@ -1282,9 +1283,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isEnergyLoss && mech.maxEnergy < 1.1 && !tech.isMissileField && !tech.isSporeField && !tech.isRewindAvoidDeath
+                return tech.isEnergyLoss && mech.maxEnergy < 1.1 && !tech.isSporeField && !tech.isRewindAvoidDeath
             },
-            requires: "exothermic process, not max energy increase, CPT, missile or spore nano-scale",
+            requires: "exothermic process, not max energy increase, CPT, or spore nano-scale",
             effect() {
                 tech.isMaxEnergyTech = true;
                 mech.setMaxEnergy()
@@ -1400,7 +1401,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.health < 0.6 || build.isCustomSelection
+                return mech.health < 0.5 || build.isCustomSelection
             },
             requires: "health below 60",
             effect() {
@@ -1408,6 +1409,21 @@ const tech = {
             },
             remove() {
                 tech.isLowHealthDmg = false;
+            }
+        }, {
+            name: "antiscience",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>lose <strong>11</strong> <strong class='color-h'>health</strong> when you pick up a <strong class='color-m'>tech</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (mech.harmReduction() < 1 || tech.healthDrain || tech.isLowHealthDmg || tech.isHealthRecovery || tech.isHealLowHealth || tech.largerHeals > 1 || tech.isPerpetualHeal) && !tech.isEnergyHealth
+            },
+            requires: "negative feedback or extra healing tech or harm reduction, not mass-energy",
+            effect() {
+                tech.isTechDamage = true;
+            },
+            remove() {
+                tech.isTechDamage = false;
             }
         },
         {
@@ -2822,7 +2838,7 @@ const tech = {
         },
         {
             name: "mutualism",
-            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
+            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3093,9 +3109,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.historyLaser
             },
-            requires: "laser, not specular reflection<br>not diffraction grating",
+            requires: "laser, not specular reflection, diffraction grating, slow light",
             effect() {
                 if (tech.wideLaser === 0) tech.wideLaser = 3
                 tech.isWideLaser = true;
@@ -3115,14 +3131,14 @@ const tech = {
             name: "output coupler",
             description: "<strong>widen</strong> diffuse <strong class='color-laser'>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
             isGunTech: true,
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             allowed() {
                 return tech.haveGunCheck("laser") && tech.isWideLaser
             },
             requires: "laser, not specular reflection<br>not diffraction grating",
             effect() {
-                tech.wideLaser = 4
+                tech.wideLaser += 2
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                 }
@@ -3145,9 +3161,9 @@ const tech = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.isWideLaser
             },
-            requires: "laser, not specular reflection<br>not diffraction grating",
+            requires: "laser, not specular reflection, diffraction grating, diffuse beam",
             effect() {
                 // this.description = `add 5 more <strong>laser</strong> beams into into your past`
                 tech.historyLaser++
@@ -3434,7 +3450,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.maxEnergy > 0.99 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
+                return mech.maxEnergy > 0.5 && mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
             },
             requires: "nano-scale manufacturing",
             effect() {
@@ -4057,5 +4073,6 @@ const tech = {
     isIceIX: null,
     isDupDamage: null,
     isFireRateForGuns: null,
-    cyclicImmunity: null
+    cyclicImmunity: null,
+    isTechDamage: null
 }

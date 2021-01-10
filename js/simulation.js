@@ -514,7 +514,6 @@ const simulation = {
         input.endKeySensing();
         b.removeAllGuns();
         simulation.isNoPowerUps = false;
-
         tech.setupAllTech(); //sets tech to default values
         tech.laserBotCount = 0;
         tech.orbitBotCount = 0;
@@ -529,23 +528,23 @@ const simulation = {
         powerUps.totalPowerUps = 0;
         powerUps.research.research = 0;
         mech.setFillColors();
-        mech.maxHealth = 1
-        mech.maxEnergy = 1
-        mech.energy = 1
+        // mech.maxHealth = 1
+        // mech.maxEnergy = 1
+        // mech.energy = 1
         mech.hole.isOn = false
         simulation.paused = false;
         engine.timing.timeScale = 1;
         simulation.fpsCap = simulation.fpsCapDefault;
         simulation.isAutoZoom = true;
         simulation.makeGunHUD();
-        mech.drop();
-        mech.holdingTarget = null
-        mech.health = 0.25;
-        mech.displayHealth();
-        mech.alive = true;
+        simulation.lastLogTime = 0;
+
+
+
+
+
         level.onLevel = 0;
         level.levelsCleared = 0;
-
         //resetting difficulty
         simulation.dmgScale = 0; //increases in level.difficultyIncrease
         b.dmgScale = 1; //decreases in level.difficultyIncrease
@@ -560,6 +559,14 @@ const simulation = {
         document.getElementById("text-log").style.opacity = 0;
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
+
+        mech.alive = true;
+        mech.setMaxHealth()
+        mech.health = 0;
+        mech.addHealth(0.25)
+        mech.drop();
+        mech.holdingTarget = null
+
         //set to default field
         mech.fieldMode = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${mech.fieldUpgrades[mech.fieldMode].name}</strong><br><span class='faded'></span><br>${mech.fieldUpgrades[mech.fieldMode].description}`, 600);
@@ -573,45 +580,36 @@ const simulation = {
         // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
         // <br><span class='color-var'>mech</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].description}</span>"
         // `, 800);
+
+
         let delay = 500
         const step = 150
         setTimeout(function() {
             simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
-        }, delay);
-        delay += step
+        }, delay += step);
         setTimeout(function() {
             simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
-        }, delay);
-        delay += step
+        }, delay += step);
         setTimeout(function() {
             simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
-        }, delay);
-        delay += step
+        }, delay += step);
         setTimeout(function() {
             simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
-        }, delay);
-        delay += 1000
+        }, delay += step);
         setTimeout(function() {
             simulation.makeTextLog(`<br><span class='color-var'>mech</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].name}</span>"`);
-        }, delay);
-        delay += step
+        }, delay += step);
         setTimeout(function() {
             simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
-        }, delay);
-        // delay += step
-        // setTimeout(function() {
-        //     simulation.makeTextLog(`<span class='color-var'>mech</span>.field.description<br>"<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].description}</span>"`);
-        // }, delay);
-
+        }, delay += step);
 
         mech.setField(mech.fieldMode)
+        // mech.energy = 0;
         //exit testing
         if (simulation.testing) {
             simulation.testing = false;
             simulation.loop = simulation.normalLoop
-            if (simulation.isConstructionMode) {
-                document.getElementById("construct").style.display = 'none'
-            }
+            if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
         }
         simulation.isCheating = false
         simulation.firstRun = false;

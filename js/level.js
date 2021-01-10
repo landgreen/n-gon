@@ -19,14 +19,14 @@ const level = {
             // mech.setField("plasma torch")
             // b.giveGuns("laser")
             // tech.isMineSentry = true
-            // tech.giveTech("foam fractionation")
+            // tech.giveTech("diffuse beam")
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
-            // level.escape() //after the final boss, ending
+            // level.null() //after the final boss, ending
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
             // level.testChamber() //less mobs, more puzzle
@@ -61,11 +61,8 @@ const level = {
         b.respawnBots();
         mech.resetHistory();
         if (tech.isArmorFromPowerUps) {
-            const gain = Math.min(0.03 * powerUps.totalPowerUps, 0.42)
-            tech.armorFromPowerUps += gain
+            tech.armorFromPowerUps += Math.min(0.03 * powerUps.totalPowerUps, 0.42)
             mech.setMaxHealth();
-            // if (powerUps.totalPowerUps) simulation.makeTextLog("<span style='font-size:115%;'> max health increased by " + (gain * 100).toFixed(0) + "%</span>", 300)
-            simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>+=</span> ${(gain).toFixed(2)}`)
         }
         if (tech.isHealLowHealth) {
             const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
@@ -98,7 +95,7 @@ const level = {
     //******************************************************************************************************************
     //******************************************************************************************************************
     //******************************************************************************************************************
-    escape() {
+    null() {
         const hazardSlime = level.hazard(-1775, 150, 3575, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
         // const hazardLaser1 = level.hazard(-475, -800, 1, 800, 0.4, "#50f", true) //laser
         // const hazardLaser2 = level.hazard(475, -800, 1, 800, 0.4, "#50f", true) //laser
@@ -165,7 +162,7 @@ const level = {
         // spawn.mapRect(450, -820, 50, 25); //edge shelf ceiling
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
 
-        setTimeout(() => { simulation.makeTextLog(`test`) }, 3000);
+        // setTimeout(() => { simulation.makeTextLog(`test`) }, 3000);
 
 
 

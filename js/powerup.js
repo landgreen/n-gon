@@ -461,15 +461,16 @@ const powerUps = {
             }
         }
     },
-    onPickUp(where) {
+    onPickUp(who) {
+        if (tech.isTechDamage && who.name === "tech") mech.damage(0.11)
         if (tech.isMassEnergy) mech.energy += 2.5;
-        if (tech.isMineDrop) b.mine({
-            x: where.x,
-            y: where.y
-        }, {
-            x: 0,
-            y: 0
-        }, 0, tech.isMineAmmoBack)
+        if (tech.isMineDrop) {
+            if (tech.isLaserMine) { //laser mine
+                b.laserMine(who.position)
+            } else {
+                b.mine(who.position, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
+            }
+        }
     },
     giveRandomAmmo() {
         const ammoTarget = Math.floor(Math.random() * (b.guns.length));

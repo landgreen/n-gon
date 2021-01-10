@@ -1,12 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: active cooling - 15% faster fire rate for each gun in your inventory
-tech: specialist - spawn a random power up for each gun in your inventory
-  (not available in custom, requires tech: generalist)
-tech: complex spin-statistics - become immune to harm for 1s every 7s
-  requires Pauli exclusion
-
-even less difficulty ramp after killing final boss
+tech: antiscience - 100% damage, but lose 11 health when you pick up a tech
+tech: laser widebeam + output coupler can now stack up to 9x (was 1x)
+  but it not longer works with tech: slow light propagation
 
 ******************************************************** BUGS ********************************************************
 
@@ -27,8 +23,7 @@ CPT check for crouch after rewind
 
 ******************************************************** TODO ********************************************************
 
-tech "Circadian Rhythm": Become immune to harm for 1 second every 10 seconds while playing.
-
+tech: can't fire while moving, get attack speed and damage
 
 bot that follows the players history
   could have the same shape as the mech circle head
@@ -437,7 +432,7 @@ ending outline
         jump twice if you understand
       they ask the player to enter console commands
         give ammo or tech or something
-      They tell the play a console command to permanently enable custom and testing mode (in local storage)
+      They tell the player a console command to permanently enable custom and testing mode (in local storage)
         players can use this command in the future to enable custom and testing without beating the game even if local storage is wiped
       they then tell the player the command to increase the difficulty and the command to restart the game.
     If you win on hard or why:  
