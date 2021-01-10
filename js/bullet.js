@@ -4000,55 +4000,62 @@ const b = {
                 } else {
                     mech.fireCDcycle = mech.cycle
                     mech.energy -= mech.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
+                    const range = {
+                        x: 5000 * Math.cos(mech.angle),
+                        y: 5000 * Math.sin(mech.angle)
+                    }
+                    const rangeOffPlus = {
+                        x: 7.5 * Math.cos(mech.angle + Math.PI / 2),
+                        y: 7.5 * Math.sin(mech.angle + Math.PI / 2)
+                    }
+                    const rangeOffMinus = {
+                        x: 7.5 * Math.cos(mech.angle - Math.PI / 2),
+                        y: 7.5 * Math.sin(mech.angle - Math.PI / 2)
+                    }
                     const dmg = 0.55 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const where = { x: mech.pos.x + 30 * Math.cos(mech.angle), y: mech.pos.y + 30 * Math.sin(mech.angle) }
                     const eye = {
-                        x: mech.pos.x + 16 * Math.cos(mech.angle),
-                        y: mech.pos.y + 16 * Math.sin(mech.angle)
+                        x: mech.pos.x + 15 * Math.cos(mech.angle),
+                        y: mech.pos.y + 15 * Math.sin(mech.angle)
                     }
-                    const wideLaser = function(where = {
-                        x: mech.pos.x + 30 * Math.cos(mech.angle),
-                        y: mech.pos.y + 30 * Math.sin(mech.angle)
-                    }, angle = mech.angle) {
-                        ctx.strokeStyle = "#f00";
-                        ctx.lineWidth = 8
-                        ctx.globalAlpha = 0.5;
-                        ctx.beginPath();
-                        const off = 7.5
-                        b.laser(where, {
-                            x: eye.x + 3000 * Math.cos(angle),
-                            y: eye.y + 3000 * Math.sin(angle)
+                    ctx.strokeStyle = "#f00";
+                    ctx.lineWidth = 8
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    if (Matter.Query.ray(map, eye, where).length === 0 && Matter.Query.ray(body, eye, where).length === 0) {
+                        b.laser(eye, {
+                            x: eye.x + range.x,
+                            y: eye.y + range.y
                         }, dmg, 0, true, 0.3)
-
-                        for (let i = 1; i < tech.wideLaser; i++) {
-                            let whereOff = Vector.add(where, {
-                                x: i * off * Math.cos(angle + Math.PI / 2),
-                                y: i * off * Math.sin(angle + Math.PI / 2)
-                            })
-                            if (Matter.Query.ray(map, eye, whereOff).length === 0) {
-                                ctx.moveTo(eye.x, eye.y)
-                                ctx.lineTo(whereOff.x, whereOff.y)
-                                b.laser(whereOff, {
-                                    x: whereOff.x + 3000 * Math.cos(angle),
-                                    y: whereOff.y + 3000 * Math.sin(angle)
-                                }, dmg, 0, true, 0.3)
-                            }
-                            whereOff = Vector.add(where, {
-                                x: i * off * Math.cos(angle - Math.PI / 2),
-                                y: i * off * Math.sin(angle - Math.PI / 2)
-                            })
-                            if (Matter.Query.ray(map, eye, whereOff).length === 0) {
-                                ctx.moveTo(eye.x, eye.y)
-                                ctx.lineTo(whereOff.x, whereOff.y)
-                                b.laser(whereOff, {
-                                    x: whereOff.x + 3000 * Math.cos(angle),
-                                    y: whereOff.y + 3000 * Math.sin(angle)
-                                }, dmg, 0, true, 0.3)
-                            }
-                        }
-                        ctx.stroke();
-                        ctx.globalAlpha = 1;
                     }
-                    wideLaser();
+                    for (let i = 1; i < tech.wideLaser; i++) {
+                        let whereOff = Vector.add(where, {
+                            x: i * rangeOffPlus.x,
+                            y: i * rangeOffPlus.y
+                        })
+                        if (Matter.Query.ray(map, eye, whereOff).length === 0 && Matter.Query.ray(body, eye, whereOff).length === 0) {
+                            ctx.moveTo(eye.x, eye.y)
+                            ctx.lineTo(whereOff.x, whereOff.y)
+                            b.laser(whereOff, {
+                                x: whereOff.x + range.x,
+                                y: whereOff.y + range.y
+                            }, dmg, 0, true, 0.3)
+                        }
+                        whereOff = Vector.add(where, {
+                            x: i * rangeOffMinus.x,
+                            y: i * rangeOffMinus.y
+                        })
+                        if (Matter.Query.ray(map, eye, whereOff).length === 0 && Matter.Query.ray(body, eye, whereOff).length === 0) {
+                            ctx.moveTo(eye.x, eye.y)
+                            ctx.lineTo(whereOff.x, whereOff.y)
+                            b.laser(whereOff, {
+                                x: whereOff.x + range.x,
+                                y: whereOff.y + range.y
+                            }, dmg, 0, true, 0.3)
+                        }
+                    }
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
                 }
             },
             fireHistory() {

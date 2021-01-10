@@ -2093,6 +2093,23 @@ const tech = {
             }
         },
         {
+            name: "radioactive contamination",
+            description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("flechettes") || tech.isNailPoison || tech.isWormholeDamage || tech.isNeutronBomb
+            },
+            requires: "radiation damage source",
+            effect() {
+                tech.isRadioactive = true
+            },
+            remove() {
+                tech.isRadioactive = false
+            }
+        },
+        {
             name: "anti-shear topology",
             description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
             isGunTech: true,
@@ -2450,23 +2467,6 @@ const tech = {
             },
             remove() {
                 tech.isFlechetteExplode = false
-            }
-        },
-        {
-            name: "radioactive contamination",
-            description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("flechettes") || tech.isNailPoison || tech.isWormholeDamage || tech.isNeutronBomb
-            },
-            requires: "radiation damage source",
-            effect() {
-                tech.isRadioactive = true
-            },
-            remove() {
-                tech.isRadioactive = false
             }
         },
         {

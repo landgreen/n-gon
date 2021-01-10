@@ -20,6 +20,7 @@ const level = {
             // b.giveGuns("laser")
             // tech.isMineSentry = true
             // tech.giveTech("diffuse beam")
+            // for (let i = 0; i < 60; i++) tech.giveTech("output coupler")
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
