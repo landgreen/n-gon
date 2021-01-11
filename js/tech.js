@@ -90,7 +90,7 @@ const tech = {
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isEnergyDamage) dmg *= 1 + mech.energy / 9;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-        if (tech.isRerollDamage) dmg *= 1 + 0.035 * powerUps.research.research
+        if (tech.isRerollDamage) dmg *= 1 + 0.035 * powerUps.research.count
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && mech.cycle > mech.fireCDcycle + 120) dmg *= 1.66
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
@@ -322,6 +322,76 @@ const tech = {
             },
             remove() {
                 tech.isTurret = false;
+            }
+        },
+        {
+            name: "inertial frame",
+            description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>you can only <strong>fire</strong> when at <strong>rest</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect: () => {
+                tech.isFireNotMove = true;
+                b.setFireCD();
+                b.setFireMethod();
+            },
+            remove() {
+                if (tech.isFireNotMove) {
+                    tech.isFireNotMove = false
+                    b.setFireCD();
+                    b.setFireMethod();
+                }
+            }
+        },
+        {
+            name: "dead reckoning",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong> when at <strong>rest</strong>",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return tech.isFireNotMove
+            },
+            requires: "inertial frame",
+            effect: () => {
+                tech.restDamage += 0.33
+            },
+            remove() {
+                tech.restDamage = 1;
+            }
+        },
+        {
+            name: "Galilean group",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when at <strong>rest</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isFireNotMove
+            },
+            requires: "inertial frame",
+            effect() {
+                tech.isRestHarm = true
+            },
+            remove() {
+                tech.isRestHarm = false;
+            }
+        },
+        {
+            name: "kinetic bombardment",
+            description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isFarAwayDmg = true; //used in mob.damage()
+            },
+            remove() {
+                tech.isFarAwayDmg = false;
             }
         },
         {
@@ -755,7 +825,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research > 5 || build.isCustomSelection
+                return powerUps.research.count > 5 || build.isCustomSelection
             },
             requires: "at least 6 research",
             effect() {
@@ -845,38 +915,6 @@ const tech = {
             remove() {}
         },
         {
-            name: "rest frame",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>when not <strong>moving</strong>",
-            maxCount: 6,
-            count: 0,
-            allowed() {
-                return mech.Fx === 0.016
-            },
-            requires: "base movement speed",
-            effect: () => {
-                tech.restDamage += 0.25
-            },
-            remove() {
-                tech.restDamage = 1;
-            }
-        },
-        {
-            name: "kinetic bombardment",
-            description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.isFarAwayDmg = true; //used in mob.damage()
-            },
-            remove() {
-                tech.isFarAwayDmg = false;
-            }
-        },
-        {
             name: "squirrel-cage rotor",
             description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
             maxCount: 9,
@@ -946,7 +984,7 @@ const tech = {
         },
         {
             name: "perpetual stun",
-            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds<br>at the start of each <strong>level</strong>",
+            description: "<strong>stun</strong> all mobs for up to <strong>10</strong> seconds<br>at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -958,22 +996,6 @@ const tech = {
             },
             remove() {
                 tech.isPerpetualStun = false
-            }
-        },
-        {
-            name: "osmoprotectant",
-            description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
-            },
-            requires: "a freezing or stunning effect",
-            effect() {
-                tech.isFreezeHarmImmune = true;
-            },
-            remove() {
-                tech.isFreezeHarmImmune = false;
             }
         },
         {
@@ -1076,7 +1098,22 @@ const tech = {
                 tech.isHarmFreeze = false;
             }
         },
-
+        {
+            name: "osmoprotectant",
+            description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+            },
+            requires: "a freezing or stunning effect",
+            effect() {
+                tech.isFreezeHarmImmune = true;
+            },
+            remove() {
+                tech.isFreezeHarmImmune = false;
+            }
+        },
         {
             name: "clock gating",
             description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
@@ -1572,7 +1609,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research > 0 || build.isCustomSelection
+                return powerUps.research.count > 0 || build.isCustomSelection
             },
             requires: "at least 1 research",
             effect() {
@@ -1592,7 +1629,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research > 1 || build.isCustomSelection
+                return powerUps.research.count > 1 || build.isCustomSelection
             },
             requires: "at least 2 research",
             effect() {
@@ -1774,13 +1811,13 @@ const tech = {
             isNonRefundable: true,
             isCustomHide: true,
             allowed() {
-                return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.research > 1
+                return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
             },
             requires: "at least 1 tech and 1 research, a chance to duplicate power ups",
             effect: () => {
                 powerUps.research.changeRerolls(-2)
                 simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2
-                <br>${powerUps.research.research}`)
+                <br>${powerUps.research.count}`)
                 const chanceStore = tech.duplicateChance
                 tech.duplicateChance = (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + mech.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                 powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
@@ -1867,7 +1904,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research === 0 && !tech.manyWorlds
+                return powerUps.research.count === 0 && !tech.manyWorlds
             },
             requires: "no research",
             effect() {
@@ -1887,7 +1924,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
+                return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
             requires: "not superdeterminism or Ψ(t) collapse<br>no research",
             effect: () => {
@@ -1903,7 +1940,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.research.research > 1 || build.isCustomSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                return (powerUps.research.count > 1 || build.isCustomSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
             requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 research",
             effect() {
@@ -1919,7 +1956,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.research.research > 2 || build.isCustomSelection) && !tech.isDeterminism
+                return (powerUps.research.count > 2 || build.isCustomSelection) && !tech.isDeterminism
             },
             requires: "not determinism, at least 3 research",
             effect() {
@@ -1939,7 +1976,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.research > 4 || build.isCustomSelection
+                return powerUps.research.count > 4 || build.isCustomSelection
             },
             requires: "at least 5 research",
             effect() {
@@ -4074,5 +4111,7 @@ const tech = {
     isDupDamage: null,
     isFireRateForGuns: null,
     cyclicImmunity: null,
-    isTechDamage: null
+    isTechDamage: null,
+    isFireNotMove: null,
+    isRestHarm: null
 }

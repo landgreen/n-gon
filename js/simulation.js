@@ -523,10 +523,11 @@ const simulation = {
         tech.plasmaBotCount = 0;
         tech.missileBotCount = 0;
 
+        b.setFireMethod()
         b.setFireCD();
         simulation.updateTechHUD();
         powerUps.totalPowerUps = 0;
-        powerUps.research.research = 0;
+        powerUps.research.count = 0;
         mech.setFillColors();
         // mech.maxHealth = 1
         // mech.maxEnergy = 1
@@ -538,10 +539,6 @@ const simulation = {
         simulation.isAutoZoom = true;
         simulation.makeGunHUD();
         simulation.lastLogTime = 0;
-
-
-
-
 
         level.onLevel = 0;
         level.levelsCleared = 0;

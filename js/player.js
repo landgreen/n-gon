@@ -464,7 +464,7 @@ const mech = {
     displayHealth() {
         id = document.getElementById("health");
         // health display follows a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
-        id.style.width = Math.floor(300 * Math.pow(mech.health, 1.5)) + "px";
+        id.style.width = Math.floor(300 * mech.maxHealth * Math.pow(mech.health / mech.maxHealth, 1.4)) + "px";
         //css animation blink if health is low
         if (mech.health < 0.3) {
             id.classList.add("low-health");
@@ -482,6 +482,7 @@ const mech = {
     baseHealth: 1,
     setMaxHealth() {
         mech.maxHealth = mech.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
+        document.getElementById("health-bg").style.width = `${Math.floor(300*mech.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${mech.maxHealth.toFixed(2)}`)
         if (mech.health > mech.maxHealth) mech.health = mech.maxHealth;
         mech.displayHealth();
@@ -501,6 +502,7 @@ const mech = {
         if (tech.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
         if (tech.energyRegen === 0) dmg *= 0.4
         if (tech.isTurret && mech.crouch) dmg *= 0.5;
+        if (tech.isRestHarm && player.speed < 1) dmg *= 0.5;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
@@ -620,10 +622,10 @@ const mech = {
         if (tech.isEnergyHealth) {
             mech.energy -= dmg;
             if (mech.energy < 0 || isNaN(mech.energy)) { //taking deadly damage
-                if (tech.isDeathAvoid && powerUps.research.research && !tech.isDeathAvoidedThisLevel) {
+                if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
-                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.research}`)
+                    simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                     for (let i = 0; i < 6; i++) {
                         powerUps.spawn(mech.pos.x, mech.pos.y, "heal", false);
                     }
@@ -650,12 +652,12 @@ const mech = {
             dmg *= mech.harmReduction()
             mech.health -= dmg;
             if (mech.health < 0 || isNaN(mech.health)) {
-                if (tech.isDeathAvoid && powerUps.research.research > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
+                if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
                     tech.isDeathAvoidedThisLevel = true
                     mech.health = 0.05
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
-                    <br>${powerUps.research.research}`)
+                    <br>${powerUps.research.count}`)
                     for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 10 * Math.random(), mech.pos.y + 10 * Math.random(), "heal", false);
                     mech.immuneCycle = mech.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails

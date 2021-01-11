@@ -6,8 +6,47 @@ const b = {
     activeGun: null, //current gun in use by player
     inventoryGun: 0,
     inventory: [], //list of what guns player has  // 0 starts with basic gun
-    fire() {
+    setFireMethod() {
+        if (tech.isFireNotMove) {
+            b.fire = b.fireNotMove
+        } else {
+            b.fire = b.fireNormal
+        }
+    },
+    fire() {},
+    fireNormal() {
         if (input.fire && mech.fireCDcycle < mech.cycle && (!input.field || mech.fieldFire) && b.inventory.length) {
+            if (b.guns[b.activeGun].ammo > 0) {
+                b.guns[b.activeGun].fire();
+                if (tech.isCrouchAmmo && mech.crouch) {
+                    if (tech.isCrouchAmmo % 2) {
+                        b.guns[b.activeGun].ammo--;
+                        simulation.updateGunHUD();
+                    }
+                    tech.isCrouchAmmo++ //makes the no ammo toggle off and on
+                } else {
+                    b.guns[b.activeGun].ammo--;
+                    simulation.updateGunHUD();
+                }
+            } else {
+                if (tech.isAmmoFromHealth) {
+                    if (mech.health > 0.05) {
+                        mech.damage(0.05 / mech.harmReduction()); //  /mech.harmReduction() undoes  damage increase from difficulty
+                        if (!(tech.isRewindAvoidDeath && mech.energy > 0.66)) { //don't give ammo if CPT triggered
+                            for (let i = 0; i < 3; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                        }
+                    }
+                } else {
+                    simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
+                }
+                mech.fireCDcycle = mech.cycle + 30; //fire cooldown        
+            }
+            if (mech.holdingTarget) mech.drop();
+        }
+    },
+    fireNotMove() {
+        //added  && player.speed < 0.5 && mech.onGround ************************* 
+        if (input.fire && mech.fireCDcycle < mech.cycle && (!input.field || mech.fieldFire) && b.inventory.length && player.speed < 0.5 && mech.onGround && Math.abs(mech.yOff - mech.yOffGoal) < 1) {
             if (b.guns[b.activeGun].ammo > 0) {
                 b.guns[b.activeGun].fire();
                 if (tech.isCrouchAmmo && mech.crouch) {
@@ -152,6 +191,7 @@ const b = {
     setFireCD() {
         b.fireCD = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
         if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.85, b.inventory.length)
+        if (tech.isFireNotMove) b.fireCD *= 0.33
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {

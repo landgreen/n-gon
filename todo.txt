@@ -1,9 +1,13 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: antiscience - 100% damage, but lose 11 health when you pick up a tech
-tech: laser widebeam + output coupler can now stack up to 9x (was 1x)
-  but it not longer works with tech: slow light propagation
+health background finally updates to show max health changes
 
+tech: rest frame is removed
+tech: inertial frame - gain 66% fire rate, but you can't fire when moving
+tech: dead reckoning - when at rest do 33% more damage
+  requires inertial frame
+tech: Galilean group - when at rest take 50% less harm
+  requires inertial frame
 ******************************************************** BUGS ********************************************************
 
 CPT check for crouch after rewind
@@ -34,7 +38,7 @@ bot that follows the players history
     give player energy overfill
     AOE damage to mobs
     push away mobs
-    wen close to player: damage bonus    damage reduction
+    when close to player: damage bonus    damage reduction
 
 tech: dodge chance for cloaking, harmonic fields, also pilot wave
   20% chance up to 3 stacks, not additive

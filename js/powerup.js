@@ -56,7 +56,7 @@ const powerUps = {
                 simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
             }
         }
-        if (tech.manyWorlds && powerUps.research.research === 0) {
+        if (tech.manyWorlds && powerUps.research.count === 0) {
             for (let i = 0; i < 2; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
         document.getElementById("choose-grid").style.display = "none"
@@ -70,7 +70,7 @@ const powerUps = {
         requestAnimationFrame(cycle);
     },
     research: {
-        research: 0,
+        count: 0,
         name: "research",
         color: "#f7b",
         size() {
@@ -80,17 +80,17 @@ const powerUps = {
             powerUps.research.changeRerolls(1)
         },
         changeRerolls(amount) {
-            powerUps.research.research += amount
-            if (powerUps.research.research < 0) {
-                powerUps.research.research = 0
-            } else {
-                simulation.makeTextLog(`powerUps.research.research <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.research}
+            if (amount !== 0) {
+                powerUps.research.count += amount
+                if (powerUps.research.count < 0) {
+                    powerUps.research.count = 0
+                } else {
+                    simulation.makeTextLog(`powerUps.research.count <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.count}
+                }
             }
-
-
             if (tech.isRerollBots) {
                 const limit = 5
-                for (; powerUps.research.research > limit - 1; powerUps.research.research -= limit) {
+                for (; powerUps.research.count > limit - 1; powerUps.research.count -= limit) {
                     b.randomBot()
                     if (tech.renormalization) {
                         for (let i = 0; i < limit; i++) {
@@ -103,11 +103,11 @@ const powerUps = {
                 }
             }
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
-                document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.research}`
+                document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
             if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(mech.pos.x, mech.pos.y, "research");
             if (tech.isRerollHaste) {
-                if (powerUps.research.research === 0) {
+                if (powerUps.research.count === 0) {
                     tech.researchHaste = 0.66;
                     b.setFireCD();
                 } else {
@@ -119,7 +119,7 @@ const powerUps = {
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
             powerUps.research.changeRerolls(-1)
             // simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
-            // <br>${powerUps.research.research}`)
+            // <br>${powerUps.research.count}`)
             if (tech.isBanish && type === 'tech') { // banish researched tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
                 if (powerUps.tech.choiceLog.length > banishLength || powerUps.tech.choiceLog.length === banishLength) { //I'm not sure this check is needed
@@ -248,12 +248,12 @@ const powerUps = {
                 powerUps.field.choiceLog.push(choice2)
                 powerUps.field.choiceLog.push(choice3)
 
-                if (powerUps.research.research) {
+                if (powerUps.research.count) {
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
-                    for (let i = 0, len = Math.min(powerUps.research.research, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                    for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span><span class='research-select'>research</span></div></div>`
                 }
-                //(${powerUps.research.research})
+                //(${powerUps.research.count})
                 // text += `<div style = 'color:#fff'>${simulation.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
@@ -358,11 +358,11 @@ const powerUps = {
                     powerUps.tech.choiceLog.push(choice1)
                     powerUps.tech.choiceLog.push(choice2)
                     powerUps.tech.choiceLog.push(choice3)
-                    // if (powerUps.research.research) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.research}</span></div></div>`
+                    // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
-                    if (powerUps.research.research) {
+                    if (powerUps.research.count) {
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
-                        for (let i = 0, len = Math.min(powerUps.research.research, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                        for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span><span class='research-select'>research</span></div></div>`
                     }
 
@@ -445,10 +445,10 @@ const powerUps = {
                 powerUps.gun.choiceLog.push(choice1)
                 powerUps.gun.choiceLog.push(choice2)
                 powerUps.gun.choiceLog.push(choice3)
-                // if (powerUps.research.research) text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.research}</span></div></div>`
-                if (powerUps.research.research) {
+                // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
+                if (powerUps.research.count) {
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
-                    for (let i = 0, len = Math.min(powerUps.research.research, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                    for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span><span class='research-select'>research</span></div></div>`
                 }
                 // console.log(powerUps.gun.choiceLog)
