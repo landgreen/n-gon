@@ -7,7 +7,9 @@ const b = {
     inventoryGun: 0,
     inventory: [], //list of what guns player has  // 0 starts with basic gun
     setFireMethod() {
-        if (tech.isFireNotMove) {
+        if (tech.isFireMoveLock) {
+            b.fire = b.fireFloat
+        } else if (tech.isFireNotMove) {
             b.fire = b.fireNotMove
         } else {
             b.fire = b.fireNormal
@@ -73,6 +75,45 @@ const b = {
                 mech.fireCDcycle = mech.cycle + 30; //fire cooldown        
             }
             if (mech.holdingTarget) mech.drop();
+        }
+    },
+    fireFloat() {
+        //added  && player.speed < 0.5 && mech.onGround ************************* 
+        if (input.fire && (!input.field || mech.fieldFire) && b.inventory.length) {
+            if (mech.fireCDcycle < mech.cycle) {
+                if (b.guns[b.activeGun].ammo > 0) {
+                    b.guns[b.activeGun].fire();
+                    if (tech.isCrouchAmmo && mech.crouch) {
+                        if (tech.isCrouchAmmo % 2) {
+                            b.guns[b.activeGun].ammo--;
+                            simulation.updateGunHUD();
+                        }
+                        tech.isCrouchAmmo++ //makes the no ammo toggle off and on
+                    } else {
+                        b.guns[b.activeGun].ammo--;
+                        simulation.updateGunHUD();
+                    }
+                } else {
+                    if (tech.isAmmoFromHealth) {
+                        if (mech.health > 0.05) {
+                            mech.damage(0.05 / mech.harmReduction()); //  /mech.harmReduction() undoes  damage increase from difficulty
+                            if (!(tech.isRewindAvoidDeath && mech.energy > 0.66)) { //don't give ammo if CPT triggered
+                                for (let i = 0; i < 3; i++) powerUps.spawn(mech.pos.x, mech.pos.y, "ammo");
+                            }
+                        }
+                    } else {
+                        simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
+                    }
+                    mech.fireCDcycle = mech.cycle + 30; //fire cooldown        
+                }
+                if (mech.holdingTarget) mech.drop();
+            }
+            Matter.Body.setVelocity(player, {
+                x: 0,
+                y: -55 * player.mass * simulation.g //undo gravity before it is added
+            });
+            player.force.x = 0
+            player.force.y = 0
         }
     },
     giveGuns(gun = "random", ammoPacks = 10) {

@@ -1,13 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-health background finally updates to show max health changes
+tech: Higgs mechanism - you can't move when firing, reduce harm by 60% when firing
+  removed Galilean group
 
-tech: rest frame is removed
-tech: inertial frame - gain 66% fire rate, but you can't fire when moving
-tech: dead reckoning - when at rest do 33% more damage
-  requires inertial frame
-tech: Galilean group - when at rest take 50% less harm
-  requires inertial frame
+damage immunity graphic is more obvious
+
 ******************************************************** BUGS ********************************************************
 
 CPT check for crouch after rewind
@@ -26,6 +23,11 @@ CPT check for crouch after rewind
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+tech: nail gun no longer ramps up in speed, nail gun fires slugs (like the shotgun)
+
+tech: you are unable to move while firing
+  float in mid air
 
 tech: can't fire while moving, get attack speed and damage
 

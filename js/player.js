@@ -502,7 +502,7 @@ const mech = {
         if (tech.isNoFireDefense && mech.cycle > mech.fireCDcycle + 120) dmg *= 0.6
         if (tech.energyRegen === 0) dmg *= 0.4
         if (tech.isTurret && mech.crouch) dmg *= 0.5;
-        if (tech.isRestHarm && player.speed < 1) dmg *= 0.5;
+        if (tech.isFireMoveLock && input.fire) dmg *= 0.4;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
@@ -789,7 +789,7 @@ const mech = {
 
         //draw body
         ctx.save();
-        ctx.globalAlpha = (mech.immuneCycle < mech.cycle) ? 1 : 0.7
+        ctx.globalAlpha = (mech.immuneCycle < mech.cycle) ? 1 : 0.5
         ctx.translate(mech.pos.x, mech.pos.y);
         mech.calcLeg(Math.PI, -3);
         mech.drawLeg("#4a4a4a");

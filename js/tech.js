@@ -363,21 +363,93 @@ const tech = {
             }
         },
         {
-            name: "Galilean group",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when at <strong>rest</strong>",
+            name: "Higgs mechanism",
+            description: "<strong>movement</strong> isn't possible while <strong>firing</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> when <strong>firing</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isFireNotMove
+                return true
             },
-            requires: "inertial frame",
-            effect() {
-                tech.isRestHarm = true
+            requires: "",
+            effect: () => {
+                tech.isFireMoveLock = true;
+                b.setFireMethod();
             },
             remove() {
-                tech.isRestHarm = false;
+                if (tech.isFireMoveLock) {
+                    tech.isFireMoveLock = false
+                    b.setFireMethod();
+                }
             }
         },
+        {
+            name: "squirrel-cage rotor",
+            description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() { // good with melee builds, content skipping builds
+                tech.squirrelFx += 0.2;
+                tech.squirrelJump += 0.09;
+                mech.setMovement()
+            },
+            remove() {
+                tech.squirrelFx = 1;
+                tech.squirrelJump = 1;
+                mech.setMovement()
+            }
+        },
+        {
+            name: "Newton's 1st law",
+            description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>50%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.Fx > 0.016 && !tech.isEnergyHealth
+            },
+            requires: "speed increase, not mass-energy equivalence",
+            effect() {
+                tech.isSpeedHarm = true
+            },
+            remove() {
+                tech.isSpeedHarm = false
+            }
+        },
+        {
+            name: "Newton's 2nd law",
+            description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>33%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return mech.Fx > 0.016
+            },
+            requires: "speed increase",
+            effect() {
+                tech.isSpeedDamage = true
+            },
+            remove() {
+                tech.isSpeedDamage = false
+            }
+        },
+        // {
+        //     name: "Galilean group",
+        //     description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> when at <strong>rest</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     allowed() {
+        //         return tech.isFireNotMove || tech.isFireMoveLock
+        //     },
+        //     requires: "inertial frame or Higgs mechanism",
+        //     effect() {
+        //         tech.isRestHarm = true
+        //     },
+        //     remove() {
+        //         tech.isRestHarm = false;
+        //     }
+        // },
         {
             name: "kinetic bombardment",
             description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
@@ -913,58 +985,6 @@ const tech = {
                 tech.missileBotCount *= 2
             },
             remove() {}
-        },
-        {
-            name: "squirrel-cage rotor",
-            description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
-            maxCount: 9,
-            count: 0,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() { // good with melee builds, content skipping builds
-                tech.squirrelFx += 0.2;
-                tech.squirrelJump += 0.09;
-                mech.setMovement()
-            },
-            remove() {
-                tech.squirrelFx = 1;
-                tech.squirrelJump = 1;
-                mech.setMovement()
-            }
-        },
-        {
-            name: "Newton's 1st law",
-            description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>50%</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.Fx > 0.016 && !tech.isEnergyHealth
-            },
-            requires: "speed increase, not mass-energy equivalence",
-            effect() {
-                tech.isSpeedHarm = true
-            },
-            remove() {
-                tech.isSpeedHarm = false
-            }
-        },
-        {
-            name: "Newton's 2nd law",
-            description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>33%</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return mech.Fx > 0.016
-            },
-            requires: "speed increase",
-            effect() {
-                tech.isSpeedDamage = true
-            },
-            remove() {
-                tech.isSpeedDamage = false
-            }
         },
         {
             name: "mass driver",
@@ -4113,5 +4133,6 @@ const tech = {
     cyclicImmunity: null,
     isTechDamage: null,
     isFireNotMove: null,
-    isRestHarm: null
+    isRestHarm: null,
+    isFireMoveLock: null
 }
