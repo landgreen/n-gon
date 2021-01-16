@@ -164,16 +164,16 @@ const mobs = {
                             time: simulation.drawTime
                         });
                     }
-                    if (true) {
-                        //check for nearby mobs
+                    // if (true) {
+                    //     //check for nearby mobs
 
-                    }
+                    // }
                 },
                 endEffect() {},
                 dmg: tickDamage,
                 type: "dot",
                 endCycle: simulation.cycle + cycles,
-                startCycle: simulation.cycle
+                startCycle: simulation.cycle + 29 //makes sure it doesn't tick on first application
             })
         }
     },

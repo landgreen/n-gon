@@ -13,13 +13,19 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(20)
+            // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("laser")
+            // b.giveGuns("nail gun")
+            // tech.giveTech("rivet gun")
+            // tech.giveTech("needle gun")
+            // tech.giveTech("supercritical fission")
+            // tech.giveTech("irradiated nails")
+            // tech.giveTech("4s half-life")
+            // tech.giveTech("1/2s half-life")
+
             // tech.isMineSentry = true
-            // tech.giveTech("diffuse beam")
             // for (let i = 0; i < 60; i++) tech.giveTech("output coupler")
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
@@ -231,16 +237,16 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.exploder(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
-        spawn.shooter(1700, -120)
+        // spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)
-        spawn.streamBoss(1600, -500)
+        // spawn.streamBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 

@@ -494,7 +494,7 @@ const mech = {
         let dmg = 1
         dmg *= mech.fieldHarmReduction
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
-        if (tech.isSlowFPS) dmg *= 0.85
+        if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && mech.fieldUpgrades[mech.fieldMode].name === "negative mass field" && mech.isFieldActive) dmg *= 0.6
         if (tech.isBotArmor) dmg *= 0.97 ** tech.totalBots()

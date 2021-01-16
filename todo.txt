@@ -1,11 +1,30 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+damage immunity graphic is more obvious
+difficulty mode no longer increases after killing final boss (it was too confusing)
+
 tech: Higgs mechanism - you can't move when firing, reduce harm by 60% when firing
   removed Galilean group
 
-damage immunity graphic is more obvious
+removed gun flechettes
+removed critical bifrication
+removed railroad ties
+removed incendiary (for nail gun)
+
+nail gun:
+  needle gun: accurate, piercing mobs, fire 3 at a time
+  rivet gun: accurate, ballistic arc, doesn't use much ammo
+    tech: bigger rivets (9x stack)
+  all nails
+    radioactive 2s tick (about 70% damage increase)
+      0.5s full tick
+      4s longer tick
+    critical hits -> explosion (from flechettes)
 
 ******************************************************** BUGS ********************************************************
+
+Laser+slow light prop+crouch= all but one laser stays in original position
+  log crouch state and apply that to laser, rewind
 
 CPT check for crouch after rewind
   
@@ -24,12 +43,16 @@ CPT check for crouch after rewind
 
 ******************************************************** TODO ********************************************************
 
-tech: nail gun no longer ramps up in speed, nail gun fires slugs (like the shotgun)
+tech: increase maxHealth by 100%, but you can no longer see your health
 
-tech: you are unable to move while firing
-  float in mid air
+modify tech: increase squirrel cage speed, but also increase harm taken by 5-10%
 
-tech: can't fire while moving, get attack speed and damage
+tech: explosions are radioactive
+
+tech: double your rerolls
+  set your duplication chance to zero
+  requires 5 rerolls and 20% duplication chance
+  might want to use a single variable for all duplication
 
 bot that follows the players history
   could have the same shape as the mech circle head

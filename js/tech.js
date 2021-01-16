@@ -109,7 +109,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return b.inventory.length < 2
+                return b.inventory.length < 2 //&& !tech.haveGunCheck("CPT gun")
             },
             requires: "no more than 1 gun",
             effect() {
@@ -364,7 +364,7 @@ const tech = {
         },
         {
             name: "Higgs mechanism",
-            description: "<strong>movement</strong> isn't possible while <strong>firing</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> when <strong>firing</strong>",
+            description: "while <strong>firing</strong> your <strong>position</strong> is locked<br> and <strong class='color-harm'>harm</strong> is reduced by <strong>60%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -507,7 +507,7 @@ const tech = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isFlechetteExplode
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -523,7 +523,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isFlechetteExplode
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -539,7 +539,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.isFlechetteExplode
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -556,7 +556,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isFlechetteExplode || tech.isPulseLaser
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser
             },
             requires: "an explosive damage source",
             effect: () => {
@@ -572,7 +572,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isFlechetteExplode) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isBotSpawner
+                return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isBotSpawner
             },
             requires: "an explosive damage source, no other mob death tech",
             effect: () => {
@@ -1136,7 +1136,7 @@ const tech = {
         },
         {
             name: "clock gating",
-            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>`,
+            description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2100,14 +2100,14 @@ const tech = {
         },
         {
             name: "incendiary ammunition",
-            description: "some <strong>bullets</strong> are loaded with <strong class='color-e'>explosives</strong><br><em style = 'font-size: 90%'>nail gun, shotgun, super balls, drones</em>",
+            description: "<strong>shotgun</strong>, <strong>super balls</strong>, and <strong>drones</strong><br>are loaded with <strong class='color-e'>explosives</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return ((mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("nail gun") || tech.haveGunCheck("shotgun")) && !tech.isIceCrystals && !tech.isNailCrit && !tech.isNailShot && !tech.isNailPoison
+                return ((mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
             },
-            requires: "drones, super balls, nail gun, shotgun",
+            requires: "drones, super balls, shotgun",
             effect() {
                 tech.isIncendiary = true
             },
@@ -2156,7 +2156,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("flechettes") || tech.isNailPoison || tech.isWormholeDamage || tech.isNeutronBomb
+                return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb
             },
             requires: "radiation damage source",
             effect() {
@@ -2201,15 +2201,100 @@ const tech = {
             }
         },
         {
+            name: "needle gun",
+            description: "<strong>nail gun</strong> slowly fires <strong>3</strong> piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong class='color-g'>ammo</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals
+            },
+            requires: "nail gun, not ice crystal or pneumatic actuator",
+            effect() {
+                tech.isNeedles = true
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "nail gun") {
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+                        b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+                        b.guns[i].chooseFireMethod()
+                        simulation.updateGunHUD();
+                        break
+                    }
+                }
+            },
+            remove() {
+                if (tech.isNeedles) {
+                    tech.isNeedles = false
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") {
+                            b.guns[i].chooseFireMethod()
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                            simulation.updateGunHUD();
+                            break
+                        }
+                    }
+                }
+            }
+        },
+        {
+            name: "rivet gun",
+            description: "<strong>nail gun</strong> slowly fires a heavy <strong>rivet</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals
+            },
+            requires: "nail gun, not ice crystal or pneumatic actuator",
+            effect() {
+                tech.isRivets = true
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "nail gun") {
+                        b.guns[i].chooseFireMethod()
+                        break
+                    }
+                }
+            },
+            remove() {
+                if (tech.isRivets) {
+                    tech.isRivets = false
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") {
+                            b.guns[i].chooseFireMethod()
+                            break
+                        }
+                    }
+                }
+            }
+        },
+        {
+            name: "rivet diameter",
+            description: `your <strong>rivets</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return tech.isRivets
+            },
+            requires: "rivet gun",
+            effect() {
+                tech.rivetSize += 0.2
+            },
+            remove() {
+                tech.rivetSize = 1;
+            }
+        },
+        {
             name: "ice crystal nucleation",
             description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIncendiary
+                return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isRivets && !tech.isNeedles && !tech.isNailRadiation && !tech.isNailCrit
             },
-            requires: "nail gun, not incendiary, not powder-actuated",
+            requires: "nail gun, not powder-actuated, rivets, needles, irradiated, or fission",
             effect() {
                 tech.isIceCrystals = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2224,6 +2309,7 @@ const tech = {
             },
             remove() {
                 if (tech.isIceCrystals) {
+                    tech.isIceCrystals = false;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "nail gun") {
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
@@ -2233,24 +2319,6 @@ const tech = {
                         }
                     }
                 }
-                tech.isIceCrystals = false;
-            }
-        },
-        {
-            name: "critical bifurcation",
-            description: "nail gun <strong>nails</strong> do <strong>400%</strong> more <strong class='color-d'>damage</strong><br>when they strike near the <strong>center</strong> of a mob",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("nail gun") && !tech.isIncendiary
-            },
-            requires: "nail gun, not incendiary",
-            effect() {
-                tech.isNailCrit = true
-            },
-            remove() {
-                tech.isNailCrit = false
             }
         },
         {
@@ -2260,14 +2328,22 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("nail gun")
+                return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles
             },
-            requires: "nail gun",
+            requires: "nail gun, not rivets or needles",
             effect() {
                 tech.nailFireRate = true
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+                }
             },
             remove() {
-                tech.nailFireRate = false
+                if (tech.nailFireRate) {
+                    tech.nailFireRate = false
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+                    }
+                }
             }
         },
         {
@@ -2282,9 +2358,85 @@ const tech = {
             requires: "nail gun and pneumatic actuator",
             effect() {
                 tech.nailInstantFireRate = true
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+                }
             },
             remove() {
-                tech.nailInstantFireRate = false
+                if (tech.nailInstantFireRate) {
+                    tech.nailInstantFireRate = false
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+                    }
+                }
+            }
+        },
+        {
+            name: "supercritical fission",
+            description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("nail gun") && !tech.isIceCrystals
+            },
+            requires: "nail gun, not ice crystals",
+            effect() {
+                tech.isNailCrit = true
+            },
+            remove() {
+                tech.isNailCrit = false
+            }
+        },
+        {
+            name: "irradiated nails",
+            description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>70%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + tech.haveGunCheck("nail gun")) * 2 > 1) && !tech.isIceCrystals
+            },
+            requires: "nails, not ice crystals",
+            effect() {
+                tech.isNailRadiation = true;
+            },
+            remove() {
+                tech.isNailRadiation = false;
+            }
+        },
+        {
+            name: "4s half-life",
+            description: "<strong>nails</strong> are made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isNailRadiation && !tech.isFastRadiation
+            },
+            requires: "irradiated nails",
+            effect() {
+                tech.isSlowRadiation = true;
+            },
+            remove() {
+                tech.isSlowRadiation = false;
+            }
+        },
+        {
+            name: "1/2s half-life",
+            description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isNailRadiation && !tech.isSlowRadiation
+            },
+            requires: "irradiated nails",
+            effect() {
+                tech.isFastRadiation = true;
+            },
+            remove() {
+                tech.isFastRadiation = false;
             }
         },
         {
@@ -2429,128 +2581,13 @@ const tech = {
             }
         },
         {
-            name: "flechettes cartridges",
-            description: "<strong>flechettes</strong> release <strong>three</strong> needles in each shot<br><strong class='color-g'>ammo</strong> costs are <strong>tripled</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("flechettes")
-            },
-            requires: "flechettes",
-            effect() {
-                tech.isFlechetteMultiShot = true;
-                //cut current ammo by 1/3
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "flechettes") {
-                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
-                        break
-                    }
-                }
-                //cut ammo packs by 1/3
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                    if (b.guns[i].name === "flechettes") {
-                        b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
-                        break
-                    }
-                }
-                simulation.updateGunHUD();
-            },
-            remove() {
-                if (tech.isFlechetteMultiShot) {
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "flechettes") {
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
-                            break
-                        }
-                    }
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "flechettes") {
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-                            break
-                        }
-                        simulation.updateGunHUD();
-                    }
-                }
-                tech.isFlechetteMultiShot = false;
-            }
-        },
-        {
-            name: "6s half-life",
-            description: "<strong>flechette</strong> needles made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("flechettes") && !tech.isFastDot
-            },
-            requires: "flechettes",
-            effect() {
-                tech.isSlowDot = true;
-            },
-            remove() {
-                tech.isSlowDot = false;
-            }
-        },
-        {
-            name: "1/2s half-life",
-            description: "<strong>flechette</strong> needles made of <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("flechettes") && !tech.isSlowDot
-            },
-            requires: "flechettes",
-            effect() {
-                tech.isFastDot = true;
-            },
-            remove() {
-                tech.isFastDot = false;
-            }
-        },
-        {
-            name: "supercritical fission",
-            description: "<strong>flechettes</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("flechettes") && !tech.pierce
-            },
-            requires: "flechettes and not piercing needles",
-            effect() {
-                tech.isFlechetteExplode = true
-            },
-            remove() {
-                tech.isFlechetteExplode = false
-            }
-        },
-        {
-            name: "piercing needles",
-            description: "<strong>needles</strong> penetrate <strong>mobs</strong> and <strong>blocks</strong><br>potentially hitting <strong>multiple</strong> targets",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.haveGunCheck("flechettes") && !tech.isFlechetteExplode
-            },
-            requires: "flechettes and not supercritical fission",
-            effect() {
-                tech.pierce = true;
-            },
-            remove() {
-                tech.pierce = false;
-            }
-        },
-        {
             name: "wave packet",
             description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("wave beam") && !tech.isExtruder
+                return tech.haveGunCheck("wave beam")
             },
             requires: "wave beam",
             effect() {
@@ -2567,7 +2604,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("wave beam") && !tech.isWaveReflect && !tech.isExtruder
+                return tech.haveGunCheck("wave beam") && !tech.isWaveReflect
             },
             requires: "wave beam",
             effect() {
@@ -2586,7 +2623,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("wave beam") && tech.waveSpeedMap !== 3 && !tech.isExtruder
+                return tech.haveGunCheck("wave beam") && tech.waveSpeedMap !== 3
             },
             requires: "wave beam",
             effect() {
@@ -2788,40 +2825,6 @@ const tech = {
             },
             remove() {
                 tech.isMineSentry = false;
-            }
-        },
-        {
-            name: "irradiated nails",
-            description: "<strong>nails</strong> are made with a <strong class='color-p'>cobalt-60</strong> alloy<br><strong>85%</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
-            },
-            requires: "nails",
-            effect() {
-                tech.isNailPoison = true;
-            },
-            remove() {
-                tech.isNailPoison = false;
-            }
-        },
-        {
-            name: "railroad ties",
-            description: "<strong>nails</strong> are <strong>40%</strong> <strong>larger</strong><br>increases physical <strong class='color-d'>damage</strong> by about <strong>20%</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isIncendiary)) * 2 > 1
-            },
-            requires: "nails",
-            effect() {
-                tech.biggerNails += 0.33
-            },
-            remove() {
-                tech.biggerNails = 1
             }
         },
         {
@@ -3153,9 +3156,11 @@ const tech = {
                 }
             },
             remove() {
-                tech.beamSplitter = 0
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                if (tech.beamSplitter !== 0) {
+                    tech.beamSplitter = 0
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                    }
                 }
             }
         },
@@ -3177,10 +3182,12 @@ const tech = {
                 }
             },
             remove() {
-                tech.wideLaser = 0
-                tech.isWideLaser = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                if (tech.isWideLaser) {
+                    tech.wideLaser = 0
+                    tech.isWideLaser = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                    }
                 }
             }
         },
@@ -3230,9 +3237,11 @@ const tech = {
             },
             remove() {
                 // this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>"
-                tech.historyLaser = 0
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                if (tech.historyLaser) {
+                    tech.historyLaser = 0
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                    }
                 }
             }
         },
@@ -3253,9 +3262,11 @@ const tech = {
                 }
             },
             remove() {
-                tech.isPulseLaser = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                if (tech.isPulseLaser) {
+                    tech.isPulseLaser = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
+                    }
                 }
             }
         },
@@ -3768,7 +3779,7 @@ const tech = {
         },
         {
             name: "discrete optimization",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -3777,7 +3788,7 @@ const tech = {
             },
             requires: "metamaterial cloaking",
             effect() {
-                tech.aimDamage = 1.5
+                tech.aimDamage = 1.66
                 b.setFireCD();
             },
             remove() {
@@ -3998,7 +4009,6 @@ const tech = {
     isSporeField: null,
     isMissileField: null,
     isIceField: null,
-    isFlechetteMultiShot: null,
     isMineAmmoBack: null,
     isPlasmaRange: null,
     isFreezeMobs: null,
@@ -4015,7 +4025,7 @@ const tech = {
     isBotSpawner: null,
     waveHelix: null,
     isSporeFollow: null,
-    isNailPoison: null,
+    isNailRadiation: null,
     isEnergyHealth: null,
     isPulseStun: null,
     restDamage: null,
@@ -4035,7 +4045,7 @@ const tech = {
     fastTime: null,
     squirrelJump: null,
     fastTimeJump: null,
-    isFastDot: null,
+    isFastRadiation: null,
     isArmorFromPowerUps: null,
     isAmmoForGun: null,
     isRapidPulse: null,
@@ -4134,5 +4144,7 @@ const tech = {
     isTechDamage: null,
     isFireNotMove: null,
     isRestHarm: null,
-    isFireMoveLock: null
+    isFireMoveLock: null,
+    isRivets: null,
+    isNeedles: null
 }
