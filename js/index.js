@@ -177,13 +177,14 @@ const build = {
         }
     },
     pauseGrid() {
+        const harm = (1 - mech.harmReduction()) * 100
         let text = ""
         if (!simulation.isChoosing) text += `<div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
         text += `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
       <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
-      <br><strong class='color-harm'>harm</strong> reduction: ${((1-mech.harmReduction())*100).toFixed(0)}%
-      <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(0)}%
+      <br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
+      <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(b.fireCD < 0.1 ? 2 : 0)}%
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
       <br>
       <br><strong class='color-r'>research</strong>: ${powerUps.research.count}

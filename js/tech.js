@@ -384,7 +384,7 @@ const tech = {
         },
         {
             name: "squirrel-cage rotor",
-            description: "<strong>move</strong> and <strong>jump</strong> about <strong>25%</strong> faster",
+            description: "<strong>move</strong> and <strong>jump</strong> about <strong>30%</strong> faster<br>but you take <strong>5%</strong> more <strong class='color-harm'>harm</strong>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -392,8 +392,8 @@ const tech = {
             },
             requires: "",
             effect() { // good with melee builds, content skipping builds
-                tech.squirrelFx += 0.2;
-                tech.squirrelJump += 0.09;
+                tech.squirrelFx += 0.25;
+                tech.squirrelJump += 0.1;
                 mech.setMovement()
             },
             remove() {
@@ -499,6 +499,22 @@ const tech = {
             remove() {
                 tech.fireRate = 1;
                 b.setFireCD();
+            }
+        },
+        {
+            name: "iridium-192",
+            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>80%</strong> more <strong class='color-d'>damage</strong> over 4 seconds",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1
+            },
+            requires: "an explosive damage source",
+            effect: () => {
+                tech.isExplodeRadio = true;
+            },
+            remove() {
+                tech.isExplodeRadio = false;
             }
         },
         {
@@ -2156,7 +2172,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb
+                return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio
             },
             requires: "radiation damage source",
             effect() {
@@ -2207,9 +2223,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals
+                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets
             },
-            requires: "nail gun, not ice crystal or pneumatic actuator",
+            requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
             effect() {
                 tech.isNeedles = true
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2244,9 +2260,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals
+                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isNeedles
             },
-            requires: "nail gun, not ice crystal or pneumatic actuator",
+            requires: "nail gun, not ice crystal, needles, or pneumatic actuator",
             effect() {
                 tech.isRivets = true
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -2378,7 +2394,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("nail gun") && !tech.isIceCrystals
+                return (tech.nailBotCount > 2 || tech.haveGunCheck("nail gun")) && !tech.isIceCrystals
             },
             requires: "nail gun, not ice crystals",
             effect() {
@@ -2424,7 +2440,7 @@ const tech = {
         },
         {
             name: "1/2s half-life",
-            description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br>flechette <strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
+            description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br><strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4146,5 +4162,6 @@ const tech = {
     isRestHarm: null,
     isFireMoveLock: null,
     isRivets: null,
-    isNeedles: null
+    isNeedles: null,
+    isExplodeRadio: null
 }

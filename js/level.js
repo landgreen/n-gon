@@ -17,16 +17,17 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // mech.setField("plasma torch")
-            // b.giveGuns("nail gun")
-            // tech.giveTech("rivet gun")
+            // b.giveGuns("grenades")
+            // tech.isExplodeRadio = true
+            // tech.giveTech("boom-bot")
             // tech.giveTech("needle gun")
             // tech.giveTech("supercritical fission")
             // tech.giveTech("irradiated nails")
             // tech.giveTech("4s half-life")
-            // tech.giveTech("1/2s half-life")
+            // tech.giveTech("CPT gun")
 
             // tech.isMineSentry = true
-            // for (let i = 0; i < 60; i++) tech.giveTech("output coupler")
+            // for (let i = 0; i < 60; i++) tech.giveTech("rivet diameter")
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
@@ -671,6 +672,10 @@ const level = {
             x: 2425,
             y: -600
         }, -2 * Math.PI / 3) //up left
+        spawn.mapRect(0, -1955, 175, 30);
+        const removeIndex1 = map.length - 1 //so much work to catch blocks caught at the bottom of the vertical portals
+        spawn.mapRect(1225, -1955, 175, 30);
+        const removeIndex2 = map.length - 1 //so much work to catch blocks caught at the bottom of the vertical portals
 
         const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)", true) //laser
         const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)", true) //laser
@@ -682,6 +687,33 @@ const level = {
         const door = level.door(312, -750, 25, 190, 185)
 
         level.custom = () => {
+            if (!(mech.cycle % 60)) { //so much work to catch blocks caught at the bottom of the vertical portals
+                let touching = Matter.Query.collides(map[removeIndex1], body)
+                if (touching.length) {
+                    // console.log(touching[0].bodyB)
+                    Matter.World.remove(engine.world, touching[0].bodyB);
+                    for (let i = 0, len = body.length; i < len; i++) {
+                        if (body[i].id === touching[0].bodyB.id) {
+                            body.splice(i, 1);
+                            break
+                        }
+                    }
+                    // 
+                }
+                touching = Matter.Query.collides(map[removeIndex2], body)
+                if (touching.length) {
+                    // console.log(touching[0].bodyB)
+                    Matter.World.remove(engine.world, touching[0].bodyB);
+                    for (let i = 0, len = body.length; i < len; i++) {
+                        if (body[i].id === touching[0].bodyB.id) {
+                            body.splice(i, 1);
+                            break
+                        }
+                    }
+                }
+            }
+
+
             buttonDoor.query();
             buttonDoor.draw();
             if (buttonDoor.isUp) {
@@ -837,9 +869,6 @@ const level = {
         spawn.mapRect(1400, -2600, 375, 675); //right platform
         spawn.mapRect(1925, -2600, 775, 675); //far right platform
         spawn.bodyRect(2130, -2660, 50, 50); //button's block
-
-        spawn.mapRect(0, -1975, 175, 50);
-        spawn.mapRect(1225, -1975, 175, 50);
         spawn.mapRect(150, -2100, 200, 175);
         spawn.mapRect(1050, -2100, 200, 175);
 
@@ -4404,11 +4433,12 @@ const level = {
                         }
                         let v = Vector.mult(this.portalPair.unit, mag)
                         Matter.Body.setVelocity(body[i], v);
-                    } else if (body[i].speed < 0.1) { //touching this portal and very slow
-                        Matter.World.remove(engine.world, body[i]);
-                        body.splice(i, 1);
-                        break
                     }
+                    // else if (body[i].speed < 0.1) { //touching this portal and very slow
+                    //     Matter.World.remove(engine.world, body[i]);
+                    //     body.splice(i, 1);
+                    //     break
+                    // }
                 }
             }
             // }

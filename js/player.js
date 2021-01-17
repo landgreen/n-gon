@@ -103,7 +103,8 @@ const mech = {
         x: 0,
         y: 0
     },
-    yPosDifference: 24.285923217549026, //player.position.y - mech.pos.y
+    yPosDifference: 24.2859, //player.position.y - mech.pos.y  //24.285923217549026
+    // yPosDifferenceCrouched: -2.7140767824453604,
     Sy: 0, //adds a smoothing effect to vertical only
     Vx: 0,
     Vy: 0,
@@ -146,9 +147,11 @@ const mech = {
                     x: player.velocity.x,
                     y: player.velocity.y
                 },
+                yOff: mech.yOff,
                 angle: mech.angle,
                 health: mech.health,
                 energy: mech.energy,
+                activeGun: b.activeGun
             }
         }
     },
@@ -169,6 +172,7 @@ const mech = {
                 x: player.velocity.x,
                 y: player.velocity.y
             },
+            yOff: mech.yOff,
             angle: mech.angle,
             health: mech.health,
             energy: mech.energy,
@@ -493,6 +497,7 @@ const mech = {
     harmReduction() {
         let dmg = 1
         dmg *= mech.fieldHarmReduction
+        if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isPiezo) dmg *= 0.85
@@ -537,6 +542,12 @@ const mech = {
         let history = mech.history[(mech.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+        mech.yOff = history.yOff
+        if (mech.yOff < 48) {
+            mech.doCrouch()
+        } else {
+            mech.undoCrouch()
+        }
 
         // b.activeGun = history.activeGun
         // for (let i = 0; i < b.inventory.length; i++) {
@@ -579,7 +590,8 @@ const mech = {
                     for (let i = 1; i < steps; i++) {
                         history = mech.history[(mech.cycle - i) % 600]
                         mech.pos.x = history.position.x
-                        mech.pos.y = history.position.y
+                        mech.pos.y = history.position.y + mech.yPosDifference - history.yOff
+                        mech.yOff = history.yOff
                         mech.draw();
                     }
                     ctx.restore();

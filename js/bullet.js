@@ -314,13 +314,26 @@ const b = {
             dmg *= 1.6
         }
 
-        simulation.drawList.push({ //add dmg to draw queue
-            x: where.x,
-            y: where.y,
-            radius: radius,
-            color: "rgba(255,25,0,0.6)",
-            time: simulation.drawTime
-        });
+
+        if (tech.isExplodeRadio) {
+            simulation.drawList.push({ //add dmg to draw queue
+                x: where.x,
+                y: where.y,
+                radius: radius,
+                color: "rgba(25,139,170,0.45)",
+                time: simulation.drawTime
+            });
+        } else {
+            simulation.drawList.push({ //add dmg to draw queue
+                x: where.x,
+                y: where.y,
+                radius: radius,
+                color: "rgba(255,25,0,0.6)",
+                time: simulation.drawTime
+            });
+        }
+
+
 
         const alertRange = 100 + radius * 2; //alert range
         simulation.drawList.push({ //add alert to draw queue
@@ -342,14 +355,6 @@ const b = {
             } else {
                 mech.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
             }
-            // if (!(tech.isImmuneExplosion && mech.energy > 0.97)) {
-            //   if (tech.isExplosionHarm) {
-            //     mech.damage(radius * 0.0004); //300% more player damage from explosions
-            //   } else {
-            //     mech.damage(radius * 0.0001); //normal player damage from explosions
-            //   }
-            //   mech.drop();
-            // }
             knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
             player.force.x += knock.x;
             player.force.y += knock.y;
@@ -398,7 +403,11 @@ const b = {
                 if (dist < radius) {
                     if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
                     if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-                    mob[i].damage(dmg * damageScale * b.dmgScale);
+                    if (tech.isExplodeRadio) {
+                        mobs.statusDoT(mob[i], dmg * damageScale * 0.25, 240) //apply radiation damage status effect on direct hits
+                    } else {
+                        mob[i].damage(dmg * damageScale * b.dmgScale);
+                    }
                     mob[i].locatePlayer();
                     knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.01);
                     mob[i].force.x += knock.x;
@@ -3887,6 +3896,17 @@ const b = {
                             player.force.y -= KNOCK * Math.sin(mech.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
                             pushAway(1200 * this.charge)
                         } else { // charging on mouse down
+
+                            if (tech.isFireMoveLock) {
+                                Matter.Body.setVelocity(player, {
+                                    x: 0,
+                                    y: -55 * player.mass * simulation.g //undo gravity before it is added
+                                });
+                                player.force.x = 0
+                                player.force.y = 0
+                            }
+
+
                             mech.fireCDcycle = Infinity //can't fire until mouse is released
                             const previousCharge = this.charge
                             let smoothRate = 0.98 * (mech.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCD) //small b.fireCD = faster shots, b.fireCD=1 = normal shot,  big b.fireCD = slower chot
@@ -4162,12 +4182,13 @@ const b = {
                     }, dmg, 0, true, 0.2);
                     for (let i = 1, len = 5 + tech.historyLaser * 5; i < len; i++) {
                         const history = mech.history[(mech.cycle - i * spacing) % 600]
+                        const off = history.yOff - 24.2859
                         b.laser({
                             x: history.position.x + 20 * Math.cos(history.angle),
-                            y: history.position.y + 20 * Math.sin(history.angle) - mech.yPosDifference
+                            y: history.position.y + 20 * Math.sin(history.angle) - off
                         }, {
                             x: history.position.x + 3000 * Math.cos(history.angle),
-                            y: history.position.y + 3000 * Math.sin(history.angle) - mech.yPosDifference
+                            y: history.position.y + 3000 * Math.sin(history.angle) - off
                         }, dmg, 0, true, 0.2);
                     }
                     ctx.strokeStyle = "#f00";
@@ -4219,6 +4240,12 @@ const b = {
                     if (mech.health !== history.health) {
                         mech.health = history.health
                         mech.displayHealth();
+                    }
+                    mech.yOff = history.yOff
+                    if (mech.yOff < 48) {
+                        mech.doCrouch()
+                    } else {
+                        mech.undoCrouch()
                     }
                 }
             } else { //button is held the first time

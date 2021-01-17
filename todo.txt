@@ -1,33 +1,17 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-damage immunity graphic is more obvious
-difficulty mode no longer increases after killing final boss (it was too confusing)
+various bug fixes
+  Laser+slow light prop+crouch= all but one laser stays in original position
+  CPT rewind and gun: correctly put you back into a crouch position
+  Higgs + rail gun allows movement
+  blocks don't linger at the bottom of portals anymore
 
-tech: Higgs mechanism - you can't move when firing, reduce harm by 60% when firing
-  removed Galilean group
+squirrel cage - move even faster, but take 5% more harm
 
-removed gun flechettes
-removed critical bifrication
-removed railroad ties
-removed incendiary (for nail gun)
-
-nail gun:
-  needle gun: accurate, piercing mobs, fire 3 at a time
-  rivet gun: accurate, ballistic arc, doesn't use much ammo
-    tech: bigger rivets (9x stack)
-  all nails
-    radioactive 2s tick (about 70% damage increase)
-      0.5s full tick
-      4s longer tick
-    critical hits -> explosion (from flechettes)
+tech: iridium-192 - explosions are radioactive, +80% damage, spread over 4 seconds
 
 ******************************************************** BUGS ********************************************************
 
-Laser+slow light prop+crouch= all but one laser stays in original position
-  log crouch state and apply that to laser, rewind
-
-CPT check for crouch after rewind
-  
 (always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
 (always) is there a way to check if the player is stuck inside the map or block
@@ -42,12 +26,6 @@ CPT check for crouch after rewind
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
-
-tech: increase maxHealth by 100%, but you can no longer see your health
-
-modify tech: increase squirrel cage speed, but also increase harm taken by 5-10%
-
-tech: explosions are radioactive
 
 tech: double your rerolls
   set your duplication chance to zero
