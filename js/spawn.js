@@ -98,6 +98,9 @@ const spawn = {
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
+            //add lore level as next level if player took lore tech earlier in the game
+            if (lore.techCount > 9 && !simulation.isCheating) level.levels.push("null")
+
             level.exit.x = 5500;
             level.exit.y = -330;
             //ramp up damage

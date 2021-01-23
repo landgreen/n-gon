@@ -265,10 +265,7 @@ const simulation = {
     lastLogTimeBig: 0,
     boldActiveGunHUD() {
         if (b.inventory.length > 0) {
-            for (let i = 0, len = b.inventory.length; i < len; ++i) {
-                // document.getElementById(b.inventory[i]).style.fontSize = "25px";
-                document.getElementById(b.inventory[i]).style.opacity = "0.3";
-            }
+            for (let i = 0, len = b.inventory.length; i < len; ++i) document.getElementById(b.inventory[i]).style.opacity = "0.3";
             // document.getElementById(b.activeGun).style.fontSize = "30px";
             if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
         }
@@ -276,9 +273,7 @@ const simulation = {
         if (tech.isEntanglement && document.getElementById("tech-entanglement")) {
             if (b.inventory[0] === b.activeGun) {
                 let lessDamage = 1
-                for (let i = 0, len = b.inventory.length; i < len; i++) {
-                    lessDamage *= 0.87 // 1 - 0.13
-                }
+                for (let i = 0, len = b.inventory.length; i < len; i++) lessDamage *= 0.87 // 1 - 0.13
                 document.getElementById("tech-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
             } else {
                 document.getElementById("tech-entanglement").innerHTML = " 0%"
@@ -465,6 +460,7 @@ const simulation = {
     },
     firstRun: true,
     splashReturn() {
+        simulation.clearTimeouts();
         simulation.onTitlePage = true;
         document.getElementById("splash").onclick = function() {
             simulation.startGame();
@@ -496,7 +492,6 @@ const simulation = {
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
         document.getElementById("dmg").style.display = "inline";
         document.getElementById("health-bg").style.display = "inline";
-
         mech.spawn(); //spawns the player
 
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
@@ -529,13 +524,17 @@ const simulation = {
 
         b.setFireMethod()
         b.setFireCD();
-        simulation.updateTechHUD();
+        // simulation.updateTechHUD();
         powerUps.totalPowerUps = 0;
         powerUps.research.count = 0;
         mech.setFillColors();
         // mech.maxHealth = 1
         // mech.maxEnergy = 1
         // mech.energy = 1
+        input.isPauseKeyReady = true
+        simulation.wipe = function() { //set wipe to normal
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
         mech.hole.isOn = false
         simulation.paused = false;
         engine.timing.timeScale = 1;
@@ -619,6 +618,12 @@ const simulation = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         simulation.then = Date.now();
         requestAnimationFrame(cycle); //starts game loop
+    },
+    clearTimeouts() {
+        let id = window.setTimeout(function() {}, 0);
+        while (id--) {
+            window.clearTimeout(id); // will do nothing if no timeout with id is present
+        }
     },
     clearNow: false,
     clearMap() {
@@ -706,6 +711,7 @@ const simulation = {
             mech.holdingTarget = body[len];
             mech.holdingTarget.collisionFilter.category = 0;
             mech.holdingTarget.collisionFilter.mask = 0;
+            mech.definePlayerMass(mech.defaultMass + mech.holdingTarget.mass * mech.holdingMassScale)
         }
         //set fps back to default
         simulation.fpsCap = simulation.fpsCapDefault
@@ -837,27 +843,6 @@ const simulation = {
     },
     testingOutput() {
         ctx.fillStyle = "#000";
-        if (!simulation.isConstructionMode) {
-            // ctx.textAlign = "right";
-            ctx.fillText("T: exit testing mode", canvas.width / 2, canvas.height - 10);
-            // let line = 500;
-            // const x = canvas.width - 5;
-            // ctx.fillText("T: exit testing mode", x, line);
-            // line += 20;
-            // ctx.fillText("Y: give all tech", x, line);
-            // line += 20;
-            // ctx.fillText("R: teleport to mouse", x, line);
-            // line += 20;
-            // ctx.fillText("F: cycle field", x, line);
-            // line += 20;
-            // ctx.fillText("G: give all guns", x, line);
-            // line += 20;
-            // ctx.fillText("H: heal", x, line);
-            // line += 20;
-            // ctx.fillText("U: next level", x, line);
-            // line += 20;
-            // ctx.fillText("1-7: spawn things", x, line);
-        }
         ctx.textAlign = "center";
         ctx.fillText(`(${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})`, simulation.mouse.x, simulation.mouse.y - 20);
     },
@@ -883,16 +868,15 @@ const simulation = {
             ctx.globalAlpha = 1;
         },
         powerUpBonus() { //draws crackle effect for bonus power ups
+            ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
             for (let i = 0, len = powerUp.length; i < len; ++i) {
-                ctx.globalAlpha = 0.4 * Math.sin(mech.cycle * 0.15) + 0.6;
-                for (let i = 0, len = powerUp.length; i < len; ++i) {
-                    ctx.beginPath();
-                    ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-                    ctx.fillStyle = powerUp[i].color;
-                    ctx.fill();
-                }
-                ctx.globalAlpha = 1;
-
+                ctx.beginPath();
+                ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+                ctx.fillStyle = powerUp[i].color;
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            for (let i = 0, len = powerUp.length; i < len; ++i) {
                 if (powerUp[i].isBonus && Math.random() < 0.1) {
                     //draw electricity
                     const mag = 5 + powerUp[i].size / 5

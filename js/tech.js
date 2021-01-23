@@ -6,6 +6,9 @@ const tech = {
             tech.tech[i].isLost = false
             tech.tech[i].count = 0
         }
+        lore.techCount = 0;
+        tech.removeLoreTechFromPool();
+        tech.addLoreTechToPool();
         // tech.nailBotCount = 0;
         // tech.foamBotCount = 0;
         // tech.boomBotCount = 0;
@@ -21,12 +24,24 @@ const tech = {
         tech.tech[index].count = 0;
         simulation.updateTechHUD();
     },
+    removeLoreTechFromPool() {
+        // for (let i = 0, len = tech.tech.length; i < len; i++) {
+        //     if (tech.tech[i].isLore) {
+        //         console.log('found one')
+        //         tech.tech.splice(i, 1)
+        //         tech.removeLoreTechFromPool();
+        //         return;
+        //     }
+        // }
+        for (let i = tech.tech.length - 1; i > 0; i--) {
+            if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech.splice(i, 1)
+        }
+    },
     giveTech(index = 'random') {
         if (index === 'random') {
             let options = [];
             for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed())
-                    options.push(i);
+                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) options.push(i);
             }
             // give a random tech from the tech I don't have
             if (options.length > 0) {
@@ -98,7 +113,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.035 + tech.duplicateChance + mech.duplicateChance
+        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + mech.duplicateChance
     },
     totalBots() {
         return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
@@ -1746,7 +1761,7 @@ const tech = {
         },
         {
             name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>3.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4%</strong> power up <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1760,7 +1775,7 @@ const tech = {
             },
             remove() {
                 tech.isCancelDuplication = false
-                tech.cancelCount = 0
+                // tech.cancelCount = 0
                 if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
             }
         },
@@ -2045,6 +2060,7 @@ const tech = {
                 if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
 
                 tech.setupAllTech(); // remove all tech
+                tech.addLoreTechToPool();
                 for (let i = 0; i < count; i++) { // spawn new tech power ups
                     powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
                 }
@@ -2394,9 +2410,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.nailBotCount > 2 || tech.haveGunCheck("nail gun")) && !tech.isIceCrystals
+                return (tech.isNailShot || tech.nailBotCount > 1 || tech.haveGunCheck("nail gun")) && !tech.isIceCrystals
             },
-            requires: "nail gun, not ice crystals",
+            requires: "nails",
             effect() {
                 tech.isNailCrit = true
             },
@@ -2530,7 +2546,7 @@ const tech = {
         },
         {
             name: "Newton's 3rd law",
-            description: "the <strong>shotgun</strong> fire <strong><em>delay</em></strong> is <strong>66%</strong> faster<br><strong>recoil</strong> is greatly increased",
+            description: "<strong>shotgun</strong> <strong>recoil</strong> is greatly increased<br>and has a <strong>66%</strong> decreased <strong><em>delay</em></strong> after firing",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3882,6 +3898,10 @@ const tech = {
                 tech.isWormBullets = false
             }
         },
+        //************************************************** 
+        //************************************************** spawn power up
+        //************************************************** tech
+        //************************************************** 
         {
             name: "heals",
             description: "spawn <strong>6</strong> <strong class='color-h'>heals</strong>",
@@ -3972,8 +3992,37 @@ const tech = {
                 this.count--
             },
             remove() {}
-        },
+        }
     ],
+    addLoreTechToPool() { //adds lore tech to tech pool
+        tech.tech.push({
+            name: `undefined`,
+            description: `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`,
+            maxCount: 1,
+            count: 0,
+            isLore: true,
+            isNonRefundable: true,
+            isCustomHide: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                setTimeout(() => { //a short delay, I can't remember why
+                    lore.techCount++
+                    if (lore.techCount > 9) {
+                        tech.removeLoreTechFromPool();
+                    } else {
+                        for (let i = 0; i < tech.tech.length; i++) { //set name for all unchosen copies of this tech
+                            if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
+                        }
+                        for (let i = 0, len = 10; i < len; i++) tech.addLoreTechToPool()
+                    }
+                }, 1);
+            },
+            remove() {}
+        })
+    },
     //variables use for gun tech upgrades
     fireRate: null,
     bulletSize: null,

@@ -2300,7 +2300,7 @@ const b = {
             angle: mech.angle,
             friction: 0,
             frictionStatic: 0,
-            frictionAir: 0.055,
+            frictionAir: 0.04,
             restitution: 0.7,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
@@ -2331,6 +2331,7 @@ const b = {
                                 const angle = Vector.angle(this.position, mob[i].position)
                                 Matter.Body.setAngle(this, angle)
                                 // Matter.Body.setAngularVelocity(this, 0.025)
+                                this.torque += this.inertia * 0.00004 * (Math.round(Math.random()) ? 1 : -1)
                                 this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), this.mass * 0.02)
                                 b.missile(this.position, angle, -8, 0.7 * (tech.missileSize ? 1.5 : 1))
                                 break;
@@ -3070,7 +3071,7 @@ const b = {
                     const me = bullet.length;
                     const dir = mech.angle + 0.02 * (Math.random() - 0.5)
                     bullet[me] = Bodies.rectangle(mech.pos.x + 35 * Math.cos(mech.angle), mech.pos.y + 35 * Math.sin(mech.angle), 45, 20, b.fireAttributes(dir));
-                    Matter.Body.setDensity(bullet[me], 0.003);
+                    Matter.Body.setDensity(bullet[me], 0.004);
                     World.add(engine.world, bullet[me]); //add bullet to world
                     const SPEED = (mech.crouch ? 52 : 43) + Math.random() * 7
                     Matter.Body.setVelocity(bullet[me], {
@@ -3135,7 +3136,7 @@ const b = {
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 80 + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 100 + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion

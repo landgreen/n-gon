@@ -182,18 +182,19 @@ const build = {
         if (!simulation.isChoosing) text += `<div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
         text += `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
+        ${simulation.isCheating? "<em>lore disabled</em><br><br>": ""}
       <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
       <br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
       <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(b.fireCD < 0.1 ? 2 : 0)}%
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
       <br>
-      <br><strong class='color-r'>research</strong>: ${powerUps.research.count}
+      <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
       <br><strong class='color-h'>health</strong>: (${(mech.health*100).toFixed(0)} / ${(mech.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(mech.energy*100).toFixed(0)} / ${(mech.maxEnergy*100).toFixed(0)})
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
       <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
       <br>
       <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${mech.cycle} cycles
-      <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups      
+      <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
       <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
       <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
@@ -216,7 +217,6 @@ const build = {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
                 const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-
                 if (tech.tech[i].isFieldTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
@@ -231,6 +231,8 @@ const build = {
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                } else if (tech.tech[i].isLore) {
+                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else {
                     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
@@ -471,6 +473,7 @@ const build = {
             removeOne();
         }
         simulation.isCheating = true;
+        tech.removeLoreTechFromPool();
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
         document.getElementById("build-grid").style.display = "none"
@@ -557,7 +560,7 @@ const input = {
         document.getElementById("key-pause").innerHTML = cleanText(input.key.pause)
         document.getElementById("key-next-gun").innerHTML = cleanText(input.key.nextGun)
         document.getElementById("key-previous-gun").innerHTML = cleanText(input.key.previousGun)
-        document.getElementById("key-testing").innerHTML = cleanText(input.key.testing)
+        document.getElementById("key-testing").innerHTML = cleanText(input.key.testing) //if (localSettings.loreCount > 0) 
 
         document.getElementById("splash-up").innerHTML = cleanText(input.key.up)[0]
         document.getElementById("splash-down").innerHTML = cleanText(input.key.down)[0]
@@ -697,6 +700,7 @@ window.addEventListener("keydown", function(event) {
             input.down = true
             break;
         case input.key.field:
+            event.preventDefault();
             input.field = true
             break
         case input.key.nextGun:
@@ -725,20 +729,63 @@ window.addEventListener("keydown", function(event) {
             }
             break
         case input.key.testing:
-            if (mech.alive) {
+            if (mech.alive && localSettings.loreCount > 0) {
                 if (simulation.testing) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop
-                    if (simulation.isConstructionMode) {
-                        document.getElementById("construct").style.display = 'none'
-                    }
+                    if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
+                    simulation.makeTextLog(`<em>exiting testing mode</em>`);
                 } else { //if (keys[191])
                     simulation.testing = true;
-                    simulation.isCheating = true;
-                    if (simulation.isConstructionMode) {
-                        document.getElementById("construct").style.display = 'inline'
-                    }
                     simulation.loop = simulation.testingLoop
+                    if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'
+                    if (!simulation.isCheating) {
+                        simulation.isCheating = true;
+                        tech.removeLoreTechFromPool();
+                    }
+                    simulation.makeTextLog(
+                        `<table id="control-table">
+                            <tr>
+                                <td class='key-input'>T</td>
+                                <td class='key-used'><strong>enter / exit testing mode</strong></td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>R</td>
+                                <td class='key-used'>teleport to mouse</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>F</td>
+                                <td class='key-used'>cycle field</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>G</td>
+                                <td class='key-used'>all guns</td>
+                            </tr>                            
+                            <tr>
+                                <td class='key-input'>H</td>
+                                <td class='key-used'>fill health and energy</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>Y</td>
+                                <td class='key-used'>random tech</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>U</td>
+                                <td class='key-used'>next level</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>I/O</td>
+                                <td class='key-used'>zoom in / out</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>1-8</td>
+                                <td class='key-used'>spawn things</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input'>⇧X</td>
+                                <td class='key-used'>restart</td>
+                            </tr>    
+                        </table>`, Infinity);
                 }
             }
             break
@@ -825,6 +872,7 @@ window.addEventListener("keydown", function(event) {
                 }
                 break
             case "u":
+                simulation.clearTimeouts();
                 level.nextLevel();
                 break
         }
@@ -922,6 +970,7 @@ if (localSettings) {
         fpsCapDefault: 'max',
         runCount: 0,
         levelsClearedLastGame: 0,
+        loreCount: 0,
         key: undefined
     };
     input.setDefault()
@@ -931,6 +980,9 @@ if (localSettings) {
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }
+document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+document.getElementById("build-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+
 input.controlTextUpdate()
 
 //**********************************************************************
@@ -962,10 +1014,7 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
 });
 
 
-
 document.getElementById("updates").addEventListener("toggle", function() {
-
-
     function loadJSON(path, success, error) { //generic function to get JSON
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {

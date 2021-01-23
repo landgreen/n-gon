@@ -1,16 +1,20 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-various bug fixes
-  Laser+slow light prop+crouch= all but one laser stays in original position
-  CPT rewind and gun: correctly put you back into a crouch position
-  Higgs + rail gun allows movement
-  blocks don't linger at the bottom of portals anymore
+lore: chapter 1 and 2 are now somewhere in the game
+  lore is the same for all difficulty levels
 
-squirrel cage - move even faster, but take 5% more harm
+testing mode and custom are now locked by default until you reach chapter 1
+  or just hack the game to skip the lore and enable testing and custom
+    localSettings.loreCount = Infinity;
+    localStorage.setItem("localSettings", JSON.stringify(localSettings));
 
-tech: iridium-192 - explosions are radioactive, +80% damage, spread over 4 seconds
+bug fix: performance greatly improved on drawing multiple duplicated power ups
+
 
 ******************************************************** BUGS ********************************************************
+
+(a few times) wormhole teleportation can leave the player in a stuck jump state
+  seems to be easily fixed, by porting, firing or something
 
 (always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
@@ -26,6 +30,17 @@ tech: iridium-192 - explosions are radioactive, +80% damage, spread over 4 secon
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+chapter 3:  why is the bot attacking things?
+
+mechanic: use gun swap as an active ability
+  this effect is spammable, so it needs a cost or a cooldown
+  tech:
+    trigger damage immunity for 3 seconds, but drain ammo
+    push away nearby mobs, but drain energy
+    produce ammo, but take 1 damage
+    rewind, still uses energy
+    cycle to next field, uses a reroll
 
 tech: double your rerolls
   set your duplication chance to zero
@@ -57,13 +72,6 @@ in game console
   set highlighting rules
     mech, tech, level are all highlighted
     maybe the first term in each variable should get a highlight
-
-mechanic: use gun swap as an active ability
-  this effect is spammable, so it needs a cost or a cooldown
-  ideas?
-    trigger damage immunity for 3 seconds, but drain ammo
-    push away nearby mobs, but drain energy
-    produce ammo, but take 1 damage
 
 tech: time dilation - when you exit time dilation rewind to the state you entered
   position, velocity, and health
@@ -360,7 +368,7 @@ n-gon outreach ideas
 ******************************************************** LORE ********************************************************
 
 cool names for tech
-  strange loop  
+  strange loop, ansatz
 
 lore - a robot (the player) gains self awareness
   each tech gun/field is a new tech
@@ -424,7 +432,9 @@ scientist console text:
       Are those shapes supposed to be us?
 
 ending outline
-  if no cheats
+  testing mode is unlocked when player see the 1st ending
+  if player chose tech: choosing this tech means the player gets lore after beating the game
+    count 1:
   after final boss is cleared, player enters a level with no mobs
     level maybe has some environmental damage, so player has an option to die at any time
   player can see text output between two colors of text strings (scientists)

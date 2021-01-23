@@ -19,12 +19,11 @@ const level = {
             // mech.setField("plasma torch")
             // b.giveGuns("grenades")
             // tech.isExplodeRadio = true
-            // tech.giveTech("boom-bot")
             // tech.giveTech("needle gun")
             // tech.giveTech("supercritical fission")
             // tech.giveTech("irradiated nails")
-            // tech.giveTech("4s half-life")
-            // tech.giveTech("CPT gun")
+            // tech.giveTech("cardinality")
+            // tech.giveTech("Bayesian statistics")
 
             // tech.isMineSentry = true
             // for (let i = 0; i < 60; i++) tech.giveTech("rivet diameter")
@@ -34,7 +33,6 @@ const level = {
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
-            // level.null() //after the final boss, ending
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
             // level.testChamber() //less mobs, more puzzle
@@ -51,6 +49,15 @@ const level = {
             // level.detours() //fan level
             // level.basement(); //fan level
             // level.stronghold() //fan level
+
+            // for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
+            // tech.giveTech("undefined")
+            // lore.techCount = 1
+            // localSettings.loreCount = 0;
+            // simulation.isCheating = true;
+            // localSettings.loreCount = 0;
+            // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            // level.null()
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -104,39 +111,86 @@ const level = {
     //******************************************************************************************************************
     //******************************************************************************************************************
     null() {
-        const hazardSlime = level.hazard(-1775, 150, 3575, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
-        // const hazardLaser1 = level.hazard(-475, -800, 1, 800, 0.4, "#50f", true) //laser
-        // const hazardLaser2 = level.hazard(475, -800, 1, 800, 0.4, "#50f", true) //laser
+        level.levels.pop(); //remove lore level from rotation
+        //start a conversation based on the number of conversations seen
+        if (!simulation.isCheating) lore.conversation[localSettings.loreCount % lore.conversation.length]()
 
+        const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
+        const circle = {
+            x: 0,
+            y: -500,
+            radius: 50
+        }
         level.custom = () => {
             // level.playerExitCheck();
             hazardSlime.query();
-            // hazardLaser1.query();
-            // hazardLaser2.query();
-            // hazard.level(true)
+
+            //draw wide line
+            ctx.beginPath();
+            ctx.moveTo(circle.x, -800)
+            ctx.lineTo(circle.x, circle.y)
+            ctx.lineWidth = 40;
+            ctx.strokeStyle = lore.talkingColor //"#d5dddd" //"#bcc";
+            ctx.globalAlpha = 0.03;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            //draw circles
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = "#bcc"
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#abb";
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, circle.radius / 8, 0, 2 * Math.PI);
+            ctx.fillStyle = lore.talkingColor //"#dff"
+            ctx.fill();
+            // ctx.stroke();
         };
+        let sway = {
+            x: 0,
+            y: 0
+        }
+        let phase = -Math.PI / 2
         level.customTopLayer = () => {
             hazardSlime.drawTides();
-            // hazardLaser1.draw();
-            // hazardLaser2.draw();
 
-            //draw wires
+            //draw center circle lines
             ctx.beginPath();
-            ctx.moveTo(-525, -800);
-            ctx.quadraticCurveTo(-800, -100, -1775, -375);
-
-            ctx.moveTo(-600, -800);
-            ctx.quadraticCurveTo(-800, -200, -1775, -325);
-
-            // ctx.moveTo(-525, -800);
-            // ctx.quadraticCurveTo(-800, -100, -1825, -450);
-
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "#234";
+            const step = Math.PI / 20
+            const horizontalStep = 85
+            if (simulation.isCheating) phase += 0.003 //(mech.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
+            // const sway = 5 * Math.cos(simulation.cycle * 0.007)
+            sway.x = sway.x * 0.995 + 0.005 * (mech.pos.x - circle.x) * 0.05 //+ 0.04 * Math.cos(simulation.cycle * 0.01)
+            sway.y = 2.5 * Math.sin(simulation.cycle * 0.015)
+            for (let i = -19.5; i < 20; i++) {
+                const where = {
+                    x: circle.x + circle.radius * Math.cos(i * step + phase),
+                    y: circle.y + circle.radius * Math.sin(i * step + phase)
+                }
+                ctx.moveTo(where.x, where.y);
+                ctx.bezierCurveTo(sway.x * Math.abs(i) + where.x, where.y + 25 * Math.abs(i) + 60 + sway.y * Math.sqrt(Math.abs(i)),
+                    sway.x * Math.abs(i) + where.x + horizontalStep * i, where.y + 25 * Math.abs(i) + 60 + sway.y * Math.sqrt(Math.abs(i)),
+                    horizontalStep * i, -800);
+            }
+            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = "#899";
             ctx.stroke();
+            //draw wires
+            // ctx.beginPath();
+            // ctx.moveTo(-500, -800);
+            // ctx.quadraticCurveTo(-800, -100, -1800, -375);
+            // ctx.moveTo(-600, -800);
+            // ctx.quadraticCurveTo(-800, -200, -1800, -325);
+            // ctx.lineWidth = 1;
+            // ctx.strokeStyle = "#9aa";
+            // ctx.stroke();
         };
         level.setPosToSpawn(0, -50); //normal spawn
-        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        spawn.mapRect(level.enter.x, level.enter.y + 25, 100, 10);
         level.exit.x = 0;
         level.exit.y = 200;
         level.defaultZoom = 1000
@@ -159,17 +213,20 @@ const level = {
         //   color: "#d4d4d7"
         // });
 
+        spawn.mapRect(-3000, 800, 5000, 1200); //bottom
+        spawn.mapRect(-2000, -2000, 5000, 1200); //ceiling
+        spawn.mapRect(-3000, -2000, 1200, 3400); //left
+        spawn.mapRect(1800, -1400, 1200, 3400); //right
+
         spawn.mapRect(-500, 0, 1000, 1000); //center platform
-        spawn.mapRect(-2000, 800, 4000, 200); //base
-        spawn.mapRect(-2000, -1000, 4000, 200); //ceiling
-        spawn.mapRect(-2000, -1000, 225, 2000); //left
-        spawn.mapRect(1800, -1000, 200, 2000); //right
         spawn.mapRect(-500, -25, 25, 50); //edge shelf
         spawn.mapRect(475, -25, 25, 50); //edge shelf
         // spawn.mapRect(-500, -820, 50, 25); //edge shelf ceiling
         // spawn.mapRect(450, -820, 50, 25); //edge shelf ceiling
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
 
+
+        // spawn.mapRect(-50, -500, 100, 100); //center square
         // setTimeout(() => { simulation.makeTextLog(`test`) }, 3000);
 
 
@@ -3878,7 +3935,7 @@ const level = {
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.38 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.378 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.06) //a higher denominator makes for lower heals // mech.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
@@ -3890,7 +3947,7 @@ const level = {
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.38 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.378 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.06)
     },
@@ -3906,10 +3963,12 @@ const level = {
         }
     },
     levelAnnounce() {
+
+
         if (level.levelsCleared === 0) {
             document.title = "n-gon: (" + level.difficultyText() + ")";
         } else {
-            document.title = "n-gon: " + (level.levelsCleared) + " " + level.levels[level.onLevel] + " (" + level.difficultyText() + ")";
+            document.title = (simulation.isCheating ? "∅ " : "n-gon:") + (level.levelsCleared) + " " + level.levels[level.onLevel] + " (" + level.difficultyText() + ")";
             simulation.makeTextLog(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
         }
         // simulation.makeTextLog(`
