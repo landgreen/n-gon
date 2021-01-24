@@ -77,7 +77,7 @@ const tech = {
     },
     haveGunCheck(name) {
         if (
-            !build.isCustomSelection &&
+            !build.isExperimentSelection &&
             b.inventory.length > 2 &&
             name !== b.guns[b.activeGun].name &&
             Math.random() > 2 / (b.inventory.length + tech.isGunCycle * 3) //lower chance of tech specific to a gun if you have lots of guns
@@ -928,7 +928,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.count > 5 || build.isCustomSelection
+                return powerUps.research.count > 5 || build.isExperimentSelection
             },
             requires: "at least 6 research",
             effect() {
@@ -1489,7 +1489,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return mech.health < 0.5 || build.isCustomSelection
+                return mech.health < 0.5 || build.isExperimentSelection
             },
             requires: "health below 60",
             effect() {
@@ -1622,7 +1622,7 @@ const tech = {
             maxCount: 3,
             count: 0,
             allowed() {
-                return (mech.health < 0.7 || build.isCustomSelection) && !tech.isEnergyHealth
+                return (mech.health < 0.7 || build.isExperimentSelection) && !tech.isEnergyHealth
             },
             requires: "not mass-energy equivalence",
             effect() {
@@ -1660,7 +1660,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.count > 0 || build.isCustomSelection
+                return powerUps.research.count > 0 || build.isExperimentSelection
             },
             requires: "at least 1 research",
             effect() {
@@ -1680,7 +1680,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.count > 1 || build.isCustomSelection
+                return powerUps.research.count > 1 || build.isExperimentSelection
             },
             requires: "at least 2 research",
             effect() {
@@ -1986,12 +1986,42 @@ const tech = {
             }
         },
         {
+            name: "unified field theory",
+            description: "after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (powerUps.research.count > 1 && b.inventory.length > 1) || build.isExperimentSelection
+            },
+            requires: "at least 2 guns, and 2 research",
+            effect() {
+                tech.isGunSwitchField = true;
+                for (let i = tech.tech.length - 1; i > 0; i--) {
+                    if (tech.tech[i].name === "unified field theory") {
+                        const index = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 1 : mech.fieldMode + 1
+                        tech.tech[i].description = `after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>
+                        <br>(next <strong class='color-f'>field</strong>: ${mech.fieldUpgrades[index].name})`
+                        break
+                    }
+                }
+            },
+            remove() {
+                tech.isGunSwitchField = false;
+                for (let i = tech.tech.length - 1; i > 0; i--) {
+                    if (tech.tech[i].name === "unified field theory") {
+                        tech.tech[i].description = "after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>"
+                        break
+                    }
+                }
+            }
+        },
+        {
             name: "renormalization",
             description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.research.count > 1 || build.isCustomSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                return (powerUps.research.count > 1 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
             },
             requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 research",
             effect() {
@@ -2007,7 +2037,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (powerUps.research.count > 2 || build.isCustomSelection) && !tech.isDeterminism
+                return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isDeterminism
             },
             requires: "not determinism, at least 3 research",
             effect() {
@@ -2027,7 +2057,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return powerUps.research.count > 4 || build.isCustomSelection
+                return powerUps.research.count > 4 || build.isExperimentSelection
             },
             requires: "at least 5 research",
             effect() {
@@ -2095,7 +2125,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isCustomSelection ||
+                return (tech.totalBots() > 5 || mech.fieldUpgrades[mech.fieldMode].name === "nano-scale manufacturing" || mech.fieldUpgrades[mech.fieldMode].name === "plasma torch" || mech.fieldUpgrades[mech.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
             },
             requires: "bots > 5, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
             effect() {
@@ -4212,5 +4242,6 @@ const tech = {
     isFireMoveLock: null,
     isRivets: null,
     isNeedles: null,
-    isExplodeRadio: null
+    isExplodeRadio: null,
+    isGunSwitchField: null
 }

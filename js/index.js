@@ -38,7 +38,7 @@ if (screen.height < 800) {
 
 
 //**********************************************************************
-// check for URL parameters to load a custom game
+// check for URL parameters to load an experimental game
 //**********************************************************************
 
 //example  https://landgreen.github.io/sidescroller/index.html?
@@ -61,8 +61,8 @@ function getUrlVars() {
 window.addEventListener('load', (event) => {
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
-        openCustomBuildMenu();
-        //add custom selections based on url
+        openExperimentMenu();
+        //add experimental selections based on url
         for (const property in set) {
             set[property] = set[property].replace(/%20/g, " ")
             set[property] = set[property].replace(/%CE%A8/g, "Ψ")
@@ -100,7 +100,7 @@ window.addEventListener('load', (event) => {
             }
             if (property === "difficulty") {
                 simulation.difficultyMode = Number(set[property])
-                document.getElementById("difficulty-select-custom").value = Number(set[property])
+                document.getElementById("difficulty-select-experiment").value = Number(set[property])
             }
             if (property === "level") {
                 document.getElementById("starting-level").value = Number(set[property])
@@ -146,7 +146,7 @@ window.onresize = () => {
 };
 
 //**********************************************************************
-// custom build grid display and pause
+// experimental build grid display and pause
 //**********************************************************************
 const build = {
     onLoadPowerUps() {
@@ -253,7 +253,7 @@ const build = {
         document.getElementById("pause-grid-right").style.display = "none"
         window.scrollTo(0, 0);
     },
-    isCustomSelection: true,
+    isExperimentSelection: true,
     choosePowerUp(who, index, type, isAllowed = false) {
         if (type === "gun") {
             let isDeselect = false
@@ -318,14 +318,14 @@ const build = {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     }
 
-                    if (techID.classList.contains("build-grid-disabled")) {
-                        techID.classList.remove("build-grid-disabled");
+                    if (techID.classList.contains("experiment-grid-disabled")) {
+                        techID.classList.remove("experiment-grid-disabled");
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'tech')`);
                     }
                 } else {
                     techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
-                    if (!techID.classList.contains("build-grid-disabled")) {
-                        techID.classList.add("build-grid-disabled");
+                    if (!techID.classList.contains("experiment-grid-disabled")) {
+                        techID.classList.add("experiment-grid-disabled");
                         techID.onclick = null
                     }
                     if (tech.tech[i].count > 0) tech.removeTech(i)
@@ -337,7 +337,7 @@ const build = {
     populateGrid() {
         let text = `
   <div style="display: flex; justify-content: space-around; align-items: center;">
-    <svg class="SVG-button" onclick="build.startBuildRun()" width="115" height="51">
+    <svg class="SVG-button" onclick="build.startExperiment()" width="115" height="51">
       <g stroke='none' fill='#333' stroke-width="2" font-size="40px" font-family="Ariel, sans-serif">
         <text x="18" y="38">start</text>
       </g>
@@ -357,7 +357,7 @@ const build = {
     <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
     <div>
     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-      <select name="difficulty-select" id="difficulty-select-custom">
+      <select name="difficulty-select" id="difficulty-select-experiment">
         <option value="1">easy</option>
         <option value="2" selected>normal</option>
         <option value="4">hard</option>
@@ -370,34 +370,34 @@ const build = {
     </div>
   </div>`
         for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
-            text += `<div id ="field-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
+            text += `<div id ="field-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
         }
         for (let i = 0, len = b.guns.length; i < len; i++) {
-            text += `<div id = "gun-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+            text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
         }
 
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (!tech.tech[i].isCustomHide) {
                 if (!tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
-                    text += `<div id="tech-${i}" class="build-grid-module build-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     // } else if (tech.tech[i].count > 1) {
-                    //     text += `<div id="tech-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} (${tech.tech[i].count}x)</div> ${tech.tech[i].description}</div>`
+                    //     text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} (${tech.tech[i].count}x)</div> ${tech.tech[i].description}</div>`
                 } else {
-                    text += `<div id="tech-${i}" class="build-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                    text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                 }
             }
         }
-        document.getElementById("build-grid").innerHTML = text
-        document.getElementById("difficulty-select-custom").value = document.getElementById("difficulty-select").value
-        document.getElementById("difficulty-select-custom").addEventListener("input", () => {
-            simulation.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
-            localSettings.difficultyMode = Number(document.getElementById("difficulty-select-custom").value)
-            document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-custom").value
+        document.getElementById("experiment-grid").innerHTML = text
+        document.getElementById("difficulty-select-experiment").value = document.getElementById("difficulty-select").value
+        document.getElementById("difficulty-select-experiment").addEventListener("input", () => {
+            simulation.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
+            localSettings.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
+            document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-experiment").value
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         });
     },
     reset() {
-        build.isCustomSelection = true;
+        build.isExperimentSelection = true;
         mech.setField(0)
 
         b.inventory = []; //removes guns and ammo  
@@ -412,7 +412,7 @@ const build = {
         tech.setupAllTech();
         build.populateGrid();
         document.getElementById("field-0").classList.add("build-field-selected");
-        document.getElementById("build-grid").style.display = "grid"
+        document.getElementById("experiment-grid").style.display = "grid"
     },
     shareURL(isCustom = false) {
         let url = "https://landgreen.github.io/sidescroller/index.html?"
@@ -445,8 +445,8 @@ const build = {
         console.log(url)
         simulation.copyToClipBoard(url)
     },
-    startBuildRun() {
-        build.isCustomSelection = false;
+    startExperiment() {
+        build.isExperimentSelection = false;
         spawn.setSpawnList(); //gives random mobs,  not starter mobs
         spawn.setSpawnList();
         if (b.inventory.length > 0) {
@@ -476,27 +476,27 @@ const build = {
         tech.removeLoreTechFromPool();
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
-        document.getElementById("build-grid").style.display = "none"
+        document.getElementById("experiment-grid").style.display = "none"
         simulation.paused = false;
         requestAnimationFrame(cycle);
     }
 }
 
-function openCustomBuildMenu() {
-    document.getElementById("build-button").style.display = "none";
-    const el = document.getElementById("build-grid")
+function openExperimentMenu() {
+    document.getElementById("experiment-button").style.display = "none";
+    const el = document.getElementById("experiment-grid")
     el.style.display = "grid"
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
     simulation.startGame(true); //starts game, but pauses it
-    build.isCustomSelection = true;
+    build.isExperimentSelection = true;
     simulation.paused = true;
     build.reset();
 }
 
-//record settings so they can be reproduced in the custom menu
-document.getElementById("build-button").addEventListener("click", () => { //setup build run
+//record settings so they can be reproduced in the experimental menu
+document.getElementById("experiment-button").addEventListener("click", () => { //setup build run
     let field = 0;
     let inventory = [];
     let techList = [];
@@ -507,7 +507,7 @@ document.getElementById("build-button").addEventListener("click", () => { //setu
             techList.push(tech.tech[i].count)
         }
     }
-    openCustomBuildMenu();
+    openExperimentMenu();
 });
 
 // ************************************************************************************************
@@ -952,6 +952,10 @@ if (localSettings) {
         input.setDefault()
     }
 
+    if (localSettings.loreCount === undefined) {
+        localSettings.loreCount = 0
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
 
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
@@ -981,7 +985,7 @@ if (localSettings) {
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 }
 document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-document.getElementById("build-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+// document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
 
 input.controlTextUpdate()
 
@@ -1005,7 +1009,7 @@ document.getElementById("community-maps").addEventListener("input", () => {
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
-// difficulty-select-custom event listener is set in build.makeGrid
+// difficulty-select-experiment event listener is set in build.makeGrid
 document.getElementById("difficulty-select").addEventListener("input", () => {
     simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
     localSettings.difficultyMode = simulation.difficultyMode

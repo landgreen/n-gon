@@ -1,15 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-lore: chapter 1 and 2 are now somewhere in the game
-  lore is the same for all difficulty levels
+duplication bug fix
 
-testing mode and custom are now locked by default until you reach chapter 1
-  or just hack the game to skip the lore and enable testing and custom
-    localSettings.loreCount = Infinity;
-    localStorage.setItem("localSettings", JSON.stringify(localSettings));
+renaming custom mode -> experimental mode
+  experimental mode is available again even without completing lore
 
-bug fix: performance greatly improved on drawing multiple duplicated power ups
+mob: sneaker is a bit faster and stronger
+  (the invisible one that attacks from stealth)
 
+tech: unified field theory - switching guns uses a reroll to cycle your field
 
 ******************************************************** BUGS ********************************************************
 
@@ -31,8 +30,6 @@ bug fix: performance greatly improved on drawing multiple duplicated power ups
 
 ******************************************************** TODO ********************************************************
 
-chapter 3:  why is the bot attacking things?
-
 mechanic: use gun swap as an active ability
   this effect is spammable, so it needs a cost or a cooldown
   tech:
@@ -41,6 +38,13 @@ mechanic: use gun swap as an active ability
     produce ammo, but take 1 damage
     rewind, still uses energy
     cycle to next field, uses a reroll
+
+chapter 3:  why is the bot attacking things?
+voice singing with pitch?
+
+bot: ice blast,  long CD AOE freeze
+
+RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
 
 tech: double your rerolls
   set your duplication chance to zero
@@ -209,12 +213,6 @@ tech- foam is attracted to mobs
     is this too computationally intense?
   name - static cling
   could also do bremsstrahlung radiation like damage on attachment
-
-field - one block orbits you, it can protect you a bit and do collision damage
-    use field to fire and press field again to pull it back
-    tech- more blocks
-    tech- attach a permanent neutron bomb to the block
-      lowers energy regen, but it can damage mobs
 
 repeat map in vertical and horizontal space
   or at least vertical space

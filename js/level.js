@@ -53,9 +53,9 @@ const level = {
             // for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
             // tech.giveTech("undefined")
             // lore.techCount = 1
-            // localSettings.loreCount = 0;
+            // localSettings.loreCount = 2;
             // simulation.isCheating = true;
-            // localSettings.loreCount = 0;
+            // localSettings.loreCount = undefined;
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.null()
         } else {
@@ -113,7 +113,7 @@ const level = {
     null() {
         level.levels.pop(); //remove lore level from rotation
         //start a conversation based on the number of conversations seen
-        if (!simulation.isCheating) lore.conversation[localSettings.loreCount % lore.conversation.length]()
+        if (!simulation.isCheating && localSettings.loreCount < lore.conversation.length) lore.conversation[localSettings.loreCount]()
 
         const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
         const circle = {
@@ -225,12 +225,8 @@ const level = {
         // spawn.mapRect(450, -820, 50, 25); //edge shelf ceiling
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
 
-
         // spawn.mapRect(-50, -500, 100, 100); //center square
         // setTimeout(() => { simulation.makeTextLog(`test`) }, 3000);
-
-
-
     },
     testing() {
         const button = level.button(200, -700)
@@ -295,8 +291,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 200) //big boy
-        // spawn.exploder(2900, -500)
+        // spawn.starter(1900, -500, 200) //big boy
+        spawn.sneaker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)

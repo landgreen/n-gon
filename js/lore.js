@@ -35,7 +35,7 @@ const lore = {
                 localSettings.loreCount = 1
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-                document.getElementById("build-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+                document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
             }
             let delay = 6000
             setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.", true) }, delay);

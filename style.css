@@ -103,7 +103,7 @@ summary {
     background-color: #e8e8ee;
 }
 
-#build-button {
+#experiment-button {
     position: absolute;
     bottom: 3px;
     right: 3px;
@@ -217,7 +217,7 @@ summary {
     font-size: 0.65em;
 }
 
-#build-grid {
+#experiment-grid {
     /* align-content: space-between; */
     padding: 1px;
     /* padding: 16px; */
@@ -238,7 +238,7 @@ summary {
     font-size: 1.3em;
 }
 
-.build-grid-module {
+.experiment-grid-module {
     margin: -1px;
     padding: 10px;
     line-height: 170%;
@@ -256,7 +256,7 @@ summary {
     font-weight: 600;
 }
 
-.build-grid-module:hover {
+.experiment-grid-module:hover {
     background-color: #efeff5;
 }
 
@@ -284,14 +284,14 @@ summary {
     background-color: hsl(253, 100%, 81%);
 }
 
-.build-grid-disabled {
+.experiment-grid-disabled {
     /* opacity: 0.5; */
     background-color: var(--build-bg-color);
     color: rgba(0, 0, 0, 0.2);
     /* transition: background-color 1s, color 1s; */
 }
 
-.build-grid-disabled:hover {
+.experiment-grid-disabled:hover {
     /* background-color: #fff; */
     background-color: var(--build-bg-color);
 }
@@ -461,7 +461,7 @@ summary {
     color: hsl(218, 100%, 58%);
 }
 
-/* colors for pause, selection and custom */
+/* colors for pause, selection and experiment */
 
 /* #text-log {
     z-index: 2;
@@ -665,7 +665,7 @@ summary {
 }
 
 .lore {
-    animation: bgColor 10s linear infinite;
+    animation: bgColor 6s linear infinite;
 }
 
 @keyframes bgColor {

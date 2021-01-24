@@ -1653,11 +1653,13 @@ const spawn = {
             }
         };
     },
-    sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {
+    sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 20)) {
         let me;
         mobs.spawn(x, y, 5, radius, "transparent");
         me = mob[mob.length - 1];
-        me.accelMag = 0.0007 * simulation.accelScale;
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        me.accelMag = 0.001 * simulation.accelScale;
+        me.frictionAir = 0.01;
         me.g = 0.0002; //required if using 'gravity'
         me.stroke = "transparent"; //used for drawSneaker
         me.alpha = 1; //used in drawSneaker
@@ -1680,7 +1682,7 @@ const spawn = {
                 }
             }
             if (this.alpha > 0) {
-                if (this.alpha > 0.95) {
+                if (this.alpha > 0.7) {
                     this.healthBar();
                     if (!this.canTouchPlayer) {
                         this.canTouchPlayer = true;
