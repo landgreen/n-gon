@@ -12,8 +12,8 @@ const powerUps = {
             <br>input.key.previousGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.previousGun}</span>","<span class='color-text'>MouseWheel</span>"]`
             simulation.makeTextLog(text);
         } else if (type === "field") {
-            mech.setField(index)
-            simulation.makeTextLog(`<span class='color-var'>mech</span>.setField("<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].name}</span>")`);
+            m.setField(index)
+            simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
         } else if (type === "tech") {
             tech.giveTech(index)
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
@@ -38,13 +38,13 @@ const powerUps = {
         if (isCanceled) {
             if (tech.isCancelDuplication) tech.cancelCount++
             if (tech.isCancelRerolls) {
-                let spawnType = (mech.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
+                let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
                 if (Math.random() < 0.33) {
                     spawnType = "heal"
                 } else if (Math.random() < 0.5 && !tech.isSuperDeterminism) {
                     spawnType = "research"
                 }
-                for (let i = 0; i < 6; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
+                for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
             }
             if (tech.isBanish && type === 'tech') { // banish researched tech by adding them to the list of banished tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
@@ -57,7 +57,7 @@ const powerUps = {
             }
         }
         if (tech.manyWorlds && powerUps.research.count === 0) {
-            for (let i = 0; i < 2; i++) powerUps.spawn(mech.pos.x + 40 * (Math.random() - 0.5), mech.pos.y + 40 * (Math.random() - 0.5), "research", false);
+            for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
         document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-background").style.display = "none"
@@ -65,7 +65,7 @@ const powerUps = {
         document.body.style.overflow = "hidden"
         simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
-        mech.immuneCycle = mech.cycle + 60; //player is immune to collision damage for 30 cycles
+        m.immuneCycle = m.cycle + 60; //player is immune to collision damage for 30 cycles
         build.unPauseGrid()
         requestAnimationFrame(cycle);
     },
@@ -95,8 +95,8 @@ const powerUps = {
                     if (tech.renormalization) {
                         for (let i = 0; i < limit; i++) {
                             if (Math.random() < 0.37) {
-                                mech.fieldCDcycle = mech.cycle + 30;
-                                powerUps.spawn(mech.pos.x, mech.pos.y, "research");
+                                m.fieldCDcycle = m.cycle + 30;
+                                powerUps.spawn(m.pos.x, m.pos.y, "research");
                             }
                         }
                     }
@@ -105,7 +105,7 @@ const powerUps = {
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
-            if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(mech.pos.x, mech.pos.y, "research");
+            if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(m.pos.x, m.pos.y, "research");
             if (tech.isRerollHaste) {
                 if (powerUps.research.count === 0) {
                     tech.researchHaste = 0.66;
@@ -118,7 +118,7 @@ const powerUps = {
         },
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
             powerUps.research.changeRerolls(-1)
-            // simulation.makeTextLog(`<span class='color-var'>mech</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
+            // simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
             // <br>${powerUps.research.count}`)
             if (tech.isBanish && type === 'tech') { // banish researched tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
@@ -140,18 +140,18 @@ const powerUps = {
             return 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
         },
         effect() {
-            if (!tech.isEnergyHealth && mech.alive) {
-                const heal = tech.largerHeals * (this.size / 40 / Math.sqrt(tech.largerHeals) / (simulation.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on mech.addHealth()
+            if (!tech.isEnergyHealth && m.alive) {
+                const heal = tech.largerHeals * (this.size / 40 / Math.sqrt(tech.largerHeals) / (simulation.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on m.addHealth()
                 if (heal > 0) {
-                    const healOutput = Math.min(mech.maxHealth - mech.health, heal) * simulation.healScale
-                    mech.addHealth(heal);
-                    simulation.makeTextLog(`<span class='color-var'>mech</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${mech.health.toFixed(3)}
-                    // simulation.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(mech.maxHealth - mech.health, heal) * simulation.healScale * 100).toFixed(0) + "%</span>", 300)
+                    const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
+                    m.addHealth(heal);
+                    simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                    // simulation.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(m.maxHealth - m.health, heal) * simulation.healScale * 100).toFixed(0) + "%</span>", 300)
                 }
             }
             if (tech.healGiveMaxEnergy) {
                 tech.healMaxEnergyBonus += 0.04
-                mech.setMaxEnergy();
+                m.setMaxEnergy();
             }
         },
         spawn(x, y, size) { //used to spawn a heal with a specific size / heal amount, not normally used
@@ -201,7 +201,7 @@ const powerUps = {
             function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
                 let options = [];
                 for (let i = 1; i < who.length; i++) {
-                    if (i !== mech.fieldMode && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
+                    if (i !== m.fieldMode && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
                 }
                 //remove repeats from last selection
                 const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
@@ -222,25 +222,25 @@ const powerUps = {
                 }
             }
 
-            let choice1 = pick(mech.fieldUpgrades)
+            let choice1 = pick(m.fieldUpgrades)
             let choice2 = -1
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
                 if (!tech.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("field",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>field</h3>`
-                text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice1].name}</div> ${mech.fieldUpgrades[choice1].description}</div>`
+                text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice1].name}</div> ${m.fieldUpgrades[choice1].description}</div>`
                 if (!tech.isDeterminism) {
-                    choice2 = pick(mech.fieldUpgrades, choice1)
-                    if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice2].name}</div> ${mech.fieldUpgrades[choice2].description}</div>`
-                    choice3 = pick(mech.fieldUpgrades, choice1, choice2)
-                    if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice3].name}</div> ${mech.fieldUpgrades[choice3].description}</div>`
+                    choice2 = pick(m.fieldUpgrades, choice1)
+                    if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice2].name}</div> ${m.fieldUpgrades[choice2].description}</div>`
+                    choice3 = pick(m.fieldUpgrades, choice1, choice2)
+                    if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice3].name}</div> ${m.fieldUpgrades[choice3].description}</div>`
                 }
                 if (tech.isExtraChoice) {
-                    let choice4 = pick(mech.fieldUpgrades, choice1, choice2, choice3)
-                    if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice4].name}</div> ${mech.fieldUpgrades[choice4].description}</div>`
-                    let choice5 = pick(mech.fieldUpgrades, choice1, choice2, choice3, choice4)
-                    if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice5})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[choice5].name}</div> ${mech.fieldUpgrades[choice5].description}</div>`
+                    let choice4 = pick(m.fieldUpgrades, choice1, choice2, choice3)
+                    if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice4].name}</div> ${m.fieldUpgrades[choice4].description}</div>`
+                    let choice5 = pick(m.fieldUpgrades, choice1, choice2, choice3, choice4)
+                    if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice5})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice5].name}</div> ${m.fieldUpgrades[choice5].description}</div>`
                     powerUps.field.choiceLog.push(choice4)
                     powerUps.field.choiceLog.push(choice5)
                 }
@@ -272,7 +272,7 @@ const powerUps = {
         lastTotalChoices: 0, //tracks how many tech were available for random selection last time a tech was picked up
         banishLog: [], //records all tech permanently removed from the selection pool
         effect() {
-            if (mech.alive) {
+            if (m.alive) {
                 function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
                     let options = [];
                     for (let i = 0; i < tech.tech.length; i++) {
@@ -378,7 +378,7 @@ const powerUps = {
                         }
                         // simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
                         simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
-                        powerUps.spawn(mech.pos.x, mech.pos.y, "tech");
+                        powerUps.spawn(m.pos.x, m.pos.y, "tech");
                         powerUps.endDraft("tech");
                     } else {
                         powerUps.giveRandomAmmo()
@@ -465,8 +465,8 @@ const powerUps = {
         }
     },
     onPickUp(who) {
-        if (tech.isTechDamage && who.name === "tech") mech.damage(0.11)
-        if (tech.isMassEnergy) mech.energy += 2.5;
+        if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
+        if (tech.isMassEnergy) m.energy += 2.5;
         if (tech.isMineDrop) {
             if (tech.isLaserMine) { //laser mine
                 b.laserMine(who.position)
@@ -485,7 +485,7 @@ const powerUps = {
         }
     },
     spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
-        if ((Math.random() * Math.random() - 0.3 > Math.sqrt(mech.health) && !tech.isEnergyHealth) || Math.random() < 0.04) { //spawn heal chance is higher at low health
+        if ((Math.random() * Math.random() - 0.3 > Math.sqrt(m.health) && !tech.isEnergyHealth) || Math.random() < 0.04) { //spawn heal chance is higher at low health
             powerUps.spawn(x, y, "heal");
             return;
         }
@@ -512,7 +512,7 @@ const powerUps = {
     },
     randomPowerUpCounter: 0,
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
-        if (mech.fieldMode === 0) {
+        if (m.fieldMode === 0) {
             powerUps.spawn(x, y, "field")
         } else {
             powerUps.randomPowerUpCounter++;
@@ -530,7 +530,7 @@ const powerUps = {
                     powerUps.spawn(x, y, "gun")
                 }
             } else {
-                if (mech.health < 0.65 && !tech.isEnergyHealth) {
+                if (m.health < 0.65 && !tech.isEnergyHealth) {
                     powerUps.spawn(x, y, "heal");
                     powerUps.spawn(x, y, "heal");
                 } else {
@@ -560,7 +560,7 @@ const powerUps = {
             //bonus power ups for clearing runs in the last game
             if (level.levelsCleared === 0 && !simulation.isCheating) {
                 for (let i = 0; i < localSettings.levelsClearedLastGame / 4 - 1; i++) {
-                    powerUps.spawn(mech.pos.x, mech.pos.y, "tech", false); //spawn a tech for levels cleared in last game
+                    powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
                 }
                 localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -601,7 +601,7 @@ const powerUps = {
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
-                    powerUps.directSpawn(mech.pos.x, mech.pos.y, "tech");
+                    powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
                     powerUp[powerUp.length - 1].isBonus = true
                 }
                 // remove a random tech from the list of tech you have
@@ -609,14 +609,14 @@ const powerUps = {
                 tech.tech[choose].count = 0;
                 tech.tech[choose].isLost = true;
                 simulation.updateTechHUD();
-                mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected tech
+                m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
             }
         } else {
             // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
             simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
             for (let i = 0; i < tech.tech[choose].count; i++) {
-                powerUps.directSpawn(mech.pos.x, mech.pos.y, "tech");
+                powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
                 powerUp[powerUp.length - 1].isBonus = true
             }
             // remove a random tech from the list of tech you have
@@ -624,7 +624,7 @@ const powerUps = {
             tech.tech[choose].count = 0;
             tech.tech[choose].isLost = true;
             simulation.updateTechHUD();
-            mech.fieldCDcycle = mech.cycle + 30; //disable field so you can't pick up the ejected tech
+            m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
         }
     },
     directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {

@@ -69,8 +69,8 @@ window.addEventListener('load', (event) => {
             if (property === "field") {
                 let found = false
                 let index
-                for (let i = 0; i < mech.fieldUpgrades.length; i++) {
-                    if (set[property] === mech.fieldUpgrades[i].name) {
+                for (let i = 0; i < m.fieldUpgrades.length; i++) {
+                    if (set[property] === m.fieldUpgrades[i].name) {
                         index = i;
                         found = true;
                         break;
@@ -156,7 +156,7 @@ const build = {
                 set[property] = set[property].replace(/%20/g, " ")
                 if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
                 if (property.substring(0, 3) === "tech") tech.giveTech(set[property])
-                if (property === "field") mech.setField(set[property])
+                if (property === "field") m.setField(set[property])
                 if (property === "difficulty") {
                     simulation.difficultyMode = Number(set[property])
                     document.getElementById("difficulty-select").value = Number(set[property])
@@ -177,7 +177,7 @@ const build = {
         }
     },
     pauseGrid() {
-        const harm = (1 - mech.harmReduction()) * 100
+        const harm = (1 - m.harmReduction()) * 100
         let text = ""
         if (!simulation.isChoosing) text += `<div class="pause-grid-module">
       <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
@@ -189,11 +189,11 @@ const build = {
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
       <br>
       <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
-      <br><strong class='color-h'>health</strong>: (${(mech.health*100).toFixed(0)} / ${(mech.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(mech.energy*100).toFixed(0)} / ${(mech.maxEnergy*100).toFixed(0)})
+      <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
       <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
       <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
       <br>
-      <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${mech.cycle} cycles
+      <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
       <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
       <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
@@ -212,7 +212,7 @@ const build = {
         el.style.display = "grid"
         el.innerHTML = text
         text = "";
-        text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[mech.fieldMode].name}</div> ${mech.fieldUpgrades[mech.fieldMode].description}</div>`
+        text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         let countTech = 0
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
@@ -276,9 +276,9 @@ const build = {
                 b.giveGuns(index)
             }
         } else if (type === "field") {
-            if (mech.fieldMode !== index) {
-                document.getElementById("field-" + mech.fieldMode).classList.remove("build-field-selected");
-                mech.setField(index)
+            if (m.fieldMode !== index) {
+                document.getElementById("field-" + m.fieldMode).classList.remove("build-field-selected");
+                m.setField(index)
                 who.classList.add("build-field-selected");
             }
         } else if (type === "tech") { //remove tech if you have too many
@@ -369,8 +369,8 @@ const build = {
       <input type="checkbox" id="no-power-ups" name="no-power-ups" style="width:17px; height:17px;">
     </div>
   </div>`
-        for (let i = 0, len = mech.fieldUpgrades.length; i < len; i++) {
-            text += `<div id ="field-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${mech.fieldUpgrades[i].name}</div> ${mech.fieldUpgrades[i].description}</div>`
+        for (let i = 0, len = m.fieldUpgrades.length; i < len; i++) {
+            text += `<div id ="field-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[i].name}</div> ${m.fieldUpgrades[i].description}</div>`
         }
         for (let i = 0, len = b.guns.length; i < len; i++) {
             text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
@@ -398,7 +398,7 @@ const build = {
     },
     reset() {
         build.isExperimentSelection = true;
-        mech.setField(0)
+        m.setField(0)
 
         b.inventory = []; //removes guns and ammo  
         for (let i = 0, len = b.guns.length; i < len; ++i) {
@@ -432,7 +432,7 @@ const build = {
                 count++
             }
         }
-        url += `&field=${encodeURIComponent(mech.fieldUpgrades[mech.fieldMode].name.trim())}`
+        url += `&field=${encodeURIComponent(m.fieldUpgrades[m.fieldMode].name.trim())}`
         url += `&difficulty=${simulation.difficultyMode}`
         if (isCustom) {
             url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
@@ -501,7 +501,7 @@ document.getElementById("experiment-button").addEventListener("click", () => { /
     let inventory = [];
     let techList = [];
     if (!simulation.firstRun) {
-        field = mech.fieldMode
+        field = m.fieldMode
         inventory = [...b.inventory]
         for (let i = 0; i < tech.tech.length; i++) {
             techList.push(tech.tech[i].count)
@@ -710,7 +710,7 @@ window.addEventListener("keydown", function(event) {
             simulation.previousGun();
             break
         case input.key.pause:
-            if (!simulation.isChoosing && input.isPauseKeyReady && mech.alive) {
+            if (!simulation.isChoosing && input.isPauseKeyReady && m.alive) {
                 input.isPauseKeyReady = false
                 setTimeout(function() {
                     input.isPauseKeyReady = true
@@ -729,7 +729,7 @@ window.addEventListener("keydown", function(event) {
             }
             break
         case input.key.testing:
-            if (mech.alive && localSettings.loreCount > 0) {
+            if (m.alive && localSettings.loreCount > 0) {
                 if (simulation.testing) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop
@@ -791,7 +791,7 @@ window.addEventListener("keydown", function(event) {
             break
     }
     if (simulation.testing) {
-        if (event.key === "X") mech.death(); //only uppercase
+        if (event.key === "X") m.death(); //only uppercase
         switch (event.key.toLowerCase()) {
             case "o":
                 simulation.isAutoZoom = false;
@@ -837,21 +837,21 @@ window.addEventListener("keydown", function(event) {
                 spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y);
                 break
             case "f":
-                const mode = (mech.fieldMode === mech.fieldUpgrades.length - 1) ? 0 : mech.fieldMode + 1
-                mech.setField(mode)
+                const mode = (m.fieldMode === m.fieldUpgrades.length - 1) ? 0 : m.fieldMode + 1
+                m.setField(mode)
                 break
             case "g":
                 b.giveGuns("all", 1000)
                 break
             case "h":
-                mech.addHealth(Infinity)
-                mech.energy = mech.maxEnergy;
+                m.addHealth(Infinity)
+                m.energy = m.maxEnergy;
                 break
             case "y":
                 tech.giveTech()
                 break
             case "r":
-                mech.resetHistory();
+                m.resetHistory();
                 Matter.Body.setPosition(player, simulation.mouseInGame);
                 Matter.Body.setVelocity(player, {
                     x: 0,
@@ -1068,7 +1068,7 @@ function cycle() {
         simulation.then = now - (elapsed % simulation.fpsInterval); // Get ready for next frame by setting then=now.   Also, adjust for fpsInterval not being multiple of 16.67
 
         simulation.cycle++; //tracks game cycles
-        mech.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
+        m.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
         if (simulation.clearNow) {
             simulation.clearNow = false;
             simulation.clearMap();
@@ -1076,8 +1076,8 @@ function cycle() {
         }
 
         simulation.loop();
-        // if (isNaN(mech.health) || isNaN(mech.energy)) {
-        //   console.log(`mech.health = ${mech.health}`)
+        // if (isNaN(m.health) || isNaN(m.energy)) {
+        //   console.log(`m.health = ${m.health}`)
         //   simulation.paused = true;
         //   build.pauseGrid()
         //   document.body.style.cursor = "auto";

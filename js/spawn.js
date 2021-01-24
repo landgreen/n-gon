@@ -99,10 +99,12 @@ const spawn = {
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             //add lore level as next level if player took lore tech earlier in the game
-            if (lore.techCount > 9 && !simulation.isCheating) level.levels.push("null")
-
-            level.exit.x = 5500;
-            level.exit.y = -330;
+            if (lore.techCount > 9 && !simulation.isCheating) {
+                level.levels.push("null")
+                level.exit.x = 5500;
+                level.exit.y = -330;
+                simulation.makeTextLog(`level.levels.push("null")`) // <br>${powerUps.research.count}
+            }
             //ramp up damage
             for (let i = 0; i < 3; i++) level.difficultyIncrease(simulation.difficultyMode)
 
@@ -165,7 +167,7 @@ const spawn = {
             this.modeDo(); //this does different things based on the mode
             this.checkStatus();
             this.cycle++; //switch modes÷
-            // if (!mech.isBodiesAsleep) {
+            // if (!m.isBodiesAsleep) {
             if (this.health > 0.25) {
                 if (this.cycle > this.endCycle) {
                     this.cycle = 0;
@@ -222,7 +224,7 @@ const spawn = {
         }
         me.spawnInterval = 395
         me.modeSpawns = function() {
-            if (!(this.cycle % this.spawnInterval) && !mech.isBodiesAsleep && mob.length < 40) {
+            if (!(this.cycle % this.spawnInterval) && !m.isBodiesAsleep && mob.length < 40) {
                 if (this.mode !== 3) Matter.Body.setAngularVelocity(this, 0.1)
                 //fire a bullet from each vertex
                 let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
@@ -273,22 +275,22 @@ const spawn = {
             ctx.fill();
             //when player is inside event horizon
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                if (mech.energy > 0) mech.energy -= 0.01
-                if (mech.energy < 0.15) {
-                    mech.damage(0.0004 * simulation.dmgScale);
+                if (m.energy > 0) m.energy -= 0.01
+                if (m.energy < 0.15) {
+                    m.damage(0.0004 * simulation.dmgScale);
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-                player.force.x -= 0.0017 * Math.cos(angle) * player.mass * (mech.onGround ? 1.7 : 1);
+                player.force.x -= 0.0017 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
                 player.force.y -= 0.0017 * Math.sin(angle) * player.mass;
                 //draw line to player
                 ctx.beginPath();
                 ctx.moveTo(this.position.x, this.position.y);
-                ctx.lineTo(mech.pos.x, mech.pos.y);
+                ctx.lineTo(m.pos.x, m.pos.y);
                 ctx.lineWidth = Math.min(60, this.radius * 2);
                 ctx.strokeStyle = "rgba(0,0,0,0.5)";
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
+                ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
                 ctx.fillStyle = "rgba(0,0,0,0.3)";
                 ctx.fill();
             }
@@ -297,7 +299,7 @@ const spawn = {
         me.rotateVelocity = 0.0025
         me.rotateCount = 0;
         me.modeLasers = function() {
-            if (!mech.isBodiesAsleep && !this.isStunned) {
+            if (!m.isBodiesAsleep && !this.isStunned) {
                 let slowed = false //check if slowed
                 for (let i = 0; i < this.status.length; i++) {
                     if (this.status[i].type === "slow") {
@@ -401,10 +403,10 @@ const spawn = {
                 // vertexCollision(where, look, mob);
                 vertexCollision(where, look, map);
                 vertexCollision(where, look, body);
-                if (!mech.isCloak) vertexCollision(where, look, [player]);
-                if (best.who && best.who === player && mech.immuneCycle < mech.cycle) {
-                    mech.immuneCycle = mech.cycle + 60 + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
-                    mech.damage(dmg);
+                if (!m.isCloak) vertexCollision(where, look, [player]);
+                if (best.who && best.who === player && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + 60 + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                    m.damage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -519,7 +521,7 @@ const spawn = {
             if (Math.random() < 0.33 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
         }
         me.do = function() {
-            if (!mech.isBodiesAsleep) {
+            if (!m.isBodiesAsleep) {
                 this.seePlayerByDistOrLOS();
                 this.checkStatus();
                 this.attraction();
@@ -578,13 +580,13 @@ const spawn = {
             powerUps.spawnBossPowerUp(me.position.x, me.position.y)
             powerUps.spawn(me.position.x, me.position.y, "heal");
             powerUps.spawn(me.position.x, me.position.y, "ammo");
-        } else if (!mech.isCloak) {
+        } else if (!m.isCloak) {
             me.foundPlayer();
         }
         me.onHit = function() { //run this function on hitting player
             powerUps.ejectTech()
-            powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
-            powerUps.spawn(mech.pos.x, mech.pos.y, "heal");
+            powerUps.spawn(m.pos.x, m.pos.y, "heal");
+            powerUps.spawn(m.pos.x, m.pos.y, "heal");
         };
         me.onDeath = function() {
             this.leaveBody = false;
@@ -814,7 +816,7 @@ const spawn = {
             }
             // this.seePlayerCheckByDistance()
             if (!(simulation.cycle % this.seePlayerFreq)) {
-                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !mech.isCloak   ignore cloak for black holes
+                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !m.isCloak   ignore cloak for black holes
                     this.locatePlayer();
                     if (!this.seePlayer.yes) this.seePlayer.yes = true;
                 } else if (this.seePlayer.recall) {
@@ -848,22 +850,22 @@ const spawn = {
 
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                    if (mech.energy > 0) mech.energy -= 0.004
-                    if (mech.energy < 0.1) {
-                        mech.damage(0.00015 * simulation.dmgScale);
+                    if (m.energy > 0) m.energy -= 0.004
+                    if (m.energy < 0.1) {
+                        m.damage(0.00015 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-                    player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (mech.onGround ? 1.8 : 1);
+                    player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
                     player.force.y -= 0.0001 * player.mass * Math.sin(angle);
                     //draw line to player
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
-                    ctx.lineTo(mech.pos.x, mech.pos.y);
+                    ctx.lineTo(m.pos.x, m.pos.y);
                     ctx.lineWidth = Math.min(60, this.radius * 2);
                     ctx.strokeStyle = "rgba(0,0,0,0.5)";
                     ctx.stroke();
                     ctx.beginPath();
-                    ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
+                    ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
                     ctx.fillStyle = "rgba(0,0,0,0.3)";
                     ctx.fill();
                 }
@@ -910,7 +912,7 @@ const spawn = {
                 });
             }
             if (!(simulation.cycle % this.seePlayerFreq)) {
-                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !mech.isCloak   ignore cloak for black holes
+                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !m.isCloak   ignore cloak for black holes
                     this.locatePlayer();
                     if (!this.seePlayer.yes) this.seePlayer.yes = true;
                 } else if (this.seePlayer.recall) {
@@ -954,22 +956,22 @@ const spawn = {
                 ctx.fill();
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                    if (mech.energy > 0) mech.energy -= 0.006
-                    if (mech.energy < 0.1) {
-                        mech.damage(0.0002 * simulation.dmgScale);
+                    if (m.energy > 0) m.energy -= 0.006
+                    if (m.energy < 0.1) {
+                        m.damage(0.0002 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-                    player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (mech.onGround ? 1.7 : 1);
+                    player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
                     player.force.y -= 0.0013 * Math.sin(angle) * player.mass;
                     //draw line to player
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
-                    ctx.lineTo(mech.pos.x, mech.pos.y);
+                    ctx.lineTo(m.pos.x, m.pos.y);
                     ctx.lineWidth = Math.min(60, this.radius * 2);
                     ctx.strokeStyle = "rgba(0,0,0,0.5)";
                     ctx.stroke();
                     ctx.beginPath();
-                    ctx.arc(mech.pos.x, mech.pos.y, 40, 0, 2 * Math.PI);
+                    ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
                     ctx.fillStyle = "rgba(0,0,0,0.3)";
                     ctx.fill();
                 }
@@ -1179,7 +1181,7 @@ const spawn = {
         };
         spawn.shield(me, x, y);
         me.do = function() {
-            if (!mech.isBodiesAsleep) {
+            if (!m.isBodiesAsleep) {
                 this.seePlayerByLookingAt();
                 this.checkStatus();
                 this.attraction();
@@ -1189,7 +1191,7 @@ const spawn = {
                     const rangeWidth = 2000; //this is sqrt of 4000000 from above if()
                     //targeting laser will slowly move from the mob to the player's position
                     this.laserPos = Vector.add(this.laserPos, Vector.mult(Vector.sub(player.position, this.laserPos), 0.1));
-                    let targetDist = Vector.magnitude(Vector.sub(this.laserPos, mech.pos));
+                    let targetDist = Vector.magnitude(Vector.sub(this.laserPos, m.pos));
                     const r = 12;
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
@@ -1341,12 +1343,12 @@ const spawn = {
                 };
                 vertexCollision(this.position, look, map);
                 vertexCollision(this.position, look, body);
-                if (!mech.isCloak) vertexCollision(this.position, look, [player]);
+                if (!m.isCloak) vertexCollision(this.position, look, [player]);
                 // hitting player
                 if (best.who === player) {
-                    if (mech.immuneCycle < mech.cycle) {
+                    if (m.immuneCycle < m.cycle) {
                         const dmg = 0.001 * simulation.dmgScale;
-                        mech.damage(dmg);
+                        m.damage(dmg);
                         //draw damage
                         ctx.fillStyle = color;
                         ctx.beginPath();
@@ -1408,7 +1410,7 @@ const spawn = {
             this.checkStatus();
 
             if (!this.isStunned) {
-                if (!mech.isBodiesAsleep) {
+                if (!m.isBodiesAsleep) {
                     //check if slowed
                     let slowed = false
                     for (let i = 0; i < this.status.length; i++) {
@@ -1499,11 +1501,11 @@ const spawn = {
             // vertexCollision(where, look, mob);
             vertexCollision(where, look, map);
             vertexCollision(where, look, body);
-            if (!mech.isCloak) vertexCollision(where, look, [player]);
-            if (best.who && best.who === player && mech.immuneCycle < mech.cycle) {
-                mech.immuneCycle = mech.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+            if (!m.isCloak) vertexCollision(where, look, [player]);
+            if (best.who && best.who === player && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
                 const dmg = 0.14 * simulation.dmgScale;
-                mech.damage(dmg);
+                m.damage(dmg);
                 simulation.drawList.push({ //add dmg to draw queue
                     x: best.x,
                     y: best.y,
@@ -1544,7 +1546,7 @@ const spawn = {
             }
         };
         me.do = function() {
-            if (!mech.isBodiesAsleep) {
+            if (!m.isBodiesAsleep) {
                 // this.gravity();
                 this.seePlayerByLookingAt();
                 this.checkStatus();
@@ -1616,9 +1618,9 @@ const spawn = {
             if (!(simulation.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
                 if (
                     this.distanceToPlayer2() < this.seeAtDistance2 &&
-                    Matter.Query.ray(map, this.position, this.mechPosRange()).length === 0 &&
-                    Matter.Query.ray(body, this.position, this.mechPosRange()).length === 0 &&
-                    !mech.isCloak
+                    Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
+                    Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+                    !m.isCloak
                 ) {
                     this.foundPlayer();
                     if (this.cd === Infinity) this.cd = simulation.cycle + this.delay * 0.7;
@@ -1674,7 +1676,7 @@ const spawn = {
             this.checkStatus();
             this.attraction();
             //draw
-            if (!mech.isBodiesAsleep) {
+            if (!m.isBodiesAsleep) {
                 if (this.seePlayer.yes) {
                     if (this.alpha < 1) this.alpha += 0.01;
                 } else {
@@ -2019,7 +2021,7 @@ const spawn = {
             this.seePlayerCheck();
             this.checkStatus();
 
-            if (!mech.isBodiesAsleep) {
+            if (!m.isBodiesAsleep) {
                 const setNoseShape = () => {
                     const mag = this.radius + this.radius * this.noseLength;
                     this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
@@ -2135,7 +2137,7 @@ const spawn = {
             this.seePlayerCheck();
             this.checkStatus();
             this.attraction();
-            if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq) && !mech.isBodiesAsleep) {
+            if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq) && !m.isBodiesAsleep) {
                 Matter.Body.setAngularVelocity(this, 0.14)
                 //fire a bullet from each vertex
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -2173,7 +2175,7 @@ const spawn = {
             this.checkStatus();
             this.attraction();
             this.repulsion();
-            if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq) && !mech.isBodiesAsleep) {
+            if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq) && !m.isBodiesAsleep) {
                 Matter.Body.setAngularVelocity(this, 0.11)
                 //fire a bullet from each vertex
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -2218,7 +2220,7 @@ const spawn = {
             this.repulsion();
 
             this.cycle++
-            if (this.seePlayer.recall && ((this.cycle % 15) === 0) && !mech.isBodiesAsleep) {
+            if (this.seePlayer.recall && ((this.cycle % 15) === 0) && !m.isBodiesAsleep) {
                 if (this.canFire) {
                     if (this.cycle > 120) {
                         this.cycle = 0
@@ -2701,7 +2703,7 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (mech.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint) {
                     this.freeOfWires = true;
                     this.fill = "#000"
                     this.force.x += -0.003;
@@ -2716,9 +2718,9 @@ const spawn = {
                 })
 
                 //player friction from the wires
-                if (mech.pos.x > 700 && player.velocity.x > -2) {
-                    let wireFriction = 0.75 * Math.min(0.6, Math.max(0, 100 / (breakingPoint - mech.pos.x)));
-                    if (!mech.onGround) wireFriction *= 3
+                if (m.pos.x > 700 && player.velocity.x > -2) {
+                    let wireFriction = 0.75 * Math.min(0.6, Math.max(0, 100 / (breakingPoint - m.pos.x)));
+                    if (!m.onGround) wireFriction *= 3
                     Matter.Body.setVelocity(player, {
                         x: player.velocity.x - wireFriction,
                         y: player.velocity.y
@@ -2726,15 +2728,15 @@ const spawn = {
                 }
                 //move to player
                 Matter.Body.setPosition(this, {
-                    x: mech.pos.x + (42 * Math.cos(mech.angle + Math.PI)),
-                    y: mech.pos.y + (42 * Math.sin(mech.angle + Math.PI))
+                    x: m.pos.x + (42 * Math.cos(m.angle + Math.PI)),
+                    y: m.pos.y + (42 * Math.sin(m.angle + Math.PI))
                 })
             }
             //draw wire
             ctx.beginPath();
             ctx.moveTo(wireX, wireY);
             ctx.quadraticCurveTo(wireX, 0, this.position.x, this.position.y);
-            if (!this.freeOfWires) ctx.lineTo(mech.pos.x + (30 * Math.cos(mech.angle + Math.PI)), mech.pos.y + (30 * Math.sin(mech.angle + Math.PI)));
+            if (!this.freeOfWires) ctx.lineTo(m.pos.x + (30 * Math.cos(m.angle + Math.PI)), m.pos.y + (30 * Math.sin(m.angle + Math.PI)));
             ctx.lineCap = "butt";
             ctx.lineWidth = 15;
             ctx.strokeStyle = "#000";
@@ -2769,16 +2771,16 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (mech.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint) {
                     this.freeOfWires = true;
                     this.force.x -= 0.0004;
                     this.fill = "#222";
                 }
                 //move mob to player
-                mech.calcLeg(0, 0);
+                m.calcLeg(0, 0);
                 Matter.Body.setPosition(this, {
-                    x: mech.pos.x + mech.flipLegs * mech.knee.x - 5,
-                    y: mech.pos.y + mech.knee.y
+                    x: m.pos.x + m.flipLegs * m.knee.x - 5,
+                    y: m.pos.y + m.knee.y
                 })
             }
             //draw wire
@@ -2819,16 +2821,16 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (mech.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint) {
                     this.freeOfWires = true;
                     this.force.x += -0.0003;
                     this.fill = "#333";
                 }
                 //move mob to player
-                mech.calcLeg(Math.PI, -3);
+                m.calcLeg(Math.PI, -3);
                 Matter.Body.setPosition(this, {
-                    x: mech.pos.x + mech.flipLegs * mech.knee.x - 5,
-                    y: mech.pos.y + mech.knee.y
+                    x: m.pos.x + m.flipLegs * m.knee.x - 5,
+                    y: m.pos.y + m.knee.y
                 })
             }
             //draw wire
@@ -2868,16 +2870,16 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (mech.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint) {
                     this.freeOfWires = true;
                     this.force.x += -0.0006;
                     this.fill = "#111";
                 }
                 //move mob to player
-                mech.calcLeg(0, 0);
+                m.calcLeg(0, 0);
                 Matter.Body.setPosition(this, {
-                    x: mech.pos.x + mech.flipLegs * mech.foot.x - 5,
-                    y: mech.pos.y + mech.foot.y - 1
+                    x: m.pos.x + m.flipLegs * m.foot.x - 5,
+                    y: m.pos.y + m.foot.y - 1
                 })
             }
             //draw wire
@@ -2917,16 +2919,16 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (mech.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint) {
                     this.freeOfWires = true;
                     this.force.x += -0.0005;
                     this.fill = "#222";
                 }
                 //move mob to player
-                mech.calcLeg(Math.PI, -3);
+                m.calcLeg(Math.PI, -3);
                 Matter.Body.setPosition(this, {
-                    x: mech.pos.x + mech.flipLegs * mech.foot.x - 5,
-                    y: mech.pos.y + mech.foot.y - 1
+                    x: m.pos.x + m.flipLegs * m.foot.x - 5,
+                    y: m.pos.y + m.foot.y - 1
                 })
             }
             //draw wire

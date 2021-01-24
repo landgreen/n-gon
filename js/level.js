@@ -16,7 +16,7 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
-            // mech.setField("plasma torch")
+            // m.setField("plasma torch")
             // b.giveGuns("grenades")
             // tech.isExplodeRadio = true
             // tech.giveTech("needle gun")
@@ -74,26 +74,26 @@ const level = {
         level.addToWorld(); //add bodies to game engine
         simulation.draw.setPaths();
         b.respawnBots();
-        mech.resetHistory();
+        m.resetHistory();
         if (tech.isArmorFromPowerUps) {
             tech.armorFromPowerUps += Math.min(0.03 * powerUps.totalPowerUps, 0.42)
-            mech.setMaxHealth();
+            m.setMaxHealth();
         }
         if (tech.isHealLowHealth) {
-            const len = Math.floor((mech.maxHealth - mech.health) / 0.5)
+            const len = Math.floor((m.maxHealth - m.health) / 0.5)
             for (let i = 0; i < len; i++) {
-                powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
-                // powerUps.heal.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), 50);
+                powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+                // powerUps.heal.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), 50);
             }
         }
-        if (tech.isPerpetualReroll) powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "research", false);
+        if (tech.isPerpetualReroll) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research", false);
         if (tech.isPerpetualAmmo) {
-            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
-            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
+            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
+            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
         }
         if (tech.isPerpetualHeal) {
-            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
-            powerUps.spawn(mech.pos.x + 60 * (Math.random() - 0.5), mech.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isPerpetualStun) {
             for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 600)
@@ -162,9 +162,9 @@ const level = {
             ctx.beginPath();
             const step = Math.PI / 20
             const horizontalStep = 85
-            if (simulation.isCheating) phase += 0.003 //(mech.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
+            if (simulation.isCheating) phase += 0.003 //(m.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
             // const sway = 5 * Math.cos(simulation.cycle * 0.007)
-            sway.x = sway.x * 0.995 + 0.005 * (mech.pos.x - circle.x) * 0.05 //+ 0.04 * Math.cos(simulation.cycle * 0.01)
+            sway.x = sway.x * 0.995 + 0.005 * (m.pos.x - circle.x) * 0.05 //+ 0.04 * Math.cos(simulation.cycle * 0.01)
             sway.y = 2.5 * Math.sin(simulation.cycle * 0.015)
             for (let i = -19.5; i < 20; i++) {
                 const where = {
@@ -740,7 +740,7 @@ const level = {
         const door = level.door(312, -750, 25, 190, 185)
 
         level.custom = () => {
-            if (!(mech.cycle % 60)) { //so much work to catch blocks caught at the bottom of the vertical portals
+            if (!(m.cycle % 60)) { //so much work to catch blocks caught at the bottom of the vertical portals
                 let touching = Matter.Query.collides(map[removeIndex1], body)
                 if (touching.length) {
                     // console.log(touching[0].bodyB)
@@ -1112,7 +1112,7 @@ const level = {
             level.playerExitCheck();
         };
         level.customTopLayer = () => {
-            if (elevator.pauseUntilCycle < simulation.cycle && !mech.isBodiesAsleep) { //elevator move
+            if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
                 if (elevator.pointA.y > -1275) { //bottom
                     elevator.plat.speed = -10
                     elevator.pauseUntilCycle = simulation.cycle + 90
@@ -1321,7 +1321,7 @@ const level = {
         };
         level.customTopLayer = () => {
 
-            if (elevator.pauseUntilCycle < simulation.cycle && !mech.isBodiesAsleep) { //elevator move
+            if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
                 if (elevator.pointA.y > -980) { //bottom
                     elevator.plat.speed = -2
                     elevator.pauseUntilCycle = simulation.cycle + 60
@@ -2796,7 +2796,7 @@ const level = {
             portal[3].draw();
             hazard.draw();
             //elevator
-            if (elevator.pauseUntilCycle < simulation.cycle && !mech.isBodiesAsleep) {
+            if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) {
                 if (elevator.plat.position.y > -200) { //bottom
                     elevator.plat.speed = -20
                     elevator.pauseUntilCycle = simulation.cycle + 90
@@ -3932,7 +3932,7 @@ const level = {
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
         simulation.dmgScale = 0.378 * simulation.difficulty //damage done by mobs increases each level
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.06) //a higher denominator makes for lower heals // mech.health += heal * simulation.healScale;
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.06) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
@@ -3973,9 +3973,9 @@ const level = {
         // <br>input.key.down = ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]
         // <br>input.key.right = ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]
         // <br>
-        // <br><span class='color-var'>mech</span>.fieldMode = "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].name}</span>"
+        // <br><span class='color-var'>m</span>.fieldMode = "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>"
         // <br>input.key.field = ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
-        // <br><span class='color-var'>mech</span>.field.description = "<span class='color-text'>${mech.fieldUpgrades[mech.fieldMode].description}</span>"
+        // <br><span class='color-var'>m</span>.field.description = "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
         // `, 1200);
     },
     nextLevel() {
@@ -4009,18 +4009,18 @@ const level = {
         }
     },
     setPosToSpawn(xPos, yPos) {
-        mech.spawnPos.x = mech.pos.x = xPos;
-        mech.spawnPos.y = mech.pos.y = yPos;
-        level.enter.x = mech.spawnPos.x - 50;
-        level.enter.y = mech.spawnPos.y + 20;
-        mech.transX = mech.transSmoothX = canvas.width2 - mech.pos.x;
-        mech.transY = mech.transSmoothY = canvas.height2 - mech.pos.y;
-        mech.Vx = mech.spawnVel.x;
-        mech.Vy = mech.spawnVel.y;
+        m.spawnPos.x = m.pos.x = xPos;
+        m.spawnPos.y = m.pos.y = yPos;
+        level.enter.x = m.spawnPos.x - 50;
+        level.enter.y = m.spawnPos.y + 20;
+        m.transX = m.transSmoothX = canvas.width2 - m.pos.x;
+        m.transY = m.transSmoothY = canvas.height2 - m.pos.y;
+        m.Vx = m.spawnVel.x;
+        m.Vy = m.spawnVel.y;
         player.force.x = 0;
         player.force.y = 0;
-        Matter.Body.setPosition(player, mech.spawnPos);
-        Matter.Body.setVelocity(player, mech.spawnVel);
+        Matter.Body.setPosition(player, m.spawnPos);
+        Matter.Body.setVelocity(player, m.spawnVel);
     },
     enter: {
         x: 0,
@@ -4115,8 +4115,8 @@ const level = {
             target.torque = (Math.random() - 0.5) * 2 * target.mass;
         },
         boost(target, yVelocity) {
-            mech.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
-            mech.hardLandCD = 0 // disable hard landing
+            m.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
+            m.hardLandCD = 0 // disable hard landing
             if (target.velocity.y > 30) {
                 Matter.Body.setVelocity(target, {
                     x: target.velocity.x + (Math.random() - 0.5) * 2,
@@ -4148,7 +4148,7 @@ const level = {
     addToWorld() { //needs to be run to put bodies into the world
         for (let i = 0; i < body.length; i++) {
             //body[i].collisionFilter.group = 0;
-            if (body[i] !== mech.holdingTarget) {
+            if (body[i] !== m.holdingTarget) {
                 body[i].collisionFilter.category = cat.body;
                 body[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
             }
@@ -4270,7 +4270,7 @@ const level = {
 
         if (rotate) {
             rotor.rotate = function() {
-                if (!mech.isBodiesAsleep) {
+                if (!m.isBodiesAsleep) {
                     Matter.Body.applyForce(rotor, {
                         x: rotor.position.x + 100,
                         y: rotor.position.y + 100
@@ -4364,7 +4364,7 @@ const level = {
             restitution: 0,
             isOpen: false,
             openClose() {
-                if (!mech.isBodiesAsleep) {
+                if (!m.isBodiesAsleep) {
                     if (!this.isOpen) {
                         if (this.position.y > y - distance) { //try to open 
                             const position = {
@@ -4432,8 +4432,8 @@ const level = {
             if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
                 if (player.isInPortal === this) player.isInPortal = null
             } else if (player.isInPortal !== this) { //touching player
-                if (mech.buttonCD_jump === mech.cycle) player.force.y = 0 // undo a jump right before entering the portal
-                mech.buttonCD_jump = 0 //disable short jumps when letting go of jump key
+                if (m.buttonCD_jump === m.cycle) player.force.y = 0 // undo a jump right before entering the portal
+                m.buttonCD_jump = 0 //disable short jumps when letting go of jump key
                 player.isInPortal = this.portalPair
                 //teleport
                 if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
@@ -4467,7 +4467,7 @@ const level = {
             }
             // if (body.length) {
             for (let i = 0, len = body.length; i < len; i++) {
-                if (body[i] !== mech.holdingTarget) {
+                if (body[i] !== m.holdingTarget) {
                     // body[i].bounds.max.x - body[i].bounds.min.x < 100 && body[i].bounds.max.y - body[i].bounds.min.y < 100
                     if (Matter.Query.collides(this, [body[i]]).length === 0) {
                         if (body[i].isInPortal === this) body[i].isInPortal = null
@@ -4502,7 +4502,7 @@ const level = {
             // if (body.length) {
             //   touching = Matter.Query.collides(this, body)
             //   for (let i = 0; i < touching.length; i++) {
-            //     if (touching[i].bodyB !== mech.holdingTarget) {
+            //     if (touching[i].bodyB !== m.holdingTarget) {
             //       for (let j = 0, len = body.length; j < len; j++) {
             //         if (body[j] === touching[i].bodyB) {
             //           body.splice(j, 1);
@@ -4515,7 +4515,7 @@ const level = {
             //   }
             // }
 
-            // if (touching.length !== 0 && touching[0].bodyB !== mech.holdingTarget) {
+            // if (touching.length !== 0 && touching[0].bodyB !== m.holdingTarget) {
             //   if (body.length) {
             //     for (let i = 0; i < body.length; i++) {
             //       if (body[i] === touching[0].bodyB) {
@@ -4591,12 +4591,12 @@ const level = {
             maxHeight: height,
             isOn: true,
             query() {
-                if (this.isOn && this.height > 0 && Matter.Query.region([player], this).length && !(mech.isCloak && isOptical)) {
+                if (this.isOn && this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak && isOptical)) {
                     if (damage < 0.02) {
-                        mech.damage(damage)
-                    } else if (mech.immuneCycle < mech.cycle) {
-                        mech.immuneCycle = mech.cycle + tech.collisionImmuneCycles;
-                        mech.damage(damage)
+                        m.damage(damage)
+                    } else if (m.immuneCycle < m.cycle) {
+                        m.immuneCycle = m.cycle + tech.collisionImmuneCycles;
+                        m.damage(damage)
                         simulation.drawList.push({ //add dmg to draw queue
                             x: player.position.x,
                             y: player.position.y,
@@ -4606,7 +4606,7 @@ const level = {
                         });
                     }
                     const drain = 0.005
-                    if (mech.energy > drain) mech.energy -= drain
+                    if (m.energy > drain) m.energy -= drain
                 }
             },
             draw() {
@@ -4623,7 +4623,7 @@ const level = {
                 }
             },
             level(isFill) {
-                if (!mech.isBodiesAsleep) {
+                if (!m.isBodiesAsleep) {
                     const growSpeed = 1
                     if (isFill) {
                         if (this.height < this.maxHeight) {

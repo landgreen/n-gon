@@ -1,14 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-duplication bug fix
-
-renaming custom mode -> experimental mode
-  experimental mode is available again even without completing lore
-
-mob: sneaker is a bit faster and stronger
-  (the invisible one that attacks from stealth)
-
-tech: unified field theory - switching guns uses a reroll to cycle your field
+to continue playing after the final boss you need to use testing mode:  "T" -> "U"
+renamed mech -> m
 
 ******************************************************** BUGS ********************************************************
 
@@ -29,6 +22,10 @@ tech: unified field theory - switching guns uses a reroll to cycle your field
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+rename ?
+  health -> integrity, unity
+  heal -> also integrity, unity
 
 mechanic: use gun swap as an active ability
   this effect is spammable, so it needs a cost or a cooldown
@@ -52,7 +49,7 @@ tech: double your rerolls
   might want to use a single variable for all duplication
 
 bot that follows the players history
-  could have the same shape as the mech circle head
+  could have the same shape as the m circle head
   1st bot is at 5s, 2nd is at 4.5s, ...
   bots don't get too close to player
     run smoothing on position update, don't update if close to player, based on ordering
@@ -68,13 +65,9 @@ tech: dodge chance for cloaking, harmonic fields, also pilot wave
   set to 100% harm reduction randomly
     if (Math.random() < 0.2)  damage *= 0;
 
-rename ?
-  health -> integrity, unity
-  heal -> also integrity, unity
-
 in game console
   set highlighting rules
-    mech, tech, level are all highlighted
+    m, tech, level are all highlighted
     maybe the first term in each variable should get a highlight
 
 tech: time dilation - when you exit time dilation rewind to the state you entered
@@ -89,14 +82,14 @@ mechanic: technological dead end - add tech to the tech pool with a dumb effect
   don't show up in custom?
   negative effect (one time effects are better to avoid code clutter)
     make the player rainbow colors
-      mech.color = {
+      m.color = {
         hue: 0,
         sat: 100,
         light: 50
       }
       setInterval(function(){
-          mech.color.hue++
-          mech.setFillColors()
+          m.color.hue++
+          m.setFillColors()
       }, 10);
     remove all your energy
     eject all your rerolls (not bad with dup)
@@ -200,7 +193,7 @@ tech "Solar Power": Energy regeneration is doubled while standing still
 mechanic - remove a random tech as a condition for picking up a really good mod
 
 mechanic - do something for 2 seconds after firing
-  if (mech.fireCDcycle + 120)
+  if (m.fireCDcycle + 120)
 
 tech- do 50% more damage in close, but 50% less at a distance
   code it like techisFarAwayDmg
@@ -243,7 +236,7 @@ mouse event e.which is deprecated
 
 add some more computer / AI stuff to the level lore text
 
-mechanic - shrink mech.baseHealth in a tech or field
+mechanic - shrink m.baseHealth in a tech or field
 
 standing wave harmonics tech- push things away
   push scales with mass up to about 4
@@ -290,7 +283,7 @@ atmosphere levels
   change the pace, give the user a rest between combat
   low or no combat, but more graphics
   explore lore
-    find power ups in "wrecked" mechs representing previous simulations
+    find power ups in "wrecked" m representing previous simulations
       how you could leave something in one simulation that effects a different simulation
         Maybe some strange quantum physics principle.
     add text for player thoughts?
@@ -371,7 +364,7 @@ cool names for tech
 lore - a robot (the player) gains self awareness
   each tech gun/field is a new tech
     all the technology leads to the singularity
-  each game run is actually the mech simulating a possible escape
+  each game run is actually the m simulating a possible escape
     this is why the graphics are so bad, its just a simulation
     final tech is "this is just a simulation"
       you get immortality and Infinity damage
