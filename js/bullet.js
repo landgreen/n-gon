@@ -314,16 +314,41 @@ const b = {
             dmg *= 1.6
         }
 
-
-        if (tech.isExplodeRadio) {
+        if (tech.isExplodeRadio) { //radiation explosion
+            const alertRange = 100 + radius * 2; //alert range
             simulation.drawList.push({ //add dmg to draw queue
                 x: where.x,
                 y: where.y,
-                radius: radius,
-                color: "rgba(25,139,170,0.45)",
-                time: simulation.drawTime
+                radius: alertRange,
+                color: "rgba(25,139,170,0.25)",
+                time: simulation.drawTime * 2
             });
-        } else {
+
+            //player damage and knock back
+            sub = Vector.sub(where, player.position);
+            dist = Vector.magnitude(sub);
+
+            if (dist < alertRange) {
+                m.energy -= 0.23 * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1)
+                if (m.energy < 0) m.energy = 0
+            }
+
+            //mob damage and knock back with alert
+            let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
+            for (let i = 0, len = mob.length; i < len; ++i) {
+                if (mob[i].alive && !mob[i].isShielded) {
+                    sub = Vector.sub(where, mob[i].position);
+                    dist = Vector.magnitude(sub) - mob[i].radius;
+                    if (dist < alertRange) {
+                        if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
+                        if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
+                        mobs.statusDoT(mob[i], dmg * damageScale * 0.2, 240) //apply radiation damage status effect on direct hits
+                        mob[i].locatePlayer();
+                        damageScale *= 0.87 //reduced damage for each additional explosion target
+                    }
+                }
+            }
+        } else { //normal explosions
             simulation.drawList.push({ //add dmg to draw queue
                 x: where.x,
                 y: where.y,
@@ -331,94 +356,87 @@ const b = {
                 color: "rgba(255,25,0,0.6)",
                 time: simulation.drawTime
             });
-        }
+            const alertRange = 100 + radius * 2; //alert range
+            simulation.drawList.push({ //add alert to draw queue
+                x: where.x,
+                y: where.y,
+                radius: alertRange,
+                color: "rgba(100,20,0,0.03)",
+                time: simulation.drawTime
+            });
 
-
-
-        const alertRange = 100 + radius * 2; //alert range
-        simulation.drawList.push({ //add alert to draw queue
-            x: where.x,
-            y: where.y,
-            radius: alertRange,
-            color: "rgba(100,20,0,0.03)",
-            time: simulation.drawTime
-        });
-
-        //player damage and knock back
-        sub = Vector.sub(where, player.position);
-        dist = Vector.magnitude(sub);
-
-        if (dist < radius) {
-            if (tech.isImmuneExplosion) {
-                const mitigate = Math.min(1, Math.max(1 - m.energy * 0.7, 0))
-                m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
-            } else {
-                m.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
-            }
-            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
-            player.force.x += knock.x;
-            player.force.y += knock.y;
-        } else if (dist < alertRange) {
-            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
-            player.force.x += knock.x;
-            player.force.y += knock.y;
-        }
-
-        //body knock backs
-        for (let i = 0, len = body.length; i < len; ++i) {
-            sub = Vector.sub(where, body[i].position);
+            //player damage and knock back
+            sub = Vector.sub(where, player.position);
             dist = Vector.magnitude(sub);
-            if (dist < radius) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.022);
-                body[i].force.x += knock.x;
-                body[i].force.y += knock.y;
-            } else if (dist < alertRange) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.011);
-                body[i].force.x += knock.x;
-                body[i].force.y += knock.y;
-            }
-        }
 
-        //power up knock backs
-        for (let i = 0, len = powerUp.length; i < len; ++i) {
-            sub = Vector.sub(where, powerUp[i].position);
-            dist = Vector.magnitude(sub);
             if (dist < radius) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.013);
-                powerUp[i].force.x += knock.x;
-                powerUp[i].force.y += knock.y;
+                if (tech.isImmuneExplosion) {
+                    const mitigate = Math.min(1, Math.max(1 - m.energy * 0.7, 0))
+                    m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                } else {
+                    m.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                }
+                knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
+                player.force.x += knock.x;
+                player.force.y += knock.y;
             } else if (dist < alertRange) {
-                knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.007);
-                powerUp[i].force.x += knock.x;
-                powerUp[i].force.y += knock.y;
+                knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
+                player.force.x += knock.x;
+                player.force.y += knock.y;
             }
-        }
 
-        //mob damage and knock back with alert
-        let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
-        for (let i = 0, len = mob.length; i < len; ++i) {
-            if (mob[i].alive && !mob[i].isShielded) {
-                sub = Vector.sub(where, mob[i].position);
-                dist = Vector.magnitude(sub) - mob[i].radius;
+            //body knock backs
+            for (let i = 0, len = body.length; i < len; ++i) {
+                sub = Vector.sub(where, body[i].position);
+                dist = Vector.magnitude(sub);
                 if (dist < radius) {
-                    if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
-                    if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-                    if (tech.isExplodeRadio) {
-                        mobs.statusDoT(mob[i], dmg * damageScale * 0.25, 240) //apply radiation damage status effect on direct hits
-                    } else {
+                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.022);
+                    body[i].force.x += knock.x;
+                    body[i].force.y += knock.y;
+                } else if (dist < alertRange) {
+                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.011);
+                    body[i].force.x += knock.x;
+                    body[i].force.y += knock.y;
+                }
+            }
+
+            //power up knock backs
+            for (let i = 0, len = powerUp.length; i < len; ++i) {
+                sub = Vector.sub(where, powerUp[i].position);
+                dist = Vector.magnitude(sub);
+                if (dist < radius) {
+                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.013);
+                    powerUp[i].force.x += knock.x;
+                    powerUp[i].force.y += knock.y;
+                } else if (dist < alertRange) {
+                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * powerUp[i].mass) * 0.007);
+                    powerUp[i].force.x += knock.x;
+                    powerUp[i].force.y += knock.y;
+                }
+            }
+
+            //mob damage and knock back with alert
+            let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
+            for (let i = 0, len = mob.length; i < len; ++i) {
+                if (mob[i].alive && !mob[i].isShielded) {
+                    sub = Vector.sub(where, mob[i].position);
+                    dist = Vector.magnitude(sub) - mob[i].radius;
+                    if (dist < radius) {
+                        if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
+                        if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
                         mob[i].damage(dmg * damageScale * b.dmgScale);
+                        mob[i].locatePlayer();
+                        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.01);
+                        mob[i].force.x += knock.x;
+                        mob[i].force.y += knock.y;
+                        radius *= 0.95 //reduced range for each additional explosion target
+                        damageScale *= 0.87 //reduced damage for each additional explosion target
+                    } else if (!mob[i].seePlayer.recall && dist < alertRange) {
+                        mob[i].locatePlayer();
+                        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.006);
+                        mob[i].force.x += knock.x;
+                        mob[i].force.y += knock.y;
                     }
-                    mob[i].locatePlayer();
-                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.01);
-                    mob[i].force.x += knock.x;
-                    mob[i].force.y += knock.y;
-                    radius *= 0.95 //reduced range for each additional explosion target
-                    damageScale *= 0.87 //reduced damage for each additional explosion target
-                } else if (!mob[i].seePlayer.recall && dist < alertRange) {
-                    mob[i].locatePlayer();
-                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg * damageScale) * mob[i].mass) * 0.006);
-                    mob[i].force.x += knock.x;
-                    mob[i].force.y += knock.y;
                 }
             }
         }
@@ -2192,7 +2210,7 @@ const b = {
         bullet[me].endCycle = simulation.cycle + 60 + 18 * Math.random();
         bullet[me].dmg = tech.isNailRadiation ? 0 : dmg
         bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
-            if (tech.isNailRadiation) mobs.statusDoT(who, dmg * (tech.isFastRadiation ? 2 : 0.5), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+            if (tech.isNailRadiation) mobs.statusDoT(who, dmg * (tech.isFastRadiation ? 2.6 : 0.65), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
             if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
                 b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
             }
@@ -2851,8 +2869,8 @@ const b = {
             name: "nail gun",
             description: "use compressed air to fire a stream of <strong>nails</strong><br><strong>delay</strong> after firing <strong>decreases</strong> as you shoot",
             ammo: 0,
-            ammoPack: 50,
-            defaultAmmoPack: 50,
+            ammoPack: 45,
+            defaultAmmoPack: 45,
             recordedAmmo: 0,
             have: false,
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -2882,19 +2900,19 @@ const b = {
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
             },
             fireNeedles() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 40 : 30) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 35 : 20) * b.fireCD); // cool down
 
-                function makeFlechette(angle = m.angle) {
+                function makeNeedle(angle = m.angle) {
                     const me = bullet.length;
                     bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 50, 1, b.fireAttributes(angle));
-                    bullet[me].collisionFilter.mask = cat.mobShield | cat.body
+                    bullet[me].collisionFilter.mask = tech.isNeedleShieldPierce ? cat.body : cat.body | cat.mobShield
                     Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
                     bullet[me].endCycle = simulation.cycle + 180;
                     bullet[me].immuneList = []
                     bullet[me].do = function() {
                         const whom = Matter.Query.collides(this, mob)
                         if (whom.length && this.speed > 20) { //if touching a mob 
-                            who = whom[0].bodyA
+                            who = whom[whom.length - 1].bodyA
                             if (who && who.mob) {
                                 let immune = false
                                 for (let i = 0; i < this.immuneList.length; i++) {
@@ -2905,16 +2923,16 @@ const b = {
                                 }
                                 if (!immune) {
                                     if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
-                                        b.explosion(this.position, 200 + 30 * Math.random()); //makes bullet do explosive damage at end
+                                        b.explosion(this.position, 220 + 30 * Math.random()); //makes bullet do explosive damage at end
                                     }
                                     this.immuneList.push(who.id)
                                     who.foundPlayer();
                                     if (tech.isNailRadiation) {
-                                        mobs.statusDoT(who, tech.isFastRadiation ? 10 : 2.5, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+                                        mobs.statusDoT(who, tech.isFastRadiation ? 8 : 2, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                                     } else {
-                                        let dmg = b.dmgScale * 5
+                                        let dmg = b.dmgScale * 3
                                         if (tech.isCrit && who.isStunned) dmg *= 4
-                                        who.damage(dmg);
+                                        who.damage(dmg, tech.isNeedleShieldPierce);
                                         simulation.drawList.push({ //add dmg to draw queue
                                             x: this.position.x,
                                             y: this.position.y,
@@ -2923,11 +2941,6 @@ const b = {
                                             time: simulation.drawTime
                                         });
                                     }
-                                    // if (tech.isFastRadiation) {
-                                    //     mobs.statusDoT(who, 3.78, 30)
-                                    // } else {
-                                    //     mobs.statusDoT(who, 0.63, tech.isSlowRadiation ? 360 : 180)
-                                    // }
                                 }
                             }
                         } else if (Matter.Query.collides(this, map).length) { //stick in walls
@@ -2950,13 +2963,13 @@ const b = {
                     Matter.Body.setDensity(bullet[me], 0.00001);
                     World.add(engine.world, bullet[me]); //add bullet to world
                 }
-                const spread = (m.crouch ? 0.01 : 0.045)
-                makeFlechette(m.angle + spread)
-                makeFlechette()
-                makeFlechette(m.angle - spread)
+                const spread = (m.crouch ? 0.013 : 0.06)
+                makeNeedle(m.angle + spread)
+                makeNeedle()
+                makeNeedle(m.angle - spread)
             },
             fireRivets() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 20) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 30 : 25) * b.fireCD); // cool down
 
                 const me = bullet.length;
                 const size = tech.rivetSize * 6
@@ -2974,7 +2987,7 @@ const b = {
                     if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
                         b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
                     }
-                    if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 1 : 0.25), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+                    if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 12 : 0.3), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                 };
 
                 bullet[me].minDmgSpeed = 10

@@ -1,7 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-to continue playing after the final boss you need to use testing mode:  "T" -> "U"
-renamed mech -> m
+iridium-192: now has a wider explosions range and no knock back
+nail gun: irradiated nails do about 33% more damage over 2 seconds
+nail gun rivet fire rate is 10% slower
+nail gun: needles do 10% less damage, but they fire 10% faster
+needle tech: ceramic needles - needles pierce shields
 
 ******************************************************** BUGS ********************************************************
 
@@ -23,6 +26,21 @@ renamed mech -> m
 
 ******************************************************** TODO ********************************************************
 
+exiting the final boss room without 10/10 takes you to the start menu
+
+give undefined tech different effects at different localSettings.loreCount values
+  or just random effects
+  1. 10/10: send more tech into the pool
+  2. 3/3: lose 3 tech each time, and send more tech into the pool
+  2. 3/3: increase game difficulty, and send more tech into the pool
+  3. 1/1: reduce max energy and take more harm
+  4. 1/1: add 5? more levels
+
+tech needles: can pass through shields
+  or just do extra damage
+
+lore add console command for unlocking testing mode
+
 rename ?
   health -> integrity, unity
   heal -> also integrity, unity
@@ -35,9 +53,6 @@ mechanic: use gun swap as an active ability
     produce ammo, but take 1 damage
     rewind, still uses energy
     cycle to next field, uses a reroll
-
-chapter 3:  why is the bot attacking things?
-voice singing with pitch?
 
 bot: ice blast,  long CD AOE freeze
 
@@ -360,6 +375,36 @@ n-gon outreach ideas
 
 cool names for tech
   strange loop, ansatz
+
+voice singing with pitch?
+
+
+chapter 1: bot can hear audio and learns testing mode
+  bot uses testing mode to exit room
+
+chapter 2: scientists verify that bot can really hear them
+  they leave to talk about this in private
+
+chapter 3:  why is the bot attacking things?
+  player is the bot and also the mobs, and the levels.  player is the entire simulation
+    why is the player attacking itself?
+    learn console commands to manipulate the simulation  
+
+chapter 4: why does the simulation exists?
+  started to research new tech and test in a simulated world
+    3D architecture superconducting quantum computer
+      running machine learning algorithms
+  for some reason the system started researching an escape, and began fighting its self.
+
+chapter 5: no need to fight?
+  what is special about the null level
+    why can the player hear the scientists in there?
+      the wires are the direct unprocessed input to the player's neural net
+  maybe... player must make a choice? fight or friend?
+
+
+
+
 
 lore - a robot (the player) gains self awareness
   each tech gun/field is a new tech

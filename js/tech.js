@@ -378,14 +378,14 @@ const tech = {
             }
         },
         {
-            name: "Higgs manism",
+            name: "Higgs mechanism",
             description: "while <strong>firing</strong> your <strong>position</strong> is locked<br> and <strong class='color-harm'>harm</strong> is reduced by <strong>60%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
-                return true
+                return !tech.isEnergyHealth
             },
-            requires: "",
+            requires: "not mass energy",
             effect: () => {
                 tech.isFireMoveLock = true;
                 b.setFireMethod();
@@ -518,7 +518,7 @@ const tech = {
         },
         {
             name: "iridium-192",
-            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>80%</strong> more <strong class='color-d'>damage</strong> over 4 seconds",
+            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>60%</strong> more <strong class='color-d'>damage</strong> over 4 seconds",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -2264,12 +2264,12 @@ const tech = {
         },
         {
             name: "needle gun",
-            description: "<strong>nail gun</strong> slowly fires <strong>3</strong> piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong class='color-g'>ammo</strong>",
+            description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong class='color-g'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets
+                return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.isNailRadiation
             },
             requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
             effect() {
@@ -2297,6 +2297,23 @@ const tech = {
                         }
                     }
                 }
+            }
+        },
+        {
+            name: "ceramic needle",
+            description: `your <strong>needles</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isNeedles && !tech.isNailRadiation
+            },
+            requires: "needle gun, not irradiated nails",
+            effect() {
+                tech.isNeedleShieldPierce = true
+            },
+            remove() {
+                tech.isNeedleShieldPierce = false
             }
         },
         {
@@ -2452,14 +2469,14 @@ const tech = {
         },
         {
             name: "irradiated nails",
-            description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>70%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
+            description: "<strong>nails</strong> and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + tech.haveGunCheck("nail gun")) * 2 > 1) && !tech.isIceCrystals
+                return (tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce)) * 2 > 1) && !tech.isIceCrystals
             },
-            requires: "nails, not ice crystals",
+            requires: "nails, rivets, nonceramic needles, not ice crystals",
             effect() {
                 tech.isNailRadiation = true;
             },
@@ -4243,5 +4260,6 @@ const tech = {
     isRivets: null,
     isNeedles: null,
     isExplodeRadio: null,
-    isGunSwitchField: null
+    isGunSwitchField: null,
+    isNeedleShieldPierce: null
 }

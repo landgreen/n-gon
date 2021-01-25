@@ -13,17 +13,18 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(30)
+            // level.difficultyIncrease(20)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("plasma torch")
-            // b.giveGuns("grenades")
+            // b.giveGuns("nail gun")
             // tech.isExplodeRadio = true
             // tech.giveTech("needle gun")
             // tech.giveTech("supercritical fission")
             // tech.giveTech("irradiated nails")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
+            // tech.isExplodeRadio = true;
 
             // tech.isMineSentry = true
             // for (let i = 0; i < 60; i++) tech.giveTech("rivet diameter")
@@ -53,7 +54,7 @@ const level = {
             // for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
             // tech.giveTech("undefined")
             // lore.techCount = 1
-            // localSettings.loreCount = 2;
+            // localSettings.loreCount = 1;
             // simulation.isCheating = true;
             // localSettings.loreCount = undefined;
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -292,12 +293,12 @@ const level = {
         // spawn.boost(1500, 0, 900);
 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.sneaker(2900, -500)
+        // spawn.sneaker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
         // spawn.shooter(1700, -120)
-        // spawn.bomberBoss(1400, -500)
+        spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.cellBossCulture(1600, -500)
         // spawn.streamBoss(1600, -500)
