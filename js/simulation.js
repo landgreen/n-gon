@@ -358,13 +358,7 @@ const simulation = {
         }
     },
     switchGun() {
-        if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
-        b.activeGun = b.inventory[b.inventoryGun];
-        simulation.updateGunHUD();
-        simulation.boldActiveGunHUD();
-        // m.drop();
-        if (tech.isGunSwitchField && powerUps.research.count > 0) {
-            powerUps.research.changeRerolls(-1)
+        if (tech.isGunSwitchField) {
             const energy = m.energy
             m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
             m.energy = energy //field swap sets energy to max, this undoes that
@@ -373,14 +367,17 @@ const simulation = {
             for (let i = tech.tech.length - 1; i > 0; i--) {
                 if (tech.tech[i].name === "unified field theory") {
                     const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
-                    tech.tech[i].description = `after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>
+                    tech.tech[i].description = `switching <strong class='color-g'>guns</strong> also cycles your <strong class='color-f'>field</strong>
                     <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
                     break
                 }
             }
-
-
         }
+        if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
+        b.activeGun = b.inventory[b.inventoryGun];
+        simulation.updateGunHUD();
+        simulation.boldActiveGunHUD();
+        // m.drop();
     },
     zoom: null,
     zoomScale: 1000,
@@ -587,6 +584,7 @@ const simulation = {
         m.holdingTarget = null
 
         //set to default field
+        m.setMaxEnergy();
         m.fieldMode = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
         // simulation.makeTextLog(`

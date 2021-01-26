@@ -897,7 +897,7 @@ const m = {
         m.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         m.isBodiesAsleep = true;
         m.wakeCheck();
-        m.setMaxEnergy();
+        // m.setMaxEnergy();
         m.hole = {
             isOn: false,
             isReady: true,

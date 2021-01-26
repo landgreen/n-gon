@@ -664,55 +664,6 @@ summary {
     float: right;
 }
 
-.lore {
-    animation: bgColor 6s linear infinite;
-}
-
-@keyframes bgColor {
-    0% {
-        background-color: rgb(255, 0, 0)
-    }
-
-    10% {
-        background-color: rgb(255, 154, 0)
-    }
-
-    20% {
-        background-color: rgb(208, 222, 33)
-    }
-
-    30% {
-        background-color: rgb(79, 220, 74)
-    }
-
-    40% {
-        background-color: rgb(63, 218, 216)
-    }
-
-    50% {
-        background-color: rgb(47, 201, 226)
-    }
-
-    60% {
-        background-color: rgb(28, 127, 238)
-    }
-
-    70% {
-        background-color: rgb(95, 21, 242)
-    }
-
-    80% {
-        background-color: rgb(186, 12, 248)
-    }
-
-    90% {
-        background-color: rgb(251, 7, 217)
-    }
-
-    100% {
-        background-color: rgba(255, 0, 0)
-    }
-}
 
 .box {
     padding: 3px 8px 3px 8px;
@@ -736,6 +687,107 @@ summary {
 .right {
     text-align: right;
 }
+
+.lore {
+    animation: bgColor 3.5s linear infinite;
+}
+
+.lore-text {
+    animation: textColor 3s linear infinite;
+}
+
+@keyframes bgColor {
+    0% {
+        background-color: rgb(63, 218, 216)
+    }
+
+    10% {
+        background-color: rgb(47, 201, 226)
+    }
+
+    20% {
+        background-color: rgb(28, 127, 238)
+    }
+
+    30% {
+        background-color: rgb(95, 21, 242)
+    }
+
+    40% {
+        background-color: rgb(186, 12, 248)
+    }
+
+    50% {
+        background-color: rgb(251, 7, 217)
+    }
+
+    60% {
+        background-color: rgba(255, 0, 0)
+    }
+
+    70% {
+        background-color: rgb(255, 0, 0)
+    }
+
+    80% {
+        background-color: rgb(255, 154, 0)
+    }
+
+    90% {
+        background-color: rgb(208, 222, 33)
+    }
+
+    100% {
+        background-color: rgb(79, 220, 74)
+    }
+}
+
+@keyframes textColor {
+    0% {
+        color: rgb(63, 218, 216)
+    }
+
+    10% {
+        color: rgb(47, 201, 226)
+    }
+
+    20% {
+        color: rgb(28, 127, 238)
+    }
+
+    30% {
+        color: rgb(95, 21, 242)
+    }
+
+    40% {
+        color: rgb(186, 12, 248)
+    }
+
+    50% {
+        color: rgb(251, 7, 217)
+    }
+
+    60% {
+        color: rgba(255, 0, 0)
+    }
+
+    70% {
+        color: rgb(255, 0, 0)
+    }
+
+    80% {
+        color: rgb(255, 154, 0)
+    }
+
+    90% {
+        color: rgb(208, 222, 33)
+    }
+
+    100% {
+        color: rgb(79, 220, 74)
+    }
+}
+
 
 /* #console {
     font-family: monospace;

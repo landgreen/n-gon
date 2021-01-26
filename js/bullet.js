@@ -2211,7 +2211,7 @@ const b = {
         bullet[me].dmg = tech.isNailRadiation ? 0 : dmg
         bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
             if (tech.isNailRadiation) mobs.statusDoT(who, dmg * (tech.isFastRadiation ? 2.6 : 0.65), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
-            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
+            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                 b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
             }
         };
@@ -2922,7 +2922,7 @@ const b = {
                                     }
                                 }
                                 if (!immune) {
-                                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
+                                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                                         b.explosion(this.position, 220 + 30 * Math.random()); //makes bullet do explosive damage at end
                                     }
                                     this.immuneList.push(who.id)
@@ -2984,7 +2984,7 @@ const b = {
                 });
                 bullet[me].endCycle = simulation.cycle + 180
                 bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
-                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
+                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                         b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 12 : 0.3), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
@@ -3036,7 +3036,7 @@ const b = {
                 if (tech.isIceCrystals) {
                     bullet[bullet.length - 1].beforeDmg = function(who) {
                         mobs.statusSlow(who, 30)
-                        if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97) {
+                        if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                             b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
                         }
                     };

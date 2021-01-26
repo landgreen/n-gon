@@ -120,7 +120,7 @@ const tech = {
     },
     tech: [{
             name: "integrated armament",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold <strong>1 gun</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -243,7 +243,7 @@ const tech = {
         },
         {
             name: "logistics",
-            description: "<strong class='color-g'>ammo</strong> power ups give <strong>200%</strong> <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your <strong>current gun</strong>",
+            description: "<strong class='color-g'>ammo</strong> power ups give <strong>200%</strong> <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your current <strong class='color-g'>gun</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1894,6 +1894,38 @@ const tech = {
             }
         },
         {
+            name: "unified field theory",
+            description: "",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return (b.inventory.length > 1) || build.isExperimentSelection && !tech.isSuperDeterminism
+            },
+            requires: "at least 2 guns, not superdeterminism",
+            effect() {
+                tech.isGunSwitchField = true;
+                for (let i = tech.tech.length - 1; i > 0; i--) {
+                    if (tech.tech[i].name === "unified field theory") {
+                        const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
+                        tech.tech[i].description = `switching <strong class='color-g'>guns</strong> also cycles your <strong class='color-f'>field</strong>
+                        <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
+                        break
+                    }
+                }
+            },
+            remove() {
+                tech.isGunSwitchField = false;
+                for (let i = tech.tech.length - 1; i > 0; i--) {
+                    if (tech.tech[i].name === "unified field theory") {
+                        const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
+                        tech.tech[i].description = `switching <strong class='color-g'>guns</strong> also cycles your <strong class='color-f'>field</strong>
+                        <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
+                        break
+                    }
+                }
+            }
+        },
+        {
             name: "cardinality",
             description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
             maxCount: 1,
@@ -1936,9 +1968,9 @@ const tech = {
             count: 0,
             isNonRefundable: true,
             allowed() {
-                return tech.isDeterminism && !tech.manyWorlds
+                return tech.isDeterminism && !tech.manyWorlds && !tech.isGunSwitchField
             },
-            requires: "determinism",
+            requires: "determinism, not unified field theory",
             effect: () => {
                 tech.isSuperDeterminism = true;
                 for (let i = 0; i < 7; i++) { //if you change the six also change it in Born rule
@@ -1986,36 +2018,6 @@ const tech = {
             }
         },
         {
-            name: "unified field theory",
-            description: "after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return (powerUps.research.count > 1 && b.inventory.length > 1) || build.isExperimentSelection
-            },
-            requires: "at least 2 guns, and 2 research",
-            effect() {
-                tech.isGunSwitchField = true;
-                for (let i = tech.tech.length - 1; i > 0; i--) {
-                    if (tech.tech[i].name === "unified field theory") {
-                        const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
-                        tech.tech[i].description = `after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>
-                        <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
-                        break
-                    }
-                }
-            },
-            remove() {
-                tech.isGunSwitchField = false;
-                for (let i = tech.tech.length - 1; i > 0; i--) {
-                    if (tech.tech[i].name === "unified field theory") {
-                        tech.tech[i].description = "after switching <strong>guns</strong><br>use a <strong class='color-r'>research</strong> to cycle your <strong class='color-f'>field</strong>"
-                        break
-                    }
-                }
-            }
-        },
-        {
             name: "renormalization",
             description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
             maxCount: 1,
@@ -2042,9 +2044,7 @@ const tech = {
             requires: "not determinism, at least 3 research",
             effect() {
                 tech.isBanish = true
-                for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "research", false);
-                }
+                for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "research", false);
             },
             remove() {
                 tech.isBanish = false

@@ -99,11 +99,32 @@ const spawn = {
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             //add lore level as next level if player took lore tech earlier in the game
+            simulation.makeTextLog(`simulation.end()`);
+
             if (lore.techCount > 9 && !simulation.isCheating) {
                 level.levels.push("null")
                 level.exit.x = 5500;
                 level.exit.y = -330;
                 simulation.makeTextLog(`level.levels.push("null")`) // <br>${powerUps.research.count}
+
+                //remove block map element
+                Matter.World.remove(engine.world, map[map.length - 1]);
+                map.splice(map.length - 1, 1);
+                simulation.draw.setPaths(); //redraw map draw path
+            } else {
+                //reset game
+                let delay = 1000
+                for (let i = 20; i > 0; i--) {
+                    setTimeout(function() {
+                        simulation.makeTextLog(`delay = ${i*1000}`);
+                    }, delay);
+                    delay += 1000
+                }
+                delay += 1000
+                setTimeout(function() {
+                    simulation.makeTextLog(`World.clear(engine.world)`);
+                    setTimeout(function() { m.death() }, 1000);
+                }, delay);
             }
             //ramp up damage
             for (let i = 0; i < 3; i++) level.difficultyIncrease(simulation.difficultyMode)

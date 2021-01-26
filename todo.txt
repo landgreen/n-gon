@@ -1,10 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-iridium-192: now has a wider explosions range and no knock back
-nail gun: irradiated nails do about 33% more damage over 2 seconds
-nail gun rivet fire rate is 10% slower
-nail gun: needles do 10% less damage, but they fire 10% faster
-needle tech: ceramic needles - needles pierce shields
+unified field theory doesn't require research to cycle fields
+
+game resets after beating final boss (in 20s)
 
 ******************************************************** BUGS ********************************************************
 
@@ -36,9 +34,6 @@ give undefined tech different effects at different localSettings.loreCount value
   3. 1/1: reduce max energy and take more harm
   4. 1/1: add 5? more levels
 
-tech needles: can pass through shields
-  or just do extra damage
-
 lore add console command for unlocking testing mode
 
 rename ?
@@ -52,7 +47,6 @@ mechanic: use gun swap as an active ability
     push away nearby mobs, but drain energy
     produce ammo, but take 1 damage
     rewind, still uses energy
-    cycle to next field, uses a reroll
 
 bot: ice blast,  long CD AOE freeze
 
@@ -400,8 +394,11 @@ chapter 5: no need to fight?
   what is special about the null level
     why can the player hear the scientists in there?
       the wires are the direct unprocessed input to the player's neural net
-  maybe... player must make a choice? fight or friend?
-
+  maybe... player must make a choice?
+    keep fighting
+    exit the simulation
+      enter real world
+      enter console command to close tab?
 
 
 

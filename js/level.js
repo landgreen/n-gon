@@ -52,8 +52,9 @@ const level = {
             // level.stronghold() //fan level
 
             // for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
+            // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
-            // lore.techCount = 1
+            // lore.techCount = 10
             // localSettings.loreCount = 1;
             // simulation.isCheating = true;
             // localSettings.loreCount = undefined;
@@ -376,12 +377,12 @@ const level = {
         powerUps.spawn(3350, -75, "ammo");
         powerUps.spawn(3925, -50, "ammo");
         powerUps.spawn(4550, -75, "ammo");
-        powerUps.spawn(5225, -50, "ammo");
-        powerUps.spawn(5475, -350, "ammo");
-        powerUps.spawn(5625, -350, "ammo");
-        powerUps.spawn(5575, -425, "ammo");
-        powerUps.spawn(5550, -400, "ammo");
-        powerUps.spawn(5575, -425, "ammo");
+        powerUps.spawn(5025, -50, "ammo");
+        powerUps.spawn(4975, -350, "ammo");
+        powerUps.spawn(5125, -350, "ammo");
+        powerUps.spawn(5075, -425, "ammo");
+        powerUps.spawn(5050, -400, "ammo");
+        powerUps.spawn(5075, -425, "ammo");
 
         spawn.mapRect(-1950, 0, 8200, 1800); //ground
         spawn.mapRect(-1950, -1500, 1800, 1900); //left wall
@@ -396,7 +397,7 @@ const level = {
         spawn.mapRect(5400, -300, 400, 400); //right wall
         spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
-
+        spawn.mapRect(5425, -650, 375, 450); //blocking exit
     },
     gauntlet() {
         level.bossKilled = true; //if there is no boss this needs to be true to increase levels
