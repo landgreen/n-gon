@@ -19,7 +19,7 @@ const level = {
             // m.setField("plasma torch")
             // b.giveGuns("nail gun")
             // tech.isExplodeRadio = true
-            for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
+            // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
             // tech.giveTech("supercritical fission")
             // tech.giveTech("irradiated nails")
             // tech.giveTech("cardinality")

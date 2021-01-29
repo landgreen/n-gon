@@ -1,9 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: cloning - chance to spawn another level boss = 3x your duplication chance
-
-tech: dynamo-bot: a bot follows your history, damages mobs, and regens energy when it gets close
-tech: dynamo upgrade: more energy regen
 
 ******************************************************** BUGS ********************************************************
 
