@@ -507,15 +507,17 @@ const spawn = {
         };
     },
     cellBossCulture(x, y, radius = 20, num = 5) {
+        const cellID = Math.random()
         for (let i = 0; i < num; i++) {
-            spawn.cellBoss(x, y, radius)
+            spawn.cellBoss(x, y, radius, cellID)
         }
     },
-    cellBoss(x, y, radius = 20) {
+    cellBoss(x, y, radius = 20, cellID) {
         mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,150,155,0.7)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.isCell = true;
+        me.cellID = cellID
         me.accelMag = 0.00015 * simulation.accelScale;
         me.memory = 40;
         me.isVerticesChange = true
@@ -531,7 +533,7 @@ const spawn = {
         me.split = function() {
             Matter.Body.scale(this, 0.4, 0.4);
             this.radius = Math.sqrt(this.mass * k / Math.PI)
-            spawn.cellBoss(this.position.x, this.position.y, this.radius);
+            spawn.cellBoss(this.position.x, this.position.y, this.radius, this.cellID);
             mob[mob.length - 1].health = this.health
         }
         me.onHit = function() { //run this function on hitting player
@@ -571,9 +573,10 @@ const spawn = {
         };
         me.onDeath = function() {
             this.isCell = false;
-            let count = 0 //count other cells
+            let count = 0 //count other cells by id
+            // console.log(this.cellID)
             for (let i = 0, len = mob.length; i < len; i++) {
-                if (mob[i].isCell) count++
+                if (mob[i].isCell && mob[i].cellID === this.cellID) count++
             }
             if (count < 1) { //only drop a power up if this is the last cell
                 powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -2420,7 +2423,6 @@ const spawn = {
             stiffness: 0.05
         });
         World.add(engine.world, consBB[consBB.length - 1]);
-
     },
     snakeBody(x, y, radius = 20) {
         mobs.spawn(x, y, 4, radius, "rgb(55,170,170)");

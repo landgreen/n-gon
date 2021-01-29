@@ -9,12 +9,6 @@ const tech = {
         lore.techCount = 0;
         tech.removeLoreTechFromPool();
         tech.addLoreTechToPool();
-        // tech.nailBotCount = 0;
-        // tech.foamBotCount = 0;
-        // tech.boomBotCount = 0;
-        // tech.laserBotCount = 0;
-        // tech.orbitalBotCount = 0;
-        // tech.plasmaBotCount = 0;
         tech.armorFromPowerUps = 0;
         tech.totalCount = 0;
         simulation.updateTechHUD();
@@ -116,7 +110,7 @@ const tech = {
         return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + m.duplicateChance
     },
     totalBots() {
-        return tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
+        return tech.dynamoBotCount + tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
     },
     tech: [{
             name: "integrated armament",
@@ -923,6 +917,45 @@ const tech = {
             }
         },
         {
+            name: "dynamo-bot",
+            description: "a bot <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>4</strong> <strong class='color-f'>energy</strong> per second when it's near",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.dynamoBotCount++;
+                b.dynamoBot();
+            },
+            remove() {
+                tech.dynamoBotCount -= this.count;
+            }
+        },
+        {
+            name: "dynamo-bot upgrade",
+            description: "dynamo-bots <strong>regen</strong> <strong>12</strong> <strong class='color-f'>energy</strong> per second<br><em>applies to all current and future orbit-bots</em>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.dynamoBotCount > 1
+            },
+            requires: "2 or more dynamo bots",
+            effect() {
+                tech.isDynamoBotUpgrade = true
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = true
+                }
+            },
+            remove() {
+                tech.isDynamoBotUpgrade = false
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = false
+                }
+            }
+        },
+        {
             name: "bot fabrication",
             description: "anytime you collect <strong>5</strong> <strong class='color-r'>research</strong><br>use them to build a <strong>random bot</strong>",
             maxCount: 1,
@@ -1076,7 +1109,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.cyclicImmunity += 60 - this.count * 6;
+                tech.cyclicImmunity += 60;
             },
             remove() {
                 tech.cyclicImmunity = 0;
@@ -1757,6 +1790,22 @@ const tech = {
             },
             remove() {
                 tech.isDupDamage = false;
+            }
+        },
+        {
+            name: "cloning",
+            description: "each level has a chance to spawn a <strong>level boss</strong><br>equal to <strong>triple</strong> your <strong class='color-dup'>duplication</strong> chance",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.duplicationChance() > 0
+            },
+            requires: "some duplication chance",
+            effect() {
+                tech.isDuplicateBoss = true;
+            },
+            remove() {
+                tech.isDuplicateBoss = false;
             }
         },
         {
@@ -3535,6 +3584,7 @@ const tech = {
                         b.nailBot()
                         tech.nailBotCount++;
                     }
+                    simulation.makeTextLog(`tech.isNailBotUpgrade = true`)
                 })
                 if (!tech.isFoamBotUpgrade) notUpgradedBots.push(() => {
                     tech.giveTech("foam-bot upgrade")
@@ -3543,6 +3593,7 @@ const tech = {
                         b.foamBot()
                         tech.foamBotCount++;
                     }
+                    simulation.makeTextLog(`tech.isFoamBotUpgrade = true`)
                 })
                 if (!tech.isBoomBotUpgrade) notUpgradedBots.push(() => {
                     tech.giveTech("boom-bot upgrade")
@@ -3551,6 +3602,7 @@ const tech = {
                         b.boomBot()
                         tech.boomBotCount++;
                     }
+                    simulation.makeTextLog(`tech.isBoomBotUpgrade = true`)
                 })
                 if (!tech.isLaserBotUpgrade) notUpgradedBots.push(() => {
                     tech.giveTech("laser-bot upgrade")
@@ -3559,6 +3611,7 @@ const tech = {
                         b.laserBot()
                         tech.laserBotCount++;
                     }
+                    simulation.makeTextLog(`tech.isLaserBotUpgrade = true`)
                 })
                 if (!tech.isOrbitBotUpgrade) notUpgradedBots.push(() => {
                     tech.giveTech("orbital-bot upgrade")
@@ -3567,6 +3620,26 @@ const tech = {
                         b.orbitBot()
                         tech.orbitBotCount++;
                     }
+                    simulation.makeTextLog(`tech.isOrbitalBotUpgrade = true`)
+                })
+                if (!tech.isDynamoBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveTech("dynamo-bot upgrade")
+                    tech.setTechoNonRefundable("dynamo-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.orbitBot()
+                        tech.dynamoBotCount++;
+                    }
+                    simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
+                })
+                //double chance for dynamo-bot, since it's very good for nano-scale
+                if (!tech.isDynamoBotUpgrade) notUpgradedBots.push(() => {
+                    tech.giveTech("dynamo-bot upgrade")
+                    tech.setTechoNonRefundable("dynamo-bot upgrade")
+                    for (let i = 0; i < 2; i++) {
+                        b.orbitBot()
+                        tech.dynamoBotCount++;
+                    }
+                    simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
                 })
                 //choose random function from the array and run it
                 notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]()
@@ -4093,6 +4166,7 @@ const tech = {
     isMassEnergy: null,
     isExtraChoice: null,
     laserBotCount: null,
+    dynamoBotCount: null,
     nailBotCount: null,
     foamBotCount: null,
     boomBotCount: null,
@@ -4261,5 +4335,7 @@ const tech = {
     isNeedles: null,
     isExplodeRadio: null,
     isGunSwitchField: null,
-    isNeedleShieldPierce: null
+    isNeedleShieldPierce: null,
+    isDuplicateBoss: null,
+    isDynamoBotUpgrade: null
 }

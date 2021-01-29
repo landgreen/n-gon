@@ -1713,7 +1713,7 @@ const b = {
             friction: 0,
             frictionAir: 0.025,
             thrust: (tech.isFastSpores ? 0.001 : 0.0004) * (1 + 0.3 * (Math.random() - 0.5)),
-            dmg: tech.isMutualism ? 10 : 4, //2x bonus damage from tech.isMutualism
+            dmg: tech.isMutualism ? 12 : 5, //bonus damage from tech.isMutualism
             lookFrequency: 100 + Math.floor(117 * Math.random()),
             classType: "bullet",
             collisionFilter: {
@@ -1722,7 +1722,7 @@ const b = {
             },
             endCycle: simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger),
             minDmgSpeed: 0,
-            playerOffPosition: { //used when following player to keep spores separate
+            playerOffPosition: { //used when moving towards player to keep spores separate
                 x: 100 * (Math.random() - 0.5),
                 y: 100 * (Math.random() - 0.5)
             },
@@ -2223,6 +2223,7 @@ const b = {
     // **************************************************************************************************
     // **************************************************************************************************
     respawnBots() {
+        for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
         for (let i = 0; i < tech.laserBotCount; i++) b.laserBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
         for (let i = 0; i < tech.nailBotCount; i++) b.nailBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
         for (let i = 0; i < tech.foamBotCount; i++) b.foamBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
@@ -2237,7 +2238,10 @@ const b = {
         }
     },
     randomBot(where = m.pos, isKeep = true, isAll = true) {
-        if (Math.random() < 0.2 && isAll) {
+        if (Math.random() < 0.167 && isAll) {
+            b.dynamoBot(where)
+            if (isKeep) tech.dynamoBotCount++;
+        } else if (Math.random() < 0.25 && isAll) {
             b.laserBot(where)
             if (isKeep) tech.laserBotCount++;
         } else if (Math.random() < 0.25 && isAll) {
@@ -2253,6 +2257,113 @@ const b = {
             b.boomBot(where)
             if (isKeep) tech.boomBotCount++;
         }
+    },
+    setDynamoBotDelay() {
+        //reorder orbital bot positions around a circle
+        let total = 0
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType === 'dynamo') total++
+        }
+        let count = 0
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType === 'dynamo') {
+                count++
+                const step = Math.max(60 - 3 * total, 20)
+                bullet[i].followDelay = (step * count) % 600
+            }
+        }
+    },
+    dynamoBot(position = m.pos, isConsole = true) {
+        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.dynamoBot()`);
+        const me = bullet.length;
+        bullet[me] = Bodies.polygon(position.x, position.y, 5, 10, {
+            isUpgraded: tech.isDynamoBotUpgrade,
+            botType: "dynamo",
+            friction: 0,
+            frictionStatic: 0,
+            frictionAir: 1,
+            isStatic: true,
+            isSensor: true,
+            restitution: 0,
+            dmg: 0, // 0.14   //damage done in addition to the damage from momentum
+            minDmgSpeed: 0,
+            endCycle: Infinity,
+            classType: "bullet",
+            collisionFilter: {
+                category: cat.bullet,
+                mask: 0 //cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+            },
+            beforeDmg() {},
+            onEnd() {
+                b.setDynamoBotDelay()
+            },
+            followDelay: 0,
+            phase: Math.floor(60 * Math.random()),
+            do() {
+                // if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 150) {
+                //     ctx.fillStyle = "rgba(0,0,0,0.06)";
+                //     ctx.beginPath();
+                //     ctx.arc(this.position.x, this.position.y, 150, 0, 2 * Math.PI);
+                //     ctx.fill();
+                // }
+                if (!((m.cycle + this.phase) % 30)) { //twice a second
+                    if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 250) { //give energy
+                        // Matter.Body.setAngularVelocity(this, 10)
+                        if (this.isUpgraded) {
+                            m.energy += 0.06
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: 8,
+                                color: m.fieldMeterColor,
+                                time: simulation.drawTime
+                            });
+                        } else {
+                            m.energy += 0.02
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: 5,
+                                color: m.fieldMeterColor,
+                                time: simulation.drawTime
+                            });
+                        }
+                    }
+                }
+                //check for damage
+                if (!m.isCloak && !m.isBodiesAsleep) { //if time dilation isn't active
+                    const size = 33
+                    q = Matter.Query.region(mob, {
+                        min: {
+                            x: this.position.x - size,
+                            y: this.position.y - size
+                        },
+                        max: {
+                            x: this.position.x + size,
+                            y: this.position.y + size
+                        }
+                    })
+                    for (let i = 0; i < q.length; i++) {
+                        // mobs.statusStun(q[i], 180)
+                        // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
+                        const dmg = 0.5 * b.dmgScale
+                        q[i].damage(dmg);
+                        q[i].foundPlayer();
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: this.position.x,
+                            y: this.position.y,
+                            radius: Math.log(2 * dmg + 1.1) * 40,
+                            color: 'rgba(0,0,0,0.4)',
+                            time: simulation.drawTime
+                        });
+                    }
+                }
+                let history = m.history[(m.cycle - this.followDelay) % 600]
+                Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
+            }
+        })
+        World.add(engine.world, bullet[me]); //add bullet to world
+        b.setDynamoBotDelay()
     },
     nailBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.nailBot()`);
@@ -2435,7 +2546,7 @@ const b = {
             drainThreshold: tech.isEnergyHealth ? 0.5 : 0.33,
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
             range: 700 * (1 + 0.1 * Math.random()) + 300 * tech.isLaserBotUpgrade,
-            followRange: 150 + Math.floor(30 * Math.random()),
+            playerRange: 150 + Math.floor(30 * Math.random()),
             offPlayer: {
                 x: 0,
                 y: 0,
@@ -2453,7 +2564,7 @@ const b = {
             onEnd() {},
             do() {
                 const playerPos = Vector.add(Vector.add(this.offPlayer, m.pos), Vector.mult(player.velocity, 20)) //also include an offset unique to this bot to keep many bots spread out
-                const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.followRange) //linear bounding well 
+                const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.playerRange) //linear bounding well 
                 const mag = Math.min(farAway, 4) * this.mass * this.acceleration
                 this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
                 //manual friction to not lose rotational velocity
@@ -3520,13 +3631,13 @@ const b = {
             name: "spores",
             description: "fire a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
             ammo: 0,
-            ammoPack: 3,
+            ammoPack: 3.5,
             have: false,
             fire() {
                 const me = bullet.length;
                 const dir = m.angle;
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 20, 4.5, b.fireAttributes(dir, false));
-                b.fireProps(m.crouch ? 50 : 30, m.crouch ? 30 : 16, dir, me); //cd , speed
+                b.fireProps(m.crouch ? 45 : 25, m.crouch ? 30 : 16, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
                 bullet[me].endCycle = Infinity;
                 bullet[me].frictionAir = 0;
@@ -3683,10 +3794,10 @@ const b = {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 35,
+            ammoPack: 36,
             have: false,
             fire() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 20 : 6) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 15 : 5) * b.fireCD); // cool down
                 const radius = (m.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
                 const SPEED = 18 - radius * 0.4;
                 const dir = m.angle + 0.2 * (Math.random() - 0.5)

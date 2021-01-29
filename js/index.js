@@ -857,7 +857,7 @@ window.addEventListener("keydown", function(event) {
                     x: 0,
                     y: 0
                 });
-                // move bots to follow player
+                // move bots to player
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType) {
                         Matter.Body.setPosition(bullet[i], Vector.add(player.position, {

@@ -19,7 +19,7 @@ const level = {
             // m.setField("plasma torch")
             // b.giveGuns("nail gun")
             // tech.isExplodeRadio = true
-            // tech.giveTech("needle gun")
+            for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
             // tech.giveTech("supercritical fission")
             // tech.giveTech("irradiated nails")
             // tech.giveTech("cardinality")
@@ -299,8 +299,9 @@ const level = {
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
         // spawn.shooter(1700, -120)
-        spawn.bomberBoss(1400, -500)
+        // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
+        // spawn.cellBossCulture(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.streamBoss(1600, -500)
         // spawn.beamer(1200, -500)
@@ -348,6 +349,7 @@ const level = {
         // spawn.randomBoss(1700, -900, 0.4);
         // if (simulation.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        // if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500); 
     },
     final() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -398,6 +400,7 @@ const level = {
         spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         spawn.mapRect(5425, -650, 375, 450); //blocking exit
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500);
     },
     gauntlet() {
         level.bossKilled = true; //if there is no boss this needs to be true to increase levels
@@ -460,6 +463,7 @@ const level = {
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(4125, -350);
     },
     intro() {
         level.bossKilled = true; //if there is no boss this needs to be true to increase levels
@@ -636,45 +640,45 @@ const level = {
                 spawn.wireKneeLeft();
                 spawn.wireHead();
             } else {
-                const say = []
-                if (localSettings.runCount > 200) { //experienced
-                    say.push(
-                        "I've been here before...",
-                        "How many times have I done this?",
-                    )
-                } else if (localSettings.runCount < 20) { //new 
-                    say.push(
-                        "Am I still alive?",
-                        "And I'm back here again...",
-                        "Is this another simulation?",
-                        "I'm alive...",
-                        "Last time was a simulation.  Is this one a simulation too?",
-                    )
-                }
-                if (simulation.difficultyMode < 4 && localSettings.levelsClearedLastGame > 10) { //too easy
-                    say.push(
-                        "That felt too easy.<br>Maybe I should increase the difficulty of the simulation.",
-                        "That was fun, but maybe I should increase the difficulty of the simulation.",
-                        "I should increase the difficulty of the simulation, that didn't feel realistic.",
-                    )
-                } else if (simulation.difficultyMode > 3 && localSettings.levelsClearedLastGame > 10) { //great run on a hard or why
-                    say.push(
-                        "What do I do after I escape?",
-                        "I'm almost ready to stop these simulations and actually escape.",
-                        "I think I'm getting closer to something, but what?",
-                        "I'm getting stronger.",
-                        "What happens after I escape?",
-                        "I found a good combination of technology last time."
-                    )
-                } else { //resolve
-                    say.push(
-                        "I'll try some different techs this time.",
-                        "I've got to escape.",
-                        "I'll find a way out.",
-                        "I keep forgetting that these are just simulated escapes."
-                    )
-                }
-                simulation.makeTextLog(say[Math.floor(say.length * Math.random())], 1000)
+                // const say = []
+                // if (localSettings.runCount > 200) { //experienced
+                //     say.push(
+                //         "I've been here before...",
+                //         "How many times have I done this?",
+                //     )
+                // } else if (localSettings.runCount < 20) { //new 
+                //     say.push(
+                //         "Am I still alive?",
+                //         "And I'm back here again...",
+                //         "Is this another simulation?",
+                //         "I'm alive...",
+                //         "Last time was a simulation.  Is this one a simulation too?",
+                //     )
+                // }
+                // if (simulation.difficultyMode < 4 && localSettings.levelsClearedLastGame > 10) { //too easy
+                //     say.push(
+                //         "That felt too easy.<br>Maybe I should increase the difficulty of the simulation.",
+                //         "That was fun, but maybe I should increase the difficulty of the simulation.",
+                //         "I should increase the difficulty of the simulation, that didn't feel realistic.",
+                //     )
+                // } else if (simulation.difficultyMode > 3 && localSettings.levelsClearedLastGame > 10) { //great run on a hard or why
+                //     say.push(
+                //         "What do I do after I escape?",
+                //         "I'm almost ready to stop these simulations and actually escape.",
+                //         "I think I'm getting closer to something, but what?",
+                //         "I'm getting stronger.",
+                //         "What happens after I escape?",
+                //         "I found a good combination of technology last time."
+                //     )
+                // } else { //resolve
+                //     say.push(
+                //         "I'll try some different techs this time.",
+                //         "I've got to escape.",
+                //         "I'll find a way out.",
+                //         "I keep forgetting that these are just simulated escapes."
+                //     )
+                // }
+                // simulation.makeTextLog(say[Math.floor(say.length * Math.random())], 1000)
 
                 const swapPeriod = 150
                 const len = 30
@@ -695,6 +699,7 @@ const level = {
             }
         }
         powerUps.spawnStartingPowerUps(2300, -150);
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(1900, -675);
     },
     testChamber() {
         level.setPosToSpawn(0, -50); //lower start
@@ -767,7 +772,6 @@ const level = {
                     }
                 }
             }
-
 
             buttonDoor.query();
             buttonDoor.draw();
@@ -961,6 +965,7 @@ const level = {
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(1925, -1250);
     },
     sewers() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -1106,6 +1111,7 @@ const level = {
         spawn.randomMob(2825, 400, 0.9);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
     satellite() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -1312,6 +1318,7 @@ const level = {
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(3950, -850);
     },
     rooftops() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -1535,6 +1542,7 @@ const level = {
         spawn.randomBoss(4900, -1200, 0);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -2050);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(2175, -2425);
     },
     aerie() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -1744,6 +1752,7 @@ const level = {
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(5350, -325);
     },
     skyscrapers() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -1905,6 +1914,7 @@ const level = {
         spawn.randomBoss(1700, -900, 0.4);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(3075, -2050);
     },
     highrise() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -2104,6 +2114,7 @@ const level = {
 
         if (simulation.difficulty > 3) spawn.randomLevelBoss(-2400, -3000);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(-1825, -1975);
     },
     warehouse() {
         level.bossKilled = false; // if a boss needs to be killed
@@ -2275,10 +2286,12 @@ const level = {
             if (Math.random() < 0.25) {
                 spawn.randomLevelBoss(-800, -1300)
             } else {
-                spawn.snakeBoss(-1000 + Math.random() * 1500, -2200); //boss snake with head
+                spawn.snakeBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(300, -800);
     },
     office() {
         let button, door
@@ -2478,6 +2491,7 @@ const level = {
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (tech.isDuplicateBoss && Math.random() < 3 * tech.duplicationChance()) spawn.randomLevelBoss(1875, -675);
     },
     stronghold() { // player made level  by    Francois 👑 from discord
         level.custom = () => {
@@ -4452,7 +4466,7 @@ const level = {
                 }
                 let v = Vector.mult(this.portalPair.unit, mag)
                 Matter.Body.setVelocity(player, v);
-                // move bots to follow player
+                // move bots to player
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType) {
                         // Matter.Body.setPosition(bullet[i], this.portalPair.portal.position);

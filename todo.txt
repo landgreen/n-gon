@@ -1,10 +1,17 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-unified field theory doesn't require research to cycle fields
+tech: cloning - chance to spawn another level boss = 3x your duplication chance
 
-game resets after beating final boss (in 20s)
+tech: dynamo-bot: a bot follows your history, damages mobs, and regens energy when it gets close
+tech: dynamo upgrade: more energy regen
 
 ******************************************************** BUGS ********************************************************
+
+(only once on my computer) once every 7 second check isn't running code
+    power ups don't teleport to exit
+    complex spin statistics isn't activating
+  wasn't able to understand bug after extensive testing
+  had tech: complex spin statistics
 
 (a few times) wormhole teleportation can leave the player in a stuck jump state
   seems to be easily fixed, by porting, firing or something
@@ -24,7 +31,7 @@ game resets after beating final boss (in 20s)
 
 ******************************************************** TODO ********************************************************
 
-exiting the final boss room without 10/10 takes you to the start menu
+smooth history following for dynamo-bot?
 
 give undefined tech different effects at different localSettings.loreCount values
   or just random effects
@@ -33,8 +40,6 @@ give undefined tech different effects at different localSettings.loreCount value
   2. 3/3: increase game difficulty, and send more tech into the pool
   3. 1/1: reduce max energy and take more harm
   4. 1/1: add 5? more levels
-
-lore add console command for unlocking testing mode
 
 rename ?
   health -> integrity, unity
@@ -46,27 +51,15 @@ mechanic: use gun swap as an active ability
     trigger damage immunity for 3 seconds, but drain ammo
     push away nearby mobs, but drain energy
     produce ammo, but take 1 damage
-    rewind, still uses energy
 
 bot: ice blast,  long CD AOE freeze
 
 RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
 
-tech: double your rerolls
+tech: double your research
   set your duplication chance to zero
   requires 5 rerolls and 20% duplication chance
   might want to use a single variable for all duplication
-
-bot that follows the players history
-  could have the same shape as the m circle head
-  1st bot is at 5s, 2nd is at 4.5s, ...
-  bots don't get too close to player
-    run smoothing on position update, don't update if close to player, based on ordering
-  effect: (one of these can be the upgrade effect)
-    give player energy overfill
-    AOE damage to mobs
-    push away mobs
-    when close to player: damage bonus    damage reduction
 
 tech: dodge chance for cloaking, harmonic fields, also pilot wave
   20% chance up to 3 stacks, not additive
@@ -84,8 +77,6 @@ tech: time dilation - when you exit time dilation rewind to the state you entere
   no energy cost
 
 mob ability bombs/bullets that suck in player
-
-tech where you can't stop firing,  how to code?
 
 mechanic: technological dead end - add tech to the tech pool with a dumb effect
   don't show up in custom?
@@ -106,22 +97,7 @@ mechanic: technological dead end - add tech to the tech pool with a dumb effect
     remove your bots (requires you to have some bots)
     your bots are changed to random bots
 
-tech "Expansion Formula": Permanently increase the size of Negative Mass field by 16%(Max 96%)
-
-
-tech "High Risk": Spawn two bosses per level.
-  maybe limit to just the power up boss and spawn it at the exit every time to keep it simple
-  also weaken the player
-    remove a tech?
-    lower harm reduction?
-    increase game difficulty by one level
-
 tech that requires integrated armament
-
-tech- reset level
-  you trade a tech for a chance at killing a new level boss and farming more ammo
-  resets health, ammo  (but not tech, fields, guns, ... ?)
-  scramble level order? or same level
 
 mechanic - Your energy regen is only active when field and gun have not been used for 5 seconds.
 

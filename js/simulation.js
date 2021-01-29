@@ -530,9 +530,10 @@ const simulation = {
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
         }
+        tech.dynamoBotCount = 0;
+        tech.nailBotCount = 0;
         tech.laserBotCount = 0;
         tech.orbitBotCount = 0;
-        tech.nailBotCount = 0;
         tech.foamBotCount = 0;
         tech.boomBotCount = 0;
         tech.plasmaBotCount = 0;

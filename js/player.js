@@ -52,7 +52,7 @@ const m = {
         });
         World.add(engine.world, m.holdConstraint);
     },
-    cycle: 300, //starts at 300 cycles instead of 0 to prevent bugs with m.history
+    cycle: 600, //starts at 600 cycles instead of 0 to prevent bugs with m.history
     lastKillCycle: 0,
     lastHarmCycle: 0,
     width: 50,
@@ -467,7 +467,7 @@ const m = {
     },
     displayHealth() {
         id = document.getElementById("health");
-        // health display follows a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
+        // health display is a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
         id.style.width = Math.floor(300 * m.maxHealth * Math.pow(m.health / m.maxHealth, 1.4)) + "px";
         //css animation blink if health is low
         if (m.health < 0.3) {
@@ -556,7 +556,7 @@ const m = {
         // simulation.updateGunHUD();
         // simulation.boldActiveGunHUD();
 
-        // move bots to follow player
+        // move bots to player
         for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType) {
                 Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
@@ -2540,7 +2540,7 @@ const m = {
                                 y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
                             });
                             m.immuneCycle = m.cycle + 15; //player is immune to collision damage 
-                            // move bots to follow player
+                            // move bots to player
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType) {
                                     Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
