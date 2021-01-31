@@ -2281,8 +2281,9 @@ const b = {
             botType: "dynamo",
             friction: 0,
             frictionStatic: 0,
-            frictionAir: 1,
-            isStatic: true,
+            frictionAir: 0.02,
+            spin: 0.07 * (Math.random() < 0.5 ? -1 : 1),
+            // isStatic: true,  
             isSensor: true,
             restitution: 0,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
@@ -2308,7 +2309,7 @@ const b = {
                 // }
                 if (!((m.cycle + this.phase) % 30)) { //twice a second
                     if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 250) { //give energy
-                        // Matter.Body.setAngularVelocity(this, 10)
+                        Matter.Body.setAngularVelocity(this, this.spin)
                         if (this.isUpgraded) {
                             m.energy += 0.06
                             simulation.drawList.push({ //add dmg to draw queue
@@ -2344,6 +2345,7 @@ const b = {
                         }
                     })
                     for (let i = 0; i < q.length; i++) {
+                        Matter.Body.setAngularVelocity(this, this.spin)
                         // mobs.statusStun(q[i], 180)
                         // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
                         const dmg = 0.5 * b.dmgScale

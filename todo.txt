@@ -1,5 +1,9 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+tech cloning requires > 25% dup chance, and is now only 2x (was 3x) your dup chance for a second boss
+playing with the 4 community levels now removes 4 random levels from the level list
+
+tech: dark patterns - reduce combat difficulty by 1 level and add 16 junk tech to the potential tech pool
 
 ******************************************************** BUGS ********************************************************
 
@@ -27,7 +31,23 @@
 
 ******************************************************** TODO ********************************************************
 
-smooth history following for dynamo-bot?
+reduce 3 difficulty, randomize all mods when you...
+  take damage
+  switch guns
+  pick up a tech
+
+add back in gamepad support
+  https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
+
+mechanic: gain damage when there are fewer bullets
+
+mechanic: untested tech
+  negative effect (one time effects are better to avoid code clutter)
+    change the player draw to some of the dumb stuff in discord console
+    convert your bots to research (requires you to have some bots)
+    your bots are changed to random bots
+
+rename intro level to something lore related
 
 give undefined tech different effects at different localSettings.loreCount values
   or just random effects
@@ -52,11 +72,6 @@ bot: ice blast,  long CD AOE freeze
 
 RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
 
-tech: double your research
-  set your duplication chance to zero
-  requires 5 rerolls and 20% duplication chance
-  might want to use a single variable for all duplication
-
 tech: dodge chance for cloaking, harmonic fields, also pilot wave
   20% chance up to 3 stacks, not additive
     0.8^count
@@ -74,25 +89,6 @@ tech: time dilation - when you exit time dilation rewind to the state you entere
 
 mob ability bombs/bullets that suck in player
 
-mechanic: technological dead end - add tech to the tech pool with a dumb effect
-  don't show up in custom?
-  negative effect (one time effects are better to avoid code clutter)
-    make the player rainbow colors
-      m.color = {
-        hue: 0,
-        sat: 100,
-        light: 50
-      }
-      setInterval(function(){
-          m.color.hue++
-          m.setFillColors()
-      }, 10);
-    remove all your energy
-    eject all your rerolls (not bad with dup)
-    teleport to the start of the level
-    remove your bots (requires you to have some bots)
-    your bots are changed to random bots
-
 tech that requires integrated armament
 
 mechanic - Your energy regen is only active when field and gun have not been used for 5 seconds.
@@ -108,8 +104,6 @@ tech power up magnetism - power ups drift towards player
 
 super balls start at 3, not 4
   have to balance damage
-
-RPG might need a buff, now that it disables the other cool grenade tech
 
 make different move methods
   tech crouch charge jump
@@ -142,8 +136,6 @@ mob vision: look at player history
     https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
 
 wormhole - make it clear when the wormhole can and can't teleport to a location before the player clicks
-
-time dilation - slow down the game engine by 1/2, but run an extra player cycle to simulate slow motion
 
 flavor - your bullets destroy blocks
   this isn't really a bonus, so maybe just add this as flavor to another tech field/gun

@@ -515,6 +515,7 @@ const simulation = {
             level.levels.push("basement");
             level.levels.push("detours");
             level.levels.push("house");
+            level.levels.splice(0, 4); //remove 4 random levels to make up for adding the 4 community levels
         }
         level.levels = shuffle(level.levels); //shuffles order of maps
         level.levels.unshift("intro"); //add level to the start of the randomized levels list

@@ -65,6 +65,7 @@ window.addEventListener('load', (event) => {
         //add experimental selections based on url
         for (const property in set) {
             set[property] = set[property].replace(/%20/g, " ")
+            set[property] = set[property].replace(/%27/g, "'")
             set[property] = set[property].replace(/%CE%A8/g, "Ψ")
             if (property === "field") {
                 let found = false
@@ -744,45 +745,45 @@ window.addEventListener("keydown", function(event) {
                         tech.removeLoreTechFromPool();
                     }
                     simulation.makeTextLog(
-                        `<table id="control-table">
+                        `<table class="pause-table">
                             <tr>
-                                <td class='key-input'>T</td>
-                                <td class='key-used'><strong>enter / exit testing mode</strong></td>
+                                <td class='key-input-pause'>T</td>
+                                <td class='key-used'><strong>toggle testing</strong></td>
                             </tr>
                             <tr>
-                                <td class='key-input'>R</td>
+                                <td class='key-input-pause'>R</td>
                                 <td class='key-used'>teleport to mouse</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>F</td>
+                                <td class='key-input-pause'>F</td>
                                 <td class='key-used'>cycle field</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>G</td>
+                                <td class='key-input-pause'>G</td>
                                 <td class='key-used'>all guns</td>
                             </tr>                            
                             <tr>
-                                <td class='key-input'>H</td>
-                                <td class='key-used'>fill health and energy</td>
+                                <td class='key-input-pause'>H</td>
+                                <td class='key-used'>fill health, energy</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>Y</td>
+                                <td class='key-input-pause'>Y</td>
                                 <td class='key-used'>random tech</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>U</td>
+                                <td class='key-input-pause'>U</td>
                                 <td class='key-used'>next level</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>I/O</td>
+                                <td class='key-input-pause'>I/O</td>
                                 <td class='key-used'>zoom in / out</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>1-8</td>
+                                <td class='key-input-pause'>1-8</td>
                                 <td class='key-used'>spawn things</td>
                             </tr>
                             <tr>
-                                <td class='key-input'>⇧X</td>
+                                <td class='key-input-pause'>⇧X</td>
                                 <td class='key-used'>restart</td>
                             </tr>    
                         </table>`, Infinity);

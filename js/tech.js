@@ -7,6 +7,7 @@ const tech = {
             tech.tech[i].count = 0
         }
         lore.techCount = 0;
+        tech.removeJunkTechFromPool();
         tech.removeLoreTechFromPool();
         tech.addLoreTechToPool();
         tech.armorFromPowerUps = 0;
@@ -19,16 +20,13 @@ const tech = {
         simulation.updateTechHUD();
     },
     removeLoreTechFromPool() {
-        // for (let i = 0, len = tech.tech.length; i < len; i++) {
-        //     if (tech.tech[i].isLore) {
-        //         console.log('found one')
-        //         tech.tech.splice(i, 1)
-        //         tech.removeLoreTechFromPool();
-        //         return;
-        //     }
-        // }
         for (let i = tech.tech.length - 1; i > 0; i--) {
             if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech.splice(i, 1)
+        }
+    },
+    removeJunkTechFromPool() {
+        for (let i = tech.tech.length - 1; i > 0; i--) {
+            if (tech.tech[i].isJunk && tech.tech[i].count === 0) tech.tech.splice(i, 1)
         }
     },
     giveTech(index = 'random') {
@@ -935,7 +933,7 @@ const tech = {
         },
         {
             name: "dynamo-bot upgrade",
-            description: "dynamo-bots <strong>regen</strong> <strong>12</strong> <strong class='color-f'>energy</strong> per second<br><em>applies to all current and future orbit-bots</em>",
+            description: "dynamo-bots <strong>regen</strong> <strong>12</strong> <strong class='color-f'>energy</strong> per second<br><em>applies to all current and future dynamo-bots</em>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1782,7 +1780,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() > 0
+                return tech.duplicationChance() > 0.15
             },
             requires: "some duplication chance",
             effect() {
@@ -1794,11 +1792,11 @@ const tech = {
         },
         {
             name: "cloning",
-            description: "each level has a chance to spawn a <strong>level boss</strong><br>equal to <strong>triple</strong> your <strong class='color-dup'>duplication</strong> chance",
+            description: "each level has a chance to spawn a <strong>level boss</strong><br>equal to <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() > 0
+                return tech.duplicationChance() > 0.25
             },
             requires: "some duplication chance",
             effect() {
@@ -1975,6 +1973,23 @@ const tech = {
             }
         },
         {
+            name: "dark patterns",
+            description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>16</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            maxCount: 1,
+            isNonRefundable: true,
+            isCustomHide: true,
+            count: 0,
+            allowed() {
+                return powerUps.research.count === 0 && level.onLevel < 6
+            },
+            requires: "no research, and in the first 5 levels",
+            effect() {
+                level.difficultyDecrease(simulation.difficultyMode)
+                for (let i = 0; i < 160; i++) tech.tech.push(tech.junk[Math.floor(Math.random() * tech.junk.length)])
+            },
+            remove() {}
+        },
+        {
             name: "cardinality",
             description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
             maxCount: 1,
@@ -2002,9 +2017,8 @@ const tech = {
             requires: "not cardinality, not futures or commodities exchanges",
             effect: () => {
                 tech.isDeterminism = true;
-                for (let i = 0; i < 5; i++) { //if you change the six also change it in Born rule
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                }
+                //if you change the six also change it in Born rule
+                for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech");
             },
             remove() {
                 tech.isDeterminism = false;
@@ -3311,7 +3325,7 @@ const tech = {
             },
             remove() {
                 if (tech.isWideLaser) {
-                    tech.wideLaser = 0
+                    // tech.wideLaser = 0
                     tech.isWideLaser = false;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -4034,9 +4048,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                for (let i = 0; i < 6; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "heal");
-                }
+                for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "heal");
                 this.count--
             },
             remove() {}
@@ -4053,9 +4065,7 @@ const tech = {
             },
             requires: "not exciton lattice",
             effect() {
-                for (let i = 0; i < 6; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "ammo");
-                }
+                for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
                 this.count--
             },
             remove() {}
@@ -4072,9 +4082,7 @@ const tech = {
             },
             requires: "not superdeterminism",
             effect() {
-                for (let i = 0; i < 4; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "research");
-                }
+                for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
                 this.count--
             },
             remove() {}
@@ -4143,6 +4151,348 @@ const tech = {
             remove() {}
         })
     },
+    junk: [
+        // {
+        //     name: "junk",
+        //     description: "",
+        //     maxCount: 9,
+        //     count: 0,
+        //     isNonRefundable: true,
+        //     isCustomHide: true,
+        //     isJunk: true,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+
+        //     },
+        //     remove() {}
+        // },
+        {
+            name: "Sleipnir",
+            description: "grow more legs",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                m.draw = function() {
+                    ctx.fillStyle = m.fillColor;
+                    m.walk_cycle += m.flipLegs * m.Vx;
+
+                    //draw body
+                    ctx.save();
+                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                    ctx.translate(m.pos.x, m.pos.y);
+                    for (let i = 0; i < 16; i++) {
+                        m.calcLeg(Math.PI * i / 8, -3 * i / 16)
+                        m.drawLeg("#444")
+                    }
+                    ctx.rotate(m.angle);
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                    grd.addColorStop(0, m.fillColorDark);
+                    grd.addColorStop(1, m.fillColor);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    // ctx.beginPath();
+                    // ctx.arc(15, 0, 3, 0, 2 * Math.PI);
+                    // ctx.fillStyle = '#0cf';
+                    // ctx.fill()
+                    ctx.restore();
+                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                }
+            },
+            remove() {}
+        },
+        {
+            name: "pareidolia",
+            description: "don't",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                m.draw = function() {
+                    ctx.fillStyle = m.fillColor;
+                    m.walk_cycle += m.flipLegs * m.Vx;
+                    ctx.save();
+                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.7
+                    ctx.translate(m.pos.x, m.pos.y);
+                    m.calcLeg(Math.PI, -3);
+                    m.drawLeg("#4a4a4a");
+                    m.calcLeg(0, 0);
+                    m.drawLeg("#333");
+                    ctx.rotate(m.angle);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                    grd.addColorStop(0, m.fillColorDark);
+                    grd.addColorStop(1, m.fillColor);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) ctx.scale(1, -1); //here is the flip
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(2, -6, 7, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(25, -6, 7, 0.25 * Math.PI, 1.6 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(2, -10, 9, 1.25 * Math.PI, 1.75 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(25, -10, 9, 1.25 * Math.PI, 1.4 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(18, 13, 10, 0, 2 * Math.PI);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(18, 13, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#555";
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(3, -6, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(26, -6, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15;
+                }
+            },
+            remove() {}
+        },
+        {
+            name: "prism",
+            description: "you cycle through different <strong>colors</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                m.color = {
+                    hue: 0,
+                    sat: 100,
+                    light: 50
+                }
+                setInterval(function() {
+                    m.color.hue++
+                    m.setFillColors()
+                }, 10);
+            },
+            remove() {}
+        },
+        {
+            name: "assimilation",
+            description: "all your <strong>bots</strong> are converted to the <strong>same</strong> random model",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return tech.totalBots() > 2
+            },
+            requires: "at least 3 bots",
+            effect() {
+                const total = tech.totalBots();
+                tech.dynamoBotCount = 0;
+                tech.nailBotCount = 0;
+                tech.laserBotCount = 0;
+                tech.orbitBotCount = 0;
+                tech.foamBotCount = 0;
+                tech.boomBotCount = 0;
+                tech.plasmaBotCount = 0;
+                tech.missileBotCount = 0;
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) bullet[i].endCycle = 0
+                }
+
+                const bots = [
+                    () => {
+                        b.nailBot();
+                        tech.nailBotCount++;
+                    },
+                    () => {
+                        b.foamBot();
+                        tech.foamBotCount++;
+                    },
+                    () => {
+                        b.boomBot();
+                        tech.boomBotCount++;
+                    },
+                    () => {
+                        b.laserBot();
+                        tech.laserBotCount++;
+                    },
+                    () => {
+                        b.orbitBot();
+                        tech.orbitBotCount++
+                    },
+                    () => {
+                        b.dynamoBot();
+                        tech.dynamoBotCount++
+                    }
+                ]
+                const index = Math.floor(Math.random() * bots.length)
+                for (let i = 0; i < total; i++) bots[index]()
+            },
+            remove() {}
+        },
+        {
+            name: "growth hacking",
+            description: "increase combat <strong>difficulty</strong> by <strong>1 level</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                level.difficultyIncrease(simulation.difficultyMode)
+            },
+            remove() {}
+        },
+        {
+            name: "stun",
+            description: "<strong>stun</strong> all mobs for up to <strong>10</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 600)
+            },
+            remove() {}
+        },
+        {
+            name: "re-arm",
+            description: "<strong>eject</strong> all your <strong class='color-g'>guns</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return b.inventory.length > 0
+            },
+            requires: "at least 1 gun",
+            effect() {
+                for (let i = 0; i < b.inventory.length; i++) powerUps.spawn(m.pos.x, m.pos.y, "gun");
+
+                //removes guns and ammo  
+                b.inventory = [];
+                b.activeGun = null;
+                b.inventoryGun = 0;
+                for (let i = 0, len = b.guns.length; i < len; ++i) {
+                    b.guns[i].have = false;
+                    if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
+                }
+                simulation.makeGunHUD(); //update gun HUD
+            },
+            remove() {}
+        },
+        {
+            name: "re-research",
+            description: "<strong>eject</strong> all your <strong class='color-r'>research</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return powerUps.research.count > 3
+            },
+            requires: "at least 4 research",
+            effect() {
+                for (let i = 0; i < powerUps.research.count; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
+                powerUps.research.count = 0
+            },
+            remove() {}
+        },
+        {
+            name: "quantum black hole",
+            description: "use all your <strong class='color-f'>energy</strong> to<br><strong>spawn</strong> inside the event horizon of a <strong>black hole boss</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                m.energy = 0
+                spawn.suckerBoss(m.pos.x, m.pos.y - 1000)
+            },
+            remove() {}
+        },
+        {
+            name: "black hole cluster",
+            description: "spawn <strong>2</strong> <strong class='color-r'>research</strong><br><strong>spawn</strong> 40 nearby <strong>black holes</strong>",
+            maxCount: 1,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
+                const unit = {
+                    x: 1,
+                    y: 0
+                }
+                for (let i = 0; i < 40; i++) {
+                    const where = Vector.add(m.pos, Vector.mult(Vector.rotate(unit, Math.random() * 2 * Math.PI), 600 + 800 * Math.random()))
+                    spawn.sucker(where.x, where.y)
+                }
+            },
+            remove() {}
+        },
+    ],
     //variables use for gun tech upgrades
     fireRate: null,
     bulletSize: null,
@@ -4337,5 +4687,5 @@ const tech = {
     isGunSwitchField: null,
     isNeedleShieldPierce: null,
     isDuplicateBoss: null,
-    isDynamoBotUpgrade: null
+    isDynamoBotUpgrade: null,
 }

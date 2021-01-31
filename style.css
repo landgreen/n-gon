@@ -84,6 +84,19 @@ td {
     text-align: center;
 }
 
+.pause-table {
+    width: auto;
+}
+
+.key-input-pause {
+    width: 15px;
+    padding: 0px 2px;
+    border: 2px solid #333;
+    /* border-radius: 50px; */
+    background-color: #fff;
+    text-align: center;
+}
+
 .key-used {
     color: #777;
     font-size: 80%;
