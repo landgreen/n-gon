@@ -711,7 +711,7 @@ const tech = {
         },
         {
             name: "nail-bot",
-            description: "a bot fires <strong>nails</strong> at targets in line of sight",
+            description: "a bot fires <strong>nails</strong> at mobs in line of sight",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -750,7 +750,7 @@ const tech = {
         },
         {
             name: "foam-bot",
-            description: "a bot fires <strong>foam</strong> at nearby targets",
+            description: "a bot fires <strong>foam</strong> at nearby mobs",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1985,7 +1985,7 @@ const tech = {
             requires: "no research, and in the first 5 levels",
             effect() {
                 level.difficultyDecrease(simulation.difficultyMode)
-                for (let i = 0; i < 160; i++) tech.tech.push(tech.junk[Math.floor(Math.random() * tech.junk.length)])
+                for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
             },
             remove() {}
         },
@@ -2811,7 +2811,7 @@ const tech = {
         },
         {
             name: "missile-bot",
-            description: "a bot fires <strong>missiles</strong> at far away targets",
+            description: "a bot fires <strong>missiles</strong> at far away mobs",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4169,6 +4169,29 @@ const tech = {
         //     },
         //     remove() {}
         // },
+        {
+            name: "inverted input",
+            description: "left input becomes right and up input becomes down",
+            maxCount: 9,
+            count: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                const left = input.key.left
+                input.key.left = input.key.right
+                input.key.right = left
+
+                const up = input.key.up
+                input.key.up = input.key.down
+                input.key.down = up
+            },
+            remove() {}
+        },
         {
             name: "Sleipnir",
             description: "grow more legs",

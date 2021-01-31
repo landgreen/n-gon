@@ -41,11 +41,8 @@ add back in gamepad support
 
 mechanic: gain damage when there are fewer bullets
 
-mechanic: untested tech
-  negative effect (one time effects are better to avoid code clutter)
-    change the player draw to some of the dumb stuff in discord console
-    convert your bots to research (requires you to have some bots)
-    your bots are changed to random bots
+junk tech
+  switch input keys: left-right, up-down?
 
 rename intro level to something lore related
 
