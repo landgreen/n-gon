@@ -21,7 +21,7 @@ const spawn = {
         "ghoster",
         "sneaker",
     ],
-    allowedBossList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper"],
+    allowedGroupList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper"],
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
         //each level has 2 mobs: one new mob and one from the last level
         spawn.pickList.splice(0, 1);
@@ -47,41 +47,41 @@ const spawn = {
             }
         }
     },
-    randomBoss(x, y, chance = 1) {
+    randomGroup(x, y, chance = 1) {
         if (spawn.spawnChance(chance) && simulation.difficulty > 2 || chance == Infinity) {
             //choose from the possible picklist
             let pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
-            //is the pick able to be a boss?
-            let canBeBoss = false;
-            for (let i = 0, len = this.allowedBossList.length; i < len; ++i) {
-                if (this.allowedBossList[i] === pick) {
-                    canBeBoss = true;
+            //is the pick able to be a group?
+            let canBeGroup = false;
+            for (let i = 0, len = this.allowedGroupList.length; i < len; ++i) {
+                if (this.allowedGroupList[i] === pick) {
+                    canBeGroup = true;
                     break;
                 }
             }
-            if (canBeBoss) {
+            if (canBeGroup) {
                 if (Math.random() < 0.55) {
-                    this.nodeBoss(x, y, pick);
+                    this.nodeGroup(x, y, pick);
                 } else {
-                    this.lineBoss(x, y, pick);
+                    this.lineGroup(x, y, pick);
                 }
             } else {
                 if (Math.random() < 0.07) {
                     this[pick](x, y, 90 + Math.random() * 40); //one extra large mob
                 } else if (Math.random() < 0.35) {
-                    this.groupBoss(x, y) //hidden grouping blocks
+                    this.blockGroup(x, y) //hidden grouping blocks
                 } else {
                     pick = (Math.random() < 0.5) ? "randomList" : "random";
                     if (Math.random() < 0.55) {
-                        this.nodeBoss(x, y, pick);
+                        this.nodeGroup(x, y, pick);
                     } else {
-                        this.lineBoss(x, y, pick);
+                        this.lineGroup(x, y, pick);
                     }
                 }
             }
         }
     },
-    randomLevelBoss(x, y, options = ["shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
+    randomLevelBoss(x, y, options = ["historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //all need a particular level to work so they are not included
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -297,7 +297,7 @@ const spawn = {
             //when player is inside event horizon
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                 if (m.energy > 0) m.energy -= 0.01
-                if (m.energy < 0.15) {
+                if (m.energy < 0.15 && m.immuneCycle < m.cycle) {
                     m.damage(0.0004 * simulation.dmgScale);
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
@@ -443,7 +443,7 @@ const spawn = {
             }
         }
     },
-    groupBoss(x, y, num = 3 + Math.random() * 8) {
+    blockGroup(x, y, num = 3 + Math.random() * 8) {
         for (let i = 0; i < num; i++) {
             const radius = 25 + Math.floor(Math.random() * 20)
             spawn.grouper(x + Math.random() * radius, y + Math.random() * radius, radius);
@@ -875,7 +875,7 @@ const spawn = {
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                     if (m.energy > 0) m.energy -= 0.004
-                    if (m.energy < 0.1) {
+                    if (m.energy < 0.1 && m.immuneCycle < m.cycle) {
                         m.damage(0.00015 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
@@ -981,7 +981,7 @@ const spawn = {
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                     if (m.energy > 0) m.energy -= 0.006
-                    if (m.energy < 0.1) {
+                    if (m.energy < 0.1 && m.immuneCycle < m.cycle) {
                         m.damage(0.0002 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
@@ -1065,7 +1065,7 @@ const spawn = {
         const nodes = 6
         const angle = 2 * Math.PI / nodes
 
-        spawn.allowShields = false; //don't want shields on individual boss mobs
+        spawn.allowShields = false; //don't want shields on individual mobs
 
         for (let i = 0; i < nodes; ++i) {
             spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
@@ -1086,7 +1086,7 @@ const spawn = {
             World.add(engine.world, consBB[consBB.length - 1]);
         }
         //spawn shield around all nodes
-        spawn.bossShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
+        spawn.groupShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
         spawn.allowShields = true;
     },
     timeSkipBoss(x, y, radius = 55) {
@@ -1185,8 +1185,94 @@ const spawn = {
             this.checkStatus();
             this.attraction();
             this.repulsion();
-            //laser beam
             this.laserBeam();
+        };
+    },
+    historyBoss(x, y, radius = 30) {
+        if (tech.dynamoBotCount > 0) {
+            spawn.randomLevelBoss(x, y, ["cellBossCulture", "bomberBoss", "powerUpBoss"])
+            return
+        }
+        mobs.spawn(x, y, 0, radius, "transparent");
+        let me = mob[mob.length - 1];
+        Matter.Body.setDensity(me, 0.3); //extra dense //normal is 0.001
+        me.laserRange = 550;
+        me.seeAtDistance2 = 2000000;
+        me.showHealthBar = false; //drawn in this.awake
+        me.delayLimit = 60 + Math.floor(60 * Math.random());
+        me.followDelay = 600 - Math.floor(60 * Math.random())
+        me.stroke = "transparent"; //used for drawGhost
+        me.collisionFilter.mask = cat.bullet
+        me.memory = Infinity
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.awake = function() {
+            this.checkStatus();
+
+            //health bar needs to be here because the position is being set
+            const h = this.radius * 0.3;
+            const w = this.radius * 2;
+            const x = this.position.x - w / 2;
+            const y = this.position.y - w * 0.7;
+            ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = "rgba(150,0,255,0.7)";
+            ctx.fillRect(x, y, w * this.health, h);
+
+            //draw eye
+            const unit = Vector.normalise(Vector.sub(m.pos, this.position))
+            const eye = Vector.add(Vector.mult(unit, 15), this.position)
+            ctx.beginPath();
+            ctx.arc(eye.x, eye.y, 4, 0, 2 * Math.PI);
+            ctx.moveTo(this.position.x + 20 * unit.x, this.position.y + 20 * unit.y);
+            ctx.lineTo(this.position.x + 30 * unit.x, this.position.y + 30 * unit.y);
+            ctx.strokeStyle = this.stroke;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
+            // ctx.lineDashOffset = 6*(simulation.cycle % 215);
+            if (this.distanceToPlayer() < this.laserRange) {
+                if (m.energy > 0.003) m.energy -= 0.003
+                if (m.immuneCycle < m.cycle && m.energy < 0.1) m.damage(0.0003 * simulation.dmgScale);
+                ctx.beginPath();
+                ctx.moveTo(eye.x, eye.y);
+                ctx.lineTo(m.pos.x, m.pos.y);
+                ctx.lineTo(m.pos.x + (Math.random() - 0.5) * 3000, m.pos.y + (Math.random() - 0.5) * 3000);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "rgb(150,0,255)";
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
+                ctx.fillStyle = "rgba(150,0,255,0.15)";
+                ctx.fill();
+            }
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);
+            ctx.strokeStyle = "rgba(150,0,255,0.5)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = "rgba(150,0,255,0.03)";
+            ctx.fill();
+            if (!m.isBodiesAsleep && !this.isStunned && !this.isSlowed) {
+                if (this.followDelay > this.delayLimit) this.followDelay -= 0.2;
+                let history = m.history[(m.cycle - Math.floor(this.followDelay)) % 600]
+                Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
+            }
+        }
+
+        me.do = function() {
+            if (this.seePlayer.recall || (!(simulation.cycle % this.seePlayerFreq) && this.distanceToPlayer2() < this.seeAtDistance2 && !m.isCloak)) {
+                setTimeout(() => {
+                    this.do = this.awake
+                    this.stroke = "rgba(205,0,255,0.5)"
+                    this.fill = "rgba(205,0,255,0.1)"
+                    this.seePlayer.yes = true
+                }, 2000);
+            }
+            this.checkStatus();
         };
     },
     focuser(x, y, radius = 30 + Math.ceil(Math.random() * 10)) {
@@ -2403,8 +2489,8 @@ const spawn = {
 
         //snake tail
         const nodes = Math.min(8 + Math.ceil(0.5 * simulation.difficulty), 40)
-        spawn.lineBoss(x + 105, y, "snakeBody", nodes);
-        //constraint boss with first 3 mobs in lineboss
+        spawn.lineGroup(x + 105, y, "snakeBody", nodes);
+        //constraint with first 3 mobs in line
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes],
             bodyB: mob[mob.length - 1 - nodes],
@@ -2520,7 +2606,7 @@ const spawn = {
             };
         }
     },
-    bossShield(targets, x, y, radius, stiffness = 0.4) {
+    groupShield(targets, x, y, radius, stiffness = 0.4) {
         const nodes = targets.length
         mobs.spawn(x, y, 9, radius, "rgba(220,220,255,0.9)");
         let me = mob[mob.length - 1];
@@ -2532,7 +2618,7 @@ const spawn = {
         me.collisionFilter.mask = cat.bullet;
         for (let i = 0; i < nodes; ++i) {
             mob[mob.length - i - 2].isShielded = true;
-            //constrain to all mob nodes in boss
+            //constrain to all mob nodes in group
             consBB[consBB.length] = Constraint.create({
                 bodyA: me,
                 bodyB: mob[mob.length - i - 2],
@@ -2567,7 +2653,7 @@ const spawn = {
     //complex constrained mob templates**********************************************************************
     //*******************************************************************************************************
     allowShields: true,
-    nodeBoss(
+    nodeGroup(
         x,
         y,
         spawn = "striker",
@@ -2577,7 +2663,7 @@ const spawn = {
         sideLength = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
         stiffness = Math.random() * 0.03 + 0.005
     ) {
-        this.allowShields = false; //don't want shields on individual boss mobs
+        this.allowShields = false; //don't want shields on individual group mobs
         const angle = 2 * Math.PI / nodes
         let targets = []
         for (let i = 0; i < nodes; ++i) {
@@ -2588,20 +2674,20 @@ const spawn = {
                 whoSpawn = this.pickList[Math.floor(Math.random() * this.pickList.length)];
             }
             this[whoSpawn](x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
-            targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
+            targets.push(mob[mob.length - 1].id) //track who is in the group, for shields
         }
         if (Math.random() < 0.3) {
             this.constrain2AdjacentMobs(nodes, stiffness * 2, true);
         } else {
             this.constrainAllMobCombos(nodes, stiffness);
         }
-        //spawn shield for entire boss
+        //spawn shield for entire group
         if (nodes > 2 && Math.random() < 0.998) {
-            this.bossShield(targets, x, y, sideLength + 2.5 * radius + nodes * 6 - 25);
+            this.groupShield(targets, x, y, sideLength + 2.5 * radius + nodes * 6 - 25);
         }
         this.allowShields = true;
     },
-    lineBoss(
+    lineGroup(
         x,
         y,
         spawn = "striker",
@@ -2611,7 +2697,7 @@ const spawn = {
         l = Math.ceil(Math.random() * 80) + 30,
         stiffness = Math.random() * 0.06 + 0.01
     ) {
-        this.allowShields = false; //don't want shields on individual boss mobs
+        this.allowShields = false; //don't want shields on individual group mobs
         for (let i = 0; i < nodes; ++i) {
             let whoSpawn = spawn;
             if (spawn === "random") {

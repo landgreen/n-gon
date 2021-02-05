@@ -196,6 +196,7 @@ const build = {
       <br>
       <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
       <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
+
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
       <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
       <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%

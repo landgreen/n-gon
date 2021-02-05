@@ -38,13 +38,15 @@ const powerUps = {
         if (isCanceled) {
             if (tech.isCancelDuplication) tech.cancelCount++
             if (tech.isCancelRerolls) {
-                let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
-                if (Math.random() < 0.33) {
-                    spawnType = "heal"
-                } else if (Math.random() < 0.5 && !tech.isSuperDeterminism) {
-                    spawnType = "research"
+                for (let i = 0; i < 6; i++) {
+                    let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
+                    if (Math.random() < 0.33) {
+                        spawnType = "heal"
+                    } else if (Math.random() < 0.5 && !tech.isSuperDeterminism) {
+                        spawnType = "research"
+                    }
+                    powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
                 }
-                for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
             }
             if (tech.isBanish && type === 'tech') { // banish researched tech by adding them to the list of banished tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
@@ -469,7 +471,7 @@ const powerUps = {
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
         if (tech.isMassEnergy) m.energy += 2.5;
         if (tech.isMineDrop) {
-            if (tech.isLaserMine) { //laser mine
+            if (tech.isLaserMine) {
                 b.laserMine(who.position)
             } else {
                 b.mine(who.position, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
@@ -498,7 +500,7 @@ const powerUps = {
             powerUps.spawn(x, y, "gun");
             return;
         }
-        if (Math.random() < 0.0027 * (25 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 15
+        if (Math.random() < 0.0027 * (25 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 25
             powerUps.spawn(x, y, "tech");
             return;
         }
@@ -559,10 +561,8 @@ const powerUps = {
             if (level.levelsCleared > 1) powerUps.spawn(x, y, "tech")
 
             //bonus power ups for clearing runs in the last game
-            if (level.levelsCleared === 0 && !simulation.isCheating) {
-                for (let i = 0; i < localSettings.levelsClearedLastGame / 4 - 1; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
-                }
+            if (level.levelsCleared === 0 && !simulation.isCheating && localSettings.levelsClearedLastGame > 1) {
+                for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
                 localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }

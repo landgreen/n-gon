@@ -128,14 +128,12 @@ const lore = {
                 requestAnimationFrame(cycle);
             }, delay);
         },
-        // () => {
-        //     let delay = 2000
-        //     setTimeout(() => { lore.miriam.text("testing speech generation for lore level", true) }, delay);
-        //     delay += 2200
-        //     setTimeout(() => { lore.anand.text("well, I'm also testing speech synthesis.  Do you think it sounds good?", true) }, delay);
-        //     delay += 4600
-        //     setTimeout(() => { lore.miriam.text("I guess it's fine.", true) }, delay);
-        // },
+        () => {
+            let delay = 6000
+            setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.", true) }, delay);
+            delay += 2700
+
+        },
     ],
     dialogue: [
         ``,

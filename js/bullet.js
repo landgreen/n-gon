@@ -315,11 +315,11 @@ const b = {
         }
 
         if (tech.isExplodeRadio) { //radiation explosion
-            const alertRange = 100 + radius * 2; //alert range
+            radius *= 1.25; //alert range
             simulation.drawList.push({ //add dmg to draw queue
                 x: where.x,
                 y: where.y,
-                radius: alertRange,
+                radius: radius,
                 color: "rgba(25,139,170,0.25)",
                 time: simulation.drawTime * 2
             });
@@ -328,9 +328,13 @@ const b = {
             sub = Vector.sub(where, player.position);
             dist = Vector.magnitude(sub);
 
-            if (dist < alertRange) {
-                m.energy -= 0.23 * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1)
-                if (m.energy < 0) m.energy = 0
+            if (dist < radius) {
+                const drain = (tech.isExplosionHarm ? 0.5 : 0.25) * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1)
+                m.energy -= drain
+                if (m.energy < 0) {
+                    m.energy = 0
+                    m.damage(0.03);
+                }
             }
 
             //mob damage and knock back with alert
@@ -339,10 +343,10 @@ const b = {
                 if (mob[i].alive && !mob[i].isShielded) {
                     sub = Vector.sub(where, mob[i].position);
                     dist = Vector.magnitude(sub) - mob[i].radius;
-                    if (dist < alertRange) {
+                    if (dist < radius) {
                         if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
                         if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-                        mobs.statusDoT(mob[i], dmg * damageScale * 0.2, 240) //apply radiation damage status effect on direct hits
+                        mobs.statusDoT(mob[i], dmg * damageScale * 0.25, 240) //apply radiation damage status effect on direct hits
                         mob[i].locatePlayer();
                         damageScale *= 0.87 //reduced damage for each additional explosion target
                     }
@@ -1077,7 +1081,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0007 + m.fieldRegen
+        const DRAIN = 0.0006 + m.fieldRegen
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -1096,7 +1100,7 @@ const b = {
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: b.dmgScale * 1.25, //damage also changes when you divide by mob.mass on in .do()
+                dmg: b.dmgScale * 1.35, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -2545,7 +2549,7 @@ const b = {
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 40 + Math.floor(7 * Math.random()),
-            drainThreshold: tech.isEnergyHealth ? 0.5 : 0.33,
+            drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
             range: 700 * (1 + 0.1 * Math.random()) + 300 * tech.isLaserBotUpgrade,
             playerRange: 150 + Math.floor(30 * Math.random()),
@@ -2711,7 +2715,7 @@ const b = {
             cd: 0,
             acceleration: 0.009,
             endCycle: Infinity,
-            drainThreshold: tech.isEnergyHealth ? 0.4 : 0.2,
+            drainThreshold: tech.isEnergyHealth ? 0.5 : 0.33,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,

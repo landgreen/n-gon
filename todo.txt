@@ -1,11 +1,18 @@
 ******************************************************** NEXT PATCH ********************************************************
+blocking uses 33% less energy
 
-tech cloning requires > 25% dup chance, and is now only 2x (was 3x) your dup chance for a second boss
-playing with the 4 community levels now removes 4 random levels from the level list
+tech: stimulated emission removed
+tech: Bayesian statistics renamed stimulated emission
+tech: futures exchange gives 4.5% per cancel (up from 4%)
 
-tech: dark patterns - reduce combat difficulty by 1 level and add 16 junk tech to the potential tech pool
+new level boss: follows you like the dynamo-bot, but is not friend
+  will not spawn if you have a dynamo-bot
+  (probably will be rebalanced in next patch)
 
 ******************************************************** BUGS ********************************************************
+
+make mobs that spawn other mobs limit spawns to line of sight
+  orange mobs
 
 (only once on my computer) once every 7 second check isn't running code
     power ups don't teleport to exit
@@ -31,18 +38,28 @@ tech: dark patterns - reduce combat difficulty by 1 level and add 16 junk tech t
 
 ******************************************************** TODO ********************************************************
 
-reduce 3 difficulty, randomize all mods when you...
-  take damage
-  switch guns
-  pick up a tech
+tech: when you switch guns switch a random bot to a different bot. If the bot you had was upgraded the new one will be too.
+  or switch all bots
+
+tech: buff block throwing
+  require +100% damage for blocks
+  works with pilot wave?
+
+
+lore: a tutorial / lore intro
+  needs to be optional so it doesn't slow experienced players
+  put something on the intro map
+    maybe a button triggers something
+
+tech:  add an eject button for each power up in the pause menu
+  also list all bot types in pause menu
+    with option to eject?
 
 add back in gamepad support
+  but does anyone care?
   https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
 
 mechanic: gain damage when there are fewer bullets
-
-junk tech
-  switch input keys: left-right, up-down?
 
 rename intro level to something lore related
 
@@ -329,7 +346,7 @@ n-gon outreach ideas
 ******************************************************** LORE ********************************************************
 
 cool names for tech
-  strange loop, ansatz
+  strange loop, ansatz, Bayesian statistics
 
 voice singing with pitch?
 
@@ -343,7 +360,12 @@ chapter 2: scientists verify that bot can really hear them
 chapter 3:  why is the bot attacking things?
   player is the bot and also the mobs, and the levels.  player is the entire simulation
     why is the player attacking itself?
-    learn console commands to manipulate the simulation  
+    learn console commands to manipulate the simulation?
+  unlock hard and why difficulty?
+    but what about easy?
+      maybe remove easy, and replace with a check box that makes the game easy, but in a different way
+        disable lore, but respawn on the level you die at?
+      
 
 chapter 4: why does the simulation exists?
   started to research new tech and test in a simulated world

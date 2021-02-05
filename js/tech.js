@@ -105,14 +105,14 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + m.duplicateChance
+        return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance
     },
     totalBots() {
         return tech.dynamoBotCount + tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
     },
     tech: [{
             name: "integrated armament",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>",
+            description: `increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -121,9 +121,17 @@ const tech = {
             requires: "no more than 1 gun",
             effect() {
                 tech.isOneGun = true;
+                //
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].name === "CPT gun") tech.tech[i].description = `adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong><br><div style = 'color: #f24'>replaces your current gun</div>`
+                }
+
             },
             remove() {
                 tech.isOneGun = false;
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].name === "CPT gun") tech.tech[i].description = `adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>`
+                }
             }
         },
         {
@@ -510,13 +518,13 @@ const tech = {
         },
         {
             name: "iridium-192",
-            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>60%</strong> more <strong class='color-d'>damage</strong> over 4 seconds",
+            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>100%</strong> more <strong class='color-d'>damage</strong>, but over 4 seconds",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1
+                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
             },
-            requires: "an explosive damage source",
+            requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
             effect: () => {
                 tech.isExplodeRadio = true;
             },
@@ -530,9 +538,9 @@ const tech = {
             maxCount: 9,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1
+                return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
             },
-            requires: "an explosive damage source",
+            requires: "an explosive damage source, not iridium-192",
             effect: () => {
                 tech.explosiveRadius += 0.2;
             },
@@ -546,9 +554,9 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1
+                return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
             },
-            requires: "an explosive damage source",
+            requires: "an explosive damage source, not iridium-192",
             effect: () => {
                 tech.isSmallExplosion = true;
             },
@@ -626,7 +634,7 @@ const tech = {
         },
         {
             name: "impact shear",
-            description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br>nails target nearby mobs",
+            description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br><em>nails target nearby mobs</em>",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1318,9 +1326,8 @@ const tech = {
                 document.getElementById("health").style.display = "inline"
                 document.getElementById("health-bg").style.display = "inline"
                 document.getElementById("dmg").style.backgroundColor = "#f67";
-                m.health = Math.min(m.maxHealth, m.energy);
+                m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
                 m.displayHealth();
-
             }
         },
         {
@@ -1739,7 +1746,7 @@ const tech = {
             }
         },
         {
-            name: "Bayesian statistics",
+            name: "stimulated emission",
             description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, eject <strong>1</strong> <strong class='color-m'>tech</strong>",
             maxCount: 1,
             count: 0,
@@ -1756,22 +1763,58 @@ const tech = {
                 if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
             }
         },
+        // {
+        //     name: "stimulated emission",
+        //     description: "<strong>6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><em>duplication chance can't exceed 100%</em>",
+        //     maxCount: 9,
+        //     count: 0,
+        //     allowed() {
+        //         return tech.duplicationChance() < 1
+        //     },
+        //     requires: "below 100% duplication chance",
+        //     effect() {
+        //         tech.duplicateChance += 0.06
+        //         simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+        //     },
+        //     remove() {
+        //         tech.duplicateChance = 0
+        //         if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+        //     }
+        // },
         {
-            name: "stimulated emission",
-            description: "<strong>6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><em>duplication chance can't exceed 100%</em>",
-            maxCount: 9,
+            name: "futures exchange",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+            maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() < 1
+                return tech.duplicationChance() < 1 && !tech.isDeterminism
             },
-            requires: "below 100% duplication chance",
+            requires: "below 100% duplication chance, not determinism",
             effect() {
-                tech.duplicateChance += 0.06
+                tech.isCancelDuplication = true
+                tech.cancelCount = 0
                 simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
             },
             remove() {
-                tech.duplicateChance = 0
+                tech.isCancelDuplication = false
+                // tech.cancelCount = 0
                 if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+            }
+        },
+        {
+            name: "commodities exchange",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isCancelDuplication
+            },
+            requires: "futures exchange",
+            effect() {
+                tech.isCancelRerolls = true
+            },
+            remove() {
+                tech.isCancelRerolls = false
             }
         },
         {
@@ -1796,7 +1839,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() > 0.25
+                return tech.duplicationChance() > 0.2
             },
             requires: "some duplication chance",
             effect() {
@@ -1804,42 +1847,6 @@ const tech = {
             },
             remove() {
                 tech.isDuplicateBoss = false;
-            }
-        },
-        {
-            name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4%</strong> power up <strong class='color-dup'>duplication</strong> chance",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.duplicationChance() < 1 && !tech.isDeterminism
-            },
-            requires: "below 100% duplication chance, not determinism",
-            effect() {
-                tech.isCancelDuplication = true
-                tech.cancelCount = 0
-                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-            },
-            remove() {
-                tech.isCancelDuplication = false
-                // tech.cancelCount = 0
-                if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
-            }
-        },
-        {
-            name: "commodities exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
-            maxCount: 1,
-            count: 0,
-            allowed() {
-                return tech.duplicationChance() > 0 && !tech.isDeterminism
-            },
-            requires: "a chance to duplicate power ups, not determinism",
-            effect() {
-                tech.isCancelRerolls = true
-            },
-            remove() {
-                tech.isCancelRerolls = false
             }
         },
         {
@@ -1974,7 +1981,7 @@ const tech = {
         },
         {
             name: "dark patterns",
-            description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>16</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>several</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
             maxCount: 1,
             isNonRefundable: true,
             isCustomHide: true,
@@ -2183,7 +2190,7 @@ const tech = {
         //**************************************************
         {
             name: "CPT gun",
-            description: "adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>",
+            description: `adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3820,7 +3827,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
             },
             requires: "plasma torch",
             effect() {
@@ -4123,33 +4130,35 @@ const tech = {
         }
     ],
     addLoreTechToPool() { //adds lore tech to tech pool
-        tech.tech.push({
-            name: `undefined`,
-            description: `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`,
-            maxCount: 1,
-            count: 0,
-            isLore: true,
-            isNonRefundable: true,
-            isCustomHide: true,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                setTimeout(() => { //a short delay, I can't remember why
-                    lore.techCount++
-                    if (lore.techCount > 9) {
-                        tech.removeLoreTechFromPool();
-                    } else {
-                        for (let i = 0; i < tech.tech.length; i++) { //set name for all unchosen copies of this tech
-                            if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
+        if (!simulation.isCheating) {
+            tech.tech.push({
+                name: `undefined`,
+                description: `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`,
+                maxCount: 1,
+                count: 0,
+                isLore: true,
+                isNonRefundable: true,
+                isCustomHide: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    setTimeout(() => { //a short delay, I can't remember why
+                        lore.techCount++
+                        if (lore.techCount > 9) {
+                            tech.removeLoreTechFromPool();
+                        } else {
+                            for (let i = 0; i < tech.tech.length; i++) { //set name for all unchosen copies of this tech
+                                if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
+                            }
+                            for (let i = 0, len = 10; i < len; i++) tech.addLoreTechToPool()
                         }
-                        for (let i = 0, len = 10; i < len; i++) tech.addLoreTechToPool()
-                    }
-                }, 1);
-            },
-            remove() {}
-        })
+                    }, 1);
+                },
+                remove() {}
+            })
+        }
     },
     junk: [
         // {
@@ -4474,7 +4483,7 @@ const tech = {
         },
         {
             name: "quantum black hole",
-            description: "use all your <strong class='color-f'>energy</strong> to<br><strong>spawn</strong> inside the event horizon of a <strong>black hole boss</strong>",
+            description: "use all your <strong class='color-f'>energy</strong> to <strong>spawn</strong> inside the event horizon of a huge <strong>black hole</strong>",
             maxCount: 1,
             count: 0,
             isNonRefundable: true,

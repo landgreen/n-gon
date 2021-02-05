@@ -410,7 +410,7 @@ const mobs = {
             //   }
             // },
             laserBeam() {
-                if (simulation.cycle % 7 && this.seePlayer.yes) {
+                if (this.seePlayer.yes) {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer() < this.laserRange) {

@@ -638,9 +638,7 @@ const m = {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 6; i++) {
-                        powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-                    }
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
                     m.energy = m.maxEnergy
                     m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
@@ -1170,14 +1168,12 @@ const m = {
     },
     pushMass(who) {
         const speed = Vector.magnitude(Vector.sub(who.velocity, player.velocity))
-        const fieldBlockCost = (0.03 + Math.sqrt(who.mass) * speed * 0.003) * m.fieldShieldingScale;
+        const fieldBlockCost = (0.025 + Math.sqrt(who.mass) * speed * 0.002) * m.fieldShieldingScale;
         const unit = Vector.normalise(Vector.sub(player.position, who.position))
 
         if (m.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
             m.energy -= fieldBlockCost
-            if (m.energy < 0) {
-                m.energy = 0;
-            }
+            if (m.energy < 0) m.energy = 0;
             // if (m.energy > m.maxEnergy) m.energy = m.maxEnergy;
 
             if (tech.blockDmg) {
@@ -1396,11 +1392,11 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>",
             effect: () => {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
-                m.fieldHarmReduction = 0.85;
+                m.fieldHarmReduction = 0.8;
                 m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -1554,13 +1550,13 @@ const m = {
         },
         {
             name: "negative mass field",
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>45%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
                 m.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
                 m.fieldMeterColor = "#000"
-                m.fieldHarmReduction = 0.55;
+                m.fieldHarmReduction = 0.5;
                 m.fieldDrawRadius = 0;
 
                 m.hold = function() {

@@ -7,7 +7,6 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    bossKilled: false,
     playableLevels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
     levels: [],
     start() {
@@ -111,26 +110,26 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.93; //damage done by player decreases each level
+            b.dmgScale *= 0.94; //damage done by player decreases each level
             if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.378 * simulation.difficulty //damage done by mobs increases each level
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.06) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.dmgScale = 0.36 * simulation.difficulty //damage done by mobs increases each level
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.93; //damage done by player decreases each level
+            b.dmgScale /= 0.94; //damage done by player decreases each level
             if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale < 5) simulation.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.378 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.36 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.06)
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
     difficultyText() {
         if (simulation.difficultyMode === 1) {
@@ -1052,7 +1051,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         // spawn.boost(1500, 0, 900);
 
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
+        spawn.historyBoss(1900, -500)
         // spawn.sneaker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
@@ -1066,7 +1066,7 @@ const level = {
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        // spawn.nodeBoss(1200, -500, "launcher")
+        // spawn.nodeGroup(1200, -500, "launcher")
         // spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -1105,13 +1105,12 @@ const level = {
         // spawn.boost(4150, 0, 1300);
         // spawn.randomSmallMob(1300, -70);
         // spawn.randomMob(2650, -975, 0.8);
-        // spawn.randomBoss(1700, -900, 0.4);
+        // spawn.randomGroup(1700, -900, 0.4);
         // if (simulation.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         // if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500); 
     },
     final() {
-        level.bossKilled = false; // if a boss needs to be killed
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -1162,7 +1161,6 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500);
     },
     gauntlet() {
-        level.bossKilled = true; //if there is no boss this needs to be true to increase levels
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -1199,12 +1197,12 @@ const level = {
         spawn.blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall
 
-        spawn.nodeBoss(3500, -200, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
+        spawn.nodeGroup(3500, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
         spawn.mapRect(4500, -1200, 200, 750); //right wall
         spawn.blockDoor(4585, -210)
         spawn.mapRect(4500, -200, 200, 300); //right wall
 
-        spawn.lineBoss(5000, -200, spawn.allowedBossList[Math.floor(Math.random() * spawn.allowedBossList.length)]);
+        spawn.lineGroup(5000, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
         spawn.mapRect(6400, -1200, 400, 750); //right wall
         spawn.mapRect(6400, -200, 400, 300); //right wall
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
@@ -1212,20 +1210,19 @@ const level = {
 
         for (let i = 0; i < 3; ++i) {
             if (simulation.difficulty * Math.random() > 15 * i) {
-                spawn.randomBoss(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+                spawn.randomGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
             }
             if (simulation.difficulty * Math.random() > 10 * i) {
-                spawn.randomBoss(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+                spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
             }
             if (simulation.difficulty * Math.random() > 7 * i) {
-                spawn.randomBoss(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+                spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4125, -350);
     },
     intro() {
-        level.bossKilled = true; //if there is no boss this needs to be true to increase levels
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -1709,7 +1706,7 @@ const level = {
             spawn.randomMob(1550, -2750, -0.5);
             spawn.randomMob(1350, -1150, -0.5);
             spawn.randomMob(-75, -1475, 0);
-            spawn.randomBoss(600, -2600, 0);
+            spawn.randomGroup(600, -2600, 0);
         }
         if (simulation.difficulty < 25) {
             spawn.randomMob(700, -1650, 0);
@@ -1727,7 +1724,6 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(1925, -1250);
     },
     sewers() {
-        level.bossKilled = false; // if a boss needs to be killed
         const rotor = level.rotor(5100, 2475, -0.001)
         const button = level.button(6600, 2675)
         const hazard = level.hazard(4550, 2750, 4550, 150)
@@ -1844,7 +1840,7 @@ const level = {
         spawn.mapRect(9300, 2590, 650, 25);
         spawn.mapRect(9700, 2580, 100, 50);
 
-        spawn.randomBoss(1300, 2100, 0.1);
+        spawn.randomGroup(1300, 2100, 0.1);
         spawn.randomMob(8300, 2100, 0.1);
         spawn.randomSmallMob(2575, -75, 0.1); //entrance
         spawn.randomMob(8125, 2450, 0.1);
@@ -1855,7 +1851,7 @@ const level = {
         spawn.randomSmallMob(1100, -300, 0.2); //entrance
         spawn.randomMob(4450, 2500, 0.2);
         spawn.randomMob(6350, 2525, 0.2);
-        spawn.randomBoss(9200, 2400, 0.3);
+        spawn.randomGroup(9200, 2400, 0.3);
         spawn.randomSmallMob(1900, -250, 0.3); //entrance
         spawn.randomMob(1500, 2100, 0.4);
         spawn.randomSmallMob(1700, -150, 0.4); //entrance
@@ -1868,12 +1864,11 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss"]);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
     satellite() {
-        level.bossKilled = false; // if a boss needs to be killed
         const elevator = level.platform(4210, -1325, 380, 30, -10)
         level.custom = () => {
             level.playerExitCheck();
@@ -2058,13 +2053,13 @@ const level = {
         spawn.randomMob(2000, -2800, 0.4);
         spawn.randomMob(2200, -500, 0.4);
         spawn.randomMob(4475, -3550, 0.3);
-        spawn.randomBoss(5000, -2150, 1);
-        spawn.randomBoss(3700, -4100, 0.3);
-        spawn.randomBoss(2700, -1600, 0.1);
-        spawn.randomBoss(1600, -100, 0);
-        spawn.randomBoss(5000, -3900, -0.3);
+        spawn.randomGroup(5000, -2150, 1);
+        spawn.randomGroup(3700, -4100, 0.3);
+        spawn.randomGroup(2700, -1600, 0.1);
+        spawn.randomGroup(1600, -100, 0);
+        spawn.randomGroup(5000, -3900, -0.3);
         if (simulation.difficulty > 3) {
-            if (Math.random() < 0.1) {
+            if (Math.random() < 0.2) {
                 spawn.randomLevelBoss(2800, -1400);
             } else if (Math.random() < 0.25) {
                 spawn.laserBoss(2900 + 300 * Math.random(), -2950 + 150 * Math.random());
@@ -2080,7 +2075,6 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3950, -850);
     },
     rooftops() {
-        level.bossKilled = false; // if a boss needs to be killed
         const elevator = level.platform(1450, -1000, 235, 30, -2)
         level.custom = () => {
             ctx.fillStyle = "#ccc"
@@ -2296,15 +2290,14 @@ const level = {
         spawn.randomMob(5200, -100, 0.3);
         spawn.randomMob(5275, -900, 0.2);
         spawn.randomMob(900, -2125, 0.3);
-        spawn.randomBoss(600, -1575, 0);
-        spawn.randomBoss(2225, -1325, 0.4);
-        spawn.randomBoss(4900, -1200, 0);
+        spawn.randomGroup(600, -1575, 0);
+        spawn.randomGroup(2225, -1325, 0.4);
+        spawn.randomGroup(4900, -1200, 0);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -2050);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(2175, -2425);
     },
     aerie() {
-        level.bossKilled = false; // if a boss needs to be killed
         // const elevator = level.platform(4112, -2300, 280, 50)
         // simulation.g = 0.0012 //0.0024
         level.custom = () => {
@@ -2446,7 +2439,7 @@ const level = {
         spawn.mapRect(4250, -3700, 50, 300);
         spawn.mapRect(3700, -3250, 1100, 100);
 
-        spawn.randomBoss(350, -500, 1)
+        spawn.randomGroup(350, -500, 1)
         spawn.randomSmallMob(-225, 25);
         spawn.randomSmallMob(1000, -1100);
         spawn.randomSmallMob(4000, -250);
@@ -2465,8 +2458,8 @@ const level = {
         spawn.randomMob(1700, -50, 0.3)
         spawn.randomMob(2350, -900, 0.3)
         spawn.randomMob(4700, -150, 0.2);
-        spawn.randomBoss(4000, -350, 0.6);
-        spawn.randomBoss(2750, -550, 0.1);
+        spawn.randomGroup(4000, -350, 0.6);
+        spawn.randomGroup(2750, -550, 0.1);
         spawn.randomMob(2175, -925, 0.5);
         spawn.randomMob(2750, 100, 0.5);
         spawn.randomMob(4250, -1725, 0.5);
@@ -2486,8 +2479,8 @@ const level = {
                 });
                 World.add(engine.world, cons[cons.length - 1]);
 
-                if (simulation.difficulty > 4) spawn.nodeBoss(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
-            } else if (Math.random() < 0.15) {
+                if (simulation.difficulty > 4) spawn.nodeGroup(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
+            } else if (Math.random() < 0.2) {
                 spawn.randomLevelBoss(4250, -250);
                 spawn.debris(-250, 50, 1650, 2); //16 debris per level
                 spawn.debris(2475, 0, 750, 2); //16 debris per level
@@ -2514,7 +2507,6 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(5350, -325);
     },
     skyscrapers() {
-        level.bossKilled = false; // if a boss needs to be killed
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -2669,14 +2661,13 @@ const level = {
         spawn.randomMob(2200, -600, 0.2);
         spawn.randomMob(850, -1300, 0.25);
         spawn.randomMob(-100, -900, -0.2);
-        spawn.randomBoss(3700, -1500, 0.4);
-        spawn.randomBoss(1700, -900, 0.4);
+        spawn.randomGroup(3700, -1500, 0.4);
+        spawn.randomGroup(1700, -900, 0.4);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3075, -2050);
     },
     highrise() {
-        level.bossKilled = false; // if a boss needs to be killed
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -2868,15 +2859,14 @@ const level = {
         spawn.randomMob(-125, -1500, -0.1);
         spawn.randomMob(-325, -1900, -0.1);
         spawn.randomMob(-550, -100, -0.1);
-        spawn.randomBoss(-3250, -2700, 0.2);
-        spawn.randomBoss(-2450, -1100, 0);
+        spawn.randomGroup(-3250, -2700, 0.2);
+        spawn.randomGroup(-2450, -1100, 0);
 
         if (simulation.difficulty > 3) spawn.randomLevelBoss(-2400, -3000);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(-1825, -1975);
     },
     warehouse() {
-        level.bossKilled = false; // if a boss needs to be killed
         level.custom = () => {
             level.playerExitCheck();
         };
@@ -3037,9 +3027,9 @@ const level = {
         spawn.randomMob(475, 300, 0);
         spawn.randomMob(-75, -700, 0);
         spawn.randomMob(900, -200, -0.1);
-        spawn.randomBoss(-125, 275, -0.2);
-        spawn.randomBoss(-825, 1000, 0.2);
-        spawn.randomBoss(-1300, -1100, -0.3);
+        spawn.randomGroup(-125, 275, -0.2);
+        spawn.randomGroup(-825, 1000, 0.2);
+        spawn.randomGroup(-1300, -1100, -0.3);
 
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.25) {
@@ -3069,7 +3059,7 @@ const level = {
                 color: "#dff"
             });
         } else { //reverse direction, start in bottom right
-            button = level.button(4300, 0)
+            button = level.button(3800, 0)
             door = level.door(3012, -200, 25, 200, 195)
             level.setPosToSpawn(3250, -550); //normal spawn
             level.exit.x = 1375;
@@ -3220,11 +3210,11 @@ const level = {
         spawn.randomMob(450, -225, 0.15);
         spawn.randomMob(100, -1200, 1);
         spawn.randomMob(950, -1150, -0.1);
-        spawn.randomBoss(1800, -800, -0.2);
-        spawn.randomBoss(4150, -1000, 0.6);
+        spawn.randomGroup(1800, -800, -0.2);
+        spawn.randomGroup(4150, -1000, 0.6);
 
         if (simulation.difficulty > 3) {
-            if (Math.random() < 0.65) {
+            if (Math.random() < 0.5) {
                 // tether ball
                 level.fillBG.push({
                     x: 2495,
@@ -3244,7 +3234,7 @@ const level = {
                 });
                 World.add(engine.world, cons[cons.length - 1]);
                 //chance to spawn a ring of exploding mobs around this boss
-                if (simulation.difficulty > 6) spawn.nodeBoss(2850, -80, "spawns", 8, 20, 105);
+                if (simulation.difficulty > 6) spawn.nodeGroup(2850, -80, "spawns", 8, 20, 105);
             } else {
                 spawn.randomLevelBoss(2200, -450)
             }
@@ -3483,9 +3473,9 @@ const level = {
         spawn.randomMob(3050, -1650, 0.8);
         spawn.randomMob(3350, -600, 0.8);
         spawn.randomMob(4400, -50, 1);
-        spawn.randomBoss(1500, -1900, 0.5);
-        spawn.randomBoss(2350, -850, 1);
-        spawn.randomBoss(100, -450, 0.9);
+        spawn.randomGroup(1500, -1900, 0.5);
+        spawn.randomGroup(2350, -850, 1);
+        spawn.randomGroup(100, -450, 0.9);
 
         if (simulation.difficulty > 3) spawn.randomLevelBoss(1850, -1400);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
@@ -3719,7 +3709,7 @@ const level = {
                         stiffness: 0.00006
                     });
                     World.add(engine.world, cons[cons.length - 1]);
-                    if (simulation.difficulty > 4) spawn.nodeBoss(7000, -3300, "spawns", 8, 20, 105);
+                    if (simulation.difficulty > 4) spawn.nodeGroup(7000, -3300, "spawns", 8, 20, 105);
                 } else if (simulation.difficulty > 3) {
                     spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss"]);
                 }
@@ -3738,7 +3728,7 @@ const level = {
                         stiffness: 0.00036
                     });
                     World.add(engine.world, cons[cons.length - 1]);
-                    if (simulation.difficulty > 4) spawn.nodeBoss(2350, -1300, "spawns", 8, 20, 105);
+                    if (simulation.difficulty > 4) spawn.nodeGroup(2350, -1300, "spawns", 8, 20, 105);
                 } else if (simulation.difficulty > 3) {
                     spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss"]);
                 }
@@ -3765,10 +3755,10 @@ const level = {
         spawn.randomMob(800, 1200, 0.3);
         spawn.randomMob(7200, -4000, 0.3);
         spawn.randomMob(250, -1550, 0.3);
-        spawn.randomBoss(900, -1450, 0.3);
-        spawn.randomBoss(2980, -400, 0.3);
-        spawn.randomBoss(5750, -3860, 0.4);
-        spawn.randomBoss(1130, 1300, 0.1);
+        spawn.randomGroup(900, -1450, 0.3);
+        spawn.randomGroup(2980, -400, 0.3);
+        spawn.randomGroup(5750, -3860, 0.4);
+        spawn.randomGroup(1130, 1300, 0.1);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         powerUps.spawn(1900, -940, "heal");
         powerUps.spawn(3000, -230, "heal");
@@ -3815,7 +3805,7 @@ const level = {
         });
         World.add(engine.world, cons[cons.length - 1]);
         //chance to spawn a ring of exploding mobs around this boss
-        if (simulation.difficulty > 4) spawn.nodeBoss(2330, 1850, "spawns", 8, 20, 105);
+        if (simulation.difficulty > 4) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
         powerUps.chooseRandomPowerUp(3100, 1630);
     },
     detours() {
@@ -3958,7 +3948,7 @@ const level = {
             spawn.randomSmallMob(2800, -1620, 0.7);
             spawn.randomMob(2400, -1370, 0.5);
             spawn.randomMob(3725, -1320, 0.3);
-            spawn.randomBoss(2115, -2020, 0.1)
+            spawn.randomGroup(2115, -2020, 0.1)
 
             powerUps.spawn(5000, -1275, "heal");
 
@@ -4078,7 +4068,7 @@ const level = {
         spawn.randomMob(1500, -270, 0.2);
         spawn.randomMob(1250, 55, 0.2);
         spawn.randomMob(8800, -45, 0.2);
-        spawn.randomBoss(8025, -845, 0.2);
+        spawn.randomGroup(8025, -845, 0.2);
 
         if (simulation.difficulty > 2) {
             if (Math.random() < 0.2) {
@@ -4099,7 +4089,7 @@ const level = {
                     stiffness: 0.00015
                 });
                 World.add(engine.world, cons[cons.length - 1]);
-                if (simulation.difficulty > 4) spawn.nodeBoss(8000, 630, "spawns", 8, 20, 105);
+                if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
             } else {
                 spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss"]);
                 let me = mob[mob.length - 1];
@@ -4664,16 +4654,16 @@ const level = {
         spawn.randomMob(3965, -1650, 0.6)
         spawn.randomMob(4650, -1750, 0.6);
         spawn.randomMob(830, -1170, 0.5);
-        spawn.randomBoss(3730, -1100, 0.5);
+        spawn.randomGroup(3730, -1100, 0.5);
         spawn.randomMob(2650, -2250, 0.3);
         spawn.randomMob(1615, -2270, 0.3);
         spawn.randomMob(1380, -1280, 0.25);
         spawn.randomMob(2280, -650, 0.2);
-        spawn.randomBoss(2450, -2650, 0.2);
+        spawn.randomGroup(2450, -2650, 0.2);
         spawn.randomMob(3800, -580, 0.2);
         spawn.randomMob(4630, -425, 0.1);
-        spawn.randomBoss(630, -1300, -0.1);
-        spawn.randomBoss(3450, -2880, -0.2)
+        spawn.randomGroup(630, -1300, -0.1);
+        spawn.randomGroup(3450, -2880, -0.2)
 
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.16) {
@@ -4687,7 +4677,7 @@ const level = {
                     stiffness: 0.00018 + 0.000007 * level.levelsCleared
                 });
                 World.add(engine.world, cons[cons.length - 1]);
-                if (simulation.difficulty > 4) spawn.nodeBoss(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
+                if (simulation.difficulty > 4) spawn.nodeGroup(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
 
             } else {
                 spawn.randomLevelBoss(3100, -1850, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "snakeBoss", "laserBoss"]);
