@@ -38,7 +38,7 @@ const powerUps = {
         if (isCanceled) {
             if (tech.isCancelDuplication) tech.cancelCount++
             if (tech.isCancelRerolls) {
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 8; i++) {
                     let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
                     if (Math.random() < 0.33) {
                         spawnType = "heal"

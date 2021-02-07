@@ -232,7 +232,7 @@ const spawn = {
                 this.eventHorizon = 750
                 this.spawnInterval = 600
                 this.rotateVelocity = 0.001 * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
-                if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
+                // if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
                 this.modeDo = this.modeAll
             }
             // }

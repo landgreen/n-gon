@@ -24,6 +24,23 @@ const tech = {
             if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech.splice(i, 1)
         }
     },
+    addJunkTechToPool(num = 1) {
+        for (let i = 0; i < num; i++) {
+            // find an index that doesn't have dups first
+            let index = null
+            for (let i = 0; i < tech.junk.length; i++) {
+                if (tech.junk[i].numberInPool === 0) {
+                    index = i
+                    break
+                }
+            }
+            if (index === null) index = Math.floor(Math.random() * tech.junk.length) //or just pick a random junk tech to add
+
+            tech.junk[index].numberInPool++
+            tech.tech.push(Object.assign({}, tech.junk[index])) // push a "clone" of the tech.junk into the pool
+            if (tech.junk[index].numberInPool > 1) tech.tech[tech.tech.length - 1].name += `(${tech.junk[index].numberInPool})` //give it a unique name so it can be found
+        }
+    },
     removeJunkTechFromPool() {
         for (let i = tech.tech.length - 1; i > 0; i--) {
             if (tech.tech[i].isJunk && tech.tech[i].count === 0) tech.tech.splice(i, 1)
@@ -89,7 +106,7 @@ const tech = {
         if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
         if (tech.isMaxEnergyTech) dmg *= 1.4
         if (tech.isEnergyNoAmmo) dmg *= 1.5
-        if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
+        if (tech.isDamageForGuns) dmg *= 1 + 0.15 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - m.health)
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
         if (tech.isEnergyLoss) dmg *= 1.5;
@@ -101,7 +118,7 @@ const tech = {
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.66
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
-        if (tech.isBotDamage) dmg *= 1 + 0.02 * tech.totalBots()
+        if (tech.isBotDamage) dmg *= 1 + 0.04 * tech.totalBots()
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
@@ -162,7 +179,7 @@ const tech = {
         },
         {
             name: "arsenal",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>13%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>15%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -981,7 +998,7 @@ const tech = {
         },
         {
             name: "perimeter defense",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>3%</strong><br>for each of your permanent <strong>bots</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>4%</strong><br>for each of your permanent <strong>bots</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -996,7 +1013,7 @@ const tech = {
             }
         }, {
             name: "network effect",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>2%</strong><br>for each of your permanent <strong>bots</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each of your permanent <strong>bots</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1074,7 +1091,7 @@ const tech = {
         },
         {
             name: "perpetual stun",
-            description: "<strong>stun</strong> all mobs for up to <strong>10</strong> seconds<br>at the start of each <strong>level</strong>",
+            description: "<strong>stun</strong> all mobs for up to <strong>12</strong> seconds<br>at the start of each <strong>level</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1763,31 +1780,32 @@ const tech = {
                 if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
             }
         },
-        // {
-        //     name: "stimulated emission",
-        //     description: "<strong>6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><em>duplication chance can't exceed 100%</em>",
-        //     maxCount: 9,
-        //     count: 0,
-        //     allowed() {
-        //         return tech.duplicationChance() < 1
-        //     },
-        //     requires: "below 100% duplication chance",
-        //     effect() {
-        //         tech.duplicateChance += 0.06
-        //         simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-        //     },
-        //     remove() {
-        //         tech.duplicateChance = 0
-        //         if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
-        //     }
-        // },
+        {
+            name: "replication",
+            description: "<strong>8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>10</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return tech.duplicationChance() < 1
+            },
+            requires: "below 100% duplication chance",
+            effect() {
+                tech.duplicateChance += 0.08
+                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+                tech.addJunkTechToPool(10)
+            },
+            remove() {
+                tech.duplicateChance = 0
+                if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+            }
+        },
         {
             name: "futures exchange",
             description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() < 1 && !tech.isDeterminism
+                return tech.duplicationChance() < 1 && !tech.isDeterminism && (level.levelsCleared < 5 || Math.random() < 0.5)
             },
             requires: "below 100% duplication chance, not determinism",
             effect() {
@@ -1803,7 +1821,7 @@ const tech = {
         },
         {
             name: "commodities exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>8</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1897,9 +1915,7 @@ const tech = {
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
-                for (let i = 0; i < tech.tech[choose].count; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                }
+                for (let i = 0; i < tech.tech[choose].count; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech");
                 powerUps.spawn(m.pos.x, m.pos.y, "tech");
                 tech.tech[choose].count = 0;
                 tech.tech[choose].remove(); // remove a random tech form the list of tech you have
@@ -1924,7 +1940,7 @@ const tech = {
                 simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2
                 <br>${powerUps.research.count}`)
                 const chanceStore = tech.duplicateChance
-                tech.duplicateChance = (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.04 + m.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
+                tech.duplicateChance = (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.045 + m.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                 powerUps.spawn(m.pos.x, m.pos.y, "tech");
                 tech.duplicateChance = chanceStore
             },
@@ -1981,7 +1997,7 @@ const tech = {
         },
         {
             name: "dark patterns",
-            description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>several</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>16</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
             maxCount: 1,
             isNonRefundable: true,
             isCustomHide: true,
@@ -1992,7 +2008,9 @@ const tech = {
             requires: "no research, and in the first 5 levels",
             effect() {
                 level.difficultyDecrease(simulation.difficultyMode)
-                for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
+                simulation.makeTextLog(`simulation.difficultyMode<span class='color-symbol'>--</span>`)
+                tech.addJunkTechToPool(16)
+                // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
             },
             remove() {}
         },
@@ -2966,7 +2984,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return (tech.haveGunCheck("mine") && !tech.isMineAmmoBack && !tech.isLaserMine) || tech.isMineDrop
+                return (tech.haveGunCheck("mine") || tech.isMineDrop) && !tech.isMineAmmoBack && !tech.isLaserMine
             },
             requires: "mines, not mine reclamation, laser-mines",
             effect() {
@@ -3280,12 +3298,12 @@ const tech = {
             effect() {
                 tech.laserReflections++;
                 tech.laserDamage += 0.08; //base is 0.12
-                tech.laserFieldDrain += 0.0008 //base is 0.002
+                tech.laserFieldDrain += 0.0009 //base is 0.002
             },
             remove() {
                 tech.laserReflections = 2;
                 tech.laserDamage = 0.16;
-                tech.laserFieldDrain = 0.0016;
+                tech.laserFieldDrain = 0.0018;
             }
         },
         {
@@ -4166,6 +4184,7 @@ const tech = {
         //     description: "",
         //     maxCount: 9,
         //     count: 0,
+        //     numberInPool: 0,
         //     isNonRefundable: true,
         //     isCustomHide: true,
         //     isJunk: true,
@@ -4179,10 +4198,158 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "energy to mass conversion",
+            description: "convert your <strong class='color-f'>energy</strong> into blocks",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0, len = Math.floor(m.energy * 40); i < len; i++) {
+                    setTimeout(() => {
+                        m.energy -= 1 / len
+                        const index = body.length
+                        where = Vector.add(m.pos, { x: 400 * (Math.random() - 0.5), y: 400 * (Math.random() - 0.5) })
+                        spawn.bodyRect(where.x, where.y, Math.floor(15 + 100 * Math.random()), Math.floor(15 + 100 * Math.random()));
+                        body[index].collisionFilter.category = cat.body;
+                        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                        body[index].classType = "body";
+                        World.add(engine.world, body[index]); //add to world
+                    }, i * 100);
+                }
+
+            },
+            remove() {}
+        },
+        {
+            name: "level.nextLevel()",
+            description: "teleport to the start of the next level",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                simulation.clearTimeouts();
+                level.nextLevel();
+            },
+            remove() {}
+        },
+        {
+            name: "expert system",
+            description: "spawn a <strong class='color-m'>tech</strong> power up<br>add <strong>64</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                tech.addJunkTechToPool(64)
+            },
+            remove() {}
+        },
+        {
+            name: "energy investment",
+            description: "every 10 seconds drain your <strong class='color-f'>energy</strong> and return it doubled 10 seconds later<br>lasts 180 seconds",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 18; i++) {
+                    setTimeout(() => { //drain energy
+                        const energy = m.energy
+                        m.energy = 0
+                        setTimeout(() => { //return energy
+                            m.energy += 2 * energy
+                        }, 5000);
+                    }, i * 10000);
+                }
+            },
+            remove() {}
+        },
+        {
+            name: "missile Launching System",
+            description: "fire missiles for the next 60 seconds",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 60; i++) {
+                    setTimeout(() => {
+                        const where = {
+                            x: m.pos.x,
+                            y: m.pos.y - 40
+                        }
+                        b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2)
+                    }, i * 1000);
+                }
+            },
+            remove() {}
+        },
+        {
+            name: "grenade production",
+            description: "drop grenades for the next 120 seconds",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 120; i++) {
+                    setTimeout(() => {
+                        b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -Math.PI / 2) //fire different angles for each grenade
+                        const who = bullet[bullet.length - 1]
+                        Matter.Body.setVelocity(who, {
+                            x: who.velocity.x * 0.1,
+                            y: who.velocity.y * 0.1
+                        });
+                    }, i * 1000);
+                }
+            },
+            remove() {}
+        },
+        {
             name: "inverted input",
             description: "left input becomes right and up input becomes down",
             maxCount: 9,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4206,6 +4373,7 @@ const tech = {
             description: "grow more legs",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4250,10 +4418,55 @@ const tech = {
             remove() {}
         },
         {
+            name: "diegesis",
+            description: "indicate gun fire delay through a rotation of your head",
+            maxCount: 1,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                m.draw = function() {
+                    ctx.fillStyle = m.fillColor;
+                    m.walk_cycle += m.flipLegs * m.Vx;
+
+                    ctx.save();
+                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                    ctx.translate(m.pos.x, m.pos.y);
+                    m.calcLeg(Math.PI, -3);
+                    m.drawLeg("#4a4a4a");
+                    m.calcLeg(0, 0);
+                    m.drawLeg("#333");
+                    ctx.rotate(m.angle - (m.fireCDcycle != Infinity ? m.flipLegs * 0.25 * Math.pow(Math.max(m.fireCDcycle - m.cycle, 0), 0.5) : 0));
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                    grd.addColorStop(0, m.fillColorDark);
+                    grd.addColorStop(1, m.fillColor);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                }
+            },
+            remove() {}
+        },
+        {
             name: "pareidolia",
             description: "don't",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4325,6 +4538,7 @@ const tech = {
             description: "you cycle through different <strong>colors</strong>",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4350,6 +4564,7 @@ const tech = {
             description: "all your <strong>bots</strong> are converted to the <strong>same</strong> random model",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4407,6 +4622,7 @@ const tech = {
             description: "increase combat <strong>difficulty</strong> by <strong>1 level</strong>",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4421,9 +4637,10 @@ const tech = {
         },
         {
             name: "stun",
-            description: "<strong>stun</strong> all mobs for up to <strong>10</strong> seconds",
+            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4432,7 +4649,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 600)
+                for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 480)
             },
             remove() {}
         },
@@ -4441,6 +4658,7 @@ const tech = {
             description: "<strong>eject</strong> all your <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4468,6 +4686,7 @@ const tech = {
             description: "<strong>eject</strong> all your <strong class='color-r'>research</strong>",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4486,6 +4705,7 @@ const tech = {
             description: "use all your <strong class='color-f'>energy</strong> to <strong>spawn</strong> inside the event horizon of a huge <strong>black hole</strong>",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,
@@ -4504,6 +4724,7 @@ const tech = {
             description: "spawn <strong>2</strong> <strong class='color-r'>research</strong><br><strong>spawn</strong> 40 nearby <strong>black holes</strong>",
             maxCount: 1,
             count: 0,
+            numberInPool: 0,
             isNonRefundable: true,
             isCustomHide: true,
             isJunk: true,

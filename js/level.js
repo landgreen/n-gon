@@ -97,7 +97,7 @@ const level = {
             powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isPerpetualStun) {
-            for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 600)
+            for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
         }
         if (tech.isGunCycle) {
             b.inventoryGun++;

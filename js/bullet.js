@@ -3519,33 +3519,62 @@ const b = {
                 if (m.crouch) {
                     m.fireCDcycle = m.cycle + 10 * b.fireCD / countReduction; // cool down
 
-                    const size = countReduction * (tech.missileSize ? 1.32 : 0.88)
-                    const where = {
-                        x: m.pos.x,
-                        y: m.pos.y - 40
-                    }
-                    for (let i = 0; i < tech.missileCount; i++) {
-                        b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, size)
-                        bullet[bullet.length - 1].force.x += 0.004 * size * (i - (tech.missileCount - 1) / 2);
+                    // for (let i = 0; i < tech.missileCount; i++) {
+                    //     b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
+                    //     bullet[bullet.length - 1].force.x += 0.004 * countReduction * (i - (tech.missileCount - 1) / 2);
+                    // }
+
+                    if (tech.missileCount > 1) {
+                        for (let i = 0; i < tech.missileCount; i++) {
+                            setTimeout(() => {
+                                const where = {
+                                    x: m.pos.x,
+                                    y: m.pos.y - 40
+                                }
+                                b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
+                                bullet[bullet.length - 1].force.x += 0.025 * countReduction * (i - (tech.missileCount - 1) / 2);
+                            }, 20 * tech.missileCount * Math.random());
+                        }
+                    } else {
+                        const where = {
+                            x: m.pos.x,
+                            y: m.pos.y - 40
+                        }
+                        b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5), -2)
                     }
                 } else {
                     m.fireCDcycle = m.cycle + 50 * b.fireCD / countReduction; // cool down
-
-                    const size = countReduction * (tech.missileSize ? 1.5 : 1)
                     const direction = {
                         x: Math.cos(m.angle),
                         y: Math.sin(m.angle)
                     }
-                    const push = Vector.mult(Vector.perp(direction), 0.02 * size / Math.sqrt(tech.missileCount))
-                    const where = {
-                        x: m.pos.x + 40 * direction.x,
-                        y: m.pos.y + 40 * direction.y
+                    const push = Vector.mult(Vector.perp(direction), 0.08 * countReduction / Math.sqrt(tech.missileCount))
+                    if (tech.missileCount > 1) {
+                        for (let i = 0; i < tech.missileCount; i++) {
+                            setTimeout(() => {
+                                const where = {
+                                    x: m.pos.x + 40 * direction.x,
+                                    y: m.pos.y + 40 * direction.y
+                                }
+                                b.missile(where, m.angle, 0, Math.sqrt(countReduction))
+                                bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
+                                bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
+                            }, 40 * tech.missileCount * Math.random());
+                        }
+                    } else {
+                        const where = {
+                            x: m.pos.x + 40 * direction.x,
+                            y: m.pos.y + 40 * direction.y
+                        }
+                        b.missile(where, m.angle, 0)
                     }
-                    for (let i = 0; i < tech.missileCount; i++) {
-                        b.missile(where, m.angle, 0, size)
-                        bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
-                        bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
-                    }
+                    // for (let i = 0; i < tech.missileCount; i++) {
+                    //     setTimeout(() => {
+                    //         b.missile(where, m.angle, 0, size)
+                    //         bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
+                    //         bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
+                    //     }, i * 50);
+                    // }
                 }
 
 

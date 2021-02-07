@@ -1,18 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
-blocking uses 33% less energy
 
-tech: stimulated emission removed
-tech: Bayesian statistics renamed stimulated emission
-tech: futures exchange gives 4.5% per cancel (up from 4%)
+tech change: commodities exchange 6 -> 8 power ups on cancel
+tech change: MIRV - doesn't reduce the missile size as much, has a better missile spread, and a very short fire delay
 
-new level boss: follows you like the dynamo-bot, but is not friend
-  will not spawn if you have a dynamo-bot
-  (probably will be rebalanced in next patch)
+tech: replication - gain 8% duplication, but add in 10 junk tech to the pool
+added several new junk tech (18 possible junk tech now)
 
 ******************************************************** BUGS ********************************************************
 
-make mobs that spawn other mobs limit spawns to line of sight
-  orange mobs
+use the floor of portal sensor on the player? to unstuck player
 
 (only once on my computer) once every 7 second check isn't running code
     power ups don't teleport to exit
@@ -37,6 +33,22 @@ make mobs that spawn other mobs limit spawns to line of sight
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+ 
+tech fire gun in the future
+  laser doesn't work because of draw, needs to be a bullet
+    foam? shotgun?
+  const where = {
+      x: m.pos.x + 20 * Math.cos(m.angle),
+      y: m.pos.y + 20 * Math.sin(m.angle)
+  }
+  setTimeout(() => {
+  }, 1000);
+
+
+historyBoss needs legs?
+
+unified field theory is too weak
+  fill energy make immune to damage on swap?
 
 tech: when you switch guns switch a random bot to a different bot. If the bot you had was upgraded the new one will be too.
   or switch all bots
@@ -44,7 +56,6 @@ tech: when you switch guns switch a random bot to a different bot. If the bot yo
 tech: buff block throwing
   require +100% damage for blocks
   works with pilot wave?
-
 
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

@@ -502,7 +502,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && m.fieldUpgrades[m.fieldMode].name === "negative mass field" && m.isFieldActive) dmg *= 0.6
-        if (tech.isBotArmor) dmg *= 0.97 ** tech.totalBots()
+        if (tech.isBotArmor) dmg *= 0.96 ** tech.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.6
         if (tech.energyRegen === 0) dmg *= 0.4
@@ -605,7 +605,7 @@ const m = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         m.defaultFPSCycle = m.cycle
         if (tech.isRewindBot) {
-            const len = steps * 0.042 * tech.isRewindBot
+            const len = steps * 0.052 * tech.isRewindBot
             for (let i = 0; i < len; i++) {
                 const where = m.history[Math.abs(m.cycle - i * 40) % 600].position //spread out spawn locations along past history
                 b.randomBot({
