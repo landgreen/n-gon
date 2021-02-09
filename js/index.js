@@ -214,7 +214,7 @@ const build = {
         el.style.display = "grid"
         el.innerHTML = text
         text = "";
-        text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
+        text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         let countTech = 0
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
@@ -729,6 +729,24 @@ window.addEventListener("keydown", function(event) {
                     simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
+
+                    if (tech.isGunSwitchField || simulation.testing) {
+                        document.getElementById("pause-field").addEventListener("click", () => {
+                            const energy = m.energy
+                            m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
+                            m.energy = energy
+                            document.getElementById("pause-field").innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}`
+                        });
+                    }
+                    if (simulation.testing) {
+
+
+
+
+
+
+
+                    }
                 }
             }
             break
@@ -876,7 +894,6 @@ window.addEventListener("keydown", function(event) {
                 }
                 break
             case "u":
-                simulation.clearTimeouts();
                 level.nextLevel();
                 break
         }

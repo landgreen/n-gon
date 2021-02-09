@@ -3674,7 +3674,7 @@ const b = {
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 20, 4.5, b.fireAttributes(dir, false));
                 b.fireProps(m.crouch ? 45 : 25, m.crouch ? 30 : 16, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
-                bullet[me].endCycle = Infinity;
+                bullet[me].endCycle = simulation.cycle + 600;
                 bullet[me].frictionAir = 0;
                 bullet[me].friction = 0.5;
                 bullet[me].radius = 4.5;

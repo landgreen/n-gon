@@ -358,21 +358,6 @@ const simulation = {
         }
     },
     switchGun() {
-        if (tech.isGunSwitchField) {
-            // const energy = m.energy
-            // m.energy = energy //field swap sets energy to max, this undoes that
-            m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
-
-            //update text to show next field
-            for (let i = tech.tech.length - 1; i > 0; i--) {
-                if (tech.tech[i].name === "unified field theory") {
-                    const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
-                    tech.tech[i].description = `switching <strong class='color-g'>guns</strong> also cycles your <strong class='color-f'>field</strong>
-                    <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
-                    break
-                }
-            }
-        }
         if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
         b.activeGun = b.inventory[b.inventoryGun];
         simulation.updateGunHUD();

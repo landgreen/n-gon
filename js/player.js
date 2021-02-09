@@ -497,6 +497,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
+        if (tech.isBlockHarm && m.isHolding) dmg *= 0.4
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
         if (tech.isSlowFPS) dmg *= 0.8
@@ -606,13 +607,14 @@ const m = {
         m.defaultFPSCycle = m.cycle
         if (tech.isRewindBot) {
             const len = steps * 0.052 * tech.isRewindBot
+            const botStep = Math.floor(steps / len)
             for (let i = 0; i < len; i++) {
-                const where = m.history[Math.abs(m.cycle - i * 40) % 600].position //spread out spawn locations along past history
+                const where = m.history[Math.abs(m.cycle - i * botStep) % 600].position //spread out spawn locations along past history
                 b.randomBot({
-                    x: where.x + 100 * (Math.random() - 0.5),
-                    y: where.y + 100 * (Math.random() - 0.5)
+                    x: where.x + 20 * (Math.random() - 0.5),
+                    y: where.y + 20 * (Math.random() - 0.5)
                 }, false, false)
-                bullet[bullet.length - 1].endCycle = simulation.cycle + 360 + Math.floor(180 * Math.random()) //6-9 seconds
+                bullet[bullet.length - 1].endCycle = simulation.cycle + 480 + Math.floor(120 * Math.random()) //8-10 seconds
             }
         }
     },

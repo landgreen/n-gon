@@ -1038,9 +1038,7 @@ const mobs = {
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
                     if (Math.random() < tech.sporesOnDeath) {
                         const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))
-                        for (let i = 0; i < len; i++) {
-                            b.spore(this.position)
-                        }
+                        for (let i = 0; i < len; i++) b.spore(this.position)
                     } else if (tech.isExplodeMob) {
                         b.explosion(this.position, Math.min(600, Math.sqrt(this.mass + 2.75) * 55))
                     } else if (tech.nailsDeathMob) {

@@ -20,7 +20,8 @@ const level = {
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
             // tech.giveTech("supercritical fission")
-            // tech.giveTech("irradiated nails")
+            // tech.giveTech("CPT reversal")
+            // tech.giveTech("causality bombs")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
             // tech.isExplodeRadio = true;
@@ -30,6 +31,7 @@ const level = {
             // tech.giveTech("missile-bot")
             // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
+            // tech.isBlockPowerUps = true;
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -1052,7 +1054,8 @@ const level = {
         // spawn.boost(1500, 0, 900);
 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.historyBoss(1900, -500)
+        spawn.starter(1900, -500)
+        // spawn.historyBoss(1900, -500)
         // spawn.sneaker(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)

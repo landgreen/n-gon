@@ -169,6 +169,17 @@ function collisionChecks(event) {
                             let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
                             if (mob[k].isShielded) dmg *= 0.35
                             mob[k].damage(dmg, true);
+                            if (tech.isBlockPowerUps && !mob[k].alive && mob[k].dropPowerUp) {
+                                let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
+                                if (Math.random() < 0.4) {
+                                    type = "heal"
+                                } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
+                                    type = "research"
+                                }
+                                powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
+                                // for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {}
+                            }
+
                             const stunTime = dmg / Math.sqrt(obj.mass)
                             if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
                             if (mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();

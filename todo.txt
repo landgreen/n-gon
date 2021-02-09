@@ -1,10 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
+several new junk tech
 
-tech change: commodities exchange 6 -> 8 power ups on cancel
-tech change: MIRV - doesn't reduce the missile size as much, has a better missile spread, and a very short fire delay
+unified field theory: now cycles fields after you click the field box when paused
 
-tech: replication - gain 8% duplication, but add in 10 junk tech to the pool
-added several new junk tech (18 possible junk tech now)
+tech: restitution - mobs killed by blocks spawn power ups
+tech: inelastic collision - 60% harm reduction when holding a block
 
 ******************************************************** BUGS ********************************************************
 
@@ -34,6 +34,21 @@ use the floor of portal sensor on the player? to unstuck player
 
 ******************************************************** TODO ********************************************************
  
+holding a block gives some defense
+  can still block?
+  just make the block more transparent so it's clear you can't block
+
+
+When you beat the boss without lore the output thing should read simulation complete, processing results, terminating simulation
+shutdown progress: 0%
+And count up by ten to 100% before you die, so that players know they won and don't think theyre stuck or something, and so its not surprising when you die
+
+Additionally, a stats screen would be nice. Like when you die, and it fades to white, output reads simulation result: failure (or success if you beat the boss)
+Then reads some stats like kills, tech picked up, research picked up, damage dealt/taken, etc
+
+
+
+
 tech fire gun in the future
   laser doesn't work because of draw, needs to be a bullet
     foam? shotgun?
@@ -43,12 +58,6 @@ tech fire gun in the future
   }
   setTimeout(() => {
   }, 1000);
-
-
-historyBoss needs legs?
-
-unified field theory is too weak
-  fill energy make immune to damage on swap?
 
 tech: when you switch guns switch a random bot to a different bot. If the bot you had was upgraded the new one will be too.
   or switch all bots

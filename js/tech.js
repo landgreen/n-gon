@@ -19,6 +19,14 @@ const tech = {
         tech.tech[index].count = 0;
         simulation.updateTechHUD();
     },
+    // onclick="tech.removeTechPaused(${i}, this)"  //add this to tech elements in pause menu
+    // removeTechPaused(index, who) {
+    //     tech.tech[index].remove();
+    //     tech.tech[index].count = 0;
+    //     simulation.updateTechHUD();
+    //     who.innerHTML = "removed"
+    //     // who.style.display = "none"
+    // },
     removeLoreTechFromPool() {
         for (let i = tech.tech.length - 1; i > 0; i--) {
             if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech.splice(i, 1)
@@ -1090,6 +1098,38 @@ const tech = {
             }
         },
         {
+            name: "restitution",
+            description: "mobs killed by collisions with <strong>blocks</strong><br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.throwChargeRate > 1
+            },
+            requires: "mass driver",
+            effect() {
+                tech.isBlockPowerUps = true
+            },
+            remove() {
+                tech.isBlockPowerUps = false
+            }
+        },
+        {
+            name: "inelastic collision",
+            description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.throwChargeRate > 1
+            },
+            requires: "mass driver",
+            effect() {
+                tech.isBlockHarm = true
+            },
+            remove() {
+                tech.isBlockHarm = false
+            }
+        },
+        {
             name: "perpetual stun",
             description: "<strong>stun</strong> all mobs for up to <strong>12</strong> seconds<br>at the start of each <strong>level</strong>",
             maxCount: 1,
@@ -1255,7 +1295,7 @@ const tech = {
         },
         {
             name: "causality bots",
-            description: "when you <strong class='color-rewind'>rewind</strong>, build some <strong>bots</strong><br>that protect you for about <strong>7</strong> seconds",
+            description: "when you <strong class='color-rewind'>rewind</strong>, build several <strong>bots</strong><br>that protect you for about <strong>9</strong> seconds",
             maxCount: 3,
             count: 0,
             allowed() {
@@ -1271,7 +1311,7 @@ const tech = {
         },
         {
             name: "causality bombs",
-            description: "before you <strong class='color-rewind'>rewind</strong> drop some <strong>grenades</strong>",
+            description: "before you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1782,7 +1822,7 @@ const tech = {
         },
         {
             name: "replication",
-            description: "<strong>8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>10</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            description: "<strong>7.5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>16</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1790,9 +1830,9 @@ const tech = {
             },
             requires: "below 100% duplication chance",
             effect() {
-                tech.duplicateChance += 0.08
+                tech.duplicateChance += 0.075
                 simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-                tech.addJunkTechToPool(10)
+                tech.addJunkTechToPool(16)
             },
             remove() {
                 tech.duplicateChance = 0
@@ -1965,7 +2005,7 @@ const tech = {
         },
         {
             name: "unified field theory",
-            description: "",
+            description: `in the pause menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1974,25 +2014,9 @@ const tech = {
             requires: "at least 2 guns, not superdeterminism",
             effect() {
                 tech.isGunSwitchField = true;
-                for (let i = tech.tech.length - 1; i > 0; i--) {
-                    if (tech.tech[i].name === "unified field theory") {
-                        const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
-                        tech.tech[i].description = `switching <strong class='color-g'>guns</strong> also cycles your <strong class='color-f'>field</strong>
-                        <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
-                        break
-                    }
-                }
             },
             remove() {
                 tech.isGunSwitchField = false;
-                for (let i = tech.tech.length - 1; i > 0; i--) {
-                    if (tech.tech[i].name === "unified field theory") {
-                        const index = (m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1
-                        tech.tech[i].description = `switching <strong class='color-g'>guns</strong> also cycles your <strong class='color-f'>field</strong>
-                        <br>(next <strong class='color-f'>field</strong>: ${m.fieldUpgrades[index].name})`
-                        break
-                    }
-                }
             }
         },
         {
@@ -3155,7 +3179,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.haveGunCheck("foam") || tech.foamBotCount > 2
+                return tech.haveGunCheck("foam")
             },
             requires: "foam",
             effect() {
@@ -4198,6 +4222,81 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "pitch",
+            description: "oscillate the pitch of your world",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                setInterval(() => { if (!simulation.paused) ctx.rotate(0.001 * Math.sin(simulation.cycle * 0.01)) }, 16);
+            },
+            remove() {}
+        },
+        {
+            name: "umbra",
+            description: "produce a blue glow around everything<br>and probably some simulation lag",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                ctx.shadowColor = '#06f';
+                ctx.shadowBlur = 25;
+            },
+            remove() {}
+        },
+        {
+            name: "lighter",
+            description: `ctx.globalCompositeOperation = "lighter"`,
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name !== "negative mass field"
+            },
+            requires: "",
+            effect() {
+                ctx.globalCompositeOperation = "lighter";
+            },
+            remove() {}
+        },
+        {
+            name: "rewind",
+            description: "every 5 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds<br>lasts 120 seconds",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 24; i++) {
+                    setTimeout(() => { m.rewind(120) }, i * 5000);
+                }
+            },
+            remove() {}
+        },
+        {
             name: "energy to mass conversion",
             description: "convert your <strong class='color-f'>energy</strong> into blocks",
             maxCount: 9,
@@ -4229,7 +4328,7 @@ const tech = {
         },
         {
             name: "level.nextLevel()",
-            description: "teleport to the start of the next level",
+            description: "advance to the next level",
             maxCount: 9,
             count: 0,
             numberInPool: 0,
@@ -4241,7 +4340,6 @@ const tech = {
             },
             requires: "",
             effect() {
-                simulation.clearTimeouts();
                 level.nextLevel();
             },
             remove() {}
@@ -4941,4 +5039,6 @@ const tech = {
     isNeedleShieldPierce: null,
     isDuplicateBoss: null,
     isDynamoBotUpgrade: null,
+    isBlockPowerUps: null,
+    isBlockHarm: null
 }
