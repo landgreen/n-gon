@@ -132,6 +132,17 @@ const tech = {
     duplicationChance() {
         return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance
     },
+    maxDuplicationEvent() {
+        if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
+            tech.is100Duplicate = false
+            const range = 1000
+            const bossOptions = ["historyBoss", "cellBossCulture", "bomberBoss", "powerUpBoss", "suckerBoss"]
+            spawn.randomLevelBoss(m.pos.x + range, m.pos.y, bossOptions);
+            spawn.randomLevelBoss(m.pos.x, m.pos.y + range, bossOptions);
+            spawn.randomLevelBoss(m.pos.x - range, m.pos.y, bossOptions);
+            spawn.randomLevelBoss(m.pos.x, m.pos.y - range, bossOptions);
+        }
+    },
     totalBots() {
         return tech.dynamoBotCount + tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
     },
@@ -1115,7 +1126,7 @@ const tech = {
         },
         {
             name: "inelastic collision",
-            description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong>",
+            description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>75%</strong>",
             maxCount: 1,
             count: 0,
             allowed() {
@@ -1814,6 +1825,7 @@ const tech = {
             effect: () => {
                 tech.isBayesian = true
                 simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+                tech.maxDuplicationEvent()
             },
             remove() {
                 tech.isBayesian = false
@@ -1822,7 +1834,7 @@ const tech = {
         },
         {
             name: "replication",
-            description: "<strong>7.5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>16</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+            description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>11</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
             maxCount: 9,
             count: 0,
             allowed() {
@@ -1832,7 +1844,8 @@ const tech = {
             effect() {
                 tech.duplicateChance += 0.075
                 simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-                tech.addJunkTechToPool(16)
+                tech.addJunkTechToPool(11)
+                tech.maxDuplicationEvent()
             },
             remove() {
                 tech.duplicateChance = 0
@@ -1892,12 +1905,12 @@ const tech = {
             }
         },
         {
-            name: "cloning",
+            name: "parthenogenesis",
             description: "each level has a chance to spawn a <strong>level boss</strong><br>equal to <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             allowed() {
-                return tech.duplicationChance() > 0.2
+                return tech.duplicationChance() > 0
             },
             requires: "some duplication chance",
             effect() {
@@ -1905,6 +1918,22 @@ const tech = {
             },
             remove() {
                 tech.isDuplicateBoss = false;
+            }
+        },
+        {
+            name: "apomixis",
+            description: "after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong> chance<br>immediately spawn <strong>4 level bosses</strong>",
+            maxCount: 1,
+            count: 0,
+            allowed() {
+                return tech.isDuplicateBoss
+            },
+            requires: "parthenogenesis",
+            effect() {
+                tech.is100Duplicate = true;
+            },
+            remove() {
+                tech.is100Duplicate = false;
             }
         },
         {
@@ -3189,6 +3218,24 @@ const tech = {
                 tech.isAmmoFoamSize = false;
             }
         },
+        {
+            name: "quantum foam",
+            description: "<strong>foam</strong> gun fires <strong>0.35</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>153%</strong>",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            allowed() {
+                return tech.haveGunCheck("foam")
+            },
+            requires: "foam",
+            effect() {
+                tech.foamFutureFire++
+            },
+            remove() {
+                tech.foamFutureFire = 0;
+            }
+        },
+
         // {
         //     name: "foam size",
         //     description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>50%</strong> faster",
@@ -3869,7 +3916,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
             },
             requires: "plasma torch",
             effect() {
@@ -3960,7 +4007,7 @@ const tech = {
         },
         {
             name: "phase decoherence",
-            description: "become <strong>intangible</strong> while <strong class='color-cloaked'>cloaked</strong><br>but, passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
+            description: "<strong>intangible</strong> to blocks and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -4222,9 +4269,30 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "lubrication",
+            description: "reduce block density and friction for this level",
+            maxCount: 9,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < body.length; i++) {
+                    Matter.Body.setDensity(body[i], 0.0001) // 0.001 is normal
+                    body[i].friction = 0.01
+                }
+            },
+            remove() {}
+        },
+        {
             name: "pitch",
             description: "oscillate the pitch of your world",
-            maxCount: 9,
+            maxCount: 1,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4242,7 +4310,7 @@ const tech = {
         {
             name: "umbra",
             description: "produce a blue glow around everything<br>and probably some simulation lag",
-            maxCount: 9,
+            maxCount: 1,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4261,7 +4329,7 @@ const tech = {
         {
             name: "lighter",
             description: `ctx.globalCompositeOperation = "lighter"`,
-            maxCount: 9,
+            maxCount: 1,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4736,7 +4804,7 @@ const tech = {
         {
             name: "stun",
             description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds",
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4754,7 +4822,7 @@ const tech = {
         {
             name: "re-arm",
             description: "<strong>eject</strong> all your <strong class='color-g'>guns</strong>",
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4782,7 +4850,7 @@ const tech = {
         {
             name: "re-research",
             description: "<strong>eject</strong> all your <strong class='color-r'>research</strong>",
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4801,7 +4869,7 @@ const tech = {
         {
             name: "quantum black hole",
             description: "use all your <strong class='color-f'>energy</strong> to <strong>spawn</strong> inside the event horizon of a huge <strong>black hole</strong>",
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -4820,7 +4888,7 @@ const tech = {
         {
             name: "black hole cluster",
             description: "spawn <strong>2</strong> <strong class='color-r'>research</strong><br><strong>spawn</strong> 40 nearby <strong>black holes</strong>",
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             numberInPool: 0,
             isNonRefundable: true,
@@ -5038,7 +5106,9 @@ const tech = {
     isGunSwitchField: null,
     isNeedleShieldPierce: null,
     isDuplicateBoss: null,
+    is100Duplicate: null,
     isDynamoBotUpgrade: null,
     isBlockPowerUps: null,
-    isBlockHarm: null
+    isBlockHarm: null,
+    foamFutureFire: null
 }

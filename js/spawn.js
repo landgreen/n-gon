@@ -112,18 +112,23 @@ const spawn = {
             } else {
                 //reset game
                 setTimeout(() => {
-                    simulation.makeTextLog(`simulation.end()`);
+                    simulation.makeTextLog(`simulation.complete()`);
                     let delay = 1000
-                    for (let i = 20; i > 0; i--) {
+                    for (let i = 0; i < 1.01; i += 0.01 + 0.1 * Math.random()) {
                         setTimeout(function() {
-                            simulation.makeTextLog(`delay = ${i*1000}`);
+                            simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(i).toFixed(3)}`);
                         }, delay);
                         delay += 1000
                     }
-                    delay += 1000
+                    setTimeout(function() {
+                        simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
+                    }, delay);
+                    delay += 2000
                     setTimeout(() => {
-                        simulation.makeTextLog(`World.clear(engine.world)`);
-                        setTimeout(() => { m.death() }, 1000);
+                        if (!simulation.paused && !simulation.testing) {
+                            simulation.makeTextLog(`World.clear(engine.world)`);
+                            setTimeout(() => { m.death() }, 2000);
+                        }
                     }, delay);
                 }, 5000);
             }
@@ -514,22 +519,21 @@ const spawn = {
         }
     },
     cellBoss(x, y, radius = 20, cellID) {
-        mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,150,155,0.7)");
+        mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,100,105,0)");
         let me = mob[mob.length - 1];
+        me.stroke = "#099"
         me.isBoss = true;
         me.isCell = true;
         me.cellID = cellID
-        me.accelMag = 0.00015 * simulation.accelScale;
+        me.accelMag = 0.00016 * simulation.accelScale;
         me.memory = 40;
         me.isVerticesChange = true
         me.frictionAir = 0.012
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
-
-        me.collisionFilter.mask = cat.player | cat.bullet
-        Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
-        // console.log(me.mass, me.radius)
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.map | cat.body
+        Matter.Body.setDensity(me, 0.001) // normal density is 0.001 // this reduces life by half and decreases knockback
         const k = 642 //k=r^2/m
         me.split = function() {
             Matter.Body.scale(this, 0.4, 0.4);
@@ -556,16 +560,16 @@ const spawn = {
                     this.radius = Math.sqrt(this.mass * k / Math.PI)
                 }
                 if (!(simulation.cycle % this.seePlayerFreq)) { //move away from other mobs
-                    const repelRange = 200
-                    const attractRange = 800
+                    const repelRange = 150
+                    const attractRange = 700
                     for (let i = 0, len = mob.length; i < len; i++) {
                         if (mob[i].isCell && mob[i].id !== this.id) {
                             const sub = Vector.sub(this.position, mob[i].position)
                             const dist = Vector.magnitude(sub)
                             if (dist < repelRange) {
-                                this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.006)
+                                this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.002)
                             } else if (dist > attractRange) {
-                                this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.004)
+                                this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.003)
                             }
                         }
                     }
@@ -594,7 +598,7 @@ const spawn = {
         me.frictionAir = 0.01
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0005 * simulation.accelScale;
-        Matter.Body.setDensity(me, 0.0006); //normal is 0.001
+        Matter.Body.setDensity(me, 0.001); //normal is 0.001
         me.collisionFilter.mask = cat.bullet | cat.player
         me.memory = Infinity;
         me.seePlayerFreq = 30
@@ -908,7 +912,7 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.bullet
         // me.frictionAir = 0.005;
         me.memory = 1600;
-        Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.075); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             //applying forces to player doesn't seem to work inside this method, not sure why
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -1008,7 +1012,7 @@ const spawn = {
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         targets.push(me.id) //add to shield protection
         me.friction = 0;
@@ -1510,7 +1514,7 @@ const spawn = {
         me.count = 0;
         me.frictionAir = 0.03;
         // me.torque -= me.inertia * 0.002
-        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);  //not working, not sure why
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -2023,7 +2027,7 @@ const spawn = {
             if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
         };
     },
-    bullet(x, y, radius = 6, sides = 0) {
+    bullet(x, y, radius = 9, sides = 0) {
         //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];
@@ -2038,6 +2042,7 @@ const spawn = {
         me.restitution = 0.8;
         me.leaveBody = false;
         me.dropPowerUp = false;
+
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
@@ -2046,7 +2051,7 @@ const spawn = {
             this.timeLimit();
         };
     },
-    bomb(x, y, radius = 6, sides = 5) {
+    bomb(x, y, radius = 9, sides = 5) {
         mobs.spawn(x, y, sides, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
@@ -2155,7 +2160,7 @@ const spawn = {
                         this.torque -= 0.000004 * this.inertia;
                     } else if (this.noseLength > 1.5) {
                         //fire
-                        spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 5 + Math.ceil(this.radius / 15), 4);
+                        spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 15), 4);
                         const v = 20 * simulation.accelScale;
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: this.velocity.x + this.fireDir.x * v + Math.random(),
@@ -2208,7 +2213,7 @@ const spawn = {
             }
         };
     },
-    sniperBullet(x, y, radius = 6, sides = 4) {
+    sniperBullet(x, y, radius = 9, sides = 4) {
         //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
         let me = mob[mob.length - 1];
@@ -2252,7 +2257,7 @@ const spawn = {
                 Matter.Body.setAngularVelocity(this, 0.14)
                 //fire a bullet from each vertex
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    spawn.seeker(this.vertices[i].x, this.vertices[i].y, 6)
+                    spawn.seeker(this.vertices[i].x, this.vertices[i].y, 7)
                     //give the bullet a rotational velocity as if they were attached to a vertex
                     const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -8)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -2290,7 +2295,7 @@ const spawn = {
                 Matter.Body.setAngularVelocity(this, 0.11)
                 //fire a bullet from each vertex
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    spawn.seeker(this.vertices[i].x, this.vertices[i].y, 6)
+                    spawn.seeker(this.vertices[i].x, this.vertices[i].y, 8)
                     //give the bullet a rotational velocity as if they were attached to a vertex
                     const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -10)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -2342,14 +2347,14 @@ const spawn = {
                         // this.force.x -= 2 * forceMag * Math.cos(angle);
                         // this.force.y -= 2 * forceMag * Math.sin(angle); // - 0.0007 * this.mass; //antigravity
                     }
-                    spawn.seeker(this.vertices[this.closestVertex1].x, this.vertices[this.closestVertex1].y, 4)
+                    spawn.seeker(this.vertices[this.closestVertex1].x, this.vertices[this.closestVertex1].y, 6)
                     Matter.Body.setDensity(mob[mob.length - 1], 0.000001); //normal is 0.001
                     const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[this.closestVertex1])), -10)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
                         x: this.velocity.x + velocity.x,
                         y: this.velocity.y + velocity.y
                     });
-                    spawn.seeker(this.vertices[this.closestVertex2].x, this.vertices[this.closestVertex2].y, 4)
+                    spawn.seeker(this.vertices[this.closestVertex2].x, this.vertices[this.closestVertex2].y, 6)
                     Matter.Body.setDensity(mob[mob.length - 1], 0.000001); //normal is 0.001
                     const velocity2 = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[this.closestVertex2])), -10)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -2378,7 +2383,7 @@ const spawn = {
             }
         };
     },
-    seeker(x, y, radius = 5, sides = 6) {
+    seeker(x, y, radius = 8, sides = 6) {
         //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,255)");
         let me = mob[mob.length - 1];
@@ -2511,8 +2516,8 @@ const spawn = {
         });
         World.add(engine.world, consBB[consBB.length - 1]);
     },
-    snakeBody(x, y, radius = 20) {
-        mobs.spawn(x, y, 4, radius, "rgb(55,170,170)");
+    snakeBody(x, y, radius = 14) {
+        mobs.spawn(x, y, 8, radius, "transparent");
         let me = mob[mob.length - 1];
         // me.onHit = function() {
         //     //run this function on hitting player
@@ -2523,6 +2528,8 @@ const spawn = {
         me.leaveBody = false;
         me.frictionAir = 0.02;
         me.isSnakeTail = true;
+        me.stroke = "#099"
+
         me.onDeath = function() {
             if (this.isSnakeTail) { //wake up tail mobs
                 for (let i = 0; i < mob.length; i++) {

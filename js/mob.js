@@ -874,7 +874,7 @@ const mobs = {
                     Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 && //see player
                     Matter.Query.ray(body, this.position, this.mPosRange()).length === 0
                 ) {
-                    spawn.bomb(this.position.x, this.position.y + this.radius * 0.5, 10 + Math.ceil(this.radius / 15), 5);
+                    spawn.bomb(this.position.x, this.position.y + this.radius * 0.7, 9 + Math.ceil(this.radius / 15), 5);
                     //add spin and speed
                     Matter.Body.setAngularVelocity(mob[mob.length - 1], (Math.random() - 0.5) * 0.5);
                     Matter.Body.setVelocity(mob[mob.length - 1], {
@@ -909,7 +909,7 @@ const mobs = {
                             this.torque -= 0.000004 * this.inertia;
                         } else if (this.noseLength > 1.5) {
                             //fire
-                            spawn.bullet(this.vertices[1].x, this.vertices[1].y, 5 + Math.ceil(this.radius / 15), 5);
+                            spawn.bullet(this.vertices[1].x, this.vertices[1].y, 9 + Math.ceil(this.radius / 15));
                             const v = 15;
                             Matter.Body.setVelocity(mob[mob.length - 1], {
                                 x: this.velocity.x + this.fireDir.x * v + 3 * Math.random(),

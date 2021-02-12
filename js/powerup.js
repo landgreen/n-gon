@@ -36,7 +36,10 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) {
         if (isCanceled) {
-            if (tech.isCancelDuplication) tech.cancelCount++
+            if (tech.isCancelDuplication) {
+                tech.cancelCount++
+                tech.maxDuplicationEvent()
+            }
             if (tech.isCancelRerolls) {
                 for (let i = 0; i < 8; i++) {
                     let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
@@ -174,7 +177,7 @@ const powerUps = {
             if (tech.isAmmoForGun && b.inventory.length > 0 && b.activeGun) {
                 const target = b.guns[b.activeGun]
                 if (target.ammo !== Infinity) {
-                    const ammoAdded = Math.ceil(Math.random() * target.ammoPack) + Math.ceil(Math.random() * target.ammoPack)
+                    const ammoAdded = Math.ceil(Math.random() * target.ammoPack) + Math.ceil(0.7 * Math.random() * target.ammoPack)
                     target.ammo += ammoAdded
                     simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                 }

@@ -760,7 +760,7 @@ const level = {
         mapB.portalPair = mapA
         return [portalA, portalB, mapA, mapB]
     },
-    hazard(x, y, width, height, damage = 0.0005, color = "hsla(160, 100%, 35%,0.75)", isOptical = false) {
+    hazard(x, y, width, height, damage = 0.0008, color = "hsla(160, 100%, 35%,0.75)", isOptical = false) {
         return {
             min: {
                 x: x,
@@ -791,6 +791,29 @@ const level = {
                     }
                     const drain = 0.005
                     if (m.energy > drain) m.energy -= drain
+
+                    //float
+                    if (!isOptical) {
+                        if (player.velocity.y > 3) player.force.y -= 0.96 * player.mass * simulation.g
+                        const slowY = (player.velocity.y > 0) ? Math.max(0.3, 1 - 0.0015 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
+                        Matter.Body.setVelocity(player, {
+                            x: Math.max(0.6, 1 - 0.07 * Math.abs(player.velocity.x)) * player.velocity.x,
+                            y: slowY * player.velocity.y
+                        });
+                    }
+                }
+                //float power ups
+                if (!isOptical) {
+                    powerUpCollide = Matter.Query.region(powerUp, this)
+                    for (let i = 0, len = powerUpCollide.length; i < len; i++) {
+                        const diameter = 2 * powerUpCollide[i].size
+                        const buoyancy = 1 - 0.2 * Math.max(0, Math.min(diameter, this.min.y - powerUpCollide[i].position.y + powerUpCollide[i].size)) / diameter
+                        powerUpCollide[i].force.y -= buoyancy * 1.1 * powerUpCollide[i].mass * simulation.g;
+                        Matter.Body.setVelocity(powerUpCollide[i], {
+                            x: powerUpCollide[i].velocity.x,
+                            y: 0.95 * powerUpCollide[i].velocity.y
+                        });
+                    }
                 }
             },
             draw() {
@@ -1054,18 +1077,19 @@ const level = {
         // spawn.boost(1500, 0, 900);
 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.starter(1900, -500)
+        // spawn.starter(1900, -500)
         // spawn.historyBoss(1900, -500)
-        // spawn.sneaker(2900, -500)
+        // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
         // spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.sniper(1800, -120)
-        // spawn.cellBossCulture(1600, -500)
-        // spawn.cellBossCulture(1600, -500)
+        spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
+        // spawn.cellBossCulture(1600, -500)
+        // spawn.cellBossCulture(1600, -500)
+        // spawn.bomberBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
@@ -1139,8 +1163,10 @@ const level = {
         powerUps.spawn(1675, -50, "ammo");
         powerUps.spawn(3350, -75, "ammo");
         powerUps.spawn(3925, -50, "ammo");
+        powerUps.spawn(4250, -75, "ammo");
         powerUps.spawn(4550, -75, "ammo");
         powerUps.spawn(5025, -50, "ammo");
+        powerUps.spawn(4725, -50, "ammo");
         powerUps.spawn(4975, -350, "ammo");
         powerUps.spawn(5125, -350, "ammo");
         powerUps.spawn(5075, -425, "ammo");

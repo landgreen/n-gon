@@ -1,10 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
-several new junk tech
 
-unified field theory: now cycles fields after you click the field box when paused
+all mobs that move through walls and blocks now have a transparent fill
+player and power ups float in hazards
 
-tech: restitution - mobs killed by blocks spawn power ups
-tech: inelastic collision - 60% harm reduction when holding a block
+tech: apomixis - after reaching 100% duplication spawn 4 level bosses
+tech: quantum foam - +153% foam damage, fire 0.35s into the future
+bullets are bigger, and  easier to see
 
 ******************************************************** BUGS ********************************************************
 
@@ -33,38 +34,26 @@ use the floor of portal sensor on the player? to unstuck player
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
- 
-holding a block gives some defense
-  can still block?
-  just make the block more transparent so it's clear you can't block
 
+increase bullet size, but don't increase bullet damage
 
-When you beat the boss without lore the output thing should read simulation complete, processing results, terminating simulation
-shutdown progress: 0%
-And count up by ten to 100% before you die, so that players know they won and don't think theyre stuck or something, and so its not surprising when you die
+final boss: hide boss after spawning mobs
+  reduce health by 1/3?
 
-Additionally, a stats screen would be nice. Like when you die, and it fades to white, output reads simulation result: failure (or success if you beat the boss)
-Then reads some stats like kills, tech picked up, research picked up, damage dealt/taken, etc
+tech: after using anthropic principle do 100% more damage for the rest of the level
 
+mechanic:  immune to next collision
+  track number of possible collisions, if number is > 0 immune and --
+  graphical indication? (recolor health bar while immune)
+tech: after taking damage go immune to next collision
+tech: at the start of each level go immune to 1 collision
 
+copy time-like foam to other guns?
+  wave gun
+  shotgun
+  nail gun
 
-
-tech fire gun in the future
-  laser doesn't work because of draw, needs to be a bullet
-    foam? shotgun?
-  const where = {
-      x: m.pos.x + 20 * Math.cos(m.angle),
-      y: m.pos.y + 20 * Math.sin(m.angle)
-  }
-  setTimeout(() => {
-  }, 1000);
-
-tech: when you switch guns switch a random bot to a different bot. If the bot you had was upgraded the new one will be too.
-  or switch all bots
-
-tech: buff block throwing
-  require +100% damage for blocks
-  works with pilot wave?
+tech: when you switch guns switch all bots to a different bot
 
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

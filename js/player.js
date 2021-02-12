@@ -497,7 +497,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
-        if (tech.isBlockHarm && m.isHolding) dmg *= 0.4
+        if (tech.isBlockHarm && m.isHolding) dmg *= 0.25
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
         if (tech.isSlowFPS) dmg *= 0.8
@@ -506,7 +506,7 @@ const m = {
         if (tech.isBotArmor) dmg *= 0.96 ** tech.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.6
-        if (tech.energyRegen === 0) dmg *= 0.4
+        if (tech.energyRegen === 0) dmg *= 0.34
         if (tech.isTurret && m.crouch) dmg *= 0.5;
         if (tech.isFireMoveLock && input.fire) dmg *= 0.4;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {

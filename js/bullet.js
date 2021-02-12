@@ -3017,7 +3017,7 @@ const b = {
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
             },
             fireNeedles() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 35 : 20) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 33 : 16) * b.fireCD); // cool down
 
                 function makeNeedle(angle = m.angle) {
                     const me = bullet.length;
@@ -3047,7 +3047,7 @@ const b = {
                                     if (tech.isNailRadiation) {
                                         mobs.statusDoT(who, tech.isFastRadiation ? 8 : 2, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                                     } else {
-                                        let dmg = b.dmgScale * 3
+                                        let dmg = b.dmgScale * 3.25
                                         if (tech.isCrit && who.isStunned) dmg *= 4
                                         who.damage(dmg, tech.isNeedleShieldPierce);
                                         simulation.drawList.push({ //add dmg to draw queue
@@ -3173,6 +3173,32 @@ const b = {
             defaultAmmoPack: 5.5,
             have: false,
             fire() {
+
+                // if (true) {
+                //     const direction = {
+                //         x: Math.cos(m.angle),
+                //         y: Math.sin(m.angle)
+                //     }
+                //     for (let i = 0; i < 2; i++) {
+                //         const push = Vector.mult(Vector.perp(direction), 0.08)
+                //         const where = {
+                //             x: m.pos.x + 40 * direction.x,
+                //             y: m.pos.y + 40 * direction.y
+                //         }
+                //         b.missile(where, m.angle, 0, 0.5) //where, angle, speed, size = 1) 
+                //         // bullet[bullet.length - 1].force.x += push.x;
+                //         // bullet[bullet.length - 1].force.y += push.y;
+                //     }
+                // }
+
+                // setTimeout(() => {
+                //     if (!simulation.paused) {
+                //         b.foam(position, velocity, radius)
+                //         bullet[bullet.length - 1].damage = (1 + 1.53 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
+                //     }
+                // }, 350 * tech.foamFutureFire);
+
+
                 let knock, spread
                 if (m.crouch) {
                     spread = 0.75
@@ -3832,19 +3858,49 @@ const b = {
             ammoPack: 36,
             have: false,
             fire() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 15 : 5) * b.fireCD); // cool down
-                const radius = (m.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                const SPEED = 18 - radius * 0.4;
-                const dir = m.angle + 0.2 * (Math.random() - 0.5)
-                const velocity = {
-                    x: SPEED * Math.cos(dir),
-                    y: SPEED * Math.sin(dir)
+                if (tech.foamFutureFire) {
+                    m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 15 : 5) * b.fireCD); // cool down
+                    const radius = (m.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                    const SPEED = 18 - radius * 0.4;
+                    const dir = m.angle + 0.2 * (Math.random() - 0.5)
+                    const velocity = {
+                        x: SPEED * Math.cos(dir),
+                        y: SPEED * Math.sin(dir)
+                    }
+                    const position = {
+                        x: m.pos.x + 30 * Math.cos(m.angle),
+                        y: m.pos.y + 30 * Math.sin(m.angle)
+                    }
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: position.x,
+                        y: position.y,
+                        radius: 5,
+                        color: "rgba(0,0,0,0.1)",
+                        time: 21 * tech.foamFutureFire
+                    });
+
+                    setTimeout(() => {
+                        if (!simulation.paused) {
+                            b.foam(position, velocity, radius)
+                            bullet[bullet.length - 1].damage = (1 + 1.53 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
+                        }
+                    }, 350 * tech.foamFutureFire);
+
+                } else {
+                    m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 15 : 5) * b.fireCD); // cool down
+                    const radius = (m.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                    const SPEED = 18 - radius * 0.4;
+                    const dir = m.angle + 0.2 * (Math.random() - 0.5)
+                    const velocity = {
+                        x: SPEED * Math.cos(dir),
+                        y: SPEED * Math.sin(dir)
+                    }
+                    const position = {
+                        x: m.pos.x + 30 * Math.cos(m.angle),
+                        y: m.pos.y + 30 * Math.sin(m.angle)
+                    }
+                    b.foam(position, velocity, radius)
                 }
-                const position = {
-                    x: m.pos.x + 30 * Math.cos(m.angle),
-                    y: m.pos.y + 30 * Math.sin(m.angle)
-                }
-                b.foam(position, velocity, radius)
             }
         },
         {
