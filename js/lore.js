@@ -4,9 +4,11 @@ const lore = {
     anand: {
         color: "#e0c",
         text: function(say, isSpeech = false) {
-            simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-            lore.talkingColor = this.color
-            if (isSpeech) this.speech(say)
+            if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
+                simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+                lore.talkingColor = this.color
+                if (isSpeech) this.speech(say)
+            }
         },
         speech: function(say) {
             var utterance = new SpeechSynthesisUtterance(say);
@@ -18,9 +20,11 @@ const lore = {
     miriam: {
         color: "#f20",
         text: function(say, isSpeech = false) {
-            simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-            lore.talkingColor = this.color
-            if (isSpeech) this.speech(say)
+            if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
+                simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+                lore.talkingColor = this.color
+                if (isSpeech) this.speech(say)
+            }
         },
         speech: function(say) {
             var utterance = new SpeechSynthesisUtterance(say);
@@ -58,9 +62,14 @@ const lore = {
             delay += 3700
             setTimeout(() => { lore.talkingColor = "#dff" }, delay); //set color of graphic on level.null when no one is talking
             delay += 25000
-            setTimeout(() => { lore.miriam.text("Poor thing... I hope it figures out how to escape.", true) }, delay);
-            delay += 3500
-            setTimeout(() => { lore.talkingColor = "#dff" }, delay); //set color of graphic on level.null when no one is talking
+            setTimeout(() => {
+                if (!simulation.isCheating) {
+                    lore.miriam.text("Poor thing... I hope it figures out how to escape.", true)
+                    delay += 3500
+                    setTimeout(() => { lore.talkingColor = "#dff" }, delay); //set color of graphic on level.null when no one is talking
+                }
+            }, delay);
+
         },
         () => {
             if (localSettings.loreCount < 2) {
@@ -129,9 +138,9 @@ const lore = {
             }, delay);
         },
         () => {
-            let delay = 6000
-            setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.", true) }, delay);
-            delay += 2700
+            // let delay = 6000
+            // setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.", true) }, delay);
+            // delay += 2700
 
         },
     ],

@@ -32,6 +32,7 @@ const level = {
             // tech.giveTech("nail-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
             // tech.isBlockPowerUps = true;
+            // m.shipMode()
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -57,8 +58,8 @@ const level = {
             // tech.giveTech("undefined")
             // lore.techCount = 10
             // localSettings.loreCount = 1;
-            // simulation.isCheating = true;
-            // localSettings.loreCount = undefined;
+            // simulation.isCheating = false //true;
+            // localSettings.loreCount = 1;
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.null()
         } else {
@@ -1085,7 +1086,7 @@ const level = {
         // spawn.striker(1600, -500)
         // spawn.shooter(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        spawn.sniper(1800, -120)
+        // spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.cellBossCulture(1600, -500)
@@ -1419,11 +1420,13 @@ const level = {
             powerUps.spawn(2050, -150, "heal", false); //starting gun
             // powerUps.spawn(2050, -150, "field", false); //starting gun
             if (localSettings.levelsClearedLastGame < 6) {
-                spawn.wireFoot();
-                spawn.wireFootLeft();
-                spawn.wireKnee();
-                spawn.wireKneeLeft();
-                spawn.wireHead();
+                if (!simulation.isCheating) {
+                    spawn.wireFoot();
+                    spawn.wireFootLeft();
+                    spawn.wireKnee();
+                    spawn.wireKneeLeft();
+                    spawn.wireHead();
+                }
             } else {
                 // const say = []
                 // if (localSettings.runCount > 200) { //experienced
@@ -2590,7 +2593,7 @@ const level = {
             color: "rgba(0,0,0,0.2)"
         });
         level.fill.push({
-            x: 3600,
+            x: 3800,
             y: -110,
             width: 400,
             height: 110,
@@ -2614,7 +2617,7 @@ const level = {
         });
         level.fillBG.push({
             x: 3350,
-            y: -1325,
+            y: -1300,
             width: 50,
             height: 1325,
             color: "#d4d4d7"
@@ -2627,7 +2630,7 @@ const level = {
             color: "#d4f4f4"
         });
 
-        spawn.mapRect(-300, 0, 5000, 300); //***********ground
+        spawn.mapRect(-300, 0, 5100, 300); //***********ground
         spawn.mapRect(-300, -350, 50, 400); //far left starting left wall
         spawn.mapRect(-300, -10, 500, 50); //far left starting ground
         spawn.mapRect(-300, -350, 500, 50); //far left starting ceiling
@@ -2638,7 +2641,7 @@ const level = {
         spawn.mapRect(1600, -400, 1500, 500); //long center building
         spawn.mapRect(1345, -1100, 250, 25); //left platform
         spawn.mapRect(1755, -1100, 250, 25); //right platform
-        spawn.mapRect(1300, -1850, 780, 50); //left higher platform
+        spawn.mapRect(1300, -1850, 800, 50); //left higher platform
         spawn.mapRect(1300, -2150, 50, 350); //left higher platform left edge wall
         spawn.mapRect(1300, -2150, 450, 50); //left higher platform roof
         spawn.mapRect(1500, -1860, 100, 50); //ground bump wall
@@ -2647,10 +2650,10 @@ const level = {
         spawn.mapRect(2500, -1450, 450, 350); //higher center floating large square
         spawn.mapRect(2500, -1675, 50, 300); //left wall on higher center floating large square
         spawn.mapRect(2500, -1700, 300, 50); //roof on higher center floating large square
-        spawn.mapRect(3300, -850, 150, 25); //ledge by far right building
-        spawn.mapRect(3300, -1350, 150, 25); //higher ledge by far right building
-        spawn.mapRect(3600, -1100, 400, 990); //far right building
-        spawn.boost(4150, 0, 1300);
+        spawn.mapRect(3275, -750, 200, 25); //ledge by far right building
+        spawn.mapRect(3275, -1300, 200, 25); //higher ledge by far right building
+        spawn.mapRect(3800, -1100, 400, 990); //far right building
+        spawn.boost(4450, 0, 1300);
 
         spawn.bodyRect(3200, -1375, 300, 25, 0.9);
         spawn.bodyRect(1825, -1875, 400, 25, 0.9);

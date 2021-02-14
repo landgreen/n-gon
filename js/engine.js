@@ -99,6 +99,7 @@ function collisionChecks(event) {
                     if (
                         m.immuneCycle < m.cycle &&
                         (obj === playerBody || obj === playerHead) &&
+                        // (obj === player) &&
                         !(tech.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
                     ) {
                         mob[k].foundPlayer();

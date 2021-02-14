@@ -3876,7 +3876,7 @@ const b = {
                         y: position.y,
                         radius: 5,
                         color: "rgba(0,0,0,0.1)",
-                        time: 21 * tech.foamFutureFire
+                        time: 18 * tech.foamFutureFire
                     });
 
                     setTimeout(() => {
@@ -3884,7 +3884,7 @@ const b = {
                             b.foam(position, velocity, radius)
                             bullet[bullet.length - 1].damage = (1 + 1.53 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
                         }
-                    }, 350 * tech.foamFutureFire);
+                    }, 300 * tech.foamFutureFire);
 
                 } else {
                     m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 15 : 5) * b.fireCD); // cool down
@@ -3993,7 +3993,8 @@ const b = {
                                     //draw magnetic field
                                     const X = m.pos.x
                                     const Y = m.pos.y
-                                    const unitVector = Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos))
+                                    // const unitVector = Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos))
+                                    const unitVector = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                                     const unitVectorPerp = Vector.perp(unitVector)
 
                                     function magField(mag, arc) {
@@ -4218,7 +4219,8 @@ const b = {
                             //draw magnetic field
                             const X = m.pos.x
                             const Y = m.pos.y
-                            const unitVector = Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos))
+                            const unitVector = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
+                            //Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos))
                             const unitVectorPerp = Vector.perp(unitVector)
 
                             function magField(mag, arc) {

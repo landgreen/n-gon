@@ -318,6 +318,9 @@ const build = {
                                                     <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                                 </span>
                                                 &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
+                    } else if (tech.tech[i].isJunk) {
+                        // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     } else {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     }
@@ -741,11 +744,6 @@ window.addEventListener("keydown", function(event) {
                     if (simulation.testing) {
 
 
-
-
-
-
-
                     }
                 }
             }
@@ -785,6 +783,10 @@ window.addEventListener("keydown", function(event) {
                             </tr>                            
                             <tr>
                                 <td class='key-input-pause'>H</td>
+                                <td class='key-used'>infinite health</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input-pause'>N</td>
                                 <td class='key-used'>fill health, energy</td>
                             </tr>
                             <tr>
@@ -794,6 +796,10 @@ window.addEventListener("keydown", function(event) {
                             <tr>
                                 <td class='key-input-pause'>U</td>
                                 <td class='key-used'>next level</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input-pause'>J</td>
+                                <td class='key-used'>clear mobs</td>
                             </tr>
                             <tr>
                                 <td class='key-input-pause'>I/O</td>
@@ -866,8 +872,14 @@ window.addEventListener("keydown", function(event) {
                 b.giveGuns("all", 1000)
                 break
             case "h":
+                m.health = Infinity
+                // m.energy = Infinity
+                document.getElementById("health").style.display = "none"
+                document.getElementById("health-bg").style.display = "none"
+                break
+            case "n":
                 m.addHealth(Infinity)
-                m.energy = m.maxEnergy;
+                m.energy = m.maxEnergy
                 break
             case "y":
                 tech.giveTech()
@@ -895,6 +907,11 @@ window.addEventListener("keydown", function(event) {
                 break
             case "u":
                 level.nextLevel();
+                break
+            case "j":
+                for (let i = 0, len = mob.length; i < len; ++i) mob[i].damage(Infinity, true)
+                setTimeout(() => { for (let i = 0, len = mob.length; i < len; ++i) mob[i].damage(Infinity, true) }, 100);
+                setTimeout(() => { for (let i = 0, len = mob.length; i < len; ++i) mob[i].damage(Infinity, true) }, 200);
                 break
         }
     }

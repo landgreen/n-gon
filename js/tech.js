@@ -3220,7 +3220,7 @@ const tech = {
         },
         {
             name: "quantum foam",
-            description: "<strong>foam</strong> gun fires <strong>0.35</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>153%</strong>",
+            description: "<strong>foam</strong> gun fires <strong>0.3</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>153%</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -4216,7 +4216,7 @@ const tech = {
                 this.count--
             },
             remove() {}
-        }
+        },
     ],
     addLoreTechToPool() { //adds lore tech to tech pool
         if (!simulation.isCheating) {
@@ -4268,6 +4268,43 @@ const tech = {
         //     },
         //     remove() {}
         // },
+        {
+            name: "banish",
+            description: "<strong>erase</strong> all junk <strong class='color-m'>tech</strong> from the possible pool<br><em>probably...</em>",
+            maxCount: 1,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.removeJunkTechFromPool()
+            },
+            remove() {}
+        },
+        {
+            name: "ship",
+            description: "fly around with no legs<br>reduce combat <strong>difficulty</strong> by <strong>1 level</strong>",
+            maxCount: 1,
+            count: 0,
+            numberInPool: 0,
+            isNonRefundable: true,
+            isCustomHide: true,
+            isJunk: true,
+            allowed() {
+                return !m.isShipMode
+            },
+            requires: "",
+            effect() {
+                m.shipMode()
+                level.difficultyDecrease(simulation.difficultyMode)
+            },
+            remove() {}
+        },
         {
             name: "lubrication",
             description: "reduce block density and friction for this level",
@@ -4544,7 +4581,7 @@ const tech = {
             isCustomHide: true,
             isJunk: true,
             allowed() {
-                return true
+                return !m.isShipMode
             },
             requires: "",
             effect() {
@@ -4593,7 +4630,7 @@ const tech = {
             isCustomHide: true,
             isJunk: true,
             allowed() {
-                return true
+                return !m.isShipMode
             },
             requires: "",
             effect() {
@@ -4637,7 +4674,7 @@ const tech = {
             isCustomHide: true,
             isJunk: true,
             allowed() {
-                return true
+                return !m.isShipMode
             },
             requires: "",
             effect() {
@@ -4833,7 +4870,7 @@ const tech = {
             },
             requires: "at least 1 gun",
             effect() {
-                for (let i = 0; i < b.inventory.length; i++) powerUps.spawn(m.pos.x, m.pos.y, "gun");
+                for (let i = 0; i < b.inventory.length; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
 
                 //removes guns and ammo  
                 b.inventory = [];
@@ -4861,7 +4898,7 @@ const tech = {
             },
             requires: "at least 4 research",
             effect() {
-                for (let i = 0; i < powerUps.research.count; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
+                for (let i = 0; i < powerUps.research.count; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
                 powerUps.research.count = 0
             },
             remove() {}

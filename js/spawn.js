@@ -103,9 +103,8 @@ const spawn = {
                 level.levels.push("null")
                 level.exit.x = 5500;
                 level.exit.y = -330;
-                simulation.makeTextLog(`level.levels.push("null")`) // <br>${powerUps.research.count}
-
-                //remove block map element
+                simulation.makeTextLog(`<span class="lore-text">undecided</span> <span class='color-symbol'>=</span> ${lore.techCount}/10<br>level.levels.push("null")`);
+                //remove block map element so exit is clear
                 Matter.World.remove(engine.world, map[map.length - 1]);
                 map.splice(map.length - 1, 1);
                 simulation.draw.setPaths(); //redraw map draw path
@@ -113,8 +112,8 @@ const spawn = {
                 //reset game
                 setTimeout(() => {
                     simulation.makeTextLog(`simulation.complete()`);
-                    let delay = 1000
-                    for (let i = 0; i < 1.01; i += 0.01 + 0.1 * Math.random()) {
+                    let delay = 2000
+                    for (let i = 0; i < 1; i += 0.01 + 0.2 * Math.random() * Math.random()) {
                         setTimeout(function() {
                             simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(i).toFixed(3)}`);
                         }, delay);
@@ -122,13 +121,15 @@ const spawn = {
                     }
                     setTimeout(function() {
                         simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
-                    }, delay);
-                    delay += 2000
-                    setTimeout(() => {
-                        if (!simulation.paused && !simulation.testing) {
-                            simulation.makeTextLog(`World.clear(engine.world)`);
-                            setTimeout(() => { m.death() }, 2000);
-                        }
+                        setTimeout(() => {
+                            simulation.makeTextLog(`<span class="lore-text">undecided</span> <span class='color-symbol'>=</span> ${lore.techCount}/10`);
+                            setTimeout(() => {
+                                if (!simulation.paused && !simulation.testing) {
+                                    simulation.makeTextLog(`World.clear(engine.world)`);
+                                    setTimeout(() => { m.death() }, 4000);
+                                }
+                            }, 3000);
+                        }, 2000);
                     }, delay);
                 }, 5000);
             }
@@ -161,8 +162,10 @@ const spawn = {
             //push away mobs
             for (let i = 0, len = mob.length; i < len; ++i) {
                 if (mob[i] !== this) {
-                    const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), -65)
-                    Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, velocity));
+                    mob[i].damage(Infinity, true);
+
+                    // const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), -65)
+                    // Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, velocity));
                 }
             }
 

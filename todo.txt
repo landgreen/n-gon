@@ -1,11 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-all mobs that move through walls and blocks now have a transparent fill
-player and power ups float in hazards
-
-tech: apomixis - after reaching 100% duplication spawn 4 level bosses
-tech: quantum foam - +153% foam damage, fire 0.35s into the future
-bullets are bigger, and  easier to see
+added 2 new testing keys: J = clear mobs, H = infinity health
+added junk tech: ship (it's hard to control, but you get better with practice)
+  m.shipMode() in console
 
 ******************************************************** BUGS ********************************************************
 
@@ -35,7 +32,23 @@ use the floor of portal sensor on the player? to unstuck player
 
 ******************************************************** TODO ********************************************************
 
-increase bullet size, but don't increase bullet damage
+tech: health becomes drones
+  requires mass-energy?
+  junk tech?
+
+tech: 1/3 of the time foam fires 1 extra backwards foam 
+
+make a secret only accessible to the ship (very small + flying)
+
+map: laboratory
+  rooms with switches that change physics
+    gravity room
+    portal room
+    laser room
+    radiation room
+    portal + rotor + falling blocks = perpetual motion   room
+  a button that spawns a heal.
+
 
 final boss: hide boss after spawning mobs
   reduce health by 1/3?
@@ -263,14 +276,6 @@ give mobs more animal-like behaviors like rain world
   mobs can fight each other
     this might be hard to code
   isolated mobs try to group up
-
-map: laboratory
-  rooms with switches that change physics
-    gravity room
-    portal room
-    laser room
-    radiation room
-  a button that spawns a heal.
 
 mob: wall mounted guns / lasers
   not part of randomized mob pool, customized to each level

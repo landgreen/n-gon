@@ -57,8 +57,8 @@ const m = {
     lastHarmCycle: 0,
     width: 50,
     radius: 30,
-    fillColor: "#fff",
-    fillColorDark: "#ccc",
+    fillColor: null, //set by setFillColors
+    fillColorDark: null, //set by setFillColors
     color: {
         hue: 0,
         sat: 0,
@@ -66,7 +66,7 @@ const m = {
     },
     setFillColors() {
         this.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
-        this.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light-20}%)`
+        this.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light-25}%)`
     },
     height: 42,
     yOffWhen: {
@@ -236,20 +236,7 @@ const m = {
                     x: player.position.x,
                     y: player.position.y - 30.28592321
                 })
-                // Matter.Body.translate(playerHead, {
-                //     x: 0,
-                //     y: -40
-                // });
             }
-
-            // playerHead.collisionFilter = {
-            //     group: 0,
-            //     category: cat.player,
-            //     mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-            // }
-            // playerHead.isSensor = false;
-            // playerHead.collisionFilter.category = cat.player
-            // playerHead.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
         }
     },
     hardLandCD: 0,
@@ -803,12 +790,13 @@ const m = {
         ctx.save();
         ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
         ctx.translate(m.pos.x, m.pos.y);
+
         m.calcLeg(Math.PI, -3);
         m.drawLeg("#4a4a4a");
         m.calcLeg(0, 0);
         m.drawLeg("#333");
-        ctx.rotate(m.angle);
 
+        ctx.rotate(m.angle);
         ctx.beginPath();
         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
         let grd = ctx.createLinearGradient(-30, 0, 30, 0);
@@ -2586,4 +2574,304 @@ const m = {
             },
         },
     ],
+    isShipMode: false,
+    shipMode() {
+        if (!m.isShipMode) {
+            m.isShipMode = true
+            simulation.isCheating = true
+            const points = [
+                { x: 29.979168754143455, y: 4.748337243898336 },
+                { x: 27.04503734408824, y: 13.7801138209198 },
+                { x: 21.462582474874278, y: 21.462582475257523 },
+                { x: 13.780113820536943, y: 27.045037344471485 },
+                { x: 4.74833724351507, y: 29.979168754526473 },
+                { x: -4.748337245049098, y: 29.979168754526473 },
+                { x: -13.780113822071026, y: 27.045037344471485 },
+                { x: -21.46258247640829, y: 21.462582475257523 },
+                { x: -27.045037345621797, y: 13.7801138209198 },
+                { x: -29.979168755677012, y: 4.748337243898336 },
+                { x: -29.979168755677012, y: -4.7483372446656045 },
+                { x: -27.045037345621797, y: -13.78011382168726 },
+                { x: -21.46258247640829, y: -21.462582476024817 },
+                { x: -13.780113822071026, y: -27.045037345239006 },
+                { x: -4.748337245049098, y: -29.97916875529422 },
+                { x: 4.74833724351507, y: -29.97916875529422 },
+                { x: 13.780113820536943, y: -27.045037345239006 },
+                { x: 21.462582474874278, y: -21.462582476024817 },
+                { x: 27.04503734408824, y: -13.78011382168726 },
+                { x: 29.979168754143455, y: -4.7483372446656045 }
+            ]
+            // 
+            Matter.Body.setVertices(player, Matter.Vertices.create(points, player))
+            // console.log(circle)        
+            player.parts.pop()
+            player.parts.pop()
+            player.parts.pop()
+            player.parts.pop()
+            // Matter.Body.setDensity(player, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
+            m.defaultMass = 30
+            Matter.Body.setMass(player, m.defaultMass);
+            player.friction = 0.07
+            // player.frictionStatic = 0.1
+            // Matter.Body.setInertia(player, Infinity); //disable rotation
+
+            // const circle = Bodies.polygon(player.position.x, player.position.x, 30, 30)
+            // player.parts[0] = circle
+            // console.log(player.parts[0])
+            // Matter.Body.setVertices(player.parts[0], Matter.Vertices.create(points, player.parts[0]))
+            // console.log(player.parts[0].vertices)
+
+            level.playerExitCheck = () => {
+                if (
+                    player.position.x > level.exit.x &&
+                    player.position.x < level.exit.x + 100 &&
+                    player.position.y > level.exit.y - 150 &&
+                    player.position.y < level.exit.y - 40 &&
+                    player.speed < 4
+                ) {
+                    level.nextLevel()
+                }
+            }
+            m.move = () => {
+                m.pos.x = player.position.x;
+                m.pos.y = player.position.y;
+                m.Vx = player.velocity.x;
+                m.Vy = player.velocity.y;
+
+                //tracks the last 10s of player information
+                // console.log(m.history)
+                m.history.splice(m.cycle % 600, 1, {
+                    position: {
+                        x: player.position.x,
+                        y: player.position.y,
+                    },
+                    velocity: {
+                        x: player.velocity.x,
+                        y: player.velocity.y
+                    },
+                    yOff: m.yOff,
+                    angle: m.angle,
+                    health: m.health,
+                    energy: m.energy,
+                    activeGun: b.activeGun
+                });
+            }
+
+            m.look = () => { //disable mouse aiming
+                //always on mouse look
+                // m.angle = Math.atan2(
+                //     simulation.mouseInGame.y - m.pos.y,
+                //     simulation.mouseInGame.x - m.pos.x
+                // );
+                //smoothed mouse look translations
+                const scale = 0.8;
+                m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+
+                m.transX += (m.transSmoothX - m.transX) * 0.07;
+                m.transY += (m.transSmoothY - m.transY) * 0.07;
+            }
+
+            simulation.camera = () => {
+                const dx = simulation.mouse.x / window.innerWidth - 0.5 //x distance from mouse to window center scaled by window width
+                const dy = simulation.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
+                const d = Math.max(dx * dx, dy * dy)
+                simulation.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.04 + simulation.edgeZoomOutSmooth * 0.96
+
+
+                ctx.save();
+                ctx.translate(canvas.width2, canvas.height2); //center
+                ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
+                ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate
+                //calculate in game mouse position by undoing the zoom and translations
+                simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+                simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+            }
+
+            m.draw = () => { //just draw the circle
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                ctx.translate(player.position.x, player.position.y);
+                ctx.rotate(player.angle);
+
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                grd.addColorStop(0, m.fillColorDark);
+                grd.addColorStop(1, m.fillColor);
+                ctx.fillStyle = grd;
+                ctx.fill();
+                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+            m.spin = 0
+            // m.groundControl = () => {}         //disable entering ground
+            m.onGround = false
+            playerOnGroundCheck = () => {}
+            m.airControl = () => { //tank controls
+                player.force.y -= player.mass * simulation.g; //undo gravity
+                const thrust = 0.03 * tech.squirrelJump //Math.max(0.1 / (0.01 + player.speed), 0.03) * tech.squirrelJump
+                // console.log(player.speed, thrust)
+                if (input.up) { //thrust
+                    player.force.x += thrust * Math.cos(m.angle)
+                    player.force.y += thrust * Math.sin(m.angle)
+
+                    const friction = 0.99
+                    Matter.Body.setVelocity(player, {
+                        x: friction * player.velocity.x,
+                        y: friction * player.velocity.y
+                    });
+                } else if (input.down) {
+                    player.force.x -= 0.7 * thrust * Math.cos(m.angle)
+                    player.force.y -= 0.7 * thrust * Math.sin(m.angle)
+
+                    const friction = 0.96
+                    Matter.Body.setVelocity(player, {
+                        x: friction * player.velocity.x,
+                        y: friction * player.velocity.y
+                    });
+                }
+                const spinChange = 1.1
+                if (input.right) {
+                    player.torque += spinChange
+                    // m.spin += spinChange
+                } else if (input.left) {
+                    // m.spin -= spinChange
+                    player.torque -= spinChange
+                }
+                Matter.Body.setAngularVelocity(player, player.angularVelocity * 0.9)
+                // m.spin *= 0.88 //spin friction
+                m.angle += m.spin //
+                m.angle = player.angle
+            }
+            //fix collisions
+
+            collisionChecks = (event) => {
+                const pairs = event.pairs;
+                for (let i = 0, j = pairs.length; i != j; i++) {
+                    //mob + (player,bullet,body) collisions
+                    for (let k = 0; k < mob.length; k++) {
+                        if (mob[k].alive && m.alive) {
+                            if (pairs[i].bodyA === mob[k]) {
+                                collideMob(pairs[i].bodyB);
+                                break;
+                            } else if (pairs[i].bodyB === mob[k]) {
+                                collideMob(pairs[i].bodyA);
+                                break;
+                            }
+
+                            function collideMob(obj) {
+                                //player + mob collision
+                                if (
+                                    m.immuneCycle < m.cycle &&
+                                    // (obj === playerBody || obj === playerHead) &&
+                                    (obj === player) &&
+                                    !(tech.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
+                                ) {
+                                    mob[k].foundPlayer();
+                                    let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
+                                    if (tech.isRewindAvoidDeath && m.energy > 0.66) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
+                                        m.damage(dmg);
+                                        return
+                                    }
+                                    m.damage(dmg);
+                                    if (tech.isPiezo) m.energy += 4;
+                                    if (tech.isBayesian) powerUps.ejectTech()
+                                    if (mob[k].onHit) mob[k].onHit(k);
+                                    m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                                    //extra kick between player and mob              //this section would be better with forces but they don't work...
+                                    let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
+                                    Matter.Body.setVelocity(player, {
+                                        x: player.velocity.x + 8 * Math.cos(angle),
+                                        y: player.velocity.y + 8 * Math.sin(angle)
+                                    });
+                                    Matter.Body.setVelocity(mob[k], {
+                                        x: mob[k].velocity.x - 8 * Math.cos(angle),
+                                        y: mob[k].velocity.y - 8 * Math.sin(angle)
+                                    });
+
+                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mob[k].dropPowerUp && m.energy > 0.34 * m.maxEnergy) {
+                                        m.energy -= 0.33 * m.maxEnergy
+                                        m.immuneCycle = 0; //player doesn't go immune to collision damage
+                                        mob[k].death();
+                                        simulation.drawList.push({ //add dmg to draw queue
+                                            x: pairs[i].activeContacts[0].vertex.x,
+                                            y: pairs[i].activeContacts[0].vertex.y,
+                                            radius: dmg * 2000,
+                                            color: "rgba(255,0,255,0.2)",
+                                            time: simulation.drawTime
+                                        });
+                                    } else {
+                                        simulation.drawList.push({ //add dmg to draw queue
+                                            x: pairs[i].activeContacts[0].vertex.x,
+                                            y: pairs[i].activeContacts[0].vertex.y,
+                                            radius: dmg * 500,
+                                            color: simulation.mobDmgColor,
+                                            time: simulation.drawTime
+                                        });
+                                    }
+                                    return;
+                                    // }
+                                }
+                                //mob + bullet collisions
+                                if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
+                                    obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
+                                    let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                                    if (tech.isCrit && mob[k].isStunned) dmg *= 4
+                                    mob[k].foundPlayer();
+                                    mob[k].damage(dmg);
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: pairs[i].activeContacts[0].vertex.x,
+                                        y: pairs[i].activeContacts[0].vertex.y,
+                                        radius: Math.log(2 * dmg + 1.1) * 40,
+                                        color: simulation.playerDmgColor,
+                                        time: simulation.drawTime
+                                    });
+                                    return;
+                                }
+                                //mob + body collisions
+                                if (obj.classType === "body" && obj.speed > 6) {
+                                    const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
+                                    if (v > 9) {
+                                        let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
+                                        if (mob[k].isShielded) dmg *= 0.35
+                                        mob[k].damage(dmg, true);
+                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].dropPowerUp) {
+                                            let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
+                                            if (Math.random() < 0.4) {
+                                                type = "heal"
+                                            } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
+                                                type = "research"
+                                            }
+                                            powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
+                                            // for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {}
+                                        }
+
+                                        const stunTime = dmg / Math.sqrt(obj.mass)
+                                        if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
+                                        if (mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
+                                        if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
+                                            obj.hasFragmented = true;
+                                            b.targetedNail(obj.position, tech.fragments * 4)
+                                        }
+                                        simulation.drawList.push({
+                                            x: pairs[i].activeContacts[0].vertex.x,
+                                            y: pairs[i].activeContacts[0].vertex.y,
+                                            radius: Math.log(2 * dmg + 1.1) * 40,
+                                            color: simulation.playerDmgColor,
+                                            time: simulation.drawTime
+                                        });
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
 };
