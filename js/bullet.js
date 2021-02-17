@@ -231,7 +231,7 @@ const b = {
     fireCD: 1,
     setFireCD() {
         b.fireCD = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
-        if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.85, b.inventory.length)
+        if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.83, b.inventory.length)
         if (tech.isFireNotMove) b.fireCD *= 0.33
     },
     fireAttributes(dir, rotate = true) {
@@ -2227,21 +2227,21 @@ const b = {
     // **************************************************************************************************
     // **************************************************************************************************
     respawnBots() {
-        for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.laserBotCount; i++) b.laserBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.nailBotCount; i++) b.nailBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.foamBotCount; i++) b.foamBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.boomBotCount; i++) b.boomBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.orbitBotCount; i++) b.orbitBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.plasmaBotCount; i++) b.plasmaBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
-        for (let i = 0; i < tech.missileBotCount; i++) b.missileBot({ x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.laserBotCount; i++) b.laserBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.nailBotCount; i++) b.nailBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.foamBotCount; i++) b.foamBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.boomBotCount; i++) b.boomBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.orbitBotCount; i++) b.orbitBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.plasmaBotCount; i++) b.plasmaBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
+        for (let i = 0; i < tech.missileBotCount; i++) b.missileBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
         if (tech.isIntangible && m.isCloak) {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
             }
         }
     },
-    randomBot(where = m.pos, isKeep = true, isAll = true) {
+    randomBot(where = player.position, isKeep = true, isAll = true) {
         if (Math.random() < 0.167 && isAll) {
             b.dynamoBot(where)
             if (isKeep) tech.dynamoBotCount++;
@@ -2277,7 +2277,7 @@ const b = {
             }
         }
     },
-    dynamoBot(position = m.pos, isConsole = true) {
+    dynamoBot(position = player.position, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.dynamoBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 5, 10, {
@@ -2305,17 +2305,17 @@ const b = {
             followDelay: 0,
             phase: Math.floor(60 * Math.random()),
             do() {
-                // if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 150) {
+                // if (Vector.magnitude(Vector.sub(this.position, player.position)) < 150) {
                 //     ctx.fillStyle = "rgba(0,0,0,0.06)";
                 //     ctx.beginPath();
                 //     ctx.arc(this.position.x, this.position.y, 150, 0, 2 * Math.PI);
                 //     ctx.fill();
                 // }
                 if (!((m.cycle + this.phase) % 30)) { //twice a second
-                    if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 250) { //give energy
+                    if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250) { //give energy
                         Matter.Body.setAngularVelocity(this, this.spin)
                         if (this.isUpgraded) {
-                            m.energy += 0.06
+                            m.energy += 0.12
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
@@ -2324,7 +2324,7 @@ const b = {
                                 time: simulation.drawTime
                             });
                         } else {
-                            m.energy += 0.02
+                            m.energy += 0.03
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
@@ -2371,7 +2371,7 @@ const b = {
         World.add(engine.world, bullet[me]); //add bullet to world
         b.setDynamoBotDelay()
     },
-    nailBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+    nailBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.nailBot()`);
         const me = bullet.length;
         const dir = m.angle;
@@ -2406,13 +2406,14 @@ const b = {
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
 
                     if (this.lastLookCycle < simulation.cycle && !m.isCloak) {
-                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 15 : 80)
+                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 13 : 80)
                         let target
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
                             if (dist < 3000000 && //1400*1400
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !mob[i].isShielded) {
                                 target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))
                                 const SPEED = 50
                                 const unit = Vector.normalise(Vector.sub(target, this.position))
@@ -2427,7 +2428,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    missileBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+    missileBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.missileBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(position.x, position.y, 28, 11, {
@@ -2478,7 +2479,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    foamBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+    foamBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.foamBot()`);
         const me = bullet.length;
         const dir = m.angle;
@@ -2493,7 +2494,7 @@ const b = {
             restitution: 0.6 * (1 + 0.5 * Math.random()),
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 60 + Math.floor(17 * Math.random()) - 30 * tech.isFoamBotUpgrade,
+            lookFrequency: 60 + Math.floor(17 * Math.random()) - 35 * tech.isFoamBotUpgrade,
             cd: 0,
             delay: 100,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
@@ -2523,7 +2524,7 @@ const b = {
                                 const radius = 6 + 7 * Math.random()
                                 const SPEED = 29 - radius * 0.5; //(m.crouch ? 32 : 20) - radius * 0.7;
                                 const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-                                b.foam(this.position, velocity, radius + 7 * this.isUpgraded)
+                                b.foam(this.position, velocity, radius + 8 * this.isUpgraded)
                                 break;
                             }
                         }
@@ -2533,7 +2534,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    laserBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+    laserBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.laserBot()`);
         const me = bullet.length;
         const dir = m.angle;
@@ -2605,7 +2606,7 @@ const b = {
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && m.energy > this.drainThreshold) {
                     m.energy -= tech.laserFieldDrain * tech.isLaserDiode
-                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.21), tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
+                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.25), tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
                     // laser(where = {
                     //     x: m.pos.x + 20 * Math.cos(m.angle),
                     //     y: m.pos.y + 20 * Math.sin(m.angle)
@@ -2618,7 +2619,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    boomBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+    boomBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);
         const me = bullet.length;
         const dir = m.angle;
@@ -2633,9 +2634,10 @@ const b = {
             restitution: 1,
             dmg: 0,
             minDmgSpeed: 0,
-            lookFrequency: 43 + Math.floor(7 * Math.random()),
+            lookFrequency: 43 + Math.floor(7 * Math.random()) - 10 * tech.isBoomBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 500 * (1 + 0.1 * Math.random()) + 350 * tech.isBoomBotUpgrade,
+            attackAcceleration: 0.012 + 0.005 * tech.isBoomBotUpgrade,
+            range: 500 * (1 + 0.1 * Math.random()) + 400 * tech.isBoomBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -2646,7 +2648,7 @@ const b = {
             explode: 0,
             beforeDmg() {
                 if (this.lockedOn) {
-                    const explosionRadius = Math.min(170 + 200 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
+                    const explosionRadius = Math.min(170 + 220 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
                     if (explosionRadius > 60) {
                         this.explode = explosionRadius
                         // 
@@ -2690,14 +2692,14 @@ const b = {
                     if (DIST - this.lockedOn.radius < this.range &&
                         Matter.Query.ray(map, this.position, this.lockedOn.position).length === 0) {
                         //move towards the target
-                        this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), 0.012 * this.mass))
+                        this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.attackAcceleration * this.mass))
                     }
                 }
             }
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    plasmaBot(position = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
+    plasmaBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.plasmaBot()`);
         const me = bullet.length;
         const dir = m.angle;
@@ -2882,7 +2884,7 @@ const b = {
         })
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    orbitBot(position = m.pos, isConsole = true) {
+    orbitBot(position = player.position, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.orbitBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 9, 12, {
@@ -2921,6 +2923,7 @@ const b = {
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
+
                 //check for damage
                 if (!m.isCloak && !m.isBodiesAsleep) { //if time dilation isn't active
                     // q = Matter.Query.point(mob, this.position)
@@ -2938,7 +2941,7 @@ const b = {
                     })
                     for (let i = 0; i < q.length; i++) {
                         mobs.statusStun(q[i], 180)
-                        const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1) * (tech.isCrit ? 4 : 1)
+                        const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3 : 1) * (tech.isCrit ? 4 : 1)
                         q[i].damage(dmg);
                         q[i].foundPlayer();
                         simulation.drawList.push({ //add dmg to draw queue

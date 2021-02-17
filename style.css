@@ -552,6 +552,20 @@ summary {
     /* text-decoration: underline; */
 }
 
+.color-bot {
+    /* background-color: #eee; */
+    /* color: #555; */
+    /* letter-spacing: -1.5px; */
+    /* text-transform: uppercase; */
+    /* font-variant: all-caps; */
+    /* text-decoration: underline solid; */
+    /* border: 1px solid #000; */
+    /* padding: 10px; */
+    /* border-radius: 10%; */
+    /* font-family: Lucida Console, Courier, monospace; */
+    /* color: #777; */
+}
+
 .color-cloaked {
     opacity: 0.25;
     letter-spacing: 1px;

@@ -297,7 +297,7 @@ const build = {
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if (!tech.tech[i].isCustomHide) {
+            if (!tech.tech[i].isExperimentHide) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                     if (tech.tech[i].isFieldTech) {
@@ -384,7 +384,7 @@ const build = {
         }
 
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isCustomHide) {
+            if (!tech.tech[i].isExperimentHide) {
                 if (!tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     // } else if (tech.tech[i].count > 1) {
@@ -754,7 +754,9 @@ window.addEventListener("keydown", function(event) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
-                    simulation.makeTextLog(`<em>exiting testing mode</em>`);
+                    // document.getElementById("text-log").innerHTML = ""
+                    simulation.lastLogTime = 0 //clear text log
+                    // simulation.makeTextLog(`<em>exiting testing mode</em>`);
                 } else { //if (keys[191])
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop
@@ -783,7 +785,7 @@ window.addEventListener("keydown", function(event) {
                             </tr>                            
                             <tr>
                                 <td class='key-input-pause'>H</td>
-                                <td class='key-used'>infinite health</td>
+                                <td class='key-used'>brief harm immunity</td>
                             </tr>
                             <tr>
                                 <td class='key-input-pause'>N</td>
@@ -872,10 +874,11 @@ window.addEventListener("keydown", function(event) {
                 b.giveGuns("all", 1000)
                 break
             case "h":
-                m.health = Infinity
+                // m.health = Infinity
+                m.immuneCycle = Infinity
                 // m.energy = Infinity
-                document.getElementById("health").style.display = "none"
-                document.getElementById("health-bg").style.display = "none"
+                // document.getElementById("health").style.display = "none"
+                // document.getElementById("health-bg").style.display = "none"
                 break
             case "n":
                 m.addHealth(Infinity)

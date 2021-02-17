@@ -68,6 +68,7 @@ const spawn = {
             } else {
                 if (Math.random() < 0.07) {
                     this[pick](x, y, 90 + Math.random() * 40); //one extra large mob
+                    spawn.spawnOrbitals(mob[mob.length - 1], radius + 50 + 200 * Math.random(), 1)
                 } else if (Math.random() < 0.35) {
                     this.blockGroup(x, y) //hidden grouping blocks
                 } else {
@@ -81,8 +82,8 @@ const spawn = {
             }
         }
     },
-    randomLevelBoss(x, y, options = ["historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
-        // other bosses: suckerBoss, laserBoss, tetherBoss,    //all need a particular level to work so they are not included
+    randomLevelBoss(x, y, options = ["orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
+        // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
     //mob templates *********************************************************************************************
@@ -159,7 +160,7 @@ const spawn = {
                 const pushUp = Vector.add(velocity, { x: 0, y: -0.5 })
                 Matter.Body.setVelocity(body[i], Vector.add(body[i].velocity, pushUp));
             }
-            //push away mobs
+            //damage all mobs
             for (let i = 0, len = mob.length; i < len; ++i) {
                 if (mob[i] !== this) {
                     mob[i].damage(Infinity, true);
@@ -522,9 +523,9 @@ const spawn = {
         }
     },
     cellBoss(x, y, radius = 20, cellID) {
-        mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,100,105,0)");
+        mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,100,105,0.4)");
         let me = mob[mob.length - 1];
-        me.stroke = "#099"
+        me.stroke = "transparent"
         me.isBoss = true;
         me.isCell = true;
         me.cellID = cellID
@@ -1198,7 +1199,7 @@ const spawn = {
     },
     historyBoss(x, y, radius = 30) {
         if (tech.dynamoBotCount > 0) {
-            spawn.randomLevelBoss(x, y, ["cellBossCulture", "bomberBoss", "powerUpBoss"])
+            spawn.randomLevelBoss(x, y, ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss"])
             return
         }
         mobs.spawn(x, y, 0, radius, "transparent");
@@ -1370,6 +1371,7 @@ const spawn = {
         }
         Matter.Body.setDensity(me, 0.023); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 100 + 100 * Math.random())
         me.onHit = function() {
             //run this function on hitting player
             // this.explode();
@@ -1517,6 +1519,7 @@ const spawn = {
         me.count = 0;
         me.frictionAir = 0.03;
         // me.torque -= me.inertia * 0.002
+        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
         Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);  //not working, not sure why
         me.onDeath = function() {
@@ -1875,8 +1878,8 @@ const spawn = {
                 }
                 ctx.lineTo(vertices[0].x, vertices[0].y);
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = `rgba(0,0,0,${this.alpha * this.alpha})`;
-                ctx.stroke();
+                ctx.fillStyle = `rgba(255,255,255,${this.alpha * this.alpha})`;
+                ctx.fill();
             } else if (this.canTouchPlayer) {
                 this.canTouchPlayer = false;
                 this.collisionFilter.mask = cat.bullet; //can't touch player or walls
@@ -1929,14 +1932,14 @@ const spawn = {
     // },
     bomberBoss(x, y, radius = 88) {
         //boss that drops bombs from above and holds a set distance from player
-        mobs.spawn(x, y, 3, radius, "transparent");
+        mobs.spawn(x, y, 3, radius, "rgba(255,0,200,0.5)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.0014 + 0.0003 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.004 + 0.00035 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
-        me.stroke = "rgba(255,0,200)"; //used for drawGhost
+        me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 1500000;
-        me.fireFreq = Math.floor(120 * simulation.CDScale);
+        me.fireFreq = Math.floor(100 * simulation.CDScale);
         me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
         me.hoverElevation = 460 + (Math.random() - 0.5) * 200; //squared
         me.hoverXOff = (Math.random() - 0.5) * 100;
@@ -1949,6 +1952,7 @@ const spawn = {
         // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
         me.collisionFilter.mask = cat.player | cat.bullet
         spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 150 + 250 * Math.random(), 1)
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
@@ -2062,34 +2066,32 @@ const spawn = {
             this.explode(this.mass * 120);
         };
         me.onDeath = function() {
-            if (simulation.difficulty > 4) {
-                spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
-                spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
-                spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
-                const mag = 8
-                const v1 = Vector.rotate({
-                    x: 1,
-                    y: 1
-                }, 2 * Math.PI * Math.random())
-                const v2 = Vector.rotate({
-                    x: 1,
-                    y: 1
-                }, 2 * Math.PI * Math.random())
-                const v3 = Vector.normalise(Vector.add(v1, v2)) //last vector is opposite the sum of the other two to look a bit like momentum is conserved
+            spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
+            spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
+            spawn.bullet(this.position.x, this.position.y, this.radius / 3, 5);
+            const mag = 8
+            const v1 = Vector.rotate({
+                x: 1,
+                y: 1
+            }, 2 * Math.PI * Math.random())
+            const v2 = Vector.rotate({
+                x: 1,
+                y: 1
+            }, 2 * Math.PI * Math.random())
+            const v3 = Vector.normalise(Vector.add(v1, v2)) //last vector is opposite the sum of the other two to look a bit like momentum is conserved
 
-                Matter.Body.setVelocity(mob[mob.length - 1], {
-                    x: mag * v1.x,
-                    y: mag * v1.y
-                });
-                Matter.Body.setVelocity(mob[mob.length - 2], {
-                    x: mag * v2.x,
-                    y: mag * v2.y
-                });
-                Matter.Body.setVelocity(mob[mob.length - 3], {
-                    x: -mag * v3.x,
-                    y: -mag * v3.y
-                });
-            }
+            Matter.Body.setVelocity(mob[mob.length - 1], {
+                x: mag * v1.x,
+                y: mag * v1.y
+            });
+            Matter.Body.setVelocity(mob[mob.length - 2], {
+                x: mag * v2.x,
+                y: mag * v2.y
+            });
+            Matter.Body.setVelocity(mob[mob.length - 3], {
+                x: -mag * v3.x,
+                y: -mag * v3.y
+            });
         }
         Matter.Body.setDensity(me, 0.00005); //normal is 0.001
         me.timeLeft = 140 + Math.floor(Math.random() * 30);
@@ -2283,6 +2285,8 @@ const spawn = {
         me.memory = 420;
         me.repulsionRange = 1200000; //squared
         spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
+
         Matter.Body.setDensity(me, 0.004 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -2326,6 +2330,8 @@ const spawn = {
         me.memory = 240;
         me.repulsionRange = 1200000; //squared
         spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
+
         Matter.Body.setDensity(me, 0.025); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -2564,6 +2570,8 @@ const spawn = {
         me.memory = 20;
         Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
+
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             this.removeCons(); //remove constraint
@@ -2659,8 +2667,83 @@ const spawn = {
             this.checkStatus();
         };
     },
-    //fan made mobs  *****************************************************************************************
-    //*******************************************************************************************************
+    spawnOrbitals(who, radius, chance = Math.min(0.25 + simulation.difficulty * 0.005)) {
+        if (Math.random() < chance) {
+            // simulation.difficulty = 50
+            const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty))) // simulation.difficulty = 40 on hard mode level 10
+            const speed = (0.007 + 0.003 * Math.random() + 0.004 * Math.sqrt(simulation.difficulty)) * ((Math.random() < 0.5) ? 1 : -1)
+            for (let i = 0; i < len; i++) spawn.orbital(who, radius, i / len * 2 * Math.PI, speed)
+        }
+    },
+    orbital(who, radius, phase, speed) {
+        // for (let i = 0, len = 7; i < len; i++) spawn.orbital(me, radius + 250, 2 * Math.PI / len * i)
+        mobs.spawn(0, 0, 8, 12, "rgb(255,0,150)");
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent";
+        // Matter.Body.setDensity(me, 0.00004); //normal is 0.001
+        me.leaveBody = false;
+        me.dropPowerUp = false;
+        me.showHealthBar = false;
+        me.isShielded = true
+        me.collisionFilter.category = cat.mobBullet;
+        me.collisionFilter.mask = cat.bullet; //cat.player | cat.map | cat.body
+        me.do = function() {
+            //if host is gone
+            if (!who || !who.alive) {
+                this.death();
+                return
+            }
+            //set orbit
+            const time = simulation.cycle * speed + phase
+            const orbit = {
+                x: Math.cos(time),
+                y: Math.sin(time)
+            }
+            Matter.Body.setPosition(this, Vector.add(who.position, Vector.mult(orbit, radius))) //bullets move with player
+            //damage player
+            if (Matter.Query.collides(this, [player]).length > 0) {
+                m.damage(0.1 * simulation.dmgScale);
+                this.death();
+            }
+
+        };
+    },
+    orbitalBoss(x, y, radius = 88) {
+        const nodes = Math.floor(3 + 1 * Math.sqrt(simulation.difficulty))
+        mobs.spawn(x, y, nodes, radius, "rgb(255,0,150)");
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.004 + 0.00035 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+
+        me.stroke = "transparent"; //used for drawGhost
+        me.seeAtDistance2 = 2000000;
+        me.accelMag = Math.floor(10 * (Math.random() + 4.5)) * 0.00001 * simulation.accelScale;
+        me.frictionAir = 0.005;
+        me.accelMag = 0.00017 * simulation.accelScale;
+        me.memory = Infinity;
+        me.collisionFilter.mask = cat.player | cat.bullet
+        spawn.shield(me, x, y, 1);
+
+        let speed = (0.006 + 0.002 * Math.sqrt(simulation.difficulty)) * ((Math.random() < 0.5) ? 1 : -1)
+        let range = radius + 125 + 250 * Math.random() + nodes * 5
+        for (let i = 0; i < nodes; i++) spawn.orbital(me, range, i / nodes * 2 * Math.PI, speed)
+        const orbitalIndexes = [] //find indexes for all the current nodes
+        for (let i = 0; i < nodes; i++) orbitalIndexes.push(mob.length - 1 - i)
+        // add orbitals for each orbital
+        range = 70 + Math.max(0, 140 * Math.random() - nodes * 3)
+        speed = speed * (1.5 + 2 * Math.random())
+        for (let j = 0; j < nodes; j++) {
+            for (let i = 0, len = nodes - 1; i < len; i++) spawn.orbital(mob[orbitalIndexes[j]], range, i / len * 2 * Math.PI, speed)
+        }
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.do = function() {
+            this.seePlayerCheckByDistance();
+            this.checkStatus();
+            this.attraction();
+        };
+    },
     //complex constrained mob templates**********************************************************************
     //*******************************************************************************************************
     allowShields: true,

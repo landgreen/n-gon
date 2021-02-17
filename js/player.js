@@ -40,17 +40,6 @@ const m = {
         });
         Matter.Body.setMass(player, m.mass);
         World.add(engine.world, [player]);
-
-        m.holdConstraint = Constraint.create({
-            //holding body constraint
-            pointA: {
-                x: 0,
-                y: 0
-            },
-            bodyB: jumpSensor, //setting constraint to jump sensor because it has to be on something until the player picks up things
-            stiffness: 0.4
-        });
-        World.add(engine.world, m.holdConstraint);
     },
     cycle: 600, //starts at 600 cycles instead of 0 to prevent bugs with m.history
     lastKillCycle: 0,
@@ -484,15 +473,15 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
-        if (tech.isBlockHarm && m.isHolding) dmg *= 0.25
+        if (tech.isBlockHarm && m.isHolding) dmg *= 0.2
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isPiezo) dmg *= 0.85
-        if (tech.isHarmReduce && m.fieldUpgrades[m.fieldMode].name === "negative mass field" && m.isFieldActive) dmg *= 0.6
-        if (tech.isBotArmor) dmg *= 0.96 ** tech.totalBots()
+        if (tech.isHarmReduce && m.fieldUpgrades[m.fieldMode].name === "negative mass field" && m.isFieldActive) dmg *= 0.5
+        if (tech.isBotArmor) dmg *= 0.94 ** tech.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
-        if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.6
+        if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
         if (tech.energyRegen === 0) dmg *= 0.34
         if (tech.isTurret && m.crouch) dmg *= 0.5;
         if (tech.isFireMoveLock && input.fire) dmg *= 0.4;
@@ -2575,8 +2564,12 @@ const m = {
         },
     ],
     isShipMode: false,
-    shipMode() {
+    shipMode(thrust = 0.03, drag = 0.99, torque = 1.15, rotationDrag = 0.92) { //  m.shipMode() //thrust = 0.03, drag = 0.99, torque = 1.15, rotationDrag = 0.92
         if (!m.isShipMode) {
+            //if wires remove them
+            for (let i = 0; i < mob.length; i++) {
+                if (!mob[i].freeOfWires) mob[i].freeOfWires = true
+            }
             m.isShipMode = true
             simulation.isCheating = true
             const points = [
@@ -2611,7 +2604,8 @@ const m = {
             // Matter.Body.setDensity(player, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
             m.defaultMass = 30
             Matter.Body.setMass(player, m.defaultMass);
-            player.friction = 0.07
+            player.friction = 0.05
+            player.restitution = 0.2
             // player.frictionStatic = 0.1
             // Matter.Body.setInertia(player, Infinity); //disable rotation
 
@@ -2620,14 +2614,40 @@ const m = {
             // console.log(player.parts[0])
             // Matter.Body.setVertices(player.parts[0], Matter.Vertices.create(points, player.parts[0]))
             // console.log(player.parts[0].vertices)
+            m.spin = 0
+            // m.groundControl = () => {}         //disable entering ground
+            m.onGround = false
+            playerOnGroundCheck = () => {}
+            m.airControl = () => { //tank controls
+                player.force.y -= player.mass * simulation.g; //undo gravity
+                Matter.Body.setVelocity(player, {
+                    x: drag * player.velocity.x,
+                    y: drag * player.velocity.y
+                });
+                if (input.up) { //forward thrust
+                    player.force.x += thrust * Math.cos(m.angle) * tech.squirrelJump
+                    player.force.y += thrust * Math.sin(m.angle) * tech.squirrelJump
+                } else if (input.down) {
+                    player.force.x -= 0.6 * thrust * Math.cos(m.angle)
+                    player.force.y -= 0.6 * thrust * Math.sin(m.angle)
+                }
+                //rotation
+                Matter.Body.setAngularVelocity(player, player.angularVelocity * rotationDrag)
+                if (input.right) {
+                    player.torque += torque
+                } else if (input.left) {
+                    player.torque -= torque
+                }
+                m.angle += m.spin
+                m.angle = player.angle
+            }
 
             level.playerExitCheck = () => {
                 if (
                     player.position.x > level.exit.x &&
                     player.position.x < level.exit.x + 100 &&
                     player.position.y > level.exit.y - 150 &&
-                    player.position.y < level.exit.y - 40 &&
-                    player.speed < 4
+                    player.position.y < level.exit.y - 40
                 ) {
                     level.nextLevel()
                 }
@@ -2694,6 +2714,34 @@ const m = {
                 ctx.translate(player.position.x, player.position.y);
                 ctx.rotate(player.angle);
 
+                //thrust
+                if (input.up) {
+                    var grd2 = ctx.createLinearGradient(0, 0, -150, 0);
+                    // grd2.addColorStop(0, 'rgba(255, 255, 155, 0.8)');
+                    // grd2.addColorStop(1, 'rgba(255, 200, 0, 0.1)');
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(-18, -25);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(-18, 25);
+                    ctx.lineTo(-50 - 100 * Math.random(), 0);
+                    ctx.fill();
+                } else if (input.down) {
+                    var grd2 = ctx.createLinearGradient(0, 0, 80, 0);
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(20, -16);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(20, 16);
+                    ctx.lineTo(35 + 43 * Math.random(), 0);
+                    ctx.fill();
+                }
+
+                //body
                 ctx.beginPath();
                 ctx.arc(0, 0, 30, 0, 2 * Math.PI);
                 let grd = ctx.createLinearGradient(-30, 0, 30, 0);
@@ -2705,50 +2753,10 @@ const m = {
                 ctx.strokeStyle = "#333";
                 ctx.lineWidth = 2;
                 ctx.stroke();
+
                 ctx.restore();
             }
-            m.spin = 0
-            // m.groundControl = () => {}         //disable entering ground
-            m.onGround = false
-            playerOnGroundCheck = () => {}
-            m.airControl = () => { //tank controls
-                player.force.y -= player.mass * simulation.g; //undo gravity
-                const thrust = 0.03 * tech.squirrelJump //Math.max(0.1 / (0.01 + player.speed), 0.03) * tech.squirrelJump
-                // console.log(player.speed, thrust)
-                if (input.up) { //thrust
-                    player.force.x += thrust * Math.cos(m.angle)
-                    player.force.y += thrust * Math.sin(m.angle)
-
-                    const friction = 0.99
-                    Matter.Body.setVelocity(player, {
-                        x: friction * player.velocity.x,
-                        y: friction * player.velocity.y
-                    });
-                } else if (input.down) {
-                    player.force.x -= 0.7 * thrust * Math.cos(m.angle)
-                    player.force.y -= 0.7 * thrust * Math.sin(m.angle)
-
-                    const friction = 0.96
-                    Matter.Body.setVelocity(player, {
-                        x: friction * player.velocity.x,
-                        y: friction * player.velocity.y
-                    });
-                }
-                const spinChange = 1.1
-                if (input.right) {
-                    player.torque += spinChange
-                    // m.spin += spinChange
-                } else if (input.left) {
-                    // m.spin -= spinChange
-                    player.torque -= spinChange
-                }
-                Matter.Body.setAngularVelocity(player, player.angularVelocity * 0.9)
-                // m.spin *= 0.88 //spin friction
-                m.angle += m.spin //
-                m.angle = player.angle
-            }
             //fix collisions
-
             collisionChecks = (event) => {
                 const pairs = event.pairs;
                 for (let i = 0, j = pairs.length; i != j; i++) {

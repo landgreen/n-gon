@@ -1,8 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-added 2 new testing keys: J = clear mobs, H = infinity health
-added junk tech: ship (it's hard to control, but you get better with practice)
-  m.shipMode() in console
+ship mode can be found in the experimental menu
+
+some mobs now have orbitals at random
+new level boss: orbitalBoss
+
+most late game bot tech has been buffed
+tech: get 2 random bots, also when you switch guns cycle all bots to the same type
 
 ******************************************************** BUGS ********************************************************
 
@@ -32,13 +36,15 @@ use the floor of portal sensor on the player? to unstuck player
 
 ******************************************************** TODO ********************************************************
 
+add a shipMode tech that only shows up in experimental mode
+
+tech: spawn a bot after taking collision damage
+
+tech: standing wave freezes the mobs it hits
+
 tech: health becomes drones
   requires mass-energy?
   junk tech?
-
-tech: 1/3 of the time foam fires 1 extra backwards foam 
-
-make a secret only accessible to the ship (very small + flying)
 
 map: laboratory
   rooms with switches that change physics
@@ -66,7 +72,6 @@ copy time-like foam to other guns?
   shotgun
   nail gun
 
-tech: when you switch guns switch all bots to a different bot
 
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -360,7 +365,7 @@ n-gon outreach ideas
 ******************************************************** LORE ********************************************************
 
 cool names for tech
-  strange loop, ansatz, Bayesian statistics
+  strange loop, ansatz, perturbation theory
 
 voice singing with pitch?
 

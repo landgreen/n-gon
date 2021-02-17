@@ -29,10 +29,13 @@ const level = {
             // tech.isMineSentry = true
             // for (let i = 0; i < 60; i++) tech.giveTech("rivet diameter")
             // tech.giveTech("missile-bot")
+            // for (let i = 0; i < 5; i++) 
             // tech.giveTech("nail-bot")
+            // for (let i = 0; i < 2; i++) tech.giveTech("foam-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
             // tech.isBlockPowerUps = true;
             // m.shipMode()
+            // tech.isBotSwap = true;
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -80,7 +83,7 @@ const level = {
         b.respawnBots();
         m.resetHistory();
         if (tech.isArmorFromPowerUps) {
-            tech.armorFromPowerUps += Math.min(0.03 * powerUps.totalPowerUps, 0.42)
+            tech.armorFromPowerUps += Math.min(0.03 * powerUps.totalPowerUps, 0.51)
             m.setMaxHealth();
         }
         if (tech.isHealLowHealth) {
@@ -1090,7 +1093,7 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.bomberBoss(1600, -500)
+        spawn.orbitalBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
@@ -1420,7 +1423,7 @@ const level = {
             powerUps.spawn(2050, -150, "heal", false); //starting gun
             // powerUps.spawn(2050, -150, "field", false); //starting gun
             if (localSettings.levelsClearedLastGame < 6) {
-                if (!simulation.isCheating) {
+                if (!simulation.isCheating && !m.isShipMode) {
                     spawn.wireFoot();
                     spawn.wireFootLeft();
                     spawn.wireKnee();
@@ -1896,7 +1899,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss"]);
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss"]);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
@@ -4123,7 +4126,7 @@ const level = {
                 World.add(engine.world, cons[cons.length - 1]);
                 if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
             } else {
-                spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss"]);
+                spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss"]);
                 let me = mob[mob.length - 1];
                 me.onDeath = function() {
                     this.removeCons(); //remove constraint

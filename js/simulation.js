@@ -362,7 +362,26 @@ const simulation = {
         b.activeGun = b.inventory[b.inventoryGun];
         simulation.updateGunHUD();
         simulation.boldActiveGunHUD();
-        // m.drop();
+        if (tech.isBotSwap) {
+            //get total count
+            const countPermanent = tech.dynamoBotCount + tech.laserBotCount + tech.nailBotCount + tech.foamBotCount + tech.boomBotCount + tech.orbitBotCount
+            //remove all bots
+            tech.dynamoBotCount = 0
+            tech.laserBotCount = 0
+            tech.nailBotCount = 0
+            tech.foamBotCount = 0
+            tech.boomBotCount = 0
+            tech.orbitBotCount = 0
+            for (let i = 0; i < bullet.length; i++) {
+                if (bullet[i].botType && bullet[i].endCycle === Infinity) bullet[i].endCycle = 0 //don't remove temp bots
+            }
+            //set to a new type
+            options = [() => { tech.laserBotCount = countPermanent }, () => { tech.nailBotCount = countPermanent }, () => { tech.foamBotCount = countPermanent }, () => { tech.boomBotCount = countPermanent }, () => { tech.orbitBotCount = countPermanent }, () => { tech.dynamoBotCount = countPermanent }, ]
+            options[tech.botSwapCycleIndex]()
+            tech.botSwapCycleIndex++
+            if (tech.botSwapCycleIndex > options.length - 1) tech.botSwapCycleIndex = 0
+            b.respawnBots()
+        }
     },
     zoom: null,
     zoomScale: 1000,
@@ -492,7 +511,11 @@ const simulation = {
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
         document.getElementById("dmg").style.display = "inline";
         document.getElementById("health-bg").style.display = "inline";
-        m.spawn(); //spawns the player
+        if (!m.isShipMode) {
+            m.spawn(); //spawns the player
+        } else {
+            World.add(engine.world, [player])
+        }
 
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
         if (simulation.isCommunityMaps) {
