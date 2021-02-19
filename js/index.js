@@ -754,9 +754,7 @@ window.addEventListener("keydown", function(event) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
-                    // document.getElementById("text-log").innerHTML = ""
-                    simulation.lastLogTime = 0 //clear text log
-                    // simulation.makeTextLog(`<em>exiting testing mode</em>`);
+                    simulation.makeTextLog("", 0);
                 } else { //if (keys[191])
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop

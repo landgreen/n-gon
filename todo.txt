@@ -1,12 +1,13 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-ship mode can be found in the experimental menu
+mob effect: freeze - now only slows mobs down
+  all freeze effects are about 50% longer
 
-some mobs now have orbitals at random
-new level boss: orbitalBoss
+junk tech: music - adds background music to n-gon
+junk tech: performance - adds fps tracker to n-gon
 
-most late game bot tech has been buffed
-tech: get 2 random bots, also when you switch guns cycle all bots to the same type
+tech: dormancy - if a mob has died in the last 5 seconds increase damage by 50% else decrease damage by 50%
+tech: torpor   - if a mob has died in the last 5 seconds reduce harm by 66% else increase harm by 33%
 
 ******************************************************** BUGS ********************************************************
 
@@ -36,7 +37,19 @@ use the floor of portal sensor on the player? to unstuck player
 
 ******************************************************** TODO ********************************************************
 
-add a shipMode tech that only shows up in experimental mode
+
+decrease healing effects by 50%
+decrease level scaling healing reduction
+  net effect: healing at difficulty 40 (level 10 hard) should be 25% higher then current levels
+
+bosses should have 2x health, but only do about 50 health damage
+  options:
+    cap all damage at 50 health
+      this makes high health/energy/harm reduction build much better
+    make boss flag cut damage done to player by 10x
+    boss flag cut damage done to boss by 20x <----
+      make bosses not have extra density
+    
 
 tech: spawn a bot after taking collision damage
 
@@ -71,7 +84,6 @@ copy time-like foam to other guns?
   wave gun
   shotgun
   nail gun
-
 
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -356,10 +368,6 @@ n-gon outreach ideas
   blips - errant signal on youtube
   reddit - r/IndieGaming
   hacker news - show hacker news post
-
-
-  paste this into console to see fps
-  javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
 
 
 ******************************************************** LORE ********************************************************

@@ -262,7 +262,7 @@ const simulation = {
         }
     },
     lastLogTime: 0,
-    lastLogTimeBig: 0,
+    // lastLogTimeBig: 0,
     boldActiveGunHUD() {
         if (b.inventory.length > 0) {
             for (let i = 0, len = b.inventory.length; i < len; ++i) document.getElementById(b.inventory[i]).style.opacity = "0.3";

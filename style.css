@@ -650,8 +650,8 @@ summary {
 }
 
 .junk {
-    background: hsl(254, 59%, 74%);
-    border-radius: 35%;
+    background: hsl(254, 44%, 75%);
+    border-radius: 25%;
     /* animation: 3s linear infinite alternate pulse; */
 }
 

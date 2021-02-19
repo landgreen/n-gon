@@ -50,33 +50,33 @@ const spawn = {
     randomGroup(x, y, chance = 1) {
         if (spawn.spawnChance(chance) && simulation.difficulty > 2 || chance == Infinity) {
             //choose from the possible picklist
-            let pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
+            let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             //is the pick able to be a group?
             let canBeGroup = false;
-            for (let i = 0, len = this.allowedGroupList.length; i < len; ++i) {
-                if (this.allowedGroupList[i] === pick) {
+            for (let i = 0, len = spawn.allowedGroupList.length; i < len; ++i) {
+                if (spawn.allowedGroupList[i] === pick) {
                     canBeGroup = true;
                     break;
                 }
             }
             if (canBeGroup) {
                 if (Math.random() < 0.55) {
-                    this.nodeGroup(x, y, pick);
+                    spawn.nodeGroup(x, y, pick);
                 } else {
-                    this.lineGroup(x, y, pick);
+                    spawn.lineGroup(x, y, pick);
                 }
             } else {
                 if (Math.random() < 0.07) {
-                    this[pick](x, y, 90 + Math.random() * 40); //one extra large mob
-                    spawn.spawnOrbitals(mob[mob.length - 1], radius + 50 + 200 * Math.random(), 1)
+                    spawn[pick](x, y, 90 + Math.random() * 40); //one extra large mob
+                    spawn.spawnOrbitals(mob[mob.length - 1], mob[mob.length - 1].radius + 50 + 200 * Math.random(), 1)
                 } else if (Math.random() < 0.35) {
-                    this.blockGroup(x, y) //hidden grouping blocks
+                    spawn.blockGroup(x, y) //hidden grouping blocks
                 } else {
                     pick = (Math.random() < 0.5) ? "randomList" : "random";
                     if (Math.random() < 0.55) {
-                        this.nodeGroup(x, y, pick);
+                        spawn.nodeGroup(x, y, pick);
                     } else {
-                        this.lineGroup(x, y, pick);
+                        spawn.lineGroup(x, y, pick);
                     }
                 }
             }
@@ -1355,7 +1355,7 @@ const spawn = {
         me.isBoss = true;
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0002 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.00022 * Math.sqrt(simulation.accelScale);
         me.seePlayerFreq = Math.floor(30 * simulation.lookFreqScale);
         me.memory = 420;
         me.restitution = 1;
@@ -1371,7 +1371,7 @@ const spawn = {
         }
         Matter.Body.setDensity(me, 0.023); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
-        spawn.spawnOrbitals(me, radius + 100 + 100 * Math.random())
+        spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random())
         me.onHit = function() {
             //run this function on hitting player
             // this.explode();

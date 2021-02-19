@@ -63,7 +63,6 @@ const mobs = {
         function applySlow() {
             if (!who.shield && !who.isShielded && !m.isBodiesAsleep) {
                 if (who.isBoss) cycles = Math.floor(cycles * 0.25)
-
                 let i = who.status.length
                 while (i--) {
                     if (who.status[i].type === "slow") who.status.splice(i, 1); //remove other "slow" effects on this mob
@@ -71,9 +70,11 @@ const mobs = {
                 who.isSlowed = true;
                 who.status.push({
                     effect() {
+                        const speedCap = 3
+                        const drag = 0.95
                         Matter.Body.setVelocity(who, {
-                            x: 0,
-                            y: 0
+                            x: Math.min(speedCap, who.velocity.x) * drag,
+                            y: Math.min(speedCap, who.velocity.y) * drag
                         });
                         Matter.Body.setAngularVelocity(who, 0);
                         ctx.beginPath();

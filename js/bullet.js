@@ -1732,7 +1732,7 @@ const b = {
             },
             beforeDmg(who) {
                 this.endCycle = 0; //bullet ends cycle after doing damage 
-                if (this.isFreeze) mobs.statusSlow(who, 60)
+                if (this.isFreeze) mobs.statusSlow(who, 90)
             },
             onEnd() {
                 if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
@@ -1845,7 +1845,7 @@ const b = {
             lockedOn: null,
             isFollowMouse: true,
             beforeDmg(who) {
-                mobs.statusSlow(who, 120)
+                mobs.statusSlow(who, 180)
                 this.endCycle = simulation.cycle
                 // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
                 if (tech.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && who.alive) {
@@ -2549,10 +2549,10 @@ const b = {
             restitution: 0.5 * (1 + 0.5 * Math.random()),
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 40 + Math.floor(7 * Math.random()),
+            lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-            range: 700 * (1 + 0.1 * Math.random()) + 300 * tech.isLaserBotUpgrade,
+            range: 700 * (1 + 0.1 * Math.random()) + 500 * tech.isLaserBotUpgrade,
             playerRange: 150 + Math.floor(30 * Math.random()),
             offPlayer: {
                 x: 0,
@@ -3155,7 +3155,7 @@ const b = {
                 }, dmg) //position, velocity, damage
                 if (tech.isIceCrystals) {
                     bullet[bullet.length - 1].beforeDmg = function(who) {
-                        mobs.statusSlow(who, 30)
+                        mobs.statusSlow(who, 60)
                         if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                             b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
                         }

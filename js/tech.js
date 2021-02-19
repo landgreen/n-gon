@@ -109,6 +109,7 @@
         },
         damageFromTech() {
             let dmg = m.fieldDamage
+            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.5
             if (tech.isTechDamage) dmg *= 2
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -433,7 +434,7 @@
             },
             {
                 name: "squirrel-cage rotor",
-                description: "<strong>move</strong> and <strong>jump</strong> about <strong>30%</strong> faster<br>but you take <strong>5%</strong> more <strong class='color-harm'>harm</strong>",
+                description: "<strong>move</strong> and <strong>jump</strong> about <strong>30%</strong> faster<br>take <strong>5%</strong> more <strong class='color-harm'>harm</strong>",
                 maxCount: 9,
                 count: 0,
                 allowed() {
@@ -1181,7 +1182,7 @@
             },
             {
                 name: "complex spin-statistics",
-                description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>+1</strong> second<br>once every <strong>7</strong> seconds`,
+                description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second<br>once every <strong>7</strong> seconds`,
                 maxCount: 3,
                 count: 0,
                 allowed() {
@@ -1248,7 +1249,7 @@
             },
             {
                 name: "liquid cooling",
-                description: `<strong class='color-s'>freeze</strong> all mobs for <strong>5</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+                description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1569,9 +1570,9 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return m.maxEnergy > 0.99
+                    return m.maxEnergy > 0.99 && !tech.isHealthRecovery
                 },
-                requires: "max energy >= 1",
+                requires: "max energy >= 1, not scrap recycling",
                 effect() {
                     tech.isEnergyRecovery = true;
                 },
@@ -1585,14 +1586,46 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return !tech.isEnergyHealth
+                    return !tech.isEnergyHealth && !tech.isEnergyRecovery
                 },
-                requires: "not mass-energy equivalence",
+                requires: "not mass-energy equivalence, waste energy recovery",
                 effect() {
                     tech.isHealthRecovery = true;
                 },
                 remove() {
                     tech.isHealthRecovery = false;
+                }
+            },
+            {
+                name: "dormancy",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>50%</strong></span>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    tech.isDamageAfterKill = true;
+                },
+                remove() {
+                    tech.isDamageAfterKill = false;
+                }
+            },
+            {
+                name: "torpor",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong> else increase it by <strong>50%</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isDamageAfterKill
+                },
+                requires: "dormancy",
+                effect() {
+                    tech.isHarmReduceAfterKill = true;
+                },
+                remove() {
+                    tech.isHarmReduceAfterKill = false;
                 }
             },
             {
@@ -1628,7 +1661,7 @@
             },
             {
                 name: "entropy exchange",
-                description: "<strong class='color-h'>heal</strong> for <strong>1%</strong> of <strong class='color-d'>damage</strong> done",
+                description: "<strong class='color-h'>heal</strong> for <strong>3%</strong> of <strong class='color-d'>damage</strong> done<br>take <strong>8%</strong> more <strong class='color-harm'>harm</strong>",
                 maxCount: 9,
                 count: 0,
                 allowed() {
@@ -1636,7 +1669,7 @@
                 },
                 requires: "some increased damage, not mass-energy equivalence",
                 effect() {
-                    tech.healthDrain += 0.01;
+                    tech.healthDrain += 0.03;
                 },
                 remove() {
                     tech.healthDrain = 0;
@@ -3090,7 +3123,7 @@
             },
             {
                 name: "cryodesiccation",
-                description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1</strong> second",
+                description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1.5</strong> second",
                 // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
                 isGunTech: true,
                 maxCount: 1,
@@ -3743,7 +3776,7 @@
                         tech.giveTech("dynamo-bot upgrade")
                         tech.setTechoNonRefundable("dynamo-bot upgrade")
                         for (let i = 0; i < 2; i++) {
-                            b.orbitBot()
+                            b.dynamoBot()
                             tech.dynamoBotCount++;
                         }
                         simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
@@ -3753,7 +3786,7 @@
                         tech.giveTech("dynamo-bot upgrade")
                         tech.setTechoNonRefundable("dynamo-bot upgrade")
                         for (let i = 0; i < 2; i++) {
-                            b.orbitBot()
+                            b.dynamoBot()
                             tech.dynamoBotCount++;
                         }
                         simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
@@ -4291,7 +4324,58 @@
             //     remove() {}
             // },
             {
-                name: "banish",
+                name: "music",
+                description: "add music to n-gon",
+                maxCount: 1,
+                count: 0,
+                numberInPool: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    window.open('https://www.youtube.com/results?search_query=music', '_blank')
+                },
+                remove() {}
+            },
+            {
+                name: "performance",
+                description: "display performance stats to n-gon",
+                maxCount: 1,
+                count: 0,
+                numberInPool: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    (function() {
+                        var script = document.createElement('script');
+                        script.onload = function() {
+                            var stats = new Stats();
+                            document.body.appendChild(stats.dom);
+                            requestAnimationFrame(function loop() {
+                                stats.update();
+                                requestAnimationFrame(loop)
+                            });
+                        };
+                        script.src = 'https://unpkg.com/stats.js@0.17.0/build/stats.min.js';
+                        document.head.appendChild(script);
+                    })()
+                    //move health to the right
+                    document.getElementById("health").style.left = "86px"
+                    document.getElementById("health-bg").style.left = "86px"
+                },
+                remove() {}
+            },
+            {
+                name: "defragment",
                 description: "<strong>erase</strong> all junk <strong class='color-m'>tech</strong> from the possible pool<br><em>probably...</em>",
                 maxCount: 1,
                 count: 0,
@@ -4496,7 +4580,7 @@
             },
             {
                 name: "energy investment",
-                description: "every 10 seconds drain your <strong class='color-f'>energy</strong> and return it doubled 10 seconds later<br>lasts 180 seconds",
+                description: "every 10 seconds drain your <strong class='color-f'>energy</strong><br>return it doubled 10 seconds later<br>lasts 180 seconds",
                 maxCount: 9,
                 count: 0,
                 numberInPool: 0,
@@ -4931,7 +5015,7 @@
             },
             {
                 name: "quantum black hole",
-                description: "use all your <strong class='color-f'>energy</strong> to <strong>spawn</strong> inside the event horizon of a huge <strong>black hole</strong>",
+                description: "use all your <strong class='color-f'>energy</strong> to<br><strong>spawn</strong> inside the event horizon of a huge <strong>black hole</strong>",
                 maxCount: 9,
                 count: 0,
                 numberInPool: 0,
@@ -5175,5 +5259,7 @@
         isBlockHarm: null,
         foamFutureFire: null,
         isBotSwap: null,
-        botSwapCycleIndex: null
+        botSwapCycleIndex: null,
+        isDamageAfterKill: null,
+        isHarmReduceAfterKill: null
     }
