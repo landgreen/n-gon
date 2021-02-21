@@ -94,7 +94,7 @@ const powerUps = {
                 }
             }
             if (tech.isRerollBots) {
-                const limit = 5
+                const limit = 4
                 for (; powerUps.research.count > limit - 1; powerUps.research.count -= limit) {
                     b.randomBot()
                     if (tech.renormalization) {
@@ -462,7 +462,7 @@ const powerUps = {
                 }
                 // console.log(powerUps.gun.choiceLog)
                 // console.log(choice1, choice2, choice3)
-                if (tech.isOneGun) text += `<div style = "color: #f24">replaces your current gun</div>`
+                if (tech.isOneGun && b.inventory.length > 0) text += `<div style = "color: #f24">replaces your current gun</div>`
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
             } else {

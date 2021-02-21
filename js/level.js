@@ -20,7 +20,7 @@ const level = {
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
             // tech.giveTech("supercritical fission")
-            // tech.giveTech("CPT reversal")
+            // tech.giveTech("micro-extruder")
             // tech.giveTech("causality bombs")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
@@ -109,6 +109,11 @@ const level = {
             b.inventoryGun++;
             if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
             simulation.switchGun();
+        }
+        if (tech.isSwitchReality) {
+            simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+            m.switchWorlds()
+            for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "tech", false);
         }
     },
     custom() {},
@@ -2503,13 +2508,14 @@ const level = {
         spawn.randomMob(1725, 125, 0.5);
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.1) { // tether ball
+                const index = mob.length
                 spawn.tetherBoss(4250, 0)
                 cons[cons.length] = Constraint.create({
                     pointA: {
                         x: 4250,
                         y: -675
                     },
-                    bodyB: mob[mob.length - 1],
+                    bodyB: mob[index],
                     stiffness: 0.00007
                 });
                 World.add(engine.world, cons[cons.length - 1]);

@@ -1,13 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-mob effect: freeze - now only slows mobs down
-  all freeze effects are about 50% longer
+many worlds renamed to ansatz
+new tech many-worlds: at the start of each new level switch realities
 
-junk tech: music - adds background music to n-gon
-junk tech: performance - adds fps tracker to n-gon
-
-tech: dormancy - if a mob has died in the last 5 seconds increase damage by 50% else decrease damage by 50%
-tech: torpor   - if a mob has died in the last 5 seconds reduce harm by 66% else increase harm by 33%
+removed tech: electroactive polymers - convert bots to the same type on weapon swap
+all bot upgrades convert current bots to the upgraded type
+  only one bot upgrade allowed
 
 ******************************************************** BUGS ********************************************************
 
@@ -36,7 +34,6 @@ use the floor of portal sensor on the player? to unstuck player
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
-
 
 decrease healing effects by 50%
 decrease level scaling healing reduction
@@ -373,7 +370,7 @@ n-gon outreach ideas
 ******************************************************** LORE ********************************************************
 
 cool names for tech
-  strange loop, ansatz, perturbation theory
+  strange loop,  perturbation theory
 
 voice singing with pitch?
 

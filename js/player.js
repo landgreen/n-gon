@@ -303,106 +303,117 @@ const m = {
         }
     },
     alive: false,
+    switchWorlds() {
+        //count tech
+        const totalGuns = b.inventory.length - tech.isRewindGun //count guns, but not CPT gun
+        simulation.isTextLogOpen = false; //prevent console spam
+        //remove all tech and count current tech total
+        let totalTech = 0;
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            if (!tech.tech[i].isNonRefundable && tech.tech[i].name !== "quantum immortality" && tech.tech[i].name !== "many-worlds") {
+                totalTech += tech.tech[i].count
+                tech.tech[i].remove();
+                tech.tech[i].isLost = false
+                tech.tech[i].count = 0
+            }
+        }
+        lore.techCount = 0;
+        tech.removeJunkTechFromPool();
+        tech.removeLoreTechFromPool();
+        tech.addLoreTechToPool();
+        tech.armorFromPowerUps = 0;
+        tech.totalCount = 0;
+
+        //randomize health
+        m.health = 0.7 + Math.random()
+        if (m.health > 1) m.health = 1;
+        m.displayHealth();
+
+        //randomize field
+        m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
+
+
+        //track how ammo/ ammoPack count
+        let ammoCount = 0
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+            if (b.guns[b.inventory[i]].ammo !== Infinity) ammoCount += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
+        }
+
+        //remove all bullets
+        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        bullet = [];
+        //removes guns and ammo  
+        b.inventory = [];
+        b.activeGun = null;
+        b.inventoryGun = 0;
+        for (let i = 0, len = b.guns.length; i < len; ++i) {
+            b.guns[i].have = false;
+            if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
+        }
+        //give random guns
+        for (let i = 0; i < totalGuns; i++) b.giveGuns()
+
+        //randomize ammo based on ammo/ammopack count
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.05 + 0.5 * (Math.random() - 0.5))))
+        }
+
+        //randomize tech
+        for (let i = 0; i < totalTech; i++) {
+            //find what tech I could get
+            let options = [];
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].count < tech.tech[i].maxCount &&
+                    !tech.tech[i].isNonRefundable &&
+                    tech.tech[i].name !== "quantum immortality" &&
+                    tech.tech[i].name !== "many-worlds" &&
+                    tech.tech[i].name !== "Born rule" &&
+                    tech.tech[i].name !== "determinism" &&
+                    tech.tech[i].allowed()
+                ) options.push(i);
+            }
+            //add a new tech from options pool
+            if (options.length > 0) tech.giveTech(options[Math.floor(Math.random() * options.length)])
+        }
+
+        simulation.makeGunHUD(); //update gun HUD
+        simulation.updateTechHUD();
+        simulation.isTextLogOpen = true;
+    },
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
-            simulation.isTextLogOpen = false;
-            //count tech
-            let totalTech = 0;
+
+            //remove immortality tech
             for (let i = 0; i < tech.tech.length; i++) {
-                if (!tech.tech[i].isNonRefundable) totalTech += tech.tech[i].count
-            }
-            if (tech.isDeterminism) totalTech -= 3 //remove the bonus tech 
-            if (tech.isSuperDeterminism) totalTech -= 2 //remove the bonus tech 
-            totalTech = totalTech * 1.15 + 1 // a few extra to make it stronger
-            const totalGuns = b.inventory.length //count guns
-
-            function randomizeTech() {
-                for (let i = 0; i < totalTech; i++) {
-                    //find what tech I don't have
-                    let options = [];
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].count < tech.tech[i].maxCount &&
-                            !tech.tech[i].isNonRefundable &&
-                            tech.tech[i].name !== "quantum immortality" &&
-                            tech.tech[i].name !== "Born rule" &&
-                            tech.tech[i].allowed()
-                        ) options.push(i);
-                    }
-                    //add a new tech
-                    if (options.length > 0) {
-                        const choose = Math.floor(Math.random() * options.length)
-                        let newTech = options[choose]
-                        tech.giveTech(newTech)
-                        options.splice(choose, 1);
-                    }
-                }
-                simulation.updateTechHUD();
-            }
-
-            function randomizeField() {
-                m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
-            }
-
-            function randomizeHealth() {
-                m.health = 0.7 + Math.random()
-                if (m.health > 1) m.health = 1;
-                m.displayHealth();
-            }
-
-            function randomizeGuns() {
-                //removes guns and ammo  
-                b.inventory = [];
-                b.activeGun = null;
-                b.inventoryGun = 0;
-                for (let i = 0, len = b.guns.length; i < len; ++i) {
-                    b.guns[i].have = false;
-                    if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
-                }
-                //give random guns
-                for (let i = 0; i < totalGuns; i++) b.giveGuns()
-                //randomize ammo
-                for (let i = 0, len = b.inventory.length; i < len; i++) {
-                    if (b.guns[b.inventory[i]].ammo !== Infinity) {
-                        b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(6 * b.guns[b.inventory[i]].ammo * Math.sqrt(Math.random())))
-                    }
-                }
-                simulation.makeGunHUD(); //update gun HUD
+                if (tech.tech[i].name === "quantum immortality") tech.removeTech(i)
             }
 
             simulation.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
-
-            function randomizeEverything() {
-                spawn.setSpawnList(); //new mob types
-                simulation.clearNow = true; //triggers a map reset
-
-                tech.setupAllTech(); //remove all tech
-                for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-                bullet = []; //remove all bullets
-                randomizeHealth()
-                randomizeField()
-                randomizeGuns()
-                randomizeTech()
-            }
-
-            randomizeEverything()
+            spawn.setSpawnList(); //new mob types
+            simulation.clearNow = true; //triggers a map reset
+            m.switchWorlds()
             const swapPeriod = 1000
             for (let i = 0, len = 5; i < len; i++) {
                 setTimeout(function() {
-                    randomizeEverything()
+                    simulation.wipe = function() { //set wipe to have trails
+                        ctx.fillStyle = "rgba(255,255,255,0)";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    spawn.setSpawnList(); //new mob types
+                    simulation.clearNow = true; //triggers a map reset
+                    m.switchWorlds()
                     simulation.isTextLogOpen = true;
                     simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> 0.${len-i-1}`, swapPeriod);
                     simulation.isTextLogOpen = false;
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = `rgba(255,255,255,${(i+1)*(i+1)*0.006})`;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        // pixelWindows()
                     }
                 }, (i + 1) * swapPeriod);
             }
-
             setTimeout(function() {
                 simulation.wipe = function() { //set wipe to normal
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -410,7 +421,6 @@ const m = {
                 simulation.isTextLogOpen = true;
                 simulation.makeTextLog("simulation.amplitude <span class='color-symbol'>=</span> null");
             }, 6 * swapPeriod);
-
         } else if (m.alive) { //normal death code here
             m.alive = false;
             simulation.paused = true;
@@ -482,7 +492,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && m.fieldUpgrades[m.fieldMode].name === "negative mass field" && m.isFieldActive) dmg *= 0.5
-        if (tech.isBotArmor) dmg *= 0.94 ** tech.totalBots()
+        if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
         if (tech.energyRegen === 0) dmg *= 0.34
@@ -1163,7 +1173,7 @@ const m = {
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
-                for (let i = 0, len = 2.5 * tech.blockDmg; i < len; i++) {
+                for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
                     let x = m.pos.x - 20 * unit.x;
                     let y = m.pos.y - 20 * unit.y;
                     ctx.moveTo(x, y);
@@ -1180,7 +1190,7 @@ const m = {
                 m.drawHold(who);
             }
             // if (tech.isFreezeMobs) mobs.statusSlow(who, 60) //this works but doesn't have a fun effect
-
+            if (tech.isStunField) mobs.statusStun(who, tech.isStunField)
             // m.holdingTarget = null
             //knock backs
             if (m.fieldShieldingScale > 0) {
@@ -1202,7 +1212,6 @@ const m = {
                     });
                 }
             } else {
-                if (tech.isStunField && m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism") mobs.statusStun(who, tech.isStunField)
                 // mobs.statusSlow(who, tech.isStunField)
                 const massRoot = Math.sqrt(Math.max(0.15, who.mass)); // masses above 12 can start to overcome the push back
                 Matter.Body.setVelocity(who, {

@@ -82,6 +82,7 @@ const spawn = {
             }
         }
     },
+
     randomLevelBoss(x, y, options = ["orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
@@ -1355,7 +1356,7 @@ const spawn = {
         me.isBoss = true;
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.00022 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.00018 * Math.sqrt(simulation.accelScale);
         me.seePlayerFreq = Math.floor(30 * simulation.lookFreqScale);
         me.memory = 420;
         me.restitution = 1;
@@ -1467,7 +1468,7 @@ const spawn = {
                 // hitting player
                 if (best.who === player) {
                     if (m.immuneCycle < m.cycle) {
-                        const dmg = 0.001 * simulation.dmgScale;
+                        const dmg = 0.002 * simulation.dmgScale;
                         m.damage(dmg);
                         //draw damage
                         ctx.fillStyle = color;
@@ -1477,9 +1478,7 @@ const spawn = {
                     }
                 }
                 //draw beam
-                if (best.dist2 === Infinity) {
-                    best = look;
-                }
+                if (best.dist2 === Infinity) best = look;
                 ctx.beginPath();
                 ctx.moveTo(this.vertices[1].x, this.vertices[1].y);
                 ctx.lineTo(best.x, best.y);
@@ -1948,11 +1947,20 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.01;
+        me.memory = Infinity;
         // me.memory = 300;
         // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
         me.collisionFilter.mask = cat.player | cat.bullet
         spawn.shield(me, x, y, 1);
-        spawn.spawnOrbitals(me, radius + 150 + 250 * Math.random(), 1)
+
+
+        const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty))) // simulation.difficulty = 40 on hard mode level 10
+        const speed = (0.007 + 0.003 * Math.random() + 0.004 * Math.sqrt(simulation.difficulty))
+        let radiusOrbitals = radius + 125 + 350 * Math.random()
+        for (let i = 0; i < len; i++) spawn.orbital(me, radiusOrbitals, i / len * 2 * Math.PI, speed)
+        radiusOrbitals = radius + 125 + 350 * Math.random()
+        for (let i = 0; i < len; i++) spawn.orbital(me, radiusOrbitals, i / len * 2 * Math.PI, -speed)
+
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
@@ -2570,8 +2578,8 @@ const spawn = {
         me.memory = 20;
         Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
-        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
+        setTimeout(() => { spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random()) }, 100); //have to wait a sec so the tether constraint doesn't attach to an orbital
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             this.removeCons(); //remove constraint
@@ -2677,7 +2685,7 @@ const spawn = {
     },
     orbital(who, radius, phase, speed) {
         // for (let i = 0, len = 7; i < len; i++) spawn.orbital(me, radius + 250, 2 * Math.PI / len * i)
-        mobs.spawn(0, 0, 8, 12, "rgb(255,0,150)");
+        mobs.spawn(who.position.x, who.position.y, 8, 12, "rgb(255,0,150)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
         // Matter.Body.setDensity(me, 0.00004); //normal is 0.001
@@ -2701,11 +2709,10 @@ const spawn = {
             }
             Matter.Body.setPosition(this, Vector.add(who.position, Vector.mult(orbit, radius))) //bullets move with player
             //damage player
-            if (Matter.Query.collides(this, [player]).length > 0) {
-                m.damage(0.1 * simulation.dmgScale);
+            if (Matter.Query.collides(this, [player]).length > 0 && !m.isCloak) {
+                m.damage(0.035 * simulation.dmgScale);
                 this.death();
             }
-
         };
     },
     orbitalBoss(x, y, radius = 88) {

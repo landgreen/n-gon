@@ -46,7 +46,7 @@
 
                 tech.junk[index].numberInPool++
                 tech.tech.push(Object.assign({}, tech.junk[index])) // push a "clone" of the tech.junk into the pool
-                if (tech.junk[index].numberInPool > 1) tech.tech[tech.tech.length - 1].name += `(${tech.junk[index].numberInPool})` //give it a unique name so it can be found
+                if (tech.junk[index].numberInPool > 1) tech.tech[tech.tech.length - 1].name += ` - ${(tech.junk[index].numberInPool + 9).toString(36)}` //give it a unique name so it can be found
             }
         },
         removeJunkTechFromPool() {
@@ -127,7 +127,7 @@
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
-            if (tech.isBotDamage) dmg *= 1 + 0.06 * tech.totalBots()
+            if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
@@ -144,9 +144,6 @@
                 spawn.randomLevelBoss(m.pos.x, m.pos.y - range, bossOptions);
             }
         },
-        totalBots() {
-            return tech.dynamoBotCount + tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
-        },
         tech: [{
                 name: "integrated armament",
                 description: `increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
@@ -158,7 +155,6 @@
                 requires: "no more than 1 gun",
                 effect() {
                     tech.isOneGun = true;
-                    //
                     for (let i = 0; i < tech.tech.length; i++) {
                         if (tech.tech[i].name === "CPT gun") tech.tech[i].description = `adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong><br><div style = 'color: #f24'>replaces your current gun</div>`
                     }
@@ -710,7 +706,7 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return (tech.totalBots() > 1 || tech.haveGunCheck("drones") || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
+                    return (b.totalBots() > 1 || tech.haveGunCheck("drones") || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
                 },
                 requires: "drones, spores, mines, or bots",
                 effect() {
@@ -742,7 +738,7 @@
                 maxCount: 3,
                 count: 0,
                 allowed() {
-                    return tech.totalBots() > 0 && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob
+                    return b.totalBots() > 0 && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob
                 },
                 requires: "a bot and no other mob death tech",
                 effect() {
@@ -757,6 +753,7 @@
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>nails</strong> at mobs in line of sight",
                 maxCount: 9,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return true
                 },
@@ -771,15 +768,16 @@
             },
             {
                 name: "nail-bot upgrade",
-                description: "<strong>500%</strong> increased <strong> fire rate</strong><br><em>applies to all current and future <strong class='color-bot'>nail-bots</strong></em>",
+                description: "<strong>convert</strong> all your permanent bots to <strong>nail-bots</strong><br><strong>500%</strong> increased nail-bot <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.nailBotCount > 1
+                    return tech.nailBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more nail bots",
+                requires: "2 or more nail bots and only 1 bot upgrade",
                 effect() {
                     tech.isNailBotUpgrade = true
+                    b.convertBotsTo("nailBotCount")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'nail') bullet[i].isUpgraded = true
                     }
@@ -796,6 +794,7 @@
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>foam</strong> at nearby mobs",
                 maxCount: 9,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return true
                 },
@@ -810,15 +809,16 @@
             },
             {
                 name: "foam-bot upgrade",
-                description: "<strong>250%</strong> increased <strong>foam</strong> <strong>size</strong> and <strong>fire rate</strong><br><em>applies to all current and future <strong class='color-bot'>foam-bots</strong></em>",
+                description: "<strong>convert</strong> all your permanent bots to <strong>foam-bots</strong><br><strong>250%</strong> increased foam-bot <strong>size</strong> and <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.foamBotCount > 1
+                    return tech.foamBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more foam bots",
+                requires: "2 or more foam bots and only 1 bot upgrade",
                 effect() {
                     tech.isFoamBotUpgrade = true
+                    b.convertBotsTo("foamBotCount")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'foam') bullet[i].isUpgraded = true
                     }
@@ -835,6 +835,7 @@
                 description: "a <strong class='color-bot'>bot</strong> <strong>defends</strong> the space around you<br>ignites an <strong class='color-e'>explosion</strong> after hitting a mob",
                 maxCount: 9,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return true
                 },
@@ -849,15 +850,16 @@
             },
             {
                 name: "boom-bot upgrade",
-                description: "<strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size<br><em>applies to all current and future <strong class='color-bot'>boom-bots</strong></em>",
+                description: "<strong>convert</strong> all your permanent bots to <strong>boom-bots</strong><br><strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.boomBotCount > 1
+                    return tech.boomBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more boom bots",
+                requires: "2 or more boom bots and only 1 bot upgrade",
                 effect() {
                     tech.isBoomBotUpgrade = true
+                    b.convertBotsTo("boomBotCount")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'boom') bullet[i].isUpgraded = true
                     }
@@ -874,6 +876,7 @@
                 description: "a <strong class='color-bot'>bot</strong> uses <strong class='color-f'>energy</strong> to emit a <strong class='color-laser'>laser</strong> beam<br>that targets nearby mobs",
                 maxCount: 9,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return m.maxEnergy > 0.5
                 },
@@ -888,15 +891,16 @@
             },
             {
                 name: "laser-bot upgrade",
-                description: "<strong>400%</strong> increased <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong><br><em>applies to all current and future <strong class='color-bot'>laser-bots</strong></em>",
+                description: "<strong>convert</strong> all your permanent bots to <strong>laser-bots</strong><br><strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.laserBotCount > 1
+                    return tech.laserBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more laser bots",
+                requires: "2 or more laser bots and only 1 bot upgrade",
                 effect() {
                     tech.isLaserBotUpgrade = true
+                    b.convertBotsTo("laserBotCount")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'laser') bullet[i].isUpgraded = true
                     }
@@ -913,6 +917,7 @@
                 description: "a <strong class='color-bot'>bot</strong> is locked in <strong>orbit</strong> around you<br><strong>stuns</strong> and <strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
                 maxCount: 9,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return true
                 },
@@ -927,15 +932,16 @@
             },
             {
                 name: "orbital-bot upgrade",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>30%</strong><br><em>applies to all current and future <strong class='color-bot'>orbit-bots</strong></em>",
+                description: "<strong>convert</strong> all your permanent bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>30%</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.orbitBotCount > 1
+                    return tech.orbitBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more orbital bots",
+                requires: "2 or more orbital bots and only 1 bot upgrade",
                 effect() {
                     tech.isOrbitBotUpgrade = true
+                    b.convertBotsTo("orbitBotCount")
                     const range = 190 + 60 * tech.isOrbitBotUpgrade
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'orbit') {
@@ -962,6 +968,7 @@
                 description: "a <strong class='color-bot'>bot</strong> <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second when it's near",
                 maxCount: 9,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return true
                 },
@@ -976,15 +983,16 @@
             },
             {
                 name: "dynamo-bot upgrade",
-                description: "<strong class='color-bot'>dynamo-bots</strong> <strong>regen</strong> <strong>24</strong> <strong class='color-f'>energy</strong> per second<br><em>applies to all current and future dynamo-bots</em>",
+                description: "<strong>convert</strong> your permanent bots to <strong>dynamo-bots</strong><br>dynamo-bots <strong>regen</strong> <strong>24</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.dynamoBotCount > 1
+                    return tech.dynamoBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more dynamo bots",
+                requires: "2 or more dynamo bots and only 1 bot upgrade",
                 effect() {
                     tech.isDynamoBotUpgrade = true
+                    b.convertBotsTo("dynamoBotCount")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = true
                     }
@@ -1015,32 +1023,12 @@
                 }
             },
             {
-                name: "electroactive polymers",
-                description: "build <strong>2</strong> random <strong class='color-bot'>bots</strong><br><strong>switching</strong> <strong>guns</strong> cycles <strong class='color-bot'>bots</strong> to the <strong>same</strong> type",
-                maxCount: 1,
-                isNonRefundable: true,
-                count: 0,
-                allowed() {
-                    return tech.totalBots() > 2 && b.inventory.length > 1
-                },
-                requires: "at least 3 bots and 2 guns",
-                effect() {
-                    tech.isBotSwap = true
-                    b.randomBot()
-                    b.randomBot()
-                },
-                remove() {
-                    tech.isBotSwap = false
-                    tech.botSwapCycleIndex = 0
-                }
-            },
-            {
                 name: "perimeter defense",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.totalBots() > 3 && !tech.isEnergyHealth
+                    return b.totalBots() > 3 && !tech.isEnergyHealth
                 },
                 requires: "at least 4 bots",
                 effect() {
@@ -1055,7 +1043,7 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.totalBots() > 3
+                    return b.totalBots() > 3
                 },
                 requires: "at least 4 bots",
                 effect() {
@@ -1073,7 +1061,7 @@
                 isNonRefundable: true,
                 isExperimentHide: true,
                 allowed() {
-                    return tech.totalBots() > 3
+                    return b.totalBots() > 3
                 },
                 requires: "at least 4 bots",
                 effect() {
@@ -1837,6 +1825,22 @@
                 }
             },
             {
+                name: "many-worlds",
+                description: "on each new <strong>level</strong> enter an <strong>alternate reality</strong><br> find <strong>2</strong> <strong class='color-m'>tech</strong> power ups in that reality",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isImmortal
+                },
+                requires: "quantum immortality",
+                effect() {
+                    tech.isSwitchReality = true;
+                },
+                remove() {
+                    tech.isSwitchReality = false;
+                }
+            },
+            {
                 name: "bubble fusion",
                 description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2096,9 +2100,9 @@
                 isExperimentHide: true,
                 count: 0,
                 allowed() {
-                    return powerUps.research.count === 0 && level.onLevel < 6
+                    return level.onLevel < 8 && level.onLevel > 0
                 },
-                requires: "no research, and in the first 5 levels",
+                requires: "between levels 1 and 7",
                 effect() {
                     level.difficultyDecrease(simulation.difficultyMode)
                     simulation.makeTextLog(`simulation.difficultyMode<span class='color-symbol'>--</span>`)
@@ -2183,7 +2187,7 @@
                 }
             },
             {
-                name: "many-worlds",
+                name: "ansatz",
                 description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2306,7 +2310,7 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return (tech.totalBots() > 5 || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
+                    return (b.totalBots() > 5 || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
                 },
                 requires: "bots > 5, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
                 effect() {
@@ -2933,6 +2937,7 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return tech.haveGunCheck("missiles")
                 },
@@ -3597,7 +3602,7 @@
                 },
                 requires: "standing wave harmonics",
                 effect() {
-                    tech.blockDmg += 0.75 //if you change this value also update the for loop in the electricity graphics in m.pushMass
+                    tech.blockDmg += 1.25 //if you change this value also update the for loop in the electricity graphics in m.pushMass
                 },
                 remove() {
                     tech.blockDmg = 0;
@@ -3605,7 +3610,7 @@
             },
             {
                 name: "frequency resonance",
-                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>40%</strong>",
+                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>50%</strong>",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3614,8 +3619,8 @@
                 },
                 requires: "standing wave harmonics",
                 effect() {
-                    m.fieldRange += 175 * 0.2
-                    m.fieldShieldingScale *= 0.55
+                    m.fieldRange += 175 * 0.25
+                    m.fieldShieldingScale *= 0.5
                 },
                 remove() {
                     m.fieldRange = 175;
@@ -3624,36 +3629,19 @@
             },
             {
                 name: "flux pinning",
-                description: "blocking with <strong>perfect diamagnetism</strong><br><strong>stuns</strong> mobs for <strong>+1</strong> second",
+                description: "blocking with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+                    return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
                 },
-                requires: "perfect diamagnetism",
+                requires: "a field that can block",
                 effect() {
-                    tech.isStunField += 60;
+                    tech.isStunField += 120;
                 },
                 remove() {
                     tech.isStunField = 0;
-                }
-            },
-            {
-                name: "eddy current brake",
-                description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
-                },
-                requires: "perfect diamagnetism",
-                effect() {
-                    tech.isPerfectBrake = true;
-                },
-                remove() {
-                    tech.isPerfectBrake = false;
                 }
             },
             {
@@ -3671,6 +3659,23 @@
                 },
                 remove() {
                     tech.isCrit = false;
+                }
+            },
+            {
+                name: "eddy current brake",
+                description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+                },
+                requires: "perfect diamagnetism",
+                effect() {
+                    tech.isPerfectBrake = true;
+                },
+                remove() {
+                    tech.isPerfectBrake = false;
                 }
             },
             {
@@ -3955,6 +3960,7 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
+                isBotTech: true,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
                 },
@@ -4323,6 +4329,46 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "sliders",
+                description: "become an alternate version of yourself<br>every <strong>20</strong> seconds",
+                maxCount: 1,
+                count: 0,
+                numberInPool: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        m.switchWorlds()
+                    }, 20000); //every 30 sections
+                },
+                remove() {}
+            },
+            {
+                name: "pop-ups",
+                description: "sign up to learn endless easy ways to win n-gon<br>that landgreen doesn't want you to know about!!!1!!",
+                maxCount: 1,
+                count: 0,
+                numberInPool: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        alert(`The best combo is <strong>${tech.tech[Math.floor(Math.random() * tech.tech.length)].name}</strong> with <strong>${tech.tech[Math.floor(Math.random() * tech.tech.length)].name}</strong>!`);
+                    }, 30000); //every 30 sections
+                },
+                remove() {}
+            },
             {
                 name: "music",
                 description: "add music to n-gon",
@@ -4882,11 +4928,11 @@
                 isExperimentHide: true,
                 isJunk: true,
                 allowed() {
-                    return tech.totalBots() > 2
+                    return b.totalBots() > 2
                 },
                 requires: "at least 3 bots",
                 effect() {
-                    const total = tech.totalBots();
+                    const total = b.totalBots();
                     tech.dynamoBotCount = 0;
                     tech.nailBotCount = 0;
                     tech.laserBotCount = 0;
@@ -5258,8 +5304,7 @@
         isBlockPowerUps: null,
         isBlockHarm: null,
         foamFutureFire: null,
-        isBotSwap: null,
-        botSwapCycleIndex: null,
         isDamageAfterKill: null,
-        isHarmReduceAfterKill: null
+        isHarmReduceAfterKill: null,
+        isSwitchReality: null
     }

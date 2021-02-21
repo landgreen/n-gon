@@ -1089,18 +1089,18 @@ const b = {
                 m.energy = 0;
             }
             b.isExtruderOn = true
-            const SPEED = 10
+            const SPEED = 8
             const me = bullet.length;
             const where = Vector.add(m.pos, player.velocity)
             bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(m.angle), where.y + 20 * Math.sin(m.angle), 4, 0.01, {
                 cycle: -0.5,
                 isWave: true,
-                endCycle: simulation.cycle + 10 + 40 * tech.isPlasmaRange,
+                endCycle: simulation.cycle + 35 + 45 * tech.isPlasmaRange,
                 inertia: Infinity,
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: b.dmgScale * 1.35, //damage also changes when you divide by mob.mass on in .do()
+                dmg: b.dmgScale * 1.2, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -1121,8 +1121,8 @@ const b = {
                             const q = Matter.Query.point(mob, this.position)
                             for (let i = 0; i < q.length; i++) {
                                 Matter.Body.setVelocity(q[i], {
-                                    x: q[i].velocity.x * 0.6,
-                                    y: q[i].velocity.y * 0.6
+                                    x: q[i].velocity.x * 0.2,
+                                    y: q[i].velocity.y * 0.2
                                 });
                                 Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
                                 let dmg = this.dmg / Math.min(10, q[i].mass)
@@ -2226,6 +2226,55 @@ const b = {
     // ********************************         Bots        *********************************************
     // **************************************************************************************************
     // **************************************************************************************************
+    totalBots() {
+        return tech.dynamoBotCount + tech.foamBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
+    },
+    hasBotUpgrade() {
+        return tech.isNailBotUpgrade + tech.isFoamBotUpgrade + tech.isBoomBotUpgrade + tech.isLaserBotUpgrade + tech.isOrbitBotUpgrade + tech.isDynamoBotUpgrade
+    },
+    convertBotsTo(type) { //type can be a string like "dynamoBotCount"
+        //count all bots
+        const totalBots = b.totalBots()
+        //remove all bots techs and convert them to the new type so that tech refunds work correctly
+        let totalTechToConvert = 0 //count how many tech need to be converted
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech[i].count && tech.tech[i].isBotTech) {
+                totalTechToConvert += tech.tech[i].count
+                tech.removeTech(i)
+            }
+        }
+        console.log(totalTechToConvert)
+
+        let name = ""
+        if (type === "nailBotCount") name = "nail-bot"
+        if (type === "orbitBotCount") name = "orbital-bot"
+        if (type === "boomBotCount") name = "boom-bot"
+        if (type === "laserBotCount") name = "laser-bot"
+        if (type === "foamBotCount") name = "foam-bot"
+        if (type === "dynamoBotCount") name = "dynamo-bot"
+        if (type === "plasmaBotCount") name = "plasma-bot"
+        if (type === "missileBotCount") name = "missile-bot"
+        //spawn tech for the correct bot type
+        for (let i = 0; i < totalTechToConvert; i++) tech.giveTech(name)
+
+        //remove all bots
+        b.zeroBotCount()
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType && bullet[i].endCycle === Infinity) bullet[i].endCycle = 0 //don't remove temp bots
+        }
+        //set all bots to type
+        tech[type] = totalBots
+        //respawn all bots
+        b.respawnBots();
+    },
+    zeroBotCount() { //remove all bots
+        tech.dynamoBotCount = 0
+        tech.laserBotCount = 0
+        tech.nailBotCount = 0
+        tech.foamBotCount = 0
+        tech.boomBotCount = 0
+        tech.orbitBotCount = 0
+    },
     respawnBots() {
         for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
         for (let i = 0; i < tech.laserBotCount; i++) b.laserBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
@@ -2311,61 +2360,65 @@ const b = {
                 //     ctx.arc(this.position.x, this.position.y, 150, 0, 2 * Math.PI);
                 //     ctx.fill();
                 // }
-                if (!((m.cycle + this.phase) % 30)) { //twice a second
-                    if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250) { //give energy
-                        Matter.Body.setAngularVelocity(this, this.spin)
-                        if (this.isUpgraded) {
-                            m.energy += 0.12
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: 8,
-                                color: m.fieldMeterColor,
-                                time: simulation.drawTime
-                            });
-                        } else {
-                            m.energy += 0.03
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: 5,
-                                color: m.fieldMeterColor,
-                                time: simulation.drawTime
-                            });
-                        }
-                    }
-                }
+
                 //check for damage
-                if (!m.isCloak && !m.isBodiesAsleep) { //if time dilation isn't active
-                    const size = 33
-                    q = Matter.Query.region(mob, {
-                        min: {
-                            x: this.position.x - size,
-                            y: this.position.y - size
-                        },
-                        max: {
-                            x: this.position.x + size,
-                            y: this.position.y + size
+                if (!m.isBodiesAsleep) {
+                    if (!((m.cycle + this.phase) % 30)) { //twice a second
+                        if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250) { //give energy
+                            Matter.Body.setAngularVelocity(this, this.spin)
+                            if (this.isUpgraded) {
+                                m.energy += 0.12
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    radius: 8,
+                                    color: m.fieldMeterColor,
+                                    time: simulation.drawTime
+                                });
+                            } else {
+                                m.energy += 0.03
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    radius: 5,
+                                    color: m.fieldMeterColor,
+                                    time: simulation.drawTime
+                                });
+                            }
                         }
-                    })
-                    for (let i = 0; i < q.length; i++) {
-                        Matter.Body.setAngularVelocity(this, this.spin)
-                        // mobs.statusStun(q[i], 180)
-                        // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
-                        const dmg = 0.5 * b.dmgScale
-                        q[i].damage(dmg);
-                        q[i].foundPlayer();
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: this.position.x,
-                            y: this.position.y,
-                            radius: Math.log(2 * dmg + 1.1) * 40,
-                            color: 'rgba(0,0,0,0.4)',
-                            time: simulation.drawTime
-                        });
                     }
+
+                    if (!m.isCloak) { //if time dilation isn't active
+                        const size = 33
+                        q = Matter.Query.region(mob, {
+                            min: {
+                                x: this.position.x - size,
+                                y: this.position.y - size
+                            },
+                            max: {
+                                x: this.position.x + size,
+                                y: this.position.y + size
+                            }
+                        })
+                        for (let i = 0; i < q.length; i++) {
+                            Matter.Body.setAngularVelocity(this, this.spin)
+                            // mobs.statusStun(q[i], 180)
+                            // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
+                            const dmg = 0.5 * b.dmgScale
+                            q[i].damage(dmg);
+                            q[i].foundPlayer();
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                color: 'rgba(0,0,0,0.4)',
+                                time: simulation.drawTime
+                            });
+                        }
+                    }
+                    let history = m.history[(m.cycle - this.followDelay) % 600]
+                    Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
                 }
-                let history = m.history[(m.cycle - this.followDelay) % 600]
-                Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }
         })
         World.add(engine.world, bullet[me]); //add bullet to world
@@ -2605,7 +2658,7 @@ const b = {
                 }
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && m.energy > this.drainThreshold) {
-                    m.energy -= tech.laserFieldDrain * tech.isLaserDiode
+                    m.energy -= tech.laserFieldDrain * tech.isLaserDiode * 0.7
                     b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.25), tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
                     // laser(where = {
                     //     x: m.pos.x + 20 * Math.cos(m.angle),
