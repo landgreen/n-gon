@@ -444,6 +444,24 @@ const simulation = {
     restoreCamera() {
         ctx.restore();
     },
+    trails() {
+        const swapPeriod = 150
+        const len = 30
+        for (let i = 0; i < len; i++) {
+            setTimeout(function() {
+                simulation.wipe = function() { //set wipe to have trails
+                    ctx.fillStyle = `rgba(221,221,221,${i*i*0.0005 +0.0025})`;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+            }, (i) * swapPeriod);
+        }
+
+        setTimeout(function() {
+            simulation.wipe = function() { //set wipe to normal
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }, len * swapPeriod);
+    },
     wipe() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     },

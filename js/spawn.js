@@ -2726,7 +2726,7 @@ const spawn = {
         me.seeAtDistance2 = 2000000;
         me.accelMag = Math.floor(10 * (Math.random() + 4.5)) * 0.00001 * simulation.accelScale;
         me.frictionAir = 0.005;
-        me.accelMag = 0.00017 * simulation.accelScale;
+        me.accelMag = 0.00016 * simulation.accelScale;
         me.memory = Infinity;
         me.collisionFilter.mask = cat.player | cat.bullet
         spawn.shield(me, x, y, 1);

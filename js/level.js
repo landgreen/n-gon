@@ -113,6 +113,7 @@ const level = {
         if (tech.isSwitchReality) {
             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
+            simulation.trails()
             for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "tech", false);
         }
     },
@@ -1098,7 +1099,8 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        spawn.orbitalBoss(1600, -500)
+        // simulation.difficulty = 66
+        // spawn.orbitalBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
@@ -1436,62 +1438,7 @@ const level = {
                     spawn.wireHead();
                 }
             } else {
-                // const say = []
-                // if (localSettings.runCount > 200) { //experienced
-                //     say.push(
-                //         "I've been here before...",
-                //         "How many times have I done this?",
-                //     )
-                // } else if (localSettings.runCount < 20) { //new 
-                //     say.push(
-                //         "Am I still alive?",
-                //         "And I'm back here again...",
-                //         "Is this another simulation?",
-                //         "I'm alive...",
-                //         "Last time was a simulation.  Is this one a simulation too?",
-                //     )
-                // }
-                // if (simulation.difficultyMode < 4 && localSettings.levelsClearedLastGame > 10) { //too easy
-                //     say.push(
-                //         "That felt too easy.<br>Maybe I should increase the difficulty of the simulation.",
-                //         "That was fun, but maybe I should increase the difficulty of the simulation.",
-                //         "I should increase the difficulty of the simulation, that didn't feel realistic.",
-                //     )
-                // } else if (simulation.difficultyMode > 3 && localSettings.levelsClearedLastGame > 10) { //great run on a hard or why
-                //     say.push(
-                //         "What do I do after I escape?",
-                //         "I'm almost ready to stop these simulations and actually escape.",
-                //         "I think I'm getting closer to something, but what?",
-                //         "I'm getting stronger.",
-                //         "What happens after I escape?",
-                //         "I found a good combination of technology last time."
-                //     )
-                // } else { //resolve
-                //     say.push(
-                //         "I'll try some different techs this time.",
-                //         "I've got to escape.",
-                //         "I'll find a way out.",
-                //         "I keep forgetting that these are just simulated escapes."
-                //     )
-                // }
-                // simulation.makeTextLog(say[Math.floor(say.length * Math.random())], 1000)
-
-                const swapPeriod = 150
-                const len = 30
-                for (let i = 0; i < len; i++) {
-                    setTimeout(function() {
-                        simulation.wipe = function() { //set wipe to have trails
-                            ctx.fillStyle = `rgba(221,221,221,${i*i*0.0005 +0.0025})`;
-                            ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        }
-                    }, (i) * swapPeriod);
-                }
-
-                setTimeout(function() {
-                    simulation.wipe = function() { //set wipe to normal
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                }, len * swapPeriod);
+                simulation.trails()
             }
         }
         powerUps.spawnStartingPowerUps(2300, -150);

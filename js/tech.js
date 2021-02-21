@@ -768,7 +768,7 @@
             },
             {
                 name: "nail-bot upgrade",
-                description: "<strong>convert</strong> all your permanent bots to <strong>nail-bots</strong><br><strong>500%</strong> increased nail-bot <strong>fire rate</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>nail-bots</strong><br><strong>500%</strong> increased nail-bot <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -809,7 +809,7 @@
             },
             {
                 name: "foam-bot upgrade",
-                description: "<strong>convert</strong> all your permanent bots to <strong>foam-bots</strong><br><strong>250%</strong> increased foam-bot <strong>size</strong> and <strong>fire rate</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>foam-bots</strong><br><strong>250%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -850,7 +850,7 @@
             },
             {
                 name: "boom-bot upgrade",
-                description: "<strong>convert</strong> all your permanent bots to <strong>boom-bots</strong><br><strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
+                description: "<strong>convert</strong> all your bots to <strong>boom-bots</strong><br><strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -891,7 +891,7 @@
             },
             {
                 name: "laser-bot upgrade",
-                description: "<strong>convert</strong> all your permanent bots to <strong>laser-bots</strong><br><strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>laser-bots</strong><br><strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -932,7 +932,7 @@
             },
             {
                 name: "orbital-bot upgrade",
-                description: "<strong>convert</strong> all your permanent bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>30%</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>30%</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -983,7 +983,7 @@
             },
             {
                 name: "dynamo-bot upgrade",
-                description: "<strong>convert</strong> your permanent bots to <strong>dynamo-bots</strong><br>dynamo-bots <strong>regen</strong> <strong>24</strong> <strong class='color-f'>energy</strong> per second",
+                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>dynamo-bots <strong>regen</strong> <strong>24</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1060,6 +1060,7 @@
                 count: 0,
                 isNonRefundable: true,
                 isExperimentHide: true,
+                isBadRandomOption: true,
                 allowed() {
                     return b.totalBots() > 3
                 },
@@ -1809,16 +1810,16 @@
             },
             {
                 name: "quantum immortality",
-                description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>spawn <strong>4</strong> <strong class='color-r'>research</strong>",
+                description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>16%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return powerUps.research.count > 1 || build.isExperimentSelection
+                    return !tech.isSwitchReality && !tech.isResearchReality
                 },
-                requires: "at least 2 research",
+                requires: "not many-worlds, perturbation theory",
                 effect() {
                     tech.isImmortal = true;
-                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
+                    // for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
                 },
                 remove() {
                     tech.isImmortal = false;
@@ -1826,18 +1827,169 @@
             },
             {
                 name: "many-worlds",
-                description: "on each new <strong>level</strong> enter an <strong>alternate reality</strong><br> find <strong>2</strong> <strong class='color-m'>tech</strong> power ups in that reality",
+                description: "each new <strong>level</strong> is an <strong>alternate reality</strong><br> find <strong>2</strong> <strong class='color-m'>tech</strong> power ups in that reality",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.isImmortal
+                    return !tech.isImmortal && !tech.isResearchReality
                 },
-                requires: "quantum immortality",
+                requires: "not quantum immortality, perturbation theory",
                 effect() {
                     tech.isSwitchReality = true;
                 },
                 remove() {
                     tech.isSwitchReality = false;
+                }
+            },
+            {
+                name: "decoherence",
+                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>9</strong> <strong class='color-r'>research</strong> immediately",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return !tech.isImmortal && !tech.isSwitchReality
+                },
+                requires: "not quantum immortality, many-worlds",
+                effect() {
+                    tech.isResearchReality = true;
+                    for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
+                },
+                remove() {
+                    tech.isResearchReality = false;
+                }
+            },
+            {
+                name: "renormalization",
+                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return (powerUps.research.count > 1 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                },
+                requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 research",
+                effect() {
+                    tech.renormalization = true;
+                },
+                remove() {
+                    tech.renormalization = false;
+                }
+            },
+            {
+                name: "erase",
+                description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>5</strong> <strong class='color-r'>research</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isDeterminism
+                },
+                requires: "not determinism, at least 3 research",
+                effect() {
+                    tech.isBanish = true
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x, m.pos.y, "research", false);
+                },
+                remove() {
+                    tech.isBanish = false
+                    powerUps.tech.banishLog = [] //reset banish log
+                }
+            },
+            {
+                name: "Ψ(t) collapse",
+                description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return powerUps.research.count === 0 && !tech.manyWorlds
+                },
+                requires: "no research",
+                effect() {
+                    tech.isRerollHaste = true;
+                    tech.researchHaste = 0.33;
+                    b.setFireCD();
+                },
+                remove() {
+                    tech.isRerollHaste = false;
+                    tech.researchHaste = 1;
+                    b.setFireCD();
+                }
+            },
+            {
+                name: "ansatz",
+                description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
+                },
+                requires: "not superdeterminism or Ψ(t) collapse<br>no research",
+                effect: () => {
+                    tech.manyWorlds = true;
+                },
+                remove() {
+                    tech.manyWorlds = false;
+                }
+            },
+            {
+                name: "Bayesian statistics",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>3.9%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return powerUps.research.count > 4 || build.isExperimentSelection
+                },
+                requires: "at least 5 research",
+                effect() {
+                    tech.isRerollDamage = true;
+                },
+                remove() {
+                    tech.isRerollDamage = false;
+                }
+            },
+            {
+                name: "Born rule",
+                description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
+                maxCount: 1,
+                count: 0,
+                // isNonRefundable: true,
+                isBadRandomOption: true,
+                isExperimentHide: true,
+                allowed() {
+                    return (tech.totalCount > 6)
+                },
+                requires: "more than 6 tech",
+                effect: () => {
+                    //remove active bullets  //to get rid of bots
+                    for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+                    bullet = [];
+                    let count = 0 //count tech
+                    for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
+                        if (!tech.tech[i].isNonRefundable) count += tech.tech[i].count
+                    }
+                    if (tech.isDeterminism) count -= 3 //remove the bonus tech 
+                    if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
+
+                    tech.setupAllTech(); // remove all tech
+                    tech.addLoreTechToPool();
+                    for (let i = 0; i < count; i++) { // spawn new tech power ups
+                        powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                    }
+                    //have state is checked in m.death()
+                },
+                remove() {}
+            },
+            {
+                name: "perpetual research",
+                description: "find <strong>1</strong> <strong class='color-r'>research</strong> at the start of each <strong>level</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return !tech.isSuperDeterminism && !tech.isPerpetualHeal && !tech.isPerpetualAmmo && !tech.isPerpetualStun
+                },
+                requires: "only 1 perpetual effect, not superdeterminism",
+                effect() {
+                    tech.isPerpetualReroll = true
+                },
+                remove() {
+                    tech.isPerpetualReroll = false
                 }
             },
             {
@@ -2133,6 +2285,7 @@
                 maxCount: 1,
                 count: 0,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isExtraChoice && !tech.isCancelDuplication && !tech.isCancelRerolls
                 },
@@ -2152,6 +2305,7 @@
                 maxCount: 1,
                 count: 0,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return tech.isDeterminism && !tech.manyWorlds && !tech.isGunSwitchField
                 },
@@ -2164,139 +2318,6 @@
                 },
                 remove() {
                     tech.isSuperDeterminism = false;
-                }
-            },
-            {
-                name: "Ψ(t) collapse",
-                description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return powerUps.research.count === 0 && !tech.manyWorlds
-                },
-                requires: "no research",
-                effect() {
-                    tech.isRerollHaste = true;
-                    tech.researchHaste = 0.33;
-                    b.setFireCD();
-                },
-                remove() {
-                    tech.isRerollHaste = false;
-                    tech.researchHaste = 1;
-                    b.setFireCD();
-                }
-            },
-            {
-                name: "ansatz",
-                description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
-                },
-                requires: "not superdeterminism or Ψ(t) collapse<br>no research",
-                effect: () => {
-                    tech.manyWorlds = true;
-                },
-                remove() {
-                    tech.manyWorlds = false;
-                }
-            },
-            {
-                name: "renormalization",
-                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return (powerUps.research.count > 1 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
-                },
-                requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 research",
-                effect() {
-                    tech.renormalization = true;
-                },
-                remove() {
-                    tech.renormalization = false;
-                }
-            },
-            {
-                name: "erase",
-                description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>4</strong> <strong class='color-r'>research</strong>",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isDeterminism
-                },
-                requires: "not determinism, at least 3 research",
-                effect() {
-                    tech.isBanish = true
-                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "research", false);
-                },
-                remove() {
-                    tech.isBanish = false
-                    powerUps.tech.banishLog = [] //reset banish log
-                }
-            },
-            {
-                name: "Bayesian statistics",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>3.9%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return powerUps.research.count > 4 || build.isExperimentSelection
-                },
-                requires: "at least 5 research",
-                effect() {
-                    tech.isRerollDamage = true;
-                },
-                remove() {
-                    tech.isRerollDamage = false;
-                }
-            },
-            {
-                name: "Born rule",
-                description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
-                maxCount: 1,
-                count: 0,
-                // isNonRefundable: true,
-                isExperimentHide: true,
-                allowed() {
-                    return (tech.totalCount > 6)
-                },
-                requires: "more than 6 tech",
-                effect: () => {
-                    //remove active bullets  //to get rid of bots
-                    for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-                    bullet = [];
-                    let count = 0 //count tech
-                    for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
-                        if (!tech.tech[i].isNonRefundable) count += tech.tech[i].count
-                    }
-                    if (tech.isDeterminism) count -= 3 //remove the bonus tech 
-                    if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
-
-                    tech.setupAllTech(); // remove all tech
-                    tech.addLoreTechToPool();
-                    for (let i = 0; i < count; i++) { // spawn new tech power ups
-                        powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                    }
-                    //have state is checked in m.death()
-                },
-                remove() {}
-            },
-            {
-                name: "perpetual research",
-                description: "find <strong>1</strong> <strong class='color-r'>research</strong> at the start of each <strong>level</strong>",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return !tech.isSuperDeterminism && !tech.isPerpetualHeal && !tech.isPerpetualAmmo && !tech.isPerpetualStun
-                },
-                requires: "only 1 perpetual effect, not superdeterminism",
-                effect() {
-                    tech.isPerpetualReroll = true
-                },
-                remove() {
-                    tech.isPerpetualReroll = false
                 }
             },
             //************************************************** 
@@ -3718,7 +3739,7 @@
             },
             {
                 name: "bot prototypes",
-                description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all <strong class='color-bot'>bots</strong> of a random type and <strong>build</strong> <strong>2</strong> of that <strong class='color-bot'>bot</strong>",
+                description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all <strong class='color-bot'>bots</strong> to a random type and <strong>build</strong> <strong>2</strong> of that <strong class='color-bot'>bot</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4052,7 +4073,7 @@
                 }
             },
             {
-                name: "phase decoherence",
+                name: "boson composite",
                 description: "<strong>intangible</strong> to blocks and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -4185,6 +4206,7 @@
                 count: 0,
                 isNonRefundable: true,
                 isExperimentHide: true,
+                isBadRandomOption: true,
                 allowed() {
                     return true
                 },
@@ -4202,6 +4224,7 @@
                 count: 0,
                 isNonRefundable: true,
                 isExperimentHide: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isEnergyNoAmmo
                 },
@@ -4219,6 +4242,7 @@
                 count: 0,
                 isNonRefundable: true,
                 isExperimentHide: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
@@ -4236,6 +4260,7 @@
                 count: 0,
                 isNonRefundable: true,
                 isExperimentHide: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
@@ -4253,6 +4278,7 @@
                 count: 0,
                 isNonRefundable: true,
                 isExperimentHide: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
@@ -4265,16 +4291,38 @@
             },
             {
                 name: "ship",
-                description: "<strong>experimental mode:</strong> fly around with no legs",
+                description: "<strong>experimental mode:</strong> fly around with no legs<br>aim by rotating with keyboard",
                 maxCount: 1,
                 count: 0,
                 isNonRefundable: true,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
                 allowed() {
-                    return !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && build.isExperimentSelection
+                    return build.isExperimentSelection && !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass field"
                 },
                 requires: "",
                 effect() {
                     m.shipMode()
+                },
+                remove() {}
+            },
+            {
+                name: "quantum leap",
+                description: "<strong>experimental mode:</strong> every 20 seconds<br>become an alternate version of yourself",
+                maxCount: 1,
+                count: 0,
+                isNonRefundable: true,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        m.switchWorlds()
+                        simulation.trails()
+                    }, 20000); //every 20 sections
                 },
                 remove() {}
             },
@@ -4330,7 +4378,7 @@
             //     remove() {}
             // },
             {
-                name: "sliders",
+                name: "quantum leap",
                 description: "become an alternate version of yourself<br>every <strong>20</strong> seconds",
                 maxCount: 1,
                 count: 0,
@@ -4345,6 +4393,7 @@
                 effect() {
                     setInterval(() => {
                         m.switchWorlds()
+                        simulation.trails()
                     }, 20000); //every 30 sections
                 },
                 remove() {}
@@ -5306,5 +5355,6 @@
         foamFutureFire: null,
         isDamageAfterKill: null,
         isHarmReduceAfterKill: null,
-        isSwitchReality: null
+        isSwitchReality: null,
+        isResearchReality: null
     }

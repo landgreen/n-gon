@@ -1,13 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-many worlds renamed to ansatz
-new tech many-worlds: at the start of each new level switch realities
-
-removed tech: electroactive polymers - convert bots to the same type on weapon swap
-all bot upgrades convert current bots to the upgraded type
-  only one bot upgrade allowed
+tech: decoherence - switch realities after you research, spawn 9 research power ups
 
 ******************************************************** BUGS ********************************************************
+
+ship mode can old exit a level in the top part of the exit
 
 use the floor of portal sensor on the player? to unstuck player
 
@@ -339,10 +336,6 @@ redblobgames.com/articles/visibility
   https://github.com/Silverwolf90/2d-visibility/tree/master/src
   could apply to explosions, neutron bomb, player LOS
 
-possible names for tech
-  holonomy -  parallel transport of a vector leads to movement (applies to curved space)
-  Hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
-
 have a mob apply a positive status effect on other mobs,
   heal?
   make it yellow
@@ -369,10 +362,11 @@ n-gon outreach ideas
 
 ******************************************************** LORE ********************************************************
 
-cool names for tech
-  strange loop,  perturbation theory
-
-voice singing with pitch?
+possible names for tech
+  strange loop
+  perturbation theory
+  holonomy -  parallel transport of a vector leads to movement (applies to curved space)
+  hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
 
 
 chapter 1: bot can hear audio and learns testing mode

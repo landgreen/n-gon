@@ -2457,19 +2457,16 @@ const b = {
                     this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration)
                 } else { //close to player
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
-
                     if (this.lastLookCycle < simulation.cycle && !m.isCloak) {
-                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 13 : 80)
-                        let target
+                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 15 : 80)
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
                             if (dist < 3000000 && //1400*1400
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
                                 !mob[i].isShielded) {
-                                target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60))
-                                const SPEED = 50
-                                const unit = Vector.normalise(Vector.sub(target, this.position))
+                                const SPEED = 45
+                                const unit = Vector.normalise(Vector.sub(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)), this.position))
                                 b.nail(this.position, Vector.mult(unit, SPEED), 0.4)
                                 this.force = Vector.mult(unit, -0.01 * this.mass)
                                 break;
@@ -2577,7 +2574,7 @@ const b = {
                                 const radius = 6 + 7 * Math.random()
                                 const SPEED = 29 - radius * 0.5; //(m.crouch ? 32 : 20) - radius * 0.7;
                                 const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-                                b.foam(this.position, velocity, radius + 8 * this.isUpgraded)
+                                b.foam(this.position, velocity, radius + 7 * this.isUpgraded)
                                 break;
                             }
                         }
@@ -2690,7 +2687,7 @@ const b = {
             lookFrequency: 43 + Math.floor(7 * Math.random()) - 10 * tech.isBoomBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             attackAcceleration: 0.012 + 0.005 * tech.isBoomBotUpgrade,
-            range: 500 * (1 + 0.1 * Math.random()) + 400 * tech.isBoomBotUpgrade,
+            range: 500 * (1 + 0.1 * Math.random()) + 300 * tech.isBoomBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {

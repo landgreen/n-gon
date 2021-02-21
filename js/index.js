@@ -300,6 +300,7 @@ const build = {
             if (!tech.tech[i].isExperimentHide) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
+
                     if (tech.tech[i].isFieldTech) {
                         techID.innerHTML = ` <div class="grid-title">
                                                 <span style="position:relative;">
@@ -321,6 +322,8 @@ const build = {
                     } else if (tech.tech[i].isJunk) {
                         // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
+                    } else if (tech.tech[i].isExperimentalMode) {
+                        techID.innerHTML = `${tech.tech[i].description}</div>`
                     } else {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     }
@@ -385,12 +388,14 @@ const build = {
 
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (!tech.tech[i].isExperimentHide) {
-                if (!tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
-                    text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
-                    // } else if (tech.tech[i].count > 1) {
-                    //     text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} (${tech.tech[i].count}x)</div> ${tech.tech[i].description}</div>`
+                if (tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+                    if (tech.tech[i].isExperimentalMode) {
+                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')">${tech.tech[i].description}</div>`
+                    } else {
+                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                    }
                 } else {
-                    text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                    text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                 }
             }
         }

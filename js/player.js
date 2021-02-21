@@ -310,7 +310,11 @@ const m = {
         //remove all tech and count current tech total
         let totalTech = 0;
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isNonRefundable && tech.tech[i].name !== "quantum immortality" && tech.tech[i].name !== "many-worlds") {
+            if (
+                !tech.tech[i].isNonRefundable &&
+                tech.tech[i].name !== "many-worlds" &&
+                tech.tech[i].name !== "perturbation theory"
+            ) {
                 totalTech += tech.tech[i].count
                 tech.tech[i].remove();
                 tech.tech[i].isLost = false
@@ -323,6 +327,11 @@ const m = {
         tech.addLoreTechToPool();
         tech.armorFromPowerUps = 0;
         tech.totalCount = 0;
+        const randomBotCount = b.totalBots()
+        b.zeroBotCount()
+        //remove all bullets, respawn bots
+        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        bullet = [];
 
         //randomize health
         m.health = 0.7 + Math.random()
@@ -332,16 +341,11 @@ const m = {
         //randomize field
         m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
 
-
-        //track how ammo/ ammoPack count
+        //track ammo/ ammoPack count
         let ammoCount = 0
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].ammo !== Infinity) ammoCount += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
         }
-
-        //remove all bullets
-        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-        bullet = [];
         //removes guns and ammo  
         b.inventory = [];
         b.activeGun = null;
@@ -353,7 +357,7 @@ const m = {
         //give random guns
         for (let i = 0; i < totalGuns; i++) b.giveGuns()
 
-        //randomize ammo based on ammo/ammopack count
+        //randomize ammo based on ammo/ammoPack count
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.05 + 0.5 * (Math.random() - 0.5))))
         }
@@ -364,18 +368,19 @@ const m = {
             let options = [];
             for (let i = 0, len = tech.tech.length; i < len; i++) {
                 if (tech.tech[i].count < tech.tech[i].maxCount &&
-                    !tech.tech[i].isNonRefundable &&
-                    tech.tech[i].name !== "quantum immortality" &&
-                    tech.tech[i].name !== "many-worlds" &&
-                    tech.tech[i].name !== "Born rule" &&
-                    tech.tech[i].name !== "determinism" &&
-                    tech.tech[i].allowed()
-                ) options.push(i);
+                    !tech.tech[i].isBadRandomOption &&
+                    tech.tech[i].allowed() &&
+                    (!tech.tech[i].isJunk || Math.random() < 0.25)) options.push(i);
+                // !tech.tech[i].isNonRefundable &&
+                // tech.tech[i].name !== "quantum immortality" &&
+                // tech.tech[i].name !== "many-worlds" &&
+                // tech.tech[i].name !== "perturbation theory" &&
             }
             //add a new tech from options pool
             if (options.length > 0) tech.giveTech(options[Math.floor(Math.random() * options.length)])
         }
-
+        b.respawnBots();
+        for (let i = 0; i < randomBotCount; i++) b.randomBot()
         simulation.makeGunHUD(); //update gun HUD
         simulation.updateTechHUD();
         simulation.isTextLogOpen = true;
@@ -384,9 +389,9 @@ const m = {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
 
             //remove immortality tech
-            for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].name === "quantum immortality") tech.removeTech(i)
-            }
+            // for (let i = 0; i < tech.tech.length; i++) {
+            //     if (tech.tech[i].name === "quantum immortality") tech.removeTech(i)
+            // }
 
             simulation.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
@@ -483,7 +488,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
-
+        if (tech.isImmortal) dmg *= 0.84
         if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.33 : 1.33
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
