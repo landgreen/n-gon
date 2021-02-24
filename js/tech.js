@@ -109,6 +109,7 @@
         },
         damageFromTech() {
             let dmg = m.fieldDamage
+            if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.37
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.5
             if (tech.isTechDamage) dmg *= 2
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
@@ -891,7 +892,7 @@
             },
             {
                 name: "laser-bot upgrade",
-                description: "<strong>convert</strong> all your bots to <strong>laser-bots</strong><br><strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>laser-bots</strong><br><strong>75%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1334,16 +1335,16 @@
             },
             {
                 name: "piezoelectricity",
-                description: "<strong>colliding</strong> with mobs gives you <strong>400</strong> <strong class='color-f'>energy</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>",
+                description: "<strong>colliding</strong> with mobs gives you <strong>2048</strong> <strong class='color-f'>energy</strong>", //<br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return !tech.isEnergyHealth
+                    return !tech.isEnergyHealth && m.harmReduction() < 1
                 },
-                requires: "not mass-energy equivalence",
+                requires: "not mass-energy equivalence, some harm reduction",
                 effect() {
                     tech.isPiezo = true;
-                    m.energy += 4;
+                    m.energy += 20.48;
                 },
                 remove() {
                     tech.isPiezo = false;
@@ -1603,7 +1604,7 @@
             },
             {
                 name: "torpor",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong> else increase it by <strong>50%</strong>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>75%</strong> else increase it by <strong>25%</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1809,6 +1810,22 @@
                 }
             },
             {
+                name: "strong anthropic principle",
+                description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>increase <strong class='color-d'>damage</strong> by <strong>137.03599%</strong> on that level",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isDeathAvoid
+                },
+                requires: "anthropic principle",
+                effect() {
+                    tech.isAnthropicDamage = true
+                },
+                remove() {
+                    tech.isAnthropicDamage = false
+                }
+            },
+            {
                 name: "quantum immortality",
                 description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>16%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
                 maxCount: 1,
@@ -1843,7 +1860,7 @@
             },
             {
                 name: "decoherence",
-                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>9</strong> <strong class='color-r'>research</strong> immediately",
+                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>9</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1885,7 +1902,7 @@
                 requires: "not determinism, at least 3 research",
                 effect() {
                     tech.isBanish = true
-                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x, m.pos.y, "research", false);
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research", false);
                 },
                 remove() {
                     tech.isBanish = false
@@ -1970,7 +1987,7 @@
                     tech.setupAllTech(); // remove all tech
                     tech.addLoreTechToPool();
                     for (let i = 0; i < count; i++) { // spawn new tech power ups
-                        powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                        powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                     }
                     //have state is checked in m.death()
                 },
@@ -2293,7 +2310,7 @@
                 effect: () => {
                     tech.isDeterminism = true;
                     //if you change the six also change it in Born rule
-                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
                     tech.isDeterminism = false;
@@ -2312,9 +2329,8 @@
                 requires: "determinism, not unified field theory",
                 effect: () => {
                     tech.isSuperDeterminism = true;
-                    for (let i = 0; i < 7; i++) { //if you change the six also change it in Born rule
-                        powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                    }
+                    //if you change the six also change it in Born rule
+                    for (let i = 0; i < 7; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
                     tech.isSuperDeterminism = false;
@@ -2331,9 +2347,9 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return (b.totalBots() > 5 || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
+                    return (b.totalBots() > 3 || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
                 },
-                requires: "bots > 5, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
+                requires: "bots > 3, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
                 effect() {
                     tech.isRewindGun = true
                     b.guns.push(b.gunRewind)
@@ -4212,7 +4228,7 @@
                 },
                 requires: "",
                 effect() {
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "heal");
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     this.count--
                 },
                 remove() {}
@@ -4230,7 +4246,7 @@
                 },
                 requires: "not exciton lattice",
                 effect() {
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
                     this.count--
                 },
                 remove() {}
@@ -4248,7 +4264,7 @@
                 },
                 requires: "not superdeterminism",
                 effect() {
-                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
+                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
                     this.count--
                 },
                 remove() {}
@@ -4510,27 +4526,27 @@
                 },
                 remove() {}
             },
-            {
-                name: "lubrication",
-                description: "reduce block density and friction for this level",
-                maxCount: 9,
-                count: 0,
-                numberInPool: 0,
-                isNonRefundable: true,
-                isExperimentHide: true,
-                isJunk: true,
-                allowed() {
-                    return true
-                },
-                requires: "",
-                effect() {
-                    for (let i = 0; i < body.length; i++) {
-                        Matter.Body.setDensity(body[i], 0.0001) // 0.001 is normal
-                        body[i].friction = 0.01
-                    }
-                },
-                remove() {}
-            },
+            // {
+            //     name: "lubrication",
+            //     description: "reduce block density and friction for this level",
+            //     maxCount: 9,
+            //     count: 0,
+            //     numberInPool: 0,
+            //     isNonRefundable: true,
+            //     isExperimentHide: true,
+            //     isJunk: true,
+            //     allowed() {
+            //         return true
+            //     },
+            //     requires: "",
+            //     effect() {
+            //         for (let i = 0; i < body.length; i++) {
+            //             Matter.Body.setDensity(body[i], 0.0001) // 0.001 is normal
+            //             body[i].friction = 0.01
+            //         }
+            //     },
+            //     remove() {}
+            // },
             {
                 name: "pitch",
                 description: "oscillate the pitch of your world",
@@ -5356,5 +5372,6 @@
         isDamageAfterKill: null,
         isHarmReduceAfterKill: null,
         isSwitchReality: null,
-        isResearchReality: null
+        isResearchReality: null,
+        isAnthropicDamage: null
     }

@@ -82,8 +82,8 @@ const spawn = {
             }
         }
     },
-
-    randomLevelBoss(x, y, options = ["orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
+    //, "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"
+    randomLevelBoss(x, y, options = ["orbitalBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -2688,11 +2688,11 @@ const spawn = {
         mobs.spawn(who.position.x, who.position.y, 8, 12, "rgb(255,0,150)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
-        // Matter.Body.setDensity(me, 0.00004); //normal is 0.001
+        Matter.Body.setDensity(me, 0.1); //normal is 0.001
         me.leaveBody = false;
         me.dropPowerUp = false;
         me.showHealthBar = false;
-        me.isShielded = true
+        // me.isShielded = true
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.bullet; //cat.player | cat.map | cat.body
         me.do = function() {
@@ -2709,14 +2709,15 @@ const spawn = {
             }
             Matter.Body.setPosition(this, Vector.add(who.position, Vector.mult(orbit, radius))) //bullets move with player
             //damage player
-            if (Matter.Query.collides(this, [player]).length > 0 && !m.isCloak) {
+            if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible)) {
                 m.damage(0.035 * simulation.dmgScale);
                 this.death();
             }
         };
     },
     orbitalBoss(x, y, radius = 88) {
-        const nodes = Math.floor(3 + 1 * Math.sqrt(simulation.difficulty))
+        const nodeBalance = Math.random()
+        const nodes = Math.min(15, Math.floor(1 + 5 * nodeBalance + 0.75 * Math.sqrt(simulation.difficulty)))
         mobs.spawn(x, y, nodes, radius, "rgb(255,0,150)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -2724,23 +2725,24 @@ const spawn = {
 
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 2000000;
-        me.accelMag = Math.floor(10 * (Math.random() + 4.5)) * 0.00001 * simulation.accelScale;
-        me.frictionAir = 0.005;
-        me.accelMag = 0.00016 * simulation.accelScale;
         me.memory = Infinity;
+        me.frictionAir = 0.01;
+        me.accelMag = 0.00004 * simulation.accelScale;
         me.collisionFilter.mask = cat.player | cat.bullet
         spawn.shield(me, x, y, 1);
 
-        let speed = (0.006 + 0.002 * Math.sqrt(simulation.difficulty)) * ((Math.random() < 0.5) ? 1 : -1)
-        let range = radius + 125 + 250 * Math.random() + nodes * 5
+        const rangeInnerVsOuter = Math.random()
+        let speed = (0.003 + 0.0015 * Math.sqrt(simulation.difficulty)) * ((Math.random() < 0.5) ? 1 : -1)
+        let range = radius + 150 + 200 * rangeInnerVsOuter + nodes * 5
         for (let i = 0; i < nodes; i++) spawn.orbital(me, range, i / nodes * 2 * Math.PI, speed)
         const orbitalIndexes = [] //find indexes for all the current nodes
         for (let i = 0; i < nodes; i++) orbitalIndexes.push(mob.length - 1 - i)
         // add orbitals for each orbital
-        range = 70 + Math.max(0, 140 * Math.random() - nodes * 3)
-        speed = speed * (1.5 + 2 * Math.random())
+        range = Math.max(60, 150 - nodes * 3 - rangeInnerVsOuter * 80)
+        speed = speed * (1.25 + 2 * Math.random())
+        const subNodes = Math.max(2, Math.floor(6 - 5 * nodeBalance + 0.5 * Math.sqrt(simulation.difficulty)))
         for (let j = 0; j < nodes; j++) {
-            for (let i = 0, len = nodes - 1; i < len; i++) spawn.orbital(mob[orbitalIndexes[j]], range, i / len * 2 * Math.PI, speed)
+            for (let i = 0, len = subNodes; i < len; i++) spawn.orbital(mob[orbitalIndexes[j]], range, i / len * 2 * Math.PI, speed)
         }
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)

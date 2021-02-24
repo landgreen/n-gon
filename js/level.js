@@ -12,10 +12,10 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(20)
+            // level.difficultyIncrease(40)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
-            // m.setField("plasma torch")
+            // m.setField("nano-scale manufacturing")
             // b.giveGuns("nail gun")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
@@ -770,7 +770,7 @@ const level = {
         mapB.portalPair = mapA
         return [portalA, portalB, mapA, mapB]
     },
-    hazard(x, y, width, height, damage = 0.0008, color = "hsla(160, 100%, 35%,0.75)", isOptical = false) {
+    hazard(x, y, width, height, damage = 0.003, color = "hsla(160, 100%, 35%,0.75)", isOptical = false) {
         return {
             min: {
                 x: x,
@@ -786,21 +786,24 @@ const level = {
             isOn: true,
             query() {
                 if (this.isOn && this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak && isOptical)) {
-                    if (damage < 0.02) {
-                        m.damage(damage)
-                    } else if (m.immuneCycle < m.cycle) {
-                        m.immuneCycle = m.cycle + tech.collisionImmuneCycles;
-                        m.damage(damage)
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: player.position.x,
-                            y: player.position.y,
-                            radius: damage * 1500,
-                            color: simulation.mobDmgColor,
-                            time: 20
-                        });
+                    const drain = 0.003 + m.fieldRegen
+                    if (m.energy > drain) {
+                        m.energy -= drain
+                    } else {
+                        if (damage < 0.02) {
+                            m.damage(damage)
+                        } else if (m.immuneCycle < m.cycle) {
+                            m.immuneCycle = m.cycle + tech.collisionImmuneCycles;
+                            m.damage(damage)
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: player.position.x,
+                                y: player.position.y,
+                                radius: damage * 1500,
+                                color: simulation.mobDmgColor,
+                                time: 20
+                            });
+                        }
                     }
-                    const drain = 0.005
-                    if (m.energy > drain) m.energy -= drain
 
                     //float
                     if (!isOptical) {
@@ -910,7 +913,7 @@ const level = {
         //start a conversation based on the number of conversations seen
         if (!simulation.isCheating && localSettings.loreCount < lore.conversation.length) lore.conversation[localSettings.loreCount]()
 
-        const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.01, "hsla(160, 100%, 35%,0.75)")
+        const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
         const circle = {
             x: 0,
             y: -500,
@@ -957,7 +960,7 @@ const level = {
             ctx.beginPath();
             const step = Math.PI / 20
             const horizontalStep = 85
-            if (simulation.isCheating) phase += 0.003 //(m.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
+            if (simulation.isCheating) phase += 0.01 //(m.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
             // const sway = 5 * Math.cos(simulation.cycle * 0.007)
             sway.x = sway.x * 0.995 + 0.005 * (m.pos.x - circle.x) * 0.05 //+ 0.04 * Math.cos(simulation.cycle * 0.01)
             sway.y = 2.5 * Math.sin(simulation.cycle * 0.015)
@@ -1099,8 +1102,8 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        // simulation.difficulty = 66
-        // spawn.orbitalBoss(1600, -500)
+        // simulation.difficulty = 30
+        spawn.orbitalBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 

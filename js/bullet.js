@@ -304,6 +304,9 @@ const b = {
             }
         }
     },
+    explosionRange() {
+        return tech.explosiveRadius * (tech.isExplosionHarm ? 1.8 : 1) * (tech.isSmallExplosion ? 0.8 : 1) * (tech.isExplodeRadio ? 1.25 : 1)
+    },
     explosion(where, radius) { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
         let dist, sub, knock;
@@ -664,7 +667,7 @@ const b = {
             }
             bullet[me].do = function() {
                 const suckCycles = 40
-                if (simulation.cycle > this.endCycle - suckCycles || Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) { //suck
+                if (!m.isBodiesAsleep && simulation.cycle > this.endCycle - suckCycles || Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) { //suck
                     const that = this
 
                     function suck(who, radius = that.explodeRad * 3.2) {
@@ -726,7 +729,7 @@ const b = {
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
 
                 const suckCycles = 40
-                if (simulation.cycle > this.endCycle - suckCycles) { //suck
+                if (!m.isBodiesAsleep && simulation.cycle > this.endCycle - suckCycles) { //suck
                     const that = this
 
                     function suck(who, radius = that.explodeRad * 3.2) {
@@ -2597,17 +2600,19 @@ const b = {
             frictionStatic: 0,
             frictionAir: 0.008 * (1 + 0.3 * Math.random()),
             restitution: 0.5 * (1 + 0.5 * Math.random()),
-            dmg: 0, // 0.14   //damage done in addition to the damage from momentum
-            minDmgSpeed: 2,
-            lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
-            drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-            range: 700 * (1 + 0.1 * Math.random()) + 500 * tech.isLaserBotUpgrade,
             playerRange: 150 + Math.floor(30 * Math.random()),
             offPlayer: {
                 x: 0,
                 y: 0,
             },
+            dmg: 0, //damage done in addition to the damage from momentum
+            minDmgSpeed: 2,
+            lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
+            range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
+            drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
+            drain: 0.7 - 0.52 * tech.isLaserBotUpgrade,
+            laserDamage: 0.38 + 0.29 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -2655,8 +2660,8 @@ const b = {
                 }
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && m.energy > this.drainThreshold) {
-                    m.energy -= tech.laserFieldDrain * tech.isLaserDiode * 0.7
-                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * (0.38 * tech.laserDamage + this.isUpgraded * 0.25), tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
+                    m.energy -= tech.laserFieldDrain * tech.isLaserDiode * this.drain
+                    b.laser(this.vertices[0], this.lockedOn.position, b.dmgScale * this.laserDamage * tech.laserDamage, tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
                     // laser(where = {
                     //     x: m.pos.x + 20 * Math.cos(m.angle),
                     //     y: m.pos.y + 20 * Math.sin(m.angle)
@@ -2712,13 +2717,17 @@ const b = {
             },
             onEnd() {},
             do() {
-                if (this.explode) {
-                    b.explosion(this.position, this.explode); //makes bullet do explosive damage at end
-                    this.explode = 0;
-                }
-                const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
+                const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, player.position))
                 if (distanceToPlayer > 100) { //if far away move towards player
-                    this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration)
+                    if (this.explode) {
+                        if (tech.isImmuneExplosion && m.energy > 1.43) {
+                            b.explosion(this.position, this.explode);
+                        } else {
+                            b.explosion(this.position, Math.max(0, Math.min(this.explode, (distanceToPlayer - 70) / b.explosionRange())));
+                        }
+                        this.explode = 0;
+                    }
+                    this.force = Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), this.mass * this.acceleration)
                 } else if (distanceToPlayer < 250) { //close to player
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
                     //find targets
@@ -3220,7 +3229,7 @@ const b = {
         },
         {
             name: "shotgun",
-            description: "fire a <strong>burst</strong> of short range <strong> bullets</strong>",
+            description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
             ammoPack: 5.5,
             defaultAmmoPack: 5.5,
