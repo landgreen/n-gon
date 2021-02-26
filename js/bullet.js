@@ -2468,7 +2468,7 @@ const b = {
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
                                 !mob[i].isShielded) {
-                                const SPEED = 45
+                                const SPEED = 40
                                 const unit = Vector.normalise(Vector.sub(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)), this.position))
                                 b.nail(this.position, Vector.mult(unit, SPEED), 0.4)
                                 this.force = Vector.mult(unit, -0.01 * this.mass)
@@ -2611,8 +2611,8 @@ const b = {
             lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
             range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
-            drain: 0.7 - 0.52 * tech.isLaserBotUpgrade,
-            laserDamage: 0.38 + 0.29 * tech.isLaserBotUpgrade,
+            drain: 0.56 - 0.42 * tech.isLaserBotUpgrade,
+            laserDamage: 0.5 + 0.35 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -3265,11 +3265,11 @@ const b = {
                 if (m.crouch) {
                     spread = 0.75
                     m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCD); // cool down
-                    if (tech.isShotgunImmune) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCD); //player is immune to collision damage for 30 cycles
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCD); //player is immune to collision damage for 30 cycles
                     knock = 0.01
                 } else {
                     m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCD); // cool down
-                    if (tech.isShotgunImmune) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCD); //player is immune to collision damage for 30 cycles
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCD); //player is immune to collision damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
                 }
@@ -4514,7 +4514,7 @@ const b = {
                     m.fireCDcycle = m.cycle + Math.floor(120 * b.fireCD); // cool down
                 } else {
                     m.energy -= DRAIN
-                    m.immuneCycle = m.cycle + 30; //player is immune to collision damage for 5 cycles
+                    if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //player is immune to collision damage for 5 cycles
                     Matter.Body.setPosition(player, history.position);
                     Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
                     if (m.health !== history.health) {

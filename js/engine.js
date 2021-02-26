@@ -108,7 +108,20 @@ function collisionChecks(event) {
                             m.damage(dmg);
                             return
                         }
-                        m.damage(dmg);
+
+                        if (tech.isAnthropicHarm) {
+                            if (!tech.isAnthropicHarmImmune) {
+                                tech.isAnthropicHarmImmune = true
+                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = on`
+                                m.damage(dmg * 1.25); //damage triggers immune to next hit with extra 10% damage
+                            } else {
+                                tech.isAnthropicHarmImmune = false //immune to damage this hit, lose immunity for next hit
+                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = off`
+                            }
+                        } else {
+                            m.damage(dmg); //normal damage
+                        }
+
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isBayesian) powerUps.ejectTech()
                         if (mob[k].onHit) mob[k].onHit(k);

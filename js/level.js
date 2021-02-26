@@ -12,7 +12,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(40)
+            // level.difficultyIncrease(5)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
@@ -792,7 +792,7 @@ const level = {
                     } else {
                         if (damage < 0.02) {
                             m.damage(damage)
-                        } else if (m.immuneCycle < m.cycle) {
+                        } else if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) {
                             m.immuneCycle = m.cycle + tech.collisionImmuneCycles;
                             m.damage(damage)
                             simulation.drawList.push({ //add dmg to draw queue
@@ -1090,7 +1090,7 @@ const level = {
         // spawn.boost(1500, 0, 900);
 
         // spawn.starter(1900, -500, 200) //big boy
-        // spawn.starter(1900, -500)
+        spawn.starter(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
@@ -1103,12 +1103,12 @@ const level = {
         // spawn.cellBossCulture(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // simulation.difficulty = 30
-        spawn.orbitalBoss(1600, -500)
+        spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "launcher")
-        // spawn.snakeBoss(1200, -500)
+        spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
@@ -1698,16 +1698,16 @@ const level = {
             spawn.randomMob(-75, -1475, 0);
             spawn.randomGroup(600, -2600, 0);
         }
-        if (simulation.difficulty < 25) {
+        if (simulation.difficulty < 20) {
             spawn.randomMob(700, -1650, 0);
             spawn.randomMob(600, -3500, 0.2);
             spawn.randomMob(-75, -1175, 0.2);
             powerUps.spawnBossPowerUp(-125, -1760);
         } else {
             if (Math.random() < 0.5) {
-                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
+                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss"]);
             } else {
-                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss"]);
+                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss"]);
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
@@ -1854,7 +1854,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss"]);
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "shieldingBoss"]);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
@@ -2459,17 +2459,7 @@ const level = {
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.1) { // tether ball
                 const index = mob.length
-                spawn.tetherBoss(4250, 0)
-                cons[cons.length] = Constraint.create({
-                    pointA: {
-                        x: 4250,
-                        y: -675
-                    },
-                    bodyB: mob[index],
-                    stiffness: 0.00007
-                });
-                World.add(engine.world, cons[cons.length - 1]);
-
+                spawn.tetherBoss(4250, 0, { x: 4250, y: -675 })
                 if (simulation.difficulty > 4) spawn.nodeGroup(4250, 0, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
             } else if (Math.random() < 0.2) {
                 spawn.randomLevelBoss(4250, -250);
@@ -3214,16 +3204,7 @@ const level = {
                     height: 525,
                     color: "#ccc"
                 });
-                spawn.tetherBoss(2850, -80)
-                cons[cons.length] = Constraint.create({
-                    pointA: {
-                        x: 2500,
-                        y: -500
-                    },
-                    bodyB: mob[mob.length - 1],
-                    stiffness: 0.00012
-                });
-                World.add(engine.world, cons[cons.length - 1]);
+                spawn.tetherBoss(2850, -80, { x: 2500, y: -500 })
                 //chance to spawn a ring of exploding mobs around this boss
                 if (simulation.difficulty > 6) spawn.nodeGroup(2850, -80, "spawns", 8, 20, 105);
             } else {
@@ -3690,16 +3671,7 @@ const level = {
             if (simulation.difficulty > 2) {
                 if (Math.random() < 0.2) {
                     // tether ball
-                    spawn.tetherBoss(7000, -3300)
-                    cons[cons.length] = Constraint.create({
-                        pointA: {
-                            x: 7300,
-                            y: -3300
-                        },
-                        bodyB: mob[mob.length - 1],
-                        stiffness: 0.00006
-                    });
-                    World.add(engine.world, cons[cons.length - 1]);
+                    spawn.tetherBoss(7000, -3300, { x: 7300, y: -3300 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(7000, -3300, "spawns", 8, 20, 105);
                 } else if (simulation.difficulty > 3) {
                     spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss"]);
@@ -3709,16 +3681,7 @@ const level = {
             if (simulation.difficulty > 2) {
                 if (Math.random() < 0.2) {
                     // tether ball
-                    spawn.tetherBoss(2300, -1300)
-                    cons[cons.length] = Constraint.create({
-                        pointA: {
-                            x: 2300,
-                            y: -1750
-                        },
-                        bodyB: mob[mob.length - 1],
-                        stiffness: 0.00036
-                    });
-                    World.add(engine.world, cons[cons.length - 1]);
+                    spawn.tetherBoss(2300, -1300, { x: 2300, y: -1750 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(2350, -1300, "spawns", 8, 20, 105);
                 } else if (simulation.difficulty > 3) {
                     spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss"]);
@@ -3785,16 +3748,7 @@ const level = {
         spawn.mapRect(3075, 1075, 375, 150); //Plafond salle trésor
         spawn.mapRect(3300, 1075, 1500, 1800); //Mur droite salle trésor
         // tether ball
-        spawn.tetherBoss(2330, 1850)
-        cons[cons.length] = Constraint.create({
-            pointA: {
-                x: 2330,
-                y: 1425
-            },
-            bodyB: mob[mob.length - 1],
-            stiffness: 0.00017
-        });
-        World.add(engine.world, cons[cons.length - 1]);
+        spawn.tetherBoss(2330, 1850, { x: 2330, y: 1425 })
         //chance to spawn a ring of exploding mobs around this boss
         if (simulation.difficulty > 4) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
         powerUps.chooseRandomPowerUp(3100, 1630);
@@ -4062,34 +4016,25 @@ const level = {
         spawn.randomGroup(8025, -845, 0.2);
 
         if (simulation.difficulty > 2) {
-            if (Math.random() < 0.2) {
-                // tether ball
-                spawn.tetherBoss(8000, 630)
-                let me = mob[mob.length - 1];
-                me.onDeath = function() {
-                    this.removeCons(); //remove constraint
-                    spawnCouloirEnHaut()
-                    doorSortieSalle.isOpen = false;
-                };
-                cons[cons.length] = Constraint.create({
-                    pointA: {
-                        x: 8550,
-                        y: 680
-                    },
-                    bodyB: mob[mob.length - 1],
-                    stiffness: 0.00015
-                });
-                World.add(engine.world, cons[cons.length - 1]);
-                if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
-            } else {
-                spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss"]);
-                let me = mob[mob.length - 1];
-                me.onDeath = function() {
-                    this.removeCons(); //remove constraint
-                    spawnCouloirEnHaut()
-                    doorSortieSalle.isOpen = false;
-                };
-            }
+            // if (Math.random() < 0.2) {
+            //     // tether ball
+            //     spawn.tetherBoss(8000, 630, { x: 8550, y: 680 })
+            //     let me = mob[mob.length - 1];
+            //     me.onDeath = function() {
+            //         this.removeCons(); //remove constraint
+            //         spawnCouloirEnHaut()
+            //         doorSortieSalle.isOpen = false;
+            //     };
+            //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
+            // } else {
+            spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss"]);
+            let me = mob[mob.length - 1];
+            me.onDeath = function() {
+                this.removeCons(); //remove constraint
+                spawnCouloirEnHaut()
+                doorSortieSalle.isOpen = false;
+            };
+            // }
         } else {
             spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
             let me = mob[mob.length - 1];
@@ -4658,18 +4603,8 @@ const level = {
 
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.16) {
-                spawn.tetherBoss(3380, -1775)
-                cons[cons.length] = Constraint.create({
-                    pointA: {
-                        x: 3775,
-                        y: -1775
-                    },
-                    bodyB: mob[mob.length - 1],
-                    stiffness: 0.00018 + 0.000007 * level.levelsCleared
-                });
-                World.add(engine.world, cons[cons.length - 1]);
+                spawn.tetherBoss(3380, -1775, { x: 3775, y: -1775 })
                 if (simulation.difficulty > 4) spawn.nodeGroup(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
-
             } else {
                 spawn.randomLevelBoss(3100, -1850, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "snakeBoss", "laserBoss"]);
             }

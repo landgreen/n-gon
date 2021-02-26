@@ -1002,7 +1002,7 @@ const simulation = {
                 //ctx.fillText(bodies[i].id,bodies[i].position.x,bodies[i].position.y);  //shows the id of every body
                 let vertices = bodies[i].vertices;
                 ctx.moveTo(vertices[0].x, vertices[0].y);
-                for (let j = 1; j < vertices.length; j += 1) {
+                for (let j = 1; j < vertices.length; j++) {
                     ctx.lineTo(vertices[j].x, vertices[j].y);
                 }
                 ctx.lineTo(vertices[0].x, vertices[0].y);

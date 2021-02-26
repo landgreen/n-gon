@@ -570,7 +570,7 @@ const m = {
             }
         }
         m.energy = Math.max(m.energy - steps / 136, 0.01)
-        m.immuneCycle = m.cycle + 30; //player is immune to collision damage for 30 cycles
+        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
 
         let isDrawPlayer = true
         const shortPause = function() {
@@ -642,7 +642,7 @@ const m = {
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                     for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
                     m.energy = m.maxEnergy
-                    m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
+                    if (m.immuneCycle < m.cycle + 360) m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -671,7 +671,7 @@ const m = {
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
                     for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "heal", false);
-                    m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
+                    if (m.immuneCycle < m.cycle + 360) m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1777,7 +1777,7 @@ const m = {
 
                             simulation.cycle--; //pause all functions that depend on game cycle increasing
                             if (tech.isTimeSkip) {
-                                m.immuneCycle = m.cycle + 10;
+                                if (m.immuneCycle < m.cycle + 10) m.immuneCycle = m.cycle + 10;
                                 simulation.isTimeSkipping = true;
                                 m.cycle++;
                                 simulation.gravity();
@@ -2537,7 +2537,7 @@ const m = {
                                 x: velocity.x,
                                 y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
                             });
-                            m.immuneCycle = m.cycle + 15; //player is immune to collision damage 
+                            if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage 
                             // move bots to player
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType) {
@@ -2813,7 +2813,7 @@ const m = {
                                     if (tech.isPiezo) m.energy += 20.48;
                                     if (tech.isBayesian) powerUps.ejectTech()
                                     if (mob[k].onHit) mob[k].onHit(k);
-                                    m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
                                     //extra kick between player and mob              //this section would be better with forces but they don't work...
                                     let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
                                     Matter.Body.setVelocity(player, {

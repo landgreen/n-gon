@@ -1,13 +1,18 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-mob orbitals can now be destroyed, but it takes a very large amount of damage
+shieldingBoss - doesn't attack, but shields all mobs every 2.5s
 
-laser-bot upgrade: gives 75% damage, range, and energy efficiency  (was 400% damage, but they ran out of energy too fast)
-boom-bots are now smart about not hurting the player with explosions while doing the most damage
+reworked how tetherBoss's constraint work
+  please, let me know if the tether boss is buggy on any of the levels
+  the chance for tether boss was removed from level: detours
 
-tech: strong anthropic principle - after anthropic principle prevents your death do 137.03599 extra damage for the rest of the level
+tech: flip-flop - collisions do 25% more harm, but you become immune to harm for the next collision
+
 
 ******************************************************** BUGS ********************************************************
+
+shields being put in front of mob array messes up some types of index = mob.length-1 uses
+adding orbitals puts a random # of mobs in front of target, and shield behind
 
 use the floor of portal sensor on the player? to unstuck player
 
@@ -35,9 +40,6 @@ use the floor of portal sensor on the player? to unstuck player
 
 ******************************************************** TODO ********************************************************
 
-tech: after using anthropic principle do 200% more damage for the rest of the level
-
-
 use ship tech to make a mob mode
   differences from ship to mob
     graphics
@@ -57,12 +59,6 @@ bosses should have 2x health, but only do about 50 health damage
       make bosses not have extra density
     
 tech: spawn a bot after taking collision damage
-
-tech: standing wave freezes the mobs it hits
-
-tech: health becomes drones
-  requires mass-energy?
-  junk tech?
 
 map: laboratory
   rooms with switches that change physics
@@ -373,7 +369,7 @@ possible names for tech
   perturbation theory
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
-
+  uncertainty principle
 
 chapter 1: bot can hear audio and learns testing mode
   bot uses testing mode to exit room

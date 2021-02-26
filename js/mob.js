@@ -651,25 +651,27 @@ const mobs = {
                 //cause all mobs, and bodies to rotate in a circle
                 applyCurl = function(center, array, isAntiGravity = true) {
                     for (let i = 0; i < array.length; ++i) {
-                        const sub = Vector.sub(center, array[i].position)
-                        const radius2 = Vector.magnitudeSquared(sub);
+                        if (!array[i].isNotHoldable) {
+                            const sub = Vector.sub(center, array[i].position)
+                            const radius2 = Vector.magnitudeSquared(sub);
 
-                        //if too close, like center mob or shield, don't curl   // if too far don't curl
-                        if (radius2 < range * range && radius2 > 10000) {
-                            const curlVector = Vector.mult(Vector.perp(Vector.normalise(sub)), mag)
-                            //apply curl force
-                            Matter.Body.setVelocity(array[i], {
-                                x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
-                                y: array[i].velocity.y * 0.94 + curlVector.y * 0.06
-                            })
-                            if (isAntiGravity) array[i].force.y -= 0.8 * simulation.g * array[i].mass
-                            // //draw curl, for debugging
-                            // ctx.beginPath();
-                            // ctx.moveTo(array[i].position.x, array[i].position.y);
-                            // ctx.lineTo(array[i].position.x + curlVector.x * 10, array[i].position.y + curlVector.y * 10);
-                            // ctx.lineWidth = 2;
-                            // ctx.strokeStyle = "#000";
-                            // ctx.stroke();
+                            //if too close, like center mob or shield, don't curl   // if too far don't curl
+                            if (radius2 < range * range && radius2 > 10000) {
+                                const curlVector = Vector.mult(Vector.perp(Vector.normalise(sub)), mag)
+                                //apply curl force
+                                Matter.Body.setVelocity(array[i], {
+                                    x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
+                                    y: array[i].velocity.y * 0.94 + curlVector.y * 0.06
+                                })
+                                if (isAntiGravity) array[i].force.y -= 0.8 * simulation.g * array[i].mass
+                                // //draw curl, for debugging
+                                // ctx.beginPath();
+                                // ctx.moveTo(array[i].position.x, array[i].position.y);
+                                // ctx.lineTo(array[i].position.x + curlVector.x * 10, array[i].position.y + curlVector.y * 10);
+                                // ctx.lineWidth = 2;
+                                // ctx.strokeStyle = "#000";
+                                // ctx.stroke();
+                            }
                         }
                     }
                 }
@@ -1050,7 +1052,7 @@ const mobs = {
                         bullet[bullet.length - 1].endCycle = simulation.cycle + 1000 + Math.floor(400 * Math.random())
                         this.leaveBody = false; // no body since it turned into the bot
                     }
-                } else if (tech.isShieldAmmo && this.shield) {
+                } else if (tech.isShieldAmmo && this.shield && !this.isBonusShield) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"

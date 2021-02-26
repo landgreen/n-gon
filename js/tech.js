@@ -95,13 +95,12 @@
         haveGunCheck(name) {
             if (
                 !build.isExperimentSelection &&
-                b.inventory.length > 2 &&
+                b.inventory > 2 &&
                 name !== b.guns[b.activeGun].name &&
-                Math.random() > 2 / (b.inventory.length + tech.isGunCycle * 3) //lower chance of tech specific to a gun if you have lots of guns
+                Math.random() > 2 - b.inventory.length * 0.5
             ) {
                 return false
             }
-
             for (i = 0, len = b.inventory.length; i < len; i++) {
                 if (b.guns[b.inventory[i]].name === name) return true
             }
@@ -1164,10 +1163,10 @@
                 requires: "",
                 effect() {
                     tech.collisionImmuneCycles += 45;
-                    m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
                 },
                 remove() {
-                    tech.collisionImmuneCycles = 25;
+                    tech.collisionImmuneCycles = 30;
                 }
             },
             {
@@ -1184,6 +1183,84 @@
                 },
                 remove() {
                     tech.cyclicImmunity = 0;
+                }
+            },
+            {
+                name: "flip-flop",
+                description: "after a <strong>collision</strong> take <strong>25%</strong> more <strong class='color-harm'>harm</strong><br>but, on your next <strong>collision</strong> take <strong>0</strong> <strong class='color-harm'>harm</strong>",
+                nameInfo: "<span id = 'tech-flip-flop'></span>",
+                addNameInfo() {
+                    setTimeout(function() {
+                        if (document.getElementById("tech-flip-flop")) {
+                            if (tech.isAnthropicHarmImmune) {
+                                document.getElementById("tech-flip-flop").innerHTML = ` = on`
+                            } else {
+                                document.getElementById("tech-flip-flop").innerHTML = ` = off`
+                            }
+                        }
+                    }, 100);
+                },
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    tech.isAnthropicHarm = true //do you have this tech
+                    tech.isAnthropicHarmImmune = false //are you immune to next collision
+                },
+                remove() {
+                    tech.isAnthropicHarm = false
+                    tech.isAnthropicHarmImmune = false
+                }
+            },
+            {
+                name: "clock gating",
+                description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
+                },
+                requires: "FPS above 45",
+                effect() {
+                    tech.isSlowFPS = true;
+                },
+                remove() {
+                    tech.isSlowFPS = false;
+                }
+            },
+            {
+                name: "liquid cooling",
+                description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isSlowFPS
+                },
+                requires: "clock gating",
+                effect() {
+                    tech.isHarmFreeze = true;
+                },
+                remove() {
+                    tech.isHarmFreeze = false;
+                }
+            },
+            {
+                name: "osmoprotectant",
+                description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+                },
+                requires: "a freezing or stunning effect",
+                effect() {
+                    tech.isFreezeHarmImmune = true;
+                },
+                remove() {
+                    tech.isFreezeHarmImmune = false;
                 }
             },
             {
@@ -1235,54 +1312,6 @@
                 },
                 remove() {
                     tech.isHarmDamage = false;
-                }
-            },
-            {
-                name: "liquid cooling",
-                description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return tech.isSlowFPS
-                },
-                requires: "clock gating",
-                effect() {
-                    tech.isHarmFreeze = true;
-                },
-                remove() {
-                    tech.isHarmFreeze = false;
-                }
-            },
-            {
-                name: "osmoprotectant",
-                description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
-                },
-                requires: "a freezing or stunning effect",
-                effect() {
-                    tech.isFreezeHarmImmune = true;
-                },
-                remove() {
-                    tech.isFreezeHarmImmune = false;
-                }
-            },
-            {
-                name: "clock gating",
-                description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
-                },
-                requires: "FPS above 45",
-                effect() {
-                    tech.isSlowFPS = true;
-                },
-                remove() {
-                    tech.isSlowFPS = false;
                 }
             },
             {
@@ -1339,7 +1368,7 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return !tech.isEnergyHealth && m.harmReduction() < 1
+                    return !tech.isEnergyHealth && (m.harmReduction() < 1 || tech.isAnthropicHarm)
                 },
                 requires: "not mass-energy equivalence, some harm reduction",
                 effect() {
@@ -1860,7 +1889,7 @@
             },
             {
                 name: "decoherence",
-                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>9</strong> <strong class='color-r'>research</strong>",
+                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>11</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1869,7 +1898,7 @@
                 requires: "not quantum immortality, many-worlds",
                 effect() {
                     tech.isResearchReality = true;
-                    for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
+                    for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
                 },
                 remove() {
                     tech.isResearchReality = false;
@@ -2011,7 +2040,7 @@
             },
             {
                 name: "bubble fusion",
-                description: "after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                description: "after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -4307,7 +4336,7 @@
             },
             {
                 name: "ship",
-                description: "<strong>experimental mode:</strong> fly around with no legs<br>aim by rotating with keyboard",
+                description: "<strong>experiment:</strong> fly around with no legs<br>aim by rotating with keyboard",
                 maxCount: 1,
                 count: 0,
                 isNonRefundable: true,
@@ -4324,7 +4353,7 @@
             },
             {
                 name: "quantum leap",
-                description: "<strong>experimental mode:</strong> every 20 seconds<br>become an alternate version of yourself",
+                description: "<strong>experiment:</strong> every 20 seconds<br>become an alternate version of yourself",
                 maxCount: 1,
                 count: 0,
                 isNonRefundable: true,
@@ -5373,5 +5402,7 @@
         isHarmReduceAfterKill: null,
         isSwitchReality: null,
         isResearchReality: null,
-        isAnthropicDamage: null
+        isAnthropicDamage: null,
+        isAnthropicHarm: null,
+        isAnthropicHarmImmune: null
     }
