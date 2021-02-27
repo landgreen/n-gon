@@ -450,7 +450,7 @@ const b = {
     },
     pulse(energy, angle = m.angle) {
         let best;
-        let explosionRange = 1560 * energy
+        let explosionRadius = 1400 * energy
         let range = 3000
         const path = [{
                 x: m.pos.x + 20 * Math.cos(angle),
@@ -514,7 +514,7 @@ const b = {
             let dist = 2200
             for (let i = 0, len = mob.length; i < len; i++) {
                 const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
-                if (explosionRange < newDist &&
+                if (explosionRadius < newDist &&
                     newDist < dist &&
                     Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
                     Matter.Query.ray(body, path[0], mob[i].position).length === 0) {
@@ -535,7 +535,7 @@ const b = {
                 };
             }
         }
-        if (best.who) b.explosion(path[1], explosionRange, true)
+        if (best.who) b.explosion(path[1], explosionRadius, true)
 
         if (tech.isPulseStun) {
             const range = 100 + 2000 * energy
@@ -2277,6 +2277,7 @@ const b = {
         tech.foamBotCount = 0
         tech.boomBotCount = 0
         tech.orbitBotCount = 0
+        tech.missileBotCount = 0
     },
     respawnBots() {
         for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({ x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, false)
@@ -2612,7 +2613,7 @@ const b = {
             range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             drain: 0.56 - 0.42 * tech.isLaserBotUpgrade,
-            laserDamage: 0.5 + 0.35 * tech.isLaserBotUpgrade,
+            laserDamage: 0.55 + 0.39 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -4398,7 +4399,7 @@ const b = {
                         x: 7.5 * Math.cos(m.angle - Math.PI / 2),
                         y: 7.5 * Math.sin(m.angle - Math.PI / 2)
                     }
-                    const dmg = 0.55 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const dmg = 0.6 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     const eye = {
                         x: m.pos.x + 15 * Math.cos(m.angle),

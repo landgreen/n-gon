@@ -108,6 +108,7 @@
         },
         damageFromTech() {
             let dmg = m.fieldDamage
+            if (tech.isFlipFlopDamage && !tech.isFlipFlopHarmImmune) dmg *= 1.5
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.37
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.5
             if (tech.isTechDamage) dmg *= 2
@@ -1187,15 +1188,15 @@
             },
             {
                 name: "flip-flop",
-                description: "after a <strong>collision</strong> take <strong>25%</strong> more <strong class='color-harm'>harm</strong><br>but, on your next <strong>collision</strong> take <strong>0</strong> <strong class='color-harm'>harm</strong>",
+                description: "take <strong>25%</strong> more <strong class='color-harm'>harm</strong> from a <strong>collision</strong><br>but, on your next <strong>collision</strong> take <strong>0</strong> <strong class='color-harm'>harm</strong>",
                 nameInfo: "<span id = 'tech-flip-flop'></span>",
                 addNameInfo() {
                     setTimeout(function() {
                         if (document.getElementById("tech-flip-flop")) {
-                            if (tech.isAnthropicHarmImmune) {
-                                document.getElementById("tech-flip-flop").innerHTML = ` = on`
+                            if (tech.isFlipFlopHarmImmune) {
+                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>on</strong>`
                             } else {
-                                document.getElementById("tech-flip-flop").innerHTML = ` = off`
+                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>off</strong>`
                             }
                         }
                     }, 100);
@@ -1207,12 +1208,44 @@
                 },
                 requires: "",
                 effect() {
-                    tech.isAnthropicHarm = true //do you have this tech
-                    tech.isAnthropicHarmImmune = false //are you immune to next collision
+                    tech.isFlipFlopHarm = true //do you have this tech
+                    tech.isFlipFlopHarmImmune = false //are you immune to next collision?
                 },
                 remove() {
-                    tech.isAnthropicHarm = false
-                    tech.isAnthropicHarmImmune = false
+                    tech.isFlipFlopHarm = false
+                    tech.isFlipFlopHarmImmune = false
+                }
+            },
+            {
+                name: "NAND gate",
+                description: "set <strong>flip-flip</strong> to the <strong>on</strong> state at start of a <strong>level</strong><br><em>take 0 harm on your next collision</em>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isFlipFlopHarm
+                },
+                requires: "flip-flop",
+                effect() {
+                    tech.isFlipFlopLevelReset = true;
+                },
+                remove() {
+                    tech.isFlipFlopLevelReset = true;
+                }
+            },
+            {
+                name: "NOR gate",
+                description: "do <strong>50%</strong> more <strong class='color-d'>damage</strong><br>while <strong>flip-flip</strong> is in the <strong>off</strong> state",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isFlipFlopHarm
+                },
+                requires: "flip-flop",
+                effect() {
+                    tech.isFlipFlopDamage = true;
+                },
+                remove() {
+                    tech.isFlipFlopDamage = true;
                 }
             },
             {
@@ -1368,7 +1401,7 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return !tech.isEnergyHealth && (m.harmReduction() < 1 || tech.isAnthropicHarm)
+                    return !tech.isEnergyHealth && (m.harmReduction() < 1 || tech.isFlipFlopHarm)
                 },
                 requires: "not mass-energy equivalence, some harm reduction",
                 effect() {
@@ -1736,9 +1769,9 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return !tech.isEnergyHealth
+                    return !tech.isEnergyHealth && !tech.isDroneGrab
                 },
-                requires: "not mass-energy equivalence",
+                requires: "not mass-energy equivalence, not drone harvester",
                 effect() {
                     tech.isArmorFromPowerUps = true; //tracked by  tech.armorFromPowerUps
                 },
@@ -3270,7 +3303,7 @@
                 allowed() {
                     return !tech.isArmorFromPowerUps && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
-                requires: "drones",
+                requires: "drones, not inductive coupling",
                 effect() {
                     tech.isDroneGrab = true
                 },
@@ -3434,7 +3467,7 @@
             },
             {
                 name: "laser diodes",
-                description: "all <strong class='color-laser'>lasers</strong> drain <strong>37%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
+                description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3443,7 +3476,7 @@
                 },
                 requires: "laser",
                 effect() {
-                    tech.isLaserDiode = 0.63; //100%-37%
+                    tech.isLaserDiode = 0.70; //100%-37%
                 },
                 remove() {
                     tech.isLaserDiode = 1;
@@ -4336,7 +4369,7 @@
             },
             {
                 name: "ship",
-                description: "<strong>experiment:</strong> fly around with no legs<br>aim by rotating with keyboard",
+                description: "<strong>experiment:</strong> fly around with no legs<br>aim with the keyboard",
                 maxCount: 1,
                 count: 0,
                 isNonRefundable: true,
@@ -4368,6 +4401,27 @@
                         m.switchWorlds()
                         simulation.trails()
                     }, 20000); //every 20 sections
+                },
+                remove() {}
+            },
+            {
+                name: "shields",
+                description: "<strong>experiment:</strong> every 5 seconds<br>all mobs gain a shield",
+                maxCount: 1,
+                count: 0,
+                isNonRefundable: true,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (!mob[i].isShielded && !mob[i].shield && mob[i].dropPowerUp) spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
+                        }
+                    }, 5000); //every 5 sections
                 },
                 remove() {}
             },
@@ -4458,7 +4512,7 @@
                 requires: "",
                 effect() {
                     setInterval(() => {
-                        alert(`The best combo is <strong>${tech.tech[Math.floor(Math.random() * tech.tech.length)].name}</strong> with <strong>${tech.tech[Math.floor(Math.random() * tech.tech.length)].name}</strong>!`);
+                        alert(`The best combo is ${tech.tech[Math.floor(Math.random() * tech.tech.length)].name} with ${tech.tech[Math.floor(Math.random() * tech.tech.length)].name}!`);
                     }, 30000); //every 30 sections
                 },
                 remove() {}
@@ -5403,6 +5457,8 @@
         isSwitchReality: null,
         isResearchReality: null,
         isAnthropicDamage: null,
-        isAnthropicHarm: null,
-        isAnthropicHarmImmune: null
+        isFlipFlopHarm: null,
+        isFlipFlopHarmImmune: null,
+        isFlipFlopLevelReset: null,
+        isFlipFlopDamage: null
     }

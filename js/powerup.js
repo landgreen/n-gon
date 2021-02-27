@@ -73,6 +73,7 @@ const powerUps = {
         if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
         build.unPauseGrid()
         requestAnimationFrame(cycle);
+        if (m.holdingTarget) m.drop();
     },
     research: {
         count: 0,

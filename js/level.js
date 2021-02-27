@@ -86,6 +86,17 @@ const level = {
             tech.armorFromPowerUps += Math.min(0.03 * powerUps.totalPowerUps, 0.51)
             m.setMaxHealth();
         }
+        if (tech.isGunCycle) {
+            b.inventoryGun++;
+            if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
+            simulation.switchGun();
+        }
+        if (tech.isSwitchReality) {
+            simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+            m.switchWorlds()
+            simulation.trails()
+            for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "tech", false);
+        }
         if (tech.isHealLowHealth) {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
             for (let i = 0; i < len; i++) {
@@ -105,16 +116,10 @@ const level = {
         if (tech.isPerpetualStun) {
             for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
         }
-        if (tech.isGunCycle) {
-            b.inventoryGun++;
-            if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
-            simulation.switchGun();
-        }
-        if (tech.isSwitchReality) {
-            simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
-            m.switchWorlds()
-            simulation.trails()
-            for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "tech", false);
+        if (tech.isFlipFlopHarm && tech.isFlipFlopLevelReset && !tech.isFlipFlopHarmImmune) {
+            tech.isFlipFlopHarmImmune = true
+            // if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>on</strong>`
+            simulation.makeTextLog(`tech.isFlipFlopHarmImmune <span class='color-symbol'>=</span> true`);
         }
     },
     custom() {},
@@ -1090,7 +1095,7 @@ const level = {
         // spawn.boost(1500, 0, 900);
 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.starter(1900, -500)
+        // spawn.starter(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
@@ -1100,15 +1105,15 @@ const level = {
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
+        simulation.difficulty = 30
+        spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.cellBossCulture(1600, -500)
-        // simulation.difficulty = 30
-        spawn.shieldingBoss(1600, -500)
+        // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "launcher")
-        spawn.snakeBoss(1200, -500)
+        // spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },

@@ -389,6 +389,7 @@ const m = {
         simulation.makeGunHUD(); //update gun HUD
         simulation.updateTechHUD();
         simulation.isTextLogOpen = true;
+        if (m.holdingTarget) m.drop();
     },
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
@@ -2249,10 +2250,10 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups<br><strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
                 m.drop();
-                m.duplicateChance = 0.1
+                m.duplicateChance = 0.07
                 simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
 
                 // if (tech.isRewindGun) {

@@ -105,7 +105,7 @@ const spawn = {
                 level.levels.push("null")
                 level.exit.x = 5500;
                 level.exit.y = -330;
-                simulation.makeTextLog(`<span class="lore-text">undecided</span> <span class='color-symbol'>=</span> ${lore.techCount}/10<br>level.levels.push("null")`);
+                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/10<br>level.levels.push("null")`);
                 //remove block map element so exit is clear
                 Matter.World.remove(engine.world, map[map.length - 1]);
                 map.splice(map.length - 1, 1);
@@ -124,7 +124,7 @@ const spawn = {
                     setTimeout(function() {
                         simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
                         setTimeout(() => {
-                            simulation.makeTextLog(`<span class="lore-text">undecided</span> <span class='color-symbol'>=</span> ${lore.techCount}/10`);
+                            simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/10`);
                             setTimeout(() => {
                                 if (!simulation.paused && !simulation.testing) {
                                     simulation.makeTextLog(`World.clear(engine.world)`);
@@ -835,7 +835,7 @@ const spawn = {
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = radius * 23; //required for blackhole
         me.seeAtDistance2 = (me.eventHorizon + 400) * (me.eventHorizon + 400); //vision limit is event horizon
-        me.accelMag = 0.00009 * simulation.accelScale;
+        me.accelMag = 0.0001 * simulation.accelScale;
         me.frictionAir = 0.025;
         me.collisionFilter.mask = cat.player | cat.bullet
         me.memory = Infinity;
@@ -2587,7 +2587,7 @@ const spawn = {
         World.add(engine.world, consBB[consBB.length - 1]);
         spawn.shield(me, x, y, 1);
     },
-    snakeBody(x, y, radius = 14) {
+    snakeBody(x, y, radius = 10) {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         // me.onHit = function() {

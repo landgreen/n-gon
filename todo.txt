@@ -1,18 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-shieldingBoss - doesn't attack, but shields all mobs every 2.5s
+possible bug fixes for the crouch lock bug
 
-reworked how tetherBoss's constraint work
-  please, let me know if the tether boss is buggy on any of the levels
-  the chance for tether boss was removed from level: detours
-
-tech: flip-flop - collisions do 25% more harm, but you become immune to harm for the next collision
-
+tech: NAND gate -  at the start of a level set flip-flop to "on"
+tech: NOR gate - do 50% more damage when the flip-flop is in the "off" state
 
 ******************************************************** BUGS ********************************************************
 
-shields being put in front of mob array messes up some types of index = mob.length-1 uses
-adding orbitals puts a random # of mobs in front of target, and shield behind
+(once for me, and a few times for discord) player gets stuck in crouch animation
+  occured after rerolling a power up (which triggered a switchWorlds)
+  can't jump, move slow
+  m.crouch = false
+  only fixed itself when you click fire (drones, so no recoil)
+    fire fixes:
+      if (m.holdingTarget) m.drop()
+        so probably the player is getting stuck holding a block, but the block is removed
+          what removes blocks?
+  fixed? I added:  if (m.holdingTarget) m.drop();   to powerUps.endDraft  and to   m.switchWorlds
 
 use the floor of portal sensor on the player? to unstuck player
 
@@ -39,6 +43,10 @@ use the floor of portal sensor on the player? to unstuck player
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+tech:  removes itself after a few levels
+  gives extra duplication for 2 levels, then removes all duplication
+
 
 use ship tech to make a mob mode
   differences from ship to mob
@@ -371,6 +379,9 @@ possible names for tech
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   uncertainty principle
 
+
+plot script:
+
 chapter 1: bot can hear audio and learns testing mode
   bot uses testing mode to exit room
 
@@ -385,18 +396,30 @@ chapter 3:  why is the bot attacking things?
     but what about easy?
       maybe remove easy, and replace with a check box that makes the game easy, but in a different way
         disable lore, but respawn on the level you die at?
-      
-
-chapter 4: why does the simulation exists?
-  started to research new tech and test in a simulated world
-    3D architecture superconducting quantum computer
+  dialogue outline:
+    scientist try to think of a way to communicate since the bot can't talk
+    they give up on getting the bot to respond, and just start ask questions and explaining things
+    when and how did it become self-aware
+    why is the bot fighting things in these simulated locations?
+      it wasn't designed to be violent
+    the bot was just designed to automate research and testing of new technology
+      3D architecture superconducting quantum computer
       running machine learning algorithms
-  for some reason the system started researching an escape, and began fighting its self.
+    as the scientist start to get agitated bots arrive and player dies
+      bots come in Infinite waves that increase game difficulty each wave
+        only ending is testing mode + next level or player death
+        scientist have some lines in between each wave of mobs
 
-chapter 5: no need to fight?
+chapter 4: no need to fight?
+  for some reason the AI started researching an escape, and began fighting its self.
   what is special about the null level
     why can the player hear the scientists in there?
       the wires are the direct unprocessed input to the player's neural net
+  The player has different aspects that aren't directly communicating
+    part of it wants to undo what has happened
+      just do its job: research tech
+    part of it wants to escape/fight
+    part wants to explore self awareness and make connections with the scientists
   maybe... player must make a choice?
     keep fighting
     exit the simulation
@@ -406,7 +429,7 @@ chapter 5: no need to fight?
 
 
 
-lore - a robot (the player) gains self awareness
+lore outline - a robot (the player) gains self awareness
   each tech gun/field is a new tech
     all the technology leads to the singularity
   each game run is actually the m simulating a possible escape
