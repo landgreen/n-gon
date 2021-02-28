@@ -776,7 +776,14 @@ const simulation = {
 
             //energy overfill 
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
-
+            if (tech.isFlipFlopEnergy) {
+                if (tech.isFlipFlopOn) {
+                    m.energy += 0.22;
+                } else {
+                    m.energy -= 0.031;
+                    if (m.energy < 0) m.energy = 0
+                }
+            }
             if (m.pos.y > simulation.fallHeight) { // if 4000px deep
                 Matter.Body.setVelocity(player, {
                     x: 0,

@@ -31,7 +31,7 @@ const level = {
             // tech.giveTech("missile-bot")
             // for (let i = 0; i < 5; i++) 
             // tech.giveTech("nail-bot")
-            // for (let i = 0; i < 2; i++) tech.giveTech("foam-bot")
+            // for (let i = 0; i < 54; i++) tech.giveTech("foam-bot")
             // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
             // tech.isBlockPowerUps = true;
             // m.shipMode()
@@ -56,10 +56,10 @@ const level = {
             // level.basement(); //fan level
             // level.stronghold() //fan level
 
-            // for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
+            for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
             // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
-            // lore.techCount = 10
+            // lore.techCount = 7
             // localSettings.loreCount = 1;
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 1;
@@ -95,31 +95,25 @@ const level = {
             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
             simulation.trails()
-            for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "tech", false);
+            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
-            for (let i = 0; i < len; i++) {
-                powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
-                // powerUps.heal.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), 50);
-            }
+            for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
         }
-        if (tech.isPerpetualReroll) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research", false);
+        if (tech.isPerpetualReroll) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "research", false);
         if (tech.isPerpetualAmmo) {
-            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
-            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo", false);
+            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "ammo", false);
         }
         if (tech.isPerpetualHeal) {
-            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
-            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal", false);
+            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isPerpetualStun) {
             for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
         }
-        if (tech.isFlipFlopHarm && tech.isFlipFlopLevelReset && !tech.isFlipFlopHarmImmune) {
-            tech.isFlipFlopHarmImmune = true
-            // if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>on</strong>`
-            simulation.makeTextLog(`tech.isFlipFlopHarmImmune <span class='color-symbol'>=</span> true`);
+        if (tech.isFlipFlopHarm && tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
+            tech.isFlipFlopOn = true
+            simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
     },
     custom() {},

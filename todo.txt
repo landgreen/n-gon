@@ -1,14 +1,19 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-possible bug fixes for the crouch lock bug
-
-tech: NAND gate -  at the start of a level set flip-flop to "on"
-tech: NOR gate - do 50% more damage when the flip-flop is in the "off" state
+tech: flip-flip - does nothing, except toggle on collisions
+tech: NOR gate - when flip-flip is ON take 0 harm from collisions
+tech: NAND gate - when flip-flip is ON do 55.5% damage
+tech: transistor - when flip-flop is ON regen 22 energy/s, when OFF drain 3.1 energy /s
+tech: shift registers - set flip-flop to ON with a new level
 
 ******************************************************** BUGS ********************************************************
 
+mouse event e.which is deprecated
+
+fix door.isOpen actually meaning isClosed?
+
 (once for me, and a few times for discord) player gets stuck in crouch animation
-  occured after rerolling a power up (which triggered a switchWorlds)
+  occurred after rerolling a power up (which triggered a switchWorlds)
   can't jump, move slow
   m.crouch = false
   only fixed itself when you click fire (drones, so no recoil)
@@ -42,11 +47,29 @@ use the floor of portal sensor on the player? to unstuck player
 
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
+
 ******************************************************** TODO ********************************************************
+
+flip-flop: 13% dup chance while ON
+
+tech- foam is attracted to mobs
+  use a gravitational attraction model?
+    could foam be attracted to other foam bullets too?
+      or foam is only attracted to foam bullets that are stuck to mobs
+    is this too computationally intense?
+  name - static cling
+  could also do bremsstrahlung radiation like damage on attachment
+
+mobile requirements:
+  detect mobile, flip to landscape
+  detect no keyboard, no mouse
+    auto aim?
+    limit items to ones that don't require aiming?
+    tap screen regions to move (WASD)
+    reduce font size
 
 tech:  removes itself after a few levels
   gives extra duplication for 2 levels, then removes all duplication
-
 
 use ship tech to make a mob mode
   differences from ship to mob
@@ -76,13 +99,6 @@ map: laboratory
     radiation room
     portal + rotor + falling blocks = perpetual motion   room
   a button that spawns a heal.
-
-
-mechanic:  immune to next collision
-  track number of possible collisions, if number is > 0 immune and --
-  graphical indication? (recolor health bar while immune)
-tech: after taking damage go immune to next collision
-tech: at the start of each level go immune to 1 collision
 
 copy time-like foam to other guns?
   wave gun
@@ -118,22 +134,9 @@ rename ?
   health -> integrity, unity
   heal -> also integrity, unity
 
-mechanic: use gun swap as an active ability
-  this effect is spammable, so it needs a cost or a cooldown
-  tech:
-    trigger damage immunity for 3 seconds, but drain ammo
-    push away nearby mobs, but drain energy
-    produce ammo, but take 1 damage
-
 bot: ice blast,  long CD AOE freeze
 
 RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
-
-tech: dodge chance for cloaking, harmonic fields, also pilot wave
-  20% chance up to 3 stacks, not additive
-    0.8^count
-  set to 100% harm reduction randomly
-    if (Math.random() < 0.2)  damage *= 0;
 
 in game console
   set highlighting rules
@@ -143,10 +146,6 @@ in game console
 tech: time dilation - when you exit time dilation rewind to the state you entered
   position, velocity, and health
   no energy cost
-
-mob ability bombs/bullets that suck in player
-
-tech that requires integrated armament
 
 mechanic - Your energy regen is only active when field and gun have not been used for 5 seconds.
 
@@ -179,13 +178,6 @@ tech pilot wave: antigravity - blocks have no gravity for a few seconds after ex
   maybe they bounce too?
   maybe they explode?
 
-bullet mechanic - a bullet that swims through the air
-  rotate the velocity vector towards the normalized facing vector
-    use the cross product > 0 to determine which direction to rotate the velocity
-
-in custom make a top bar that is fixed
-  use media rules to make the layout look nice
-
 mob vision: look at player history
     build a new type of attraction for mobs
       if mobs can't see player, they check to see if they can see where the player was in the history
@@ -217,25 +209,9 @@ new power up - increase damage and fire speed, for 15 seconds
   how to indicate effect duration
   or just give the effect after picking up a reroll
 
-tech "Solar Power": Energy regeneration is doubled while standing still
-  run in the 1 second check
-
-mechanic - remove a random tech as a condition for picking up a really good mod
-
-mechanic - do something for 2 seconds after firing
-  if (m.fireCDcycle + 120)
-
 tech- do 50% more damage in close, but 50% less at a distance
   code it like techisFarAwayDmg
     have these tech disable each other
-
-tech- foam is attracted to mobs
-  use a gravitational attraction model?
-    could foam be attracted to other foam bullets too?
-      or foam is only attracted to foam bullets that are stuck to mobs
-    is this too computationally intense?
-  name - static cling
-  could also do bremsstrahlung radiation like damage on attachment
 
 repeat map in vertical and horizontal space
   or at least vertical space
@@ -262,12 +238,6 @@ look for tech that could update description text with count and tech is informat
   can only use variables that change in effect() and remove()
   this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${techduplicateChance}</em>`
 
-mouse event e.which is deprecated
-
-add some more computer / AI stuff to the level lore text
-
-mechanic - shrink m.baseHealth in a tech or field
-
 standing wave harmonics tech- push things away
   push scales with mass up to about 4
     has a 25% effect on shielded mobs?
@@ -278,8 +248,6 @@ standing wave harmonics tech- push things away
 map element - player rotates a rotor that makes a platform go up or down
 
 use mac automator to speed up your n-gon -> git sync
-
-fix door.isOpen actually meaning isClosed
 
 level Boss: fractal Sierpiński triangle
   https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
@@ -300,20 +268,6 @@ give mobs more animal-like behaviors like rain world
 
 mob: wall mounted guns / lasers
   not part of randomized mob pool, customized to each level
-
-atmosphere levels
-  change the pace, give the user a rest between combat
-  low or no combat, but more graphics
-  explore lore
-    find power ups in "wrecked" m representing previous simulations
-      how you could leave something in one simulation that effects a different simulation
-        Maybe some strange quantum physics principle.
-    add text for player thoughts?
-  simple puzzles
-  cool looking stuff
-    in the final level you see your self at the starting level, with the wires
-      you shoot your self to wake up?
-  nonaggressive mobs
 
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
@@ -409,6 +363,7 @@ chapter 3:  why is the bot attacking things?
       bots come in Infinite waves that increase game difficulty each wave
         only ending is testing mode + next level or player death
         scientist have some lines in between each wave of mobs
+  after chapter 3 spawn nonaggressive mobs in future runs
 
 chapter 4: no need to fight?
   for some reason the AI started researching an escape, and began fighting its self.

@@ -101,39 +101,62 @@ const spawn = {
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
             //add lore level as next level if player took lore tech earlier in the game
-            if (lore.techCount > 9 && !simulation.isCheating) {
+            if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
                 level.levels.push("null")
                 level.exit.x = 5500;
                 level.exit.y = -330;
-                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/10<br>level.levels.push("null")`);
+                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("null")`);
                 //remove block map element so exit is clear
                 Matter.World.remove(engine.world, map[map.length - 1]);
                 map.splice(map.length - 1, 1);
                 simulation.draw.setPaths(); //redraw map draw path
             } else {
                 //reset game
-                setTimeout(() => {
-                    simulation.makeTextLog(`simulation.complete()`);
-                    let delay = 2000
-                    for (let i = 0; i < 1; i += 0.01 + 0.2 * Math.random() * Math.random()) {
-                        setTimeout(function() {
-                            simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(i).toFixed(3)}`);
-                        }, delay);
-                        delay += 1000
+                let count = 0
+
+                function loop() {
+                    if (!simulation.paused) {
+                        count++
+                        if (count < 600) {
+                            if (!(count % 60)) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(count/60- Math.random()).toFixed(3)}`);
+                        } else if (count === 600) {
+                            simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
+                        } else if (count === 720) {
+                            simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
+                        } else if (count === 900) {
+                            simulation.makeTextLog(`World.clear(engine.world)`);
+                        } else if (count === 1140) {
+                            m.death()
+                            return
+                        }
                     }
-                    setTimeout(function() {
-                        simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
-                        setTimeout(() => {
-                            simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/10`);
-                            setTimeout(() => {
-                                if (!simulation.paused && !simulation.testing) {
-                                    simulation.makeTextLog(`World.clear(engine.world)`);
-                                    setTimeout(() => { m.death() }, 4000);
-                                }
-                            }, 3000);
-                        }, 2000);
-                    }, delay);
-                }, 5000);
+                    if (!simulation.testing) requestAnimationFrame(loop);
+                }
+                requestAnimationFrame(loop);
+
+                // setTimeout(() => {
+                //     if (simulation.paused || simulation.testing) isEnding = false
+                //     simulation.makeTextLog(`simulation.complete()`);
+                //     let delay = 2000
+                //     for (let i = 0; i < 1; i += 0.01 + 0.2 * Math.random() * Math.random()) {
+                //         setTimeout(function() {
+                //             if (!simulation.paused && !simulation.testing) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(i).toFixed(3)}`);
+                //         }, delay);
+                //         delay += 1000
+                //     }
+                //     setTimeout(function() {
+                //         if (isEnding) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
+                //         setTimeout(() => {
+                //             if (isEnding) simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/10`);
+                //             setTimeout(() => {
+                //                 if (isEnding) {
+                //                     if (isEnding) simulation.makeTextLog(`World.clear(engine.world)`);
+                //                     setTimeout(() => { if (isEnding) m.death() }, 4000);
+                //                 }
+                //             }, 3000);
+                //         }, 2000);
+                //     }, delay);
+                // }, 5000);
             }
             //ramp up damage
             for (let i = 0; i < 3; i++) level.difficultyIncrease(simulation.difficultyMode)

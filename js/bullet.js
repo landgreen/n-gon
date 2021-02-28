@@ -2446,7 +2446,7 @@ const b = {
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 70 * (1 + 0.3 * Math.random()),
+            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -2497,7 +2497,7 @@ const b = {
             lookFrequency: 70,
             cd: 0,
             delay: 90,
-            range: 80,
+            range: 70 + 3 * b.totalBots(),
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -2552,7 +2552,7 @@ const b = {
             cd: 0,
             delay: 100,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 70 * (1 + 0.3 * Math.random()),
+            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -2602,7 +2602,7 @@ const b = {
             frictionAir: 0.008 * (1 + 0.3 * Math.random()),
             restitution: 0.5 * (1 + 0.5 * Math.random()),
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
-            playerRange: 150 + Math.floor(30 * Math.random()),
+            playerRange: 140 + Math.floor(30 * Math.random()) + 2 * b.totalBots(),
             offPlayer: {
                 x: 0,
                 y: 0,
@@ -2613,7 +2613,7 @@ const b = {
             range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             drain: 0.56 - 0.42 * tech.isLaserBotUpgrade,
-            laserDamage: 0.55 + 0.39 * tech.isLaserBotUpgrade,
+            laserDamage: 0.6 + 0.43 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -2653,9 +2653,10 @@ const b = {
                     }
                     //randomize position relative to player
                     if (Math.random() < 0.15) {
+                        const range = 110 + 4 * b.totalBots()
                         this.offPlayer = {
-                            x: 120 * (Math.random() - 0.5),
-                            y: 120 * (Math.random() - 0.5) - 20,
+                            x: range * (Math.random() - 0.5),
+                            y: range * (Math.random() - 0.5) - 20,
                         }
                     }
                 }

@@ -95,7 +95,7 @@
         haveGunCheck(name) {
             if (
                 !build.isExperimentSelection &&
-                b.inventory > 2 &&
+                b.inventory.length > 2 &&
                 name !== b.guns[b.activeGun].name &&
                 Math.random() > 2 - b.inventory.length * 0.5
             ) {
@@ -108,7 +108,7 @@
         },
         damageFromTech() {
             let dmg = m.fieldDamage
-            if (tech.isFlipFlopDamage && !tech.isFlipFlopHarmImmune) dmg *= 1.5
+            if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.37
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.5
             if (tech.isTechDamage) dmg *= 2
@@ -602,9 +602,9 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField
+                    return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField)
                 },
-                requires: "an explosive damage source",
+                requires: "an explosive damage source, not causality bombs",
                 effect: () => {
                     tech.isExplosionHarm = true;
                 },
@@ -1123,7 +1123,7 @@
             },
             {
                 name: "inelastic collision",
-                description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>80%</strong>",
+                description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>",
                 maxCount: 1,
                 count: 0,
                 allowed() {
@@ -1188,15 +1188,21 @@
             },
             {
                 name: "flip-flop",
-                description: "take <strong>25%</strong> more <strong class='color-harm'>harm</strong> from a <strong>collision</strong><br>but, on your next <strong>collision</strong> take <strong>0</strong> <strong class='color-harm'>harm</strong>",
+                description: `collisions set <strong>flip-flop</strong> to <strong class="color-flop">OFF</strong> when <strong class="color-flop">ON</strong>
+                              <br>collisions set <strong>flip-flop</strong> to <strong class="color-flop">ON</strong> when <strong class="color-flop">OFF</strong>`,
+                // description: `<strong>collisions</strong> toggle flip-flop <strong>ON</strong> and <strong>OFF</strong>
+                //               <br><strong>ON</strong>: 0 collision <strong class='color-harm'>harm</strong>,  <strong>OFF</strong>: <strong>25%</strong> extra <strong class='color-harm'>harm</strong>`,
+                //   on your next <strong>collision</strong> take <strong>0</strong> <strong class='color-harm'>harm</strong>
                 nameInfo: "<span id = 'tech-flip-flop'></span>",
                 addNameInfo() {
                     setTimeout(function() {
                         if (document.getElementById("tech-flip-flop")) {
-                            if (tech.isFlipFlopHarmImmune) {
-                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>on</strong>`
+                            if (tech.isFlipFlopOn) {
+                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
+                                m.eyeFillColor = m.fieldMeterColor //'#5af'
                             } else {
-                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>off</strong>`
+                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
+                                m.eyeFillColor = "transparent"
                             }
                         }
                     }, 100);
@@ -1208,44 +1214,112 @@
                 },
                 requires: "",
                 effect() {
-                    tech.isFlipFlopHarm = true //do you have this tech
-                    tech.isFlipFlopHarmImmune = false //are you immune to next collision?
+                    tech.isFlipFlop = true //do you have this tech?
+                    tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                    m.draw = () => {
+                        ctx.fillStyle = m.fillColor;
+                        m.walk_cycle += m.flipLegs * m.Vx;
+
+                        //draw body
+                        ctx.save();
+                        ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                        ctx.translate(m.pos.x, m.pos.y);
+
+                        m.calcLeg(Math.PI, -3);
+                        m.drawLeg("#4a4a4a");
+                        m.calcLeg(0, 0);
+                        m.drawLeg("#333");
+
+                        ctx.rotate(m.angle);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                        grd.addColorStop(0, m.fillColorDark);
+                        grd.addColorStop(1, m.fillColor);
+                        ctx.fillStyle = grd;
+                        ctx.fill();
+                        ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                        ctx.strokeStyle = "#333";
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        //draw eye
+                        ctx.beginPath();
+                        ctx.arc(15, 0, 3, 0, 2 * Math.PI);
+                        ctx.fillStyle = m.eyeFillColor;
+                        ctx.fill()
+                        ctx.restore();
+
+                        m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                    }
                 },
                 remove() {
-                    tech.isFlipFlopHarm = false
-                    tech.isFlipFlopHarmImmune = false
-                }
-            },
-            {
-                name: "NAND gate",
-                description: "set <strong>flip-flip</strong> to the <strong>on</strong> state at start of a <strong>level</strong><br><em>take 0 harm on your next collision</em>",
-                maxCount: 1,
-                count: 0,
-                allowed() {
-                    return tech.isFlipFlopHarm
-                },
-                requires: "flip-flop",
-                effect() {
-                    tech.isFlipFlopLevelReset = true;
-                },
-                remove() {
-                    tech.isFlipFlopLevelReset = true;
+                    tech.isFlipFlop = false
+                    tech.isFlipFlopOn = false
                 }
             },
             {
                 name: "NOR gate",
-                description: "do <strong>50%</strong> more <strong class='color-d'>damage</strong><br>while <strong>flip-flip</strong> is in the <strong>off</strong> state",
+                description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>take <strong>0</strong> <strong class='color-harm'>harm</strong> from collisions with mobs",
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.isFlipFlopHarm
+                    return tech.isFlipFlop
+                },
+                requires: "flip-flop",
+                effect() {
+                    tech.isFlipFlopHarm = true //do you have this tech
+                },
+                remove() {
+                    tech.isFlipFlopHarm = false
+                }
+
+            },
+            {
+                name: "NAND gate",
+                description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isFlipFlop
                 },
                 requires: "flip-flop",
                 effect() {
                     tech.isFlipFlopDamage = true;
                 },
                 remove() {
-                    tech.isFlipFlopDamage = true;
+                    tech.isFlipFlopDamage = false;
+                }
+            },
+            {
+                name: "transistor",
+                description: "if <strong>flip-flop</strong> is <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong>flip-flop</strong> is <strong class='color-flop'>OFF</strong> drain <strong>3.1</strong> <strong class='color-f'>energy</strong> per second",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isFlipFlop
+                },
+                requires: "flip-flop",
+                effect() {
+                    tech.isFlipFlopEnergy = true;
+                },
+                remove() {
+                    tech.isFlipFlopEnergy = false;
+                }
+            },
+            {
+                name: "shift registers",
+                description: "set <strong>flip-flop</strong> to the <strong class='color-flop'>ON</strong> state<br>at the start of a <strong>level</strong>",
+                maxCount: 1,
+                count: 0,
+                allowed() {
+                    return tech.isFlipFlopEnergy || tech.isFlipFlopDamage || tech.isFlipFlopHarm
+                },
+                requires: "2 flip-flop techs",
+                effect() {
+                    tech.isFlipFlopLevelReset = true;
+                },
+                remove() {
+                    tech.isFlipFlopLevelReset = false;
                 }
             },
             {
@@ -1369,7 +1443,7 @@
                 maxCount: 3,
                 count: 0,
                 allowed() {
-                    return tech.isRewindAvoidDeath || tech.isRewindEnergy
+                    return tech.isRewindAvoidDeath
                 },
                 requires: "CPT",
                 effect() {
@@ -1385,9 +1459,9 @@
                 maxCount: 1,
                 count: 0,
                 allowed() {
-                    return tech.isRewindAvoidDeath
+                    return !tech.isExplosionHarm && tech.isRewindAvoidDeath
                 },
-                requires: "CPT",
+                requires: "CPT, not acetone peroxide",
                 effect() {
                     tech.isRewindGrenade = true;
                 },
@@ -2108,7 +2182,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>11</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
                 count: 0,
                 allowed() {
@@ -2118,7 +2192,7 @@
                 effect() {
                     tech.duplicateChance += 0.075
                     simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-                    tech.addJunkTechToPool(11)
+                    tech.addJunkTechToPool(12)
                     tech.maxDuplicationEvent()
                 },
                 remove() {
@@ -2325,7 +2399,7 @@
             },
             {
                 name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>16</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
                 isNonRefundable: true,
                 isExperimentHide: true,
@@ -2337,7 +2411,7 @@
                 effect() {
                     level.difficultyDecrease(simulation.difficultyMode)
                     simulation.makeTextLog(`simulation.difficultyMode<span class='color-symbol'>--</span>`)
-                    tech.addJunkTechToPool(16)
+                    tech.addJunkTechToPool(18)
                     // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
                 },
                 remove() {}
@@ -4430,7 +4504,7 @@
             if (!simulation.isCheating) {
                 tech.tech.push({
                     name: `undefined`,
-                    description: `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`,
+                    description: `${lore.techCount+1}/${lore.techGoal}<br><em>add copies of <strong class="lore-text">this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`,
                     maxCount: 1,
                     count: 0,
                     isLore: true,
@@ -4443,11 +4517,11 @@
                     effect() {
                         setTimeout(() => { //a short delay, I can't remember why
                             lore.techCount++
-                            if (lore.techCount > 9) {
+                            if (lore.techCount > lore.techGoal - 1) {
                                 tech.removeLoreTechFromPool();
                             } else {
                                 for (let i = 0; i < tech.tech.length; i++) { //set name for all unchosen copies of this tech
-                                    if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/10<br><em>add copies of <strong>this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
+                                    if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/${lore.techGoal}<br><em>add copies of <strong class="lore-text">this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
                                 }
                                 for (let i = 0, len = 10; i < len; i++) tech.addLoreTechToPool()
                             }
@@ -5457,8 +5531,10 @@
         isSwitchReality: null,
         isResearchReality: null,
         isAnthropicDamage: null,
+        isFlipFlop: null,
         isFlipFlopHarm: null,
-        isFlipFlopHarmImmune: null,
+        isFlipFlopOn: null,
         isFlipFlopLevelReset: null,
-        isFlipFlopDamage: null
+        isFlipFlopDamage: null,
+        isFlipFlopEnergy: null
     }

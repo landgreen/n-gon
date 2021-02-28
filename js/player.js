@@ -46,6 +46,7 @@ const m = {
     lastHarmCycle: 0,
     width: 50,
     radius: 30,
+    eyeFillColor: null,
     fillColor: null, //set by setFillColors
     fillColorDark: null, //set by setFillColors
     color: {
@@ -498,7 +499,7 @@ const m = {
         if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.25 : 1.25
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
-        if (tech.isBlockHarm && m.isHolding) dmg *= 0.2
+        if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
@@ -822,10 +823,12 @@ const m = {
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 2;
         ctx.stroke();
+        // draw eye;  used in flip-flop
         // ctx.beginPath();
         // ctx.arc(15, 0, 3, 0, 2 * Math.PI);
-        // ctx.fillStyle = '#0cf';
+        // ctx.fillStyle = m.eyeFillColor;
         // ctx.fill()
+
         ctx.restore();
         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
     },
@@ -879,6 +882,7 @@ const m = {
         if (m.energy < m.maxEnergy) m.energy = m.maxEnergy;
         m.fieldRegen = tech.energyRegen; //0.001
         m.fieldMeterColor = "#0cf"
+        m.eyeFillColor = m.fieldMeterColor
         m.fieldShieldingScale = 1;
         m.fieldBlockCD = 10;
         m.fieldHarmReduction = 1;
@@ -1559,6 +1563,7 @@ const m = {
                 m.fieldFire = true;
                 m.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
                 m.fieldMeterColor = "#000"
+                m.eyeFillColor = m.fieldMeterColor
                 m.fieldHarmReduction = 0.5;
                 m.fieldDrawRadius = 0;
 
@@ -1676,6 +1681,7 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
             effect() {
                 m.fieldMeterColor = "#f0f"
+                m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
                     b.isExtruderOn = false
                     if (m.isHolding) {
@@ -1819,7 +1825,8 @@ const m = {
             description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>133%</strong>",
             effect: () => {
                 m.fieldFire = true;
-                m.fieldMeterColor = "#fff";
+                m.fieldMeterColor = "#000";
+                m.eyeFillColor = m.fieldMeterColor
                 m.fieldPhase = 0;
                 m.isCloak = false
                 m.fieldDamage = 2.33 // 1 + 111/100
@@ -1944,11 +1951,11 @@ const m = {
                         const yOff = m.pos.y - 50
                         ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
                         ctx.fillRect(xOff, yOff, 60 * m.maxEnergy, 10);
-                        ctx.fillStyle = m.fieldMeterColor;
+                        ctx.fillStyle = "#fff";
                         ctx.fillRect(xOff, yOff, 60 * m.energy, 10);
                         ctx.beginPath()
                         ctx.rect(xOff, yOff, 60 * m.maxEnergy, 10);
-                        ctx.strokeStyle = "rgb(0, 0, 0)";
+                        ctx.strokeStyle = m.fieldMeterColor;
                         ctx.lineWidth = 1;
                         ctx.stroke();
                     }

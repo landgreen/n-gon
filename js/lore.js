@@ -1,5 +1,6 @@
 const lore = {
     techCount: 0,
+    techGoal: 7,
     talkingColor: "#dff", //set color of graphic on level.null
     anand: {
         color: "#e0c",

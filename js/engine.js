@@ -108,20 +108,21 @@ function collisionChecks(event) {
                             m.damage(dmg);
                             return
                         }
-
-                        if (tech.isFlipFlopHarm) {
-                            if (!tech.isFlipFlopHarmImmune) {
-                                tech.isFlipFlopHarmImmune = true
-                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>on</strong>`
-                                m.damage(dmg * 1.25); //damage triggers immune to next hit with extra 10% damage
+                        if (tech.isFlipFlop) {
+                            if (tech.isFlipFlopOn) {
+                                tech.isFlipFlopOn = false
+                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
+                                m.eyeFillColor = 'transparent'
+                                if (!tech.isFlipFlopHarm) m.damage(dmg);
                             } else {
-                                tech.isFlipFlopHarmImmune = false //immune to damage this hit, lose immunity for next hit
-                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>off</strong>`
+                                tech.isFlipFlopOn = true //immune to damage this hit, lose immunity for next hit
+                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
+                                m.eyeFillColor = m.fieldMeterColor //'#0cf'
+                                m.damage(dmg);
                             }
                         } else {
                             m.damage(dmg); //normal damage
                         }
-
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isBayesian) powerUps.ejectTech()
                         if (mob[k].onHit) mob[k].onHit(k);
