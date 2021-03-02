@@ -105,13 +105,12 @@ const spawn = {
                 level.levels.push("null")
                 level.exit.x = 5500;
                 level.exit.y = -330;
-                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("null")`);
+                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("<span class='lore-text'>null</span>")`);
                 //remove block map element so exit is clear
                 Matter.World.remove(engine.world, map[map.length - 1]);
                 map.splice(map.length - 1, 1);
                 simulation.draw.setPaths(); //redraw map draw path
-            } else {
-                //reset game
+            } else { //reset game
                 let count = 0
 
                 function loop() {
@@ -133,50 +132,15 @@ const spawn = {
                     if (!simulation.testing) requestAnimationFrame(loop);
                 }
                 requestAnimationFrame(loop);
-
-                // setTimeout(() => {
-                //     if (simulation.paused || simulation.testing) isEnding = false
-                //     simulation.makeTextLog(`simulation.complete()`);
-                //     let delay = 2000
-                //     for (let i = 0; i < 1; i += 0.01 + 0.2 * Math.random() * Math.random()) {
-                //         setTimeout(function() {
-                //             if (!simulation.paused && !simulation.testing) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(i).toFixed(3)}`);
-                //         }, delay);
-                //         delay += 1000
-                //     }
-                //     setTimeout(function() {
-                //         if (isEnding) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
-                //         setTimeout(() => {
-                //             if (isEnding) simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/10`);
-                //             setTimeout(() => {
-                //                 if (isEnding) {
-                //                     if (isEnding) simulation.makeTextLog(`World.clear(engine.world)`);
-                //                     setTimeout(() => { if (isEnding) m.death() }, 4000);
-                //                 }
-                //             }, 3000);
-                //         }, 2000);
-                //     }, delay);
-                // }, 5000);
             }
-            //ramp up damage
-            for (let i = 0; i < 3; i++) level.difficultyIncrease(simulation.difficultyMode)
-
-            //set game to the next highest difficulty level if not on why
-            // if (simulation.difficultyMode < 6) {
-            //     if (simulation.difficultyMode === 0) {
-            //         simulation.difficultyMode = 1
-            //     } else if (simulation.difficultyMode === 1) {
-            //         simulation.difficultyMode = 2
-            //     } else if (simulation.difficultyMode === 2) {
-            //         simulation.difficultyMode = 4
-            //     } else {
-            //         simulation.difficultyMode = 6
-            //     }
-            //     document.getElementById("difficulty-select").value = simulation.difficultyMode
-            //     localSettings.difficultyMode = simulation.difficultyMode
-            //     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-            //     simulation.makeTextLog(`<span class='color-var'>simulation</span>.difficultyMode<span class='color-symbol'>++</span>`);
-            // }
+            // for (let i = 0; i < 3; i++)
+            level.difficultyIncrease(simulation.difficultyMode) //ramp up damage
+            //remove power Ups,  to avoid spamming console
+            function removeAll(array) {
+                for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
+            }
+            removeAll(powerUp);
+            powerUp = [];
 
             //pull in particles
             for (let i = 0, len = body.length; i < len; ++i) {
@@ -186,12 +150,7 @@ const spawn = {
             }
             //damage all mobs
             for (let i = 0, len = mob.length; i < len; ++i) {
-                if (mob[i] !== this) {
-                    mob[i].damage(Infinity, true);
-
-                    // const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), -65)
-                    // Matter.Body.setVelocity(mob[i], Vector.add(mob[i].velocity, velocity));
-                }
+                if (mob[i] !== this) mob[i].damage(Infinity, true);
             }
 
             //draw stuff
@@ -204,7 +163,6 @@ const spawn = {
                     time: 5 * (len - i + 1)
                 });
             }
-
         };
         me.onDamage = function() {};
         me.cycle = 420;
@@ -1242,7 +1200,6 @@ const spawn = {
         };
         me.awake = function() {
             this.checkStatus();
-
             //health bar needs to be here because the position is being set
             const h = this.radius * 0.3;
             const w = this.radius * 2;
@@ -1267,8 +1224,8 @@ const spawn = {
             ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
             // ctx.lineDashOffset = 6*(simulation.cycle % 215);
             if (this.distanceToPlayer() < this.laserRange) {
-                if (m.energy > 0.003) m.energy -= 0.003
-                if (m.immuneCycle < m.cycle && m.energy < 0.1) m.damage(0.0003 * simulation.dmgScale);
+                if (m.energy > 0.002) m.energy -= 0.002
+                if (m.immuneCycle < m.cycle) m.damage(0.0001 * simulation.dmgScale);
                 ctx.beginPath();
                 ctx.moveTo(eye.x, eye.y);
                 ctx.lineTo(m.pos.x, m.pos.y);
@@ -1295,7 +1252,6 @@ const spawn = {
                 Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }
         }
-
         me.do = function() {
             if (this.seePlayer.recall || (!(simulation.cycle % this.seePlayerFreq) && this.distanceToPlayer2() < this.seeAtDistance2 && !m.isCloak)) {
                 setTimeout(() => {

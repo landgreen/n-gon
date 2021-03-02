@@ -310,22 +310,30 @@ const m = {
         //remove all tech and count current tech total
         let totalTech = 0;
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (
-                !tech.tech[i].isNonRefundable &&
-                !tech.tech[i].isLore &&
-                tech.tech[i].name !== "many-worlds" &&
-                tech.tech[i].name !== "decoherence"
-            ) {
-                totalTech += tech.tech[i].count
-                tech.tech[i].remove();
-                tech.tech[i].isLost = false
-                tech.tech[i].count = 0
+            if (!tech.tech[i].isLore) {
+                if (tech.tech[i].isJunk) {
+                    tech.tech[i].frequency = 0
+                } else if (tech.tech[i].frequencyDefault) {
+                    tech.tech[i].frequency = tech.tech[i].frequencyDefault
+                } else {
+                    tech.tech[i].frequency = 1
+                }
+                if (
+                    !tech.tech[i].isNonRefundable &&
+                    tech.tech[i].name !== "many-worlds" &&
+                    tech.tech[i].name !== "decoherence"
+                ) {
+                    totalTech += tech.tech[i].count
+                    tech.tech[i].remove();
+                    tech.tech[i].isLost = false
+                    tech.tech[i].count = 0
+                }
             }
         }
         // lore.techCount = 0;
         // tech.removeLoreTechFromPool();
         // tech.addLoreTechToPool();
-        tech.removeJunkTechFromPool();
+        // tech.removeJunkTechFromPool();
         tech.armorFromPowerUps = 0;
         tech.totalCount = 0;
         const randomBotCount = b.totalBots()
@@ -508,7 +516,7 @@ const m = {
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
         if (tech.energyRegen === 0) dmg *= 0.34
-        if (tech.isTurret && m.crouch) dmg *= 0.5;
+        if (tech.isTurret && m.crouch) dmg *= 0.55;
         if (tech.isFireMoveLock && input.fire) dmg *= 0.4;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
@@ -2833,7 +2841,7 @@ const m = {
                                         y: mob[k].velocity.y - 8 * Math.sin(angle)
                                     });
 
-                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && mob[k].dropPowerUp && m.energy > 0.34 * m.maxEnergy) {
+                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].dropPowerUp && m.energy > 0.34 * m.maxEnergy) {
                                         m.energy -= 0.33 * m.maxEnergy
                                         m.immuneCycle = 0; //player doesn't go immune to collision damage
                                         mob[k].death();

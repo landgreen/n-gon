@@ -485,7 +485,9 @@ const build = {
             removeOne();
         }
         simulation.isCheating = true;
-        tech.removeLoreTechFromPool();
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            if (tech.tech[i].isLore) tech.tech[i].frequency = 0;
+        }
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
         document.getElementById("experiment-grid").style.display = "none"
@@ -766,7 +768,13 @@ window.addEventListener("keydown", function(event) {
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'
                     if (!simulation.isCheating) {
                         simulation.isCheating = true;
-                        tech.removeLoreTechFromPool();
+                        lore.techCount = 0;
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isLore) {
+                                tech.tech[i].frequency = 0;
+                                tech.tech[i].count = 0;
+                            }
+                        }
                     }
                     simulation.makeTextLog(
                         `<table class="pause-table">

@@ -12,7 +12,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(5)
+            // level.difficultyIncrease(25)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
@@ -56,7 +56,6 @@ const level = {
             // level.basement(); //fan level
             // level.stronghold() //fan level
 
-            for (let i = 0; i < 150; i++) tech.addLoreTechToPool();
             // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
             // lore.techCount = 7
@@ -101,16 +100,16 @@ const level = {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
         }
-        if (tech.isPerpetualReroll) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "research", false);
-        if (tech.isPerpetualAmmo) {
-            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "ammo", false);
-        }
-        if (tech.isPerpetualHeal) {
-            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
-        }
-        if (tech.isPerpetualStun) {
-            for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
-        }
+        // if (tech.isPerpetualReroll) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "research", false);
+        // if (tech.isPerpetualAmmo) {
+        //     for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "ammo", false);
+        // }
+        // if (tech.isPerpetualHeal) {
+        //     for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
+        // }
+        // if (tech.isPerpetualStun) {
+        //     for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
+        // }
         if (tech.isFlipFlopHarm && tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
@@ -4027,7 +4026,11 @@ const level = {
             //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
             // } else {
             spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss"]);
-            let me = mob[mob.length - 1];
+            //find level boss index
+            let me
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isBoss) me = mob[i]
+            }
             me.onDeath = function() {
                 this.removeCons(); //remove constraint
                 spawnCouloirEnHaut()
@@ -4036,7 +4039,10 @@ const level = {
             // }
         } else {
             spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
-            let me = mob[mob.length - 1];
+            let me
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isBoss) me = mob[i]
+            }
             me.onDeath = function() {
                 spawnCouloirEnHaut()
                 doorSortieSalle.isOpen = false;
