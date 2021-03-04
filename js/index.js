@@ -289,9 +289,16 @@ const build = {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
                 if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
                 tech.giveTech(index)
-            } else {
+            } else if (!tech.tech[index].isNonRefundable) {
+                tech.totalCount -= tech.tech[index].count
                 tech.removeTech(index);
                 who.classList.remove("build-tech-selected");
+            } else {
+                who.classList.remove("build-tech-selected")
+                setTimeout(() => { //return energy
+                    who.classList.add("build-tech-selected")
+                }, 50);
+
             }
         }
         //update tech text //disable not allowed tech
@@ -308,7 +315,6 @@ const build = {
                                                     <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                                 </span>
                                                 &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
-
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
                         // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
                         // border: #fff solid 0px;

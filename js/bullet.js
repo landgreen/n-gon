@@ -2241,12 +2241,11 @@ const b = {
         //remove all bots techs and convert them to the new type so that tech refunds work correctly
         let totalTechToConvert = 0 //count how many tech need to be converted
         for (let i = 0; i < tech.tech.length; i++) {
-            if (tech.tech[i].count && tech.tech[i].isBotTech) {
+            if (tech.tech[i].count && tech.tech[i].isBot) {
                 totalTechToConvert += tech.tech[i].count
                 tech.removeTech(i)
             }
         }
-        console.log(totalTechToConvert)
 
         let name = ""
         if (type === "nailBotCount") name = "nail-bot"

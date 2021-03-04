@@ -1,14 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-some tech now has 2x,3x,4x frequency of showing up
-  (most tech is at 1x, a few are at 2x if they have a rare requirement to unlock)
-reworked junk and lore tech systems
-  (might be some new bugs)
-
-tech that used to just summon a power up now also increases tech frequency
-removed the 4 perpetual techs
-
-maybe fixed immune boss bug on detours level
 
 ******************************************************** BUGS ********************************************************
 
@@ -53,6 +44,9 @@ use the floor of portal sensor on the player? to unstuck player
 
 
 ******************************************************** TODO ********************************************************
+
+mob - grows after taking damage
+mob - attack outwardly after taking damage
 
 tech- foam is attracted to mobs
   use a gravitational attraction model?

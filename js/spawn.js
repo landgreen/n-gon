@@ -125,6 +125,7 @@ const spawn = {
                         } else if (count === 900) {
                             simulation.makeTextLog(`World.clear(engine.world)`);
                         } else if (count === 1140) {
+                            tech.isImmortal = false;
                             m.death()
                             return
                         }

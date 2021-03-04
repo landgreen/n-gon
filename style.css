@@ -714,6 +714,29 @@ summary {
 }
 
 
+.flicker {
+    animation: flicker 4s linear infinite;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
 .box {
     padding: 3px 8px 3px 8px;
     border: 2px solid #444;

@@ -380,15 +380,15 @@ const m = {
             //find what tech I could get
             let options = [];
             for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].count < tech.tech[i].maxCount &&
+                if (
+                    tech.tech[i].count < tech.tech[i].maxCount &&
+                    tech.tech[i].allowed() &&
                     !tech.tech[i].isBadRandomOption &&
                     !tech.tech[i].isLore &&
-                    tech.tech[i].allowed() &&
-                    (!tech.tech[i].isJunk || Math.random() < 0.25)) options.push(i);
-                // !tech.tech[i].isNonRefundable &&
-                // tech.tech[i].name !== "quantum immortality" &&
-                // tech.tech[i].name !== "many-worlds" &&
-                // tech.tech[i].name !== "perturbation theory" &&
+                    (!tech.tech[i].isJunk || Math.random() < 0.15)
+                ) {
+                    for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
+                }
             }
             //add a new tech from options pool
             if (options.length > 0) tech.giveTech(options[Math.floor(Math.random() * options.length)])
@@ -399,6 +399,7 @@ const m = {
         simulation.updateTechHUD();
         simulation.isTextLogOpen = true;
         if (m.holdingTarget) m.drop();
+        if (simulation.paused) build.pauseGrid() //update the build when paused
     },
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
