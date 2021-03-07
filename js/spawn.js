@@ -11,6 +11,7 @@ const spawn = {
         "launcher", "launcher",
         "springer", "springer",
         "sucker", "sucker",
+        "pulsar", "pulsar", "pulsar", "pulsar", "pulsar", //briefly high chance to show from a few days
         "chaser",
         "sniper",
         "spinner",
@@ -21,7 +22,7 @@ const spawn = {
         "ghoster",
         "sneaker",
     ],
-    allowedGroupList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper"],
+    allowedGroupList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper", "pulsar"],
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
         //each level has 2 mobs: one new mob and one from the last level
         spawn.pickList.splice(0, 1);
@@ -100,16 +101,21 @@ const spawn = {
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
-            //add lore level as next level if player took lore tech earlier in the game
-            if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
-                level.levels.push("null")
+
+            function unlockExit() {
                 level.exit.x = 5500;
                 level.exit.y = -330;
-                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("<span class='lore-text'>null</span>")`);
-                //remove block map element so exit is clear
                 Matter.World.remove(engine.world, map[map.length - 1]);
                 map.splice(map.length - 1, 1);
                 simulation.draw.setPaths(); //redraw map draw path
+            }
+
+            //add lore level as next level if player took lore tech earlier in the game
+            if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
+                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("<span class='lore-text'>null</span>")`);
+                level.levels.push("null")
+                //remove block map element so exit is clear
+                unlockExit()
             } else { //reset game
                 let count = 0
 
@@ -130,7 +136,12 @@ const spawn = {
                             return
                         }
                     }
-                    if (!simulation.testing) requestAnimationFrame(loop);
+                    if (simulation.testing) {
+                        simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
+                        unlockExit()
+                    } else {
+                        requestAnimationFrame(loop);
+                    }
                 }
                 requestAnimationFrame(loop);
             }
@@ -419,7 +430,7 @@ const spawn = {
                 vertexCollision(where, look, body);
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && best.who === player && m.immuneCycle < m.cycle) {
-                    if (m.immuneCycle < m.cycle + 60 + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + 60 + tech.collisionImmuneCycles; //player is immune to collision damage extra time
+                    if (m.immuneCycle < m.cycle + 60 + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + 60 + tech.collisionImmuneCycles; //player is immune to damage extra time
                     m.damage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
@@ -1470,6 +1481,93 @@ const spawn = {
             }
         };
     },
+    pulsar(x, y, radius = 30) {
+        mobs.spawn(x, y, 3, radius, "#f08");
+        let me = mob[mob.length - 1];
+        me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+        Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+        me.radius *= 2
+        me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
+        me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
+        me.fireCycle = 0
+        me.fireTarget = { x: 0, y: 0 }
+        me.pulseRadius = Math.min(500, 300 + simulation.difficulty)
+        me.frictionAir = 0.01;
+        me.fireDelay = Math.min(90, 210 - simulation.difficulty)
+        me.isFiring = false
+        me.onHit = function() {};
+        me.canSeeTarget = function() {
+            const diff = Vector.normalise(Vector.sub(this.fireTarget, this.position)); //make a vector for the mob's direction of length 1
+            const dot = Vector.dot({
+                x: Math.cos(this.angle),
+                y: Math.sin(this.angle)
+            }, diff); //the dot product of diff and dir will return how much over lap between the vectors
+            if (dot < 0.97 || Matter.Query.ray(map, this.fireTarget, this.position).length !== 0) { //if not looking at target
+                this.isFiring = false
+                return false
+            } else {
+                return true
+            }
+        }
+        me.do = function() {
+            this.seePlayerByLookingAt();
+            this.checkStatus();
+            if (!m.isBodiesAsleep && this.seePlayer.recall) {
+
+                if (this.isFiring) {
+                    if (this.fireCycle > this.fireDelay) { //fire
+                        if (!this.canSeeTarget()) return
+                        this.isFiring = false
+                        //damage player if in range
+                        if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
+                            m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+                            m.damage(0.03 * simulation.dmgScale);
+                        }
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: this.fireTarget.x,
+                            y: this.fireTarget.y,
+                            radius: this.pulseRadius,
+                            color: "rgba(255,0,100,0.8)",
+                            time: simulation.drawTime
+                        });
+                    } else { //delay before firing
+                        this.fireCycle++
+                        if (!(simulation.cycle % 3)) {
+                            if (!this.canSeeTarget()) return //if can't see stop firing
+
+                            //draw explosion outline
+                            ctx.beginPath();
+                            ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI);
+                            ctx.fillStyle = "rgba(255,0,100,0.05)";
+                            ctx.fill();
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "rgba(255,0,100,0.5)";
+                            ctx.stroke();
+                        }
+                    }
+                } else { //aim at player
+                    this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position)); //set direction to turn to fire
+                    //rotate towards fireAngle
+                    const angle = this.angle + Math.PI / 2;
+                    const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                    const threshold = 0.03;
+                    if (c > threshold) {
+                        this.torque += 0.000001 * this.inertia;
+                    } else if (c < -threshold) {
+                        this.torque -= 0.000001 * this.inertia;
+                    } else { //fire
+                        this.fireTarget = { x: player.position.x, y: player.position.y }
+                        if (!this.canSeeTarget()) return
+                        Matter.Body.setAngularVelocity(this, 0)
+                        this.fireLockCount = 0
+                        this.isFiring = true
+                        this.fireCycle = 0
+
+                    }
+                }
+            }
+        };
+    },
     laser(x, y, radius = 30) {
         mobs.spawn(x, y, 3, radius, "#f00");
         let me = mob[mob.length - 1];
@@ -1603,7 +1701,7 @@ const spawn = {
             vertexCollision(where, look, body);
             if (!m.isCloak) vertexCollision(where, look, [player]);
             if (best.who && best.who === player && m.immuneCycle < m.cycle) {
-                m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to collision damage for an extra second
+                m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                 const dmg = 0.14 * simulation.dmgScale;
                 m.damage(dmg);
                 simulation.drawList.push({ //add dmg to draw queue
@@ -2758,7 +2856,8 @@ const spawn = {
             }
             Matter.Body.setPosition(this, Vector.add(who.position, Vector.mult(orbit, radius))) //bullets move with player
             //damage player
-            if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible)) {
+            if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                 m.damage(0.035 * simulation.dmgScale);
                 this.death();
             }

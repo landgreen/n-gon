@@ -1,7 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+new mob: pulsar - aims at player and does damage in an circle
+  (set to 3x chance to show up until the next patch)
+
+several tech that were nonrefundable now can be removed and refunded
+added several bug fixes
 
 ******************************************************** BUGS ********************************************************
+
+micro-extruder is laggy?
 
 mouse event e.which is deprecated
 
@@ -44,6 +51,16 @@ use the floor of portal sensor on the player? to unstuck player
 
 
 ******************************************************** TODO ********************************************************
+
+remove pulsar from high chance to show on next patch
+
+mob bullets that blow up
+  draw outline of exploded region, 2 seconds later damage player in region and remove bullet
+
+
+mob sniper: draw aim graphics before fire
+
+tech laser: photon - laser, but it can only move 100 pixels a cycle
 
 mob - grows after taking damage
 mob - attack outwardly after taking damage
@@ -328,7 +345,10 @@ possible names for tech
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   uncertainty principle
-
+  swarm intelligence - for a drone tech
+  genetic algorithm
+  metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
+  stochastic optimization
 
 plot script:
 

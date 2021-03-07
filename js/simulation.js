@@ -509,7 +509,11 @@ const simulation = {
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
         document.getElementById("dmg").style.display = "inline";
         document.getElementById("health-bg").style.display = "inline";
+        ctx.globalCompositeOperation = "source-over"
+        ctx.shadowBlur = 0;
+        // ctx.shadowColor = '#000';
         if (!m.isShipMode) {
+            m.draw = m.drawDefault //set the play draw to normal, undoing some junk tech
             m.spawn(); //spawns the player
         } else {
             World.add(engine.world, [player])
@@ -828,7 +832,7 @@ const simulation = {
 
             if (!(simulation.cycle % 420)) { //once every 7 seconds
 
-                if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to collision damage for 60 cycles
+                if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
                 fallCheck = function(who, save = false) {
                     let i = who.length;

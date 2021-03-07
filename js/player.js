@@ -321,7 +321,7 @@ const m = {
                 if (
                     !tech.tech[i].isNonRefundable &&
                     tech.tech[i].name !== "many-worlds" &&
-                    tech.tech[i].name !== "decoherence"
+                    tech.tech[i].name !== "Ψ(t) collapse"
                 ) {
                     totalTech += tech.tech[i].count
                     tech.tech[i].remove();
@@ -509,7 +509,7 @@ const m = {
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
-        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0185, 0.55)
+        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.019, 0.60)
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && m.fieldUpgrades[m.fieldMode].name === "negative mass field" && m.isFieldActive) dmg *= 0.5
@@ -581,7 +581,7 @@ const m = {
             }
         }
         m.energy = Math.max(m.energy - steps / 136, 0.01)
-        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
 
         let isDrawPlayer = true
         const shortPause = function() {
@@ -834,7 +834,42 @@ const m = {
         ctx.stroke();
         // draw eye;  used in flip-flop
         // ctx.beginPath();
-        // ctx.arc(15, 0, 3, 0, 2 * Math.PI);
+        // ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
+        // ctx.fillStyle = m.eyeFillColor;
+        // ctx.fill()
+
+        ctx.restore();
+        m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+    },
+    drawDefault() {
+        ctx.fillStyle = m.fillColor;
+        m.walk_cycle += m.flipLegs * m.Vx;
+
+        //draw body
+        ctx.save();
+        ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+        ctx.translate(m.pos.x, m.pos.y);
+
+        m.calcLeg(Math.PI, -3);
+        m.drawLeg("#4a4a4a");
+        m.calcLeg(0, 0);
+        m.drawLeg("#333");
+
+        ctx.rotate(m.angle);
+        ctx.beginPath();
+        ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+        grd.addColorStop(0, m.fillColorDark);
+        grd.addColorStop(1, m.fillColor);
+        ctx.fillStyle = grd;
+        ctx.fill();
+        ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // draw eye;  used in flip-flop
+        // ctx.beginPath();
+        // ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
         // ctx.fillStyle = m.eyeFillColor;
         // ctx.fill()
 
@@ -1571,7 +1606,7 @@ const m = {
             effect: () => {
                 m.fieldFire = true;
                 m.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
-                m.fieldMeterColor = "#000"
+                m.fieldMeterColor = "#333"
                 m.eyeFillColor = m.fieldMeterColor
                 m.fieldHarmReduction = 0.5;
                 m.fieldDrawRadius = 0;
@@ -1834,8 +1869,9 @@ const m = {
             description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>133%</strong>",
             effect: () => {
                 m.fieldFire = true;
-                m.fieldMeterColor = "#000";
+                m.fieldMeterColor = "#333";
                 m.eyeFillColor = m.fieldMeterColor
+                // m.eyeFillColor = '#333'
                 m.fieldPhase = 0;
                 m.isCloak = false
                 m.fieldDamage = 2.33 // 1 + 111/100
@@ -2344,7 +2380,7 @@ const m = {
             //                         break; //because the array order is messed up after splice
             //                     }
             //                 }
-            //                 m.immuneCycle = m.cycle + 5; //player is immune to collision damage for 30 cycles
+            //                 m.immuneCycle = m.cycle + 5; //player is immune to damage for 30 cycles
             //             } else {
             //                 m.fieldCDcycle = m.cycle + 30;
             //                 // m.resetHistory();
@@ -2447,7 +2483,7 @@ const m = {
                                             Matter.World.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
-                                            if (tech.isWormholeEnergy) m.energy += 0.5
+                                            if (tech.isWormholeEnergy) m.energy += 0.63
                                             if (tech.isWormSpores) { //pandimensionalspermia
                                                 for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
                                                     b.spore(Vector.add(m.hole.pos2, Vector.rotate({
@@ -2473,7 +2509,7 @@ const m = {
                                         body.splice(i, 1);
                                         m.fieldRange *= 0.8
                                         // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                        if (tech.isWormholeEnergy) m.energy += 0.5
+                                        if (tech.isWormholeEnergy) m.energy += 0.63
                                         if (tech.isWormSpores) { //pandimensionalspermia
                                             for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
                                                 b.spore(Vector.add(m.hole.pos1, Vector.rotate({
@@ -2554,7 +2590,7 @@ const m = {
                                 x: velocity.x,
                                 y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
                             });
-                            if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage 
+                            if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage 
                             // move bots to player
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType) {
@@ -2579,11 +2615,11 @@ const m = {
                             m.hole.unit = Vector.perp(Vector.normalise(sub))
 
                             if (tech.isWormholeDamage) {
-                                who = Matter.Query.ray(mob, m.pos, simulation.mouseInGame, 80)
+                                who = Matter.Query.ray(mob, m.pos, simulation.mouseInGame, 100)
                                 for (let i = 0; i < who.length; i++) {
                                     if (who[i].body.alive) {
-                                        mobs.statusDoT(who[i].body, 0.6, 420)
-                                        mobs.statusStun(who[i].body, 240)
+                                        mobs.statusDoT(who[i].body, 1, 420)
+                                        mobs.statusStun(who[i].body, 360)
                                     }
                                 }
                             }
@@ -2830,7 +2866,7 @@ const m = {
                                     if (tech.isPiezo) m.energy += 20.48;
                                     if (tech.isBayesian) powerUps.ejectTech()
                                     if (mob[k].onHit) mob[k].onHit(k);
-                                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                                     //extra kick between player and mob              //this section would be better with forces but they don't work...
                                     let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
                                     Matter.Body.setVelocity(player, {

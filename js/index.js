@@ -241,6 +241,8 @@ const build = {
                     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
                 countTech++
+            } else if (tech.tech[i].isLost) {
+                text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div></div>`
             }
         }
         el = document.getElementById("pause-grid-right")

@@ -574,6 +574,121 @@ const b = {
             });
         }
     },
+    photon(where, angle = m.angle) {
+        let best;
+        const path = [{
+                x: m.pos.x + 20 * Math.cos(angle),
+                y: m.pos.y + 20 * Math.sin(angle)
+            },
+            {
+                x: m.pos.x + range * Math.cos(angle),
+                y: m.pos.y + range * Math.sin(angle)
+            }
+        ];
+        const vertexCollision = function(v1, v1End, domain) {
+            for (let i = 0; i < domain.length; ++i) {
+                let vertices = domain[i].vertices;
+                const len = vertices.length - 1;
+                for (let j = 0; j < len; j++) {
+                    results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                            best = {
+                                x: results.x,
+                                y: results.y,
+                                dist2: dist2,
+                                who: domain[i],
+                                v1: vertices[j],
+                                v2: vertices[j + 1]
+                            };
+                        }
+                    }
+                }
+                results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                if (results.onLine1 && results.onLine2) {
+                    const dx = v1.x - results.x;
+                    const dy = v1.y - results.y;
+                    const dist2 = dx * dx + dy * dy;
+                    if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                        best = {
+                            x: results.x,
+                            y: results.y,
+                            dist2: dist2,
+                            who: domain[i],
+                            v1: vertices[0],
+                            v2: vertices[len]
+                        };
+                    }
+                }
+            }
+        };
+        //check for collisions
+        best = {
+            x: null,
+            y: null,
+            dist2: Infinity,
+            who: null,
+            v1: null,
+            v2: null
+        };
+        if (tech.isPulseAim) { //find mobs in line of sight
+            let dist = 2200
+            for (let i = 0, len = mob.length; i < len; i++) {
+                const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
+                if (explosionRadius < newDist &&
+                    newDist < dist &&
+                    Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
+                    Matter.Query.ray(body, path[0], mob[i].position).length === 0) {
+                    dist = newDist
+                    best.who = mob[i]
+                    path[path.length - 1] = mob[i].position
+                }
+            }
+        }
+        if (!best.who) {
+            vertexCollision(path[0], path[1], mob);
+            vertexCollision(path[0], path[1], map);
+            vertexCollision(path[0], path[1], body);
+            if (best.dist2 != Infinity) { //if hitting something
+                path[path.length - 1] = {
+                    x: best.x,
+                    y: best.y
+                };
+            }
+        }
+        if (best.who) b.explosion(path[1], explosionRadius, true)
+
+        //draw laser beam
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        ctx.lineTo(path[1].x, path[1].y);
+        ctx.strokeStyle = "rgba(255,0,0,0.13)"
+        ctx.lineWidth = 60 * energy / 0.2
+        ctx.stroke();
+        ctx.strokeStyle = "rgba(255,0,0,0.2)"
+        ctx.lineWidth = 18
+        ctx.stroke();
+        ctx.strokeStyle = "#f00";
+        ctx.lineWidth = 4
+        ctx.stroke();
+
+        //draw little dots along the laser path
+        const sub = Vector.sub(path[1], path[0])
+        const mag = Vector.magnitude(sub)
+        for (let i = 0, len = Math.floor(mag * 0.03 * energy / 0.2); i < len; i++) {
+            const dist = Math.random()
+            simulation.drawList.push({
+                x: path[0].x + sub.x * dist + 13 * (Math.random() - 0.5),
+                y: path[0].y + sub.y * dist + 13 * (Math.random() - 0.5),
+                radius: 1 + 4 * Math.random(),
+                color: "rgba(255,0,0,0.5)",
+                time: Math.floor(2 + 33 * Math.random() * Math.random())
+            });
+        }
+    },
     grenade() {
 
     },
@@ -3266,11 +3381,11 @@ const b = {
                 if (m.crouch) {
                     spread = 0.75
                     m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCD); // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCD); //player is immune to collision damage for 30 cycles
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCD); //player is immune to damage for 30 cycles
                     knock = 0.01
                 } else {
                     m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCD); // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCD); //player is immune to collision damage for 30 cycles
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCD); //player is immune to damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
                 }
@@ -4319,6 +4434,12 @@ const b = {
                 } else {
                     this.fire = this.fireLaser
                 }
+
+                // this.fire = this.firePhoton
+            },
+            firePhoton() {
+                m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCD); // cool down
+                b.photon({ x: m.pos.x + 23 * Math.cos(m.angle), y: m.pos.y + 23 * Math.sin(m.angle) }, m.angle)
             },
             fireLaser() {
                 if (m.energy < tech.laserFieldDrain) {
@@ -4329,7 +4450,6 @@ const b = {
                     b.laser();
                 }
             },
-
             // laser(where = {
             //     x: m.pos.x + 20 * Math.cos(m.angle),
             //     y: m.pos.y + 20 * Math.sin(m.angle)
@@ -4501,7 +4621,7 @@ const b = {
                     m.fireCDcycle = m.cycle + Math.floor(120 * b.fireCD); // cool down
                 } else {
                     m.energy -= DRAIN
-                    if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //player is immune to collision damage for 5 cycles
+                    if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //player is immune to damage for 5 cycles
                     Matter.Body.setPosition(player, history.position);
                     Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
                     if (m.health !== history.health) {

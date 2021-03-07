@@ -47,21 +47,16 @@
             if (options.length) {
                 for (let i = 0; i < num; i++) tech.tech[options[Math.floor(Math.random() * options.length)]].frequency++
             }
-            // for (let i = 0; i < num; i++) {
-            //     // find an index that doesn't have dups first
-            //     let index = null
-            //     for (let i = 0; i < tech.junk.length; i++) {
-            //         if (tech.junk[i].numberInPool === 0) {
-            //             index = i
-            //             break
-            //         }
-            //     }
-            //     if (index === null) index = Math.floor(Math.random() * tech.junk.length) //or just pick a random junk tech to add
-
-            //     tech.junk[index].numberInPool++
-            //     tech.tech.push(Object.assign({}, tech.junk[index])) // push a "clone" of the tech.junk into the pool
-            //     if (tech.junk[index].numberInPool > 1) tech.tech[tech.tech.length - 1].name += ` - ${(tech.junk[index].numberInPool + 9).toString(36)}` //give it a unique name so it can be found
-            // }
+        },
+        removeJunkTechFromPool(num = 1) {
+            for (let j = 0; j < num; j++) {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].isJunk && tech.tech[i].frequency > 0 && tech.tech[i].count < tech.tech[i].maxCount) {
+                        tech.tech[i].frequency--
+                        break
+                    }
+                }
+            }
         },
         // removeJunkTechFromPool() {
         //     for (let i = tech.tech.length - 1; i > 0; i--) {
@@ -141,7 +136,7 @@
             if (tech.isRerollDamage) dmg *= 1 + 0.039 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
-            if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.4, player.speed * 0.013)
+            if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
@@ -263,6 +258,28 @@
                 remove() {
                     tech.isGunCycle = false;
                 }
+            },
+            {
+                name: "gun technology",
+                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                isNonRefundable: true,
+                // isExperimentHide: true,
+                // isBadRandomOption: true,
+                allowed() {
+                    return !tech.isSuperDeterminism
+                },
+                requires: "not superdeterminism",
+                effect() {
+                    powerUps.spawn(m.pos.x, m.pos.y, "gun");
+                    // this.count--
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
+                    }
+                },
+                remove() {}
             },
             {
                 name: "specialist",
@@ -483,7 +500,7 @@
             },
             {
                 name: "Newton's 1st law",
-                description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>50%</strong>",
+                description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>60%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -500,7 +517,7 @@
             },
             {
                 name: "Newton's 2nd law",
-                description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>33%</strong>",
+                description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>43%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -1103,19 +1120,27 @@
                 count: 0,
                 frequency: 1,
                 isBotTech: true,
-                isNonRefundable: true,
+                // isNonRefundable: true,
                 allowed() {
                     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
                 },
                 requires: "at least 2 bots, 1 research",
                 effect: () => {
-                    powerUps.research.changeRerolls(-1)
-                    b.randomBot()
+                    if (powerUps.research.count > 0) {
+                        powerUps.research.changeRerolls(-1)
+                        b.randomBot()
+                    }
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].isBotTech) tech.tech[i].frequency *= 4
                     }
                 },
-                remove() {}
+                remove() {
+                    if (this.count > 0) {
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isBotTech) tech.tech[i].frequency /= 4
+                        }
+                    }
+                }
             }, {
                 name: "perimeter defense",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
@@ -1248,7 +1273,7 @@
                 requires: "",
                 effect() {
                     tech.collisionImmuneCycles += 45;
-                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                 },
                 remove() {
                     tech.collisionImmuneCycles = 30;
@@ -1328,7 +1353,7 @@
                         ctx.stroke();
                         //draw eye
                         ctx.beginPath();
-                        ctx.arc(15, 0, 3, 0, 2 * Math.PI);
+                        ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
                         ctx.fillStyle = m.eyeFillColor;
                         ctx.fill()
                         ctx.restore();
@@ -2002,6 +2027,27 @@
                     tech.largerHeals = 1;
                 }
             },
+            {
+                name: "healing technology",
+                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>12</strong> <strong class='color-h'>heals</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                isNonRefundable: true,
+                // isExperimentHide: true,
+                // isBadRandomOption: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    for (let i = 0; i < 12; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].isHealTech) tech.tech[i].frequency *= 2
+                    }
+                },
+                remove() {}
+            },
             // {
             //     name: "perpetual heals",
             //     description: "find <strong>3</strong> <strong class='color-h'>heals</strong> at the start of each <strong>level</strong>",
@@ -2225,6 +2271,7 @@
                     if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
 
                     tech.setupAllTech(); // remove all tech
+                    lore.techCount = 0;
                     // tech.addLoreTechToPool();
                     for (let i = 0; i < count; i++) { // spawn new tech power ups
                         powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
@@ -2268,7 +2315,7 @@
                 }
             }, {
                 name: "stimulated emission",
-                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>collision</strong>, eject <strong>1</strong> <strong class='color-m'>tech</strong>",
+                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2291,20 +2338,21 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
+                // isNonRefundable: true,
                 allowed() {
                     return tech.duplicationChance() < 1
                 },
                 requires: "below 100% duplication chance",
                 effect() {
                     tech.duplicateChance += 0.075
+                    tech.maxDuplicationEvent()
                     simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
                     tech.addJunkTechToPool(12)
-                    tech.maxDuplicationEvent()
                 },
                 remove() {
                     tech.duplicateChance = 0
                     if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+                    if (this.count > 1) tech.removeJunkTechFromPool(12)
                 }
             }, {
                 name: "futures exchange",
@@ -2491,7 +2539,7 @@
                 name: "dark patterns",
                 description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
-                isNonRefundable: true,
+                // isNonRefundable: true,
                 // isExperimentHide: true,
                 count: 0,
                 frequency: 1,
@@ -2505,7 +2553,12 @@
                     tech.addJunkTechToPool(18)
                     // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
                 },
-                remove() {}
+                remove() {
+                    if (this.count > 0) {
+                        tech.removeJunkTechFromPool(18)
+                        level.difficultyIncrease(simulation.difficultyMode)
+                    }
+                }
             }, {
                 name: "unified field theory",
                 description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
@@ -2522,8 +2575,36 @@
                 remove() {
                     tech.isGunSwitchField = false;
                 }
-            }, {
-                name: "statistical ensemble",
+            },
+            {
+                name: "field technology",
+                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                // isNonRefundable: true,
+                // isExperimentHide: true,
+                // isBadRandomOption: true,
+                allowed() {
+                    return !tech.isSuperDeterminism
+                },
+                requires: "not superdeterminism",
+                effect() {
+                    powerUps.spawn(m.pos.x, m.pos.y, "field");
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 2
+                    }
+                },
+                remove() {
+                    if (this.count > 1) {
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 2
+                        }
+                    }
+                }
+            },
+            {
+                name: "reinforcement learning",
                 description: "increase the <strong class='flicker'>frequency</strong> of finding copies of<br>recursive <strong class='color-m'>tech</strong> you already have by <strong>10000%</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2535,10 +2616,14 @@
                 requires: "at least 10 tech",
                 effect: () => {
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].count > 0) tech.tech[i].frequency += 100
+                        if (tech.tech[i].count > 0) tech.tech[i].frequency *= 100
                     }
                 },
-                remove() {}
+                remove() {
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].count > 0) tech.tech[i].frequency /= 100
+                    }
+                }
             }, {
                 name: "cardinality",
                 description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
@@ -2596,88 +2681,28 @@
                 remove() {
                     tech.isSuperDeterminism = false;
                 }
-            }, {
-                name: "gun technology",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                isNonRefundable: true,
-                // isExperimentHide: true,
-                // isBadRandomOption: true,
-                allowed() {
-                    return !tech.isSuperDeterminism
-                },
-                requires: "not superdeterminism",
-                effect() {
-                    powerUps.spawn(m.pos.x, m.pos.y, "gun");
-                    // this.count--
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
-                    }
-                },
-                remove() {}
-            }, {
-                name: "ammo technology",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong> <strong class='color-m'>tech</strong><br>spawn <strong>6</strong> <strong class='color-g'>ammo</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                isNonRefundable: true,
-                // isExperimentHide: true,
-                // isBadRandomOption: true,
-                allowed() {
-                    return !tech.isEnergyNoAmmo
-                },
-                requires: "not exciton lattice",
-                effect() {
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
-                    }
-                },
-                remove() {}
-            }, {
-                name: "field technology",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                isNonRefundable: true,
-                // isExperimentHide: true,
-                // isBadRandomOption: true,
-                allowed() {
-                    return !tech.isSuperDeterminism
-                },
-                requires: "not superdeterminism",
-                effect() {
-                    powerUps.spawn(m.pos.x, m.pos.y, "field");
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 2
-                    }
-                },
-                remove() {}
-            }, {
-                name: "healing technology",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>12</strong> <strong class='color-h'>heals</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                isNonRefundable: true,
-                // isExperimentHide: true,
-                // isBadRandomOption: true,
-                allowed() {
-                    return true
-                },
-                requires: "",
-                effect() {
-                    for (let i = 0; i < 12; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].isHealTech) tech.tech[i].frequency *= 200
-                    }
-                },
-                remove() {}
             },
+            //  {
+            //     name: "ammo technology",
+            //     description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong> <strong class='color-m'>tech</strong><br>spawn <strong>6</strong> <strong class='color-g'>ammo</strong>",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 1,
+            //     isNonRefundable: true,
+            //     // isExperimentHide: true,
+            //     // isBadRandomOption: true,
+            //     allowed() {
+            //         return !tech.isEnergyNoAmmo
+            //     },
+            //     requires: "not exciton lattice",
+            //     effect() {
+            //         for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
+            //         for (let i = 0, len = tech.tech.length; i < len; i++) {
+            //             if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
+            //         }
+            //     },
+            //     remove() {}
+            // },
             //************************************************** 
             //************************************************** gun
             //************************************************** tech
@@ -2834,7 +2859,7 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.isNailRadiation
+                    return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets
                 },
                 requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
                 effect() {
@@ -4513,7 +4538,7 @@
                 }
             }, {
                 name: "Penrose process",
-                description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>50</strong> <strong class='color-f'>energy</strong>",
+                description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>63</strong> <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4959,7 +4984,7 @@
                 },
                 requires: "",
                 effect() {
-                    for (let i = 0, len = Math.floor(m.energy * 40); i < len; i++) {
+                    for (let i = 0, len = 40; i < len; i++) {
                         setTimeout(() => {
                             m.energy -= 1 / len
                             const index = body.length

@@ -70,7 +70,7 @@ const powerUps = {
         document.body.style.overflow = "hidden"
         simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
-        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to collision damage for 30 cycles
+        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
         build.unPauseGrid()
         requestAnimationFrame(cycle);
         if (m.holdingTarget) m.drop();
@@ -379,11 +379,11 @@ const powerUps = {
                 } else {
                     if (tech.isBanish) {
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].name === "erase") powerUps.ejectTech(i)
+                            if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
                         }
                         // simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
                         simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
-                        powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                        // powerUps.spawn(m.pos.x, m.pos.y, "tech");
                         powerUps.endDraft("tech");
                     } else {
                         powerUps.giveRandomAmmo()
