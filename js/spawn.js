@@ -11,7 +11,7 @@ const spawn = {
         "launcher", "launcher",
         "springer", "springer",
         "sucker", "sucker",
-        "pulsar", "pulsar", "pulsar", "pulsar", "pulsar", //briefly high chance to show from a few days
+        "pulsar", "pulsar", "pulsar", "pulsar", "pulsar", "pulsar",
         "chaser",
         "sniper",
         "spinner",
@@ -1491,9 +1491,8 @@ const spawn = {
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
         me.fireCycle = 0
         me.fireTarget = { x: 0, y: 0 }
-        me.pulseRadius = Math.min(500, 300 + simulation.difficulty)
-        me.frictionAir = 0.01;
-        me.fireDelay = Math.min(90, 210 - simulation.difficulty)
+        me.pulseRadius = Math.min(400, 200 + simulation.difficulty * 3)
+        me.fireDelay = Math.max(70, 220 - simulation.difficulty * 2)
         me.isFiring = false
         me.onHit = function() {};
         me.canSeeTarget = function() {
@@ -1502,7 +1501,7 @@ const spawn = {
                 x: Math.cos(this.angle),
                 y: Math.sin(this.angle)
             }, diff); //the dot product of diff and dir will return how much over lap between the vectors
-            if (dot < 0.97 || Matter.Query.ray(map, this.fireTarget, this.position).length !== 0) { //if not looking at target
+            if (dot < 0.97 || Matter.Query.ray(map, this.fireTarget, this.position).length !== 0 || Matter.Query.ray(body, this.fireTarget, this.position).length !== 0) { //if not looking at target
                 this.isFiring = false
                 return false
             } else {
@@ -1513,7 +1512,6 @@ const spawn = {
             this.seePlayerByLookingAt();
             this.checkStatus();
             if (!m.isBodiesAsleep && this.seePlayer.recall) {
-
                 if (this.isFiring) {
                     if (this.fireCycle > this.fireDelay) { //fire
                         if (!this.canSeeTarget()) return
@@ -1527,22 +1525,27 @@ const spawn = {
                             x: this.fireTarget.x,
                             y: this.fireTarget.y,
                             radius: this.pulseRadius,
-                            color: "rgba(255,0,100,0.8)",
+                            color: "rgba(255,0,100,0.6)",
                             time: simulation.drawTime
                         });
                     } else { //delay before firing
                         this.fireCycle++
                         if (!(simulation.cycle % 3)) {
                             if (!this.canSeeTarget()) return //if can't see stop firing
-
                             //draw explosion outline
                             ctx.beginPath();
-                            ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI);
-                            ctx.fillStyle = "rgba(255,0,100,0.05)";
+                            ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                            ctx.fillStyle = "rgba(255,0,100,0.1)";
                             ctx.fill();
+                            //draw path from mob to explosion
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                            ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
+                            ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
                             ctx.lineWidth = 2;
                             ctx.strokeStyle = "rgba(255,0,100,0.5)";
                             ctx.stroke();
+                            ctx.setLineDash([0, 0]);
                         }
                     }
                 } else { //aim at player
@@ -1550,19 +1553,19 @@ const spawn = {
                     //rotate towards fireAngle
                     const angle = this.angle + Math.PI / 2;
                     const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-                    const threshold = 0.03;
+                    const threshold = 0.04;
                     if (c > threshold) {
-                        this.torque += 0.000001 * this.inertia;
+                        this.torque += 0.0000015 * this.inertia;
                     } else if (c < -threshold) {
-                        this.torque -= 0.000001 * this.inertia;
+                        this.torque -= 0.0000015 * this.inertia;
                     } else { //fire
-                        this.fireTarget = { x: player.position.x, y: player.position.y }
+                        unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
+                        this.fireTarget = Vector.add(this.vertices[1], unit)
                         if (!this.canSeeTarget()) return
                         Matter.Body.setAngularVelocity(this, 0)
                         this.fireLockCount = 0
                         this.isFiring = true
                         this.fireCycle = 0
-
                     }
                 }
             }

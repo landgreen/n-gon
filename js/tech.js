@@ -2844,7 +2844,7 @@
                 allowed() {
                     return tech.isBulletsLastLonger > 1
                 },
-                requires: "Lorentzian topology",
+                requires: "anti-shear topology",
                 effect() {
                     tech.isDamageFromBulletCount = true
                 },

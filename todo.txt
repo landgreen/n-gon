@@ -1,10 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-new mob: pulsar - aims at player and does damage in an circle
-  (set to 3x chance to show up until the next patch)
-
-several tech that were nonrefundable now can be removed and refunded
-added several bug fixes
 
 ******************************************************** BUGS ********************************************************
 
@@ -51,12 +46,12 @@ use the floor of portal sensor on the player? to unstuck player
 
 
 ******************************************************** TODO ********************************************************
-
-remove pulsar from high chance to show on next patch
+pulsar boss, ignores line of site, but a longer fire CD
 
 mob bullets that blow up
   draw outline of exploded region, 2 seconds later damage player in region and remove bullet
 
+holding down the field button on fields that don't have a normal field graphic shows a field arc outline to indicate grabbing blocks
 
 mob sniper: draw aim graphics before fire
 
