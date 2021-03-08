@@ -83,8 +83,7 @@ const spawn = {
             }
         }
     },
-    //
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss"]) {
+    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -1481,6 +1480,95 @@ const spawn = {
             }
         };
     },
+    pulsarBoss(x, y, radius = 90) {
+        mobs.spawn(x, y, 3, radius, "#a0f");
+        let me = mob[mob.length - 1];
+        me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+        Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+        me.radius *= 1.5
+        me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
+        me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
+        me.fireCycle = 0
+        me.fireTarget = { x: 0, y: 0 }
+        me.pulseRadius = Math.min(500, 230 + simulation.difficulty * 3)
+        me.fireDelay = Math.max(60, 190 - simulation.difficulty * 2)
+        me.isFiring = false
+
+        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random(), 1)
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+
+        me.onHit = function() {};
+        me.do = function() {
+            if (player.speed > 5) this.do = this.fire //don't attack until player moves
+        }
+        me.fire = function() {
+            this.checkStatus();
+            if (!m.isBodiesAsleep && !m.isCloak && !this.isStunned) {
+                if (this.isFiring) {
+                    if (this.fireCycle > this.fireDelay) { //fire
+                        this.isFiring = false
+                        //is player in beam path
+                        if (Matter.Query.ray([player], this.fireTarget, this.position).length) {
+                            unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
+                            this.fireTarget = Vector.add(this.vertices[1], unit)
+                        }
+                        //damage player if in range
+                        if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
+                            m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+                            m.damage(0.045 * simulation.dmgScale);
+                        }
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: this.fireTarget.x,
+                            y: this.fireTarget.y,
+                            radius: this.pulseRadius,
+                            color: "rgba(120,0,255,0.6)",
+                            time: simulation.drawTime
+                        });
+                    } else { //delay before firing
+                        this.fireCycle++
+                        if (!(simulation.cycle % 3)) {
+                            //draw explosion outline
+                            ctx.beginPath();
+                            ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                            ctx.fillStyle = "rgba(120,0,255,0.1)";
+                            ctx.fill();
+                            //draw path from mob to explosion
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                            ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
+                            ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "rgba(120,0,255,0.5)";
+                            ctx.stroke();
+                            ctx.setLineDash([0, 0]);
+                        }
+                    }
+                } else { //aim at player
+                    this.fireDir = Vector.normalise(Vector.sub(player.position, this.position)); //set direction to turn to fire
+                    //rotate towards fireAngle
+                    const angle = this.angle + Math.PI / 2;
+                    const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                    const threshold = 0.04;
+                    if (c > threshold) {
+                        this.torque += 0.0000015 * this.inertia;
+                    } else if (c < -threshold) {
+                        this.torque -= 0.0000015 * this.inertia;
+                    } else { //fire
+                        unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
+                        this.fireTarget = Vector.add(this.vertices[1], unit)
+                        Matter.Body.setAngularVelocity(this, 0)
+                        this.fireLockCount = 0
+                        this.isFiring = true
+                        this.fireCycle = 0
+                    }
+                }
+            }
+        };
+    },
     pulsar(x, y, radius = 30) {
         mobs.spawn(x, y, 3, radius, "#f08");
         let me = mob[mob.length - 1];
@@ -1501,7 +1589,7 @@ const spawn = {
                 x: Math.cos(this.angle),
                 y: Math.sin(this.angle)
             }, diff); //the dot product of diff and dir will return how much over lap between the vectors
-            if (dot < 0.97 || Matter.Query.ray(map, this.fireTarget, this.position).length !== 0 || Matter.Query.ray(body, this.fireTarget, this.position).length !== 0) { //if not looking at target
+            if (dot < 0.97 || Matter.Query.ray(map, this.fireTarget, this.position).length || Matter.Query.ray(body, this.fireTarget, this.position).length) { //if not looking at target
                 this.isFiring = false
                 return false
             } else {
@@ -1516,6 +1604,11 @@ const spawn = {
                     if (this.fireCycle > this.fireDelay) { //fire
                         if (!this.canSeeTarget()) return
                         this.isFiring = false
+                        //is player in beam path
+                        if (Matter.Query.ray([player], this.fireTarget, this.position).length) {
+                            unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
+                            this.fireTarget = Vector.add(this.vertices[1], unit)
+                        }
                         //damage player if in range
                         if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
                             m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage

@@ -1089,7 +1089,8 @@ const level = {
 
         // simulation.difficulty = 30 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.pulsar(1900, -500)
+        // spawn.pulsar(1900, -500)
+        spawn.pulsarBoss(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
@@ -1703,9 +1704,9 @@ const level = {
             powerUps.spawnBossPowerUp(-125, -1760);
         } else {
             if (Math.random() < 0.5) {
-                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss"]);
+                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss"]);
             } else {
-                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss"]);
+                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss"]);
             }
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
@@ -3672,7 +3673,7 @@ const level = {
                     spawn.tetherBoss(7000, -3300, { x: 7300, y: -3300 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(7000, -3300, "spawns", 8, 20, 105);
                 } else if (simulation.difficulty > 3) {
-                    spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss"]);
+                    spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "pulsarBoss"]);
                 }
             }
         } else { /// Reversed spawn
@@ -3682,7 +3683,7 @@ const level = {
                     spawn.tetherBoss(2300, -1300, { x: 2300, y: -1750 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(2350, -1300, "spawns", 8, 20, 105);
                 } else if (simulation.difficulty > 3) {
-                    spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss"]);
+                    spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss", "pulsarBoss"]);
                 }
             }
         }
@@ -4025,7 +4026,7 @@ const level = {
             //     };
             //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
             // } else {
-            spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss"]);
+            spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss", "pulsarBoss"]);
             //find level boss index
             let me
             for (let i = 0, len = mob.length; i < len; i++) {
