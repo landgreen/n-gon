@@ -3,6 +3,8 @@
 
 ******************************************************** BUGS ********************************************************
 
+inductive + MEE + 1st ion + negentrophy + electrolytes + tranceiver chip + dupe chance is ridiculously op
+
 micro-extruder is laggy?
 
 mouse event e.which is deprecated
@@ -46,7 +48,7 @@ use the floor of portal sensor on the player? to unstuck player
 
 
 ******************************************************** TODO ********************************************************
-pulsar boss, ignores line of site, but a longer fire CD
+add a delay between each fire for pulsar mobs
 
 mob bullets that blow up
   draw outline of exploded region, 2 seconds later damage player in region and remove bullet
