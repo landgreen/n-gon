@@ -37,8 +37,8 @@ const level = {
             // m.shipMode()
             // tech.isBotSwap = true;
 
-            // level.intro(); //starting level
-            level.testing(); //not in rotation
+            level.intro(); //starting level
+            // level.testing(); //not in rotation
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
             // level.testChamber() //less mobs, more puzzle
