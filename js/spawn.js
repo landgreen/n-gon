@@ -1579,7 +1579,7 @@ const spawn = {
             }
         };
     },
-    pulsar(x, y, radius = 30) {
+    pulsar(x, y, radius = 40) {
         mobs.spawn(x, y, 3, radius, "#f08");
         let me = mob[mob.length - 1];
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
@@ -1587,10 +1587,11 @@ const spawn = {
         me.radius *= 2
         me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
-        me.fireCycle = 0
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        me.fireCycle = Infinity
         me.fireTarget = { x: 0, y: 0 }
-        me.pulseRadius = Math.min(400, 150 + simulation.difficulty * 3)
-        me.fireDelay = Math.max(70, 180 - simulation.difficulty)
+        me.pulseRadius = Math.min(400, 165 + simulation.difficulty * 3)
+        me.fireDelay = Math.max(75, 150 - simulation.difficulty * 0.5)
         me.isFiring = false
         me.onHit = function() {};
         me.canSeeTarget = function() {
@@ -1681,7 +1682,7 @@ const spawn = {
                         this.torque += 0.000001 * this.inertia;
                     } else if (dot < -threshold) {
                         this.torque -= 0.000001 * this.inertia;
-                    } else if (this.fireCycle > 90) { // aim
+                    } else if (this.fireCycle > 60) { // aim
                         unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
                         this.fireTarget = Vector.add(this.vertices[1], unit)
                         if (!this.canSeeTarget()) return

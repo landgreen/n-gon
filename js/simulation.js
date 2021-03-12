@@ -525,7 +525,9 @@ const simulation = {
             level.levels.push("basement");
             level.levels.push("detours");
             level.levels.push("house");
-            level.levels.splice(0, 4); //remove 4 random levels to make up for adding the 4 community levels
+            level.levels.push("testChamber2");
+            // level.levels.push("vats");
+            level.levels.splice(0, 5); //remove some random levels to make up for adding the community levels
         }
         level.levels = shuffle(level.levels); //shuffles order of maps
         level.levels.unshift("intro"); //add level to the start of the randomized levels list
@@ -699,6 +701,7 @@ const simulation = {
         let holdTarget; //if player is holding something this remembers it before it gets deleted
         if (m.holdingTarget) holdTarget = m.holdingTarget;
 
+        simulation.fallHeight = 3000;
         m.fireCDcycle = 0
         m.drop();
         m.hole.isOn = false;
@@ -993,6 +996,7 @@ const simulation = {
             for (let i = 0, len = cons.length; i < len; ++i) {
                 ctx.moveTo(cons[i].pointA.x, cons[i].pointA.y);
                 ctx.lineTo(cons[i].bodyB.position.x, cons[i].bodyB.position.y);
+                // ctx.lineTo(cons[i].bodyB.position.x + cons[i].pointB.x, cons[i].bodyB.position.y + cons[i].pointB.y);
             }
             for (let i = 0, len = consBB.length; i < len; ++i) {
                 ctx.moveTo(consBB[i].bodyA.position.x, consBB[i].bodyA.position.y);

@@ -67,7 +67,7 @@
             if (index === 'random') {
                 let options = [];
                 for (let i = 0; i < tech.tech.length; i++) {
-                    if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) options.push(i);
+                    if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk && !tech.tech[i].isLore) options.push(i);
                 }
                 // give a random tech from the tech I don't have
                 if (options.length > 0) {
@@ -86,6 +86,12 @@
                     }
                     if (!found) return //if name not found don't give any tech
                 }
+                if (tech.isMetaAnalysis && tech.tech[index].isJunk) {
+                    tech.giveTech('random', true)
+                    for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "research");
+                    return
+                }
+
                 if (tech.tech[index].isLost) tech.tech[index].isLost = false; //give specific tech
                 tech.tech[index].effect(); //give specific tech
                 tech.tech[index].count++
@@ -1176,8 +1182,8 @@
                     tech.isBotDamage = false
                 }
             }, {
-                name: "bot replication",
-                description: "<strong class='color-dup'>duplicate</strong> your permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
+                name: "ersatz bots",
+                description: "<strong>double</strong> your permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2000,7 +2006,7 @@
                 frequency: 1,
                 isHealTech: true,
                 allowed() {
-                    return m.maxHealth > 1 || tech.isArmorFromPowerUps
+                    return m.health > 0.1 && (m.maxHealth > 1 || tech.isArmorFromPowerUps)
                 },
                 requires: "increased max health",
                 effect() {
@@ -2134,9 +2140,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isResearchReality
+                    return !tech.isImmortal && !tech.isResearchReality && level.onLevel < 6
                 },
-                requires: "not quantum immortality, perturbation theory",
+                requires: "before level 6, not quantum immortality, perturbation theory",
                 effect() {
                     tech.isSwitchReality = true;
                 },
@@ -2150,9 +2156,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isSwitchReality
+                    return !tech.isImmortal && !tech.isSwitchReality && (powerUps.research.count > 2 || build.isExperimentSelection)
                 },
-                requires: "not quantum immortality, many-worlds",
+                requires: "at least 2 research, not quantum immortality, many-worlds",
                 effect() {
                     tech.isResearchReality = true;
                     for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
@@ -2167,9 +2173,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return (powerUps.research.count > 1 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                    return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
                 },
-                requires: "not superdeterminism or Ψ(t) collapse<br>at least 2 research",
+                requires: "not superdeterminism or Ψ(t) collapse<br>at least 3 research",
                 effect() {
                     tech.renormalization = true;
                 },
@@ -2313,26 +2319,25 @@
                 remove() {
                     tech.isShieldAmmo = false;
                 }
-            }, {
-                name: "stimulated emission",
-                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
+            },
+            {
+                name: "meta-analysis",
+                description: "if you choose a <strong>junk</strong> <strong class='color-m'>tech</strong> you instead get a <br>random non-junk <strong class='color-m'>tech</strong> and spawn <strong>2</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 1,
+                frequency: 2,
                 allowed() {
-                    return tech.duplicationChance() < 1
+                    return tech.duplicateChance
                 },
-                requires: "below 100% duplication chance",
-                effect: () => {
-                    tech.isBayesian = true
-                    simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-                    tech.maxDuplicationEvent()
+                requires: "replication",
+                effect() {
+                    tech.isMetaAnalysis = true
                 },
                 remove() {
-                    tech.isBayesian = false
-                    if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+                    tech.isMetaAnalysis = false
                 }
-            }, {
+            },
+            {
                 name: "replication",
                 description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
@@ -2354,7 +2359,28 @@
                     if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
                     if (this.count > 1) tech.removeJunkTechFromPool(12)
                 }
-            }, {
+            },
+            {
+                name: "stimulated emission",
+                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.duplicationChance() < 1
+                },
+                requires: "below 100% duplication chance",
+                effect: () => {
+                    tech.isBayesian = true
+                    simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+                    tech.maxDuplicationEvent()
+                },
+                remove() {
+                    tech.isBayesian = false
+                    if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+                }
+            },
+            {
                 name: "futures exchange",
                 description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
@@ -2682,27 +2708,6 @@
                     tech.isSuperDeterminism = false;
                 }
             },
-            //  {
-            //     name: "ammo technology",
-            //     description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong> <strong class='color-m'>tech</strong><br>spawn <strong>6</strong> <strong class='color-g'>ammo</strong>",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 1,
-            //     isNonRefundable: true,
-            //     // isExperimentHide: true,
-            //     // isBadRandomOption: true,
-            //     allowed() {
-            //         return !tech.isEnergyNoAmmo
-            //     },
-            //     requires: "not exciton lattice",
-            //     effect() {
-            //         for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
-            //         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            //             if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
-            //         }
-            //     },
-            //     remove() {}
-            // },
             //************************************************** 
             //************************************************** gun
             //************************************************** tech
@@ -4352,23 +4357,6 @@
             //     }
             // },
             {
-                name: "plasma jet",
-                description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>27%</strong>",
-                isFieldTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
-                },
-                requires: "plasma torch",
-                effect() {
-                    tech.isPlasmaRange += 0.27;
-                },
-                remove() {
-                    tech.isPlasmaRange = 1;
-                }
-            }, {
                 name: "plasma-bot",
                 description: "a <strong class='color-bot'>bot</strong> uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
                 isFieldTech: true,
@@ -4388,7 +4376,26 @@
                 remove() {
                     tech.plasmaBotCount = 0;
                 }
-            }, {
+            },
+            {
+                name: "plasma jet",
+                description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>30%</strong>",
+                isFieldTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder
+                },
+                requires: "plasma torch, not micro-extruder",
+                effect() {
+                    tech.isPlasmaRange += 0.3;
+                },
+                remove() {
+                    tech.isPlasmaRange = 1;
+                }
+            },
+            {
                 name: "micro-extruder",
                 description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> extrudes a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
                 isFieldTech: true,
@@ -4396,9 +4403,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaRange === 1
                 },
-                requires: "plasma torch",
+                requires: "plasma torch, not plasma jet",
                 effect() {
                     tech.isExtruder = true;
                 },
@@ -5790,5 +5797,6 @@
         isFlipFlopOn: null,
         isFlipFlopLevelReset: null,
         isFlipFlopDamage: null,
-        isFlipFlopEnergy: null
+        isFlipFlopEnergy: null,
+        isMetaAnalysis: null
     }

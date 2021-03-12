@@ -112,11 +112,6 @@ const powerUps = {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
             if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(m.pos.x, m.pos.y, "research");
-            if (tech.isResearchReality && amount < 0) {
-                m.switchWorlds()
-                simulation.trails()
-                simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
-            }
             if (tech.isRerollHaste) {
                 if (powerUps.research.count === 0) {
                     tech.researchHaste = 0.66;
@@ -140,6 +135,11 @@ const powerUps = {
                 }
                 // simulation.makeTextLog(`${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)} estimated <strong class='color-m'>tech</strong> choices remaining`)
                 simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
+            }
+            if (tech.isResearchReality) {
+                m.switchWorlds()
+                simulation.trails()
+                simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             }
             powerUps[type].effect();
         },

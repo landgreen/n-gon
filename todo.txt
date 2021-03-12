@@ -1,28 +1,18 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+meta-analysis - if you choose a junk tech you instead get a random tech and spawn 2 research
+micro-extruder should have 50% less lag
+
+new community level testChamber2! by Oranger on n-gon discord
+(be sure to enable community levels in settings)
 
 ******************************************************** BUGS ********************************************************
 
-inductive + MEE + 1st ion + negentrophy + electrolytes + tranceiver chip + dupe chance is ridiculously op
-
-micro-extruder is laggy?
+fix issue where you have to press z once to get copy to work for simulation.enableConstructMode()
 
 mouse event e.which is deprecated
 
 fix door.isOpen actually meaning isClosed?
-
-(once for me, and a few times for discord) player gets stuck in crouch animation
-  occurred after rerolling a power up (which triggered a switchWorlds)
-  can't jump, move slow
-  m.crouch = false
-  only fixed itself when you click fire (drones, so no recoil)
-    fire fixes:
-      if (m.holdingTarget) m.drop()
-        so probably the player is getting stuck holding a block, but the block is removed
-          what removes blocks?
-  fixed? I added:  if (m.holdingTarget) m.drop();   to powerUps.endDraft  and to   m.switchWorlds
-
-use the floor of portal sensor on the player? to unstuck player
 
 (only once on my computer) once every 7 second check isn't running code
     power ups don't teleport to exit
@@ -48,19 +38,19 @@ use the floor of portal sensor on the player? to unstuck player
 
 
 ******************************************************** TODO ********************************************************
-add a delay between each fire for pulsar mobs
 
-mob bullets that blow up
-  draw outline of exploded region, 2 seconds later damage player in region and remove bullet
+allow levels to adjust the teleport limit in simulation.checks
 
-holding down the field button on fields that don't have a normal field graphic shows a field arc outline to indicate grabbing blocks
+copy time-like foam to shotgun
 
 mob sniper: draw aim graphics before fire
 
 tech laser: photon - laser, but it can only move 100 pixels a cycle
 
-mob - grows after taking damage
-mob - attack outwardly after taking damage
+mob - after taking damage
+  attack outwardly
+  grows
+  teleports
 
 tech- foam is attracted to mobs
   use a gravitational attraction model?
@@ -78,15 +68,6 @@ mobile requirements:
     tap screen regions to move (WASD)
     reduce font size
 
-tech:  removes itself after a few levels
-  gives extra duplication for 2 levels, then removes all duplication
-
-use ship tech to make a mob mode
-  differences from ship to mob
-    graphics
-    take no damage from mob collision
-  It would be cool if you could exit mob mode
-
 decrease healing effects by 50%
 decrease level scaling healing reduction
   net effect: healing at difficulty 40 (level 10 hard) should be 25% higher then current levels
@@ -99,8 +80,6 @@ bosses should have 2x health, but only do about 50 health damage
     boss flag cut damage done to boss by 20x <----
       make bosses not have extra density
     
-tech: spawn a bot after taking collision damage
-
 map: laboratory
   rooms with switches that change physics
     gravity room
@@ -109,11 +88,6 @@ map: laboratory
     radiation room
     portal + rotor + falling blocks = perpetual motion   room
   a button that spawns a heal.
-
-copy time-like foam to other guns?
-  wave gun
-  shotgun
-  nail gun
 
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -346,6 +320,7 @@ possible names for tech
   genetic algorithm
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
   stochastic optimization
+  meta-analysis
 
 plot script:
 

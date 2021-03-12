@@ -647,7 +647,6 @@ const m = {
             m.energy -= dmg;
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
-
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
