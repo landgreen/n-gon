@@ -87,7 +87,7 @@
                     if (!found) return //if name not found don't give any tech
                 }
                 if (tech.isMetaAnalysis && tech.tech[index].isJunk) {
-                    tech.giveTech('random', true)
+                    tech.giveTech('random')
                     for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "research");
                     return
                 }
@@ -252,7 +252,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 allowed() {
                     return (tech.isDamageForGuns || tech.isFireRateForGuns) && (b.inventory.length + 5) < b.guns.length
                 },
@@ -262,7 +261,12 @@
                     for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "gun");
                 },
                 remove() {
-                    tech.isGunCycle = false;
+                    if (tech.isGunCycle) {
+                        for (let i = 0; i < 6; i++) {
+                            if (b.inventory.length) b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name) //remove your last gun
+                        }
+                        tech.isGunCycle = false;
+                    }
                 }
             },
             {
@@ -573,7 +577,7 @@
                 }
             },
             {
-                name: "electrostatic discharge",
+                name: "simulated annealing",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>20%</strong><br><strong>20%</strong> increased <strong><em>delay</em></strong> after firing",
                 maxCount: 1,
                 count: 0,
@@ -1126,7 +1130,6 @@
                 count: 0,
                 frequency: 1,
                 isBotTech: true,
-                // isNonRefundable: true,
                 allowed() {
                     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
                 },
@@ -1189,7 +1192,6 @@
                 frequency: 1,
                 isBotTech: true,
                 isNonRefundable: true,
-                // isExperimentHide: true,
                 isBadRandomOption: true,
                 allowed() {
                     return b.totalBots() > 3
@@ -2040,8 +2042,6 @@
                 count: 0,
                 frequency: 1,
                 isNonRefundable: true,
-                // isExperimentHide: true,
-                // isBadRandomOption: true,
                 allowed() {
                     return true
                 },
@@ -2080,7 +2080,7 @@
                         powerUps.research.changeRerolls(0)
                     }, 1000);
                 },
-                description: "once per level use <strong>1</strong> <strong class='color-r'>research</strong> to avoid <strong>dying</strong><br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups",
+                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to avoid <strong>dying</strong><br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups once per level",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2258,9 +2258,8 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
-                // isNonRefundable: true,
+                isNonRefundable: true,
                 isBadRandomOption: true,
-                // isExperimentHide: true,
                 allowed() {
                     return (tech.totalCount > 6)
                 },
@@ -2269,19 +2268,17 @@
                     //remove active bullets  //to get rid of bots
                     for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                     bullet = [];
-                    let count = 0 //count tech
+                    let count = 1 //count tech
                     for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
                         if (!tech.tech[i].isNonRefundable) count += tech.tech[i].count
                     }
-                    if (tech.isDeterminism) count -= 3 //remove the bonus tech 
-                    if (tech.isSuperDeterminism) count -= 2 //remove the bonus tech 
+                    if (tech.isDeterminism) count -= 4 //remove the bonus tech 
+                    if (tech.isSuperDeterminism) count -= 4 //remove the bonus tech 
 
                     tech.setupAllTech(); // remove all tech
                     lore.techCount = 0;
                     // tech.addLoreTechToPool();
-                    for (let i = 0; i < count; i++) { // spawn new tech power ups
-                        powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
-                    }
+                    for (let i = 0; i < count; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "tech"); // spawn new tech power ups
                     //have state is checked in m.death()
                 },
                 remove() {}
@@ -2343,7 +2340,6 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                // isNonRefundable: true,
                 allowed() {
                     return tech.duplicationChance() < 1
                 },
@@ -2472,7 +2468,6 @@
                 count: 0,
                 frequency: 1,
                 isNonRefundable: true,
-                // isExperimentHide: true,
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism
                 },
@@ -2502,24 +2497,13 @@
                 count: 0,
                 frequency: 1,
                 isNonRefundable: true,
-                // isExperimentHide: true,
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism && tech.duplicationChance() > 0
                 },
                 requires: "at least 1 tech, a chance to duplicate power ups",
                 effect: () => {
-                    const have = [] //find which tech you have
-                    for (let i = 0; i < tech.tech.length; i++) {
-                        if (tech.tech[i].count > 0) have.push(i)
-                    }
-                    const choose = have[Math.floor(Math.random() * have.length)]
-                    simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
-                    for (let i = 0; i < tech.tech[choose].count; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                    tech.tech[choose].count = 0;
-                    tech.tech[choose].remove(); // remove a random tech form the list of tech you have
-                    tech.tech[choose].isLost = true
-                    simulation.updateTechHUD();
+                    const removeTotal = powerUps.removeRandomTech()
+                    for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {}
             }, {
@@ -2529,7 +2513,6 @@
                 count: 0,
                 frequency: 1,
                 isNonRefundable: true,
-                // isExperimentHide: true,
                 allowed() {
                     return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
                 },
@@ -2565,8 +2548,6 @@
                 name: "dark patterns",
                 description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
-                // isNonRefundable: true,
-                // isExperimentHide: true,
                 count: 0,
                 frequency: 1,
                 allowed() {
@@ -2608,9 +2589,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
-                // isNonRefundable: true,
-                // isExperimentHide: true,
-                // isBadRandomOption: true,
+                isNonRefundable: true,
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
@@ -2622,11 +2601,11 @@
                     }
                 },
                 remove() {
-                    if (this.count > 1) {
-                        for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 2
-                        }
-                    }
+                    // if (this.count > 1) {
+                    //     for (let i = 0, len = tech.tech.length; i < len; i++) {
+                    //         if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 2
+                    //     }
+                    // }
                 }
             },
             {
@@ -2635,7 +2614,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 allowed() {
                     return tech.totalCount > 9
                 },
@@ -2647,7 +2625,7 @@
                 },
                 remove() {
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].count > 0) tech.tech[i].frequency /= 100
+                        if (tech.tech[i].count > 0 && tech.tech[i].frequency > 1) tech.tech[i].frequency /= 100
                     }
                 }
             }, {
@@ -2672,7 +2650,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
                     return !tech.isExtraChoice && !tech.isCancelDuplication && !tech.isCancelRerolls
@@ -2680,11 +2657,12 @@
                 requires: "not cardinality, not futures or commodities exchanges",
                 effect: () => {
                     tech.isDeterminism = true;
-                    //if you change the six also change it in Born rule
+                    //if you change the number spawned also change it in Born rule
                     for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
                     tech.isDeterminism = false;
+                    for (let i = 0; i < 5; i++) powerUps.removeRandomTech()
                 }
             }, {
                 name: "superdeterminism",
@@ -2693,7 +2671,6 @@
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
-                isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
                     return tech.isDeterminism && !tech.manyWorlds && !tech.isGunSwitchField
@@ -2701,11 +2678,12 @@
                 requires: "determinism, not unified field theory",
                 effect: () => {
                     tech.isSuperDeterminism = true;
-                    //if you change the six also change it in Born rule
-                    for (let i = 0; i < 7; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
+                    //if you change the number spawned also change it in Born rule
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
                     tech.isSuperDeterminism = false;
+                    for (let i = 0; i < 5; i++) powerUps.removeRandomTech()
                 }
             },
             //************************************************** 
@@ -3656,6 +3634,41 @@
                 remove() {
                     tech.isFastFoam = false;
                 }
+            },
+            {
+                name: "electrostatic induction",
+                description: "<strong>foam</strong> bullets are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.haveGunCheck("foam") || tech.foamBotCount > 1
+                },
+                requires: "foam",
+                effect() {
+                    tech.isFoamAttract = true
+                },
+                remove() {
+                    tech.isFoamAttract = false
+                }
+            }, {
+                name: "quantum foam",
+                description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>127%</strong>",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.haveGunCheck("foam")
+                },
+                requires: "foam",
+                effect() {
+                    tech.foamFutureFire++
+                },
+                remove() {
+                    tech.foamFutureFire = 0;
+                }
             }, {
                 name: "foam fractionation",
                 description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong class='color-g'>ammo</strong>",
@@ -3672,23 +3685,6 @@
                 },
                 remove() {
                     tech.isAmmoFoamSize = false;
-                }
-            }, {
-                name: "quantum foam",
-                description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>143%</strong>",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return tech.haveGunCheck("foam")
-                },
-                requires: "foam",
-                effect() {
-                    tech.foamFutureFire++
-                },
-                remove() {
-                    tech.foamFutureFire = 0;
                 }
             },
 
@@ -5522,7 +5518,7 @@
                 count: 0,
                 frequency: 1,
                 isLore: true,
-                isNonRefundable: true,
+                // isNonRefundable: true,
                 isExperimentHide: true,
                 allowed() {
                     return true
@@ -5798,5 +5794,6 @@
         isFlipFlopLevelReset: null,
         isFlipFlopDamage: null,
         isFlipFlopEnergy: null,
-        isMetaAnalysis: null
+        isMetaAnalysis: null,
+        isFoamAttract: null
     }

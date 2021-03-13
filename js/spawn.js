@@ -1491,9 +1491,10 @@ const spawn = {
         me.fireCycle = 0
         me.fireTarget = { x: 0, y: 0 }
         me.pulseRadius = Math.min(500, 230 + simulation.difficulty * 3)
-        me.fireDelay = Math.max(60, 190 - simulation.difficulty * 2)
+        me.fireDelay = Math.max(60, 140 - simulation.difficulty * 2)
         me.isFiring = false
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        me.isBoss = true;
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random(), 1)
         me.onDeath = function() {
@@ -1560,11 +1561,11 @@ const spawn = {
                     //rotate towards fireAngle
                     const angle = this.angle + Math.PI / 2;
                     const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-                    const threshold = 0.03;
+                    const threshold = 0.04;
                     if (c > threshold) {
-                        this.torque += 0.000001 * this.inertia;
+                        this.torque += 0.0000015 * this.inertia;
                     } else if (c < -threshold) {
-                        this.torque -= 0.000001 * this.inertia;
+                        this.torque -= 0.0000015 * this.inertia;
                     } else if (this.fireCycle > 45) { //fire
                         unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
                         this.fireTarget = Vector.add(this.vertices[1], unit)
@@ -1590,8 +1591,8 @@ const spawn = {
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.fireCycle = Infinity
         me.fireTarget = { x: 0, y: 0 }
-        me.pulseRadius = Math.min(400, 165 + simulation.difficulty * 3)
-        me.fireDelay = Math.max(75, 150 - simulation.difficulty * 0.5)
+        me.pulseRadius = Math.min(400, 170 + simulation.difficulty * 3)
+        me.fireDelay = Math.max(75, 140 - simulation.difficulty * 0.5)
         me.isFiring = false
         me.onHit = function() {};
         me.canSeeTarget = function() {
@@ -1677,11 +1678,11 @@ const spawn = {
                         x: Math.cos(angle),
                         y: Math.sin(angle)
                     }, this.fireDir)
-                    const threshold = 0.03;
+                    const threshold = 0.04;
                     if (dot > threshold) { //rotate towards fireAngle
-                        this.torque += 0.000001 * this.inertia;
+                        this.torque += 0.0000015 * this.inertia;
                     } else if (dot < -threshold) {
-                        this.torque -= 0.000001 * this.inertia;
+                        this.torque -= 0.0000015 * this.inertia;
                     } else if (this.fireCycle > 60) { // aim
                         unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
                         this.fireTarget = Vector.add(this.vertices[1], unit)

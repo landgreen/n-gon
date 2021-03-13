@@ -630,6 +630,23 @@ const powerUps = {
             m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
         }
     },
+    removeRandomTech() {
+        const have = [] //find which tech you have
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech[i].count > 0) have.push(i)
+        }
+        if (have.length) {
+            const choose = have[Math.floor(Math.random() * have.length)]
+            simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+            const totalRemoved = tech.tech[choose].count
+            tech.tech[choose].count = 0;
+            tech.tech[choose].remove(); // remove a random tech form the list of tech you have
+            tech.tech[choose].isLost = true
+            simulation.updateTechHUD();
+            return totalRemoved
+        }
+        return 0
+    },
     directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
         let index = powerUp.length;
         target = powerUps[target];

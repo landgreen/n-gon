@@ -307,23 +307,25 @@ const b = {
     explosionRange() {
         return tech.explosiveRadius * (tech.isExplosionHarm ? 1.8 : 1) * (tech.isSmallExplosion ? 0.8 : 1) * (tech.isExplodeRadio ? 1.25 : 1)
     },
-    explosion(where, radius) { // typically explode is used for some bullets with .onEnd
+    explosion(where, radius, color = "rgba(255,25,0,0.6)") { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
         let dist, sub, knock;
         let dmg = radius * 0.013;
         if (tech.isExplosionHarm) radius *= 1.8 //    1/sqrt(2) radius -> area
         if (tech.isSmallExplosion) {
+            color = "rgba(255,0,30,0.7)"
             radius *= 0.8
             dmg *= 1.6
         }
 
         if (tech.isExplodeRadio) { //radiation explosion
             radius *= 1.25; //alert range
+            color = "rgba(25,139,170,0.25)"
             simulation.drawList.push({ //add dmg to draw queue
                 x: where.x,
                 y: where.y,
                 radius: radius,
-                color: "rgba(25,139,170,0.25)",
+                color: color,
                 time: simulation.drawTime * 2
             });
 
@@ -360,7 +362,7 @@ const b = {
                 x: where.x,
                 y: where.y,
                 radius: radius,
-                color: "rgba(255,25,0,0.6)",
+                color: color,
                 time: simulation.drawTime
             });
             const alertRange = 100 + radius * 2; //alert range
@@ -2246,7 +2248,7 @@ const b = {
                         this.target = null
                         this.collisionFilter.category = cat.bullet;
                         this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-                        if (tech.isFoamGrowOnDeath && bullet.length < 300) {
+                        if (tech.isFoamGrowOnDeath && bullet.length < 250) {
                             let targets = []
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -2290,6 +2292,20 @@ const b = {
                         this.radius *= SCALE;
                     } else {
                         this.force.y += this.mass * 0.00008; //gravity
+
+                        if (tech.isFoamAttract) {
+                            for (let i = 0, len = mob.length; i < len; i++) {
+                                if (mob[i].dropPowerUp && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < 375 && mob[i].alive && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                    this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * 0.004)
+                                    const slow = 0.9
+                                    Matter.Body.setVelocity(this, {
+                                        x: this.velocity.x * slow,
+                                        y: this.velocity.y * slow
+                                    });
+                                    break
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -4063,7 +4079,7 @@ const b = {
                     setTimeout(() => {
                         if (!simulation.paused) {
                             b.foam(position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
-                            bullet[bullet.length - 1].damage = (1 + 1.43 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
+                            bullet[bullet.length - 1].damage = (1 + 1.27 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
                         }
                     }, 250 * tech.foamFutureFire);
                 } else {

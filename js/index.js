@@ -217,7 +217,7 @@ const build = {
         text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         let countTech = 0
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (tech.tech[i].count > 0) {
+            if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isFieldTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
@@ -235,8 +235,8 @@ const build = {
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isLore) {
                     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
-                } else if (tech.tech[i].isJunk) {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                    // } else if (tech.tech[i].isJunk) {
+                    // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else {
                     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
@@ -755,10 +755,6 @@ window.addEventListener("keydown", function(event) {
                             m.energy = energy
                             document.getElementById("pause-field").innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}`
                         });
-                    }
-                    if (simulation.testing) {
-
-
                     }
                 }
             }

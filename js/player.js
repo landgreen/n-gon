@@ -380,13 +380,7 @@ const m = {
             //find what tech I could get
             let options = [];
             for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (
-                    tech.tech[i].count < tech.tech[i].maxCount &&
-                    tech.tech[i].allowed() &&
-                    !tech.tech[i].isBadRandomOption &&
-                    !tech.tech[i].isLore &&
-                    (!tech.tech[i].isJunk || Math.random() < 0.15)
-                ) {
+                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBadRandomOption && !tech.tech[i].isLore && !tech.tech[i].isJunk) {
                     for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
                 }
             }

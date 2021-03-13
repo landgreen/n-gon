@@ -1,10 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-meta-analysis - if you choose a junk tech you instead get a random tech and spawn 2 research
-micro-extruder should have 50% less lag
+tech: electrostatic induction - foam bullets are attracted to nearby mobs
 
-new community level testChamber2! by Oranger on n-gon discord
-(be sure to enable community levels in settings)
+portals on perplex map, now remove blocks that fall in
+new community map! coliseum by iNoobBoi
+
+a few more tech can be refunded properly
+nonRefundable tech don't show up in the list of tech you have
 
 ******************************************************** BUGS ********************************************************
 
@@ -39,10 +41,6 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-allow levels to adjust the teleport limit in simulation.checks
-
-copy time-like foam to shotgun
-
 mob sniper: draw aim graphics before fire
 
 tech laser: photon - laser, but it can only move 100 pixels a cycle
@@ -51,14 +49,6 @@ mob - after taking damage
   attack outwardly
   grows
   teleports
-
-tech- foam is attracted to mobs
-  use a gravitational attraction model?
-    could foam be attracted to other foam bullets too?
-      or foam is only attracted to foam bullets that are stuck to mobs
-    is this too computationally intense?
-  name - static cling
-  could also do bremsstrahlung radiation like damage on attachment
 
 mobile requirements:
   detect mobile, flip to landscape
@@ -88,6 +78,7 @@ map: laboratory
     radiation room
     portal + rotor + falling blocks = perpetual motion   room
   a button that spawns a heal.
+  consider adding canvas path shadows to levels in level.custom for non squared lighting
 
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -320,7 +311,7 @@ possible names for tech
   genetic algorithm
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
   stochastic optimization
-  meta-analysis
+  electrostatic discharge
 
 plot script:
 

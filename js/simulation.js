@@ -307,7 +307,7 @@ const simulation = {
             if (tech.tech[i].isLost) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
-            } else if (tech.tech[i].count > 0) {
+            } else if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += tech.tech[i].name
                 if (tech.tech[i].nameInfo) {
@@ -521,13 +521,24 @@ const simulation = {
 
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
         if (simulation.isCommunityMaps) {
+
             level.levels.push("stronghold");
             level.levels.push("basement");
-            level.levels.push("detours");
+            // level.levels.push("detours");
             level.levels.push("house");
-            level.levels.push("testChamber2");
+            level.levels.push("perplex");
+            level.levels.push("coliseum");
             // level.levels.push("vats");
             level.levels.splice(0, 5); //remove some random levels to make up for adding the community levels
+
+            //remove undefined tech for community maps
+            lore.techCount = 0;
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].isLore) {
+                    tech.tech[i].frequency = 0;
+                    tech.tech[i].count = 0;
+                }
+            }
         }
         level.levels = shuffle(level.levels); //shuffles order of maps
         level.levels.unshift("intro"); //add level to the start of the randomized levels list
