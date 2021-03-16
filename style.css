@@ -604,6 +604,13 @@ summary {
     font-weight: 100;
 }
 
+.color-j {
+    letter-spacing: 1px;
+    /* font-weight: 100; */
+    font-family: Lucida Console, Courier, monospace;
+    /* transform: rotate(-90deg); */
+}
+
 /* .color-rewind {
     background-image: linear-gradient(to left, #fff, #bbb);
     border-radius: 5px;

@@ -16,11 +16,11 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
-            // b.giveGuns("foam")
+            // b.giveGuns("spores")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
-            // tech.giveTech("supercritical fission")
-            // tech.giveTech("micro-extruder")
+            // tech.giveTech("needle gun")
+            // tech.giveTech("ceramic needles")
             // tech.giveTech("causality bombs")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
@@ -424,12 +424,14 @@ const level = {
     rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
         const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
             density: density,
-            isNotHoldable: true
+            isNotHoldable: true,
+            isComposite: true
         });
         const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
             angle: Math.PI / 2,
             density: density,
-            isNotHoldable: true
+            isNotHoldable: true,
+            isComposite: true
         });
         rotor = Body.create({ //combine rotor1 and rotor2
             parts: [rotor1, rotor2],
@@ -1100,8 +1102,8 @@ const level = {
 
         // simulation.difficulty = 30 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.pulsar(1900, -500)
-        spawn.pulsarBoss(1900, -500)
+        // spawn.pulsar(1900, -500)
+        // spawn.pulsarBoss(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
@@ -1113,7 +1115,7 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.shieldingBoss(1600, -500)
+        spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
@@ -4956,13 +4958,13 @@ const level = {
         document.body.style.backgroundColor = "#dcdcde";
         //Level
         level.setPosToSpawn(200, 50);
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
         level.exit.x = 8950;
-        level.exit.y = 200;
+        level.exit.y = 170;
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
 
         //Map
-        spawn.mapRect(150, 90, 100, 100);
-        spawn.mapRect(8950, 190, 100, 100);
         spawn.mapRect(-100, -400, 100, 600);
         spawn.mapRect(-100, 100, 700, 100);
         spawn.mapRect(500, 100, 100, 1700);
@@ -5006,7 +5008,7 @@ const level = {
         spawn.mapRect(8000, 1500, 300, 100);
         spawn.mapRect(7120, -100, 300, 100);
         spawn.mapRect(7000, 1500, 300, 100);
-        spawn.mapRect(6500, 1000, 300, 2100);
+        spawn.mapRect(6500, 1000, 300, 1200);
         spawn.mapRect(5800, 1100, 300, 100);
         spawn.mapRect(5900, 1700, 300, 100);
         spawn.mapRect(5300, 1400, 300, 100);
@@ -5063,11 +5065,11 @@ const level = {
         spawn.randomMob(8650, -200, 0.9); //end guards
 
 
-        //Boss Spawning
-        spawn.randomLevelBoss(6000, 700, ["pulsarBoss", "laserTargetingBoss", "powerUpBoss", "bomberBoss", "historyBoss", "orbitalBoss"]);
-        spawn.shieldingBoss(7200, 500);
-        if (simulation.difficulty > 20) {
-            spawn.randomLevelBoss(2000, 300, ["historyBoss", "shooterBoss"]);
+        //Boss Spawning 
+        if (simulation.difficulty > 3) {
+            spawn.randomLevelBoss(6000, 700, ["pulsarBoss", "laserTargetingBoss", "powerUpBoss", "bomberBoss", "historyBoss", "orbitalBoss"]);
+            if (simulation.difficulty > 10) spawn.shieldingBoss(7200, 500);
+            if (simulation.difficulty > 20) spawn.randomLevelBoss(2000, 300, ["historyBoss", "shooterBoss"]);
         }
 
         //Blocks

@@ -1,16 +1,19 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: electrostatic induction - foam bullets are attracted to nearby mobs
+bug fixes
+  strong anthropic principle does 0.03599% more damage
+  spores can stick to rotating blocks now
+  probably fixed the new wormhole field while targeting a block -> crouch lock bug
+  ceramic needles now correctly bypass shields
 
-portals on perplex map, now remove blocks that fall in
-new community map! coliseum by iNoobBoi
+needles fire 3 at a time with a short delay and no spread
 
-a few more tech can be refunded properly
-nonRefundable tech don't show up in the list of tech you have
+tech: planned obsolescence - 3x drone ammo, 1/3 drone nano-scale energy cost, but 53% reduced drone life span
 
 ******************************************************** BUGS ********************************************************
 
-fix issue where you have to press z once to get copy to work for simulation.enableConstructMode()
+you have to press z once to get copy to work for simulation.enableConstructMode() sometimes
+  not sure how to reproduce, but it happens often on the first draw
 
 mouse event e.which is deprecated
 
@@ -21,9 +24,6 @@ fix door.isOpen actually meaning isClosed?
     complex spin statistics isn't activating
   wasn't able to understand bug after extensive testing
   had tech: complex spin statistics
-
-(a few times) wormhole teleportation can leave the player in a stuck jump state
-  seems to be easily fixed, by porting, firing or something
 
 (always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
@@ -40,6 +40,20 @@ fix door.isOpen actually meaning isClosed?
 
 
 ******************************************************** TODO ********************************************************
+
+mob vision: look at player history
+    build a new type of attraction for mobs
+      if mobs can't see player, they check to see if they can see where the player was in the history
+    if mobs can't see player, they could check to see if they can find player in the past
+    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
+
+tech: chitin - take 50% less damage, reduce harm reduction by 5% after each collision
+
+Mob: "Tentacle": Sits on wall. Is a black blob. When you get near it, reaches out and grabs you, similar to wires. Does not deal damage.
+  maybe it could be immune to damage? but it is spawned by an actual mob
+
+wormhole, or CPT tech: after taking damage teleport in direction of mouse
+  after collision
 
 mob sniper: draw aim graphics before fire
 
@@ -152,12 +166,6 @@ tech pilot wave: mini black hole - pull mobs and blocks in with more force
 tech pilot wave: antigravity - blocks have no gravity for a few seconds after exiting the field
   maybe they bounce too?
   maybe they explode?
-
-mob vision: look at player history
-    build a new type of attraction for mobs
-      if mobs can't see player, they check to see if they can see where the player was in the history
-    if mobs can't see player, they could check to see if they can find player in the past
-    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
 
 wormhole - make it clear when the wormhole can and can't teleport to a location before the player clicks
 

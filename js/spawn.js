@@ -2566,7 +2566,7 @@ const spawn = {
                     this.cycle = 0
                     ctx.beginPath();
                     for (let i = 0; i < mob.length; i++) {
-                        if (!mob[i].isShielded && !mob[i].shield && mob[i].dropPowerUp) {
+                        if (!mob[i].isShielded && !mob[i].shield && mob[i].dropPowerUp && mob[i].alive) {
                             ctx.moveTo(this.position.x, this.position.y)
                             ctx.lineTo(mob[i].position.x, mob[i].position.y)
 

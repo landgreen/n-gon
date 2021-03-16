@@ -124,7 +124,7 @@
         damageFromTech() {
             let dmg = m.fieldDamage
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
-            if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.37
+            if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.5
             if (tech.isTechDamage) dmg *= 2
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
@@ -270,8 +270,8 @@
                 }
             },
             {
-                name: "gun technology",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong>",
+                name: "gun sciences",
+                description: "spawn a <strong class='color-g'>gun</strong> and </strong>double</strong> the <strong class='flicker'>frequency</strong><br>of finding  <strong class='color-m'>tech</strong> for a specific <strong class='color-g'>gun</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -358,14 +358,14 @@
             },
             {
                 name: "catabolism",
-                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>3</strong> <strong class='color-g'>ammo</strong>, but lose <strong>5</strong> <strong class='color-h'>health</strong>",
+                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>4</strong> <strong class='color-g'>ammo</strong>, but lose <strong>5</strong> <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isEnergyHealth && !tech.isEnergyNoAmmo
+                    return m.harmReduction() < 1 && !tech.isEnergyHealth && !tech.isEnergyNoAmmo
                 },
-                requires: "not mass-energy equivalence<br>not exciton-lattice",
+                requires: "some harm reduction, not mass-energy equivalence, exciton-lattice",
                 effect: () => {
                     tech.isAmmoFromHealth = true;
                 },
@@ -614,6 +614,58 @@
                 }
             },
             {
+                name: "microstates",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.isBulletsLastLonger > 1
+                },
+                requires: "anti-shear topology",
+                effect() {
+                    tech.isDamageFromBulletCount = true
+                },
+                remove() {
+                    tech.isDamageFromBulletCount = false
+                }
+            },
+            {
+                name: "anti-shear topology",
+                description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
+                // isGunTech: true,
+                maxCount: 3,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb
+                },
+                requires: "drones, spores, missiles, foam<br>wave beam, neutron bomb",
+                effect() {
+                    tech.isBulletsLastLonger += 0.3
+                },
+                remove() {
+                    tech.isBulletsLastLonger = 1;
+                }
+            },
+            {
+                name: "radioactive contamination",
+                description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio
+                },
+                requires: "radiation damage source",
+                effect() {
+                    tech.isRadioactive = true
+                },
+                remove() {
+                    tech.isRadioactive = false
+                }
+            },
+            {
                 name: "iridium-192",
                 description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>100%</strong> more <strong class='color-d'>damage</strong>, but over 4 seconds",
                 maxCount: 1,
@@ -700,6 +752,40 @@
                 }
             },
             {
+                name: "incendiary ammunition",
+                description: "<strong>shotgun</strong>, <strong>super balls</strong>, and <strong>drones</strong><br>are loaded with <strong class='color-e'>explosives</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
+                },
+                requires: "drones, super balls, shotgun",
+                effect() {
+                    tech.isIncendiary = true
+                },
+                remove() {
+                    tech.isIncendiary = false;
+                }
+            },
+            {
+                name: "fragmentation",
+                description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, rail gun, grenades, missiles, shotgun slugs</em>",
+                maxCount: 9,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
+                },
+                requires: "grenades, missiles, rail gun, shotgun slugs, or mass driver",
+                effect() {
+                    tech.fragments++
+                },
+                remove() {
+                    tech.fragments = 0
+                }
+            },
+            {
                 name: "thermal runaway",
                 description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
                 maxCount: 1,
@@ -714,6 +800,23 @@
                 },
                 remove() {
                     tech.isExplodeMob = false;
+                }
+            },
+            {
+                name: "impact shear",
+                description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br><em>nails target nearby mobs</em>",
+                maxCount: 9,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.isBotSpawner
+                },
+                requires: "no other mob death tech",
+                effect: () => {
+                    tech.nailsDeathMob++
+                },
+                remove() {
+                    tech.nailsDeathMob = 0;
                 }
             },
             {
@@ -734,23 +837,6 @@
                 },
                 remove() {
                     tech.sporesOnDeath = 0;
-                }
-            },
-            {
-                name: "impact shear",
-                description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br><em>nails target nearby mobs</em>",
-                maxCount: 9,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.isBotSpawner
-                },
-                requires: "no other mob death tech",
-                effect: () => {
-                    tech.nailsDeathMob++
-                },
-                remove() {
-                    tech.nailsDeathMob = 0;
                 }
             },
             {
@@ -1492,7 +1578,25 @@
                 remove() {
                     tech.isFreezeHarmImmune = false;
                 }
-            }, {
+            },
+            {
+                name: "superfluidity",
+                description: "<strong class='color-s'>freeze</strong> effects are applied to a small area",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField
+                },
+                requires: "a localized freeze effect",
+                effect() {
+                    tech.isAoESlow = true
+                },
+                remove() {
+                    tech.isAoESlow = false
+                }
+            },
+            {
                 name: "ablative drones",
                 description: "rebuild your broken parts as <strong>drones</strong><br>chance to occur after receiving <strong class='color-harm'>harm</strong>",
                 maxCount: 1,
@@ -2025,7 +2129,7 @@
                 frequency: 1,
                 isHealTech: true,
                 allowed() {
-                    return (m.health < 0.75 || build.isExperimentSelection) && !tech.isEnergyHealth
+                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isEnergyHealth
                 },
                 requires: "not mass-energy equivalence",
                 effect() {
@@ -2036,14 +2140,14 @@
                 }
             },
             {
-                name: "healing technology",
+                name: "maintenance",
                 description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>12</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 isNonRefundable: true,
                 allowed() {
-                    return true
+                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection)
                 },
                 requires: "",
                 effect() {
@@ -2118,14 +2222,14 @@
                 }
             }, {
                 name: "quantum immortality",
-                description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>16%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
+                description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>23%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isSwitchReality && !tech.isResearchReality
+                    return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid
                 },
-                requires: "not many-worlds, perturbation theory",
+                requires: "anthropic principle, not many-worlds, perturbation theory",
                 effect() {
                     tech.isImmortal = true;
                     // for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
@@ -2156,31 +2260,15 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isSwitchReality && (powerUps.research.count > 2 || build.isExperimentSelection)
+                    return !tech.isImmortal && !tech.isSwitchReality
                 },
-                requires: "at least 2 research, not quantum immortality, many-worlds",
+                requires: "not quantum immortality, many-worlds",
                 effect() {
                     tech.isResearchReality = true;
                     for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
                 },
                 remove() {
                     tech.isResearchReality = false;
-                }
-            }, {
-                name: "renormalization",
-                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
-                },
-                requires: "not superdeterminism or Ψ(t) collapse<br>at least 3 research",
-                effect() {
-                    tech.renormalization = true;
-                },
-                remove() {
-                    tech.renormalization = false;
                 }
             }, {
                 name: "decoherence",
@@ -2199,6 +2287,22 @@
                 remove() {
                     tech.isBanish = false
                     powerUps.tech.banishLog = [] //reset banish log
+                }
+            }, {
+                name: "renormalization",
+                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return (powerUps.research.count > 3 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                },
+                requires: "not superdeterminism or Ψ(t) collapse<br>at least 4 research",
+                effect() {
+                    tech.renormalization = true;
+                },
+                remove() {
+                    tech.renormalization = false;
                 }
             }, {
                 name: "perturbation theory",
@@ -2319,7 +2423,7 @@
             },
             {
                 name: "meta-analysis",
-                description: "if you choose a <strong>junk</strong> <strong class='color-m'>tech</strong> you instead get a <br>random non-junk <strong class='color-m'>tech</strong> and spawn <strong>2</strong> <strong class='color-r'>research</strong>",
+                description: "if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a <br>random normal <strong class='color-m'>tech</strong> and <strong>2</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2336,7 +2440,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2378,14 +2482,14 @@
             },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return tech.duplicationChance() < 1 && !tech.isDeterminism && (level.levelsCleared < 5 || Math.random() < 0.5)
+                    return tech.duplicationChance() < 1 && !tech.isDeterminism && level.levelsCleared < 5
                 },
-                requires: "below 100% duplication chance, not determinism",
+                requires: "below 100% duplication chance, below level 5, not determinism",
                 effect() {
                     tech.isCancelDuplication = true
                     tech.cancelCount = 0
@@ -2546,7 +2650,7 @@
                 }
             }, {
                 name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2584,7 +2688,7 @@
                 }
             },
             {
-                name: "field technology",
+                name: "vector fields",
                 description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2646,7 +2750,7 @@
                 }
             }, {
                 name: "determinism",
-                description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have only <strong>1 choice</strong>",
+                description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2666,7 +2770,7 @@
                 }
             }, {
                 name: "superdeterminism",
-                description: "spawn <strong>7</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>research</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+                description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>research</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -2733,108 +2837,6 @@
                     }
                 }
             }, {
-                name: "incendiary ammunition",
-                description: "<strong>shotgun</strong>, <strong>super balls</strong>, and <strong>drones</strong><br>are loaded with <strong class='color-e'>explosives</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
-                },
-                requires: "drones, super balls, shotgun",
-                effect() {
-                    tech.isIncendiary = true
-                },
-                remove() {
-                    tech.isIncendiary = false;
-                }
-            }, {
-                name: "fragmentation",
-                description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, rail gun, grenades, missiles, shotgun slugs</em>",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
-                },
-                requires: "grenades, missiles, rail gun, shotgun slugs, or mass driver",
-                effect() {
-                    tech.fragments++
-                },
-                remove() {
-                    tech.fragments = 0
-                }
-            }, {
-                name: "superfluidity",
-                description: "<strong class='color-s'>freeze</strong> effects are applied to a small area",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField
-                },
-                requires: "a freeze effect",
-                effect() {
-                    tech.isAoESlow = true
-                },
-                remove() {
-                    tech.isAoESlow = false
-                }
-            }, {
-                name: "radioactive contamination",
-                description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio
-                },
-                requires: "radiation damage source",
-                effect() {
-                    tech.isRadioactive = true
-                },
-                remove() {
-                    tech.isRadioactive = false
-                }
-            }, {
-                name: "anti-shear topology",
-                description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
-                isGunTech: true,
-                maxCount: 3,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb
-                },
-                requires: "drones, spores, missiles, foam<br>wave beam, neutron bomb",
-                effect() {
-                    tech.isBulletsLastLonger += 0.3
-                },
-                remove() {
-                    tech.isBulletsLastLonger = 1;
-                }
-            }, {
-                name: "microstates",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return tech.isBulletsLastLonger > 1
-                },
-                requires: "anti-shear topology",
-                effect() {
-                    tech.isDamageFromBulletCount = true
-                },
-                remove() {
-                    tech.isDamageFromBulletCount = false
-                }
-            }, {
                 name: "needle gun",
                 description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong class='color-g'>ammo</strong>",
                 isGunTech: true,
@@ -2872,7 +2874,7 @@
                     }
                 }
             }, {
-                name: "ceramic needle",
+                name: "ceramic needles",
                 description: `your <strong>needles</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
                 isGunTech: true,
                 maxCount: 1,
@@ -3599,6 +3601,31 @@
                 },
                 remove() {
                     tech.isDroneGrab = false
+                }
+            }, {
+                name: "planned obsolescence",
+                description: "reduce all <strong>drone</strong> production costs by <strong>300%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>53%</strong>",
+                isGunTech: true,
+                maxCount: 3,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
+                },
+                requires: "drones",
+                effect() {
+                    tech.droneCycleReduction = Math.pow(0.47, this.count)
+                    tech.droneEnergyReduction = Math.pow(0.33, this.count)
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * Math.pow(3, this.count)
+                    }
+                },
+                remove() {
+                    tech.droneCycleReduction = 1
+                    tech.droneEnergyReduction = 1
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
+                    }
                 }
             }, {
                 name: "necrophoresis",
@@ -4845,7 +4872,7 @@
                 remove() {}
             }, {
                 name: "defragment",
-                description: "set the <strong class='flicker'>frequency</strong> of finding junk <strong class='color-m'>tech</strong> to zero",
+                description: "set the <strong class='flicker'>frequency</strong> of finding <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to zero",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5021,7 +5048,7 @@
                 remove() {}
             }, {
                 name: "expert system",
-                description: "spawn a <strong class='color-m'>tech</strong> power up<br>add <strong>64</strong> junk <strong class='color-m'>tech</strong> to the potential pool",
+                description: "spawn a <strong class='color-m'>tech</strong> power up<br>add <strong>64</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -5795,5 +5822,7 @@
         isFlipFlopDamage: null,
         isFlipFlopEnergy: null,
         isMetaAnalysis: null,
-        isFoamAttract: null
+        isFoamAttract: null,
+        droneCycleReduction: null,
+        droneEnergyReduction: null
     }
