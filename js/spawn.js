@@ -96,7 +96,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.locatePlayer();
-        const density = 0.85
+        const density = 0.25
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -530,7 +530,7 @@ const spawn = {
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.map | cat.body
-        Matter.Body.setDensity(me, 0.001) // normal density is 0.001 // this reduces life by half and decreases knockback
+        Matter.Body.setDensity(me, 0.00035) // normal density is 0.001 // this reduces life by half and decreases knockback
         const k = 642 //k=r^2/m
         me.split = function() {
             Matter.Body.scale(this, 0.4, 0.4);
@@ -595,7 +595,7 @@ const spawn = {
         me.frictionAir = 0.01
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0005 * simulation.accelScale;
-        Matter.Body.setDensity(me, 0.001); //normal is 0.001
+        Matter.Body.setDensity(me, 0.00035); //normal is 0.001
         me.collisionFilter.mask = cat.bullet | cat.player
         me.memory = Infinity;
         me.seePlayerFreq = 30
@@ -909,7 +909,7 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.bullet
         // me.frictionAir = 0.005;
         me.memory = 1600;
-        Matter.Body.setDensity(me, 0.075); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             //applying forces to player doesn't seem to work inside this method, not sure why
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -1009,7 +1009,7 @@ const spawn = {
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         targets.push(me.id) //add to shield protection
         me.friction = 0;
@@ -1103,7 +1103,7 @@ const spawn = {
         // me.frictionAir = 0.005;
         // me.memory = 1600;
         // Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
-        Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0005 + 0.00018 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
 
 
@@ -1353,14 +1353,12 @@ const spawn = {
         me.frictionAir = 0.01;
         me.frictionStatic = 0;
         me.friction = 0;
-
         me.lookTorque = 0.000001 * (Math.random() > 0.5 ? -1 : 1);
-
         me.fireDir = {
             x: 0,
             y: 0
         }
-        Matter.Body.setDensity(me, 0.023); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random())
         me.onHit = function() {
@@ -1493,7 +1491,7 @@ const spawn = {
         me.pulseRadius = Math.min(500, 230 + simulation.difficulty * 3)
         me.fireDelay = Math.max(60, 140 - simulation.difficulty * 2)
         me.isFiring = false
-        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random(), 1)
@@ -1725,7 +1723,7 @@ const spawn = {
         me.frictionAir = 0.03;
         // me.torque -= me.inertia * 0.002
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
-        Matter.Body.setDensity(me, 0.05); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);  //not working, not sure why
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -2138,7 +2136,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "rgba(255,0,200,0.5)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.004 + 0.00035 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 1500000;
@@ -2230,7 +2228,7 @@ const spawn = {
             x: 0,
             y: 0
         };
-        Matter.Body.setDensity(me, 0.03 + 0.0008 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01 + 0.0003 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -2499,7 +2497,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.004 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -2539,7 +2537,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -2600,7 +2598,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.025); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -2751,7 +2749,7 @@ const spawn = {
         me.accelMag = 0.00075 * simulation.accelScale;
         me.memory = 250;
         me.laserRange = 500;
-        Matter.Body.setDensity(me, 0.0015 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.001 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             for (let i = 0; i < mob.length; i++) { //wake up tail mobs
@@ -2836,8 +2834,7 @@ const spawn = {
         me.g = 0.0001; //required if using 'gravity'
         me.accelMag = 0.002 * simulation.accelScale;
         me.memory = 20;
-        Matter.Body.setDensity(me, 0.001 + 0.0005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-
+        Matter.Body.setDensity(me, 0.0005 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         cons[cons.length] = Constraint.create({
             pointA: {
@@ -2997,7 +2994,7 @@ const spawn = {
         mobs.spawn(x, y, nodes, radius, "rgb(255,0,150)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.004 + 0.00035 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002 + 0.00015 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 2000000;

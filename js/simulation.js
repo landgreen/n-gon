@@ -243,8 +243,8 @@ const simulation = {
     },
     drawList: [], //so you can draw a first frame of explosions.. I know this is bad
     drawTime: 8, //how long circles are drawn.  use to push into drawlist.time
-    mobDmgColor: "rgba(255,0,0,0.7)", //used top push into drawList.color
-    playerDmgColor: "rgba(0,0,0,0.7)", //used top push into drawList.color
+    mobDmgColor: "rgba(255,0,0,0.7)", //color when a mob damages the player  // set by mass-energy tech
+    playerDmgColor: "rgba(0,0,0,0.7)", //color when the player damages a mob
     drawCircle() {
         //draws a circle for two cycles, used for showing damage mostly
         let i = simulation.drawList.length;
@@ -1007,7 +1007,7 @@ const simulation = {
             for (let i = 0, len = cons.length; i < len; ++i) {
                 ctx.moveTo(cons[i].pointA.x, cons[i].pointA.y);
                 ctx.lineTo(cons[i].bodyB.position.x, cons[i].bodyB.position.y);
-                // ctx.lineTo(cons[i].bodyB.position.x + cons[i].pointB.x, cons[i].bodyB.position.y + cons[i].pointB.y);
+                ctx.lineTo(cons[i].bodyB.position.x + cons[i].pointB.x, cons[i].bodyB.position.y + cons[i].pointB.y);
             }
             for (let i = 0, len = consBB.length; i < len; ++i) {
                 ctx.moveTo(consBB[i].bodyA.position.x, consBB[i].bodyA.position.y);

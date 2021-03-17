@@ -2109,11 +2109,11 @@ const b = {
                                         powerUp.splice(i, 1);
                                         if (tech.isDroneGrab) {
                                             this.isImproved = true;
-                                            const SCALE = 2.5
+                                            const SCALE = 2.25
                                             Matter.Body.scale(this, SCALE, SCALE);
-                                            this.lookFrequency = 30;
-                                            this.endCycle += 2500
-                                            this.frictionAir = 0
+                                            this.lookFrequency = 30 + Math.floor(11 * Math.random());
+                                            this.endCycle += 3000 * tech.droneCycleReduction * tech.isBulletsLastLonger
+                                            // this.frictionAir = 0
                                         }
                                         break;
                                     }

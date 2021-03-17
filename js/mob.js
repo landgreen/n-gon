@@ -1006,6 +1006,7 @@ const mobs = {
                     //mobs specific damage changes
                     if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
                     if (this.shield) dmg *= 0.075
+                    if (this.isBoss) dmg *= 0.25
 
                     //energy and heal drain should be calculated after damage boosts
                     if (tech.energySiphon && dmg !== Infinity && this.dropPowerUp) m.energy += Math.min(this.health, dmg) * tech.energySiphon

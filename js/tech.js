@@ -1748,6 +1748,7 @@
                     document.getElementById("health-bg").style.display = "none"
                     document.getElementById("dmg").style.backgroundColor = "#0cf";
                     tech.isEnergyHealth = true;
+                    simulation.mobDmgColor = "rgba(14, 190, 235,0.7)" //"#0cf"
                     m.displayHealth();
                 },
                 remove() {
@@ -1756,6 +1757,7 @@
                     document.getElementById("health-bg").style.display = "inline"
                     document.getElementById("dmg").style.backgroundColor = "#f67";
                     m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
+                    simulation.mobDmgColor = "rgba(0,0,0,0.7)"
                     m.displayHealth();
                 }
             }, {
@@ -3586,8 +3588,8 @@
                     tech.isFastDrones = false
                 }
             }, {
-                name: "harvester",
-                description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it's <strong>larger</strong>, <strong>faster</strong>, and very <strong>durable</strong>",
+                name: "delivery drone",
+                description: "if a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it becomes <strong>larger</strong>, <strong>faster</strong>, and more <strong>durable</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3603,7 +3605,7 @@
                     tech.isDroneGrab = false
                 }
             }, {
-                name: "planned obsolescence",
+                name: "reduced tolerances",
                 description: "reduce all <strong>drone</strong> production costs by <strong>300%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>53%</strong>",
                 isGunTech: true,
                 maxCount: 3,
@@ -3614,8 +3616,9 @@
                 },
                 requires: "drones",
                 effect() {
-                    tech.droneCycleReduction = Math.pow(0.47, this.count)
-                    tech.droneEnergyReduction = Math.pow(0.33, this.count)
+                    tech.droneCycleReduction = Math.pow(0.47, 1 + this.count)
+                    tech.droneEnergyReduction = Math.pow(0.33, 1 + this.count)
+                    console.log(tech.droneCycleReduction, tech.droneEnergyReduction)
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * Math.pow(3, this.count)
                     }
