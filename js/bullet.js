@@ -2037,7 +2037,7 @@ const b = {
             restitution: 1,
             dmg: 0.24, //damage done in addition to the damage from momentum
             lookFrequency: 80 + Math.floor(23 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((1100 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction),
+            endCycle: simulation.cycle + Math.floor((960 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 130 + RADIUS * 5,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,

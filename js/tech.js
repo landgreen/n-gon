@@ -1757,7 +1757,7 @@
                     document.getElementById("health-bg").style.display = "inline"
                     document.getElementById("dmg").style.backgroundColor = "#f67";
                     m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
-                    simulation.mobDmgColor = "rgba(0,0,0,0.7)"
+                    simulation.mobDmgColor = "rgba(255,0,0,0.7)"
                     m.displayHealth();
                 }
             }, {
@@ -3606,7 +3606,7 @@
                 }
             }, {
                 name: "reduced tolerances",
-                description: "reduce all <strong>drone</strong> production costs by <strong>300%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>53%</strong>",
+                description: "reduce all <strong>drone</strong> production costs by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>45%</strong>",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -3616,9 +3616,8 @@
                 },
                 requires: "drones",
                 effect() {
-                    tech.droneCycleReduction = Math.pow(0.47, 1 + this.count)
-                    tech.droneEnergyReduction = Math.pow(0.33, 1 + this.count)
-                    console.log(tech.droneCycleReduction, tech.droneEnergyReduction)
+                    tech.droneCycleReduction = Math.pow(0.55, 1 + this.count)
+                    tech.droneEnergyReduction = Math.pow(0.333, 1 + this.count)
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * Math.pow(3, this.count)
                     }
@@ -4734,7 +4733,6 @@
                     }
                     const index = options[Math.floor(Math.random() * options.length)]
                     tech.tech[index].frequency = 100
-                    console.log(tech.tech[index])
                 },
                 remove() {}
             },

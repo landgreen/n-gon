@@ -1,8 +1,9 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+fixed and renamed the new drone tech (it wasn't working right)
+
 level bosses will do about 50% less damage on collisions, but they will take about 33% more to kill
 
-fixed and renamed the new drone tech
 
 ******************************************************** BUGS ********************************************************
 
