@@ -341,7 +341,9 @@ const build = {
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'tech')`);
                     }
                 } else {
-                    techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div>`
                     if (!techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.add("experiment-grid-disabled");
                         techID.onclick = null
@@ -403,7 +405,8 @@ const build = {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                     }
                 } else {
-                    text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    // text += `<div id="tech-${i}" class="experiment-grid-module  "><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                    text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title"> ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                 }
             }
         }
@@ -415,6 +418,14 @@ const build = {
             document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-experiment").value
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         });
+
+        //add tooltips
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            if (document.getElementById(`tech-${i}`)) {
+                document.getElementById(`tech-${i}`).setAttribute('data-descr', tech.tech[i].requires); //add tooltip
+                // document.getElementById(`tech-${i}`).setAttribute('title', tech.tech[i].requires); //add tooltip
+            }
+        }
     },
     reset() {
         build.isExperimentSelection = true;

@@ -300,13 +300,29 @@ summary {
 .experiment-grid-disabled {
     /* opacity: 0.5; */
     background-color: var(--build-bg-color);
-    color: rgba(0, 0, 0, 0.2);
+    /* color: rgba(0, 0, 0, 0.9); */
+    color: #000;
+    opacity: 0.25;
     /* transition: background-color 1s, color 1s; */
 }
 
-.experiment-grid-disabled:hover {
-    /* background-color: #fff; */
+.experiment-grid-disabled[data-descr] {
+    position: relative;
+    /* opacity: 0; */
+}
+
+.experiment-grid-disabled[data-descr]:hover::after {
+    content: '\a \00a0 \00a0 \00a0 REQUIRES:\a''\00a0 \00a0 \00a0 'attr(data-descr);
+    white-space: pre-wrap;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     background-color: var(--build-bg-color);
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 0.5s ease;
 }
 
 #info {

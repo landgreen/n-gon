@@ -680,6 +680,7 @@ const powerUps = {
         if (
             (!tech.isSuperDeterminism || (target === 'tech' || target === 'heal' || target === 'ammo')) &&
             !(tech.isEnergyNoAmmo && target === 'ammo') &&
+            !(tech.isNoHeals || target === 'heal') &&
             (!simulation.isNoPowerUps || (target === 'research' || target === 'heal' || target === 'ammo'))
         ) {
             powerUps.directSpawn(x, y, target, moving, mode, size)

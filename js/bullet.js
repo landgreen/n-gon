@@ -2023,13 +2023,13 @@ const b = {
         //   y: m.Vy / 2 + speed * Math.sin(dir)
         // });
     },
-    drone(speed = 1) {
+    drone(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
         const me = bullet.length;
         const THRUST = tech.isFastDrones ? 0.0023 : 0.0015
         // const FRICTION = tech.isFastDrones ? 0.008 : 0.0005
         const dir = m.angle + 0.4 * (Math.random() - 0.5);
         const RADIUS = (4.5 + 3 * Math.random())
-        bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle) + Math.random(), m.pos.y + 30 * Math.sin(m.angle) + Math.random(), 8, RADIUS, {
+        bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
             angle: dir,
             inertia: Infinity,
             friction: 0.05,
@@ -2037,7 +2037,7 @@ const b = {
             restitution: 1,
             dmg: 0.24, //damage done in addition to the damage from momentum
             lookFrequency: 80 + Math.floor(23 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((960 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 130 + RADIUS * 5,
+            endCycle: simulation.cycle + Math.floor((950 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 140 + RADIUS * 5,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -4034,10 +4034,10 @@ const b = {
             have: false,
             fire() {
                 if (m.crouch) {
-                    b.drone(45)
+                    b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
                     m.fireCDcycle = m.cycle + Math.floor(13 * b.fireCD); // cool down
                 } else {
-                    b.drone(1)
+                    b.drone()
                     m.fireCDcycle = m.cycle + Math.floor(6 * b.fireCD); // cool down
                 }
             }

@@ -650,7 +650,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgb(255,150,100)"); //"#2c9790"
         let me = mob[mob.length - 1];
         // Matter.Body.setDensity(me, 0.0007); //extra dense //normal is 0.001 //makes effective life much lower
-        me.friction = 0;
+        me.friction = 0.1;
         me.frictionAir = 0;
         me.accelMag = 0.001 * Math.sqrt(simulation.accelScale);
         me.g = me.accelMag * 0.6; //required if using 'gravity'
@@ -2537,7 +2537,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -2727,6 +2727,49 @@ const spawn = {
             this.attraction();
         };
     },
+    // exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
+    //     mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
+    //     let me = mob[mob.length - 1];
+    //     me.onHit = function() { //run this function on hitting player
+    //         this.explode();
+    //     };
+    //     me.g = 0.0003; //required if using 'gravity'
+    //     me.seePlayerFreq = 50 + Math.floor(Math.random() * 20)
+    //     me.do = function() {
+    //         this.gravity();
+    //         if (!(simulation.cycle % this.seePlayerFreq)) {
+    //             if (
+    //                 this.distanceToPlayer2() < this.seeAtDistance2 &&
+    //                 Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
+    //                 Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+    //                 !m.isCloak
+    //             ) {
+    //                 this.foundPlayer();
+    //             } else if (this.seePlayer.recall) {
+    //                 for (let i = 0; i < 20; i++) {
+    //                     let history = m.history[(m.cycle - 30 * i) % 600]
+    //                     if (Matter.Query.ray(map, this.position, history.position).length === 0) {
+    //                         this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
+    //                         this.seePlayer.position.x = history.position.x;
+    //                         this.seePlayer.position.y = history.position.y;
+
+    //                         ctx.beginPath();
+    //                         ctx.moveTo(this.position.x, this.position.y);
+    //                         ctx.lineTo(history.position.x, history.position.y);
+    //                         ctx.lineWidth = 5;
+    //                         ctx.strokeStyle = "#000";
+    //                         ctx.stroke();
+
+    //                         break
+    //                     }
+    //                 }
+    //                 this.lostPlayer();
+    //             }
+    //         }
+    //         this.checkStatus();
+    //         this.attraction();
+    //     };
+    // },
     exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
         mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];

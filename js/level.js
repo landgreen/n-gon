@@ -1102,7 +1102,7 @@ const level = {
 
         // simulation.difficulty = 30 
         // spawn.starter(1900, -500, 200) //big boy
-        // spawn.pulsar(1900, -500)
+        spawn.exploder(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
@@ -1115,7 +1115,7 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        spawn.shieldingBoss(1600, -500)
+        // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 

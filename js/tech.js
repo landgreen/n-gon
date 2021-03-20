@@ -417,7 +417,7 @@
                 allowed() {
                     return tech.isCrouchAmmo && !tech.isEnergyHealth
                 },
-                requires: "desublimated ammunition<br>not mass-energy equivalence",
+                requires: "desublimated ammunition, not mass-energy",
                 effect() {
                     tech.isTurret = true
                 },
@@ -640,7 +640,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb
                 },
-                requires: "drones, spores, missiles, foam<br>wave beam, neutron bomb",
+                requires: "drones, spores, missiles, foam, wave beam, neutron bomb",
                 effect() {
                     tech.isBulletsLastLonger += 0.3
                 },
@@ -722,6 +722,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField)
                 },
@@ -1329,9 +1330,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.throwChargeRate > 1
+                    return tech.throwChargeRate > 1 && !tech.isNoHeals
                 },
-                requires: "mass driver",
+                requires: "mass driver, not ergodicity",
                 effect() {
                     tech.isBlockPowerUps = true
                 },
@@ -1390,11 +1391,9 @@
                 }
             }, {
                 name: "flip-flop",
-                description: `if <strong>flip-flop</strong> is <strong class="color-flop">ON</strong>, collisions set it to <strong class="color-flop">OFF</strong> 
-                              <br>if <strong>flip-flop</strong> is <strong class="color-flop">OFF</strong>, collisions set it to <strong class="color-flop">ON</strong>`,
-                // description: `<strong>collisions</strong> toggle flip-flop <strong>ON</strong> and <strong>OFF</strong>
-                //               <br><strong>ON</strong>: 0 collision <strong class='color-harm'>harm</strong>,  <strong>OFF</strong>: <strong>25%</strong> extra <strong class='color-harm'>harm</strong>`,
-                //   on your next <strong>collision</strong> take <strong>0</strong> <strong class='color-harm'>harm</strong>
+                description: `unlock advanced <strong class='color-m'>tech</strong> that runs if flip-flop is <strong class="color-flop">ON</strong><br><strong>flip-flop</strong> toggles <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a collision`,
+                // description: `if <strong>flip-flop</strong> is <strong class="color-flop">ON</strong>, collisions set it to <strong class="color-flop">OFF</strong> 
+                //               <br>if <strong>flip-flop</strong> is <strong class="color-flop">OFF</strong>, collisions set it to <strong class="color-flop">ON</strong>`,
                 nameInfo: "<span id = 'tech-flip-flop'></span>",
                 addNameInfo() {
                     setTimeout(function() {
@@ -1419,40 +1418,42 @@
                 effect() {
                     tech.isFlipFlop = true //do you have this tech?
                     tech.isFlipFlopOn = true //what is the state of flip-Flop?
-                    m.draw = () => {
-                        ctx.fillStyle = m.fillColor;
-                        m.walk_cycle += m.flipLegs * m.Vx;
+                    if (!m.isShipMode) {
+                        m.draw = () => {
+                            ctx.fillStyle = m.fillColor;
+                            m.walk_cycle += m.flipLegs * m.Vx;
 
-                        //draw body
-                        ctx.save();
-                        ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
-                        ctx.translate(m.pos.x, m.pos.y);
+                            //draw body
+                            ctx.save();
+                            ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                            ctx.translate(m.pos.x, m.pos.y);
 
-                        m.calcLeg(Math.PI, -3);
-                        m.drawLeg("#4a4a4a");
-                        m.calcLeg(0, 0);
-                        m.drawLeg("#333");
+                            m.calcLeg(Math.PI, -3);
+                            m.drawLeg("#4a4a4a");
+                            m.calcLeg(0, 0);
+                            m.drawLeg("#333");
 
-                        ctx.rotate(m.angle);
-                        ctx.beginPath();
-                        ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-                        grd.addColorStop(0, m.fillColorDark);
-                        grd.addColorStop(1, m.fillColor);
-                        ctx.fillStyle = grd;
-                        ctx.fill();
-                        ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                        ctx.strokeStyle = "#333";
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                        //draw eye
-                        ctx.beginPath();
-                        ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
-                        ctx.fillStyle = m.eyeFillColor;
-                        ctx.fill()
-                        ctx.restore();
+                            ctx.rotate(m.angle);
+                            ctx.beginPath();
+                            ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                            let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                            grd.addColorStop(0, m.fillColorDark);
+                            grd.addColorStop(1, m.fillColor);
+                            ctx.fillStyle = grd;
+                            ctx.fill();
+                            ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                            ctx.strokeStyle = "#333";
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            //draw eye
+                            ctx.beginPath();
+                            ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
+                            ctx.fillStyle = m.eyeFillColor;
+                            ctx.fill()
+                            ctx.restore();
 
-                        m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                            m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                        }
                     }
                 },
                 remove() {
@@ -1705,7 +1706,7 @@
                 allowed() {
                     return !tech.isEnergyHealth && (m.harmReduction() < 1 || tech.isFlipFlopHarm)
                 },
-                requires: "not mass-energy equivalence, some harm reduction",
+                requires: "not mass-energy, some harm reduction",
                 effect() {
                     tech.isPiezo = true;
                     m.energy += 20.48;
@@ -1767,9 +1768,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return tech.isEnergyHealth
+                    return tech.isEnergyHealth && !tech.isNoHeals
                 },
-                requires: "mass-energy equivalence",
+                requires: "mass-energy equivalence, not ergodicity",
                 effect() {
                     tech.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up
                     powerUps.heal.color = "#0ae"
@@ -1945,9 +1946,9 @@
                 frequency: 1,
                 isHealTech: true,
                 allowed() {
-                    return !tech.isEnergyHealth
+                    return !tech.isEnergyHealth && !tech.isNoHeals
                 },
-                requires: "not mass-energy equivalence",
+                requires: "not mass-energy equivalence, ergodicity",
                 effect() {
                     tech.isHealthRecovery = true;
                 },
@@ -2027,9 +2028,9 @@
                 frequency: 1,
                 isHealTech: true,
                 allowed() {
-                    return !tech.isEnergyHealth && tech.damageFromTech() > 1
+                    return !tech.isEnergyHealth && tech.damageFromTech() > 1 && !tech.isNoHeals
                 },
-                requires: "some increased damage, not mass-energy equivalence",
+                requires: "some increased damage, not mass-energy equivalence, ergodicity",
                 effect() {
                     tech.healthDrain += 0.03;
                 },
@@ -2059,9 +2060,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isEnergyHealth
+                    return !tech.isEnergyHealth && !tech.isNoHeals
                 },
-                requires: "not mass-energy equivalence",
+                requires: "not mass-energy equivalence, ergodicity",
                 effect() {
                     tech.bonusHealth += 0.5
                     m.addHealth(0.50)
@@ -2079,9 +2080,9 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return !tech.isEnergyHealth && !tech.isDroneGrab
+                    return !tech.isEnergyHealth && !tech.isDroneGrab && !tech.isNoHeals
                 },
-                requires: "not mass-energy equivalence, not drone harvester",
+                requires: "not mass-energy equivalence, not drone harvester, ergodicity",
                 effect() {
                     tech.isArmorFromPowerUps = true; //tracked by  tech.armorFromPowerUps
                 },
@@ -2114,9 +2115,9 @@
                 frequency: 1,
                 isHealTech: true,
                 allowed() {
-                    return m.health > 0.1 && (m.maxHealth > 1 || tech.isArmorFromPowerUps)
+                    return m.health > 0.1 && (m.maxHealth > 1 || tech.isArmorFromPowerUps) && !tech.isNoHeals
                 },
-                requires: "increased max health",
+                requires: "increased max health, not ergodicity",
                 effect() {
                     tech.isHealLowHealth = true;
                 },
@@ -2131,9 +2132,9 @@
                 frequency: 1,
                 isHealTech: true,
                 allowed() {
-                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isEnergyHealth
+                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isEnergyHealth && !tech.isNoHeals
                 },
-                requires: "not mass-energy equivalence",
+                requires: "not mass-energy equivalence, ergodicity",
                 effect() {
                     tech.largerHeals++;
                 },
@@ -2149,9 +2150,9 @@
                 frequency: 1,
                 isNonRefundable: true,
                 allowed() {
-                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection)
+                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isNoHeals
                 },
-                requires: "",
+                requires: "health > 70%, not ergodicity",
                 effect() {
                     for (let i = 0; i < 12; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -2335,7 +2336,7 @@
                 allowed() {
                     return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
                 },
-                requires: "not superdeterminism or Ψ(t) collapse<br>no research",
+                requires: "not superdeterminism or Ψ(t) collapse, no research",
                 effect: () => {
                     tech.manyWorlds = true;
                 },
@@ -2651,28 +2652,6 @@
                     tech.isMineDrop = false;
                 }
             }, {
-                name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                allowed() {
-                    return level.onLevel < 8 && level.onLevel > 0
-                },
-                requires: "between levels 1 and 7",
-                effect() {
-                    level.difficultyDecrease(simulation.difficultyMode)
-                    simulation.makeTextLog(`simulation.difficultyMode<span class='color-symbol'>--</span>`)
-                    tech.addJunkTechToPool(18)
-                    // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
-                },
-                remove() {
-                    if (this.count > 0) {
-                        tech.removeJunkTechFromPool(18)
-                        level.difficultyIncrease(simulation.difficultyMode)
-                    }
-                }
-            }, {
                 name: "unified field theory",
                 description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
                 maxCount: 1,
@@ -2790,6 +2769,50 @@
                 remove() {
                     tech.isSuperDeterminism = false;
                     for (let i = 0; i < 5; i++) powerUps.removeRandomTech()
+                }
+            },
+            {
+                name: "dark patterns",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return level.onLevel < 8 && level.onLevel > 0
+                },
+                requires: "between levels 1 and 7",
+                effect() {
+                    level.difficultyDecrease(simulation.difficultyMode)
+                    simulation.makeTextLog(`simulation.difficultyMode <span class='color-symbol'>--</span>`)
+                    tech.addJunkTechToPool(18)
+                    // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
+                },
+                remove() {
+                    if (this.count > 0) {
+                        tech.removeJunkTechFromPool(18)
+                        level.difficultyIncrease(simulation.difficultyMode)
+                    }
+                }
+            }, {
+                name: "ergodicity",
+                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>all <strong class='color-h'>healing</strong> has <strong>no</strong> effect",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return level.onLevel > 1
+                },
+                requires: "past levels 1",
+                effect() {
+                    tech.isNoHeals = true;
+                    level.difficultyDecrease(simulation.difficultyMode * 2)
+                    simulation.makeTextLog(`simulation.difficultyMode <span class='color-symbol'>-=</span> 2`)
+                },
+                remove() {
+                    tech.isNoHeals = false;
+                    if (this.count > 0) {
+                        level.difficultyIncrease(simulation.difficultyMode * 2)
+                    }
                 }
             },
             //************************************************** 
@@ -3053,7 +3076,7 @@
                 allowed() {
                     return (tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce)) * 2 > 1) && !tech.isIceCrystals
                 },
-                requires: "nails, rivets, nonceramic needles, not ice crystals",
+                requires: "nails, rivets, not ceramic needles, not ice crystals",
                 effect() {
                     tech.isNailRadiation = true;
                 },
@@ -3606,7 +3629,7 @@
                 }
             }, {
                 name: "reduced tolerances",
-                description: "reduce all <strong>drone</strong> production costs by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>45%</strong>",
+                description: "reduce all <strong>drone</strong> production costs by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -3616,7 +3639,7 @@
                 },
                 requires: "drones",
                 effect() {
-                    tech.droneCycleReduction = Math.pow(0.55, 1 + this.count)
+                    tech.droneCycleReduction = Math.pow(0.6, 1 + this.count)
                     tech.droneEnergyReduction = Math.pow(0.333, 1 + this.count)
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * Math.pow(3, this.count)
@@ -3923,7 +3946,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.isWideLaser
                 },
-                requires: "laser, not specular reflection<br>not diffraction grating",
+                requires: "laser, not specular reflection, not diffraction grating",
                 effect() {
                     tech.wideLaser += 2
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4708,8 +4731,28 @@
             //     remove() {}
             // },
             {
+                name: "disintegrated armament",
+                description: "spawn a <strong class='color-g'>gun</strong><br><strong>remove</strong> your active <strong class='color-g'>gun</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return b.inventory.length > 0
+                },
+                requires: "at least 1 gun",
+                effect() {
+                    if (b.activeGun && b.inventory.length > 0) b.removeGun(b.guns[b.activeGun].name)
+                    simulation.makeGunHUD()
+                    powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
+                },
+                remove() {}
+            },
+            {
                 name: "probability",
-                description: "increase the <strong class='flicker'>frequency</strong><br>of a random <strong class='color-m'>tech</strong> by <strong>100</strong>",
+                description: "increase the <strong class='flicker'>frequency</strong><br>of one random <strong class='color-m'>tech</strong> by <strong>100</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -4869,6 +4912,30 @@
                     //move health to the right
                     document.getElementById("health").style.left = "86px"
                     document.getElementById("health-bg").style.left = "86px"
+                },
+                remove() {}
+            }, {
+                name: "repartitioning",
+                description: "set the <strong class='flicker'>frequency</strong> of finding normal <strong class='color-m'>tech</strong> to <strong>0</strong><br>spawn 5 <strong class='color-m'>tech</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].isJunk) {
+                            tech.tech[i].frequency = 1
+                        } else {
+                            tech.tech[i].frequency = 0
+                        }
+                    }
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech");
                 },
                 remove() {}
             }, {
@@ -5825,5 +5892,6 @@
         isMetaAnalysis: null,
         isFoamAttract: null,
         droneCycleReduction: null,
-        droneEnergyReduction: null
+        droneEnergyReduction: null,
+        isNoHeals: null
     }

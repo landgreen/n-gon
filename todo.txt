@@ -1,8 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
+ 
+tech requirement info UI updated in experiment mode
 
-fixed and renamed the new drone tech (it wasn't working right)
-
-level bosses will do about 50% less damage on collisions, but they will take about 33% more to kill
+tech: ergodicity - remove heal power ups and heal tech,  reduce difficulty by 2 levels
 
 
 ******************************************************** BUGS ********************************************************
@@ -36,13 +36,22 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-damage circles when you have MEE should be field color
+reset on experiment menu should clear power ups and bullets
+
+
+give pulsars attraction if with in distance range
+
+should blocks block mob vision?
+  mobs will attack player in the starting room though...
+  Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
+  Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
 
 mob vision: look at player history
     build a new type of attraction for mobs
       if mobs can't see player, they check to see if they can see where the player was in the history
     if mobs can't see player, they could check to see if they can find player in the past
     https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
+    write find in spawn undo exploder, but commented out
 
 tech: chitin - take 50% less damage, reduce harm reduction by 5% after each collision
 
@@ -308,7 +317,6 @@ n-gon outreach ideas
 
 possible names for tech
   strange loop
-  perturbation theory
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   uncertainty principle

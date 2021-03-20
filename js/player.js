@@ -478,7 +478,7 @@ const m = {
         }
     },
     addHealth(heal) {
-        if (!tech.isEnergyHealth) {
+        if (!tech.isEnergyHealth && !tech.isNoHeals) {
             m.health += heal * simulation.healScale;
             if (m.health > m.maxHealth) m.health = m.maxHealth;
             m.displayHealth();
@@ -633,7 +633,7 @@ const m = {
         if (tech.isDroneOnDamage) { //chance to build a drone on damage  from tech
             const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40) / tech.droneEnergyReduction
             for (let i = 0; i < len; i++) {
-                if (Math.random() < 0.5) b.drone() //spawn drone
+                if (Math.random() < 0.5) b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 100 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 100 * (Math.random() - 0.5) }) //spawn drone
             }
         }
 
@@ -734,9 +734,6 @@ const m = {
         // } else {
         //   document.getElementById("health").style.transition = "width 1s ease-out"
         // }
-    },
-    hitMob(i, dmg) {
-        //prevents damage happening too quick
     },
     buttonCD: 0, //cool down for player buttons
     drawLeg(stroke) {
@@ -1567,7 +1564,7 @@ const m = {
                             b.iceIX(1)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;
-                            b.drone(1)
+                            b.drone()
                         }
                     }
 
