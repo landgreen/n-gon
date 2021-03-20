@@ -1102,8 +1102,8 @@ const level = {
 
         // simulation.difficulty = 30 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.exploder(1900, -500)
-        // spawn.pulsarBoss(1900, -500)
+        spawn.pulsar(1900, -500)
+        spawn.pulsarBoss(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)

@@ -496,6 +496,7 @@ const simulation = {
     fpsInterval: 0, //set in startGame
     then: null,
     startGame(isBuildRun = false) {
+        simulation.clearMap()
         if (!isBuildRun) { //if a build run logic flow returns to "experiment-button").addEventListener
             document.body.style.cursor = "none";
             document.body.style.overflow = "hidden"

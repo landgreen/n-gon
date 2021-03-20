@@ -428,7 +428,10 @@ const build = {
         }
     },
     reset() {
+        simulation.startGame(true); //starts game, but pauses it
         build.isExperimentSelection = true;
+        simulation.paused = true;
+
         m.setField(0)
 
         b.inventory = []; //removes guns and ammo  
@@ -522,9 +525,6 @@ function openExperimentMenu() {
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
-    simulation.startGame(true); //starts game, but pauses it
-    build.isExperimentSelection = true;
-    simulation.paused = true;
     build.reset();
 }
 

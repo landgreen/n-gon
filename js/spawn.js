@@ -1486,6 +1486,7 @@ const spawn = {
         me.radius *= 1.5
         me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
+        me.homePosition = { x: x, y: y };
         me.fireCycle = 0
         me.fireTarget = { x: 0, y: 0 }
         me.pulseRadius = Math.min(500, 230 + simulation.difficulty * 3)
@@ -1575,6 +1576,10 @@ const spawn = {
                         }
                     }
                 }
+                //gently return to starting location
+                const sub = Vector.sub(this.homePosition, this.position)
+                const dist = Vector.magnitude(sub)
+                if (dist > 250) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
             }
         };
     },
@@ -1586,6 +1591,7 @@ const spawn = {
         me.radius *= 2
         me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
+        me.homePosition = { x: x, y: y };
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.fireCycle = Infinity
         me.fireTarget = { x: 0, y: 0 }
@@ -1691,6 +1697,10 @@ const spawn = {
                         this.fireCycle = 0
                     }
                 }
+                //gently return to starting location
+                const sub = Vector.sub(this.homePosition, this.position)
+                const dist = Vector.magnitude(sub)
+                if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
             }
         };
     },

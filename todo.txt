@@ -1,9 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
  
-tech requirement info UI updated in experiment mode
+some tech is now only 50% likely to show up
+  I choose about 25 tech that don't effect game play as much, and dropped them down to 50% frequency
 
-tech: ergodicity - remove heal power ups and heal tech,  reduce difficulty by 2 levels
+reset on experiment menu should now clear power ups and bullets
 
+fixed bug with no heals
 
 ******************************************************** BUGS ********************************************************
 
@@ -36,10 +38,9 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-reset on experiment menu should clear power ups and bullets
-
-
-give pulsars attraction if with in distance range
+tech - gain all the tech you didn't take on the last selection menu
+  normally 2, but synergy with cardinality - 4, and 0 with determinism
+  frequency to 1
 
 should blocks block mob vision?
   mobs will attack player in the starting room though...
