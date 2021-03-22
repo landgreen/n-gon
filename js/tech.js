@@ -344,6 +344,7 @@
                 count: 0,
                 frequency: 2,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return tech.isAmmoForGun
                 },
@@ -2154,6 +2155,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isNoHeals
                 },
@@ -2321,7 +2323,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return powerUps.research.count === 0 && !tech.manyWorlds
+                    return powerUps.research.count === 0 && !tech.isAnsatz
                 },
                 requires: "no research",
                 effect() {
@@ -2345,10 +2347,10 @@
                 },
                 requires: "not superdeterminism or Ψ(t) collapse, no research",
                 effect: () => {
-                    tech.manyWorlds = true;
+                    tech.isAnsatz = true;
                 },
                 remove() {
-                    tech.manyWorlds = false;
+                    tech.isAnsatz = false;
                 }
             }, {
                 name: "Bayesian statistics",
@@ -2588,6 +2590,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism
                 },
@@ -2618,6 +2621,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism && tech.duplicationChance() > 0
                 },
@@ -2635,6 +2639,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
                 },
@@ -2693,6 +2698,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 isNonRefundable: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
@@ -2732,7 +2738,34 @@
                         if (tech.tech[i].count > 0 && tech.tech[i].frequency > 1) tech.tech[i].frequency /= 100
                     }
                 }
-            }, {
+            },
+
+            {
+                name: "backward induction",
+                description: "gain all the <strong class='color-m'>tech</strong> <strong>options</strong> you didn't <strong>choose</strong><br>from your previous <strong class='color-m'>tech</strong> selection",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                isNonRefundable: true,
+                isBadRandomOption: true,
+                allowed() {
+                    return powerUps.tech.choiceLog.length > 5 && !tech.isDeterminism
+                },
+                requires: "rejected an option in the last tech selection",
+                effect: () => {
+                    let num = 3
+                    if (tech.isExtraChoice) num = 5
+                    if (tech.isDeterminism) num = 1
+                    for (let i = powerUps.tech.choiceLog.length - 1 - num; i > powerUps.tech.choiceLog.length - 1 - num * 2; i--) {
+                        const index = powerUps.tech.choiceLog[i]
+                        if (powerUps.tech.choiceLog[i] !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed()) {
+                            tech.giveTech(index)
+                        }
+                    }
+                },
+                remove() {}
+            },
+            {
                 name: "cardinality",
                 description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
                 maxCount: 1,
@@ -2778,7 +2811,7 @@
                 frequencyDefault: 8,
                 isBadRandomOption: true,
                 allowed() {
-                    return tech.isDeterminism && !tech.manyWorlds && !tech.isGunSwitchField
+                    return tech.isDeterminism && !tech.isAnsatz && !tech.isGunSwitchField
                 },
                 requires: "determinism, not unified field theory",
                 effect: () => {
@@ -2829,12 +2862,20 @@
                     tech.isNoHeals = true;
                     level.difficultyDecrease(simulation.difficultyMode * 2)
                     simulation.makeTextLog(`simulation.difficultyMode <span class='color-symbol'>-=</span> 2`)
+                    powerUps.heal.color = "#abb"
+                    for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                        if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                    }
                 },
                 remove() {
-                    tech.isNoHeals = false;
-                    if (this.count > 0) {
-                        level.difficultyIncrease(simulation.difficultyMode * 2)
+                    if (tech.isNoHeals) {
+                        powerUps.heal.color = "#0eb"
+                        for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                            if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                        }
                     }
+                    tech.isNoHeals = false;
+                    if (this.count > 0) level.difficultyIncrease(simulation.difficultyMode * 2)
                 }
             },
             //************************************************** 
@@ -4768,7 +4809,7 @@
                 },
                 requires: "at least 1 gun",
                 effect() {
-                    if (b.activeGun && b.inventory.length > 0) b.removeGun(b.guns[b.activeGun].name)
+                    if (b.inventory.length > 0) b.removeGun(b.guns[b.activeGun].name)
                     simulation.makeGunHUD()
                     powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
                 },
@@ -5783,7 +5824,7 @@
         nailsDeathMob: null,
         isSlowFPS: null,
         isNeutronStun: null,
-        manyWorlds: null,
+        isAnsatz: null,
         isDamageFromBulletCount: null,
         isLaserDiode: null,
         isNailShot: null,

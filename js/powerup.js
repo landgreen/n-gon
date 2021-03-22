@@ -2,6 +2,7 @@ let powerUp = [];
 
 const powerUps = {
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
+    lastTechIndex: null,
     choose(type, index) {
         if (type === "gun") {
             b.giveGuns(index)
@@ -15,6 +16,7 @@ const powerUps = {
             m.setField(index)
             simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
         } else if (type === "tech") {
+            powerUps.lastTechIndex = index
             tech.giveTech(index)
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
         }
@@ -61,7 +63,7 @@ const powerUps = {
                 simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
             }
         }
-        if (tech.manyWorlds && powerUps.research.count === 0) {
+        if (tech.isAnsatz && powerUps.research.count === 0) {
             for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
         document.getElementById("choose-grid").style.display = "none"

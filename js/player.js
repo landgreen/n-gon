@@ -310,7 +310,7 @@ const m = {
         //remove all tech and count current tech total
         let totalTech = 0;
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isLore) {
+            if (tech.tech[i].count > 0 && !tech.tech[i].isLore) {
                 if (tech.tech[i].isJunk) {
                     tech.tech[i].frequency = 0
                 } else if (tech.tech[i].frequencyDefault) {

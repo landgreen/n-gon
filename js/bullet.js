@@ -4123,10 +4123,19 @@ const b = {
                                     y: mob[i].position.y,
                                     radius: Math.log(2 * damage + 1.1) * 40,
                                     color: "rgba(100,0,200,0.25)",
-                                    time: simulation.drawTime
+                                    time: simulation.drawTime * 2
                                 });
                             }
                         }
+                    }
+                    if (tech.isRailAreaDamage) {
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: m.pos.x,
+                            y: m.pos.y,
+                            radius: range,
+                            color: "rgba(100,0,200,0.04)",
+                            time: simulation.drawTime
+                        });
                     }
                     for (let i = 0, len = body.length; i < len; ++i) {
                         const SUB = Vector.sub(body[i].position, m.pos)
