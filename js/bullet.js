@@ -452,7 +452,7 @@ const b = {
     },
     pulse(energy, angle = m.angle) {
         let best;
-        let explosionRadius = 1400 * energy
+        let explosionRadius = 1300 * energy
         let range = 3000
         const path = [{
                 x: m.pos.x + 20 * Math.cos(angle),
@@ -537,7 +537,7 @@ const b = {
                 };
             }
         }
-        if (best.who) b.explosion(path[1], explosionRadius, true)
+        if (best.who) b.explosion(path[1], explosionRadius)
 
         if (tech.isPulseStun) {
             const range = 100 + 2000 * energy
@@ -661,7 +661,7 @@ const b = {
                 };
             }
         }
-        if (best.who) b.explosion(path[1], explosionRadius, true)
+        if (best.who) b.explosion(path[1], explosionRadius)
 
         //draw laser beam
         ctx.beginPath();

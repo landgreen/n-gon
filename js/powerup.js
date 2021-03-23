@@ -16,7 +16,9 @@ const powerUps = {
             m.setField(index)
             simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
         } else if (type === "tech") {
-            powerUps.lastTechIndex = index
+            setTimeout(() => {
+                powerUps.lastTechIndex = index
+            }, 100);
             tech.giveTech(index)
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
         }
@@ -342,7 +344,6 @@ const powerUps = {
                         // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name}</div> ${tech.tech[choose].description}</div>`
                         return choose
                     }
-
                 }
                 let text = ""
                 if (!tech.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>✕</div>`

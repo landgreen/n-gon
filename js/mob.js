@@ -312,7 +312,7 @@ const mobs = {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
                         Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
-                        Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+                        // Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -365,7 +365,7 @@ const mobs = {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
                         Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
-                        Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+                        // Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
                         !m.isCloak
                     ) {
                         this.foundPlayer();

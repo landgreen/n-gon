@@ -1953,7 +1953,7 @@ const spawn = {
                 if (
                     this.distanceToPlayer2() < this.seeAtDistance2 &&
                     Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
-                    Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+                    // Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
                     !m.isCloak
                 ) {
                     this.foundPlayer();
@@ -2547,7 +2547,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed

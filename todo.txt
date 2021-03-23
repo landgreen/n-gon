@@ -1,8 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
  
-more bug fixes (many worlds, disintegrated armament)
+more bug fixes (pulse color, backwards induction giving too many tech)
 
-tech: backward induction - gain all the tech options you didn't choose from your previous tech selection menu
+mobs can now see through blocks
+  mobs spawns and level spawns have been adjusted to prevent getting zonked at the start of a level
+
 
 ******************************************************** BUGS ********************************************************
 
@@ -35,23 +37,27 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-change the color of heals for ergodicity
-
+have junk tech drop frequency to 0 after showing up once
+  how to communicate that to player?
+    console message
+    
 look into improving mouse lag with pointer lock?
 https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
 https://www.vsynctester.com/game.html
 https://news.ycombinator.com/item?id=26530272
 
-clarify dielectric polarization text / graphics
-
-tech - gain all the tech you didn't take on the last selection menu
-  normally 2, but synergy with cardinality - 4, and 0 with determinism
-  frequency to 1
-
 should blocks block mob vision?
-  mobs will attack player in the starting room though...
   Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
   Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+  only negative is mobs will attack player in the starting room
+    maybe make all doors to spawns somehow block vision
+    maybe start in cloaking mode
+      disable it a few cycles after level loads?
+      or disable when player moves?
+    ***maybe just clear spawns away from the starting room***
+      ok go through each map and find issues on each map
+      **but first test he game with no block blocking vision**
+
 
 mob vision: look at player history
     build a new type of attraction for mobs

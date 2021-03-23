@@ -1392,9 +1392,7 @@
                 }
             }, {
                 name: "flip-flop",
-                description: `unlock advanced <strong class='color-m'>tech</strong> that runs if flip-flop is <strong class="color-flop">ON</strong><br><strong>flip-flop</strong> toggles <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a collision`,
-                // description: `if <strong>flip-flop</strong> is <strong class="color-flop">ON</strong>, collisions set it to <strong class="color-flop">OFF</strong> 
-                //               <br>if <strong>flip-flop</strong> is <strong class="color-flop">OFF</strong>, collisions set it to <strong class="color-flop">ON</strong>`,
+                description: `<strong>flip-flop</strong> toggles <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
                 nameInfo: "<span id = 'tech-flip-flop'></span>",
                 addNameInfo() {
                     setTimeout(function() {
@@ -2742,7 +2740,7 @@
 
             {
                 name: "backward induction",
-                description: "gain all the <strong class='color-m'>tech</strong> <strong>options</strong> you didn't <strong>choose</strong><br>from your previous <strong class='color-m'>tech</strong> selection",
+                description: "<strong>choose</strong> all the <strong class='color-m'>tech</strong> <strong>options</strong> you didn't <strong>choose</strong><br>from your previous <strong class='color-m'>tech</strong> selection",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2760,6 +2758,7 @@
                         const index = powerUps.tech.choiceLog[i]
                         if (powerUps.tech.choiceLog[i] !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed()) {
                             tech.giveTech(index)
+                            simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>// backward induction</em>`);
                         }
                     }
                 },

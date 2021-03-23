@@ -12,7 +12,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(25)
+            // level.difficultyIncrease(125)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
@@ -822,9 +822,9 @@ const level = {
                     }
                     //float
                     if (player.velocity.y > 5) player.force.y -= 0.95 * player.mass * simulation.g
-                    const slowY = (player.velocity.y > 0) ? Math.max(0.4, 1 - 0.001 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
+                    const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - 0.002 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
                     Matter.Body.setVelocity(player, {
-                        x: Math.max(0.6, 1 - 0.07 * Math.abs(player.velocity.x)) * player.velocity.x,
+                        x: Math.max(0.95, 1 - 0.036 * Math.abs(player.velocity.x)) * player.velocity.x,
                         y: slowY * player.velocity.y
                     });
                 }
@@ -1221,7 +1221,7 @@ const level = {
         };
         level.customTopLayer = () => {};
 
-        level.setPosToSpawn(0, -750); //normal spawn
+        level.setPosToSpawn(0, -475); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 6500;
         level.exit.y = -230;
@@ -1241,7 +1241,11 @@ const level = {
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
         spawn.mapRect(-950, -1800, 8200, 800); //roof
-        spawn.mapRect(-250, -700, 1000, 900); // shelf
+        // spawn.mapRect(-250, -700, 1000, 900); // shelf
+        // spawn.mapRect(-250, -350, 600, 550);
+        spawn.mapRect(175, -700, 575, 950);
+        spawn.mapRect(-250, -425, 600, 650);
+
         spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
         powerUps.spawnStartingPowerUps(600, -800);
 
@@ -1619,6 +1623,8 @@ const level = {
         spawn.mapRect(300, -375, 50, 225);
         spawn.bodyRect(312, -150, 25, 140);
         spawn.mapRect(300, -10, 50, 50);
+        spawn.mapVertex(1555, 0, "625 0   75 0   200 -100   500 -100"); //entrance ramp
+
 
         //upper entrance / exit
         spawn.mapRect(-400, -1050, 750, 50);
@@ -1692,16 +1698,22 @@ const level = {
         //mobs
         spawn.randomMob(1075, -3500, -0.3);
         // spawn.randomMob(-75, -3425, 0.2);
-        spawn.randomMob(1475, -225, -0.3);
-        spawn.randomMob(2075, -150, -0.2);
+        // spawn.randomMob(1475, -225, -0.3);
+        // spawn.randomMob(2075, -150, -0.2);
         spawn.randomMob(2175, -700, -0.2);
         spawn.randomMob(-75, -850, -0.1);
-        spawn.randomMob(1300, -600, -0.1);
+        // spawn.randomMob(1300, -600, -0.1);
         spawn.randomMob(550, -3400, 0);
         spawn.randomMob(0, -1175, 0.5);
         spawn.randomMob(-75, -1150, 0.5);
         spawn.randomMob(1075, -625, 0.5);
-        spawn.randomMob(1725, -575, 0.5);
+        // spawn.randomMob(1725, -575, 0.5);
+        spawn.randomMob(800, -3400, -0.3);
+        spawn.randomMob(1225, -3375, -0.2);
+        spawn.randomMob(1200, -1125, -0.1);
+        spawn.randomMob(2050, -950, 0.5);
+
+
         if (simulation.difficulty > 40) {
             spawn.randomMob(2300, -2775, -0.5);
             spawn.randomMob(600, -925, -0.5);
@@ -1842,6 +1854,7 @@ const level = {
         spawn.mapRect(9300, 2590, 650, 25);
         spawn.mapRect(9700, 2580, 100, 50);
 
+
         spawn.randomGroup(1300, 2100, 0.1);
         spawn.randomMob(8300, 2100, 0.1);
         spawn.randomSmallMob(2575, -75, 0.1); //entrance
@@ -1850,7 +1863,7 @@ const level = {
         spawn.randomMob(2425, 2150, 0.1);
         spawn.randomSmallMob(3500, 250, 0.2);
         spawn.randomMob(3800, 2175, 0.2);
-        spawn.randomSmallMob(1100, -300, 0.2); //entrance
+        spawn.randomSmallMob(2500, -275, 0.2); //entrance
         spawn.randomMob(4450, 2500, 0.2);
         spawn.randomMob(6350, 2525, 0.2);
         spawn.randomGroup(9200, 2400, 0.3);
@@ -1891,7 +1904,8 @@ const level = {
             }
         };
 
-        level.setPosToSpawn(-50, -50); //normal spawn
+        level.setPosToSpawn(-100, 210); //normal spawn
+        spawn.mapRect(-150, 240, 100, 30);
         level.exit.x = -100;
         level.exit.y = -425;
         spawn.mapRect(level.exit.x, level.exit.y + 15, 100, 50); //exit bump
@@ -1907,14 +1921,13 @@ const level = {
         document.body.style.backgroundColor = "#dbdcde";
 
         //spawn start building
-        spawn.mapRect(-300, -800, 50, 800);
-        spawn.mapRect(-100, -20, 100, 30);
+        spawn.mapRect(-350, -800, 100, 1100);
         // spawn.mapRect(-300, -10, 500, 50);
         spawn.mapRect(150, -510, 50, 365);
-        spawn.bodyRect(170, -130, 14, 145, 1, spawn.propsFriction); //door to starting room
+        spawn.bodyRect(170, -140, 20, 163, 1, spawn.propsFriction); //door to starting room
+        spawn.mapVertex(175, 200, "625 0   300 0   425 -300   500 -300"); //entrance ramp
         // spawn.mapRect(-300, 0, 1000, 300); //ground
-        spawn.mapVertex(-18, 145, "625 0  0 0  0 -300  500 -300"); //entrance ramp
-        spawn.mapRect(-300, 250, 6300, 300); //deeper ground
+        spawn.mapRect(-350, 250, 6350, 300); //deeper ground
         spawn.bodyRect(2100, 50, 80, 80);
         spawn.bodyRect(2000, 50, 60, 60);
         // spawn.bodyRect(1650, 50, 300, 200);
@@ -1923,10 +1936,10 @@ const level = {
 
         //exit building
         // spawn.mapRect(-100, -410, 100, 30);
-        spawn.mapRect(-300, -800, 500, 50);
+        spawn.mapRect(-350, -850, 550, 100);
         spawn.mapRect(150, -800, 50, 110);
         spawn.bodyRect(170, -690, 14, 180, 1, spawn.propsFriction); //door to exit room
-        spawn.mapRect(-300, -400, 500, 100); //far left starting ceiling
+        spawn.mapRect(-300, -400, 500, 150); //far left starting ceiling
         level.fill.push({
             x: -250,
             y: -400,
@@ -2050,10 +2063,10 @@ const level = {
         spawn.randomMob(5750, 125, 0.4);
         spawn.randomMob(5900, -1500, 0.4);
         spawn.randomMob(4700, -800, 0.4);
-        spawn.randomMob(1400, -400, 0.3);
+        spawn.randomMob(1400, 200, 0.3);
         spawn.randomMob(2850, 175, 0.4);
         spawn.randomMob(2000, -2800, 0.4);
-        spawn.randomMob(2200, -500, 0.4);
+        spawn.randomMob(2400, -400, 0.4);
         spawn.randomMob(4475, -3550, 0.3);
         spawn.randomGroup(5000, -2150, 1);
         spawn.randomGroup(3700, -4100, 0.3);
@@ -2277,12 +2290,15 @@ const level = {
         spawn.spawnStairs(3800, 0, 3, 150, 206); //stairs top exit
         spawn.mapRect(3400, -275, 450, 275); //exit platform
 
+
+
+
         spawn.randomSmallMob(2200, -1775);
         spawn.randomSmallMob(4000, -825);
-        spawn.randomSmallMob(-350, -2400);
+        spawn.randomSmallMob(-350, -3400);
         spawn.randomMob(4250, -1350, 0.8);
         spawn.randomMob(2550, -1350, 0.8);
-        spawn.randomMob(1225, -2400, 0.3);
+        spawn.randomMob(1875, -1075, 0.3);
         spawn.randomMob(1120, -1200, 0.3);
         spawn.randomMob(3000, -1150, 0.2);
         spawn.randomMob(3200, -1150, 0.3);
@@ -2291,11 +2307,11 @@ const level = {
         spawn.randomMob(3600, -1800, 0.1);
         spawn.randomMob(5200, -100, 0.3);
         spawn.randomMob(5275, -900, 0.2);
-        spawn.randomMob(900, -2125, 0.3);
+        spawn.randomMob(0, -1075, 0.3);
         spawn.randomGroup(600, -1575, 0);
         spawn.randomGroup(2225, -1325, 0.4);
         spawn.randomGroup(4900, -1200, 0);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -2050);
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -1900);
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(2175, -2425);
     },
@@ -2441,9 +2457,12 @@ const level = {
         spawn.mapRect(4250, -3700, 50, 300);
         spawn.mapRect(3700, -3250, 1100, 100);
 
+
+
         spawn.randomGroup(350, -500, 1)
         spawn.randomSmallMob(-225, 25);
-        spawn.randomSmallMob(1000, -1100);
+        spawn.randomSmallMob(2100, -900);
+
         spawn.randomSmallMob(4000, -250);
         spawn.randomSmallMob(4450, -3000);
         spawn.randomSmallMob(5600, 100);
@@ -2454,7 +2473,8 @@ const level = {
         spawn.randomMob(3900, -2700, 0.8);
         spawn.randomMob(3600, -500, 0.8);
         spawn.randomMob(3400, -200, 0.8);
-        spawn.randomMob(1650, -1300, 0.7)
+        // spawn.randomMob(1650, -1300, 0.7)
+        spawn.randomMob(425, 0, 0.7);
         spawn.randomMob(4100, -50, 0.7);
         spawn.randomMob(4100, -50, 0.5);
         spawn.randomMob(1700, -50, 0.3)
@@ -2639,7 +2659,9 @@ const level = {
         spawn.bodyRect(1425, -1110, 115, 25, 0.9); //block on far left building
         spawn.bodyRect(1540, -1110, 300, 25, 0.9); //block on far left building
 
-        spawn.randomSmallMob(1300, -70);
+
+        spawn.randomMob(-100, -1300, 0.5);
+        spawn.randomSmallMob(1850, -600);
         spawn.randomSmallMob(3200, -100);
         spawn.randomSmallMob(4450, -100);
         spawn.randomSmallMob(2700, -475);
@@ -2653,7 +2675,7 @@ const level = {
         spawn.randomMob(1690, -2250, 0.25);
         spawn.randomMob(2200, -600, 0.2);
         spawn.randomMob(850, -1300, 0.25);
-        spawn.randomMob(-100, -900, -0.2);
+        spawn.randomMob(-100, -1700, -0.2);
         spawn.randomGroup(3700, -1500, 0.4);
         spawn.randomGroup(1700, -900, 0.4);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
@@ -2666,7 +2688,7 @@ const level = {
         };
         level.customTopLayer = () => {};
 
-        level.setPosToSpawn(0, -700); //normal spawn
+        level.setPosToSpawn(-300, -700); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = -4275;
         level.exit.y = -2805;
@@ -2771,9 +2793,12 @@ const level = {
         spawn.mapRect(-2225, 0, 2475, 150);
         spawn.mapRect(175, -1000, 75, 1100);
 
-        spawn.mapRect(-175, -985, 25, 175);
-        spawn.bodyRect(-170, -810, 14, 160, 1, spawn.propsFriction); //door to starting room
-        spawn.mapRect(-600, -650, 825, 50);
+        // spawn.mapRect(-175, -985, 50, 175);
+        spawn.mapRect(-600, -1075, 50, 475);
+        // spawn.bodyRect(-170, -810, 14, 160, 1, spawn.propsFriction); //door to starting room
+        // spawn.mapRect(-600, -650, 825, 50);
+        // spawn.mapRect(-600, -1075, 75, 475);
+        spawn.mapRect(-600, -650, 625, 50);
         spawn.mapRect(-1300, -650, 500, 50);
         spawn.mapRect(-175, -250, 425, 300);
         spawn.bodyRect(-75, -300, 50, 50);
@@ -3036,29 +3061,29 @@ const level = {
 
         //mobs
         spawn.randomSmallMob(-1125, 550);
-        spawn.randomSmallMob(-2325, 800);
         spawn.randomSmallMob(-2950, -50);
+        spawn.randomMob(-2025, 175, 0.3);
+        spawn.randomMob(-2325, 450, 0.3);
+        spawn.randomMob(-2925, 675, 0.2);
+        spawn.randomMob(-2700, 300, 0.1);
+        spawn.randomMob(-2500, 300, 0.1);
+        spawn.randomMob(-2075, -425, 0.1);
+        spawn.randomMob(-1550, -725, 0.1);
+        spawn.randomMob(375, 1100, 0);
+        spawn.randomMob(-1575, 1100, 0);
         spawn.randomSmallMob(825, 300);
-        spawn.randomSmallMob(-900, 825);
-        spawn.randomMob(-2025, 175, 0.6);
-        spawn.randomMob(-2325, 450, 0.6);
-        spawn.randomMob(-2925, 675, 0.5);
-        spawn.randomMob(-2700, 300, 0.2);
-        spawn.randomMob(-2500, 300, 0.2);
-        spawn.randomMob(-2075, -425, 0.2);
-        spawn.randomMob(-1550, -725, 0.2);
-        spawn.randomMob(375, 1100, 0.1);
-        spawn.randomMob(-1425, -100, 0.1);
-        spawn.randomMob(-800, -750, 0);
-        spawn.randomMob(400, -350, 0);
-        spawn.randomMob(650, 1300, 0);
-        spawn.randomMob(-750, -150, 0);
-        spawn.randomMob(475, 300, 0);
-        spawn.randomMob(-75, -700, 0);
-        spawn.randomMob(900, -200, -0.1);
-        spawn.randomGroup(-125, 275, -0.2);
-        spawn.randomGroup(-825, 1000, 0.2);
+        spawn.randomMob(-800, -1750, 0);
+        spawn.randomMob(400, -750, -0.1);
+        spawn.randomMob(650, 1300, -0.1);
+        spawn.randomMob(-2450, 1050, -0.1);
+        spawn.randomMob(500, 400, -0.1);
+        spawn.randomMob(-75, -1700, -0.1);
+        spawn.randomMob(900, -800, -0.2);
+        spawn.randomGroup(-75, 1050, -0.1);
+        spawn.randomGroup(-900, 1000, 0.2);
         spawn.randomGroup(-1300, -1100, -0.3);
+        spawn.randomSmallMob(-2325, 800);
+        spawn.randomSmallMob(-900, 825);
 
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.25) {
@@ -3067,9 +3092,8 @@ const level = {
                 spawn.snakeBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head
             }
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
-
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(300, -800);
+        powerUps.addRerollToLevel() //needs to run after mobs are spawned
     },
     office() {
         let button, door
@@ -3077,8 +3101,8 @@ const level = {
             button = level.button(525, 0)
             door = level.door(1362, -200, 25, 200, 195)
             level.setPosToSpawn(1375, -1550); //normal spawn
-            level.exit.x = 3250;
-            level.exit.y = -530;
+            level.exit.x = 3288;
+            level.exit.y = -630;
             // spawn.randomSmallMob(3550, -550);
             level.fillBG.push({
                 x: 3050,
@@ -3090,7 +3114,7 @@ const level = {
         } else { //reverse direction, start in bottom right
             button = level.button(3800, 0)
             door = level.door(3012, -200, 25, 200, 195)
-            level.setPosToSpawn(3250, -550); //normal spawn
+            level.setPosToSpawn(3337, -650); //normal spawn
             level.exit.x = 1375;
             level.exit.y = -1530;
             // spawn.bodyRect(3655, -650, 40, 150); //door
@@ -3102,7 +3126,6 @@ const level = {
                 color: "#dff"
             });
         }
-
 
         level.custom = () => {
             button.query();
@@ -3122,7 +3145,6 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom)
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
-
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
         document.body.style.backgroundColor = "#e0e5e0";
@@ -3216,19 +3238,22 @@ const level = {
         spawn.mapRect(3000, -1000, 50, 800); //left wall
         spawn.mapRect(3000 + 2000 - 50, -1300, 50, 1100); //right wall
         spawn.mapRect(4150, -600, 350, 150); //table
-        spawn.mapRect(3650, -1300, 50, 650); //exit wall
+        spawn.mapRect(3650, -1300, 50, 700); //exit wall
         spawn.mapRect(3650, -1300, 1350, 50); //exit wall
-        spawn.bodyRect(3665, -650, 20, 150); //door
+        spawn.bodyRect(3665, -600, 20, 100); //door
+        // spawn.mapRect(3150, -550, 300, 75);
+        // spawn.mapRect(3225, -600, 175, 75);
+        spawn.mapRect(3150, -550, 375, 75);
+        spawn.mapRect(3225, -600, 225, 75);
 
 
         spawn.mapRect(3000, -2000 * 0.5, 700, 50); //exit roof
         spawn.mapRect(3000, -2000 * 0.25, 2000 - 300, 50); //1st floor
         spawn.spawnStairs(3000 + 2000 - 50, 0, 4, 250, 350, true); //stairs ground
-
         spawn.randomSmallMob(4575, -560, 1);
         spawn.randomSmallMob(1315, -880, 1);
         spawn.randomSmallMob(800, -600);
-        spawn.randomSmallMob(-100, -1600);
+        // spawn.randomSmallMob(-100, -1600);
         spawn.randomMob(4100, -225, 0.8);
         spawn.randomMob(-250, -700, 0.8);
         spawn.randomMob(4500, -225, 0.15);
