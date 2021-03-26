@@ -831,6 +831,41 @@ const m = {
         ctx.restore();
         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
     },
+    drawFlipFlop() {
+        ctx.fillStyle = m.fillColor;
+        m.walk_cycle += m.flipLegs * m.Vx;
+
+        //draw body
+        ctx.save();
+        ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+        ctx.translate(m.pos.x, m.pos.y);
+
+        m.calcLeg(Math.PI, -3);
+        m.drawLeg("#4a4a4a");
+        m.calcLeg(0, 0);
+        m.drawLeg("#333");
+
+        ctx.rotate(m.angle);
+        ctx.beginPath();
+        ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+        grd.addColorStop(0, m.fillColorDark);
+        grd.addColorStop(1, m.fillColor);
+        ctx.fillStyle = grd;
+        ctx.fill();
+        ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        //draw eye
+        ctx.beginPath();
+        ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
+        ctx.fillStyle = m.eyeFillColor;
+        ctx.fill()
+        ctx.restore();
+
+        m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+    },
     drawDefault() {
         ctx.fillStyle = m.fillColor;
         m.walk_cycle += m.flipLegs * m.Vx;

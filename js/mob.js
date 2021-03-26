@@ -767,9 +767,6 @@ const mobs = {
                         this.force.x += this.accelMag * this.mass;
                     }
                 }
-                // else {
-                //   this.gravity();
-                // }
             },
             grow() {
                 if (!m.isBodiesAsleep) {
@@ -780,6 +777,10 @@ const mobs = {
                             this.radius *= scale;
                             // this.torque = -0.00002 * this.inertia;
                             this.fill = `hsl(144, ${this.radius}%, 50%)`;
+                            if (this.isShielded) { //remove shield if shielded when growing
+                                this.isShielded = false;
+                                this.removeConsBB();
+                            }
                         }
                     } else {
                         if (this.radius > 15) {

@@ -1,10 +1,9 @@
 ******************************************************** NEXT PATCH ********************************************************
  
-more bug fixes (pulse color, backwards induction giving too many tech)
+bug fix - grower mob becoming immune to damage when shielded and growing bigger than shield
 
-mobs can now see through blocks
-  mobs spawns and level spawns have been adjusted to prevent getting zonked at the start of a level
-
+relay switch - toggles ON/OFF when you pick up a power up
+tech: ice IX condenser - if ON make a couple Ice IX crystals every second
 
 ******************************************************** BUGS ********************************************************
 
@@ -38,6 +37,7 @@ fix door.isOpen actually meaning isClosed?
 ******************************************************** TODO ********************************************************
 
 have junk tech drop frequency to 0 after showing up once
+  but add way more junk tech into the pool
   how to communicate that to player?
     console message
     

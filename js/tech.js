@@ -639,9 +639,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.relayIce
                 },
-                requires: "drones, spores, missiles, foam, wave beam, neutron bomb",
+                requires: "drones, spores, missiles, foam, wave beam, neutron bomb, ice IX",
                 effect() {
                     tech.isBulletsLastLonger += 0.3
                 },
@@ -1390,77 +1390,8 @@
                 remove() {
                     tech.cyclicImmunity = 0;
                 }
-            }, {
-                name: "flip-flop",
-                description: `<strong>flip-flop</strong> toggles <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
-                nameInfo: "<span id = 'tech-flip-flop'></span>",
-                addNameInfo() {
-                    setTimeout(function() {
-                        if (document.getElementById("tech-flip-flop")) {
-                            if (tech.isFlipFlopOn) {
-                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
-                                m.eyeFillColor = m.fieldMeterColor //'#5af'
-                            } else {
-                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
-                                m.eyeFillColor = "transparent"
-                            }
-                        }
-                    }, 100);
-                },
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return true
-                },
-                requires: "",
-                effect() {
-                    tech.isFlipFlop = true //do you have this tech?
-                    tech.isFlipFlopOn = true //what is the state of flip-Flop?
-                    if (!m.isShipMode) {
-                        m.draw = () => {
-                            ctx.fillStyle = m.fillColor;
-                            m.walk_cycle += m.flipLegs * m.Vx;
-
-                            //draw body
-                            ctx.save();
-                            ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
-                            ctx.translate(m.pos.x, m.pos.y);
-
-                            m.calcLeg(Math.PI, -3);
-                            m.drawLeg("#4a4a4a");
-                            m.calcLeg(0, 0);
-                            m.drawLeg("#333");
-
-                            ctx.rotate(m.angle);
-                            ctx.beginPath();
-                            ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                            let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-                            grd.addColorStop(0, m.fillColorDark);
-                            grd.addColorStop(1, m.fillColor);
-                            ctx.fillStyle = grd;
-                            ctx.fill();
-                            ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                            ctx.strokeStyle = "#333";
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                            //draw eye
-                            ctx.beginPath();
-                            ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
-                            ctx.fillStyle = m.eyeFillColor;
-                            ctx.fill()
-                            ctx.restore();
-
-                            m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-                        }
-                    }
-                },
-                remove() {
-                    tech.isFlipFlop = false
-                    tech.isFlipFlopOn = false
-                    m.eyeFillColor = 'transparent'
-                }
-            }, {
+            },
+            {
                 name: "NOR gate",
                 description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>take <strong>0</strong> <strong class='color-harm'>harm</strong> from collisions with mobs",
                 maxCount: 1,
@@ -1477,18 +1408,110 @@
                 remove() {
                     tech.isFlipFlopHarm = false
                 }
-
-            }, {
+            },
+            {
+                name: "flip-flop",
+                description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
+                nameInfo: "<span id = 'tech-flip-flop'></span>",
+                addNameInfo() {
+                    setTimeout(function() {
+                        if (document.getElementById("tech-flip-flop")) {
+                            if (tech.isFlipFlopOn) {
+                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
+                                m.eyeFillColor = m.fieldMeterColor //'#5af'
+                            } else {
+                                document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
+                                m.eyeFillColor = "transparent"
+                            }
+                        }
+                    }, 100);
+                },
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return !tech.isRelay
+                },
+                requires: "not relay switch",
+                effect() {
+                    tech.isFlipFlop = true //do you have this tech?
+                    tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                    if (!m.isShipMode) {
+                        m.draw = m.drawFlipFlop
+                    }
+                },
+                remove() {
+                    tech.isFlipFlop = false
+                    tech.isFlipFlopOn = false
+                    m.eyeFillColor = 'transparent'
+                }
+            },
+            {
+                name: "relay switch",
+                description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after picking up a <strong>power up</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
+                nameInfo: "<span id = 'tech-switch'></span>",
+                addNameInfo() {
+                    setTimeout(function() {
+                        if (document.getElementById("tech-switch")) {
+                            if (tech.isFlipFlopOn) {
+                                document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
+                                m.eyeFillColor = m.fieldMeterColor //'#5af'
+                            } else {
+                                document.getElementById("tech-switch").innerHTML = ` = <strong>OFF</strong>`
+                                m.eyeFillColor = "transparent"
+                            }
+                        }
+                    }, 100);
+                },
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                allowed() {
+                    return !tech.isFlipFlop
+                },
+                requires: "not flip-flop",
+                effect() {
+                    tech.isRelay = true //do you have this tech?
+                    tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                    if (!m.isShipMode) {
+                        m.draw = m.drawFlipFlop
+                    }
+                },
+                remove() {
+                    tech.isRelay = false
+                    tech.isFlipFlopOn = false
+                    m.eyeFillColor = 'transparent'
+                }
+            },
+            {
+                name: "thermocouple",
+                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-3</strong> <strong class='color-s'>ice IX</strong> crystals every second",
+                maxCount: 9,
+                count: 0,
+                frequency: 4,
+                frequencyDefault: 4,
+                allowed() {
+                    return tech.isRelay
+                },
+                requires: "relay switch",
+                effect() {
+                    tech.relayIce++
+                },
+                remove() {
+                    tech.relayIce = 0
+                }
+            },
+            {
                 name: "NAND gate",
-                description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
+                description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.isFlipFlop
+                    return tech.isFlipFlop || tech.isRelay
                 },
-                requires: "flip-flop",
+                requires: "ON/OFF tech",
                 effect() {
                     tech.isFlipFlopDamage = true;
                 },
@@ -1497,15 +1520,15 @@
                 }
             }, {
                 name: "transistor",
-                description: "if <strong>flip-flop</strong> is <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong>flip-flop</strong> is <strong class='color-flop'>OFF</strong> drain <strong>3.1</strong> <strong class='color-f'>energy</strong> per second",
+                description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>3.1</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.isFlipFlop
+                    return tech.isFlipFlop || tech.isRelay
                 },
-                requires: "flip-flop",
+                requires: "ON/OFF tech",
                 effect() {
                     tech.isFlipFlopEnergy = true;
                 },
@@ -1514,7 +1537,7 @@
                 }
             }, {
                 name: "shift registers",
-                description: "set <strong>flip-flop</strong> to the <strong class='color-flop'>ON</strong> state<br>at the start of a <strong>level</strong>",
+                description: "set to the <strong class='color-flop'>ON</strong> state<br>at the start of a <strong>level</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -1522,14 +1545,15 @@
                 allowed() {
                     return tech.isFlipFlopEnergy || tech.isFlipFlopDamage || tech.isFlipFlopHarm
                 },
-                requires: "2 flip-flop techs",
+                requires: "2 ON/OFF techs",
                 effect() {
                     tech.isFlipFlopLevelReset = true;
                 },
                 remove() {
                     tech.isFlipFlopLevelReset = false;
                 }
-            }, {
+            },
+            {
                 name: "clock gating",
                 description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
                 maxCount: 1,
@@ -1569,7 +1593,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
                 },
                 requires: "a freezing or stunning effect",
                 effect() {
@@ -1586,7 +1610,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField
+                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce
                 },
                 requires: "a localized freeze effect",
                 effect() {
@@ -2155,7 +2179,7 @@
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
-                    return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isNoHeals
+                    return (m.health / m.maxHealth) < 0.7 && !tech.isNoHeals
                 },
                 requires: "health > 70%, not ergodicity",
                 effect() {
@@ -2192,7 +2216,7 @@
                         powerUps.research.changeRerolls(0)
                     }, 1000);
                 },
-                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to avoid <strong>dying</strong><br>and spawn <strong>6</strong> <strong class='color-h'>heal</strong> power ups once per level",
+                description: "once per level use <strong>1</strong> <strong class='color-r'>research</strong><br>to prevent <strong>dying</strong> and spawn <strong>6</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2836,7 +2860,8 @@
                 requires: "between levels 1 and 7",
                 effect() {
                     level.difficultyDecrease(simulation.difficultyMode)
-                    simulation.makeTextLog(`simulation.difficultyMode <span class='color-symbol'>--</span>`)
+                    // simulation.difficulty<span class='color-symbol'>-=</span>
+                    simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode)`)
                     tech.addJunkTechToPool(18)
                     // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
                 },
@@ -2860,7 +2885,7 @@
                 effect() {
                     tech.isNoHeals = true;
                     level.difficultyDecrease(simulation.difficultyMode * 2)
-                    simulation.makeTextLog(`simulation.difficultyMode <span class='color-symbol'>-=</span> 2`)
+                    simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode <span class='color-symbol'>*</span> 2)`)
                     powerUps.heal.color = "#abb"
                     for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                         if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
@@ -4366,7 +4391,7 @@
                 }
             }, {
                 name: "ice IX manufacturing",
-                description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to synthesize <strong class='color-s'>ice IX</strong>",
+                description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4389,7 +4414,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isIceField
+                    return tech.isIceField || tech.relayIce
                 },
                 requires: "ice IX",
                 effect() {
@@ -5953,9 +5978,11 @@
         isFlipFlopLevelReset: null,
         isFlipFlopDamage: null,
         isFlipFlopEnergy: null,
+        isRelay: null,
+        relayIce: null,
         isMetaAnalysis: null,
         isFoamAttract: null,
         droneCycleReduction: null,
         droneEnergyReduction: null,
-        isNoHeals: null
+        isNoHeals: null,
     }

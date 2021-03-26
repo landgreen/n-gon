@@ -1958,7 +1958,7 @@ const b = {
             restitution: 0.3,
             dmg: 0.29, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
-            endCycle: simulation.cycle + 120 * tech.isBulletsLastLonger, //Math.floor((1200 + 420 * Math.random()) * tech.isBulletsLastLonger),
+            endCycle: simulation.cycle + 140 * tech.isBulletsLastLonger,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -4066,8 +4066,16 @@ const b = {
             ammoPack: 36,
             have: false,
             fire() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 15 : 5) * b.fireCD); // cool down
-                const radius = (m.crouch ? 10 + 5 * Math.random() : 4 + 6 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                let radius, spread
+                if (m.crouch) {
+                    spread = 0.2 * (Math.random() - 0.5)
+                    radius = 10 + 5 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                    m.fireCDcycle = m.cycle + Math.floor(15 * b.fireCD); // cool down
+                } else {
+                    spread = 0.5 * (Math.random() - 0.5)
+                    radius = 4 + 6 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                    m.fireCDcycle = m.cycle + Math.floor(5 * b.fireCD); // cool down
+                }
                 const SPEED = 18 - radius * 0.4;
                 const dir = m.angle + 0.15 * (Math.random() - 0.5)
                 const velocity = {
@@ -4088,12 +4096,12 @@ const b = {
                     });
                     setTimeout(() => {
                         if (!simulation.paused) {
-                            b.foam(position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
+                            b.foam(position, Vector.rotate(velocity, spread), radius)
                             bullet[bullet.length - 1].damage = (1 + 1.27 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
                         }
                     }, 250 * tech.foamFutureFire);
                 } else {
-                    b.foam(position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
+                    b.foam(position, Vector.rotate(velocity, spread), radius)
                 }
             }
         }, {

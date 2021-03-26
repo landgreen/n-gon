@@ -482,6 +482,17 @@ const powerUps = {
                 b.mine(who.position, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
             }
         }
+        if (tech.isRelay) {
+            if (tech.isFlipFlopOn) {
+                tech.isFlipFlopOn = false
+                if (document.getElementById("tech-switch")) document.getElementById("tech-switch").innerHTML = ` = <strong>OFF</strong>`
+                m.eyeFillColor = 'transparent'
+            } else {
+                tech.isFlipFlopOn = true //immune to damage this hit, lose immunity for next hit
+                if (document.getElementById("tech-switch")) document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
+                m.eyeFillColor = m.fieldMeterColor //'#0cf'
+            }
+        }
     },
     giveRandomAmmo() {
         const ammoTarget = Math.floor(Math.random() * (b.guns.length));

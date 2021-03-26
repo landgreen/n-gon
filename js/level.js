@@ -113,6 +113,7 @@ const level = {
         // }
         if (tech.isFlipFlopHarm && tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
+            m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
     },
@@ -1102,8 +1103,8 @@ const level = {
 
         // simulation.difficulty = 30 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.pulsar(1900, -500)
-        spawn.pulsarBoss(1900, -500)
+        // spawn.grower(1900, -500)
+        // spawn.pulsarBoss(1900, -500)
         // spawn.historyBoss(1900, -500)
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
@@ -1115,11 +1116,11 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.shieldingBoss(1600, -500)
+        spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        // spawn.nodeGroup(1200, -500, "launcher")
+        spawn.nodeGroup(1200, -500, "grower")
         // spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -3101,7 +3102,7 @@ const level = {
             button = level.button(525, 0)
             door = level.door(1362, -200, 25, 200, 195)
             level.setPosToSpawn(1375, -1550); //normal spawn
-            level.exit.x = 3288;
+            level.exit.x = 3088;
             level.exit.y = -630;
             // spawn.randomSmallMob(3550, -550);
             level.fillBG.push({
@@ -3114,7 +3115,7 @@ const level = {
         } else { //reverse direction, start in bottom right
             button = level.button(3800, 0)
             door = level.door(3012, -200, 25, 200, 195)
-            level.setPosToSpawn(3337, -650); //normal spawn
+            level.setPosToSpawn(3137, -650); //normal spawn
             level.exit.x = 1375;
             level.exit.y = -1530;
             // spawn.bodyRect(3655, -650, 40, 150); //door
@@ -3186,10 +3187,10 @@ const level = {
             color: "rgba(0,0,0,0.1)"
         });
 
-        spawn.debris(-300, -200, 1000, 4); //ground debris //16 debris per level
-        spawn.debris(3500, -200, 800, 4); //ground debris //16 debris per level
-        spawn.debris(-300, -650, 1200, 4); //1st floor debris //16 debris per level
-        spawn.debris(3500, -650, 800, 5); //1st floor debris //16 debris per level
+        spawn.debris(-300, -200, 1000, 6); //ground debris //16 debris per level
+        spawn.debris(3500, -200, 800, 5); //ground debris //16 debris per level
+        spawn.debris(-300, -650, 1200, 5); //1st floor debris //16 debris per level
+        // spawn.debris(3500, -650, 800, 5); //1st floor debris //16 debris per lesvel
         powerUps.spawnStartingPowerUps(-525, -700);
 
         spawn.mapRect(-600, 0, 2000, 325); //ground
@@ -3243,8 +3244,8 @@ const level = {
         spawn.bodyRect(3665, -600, 20, 100); //door
         // spawn.mapRect(3150, -550, 300, 75);
         // spawn.mapRect(3225, -600, 175, 75);
-        spawn.mapRect(3150, -550, 375, 75);
-        spawn.mapRect(3225, -600, 225, 75);
+        spawn.mapRect(3000, -550, 375, 75);
+        spawn.mapRect(3000, -600, 225, 75);
 
 
         spawn.mapRect(3000, -2000 * 0.5, 700, 50); //exit roof
