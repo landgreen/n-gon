@@ -111,7 +111,7 @@ const level = {
         // if (tech.isPerpetualStun) {
         //     for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
         // }
-        if (tech.isFlipFlopHarm && tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
+        if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
@@ -155,10 +155,11 @@ const level = {
         }
     },
     levelAnnounce() {
+        const difficulty = simulation.isCheating ? "testing" : level.difficultyText()
         if (level.levelsCleared === 0) {
-            document.title = "n-gon: (" + level.difficultyText() + ")";
+            document.title = "n-gon: (" + difficulty + ")";
         } else {
-            document.title = (simulation.isCheating ? "∅ " : "n-gon:") + (level.levelsCleared) + " " + level.levels[level.onLevel] + " (" + level.difficultyText() + ")";
+            document.title = `n-gon: ${level.levelsCleared} ${level.levels[level.onLevel]} (${difficulty})`
             simulation.makeTextLog(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
         }
         // simulation.makeTextLog(`
@@ -932,7 +933,6 @@ const level = {
             radius: 50
         }
         level.custom = () => {
-            // level.playerExitCheck();
             hazardSlime.query();
 
             //draw wide line
@@ -958,7 +958,10 @@ const level = {
             ctx.arc(circle.x, circle.y, circle.radius / 8, 0, 2 * Math.PI);
             ctx.fillStyle = lore.talkingColor //"#dff"
             ctx.fill();
-            // ctx.stroke();
+
+            level.enter.draw();
+            // level.exit.draw();
+            // level.playerExitCheck();
         };
         let sway = {
             x: 0,
@@ -1002,7 +1005,7 @@ const level = {
         level.setPosToSpawn(0, -50); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 25, 100, 10);
         level.exit.x = 0;
-        level.exit.y = 200;
+        level.exit.y = 400;
         level.defaultZoom = 1000
         simulation.zoomTransition(level.defaultZoom)
         // document.body.style.backgroundColor = "#aaa";
@@ -1044,6 +1047,8 @@ const level = {
             button.query();
             button.draw();
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -1116,11 +1121,11 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        spawn.shieldingBoss(1600, -500)
+        // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        spawn.nodeGroup(1200, -500, "grower")
+        spawn.nodeGroup(1200, -500, "sniper")
         // spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -1128,6 +1133,8 @@ const level = {
     template() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
         level.setPosToSpawn(0, -50); //normal spawn
@@ -1139,20 +1146,6 @@ const level = {
         document.body.style.backgroundColor = "#dcdcde";
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
-        // level.fill.push({     //foreground
-        //   x: 2500,
-        //   y: -1100,
-        //   width: 450,
-        //   height: 250,
-        //   color: "rgba(0,0,0,0.1)"
-        // });
-        // level.fillBG.push({     //background
-        //   x: 1300,
-        //   y: -1800,
-        //   width: 750,
-        //   height: 1800,
-        //   color: "#d4d4d7"
-        // });
 
         spawn.mapRect(-100, 0, 1000, 100);
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
@@ -1167,6 +1160,8 @@ const level = {
     final() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -1178,7 +1173,7 @@ const level = {
 
         level.defaultZoom = 2500
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#ccc";
+        document.body.style.backgroundColor = "#ddd";
 
         level.fill.push({
             x: 5400,
@@ -1219,6 +1214,8 @@ const level = {
     gauntlet() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -1284,152 +1281,174 @@ const level = {
     },
     intro() {
         level.custom = () => {
+            //draw binary number
+            const binary = (localSettings.runCount >>> 0).toString(2)
+            const height = 20
+            const width = 8
+            const yOff = -40 //-580
+            let xOff = -130 //2622
+            ctx.strokeStyle = "#adf"
+            ctx.lineWidth = 1.5;
+            ctx.beginPath()
+            for (let i = 0; i < binary.length; i++) {
+                if (binary[i] === "0") {
+                    ctx.moveTo(xOff, yOff)
+                    ctx.lineTo(xOff, yOff + height)
+                    ctx.lineTo(xOff + width, yOff + height)
+                    ctx.lineTo(xOff + width, yOff)
+                    ctx.lineTo(xOff, yOff)
+                    xOff += 10 + width
+                } else {
+                    ctx.moveTo(xOff, yOff)
+                    ctx.lineTo(xOff, yOff + height)
+                    xOff += 10
+                }
+            }
+            ctx.stroke();
+
+            //wires
+            ctx.beginPath()
+            ctx.moveTo(-150, -275)
+            ctx.lineTo(80, -275)
+            ctx.lineTo(80, -1000)
+            ctx.moveTo(-150, -265)
+            ctx.lineTo(90, -265)
+            ctx.lineTo(90, -1000)
+            ctx.moveTo(-150, -255)
+            ctx.lineTo(100, -255)
+            ctx.lineTo(100, -1000)
+            ctx.moveTo(-150, -245)
+            ctx.lineTo(1145, -245)
+            ctx.lineTo(1145, 0)
+            ctx.moveTo(-150, -235)
+            ctx.lineTo(1135, -235)
+            ctx.lineTo(1135, 0)
+            ctx.moveTo(-150, -225)
+            ctx.lineTo(1125, -225)
+            ctx.lineTo(1125, 0)
+            ctx.moveTo(-150, -215)
+            ctx.lineTo(460, -215)
+            ctx.lineTo(460, 0)
+            ctx.moveTo(-150, -205)
+            ctx.lineTo(450, -205)
+            ctx.lineTo(450, 0)
+            ctx.moveTo(-150, -195)
+            ctx.lineTo(440, -195)
+            ctx.lineTo(440, 0)
+
+            ctx.moveTo(1155, 0)
+            ctx.lineTo(1155, -450)
+            ctx.lineTo(1000, -450)
+            ctx.lineTo(1000, -1000)
+            ctx.moveTo(1165, 0)
+            ctx.lineTo(1165, -460)
+            ctx.lineTo(1010, -460)
+            ctx.lineTo(1010, -1000)
+            ctx.moveTo(1175, 0)
+            ctx.lineTo(1175, -470)
+            ctx.lineTo(1020, -470)
+            ctx.lineTo(1020, -1000)
+            ctx.moveTo(1185, 0)
+            ctx.lineTo(1185, -480)
+            ctx.lineTo(1030, -480)
+            ctx.lineTo(1030, -1000)
+            ctx.moveTo(1195, 0)
+            ctx.lineTo(1195, -490)
+            ctx.lineTo(1040, -490)
+            ctx.lineTo(1040, -1000)
+
+            ctx.moveTo(1625, -1000)
+            ctx.lineTo(1625, 0)
+            ctx.moveTo(1635, -1000)
+            ctx.lineTo(1635, 0)
+            ctx.moveTo(1645, -1000)
+            ctx.lineTo(1645, 0)
+            ctx.moveTo(1655, -1000)
+            ctx.lineTo(1655, 0)
+            ctx.moveTo(1665, -1000)
+            ctx.lineTo(1665, 0)
+
+            ctx.moveTo(1675, -465)
+            ctx.lineTo(2325, -465)
+            ctx.lineTo(2325, 0)
+            ctx.moveTo(1675, -455)
+            ctx.lineTo(2315, -455)
+            ctx.lineTo(2315, 0)
+            ctx.moveTo(1675, -445)
+            ctx.lineTo(2305, -445)
+            ctx.lineTo(2305, 0)
+            ctx.moveTo(1675, -435)
+            ctx.lineTo(2295, -435)
+            ctx.lineTo(2295, 0)
+
+            ctx.moveTo(2335, 0)
+            ctx.lineTo(2335, -710)
+            ctx.lineTo(2600, -710)
+            ctx.moveTo(2345, 0)
+            ctx.lineTo(2345, -700)
+            ctx.lineTo(2600, -700)
+            ctx.moveTo(2355, 0)
+            ctx.lineTo(2355, -690)
+            ctx.lineTo(2600, -690)
+            ctx.strokeStyle = "#ccc"
+            ctx.lineWidth = 5;
+            ctx.stroke();
+
+            //squares that look like they keep the wires in place
+            ctx.beginPath()
+            ctx.rect(1600, -500, 90, 100)
+            ctx.rect(-55, -285, 12, 100)
+            ctx.rect(1100, -497, 8, 54)
+            ctx.rect(2285, -200, 80, 10)
+            ctx.rect(1110, -70, 100, 10)
+            ctx.fillStyle = "#ccc"
+            ctx.fill()
+
+            //power up dispenser
+            // ctx.beginPath()
+            // for (let i = 2; i < 10; i++) {
+            //     ctx.moveTo(2000, -100 * i)
+            //     ctx.lineTo(2080, -100 * i)
+            // }
+            // ctx.strokeStyle = "#ddd"
+            // ctx.lineWidth = 5;
+            // ctx.stroke();
+
+            // ctx.beginPath()
+            // for (let i = 2; i < 10; i++) {
+            //     ctx.arc(2040, -100 * i, 30, 0, 2 * Math.PI);
+            //     ctx.moveTo(2040, -100 * i)
+            // }
+            // ctx.fillStyle = "rgba(0,0,0,0.3)"
+            // ctx.fill()
+
+            // ctx.fillStyle = "rgba(240,255,255,0.5)"
+            // ctx.fillRect(2000, -1000, 80, 700)
+
+            //exit room
+            ctx.fillStyle = "#f2f2f2"
+            ctx.fillRect(2600, -600, 400, 300)
+            level.exit.draw();
+            // level.enter.draw();
             level.playerExitCheck();
         };
-        level.customTopLayer = () => {};
-        const binary = (localSettings.runCount >>> 0).toString(2)
-        const height = 25
-        const thick = 2
-        const color = "#aaa"
-        const xOff = -130 //2622
-        const yOff = -45 //-580
-        let xLetter = 0
-        for (let i = 0; i < binary.length; i++) {
-            if (binary[i] === "0") {
-                zero(xOff + xLetter, yOff)
-            } else {
-                one(xOff + xLetter, yOff)
-            }
-        }
 
-        function one(x, y) {
-            level.fillBG.push({
-                x: x,
-                y: y,
-                width: thick,
-                height: height,
-                color: color
-            });
-            xLetter += 10
-        }
+        level.customTopLayer = () => {
+            //exit room glow
+            ctx.fillStyle = "rgba(0,255,255,0.05)"
+            ctx.fillRect(2600, -600, 400, 300)
+        };
 
-        function zero(x, y) {
-            const width = 10
-            level.fillBG.push({
-                x: x,
-                y: y,
-                width: thick,
-                height: height,
-                color: color
-            });
-            level.fillBG.push({
-                x: x + width,
-                y: y,
-                width: thick,
-                height: height,
-                color: color
-            });
-            level.fillBG.push({
-                x: x,
-                y: y,
-                width: width,
-                height: thick,
-                color: color
-            });
-            level.fillBG.push({
-                x: x,
-                y: y + height - thick,
-                width: width,
-                height: thick,
-                color: color
-            });
-            xLetter += 10 + width
-        }
         level.setPosToSpawn(460, -100); //normal spawn
-        level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
+        // level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
         level.exit.x = 2800;
         level.exit.y = -335;
         spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
         simulation.zoomScale = 1000 //1400 is normal
         level.defaultZoom = 1600
         simulation.zoomTransition(level.defaultZoom, 1)
-        document.body.style.backgroundColor = "#ddd";
-        level.fill.push({
-            x: 2600,
-            y: -600,
-            width: 400,
-            height: 500,
-            color: "rgba(0,255,255,0.05)"
-        });
-        level.fillBG.push({
-            x: 2600,
-            y: -600,
-            width: 400,
-            height: 500,
-            color: "#fff"
-        });
-        const lineColor = "#ccc"
-        level.fillBG.push({
-            x: 1600,
-            y: -500,
-            width: 100,
-            height: 100,
-            color: lineColor
-        });
-        level.fillBG.push({
-            x: -55,
-            y: -283,
-            width: 12,
-            height: 100,
-            color: lineColor
-        });
+        document.body.style.backgroundColor = "#e1e1e1";
 
-        //faster way to draw a wire
-        function wallWire(x, y, width, height, front = false) {
-            if (front) {
-                level.fill.push({
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    color: lineColor
-                });
-            } else {
-                level.fillBG.push({
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    color: lineColor
-                });
-            }
-        }
-        for (let i = 0; i < 3; i++) {
-            wallWire(100 - 10 * i, -1050 - 10 * i, 5, 800);
-            wallWire(100 - 10 * i, -255 - 10 * i, -300, 5);
-        }
-        for (let i = 0; i < 5; i++) {
-            wallWire(1000 + 10 * i, -1050 - 10 * i, 5, 600);
-            wallWire(1000 + 10 * i, -450 - 10 * i, 150, 5);
-            wallWire(1150 + 10 * i, -450 - 10 * i, 5, 500);
-        }
-        for (let i = 0; i < 3; i++) {
-            wallWire(2650 - 10 * i, -700 - 10 * i, -300, 5);
-            wallWire(2350 - 10 * i, -700 - 10 * i, 5, 800);
-        }
-        for (let i = 0; i < 5; i++) {
-            wallWire(1625 + 10 * i, -1050, 5, 1200);
-        }
-        for (let i = 0; i < 4; i++) {
-            wallWire(1650, -470 + i * 10, 670 - i * 10, 5);
-            wallWire(1650 + 670 - i * 10, -470 + i * 10, 5, 600);
-        }
-        for (let i = 0; i < 3; i++) {
-            wallWire(-200 - i * 10, -245 + i * 10, 1340, 5);
-            wallWire(1140 - i * 10, -245 + i * 10, 5, 300);
-            wallWire(-200 - i * 10, -215 + i * 10, 660, 5);
-            wallWire(460 - i * 10, -215 + i * 10, 5, 300);
-        }
         spawn.mapRect(-250, 0, 3600, 1800); //ground
         spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
         spawn.mapRect(3000, -2800, 2600, 4600); //right wall
@@ -1563,6 +1582,8 @@ const level = {
             button.query();
             button.draw();
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             door.draw();
@@ -1754,6 +1775,8 @@ const level = {
             hazard.level(button.isUp)
             rotor.rotate();
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             ctx.fillStyle = "#233"
@@ -1888,6 +1911,8 @@ const level = {
         const elevator = level.platform(4210, -1325, 380, 30, -10)
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
@@ -2096,6 +2121,8 @@ const level = {
             ctx.fillStyle = "#ccc"
             ctx.fillRect(1567, -1990, 5, 1020)
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
 
@@ -2321,6 +2348,8 @@ const level = {
         // simulation.g = 0.0012 //0.0024
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             // elevator.move()
@@ -2523,6 +2552,8 @@ const level = {
     skyscrapers() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -2686,6 +2717,8 @@ const level = {
     highrise() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -2888,6 +2921,8 @@ const level = {
     warehouse() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -3138,6 +3173,8 @@ const level = {
             }
             door.openClose();
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             door.draw();
@@ -3291,6 +3328,8 @@ const level = {
     stronghold() { // player made level  by    Francois 👑 from discord
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
 
@@ -3594,6 +3633,8 @@ const level = {
                 doorPlateform.openClose();
             }
             hazard.level(button.isUp)
+            level.exit.draw();
+            level.enter.draw();
         };
 
         level.customTopLayer = () => {
@@ -3978,6 +4019,8 @@ const level = {
             level.playerExitCheck();
             rotor.rotate();
             // rotor2.rotate()
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             doorSortieSalle.draw();
@@ -3994,6 +4037,8 @@ const level = {
                 rotor.rotate();
                 doorSortieSalle.openClose();
                 level.playerExitCheck();
+                level.exit.draw();
+                level.enter.draw();
             };
             // //////////////////////////////////////
             level.customTopLayer = () => {
@@ -4216,6 +4261,8 @@ const level = {
             chair2.force.y += chair2.mass * simulation.g;
             person.force.y += person.mass * simulation.g;
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {
             hazard.draw();
@@ -4731,6 +4778,8 @@ const level = {
             portal2[2].query(true)
             portal2[3].query(true)
             rotor.rotate();
+            level.exit.draw();
+            level.enter.draw();
         };
 
         level.customTopLayer = () => {
@@ -4977,6 +5026,8 @@ const level = {
     coliseum() {
         level.custom = () => {
             level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
         };
         level.customTopLayer = () => {};
         level.defaultZoom = 1800

@@ -312,7 +312,7 @@ summary {
 }
 
 .experiment-grid-disabled[data-descr]:hover::after {
-    content: '\a \00a0 \00a0 \00a0 REQUIRES:\a''\00a0 \00a0 \00a0 'attr(data-descr);
+    content: '\a \00a0 \00a0 \00a0 REQUIRES:\a \00a0 \00a0 \00a0 'attr(data-descr);
     white-space: pre-wrap;
     position: absolute;
     left: 0;

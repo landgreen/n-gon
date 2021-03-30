@@ -20,8 +20,6 @@ const simulation = {
         ctx.save();
         simulation.camera();
         level.drawFillBGs();
-        level.exit.draw();
-        level.enter.draw();
         level.custom();
         simulation.draw.powerUp();
         mobs.draw();
@@ -519,10 +517,10 @@ const simulation = {
         } else {
             World.add(engine.world, [player])
         }
+        m.look = m.lookDefault
 
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
         if (simulation.isCommunityMaps) {
-
             level.levels.push("stronghold");
             level.levels.push("basement");
             // level.levels.push("detours");

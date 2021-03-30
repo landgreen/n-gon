@@ -452,7 +452,7 @@ const b = {
     },
     pulse(energy, angle = m.angle) {
         let best;
-        let explosionRadius = 1300 * energy
+        let explosionRadius = 1250 * energy
         let range = 3000
         const path = [{
                 x: m.pos.x + 20 * Math.cos(angle),
@@ -2050,7 +2050,7 @@ const b = {
             isImproved: false,
             beforeDmg(who) {
                 if (tech.isIncendiary) {
-                    const max = Math.min(this.endCycle - simulation.cycle, 1500)
+                    const max = Math.max(Math.min(this.endCycle - simulation.cycle, 1500), 0)
                     b.explosion(this.position, max * 0.08 + this.isImproved * 100 + 60 * Math.random()); //makes bullet do explosive damage at end
                     this.endCycle -= max
                 } else {
@@ -4550,7 +4550,7 @@ const b = {
                         x: 7.5 * Math.cos(m.angle - Math.PI / 2),
                         y: 7.5 * Math.sin(m.angle - Math.PI / 2)
                     }
-                    const dmg = 0.6 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const dmg = 0.7 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     const eye = {
                         x: m.pos.x + 15 * Math.cos(m.angle),
@@ -4630,10 +4630,10 @@ const b = {
             },
             firePulse() {
                 m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCD); // cool down
-                let energy = 0.27 * Math.min(m.energy, 1.5)
+                let energy = 0.3 * Math.min(m.energy, 1.5)
                 m.energy -= energy * tech.isLaserDiode
                 if (tech.beamSplitter) {
-                    energy *= Math.pow(0.9, tech.beamSplitter)
+                    energy *= Math.pow(0.85, tech.beamSplitter)
                     b.pulse(energy, m.angle)
                     for (let i = 1; i < 1 + tech.beamSplitter; i++) {
                         b.pulse(energy, m.angle - i * 0.27)

@@ -189,6 +189,20 @@ const m = {
         m.transX += (m.transSmoothX - m.transX) * 0.07;
         m.transY += (m.transSmoothY - m.transY) * 0.07;
     },
+    lookDefault() {
+        //always on mouse look
+        m.angle = Math.atan2(
+            simulation.mouseInGame.y - m.pos.y,
+            simulation.mouseInGame.x - m.pos.x
+        );
+        //smoothed mouse look translations
+        const scale = 0.8;
+        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+
+        m.transX += (m.transSmoothX - m.transX) * 0.07;
+        m.transY += (m.transSmoothY - m.transY) * 0.07;
+    },
     doCrouch() {
         if (!m.crouch) {
             m.crouch = true;
@@ -272,13 +286,13 @@ const m = {
                 player.force.x += m.Fx
             }
         } else {
-            const stoppingFriction = 0.92;
+            const stoppingFriction = 0.92; //come to a stop if no move key is pressed
             Matter.Body.setVelocity(player, {
                 x: player.velocity.x * stoppingFriction,
                 y: player.velocity.y * stoppingFriction
             });
         }
-        //come to a stop if fast or if no move key is pressed
+        //come to a stop if fast 
         if (player.speed > 4) {
             const stoppingFriction = (m.crouch) ? 0.65 : 0.89; // this controls speed when crouched
             Matter.Body.setVelocity(player, {
@@ -2711,7 +2725,7 @@ const m = {
             m.spin = 0
             // m.groundControl = () => {}         //disable entering ground
             m.onGround = false
-            playerOnGroundCheck = () => {}
+            // playerOnGroundCheck = () => {}
             m.airControl = () => { //tank controls
                 player.force.y -= player.mass * simulation.g; //undo gravity
                 Matter.Body.setVelocity(player, {

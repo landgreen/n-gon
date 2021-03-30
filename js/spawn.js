@@ -1550,7 +1550,7 @@ const spawn = {
                         ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
                         ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
                         ctx.lineWidth = 2;
-                        ctx.strokeStyle = "rgba(120,0,255,0.15)";
+                        ctx.strokeStyle = "rgba(120,0,255,0.2)";
                         ctx.stroke();
                         ctx.setLineDash([0, 0]);
                     }
@@ -1600,12 +1600,11 @@ const spawn = {
         me.isFiring = false
         me.onHit = function() {};
         me.canSeeTarget = function() {
-            const diff = Vector.normalise(Vector.sub(this.fireTarget, this.position)); //make a vector for the mob's direction of length 1
             const angle = this.angle + Math.PI / 2;
             const dot = Vector.dot({
                 x: Math.cos(angle),
                 y: Math.sin(angle)
-            }, diff); //the dot product of di console.log(dot, 'see')
+            }, Vector.normalise(Vector.sub(this.fireTarget, this.position)));
             //distance between the target and the player's location
             if (
                 dot > 0.03 || // not looking at target
@@ -1670,18 +1669,18 @@ const spawn = {
                         ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
                         ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
                         ctx.lineWidth = 2;
-                        ctx.strokeStyle = "rgba(255,0,100,0.15)";
+                        ctx.strokeStyle = "rgba(255,0,100,0.2)";
                         ctx.stroke();
                         ctx.setLineDash([0, 0]);
                     }
                 } else { //aim at player
                     this.fireCycle++
-                    this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position)); //set direction to turn to fire
+                    // this.fireDir = ; //set direction to turn to fire
                     const angle = this.angle + Math.PI / 2;
                     const dot = Vector.dot({
                         x: Math.cos(angle),
                         y: Math.sin(angle)
-                    }, this.fireDir)
+                    }, Vector.normalise(Vector.sub(this.seePlayer.position, this.position)))
                     const threshold = 0.04;
                     if (dot > threshold) { //rotate towards fireAngle
                         this.torque += 0.0000015 * this.inertia;
@@ -2377,13 +2376,18 @@ const spawn = {
                     }
                     //rotate towards fireAngle
                     const angle = this.angle + Math.PI / 2;
-                    c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-                    const threshold = 0.2;
-                    if (c > threshold) {
+                    // c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                    //rotate towards fireAngle
+                    const dot = Vector.dot({
+                        x: Math.cos(angle),
+                        y: Math.sin(angle)
+                    }, this.fireDir)
+                    const threshold = 0.03;
+                    if (dot > threshold) {
                         this.torque += 0.000004 * this.inertia;
-                    } else if (c < -threshold) {
+                    } else if (dot < -threshold) {
                         this.torque -= 0.000004 * this.inertia;
-                    } else if (this.noseLength > 1.5) {
+                    } else if (this.noseLength > 1.5 && dot > 0 && dot < 0.05) {
                         //fire
                         spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 15), 4);
                         const v = 20 * simulation.accelScale;

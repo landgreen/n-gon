@@ -1,9 +1,15 @@
 ******************************************************** NEXT PATCH ********************************************************
  
-bug fix - grower mob becoming immune to damage when shielded and growing bigger than shield
+tech: 1-body problem - do 100% damage if there is only 1 active bullet
 
-relay switch - toggles ON/OFF when you pick up a power up
-tech: ice IX condenser - if ON make a couple Ice IX crystals every second
+experiment mode and junk tech: random aiming
+
+bug fix - sniper, shooter aiming might be improved (no more firing backwards)
+  or maybe I just made it worse, let me know
+
+bug fix - Shift registers
+
+working on rewriting the way backgrounds and foregrounds are drawn on each level (in progress)
 
 ******************************************************** BUGS ********************************************************
 
@@ -36,28 +42,34 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-have junk tech drop frequency to 0 after showing up once
-  but add way more junk tech into the pool
-  how to communicate that to player?
-    console message
-    
+add water dips to sewers
+
+move power ups in front of blocks, make blocks not transparent?
+
+consider adding canvas path shadows to levels in level.custom for non squared lighting
+  convert all level.BG into canvas draw in level.custom
+  draw exit and entrance in level
+
+
+new level: procedural generation
+  several small rooms are linked by portals
+    the portals have a randomized pattern
+    the rooms can be set out in a grid and linked by physical doors,tunnels,wells
+    choose bosses that can move though walls, so it can track you while you portal
+  the map shuffles it's pattern when the player get to a button
+    shuffle portals or shuffle the physical layout of rooms
+    and then have the player go back through to get to the end?
+  gravity room
+    portal room
+    endlessly falling blocks down a slide, that the player has to climb
+    portal + rotor + falling blocks = perpetual motion
+    laser room
+    slime radiation room
+
 look into improving mouse lag with pointer lock?
 https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
 https://www.vsynctester.com/game.html
 https://news.ycombinator.com/item?id=26530272
-
-should blocks block mob vision?
-  Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
-  Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
-  only negative is mobs will attack player in the starting room
-    maybe make all doors to spawns somehow block vision
-    maybe start in cloaking mode
-      disable it a few cycles after level loads?
-      or disable when player moves?
-    ***maybe just clear spawns away from the starting room***
-      ok go through each map and find issues on each map
-      **but first test he game with no block blocking vision**
-
 
 mob vision: look at player history
     build a new type of attraction for mobs
@@ -103,16 +115,6 @@ bosses should have 2x health, but only do about 50 health damage
     boss flag cut damage done to boss by 20x <----
       make bosses not have extra density
     
-map: laboratory
-  rooms with switches that change physics
-    gravity room
-    portal room
-    laser room
-    radiation room
-    portal + rotor + falling blocks = perpetual motion   room
-  a button that spawns a heal.
-  consider adding canvas path shadows to levels in level.custom for non squared lighting
-
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
   put something on the intro map
@@ -125,8 +127,6 @@ tech:  add an eject button for each power up in the pause menu
 add back in gamepad support
   but does anyone care?
   https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
-
-mechanic: gain damage when there are fewer bullets
 
 rename intro level to something lore related
 
@@ -338,9 +338,12 @@ possible names for tech
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
   stochastic optimization
   electrostatic discharge
+  Gödel's incompleteness
+  dynamical systems
+  quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
+
 
 plot script:
-
 chapter 1: bot can hear audio and learns testing mode
   bot uses testing mode to exit room
 
@@ -384,7 +387,8 @@ chapter 4: no need to fight?
     keep fighting
     exit the simulation
       enter real world
-      enter console command to close tab?
+      close tab?
+      wipes all local storage?
 
 
 
@@ -437,41 +441,3 @@ AI doesn't know about:
   modern pop culture
   outside the lab
 
-scientist console text:
-  2 scientists (each one a different color text)
-  at the start of each level listen to text conversation from the two colors of text strings also
-  talking about the robot, watching
-  trying to communicate with the robot?  but how
-  random lines when:
-    at start of level, about: what mobs types are queued up, and level order
-    when player gets a cool tech combination
-    at random times:
-      I think it's planing to escape
-      Why is it attacking those shapes?
-      Are those shapes supposed to be us?
-
-ending outline
-  testing mode is unlocked when player see the 1st ending
-  if player chose tech: choosing this tech means the player gets lore after beating the game
-    count 1:
-  after final boss is cleared, player enters a level with no mobs
-    level maybe has some environmental damage, so player has an option to die at any time
-  player can see text output between two colors of text strings (scientists)
-    audio.ambient(current time and date)<br> "text"
-  player reads a conversation between the two colors of text
-    first time win on east or normal they talk about:
-      how many runs the player has done
-      they guess why
-    player is asked to stand on an in game button to enable the vocoder
-      they reveal the player is running simulations, and it isn't real
-      they ask the player to communicate
-        jump twice if you understand
-      they ask the player to enter console commands
-        give ammo or tech or something
-      They tell the player a console command to permanently enable custom and testing mode (in local storage)
-        players can use this command in the future to enable custom and testing without beating the game even if local storage is wiped
-      they then tell the player the command to increase the difficulty and the command to restart the game.
-    If you win on hard or why:  
-      they give the player and option to exit the simulation and entre the real world
-        simulation.exit()
-        This wipes all local storage, and closes the browser tab

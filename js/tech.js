@@ -123,9 +123,10 @@
         },
         damageFromTech() {
             let dmg = m.fieldDamage
+            if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
-            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.5
+            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.66
             if (tech.isTechDamage) dmg *= 2
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -612,6 +613,23 @@
                 remove() {
                     tech.fireRate = 1;
                     b.setFireCD();
+                }
+            },
+            {
+                name: "1-body problem",
+                description: "if there is exactly <strong>1</strong> active <strong>bullet</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return !tech.foamBotCount && !tech.nailBotCount && m.fieldUpgrades[m.fieldMode].name !== "nano-scale manufacturing" && ((tech.haveGunCheck("missiles") && tech.missileCount === 1) || tech.haveGunCheck("rail gun") || tech.haveGunCheck("grenades") || tech.isRivets || tech.isSlugShot || tech.oneSuperBall)
+                },
+                requires: "missiles, rail gun, grenades, rivets, slugs, super ball, no foam/nail bots, nano-scale",
+                effect() {
+                    tech.isOneBullet = true
+                },
+                remove() {
+                    tech.isOneBullet = false
                 }
             },
             {
@@ -1982,7 +2000,7 @@
                 }
             }, {
                 name: "dormancy",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>50%</strong></span>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>33%</strong></span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -3939,7 +3957,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") || tech.laserBotCount > 1
+                    return (tech.haveGunCheck("laser") && !tech.isPulseLaser) || tech.laserBotCount > 1
                 },
                 requires: "laser",
                 effect() {
@@ -3998,7 +4016,7 @@
                 }
             }, {
                 name: "diffuse beam",
-                description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>175%</strong>",
+                description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>200%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4797,6 +4815,31 @@
                 },
                 remove() {}
             },
+            {
+                name: "aim",
+                description: "<strong>experiment:</strong> your aiming is random",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection && !m.isShipMode
+                },
+                requires: "not ship",
+                effect() {
+                    m.look = () => {
+                        m.angle = 2 * Math.sin(m.cycle * 0.0133) + Math.sin(m.cycle * 0.013) + 0.5 * Math.sin(m.cycle * 0.031) + 0.33 * Math.sin(m.cycle * 0.03)
+                        const scale = 0.8;
+                        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+                        m.transX += (m.transSmoothX - m.transX) * 0.07;
+                        m.transY += (m.transSmoothY - m.transY) * 0.07;
+                    }
+                },
+                remove() {}
+            },
             //************************************************** 
             //************************************************** JUNK
             //************************************************** tech
@@ -4819,6 +4862,32 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "Fourier analysis",
+                description: "your aiming is now controlled by this equation:<br>2sin(0.0133t) + sin(0.013t) + 0.5sin(0.031t)+ 0.33sin(0.03t)",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return !m.isShipMode
+                },
+                requires: "not ship",
+                effect() {
+                    m.look = () => {
+                        m.angle = 2 * Math.sin(m.cycle * 0.0133) + Math.sin(m.cycle * 0.013) + 0.5 * Math.sin(m.cycle * 0.031) + 0.33 * Math.sin(m.cycle * 0.03)
+                        const scale = 0.8;
+                        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+                        m.transX += (m.transSmoothX - m.transX) * 0.07;
+                        m.transY += (m.transSmoothY - m.transY) * 0.07;
+                    }
+                },
+                remove() {
+                    m.look = m.lookDefault
+                }
+            },
             {
                 name: "disintegrated armament",
                 description: "spawn a <strong class='color-g'>gun</strong><br><strong>remove</strong> your active <strong class='color-g'>gun</strong>",

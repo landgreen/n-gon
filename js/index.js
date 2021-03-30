@@ -783,6 +783,7 @@ window.addEventListener("keydown", function(event) {
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'
                     if (!simulation.isCheating) {
                         simulation.isCheating = true;
+                        level.levelAnnounce();
                         lore.techCount = 0;
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
                             if (tech.tech[i].isLore) {
