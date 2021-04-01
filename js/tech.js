@@ -920,7 +920,7 @@
                 description: "<strong>20%</strong> chance to build a <strong class='color-bot'>bot</strong> after killing a mob<br>the <strong class='color-bot'>bot</strong> lasts for about <strong>20</strong> seconds",
                 maxCount: 3,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBotTech: true,
                 allowed() {
                     return b.totalBots() > 0 && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob
@@ -938,7 +938,7 @@
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>nails</strong> at mobs in line of sight",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -983,7 +983,7 @@
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>foam</strong> at nearby mobs",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1028,7 +1028,7 @@
                 description: "a <strong class='color-bot'>bot</strong> <strong>defends</strong> the space around you<br>ignites an <strong class='color-e'>explosion</strong> after hitting a mob",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1073,7 +1073,7 @@
                 description: "a <strong class='color-bot'>bot</strong> uses <strong class='color-f'>energy</strong> to emit a <strong class='color-laser'>laser</strong> beam<br>that targets nearby mobs",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1118,7 +1118,7 @@
                 description: "a <strong class='color-bot'>bot</strong> is locked in <strong>orbit</strong> around you<br><strong>stuns</strong> and <strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1172,7 +1172,7 @@
                 description: "a <strong class='color-bot'>bot</strong> <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second when it's near",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1234,7 +1234,7 @@
                 description: "use <strong>1</strong>  <strong class='color-r'>research</strong> to spawn a random <strong>bot</strong><br><strong>quadruple</strong> the <strong class='flicker'>frequency</strong> of finding <strong>bot</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isBotTech: true,
                 allowed() {
                     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
@@ -1330,7 +1330,7 @@
                 description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name !== "wormhole"
                 },
@@ -1380,7 +1380,7 @@
                 description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds`,
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 allowed() {
                     return true
                 },
@@ -1916,7 +1916,7 @@
                 description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>50</strong>",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 allowed() {
                     return m.maxEnergy > 0.99
                 },

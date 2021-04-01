@@ -1,15 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
  
-tech: 1-body problem - do 100% damage if there is only 1 active bullet
+added new graphics to several maps
 
-experiment mode and junk tech: random aiming
-
-bug fix - sniper, shooter aiming might be improved (no more firing backwards)
-  or maybe I just made it worse, let me know
-
-bug fix - Shift registers
-
-working on rewriting the way backgrounds and foregrounds are drawn on each level (in progress)
+to level developers: level.fillBG and level.fill no longer work,
+you should draw backgrounds directly in level.custom like this:
+level.custom = () => {
+    ctx.fillStyle = "rgba(0,255,255,0.1)";
+    ctx.fillRect(6400, -550, 300, 350);
+    level.playerExitCheck();
+    level.exit.draw();
+    level.enter.draw();
+};
 
 ******************************************************** BUGS ********************************************************
 
@@ -42,7 +43,11 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-add water dips to sewers
+tech shotgun - crouching makes your spread very small
+  remove spread reduction on nail shot
+  doesn't apply to slug
+
+add water drops to sewers
 
 move power ups in front of blocks, make blocks not transparent?
 

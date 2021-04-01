@@ -3486,67 +3486,9 @@ const spawn = {
     },
     boost(x, y, height = 1000) {
         spawn.mapVertex(x + 50, y + 35, "120 40 -120 40 -50 -40 50 -40");
-        // level.addZone(x, y, 100, 30, "fling", {Vx:Vx, Vy: Vy});
         level.addQueryRegion(x, y - 20, 100, 20, "boost", [
             [player], body, mob, powerUp, bullet
         ], -1.21 * Math.sqrt(Math.abs(height)));
-        let color = "rgba(200,0,255,";
-        level.fillBG.push({
-            x: x,
-            y: y - 25,
-            width: 100,
-            height: 25,
-            color: color + "0.2)"
-        });
-        level.fillBG.push({
-            x: x,
-            y: y - 55,
-            width: 100,
-            height: 55,
-            color: color + "0.1)"
-        });
-        level.fillBG.push({
-            x: x,
-            y: y - 120,
-            width: 100,
-            height: 120,
-            color: color + "0.05)"
-        });
-    },
-    laserZone(x, y, width, height, dmg) {
-        level.addZone(x, y, width, height, "laser", {
-            dmg
-        });
-        level.fill.push({
-            x: x,
-            y: y,
-            width: width,
-            height: height,
-            color: "#f00"
-        });
-    },
-    deathQuery(x, y, width, height) {
-        level.addQueryRegion(x, y, width, height, "death", [
-            [player], mob
-        ]);
-        level.fill.push({
-            x: x,
-            y: y,
-            width: width,
-            height: height,
-            color: "#f00"
-        });
-    },
-    platform(x, y, width, height) {
-        const size = 20;
-        spawn.mapRect(x, y + height, width, 30);
-        level.fillBG.push({
-            x: x + width / 2 - size / 2,
-            y: y,
-            width: size,
-            height: height,
-            color: "#f0f0f3"
-        });
     },
     blockDoor(x, y, blockSize = 60) {
         spawn.mapRect(x, y - 290, 40, 60); // door lip

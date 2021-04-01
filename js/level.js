@@ -65,6 +65,21 @@ const level = {
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // simulation.isCheating = false //true;
             // level.null()
+            // let text = ''
+            // if (level.fillBG) {
+            //     for (let i = 0; i < level.fillBG.length; i++) {
+            //         text += `ctx.fillStyle = "${level.fillBG[i].color}"; ctx.fillRect(${level.fillBG[i].x}, ${level.fillBG[i].y}, ${level.fillBG[i].width}, ${level.fillBG[i].height});`
+            //     }
+            //     console.log(text)
+            // }
+            // text = ''
+            // if (level.fill) {
+            //     for (let i = 0; i < level.fill.length; i++) {
+            //         text += `ctx.fillStyle = "${level.fill[i].color}"; ctx.fillRect(${level.fill[i].x}, ${level.fill[i].y}, ${level.fill[i].width}, ${level.fill[i].height});`
+            //     }
+            //     console.log(text)
+            // }
+
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -245,22 +260,6 @@ const level = {
             ctx.fill();
         }
     },
-    fillBG: [],
-    drawFillBGs() {
-        for (let i = 0, len = level.fillBG.length; i < len; ++i) {
-            const f = level.fillBG[i];
-            ctx.fillStyle = f.color;
-            ctx.fillRect(f.x, f.y, f.width, f.height);
-        }
-    },
-    fill: [],
-    drawFills() {
-        for (let i = 0, len = level.fill.length; i < len; ++i) {
-            const f = level.fill[i];
-            ctx.fillStyle = f.color;
-            ctx.fillRect(f.x, f.y, f.width, f.height);
-        }
-    },
     queryList: [], //queries do actions on many objects in regions
     checkQuery() {
         let bounds, action, info;
@@ -312,7 +311,7 @@ const level = {
         boost(target, yVelocity) {
             m.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
             m.hardLandCD = 0 // disable hard landing
-            if (target.velocity.y > 30) {
+            if (target.velocity.y > 26) {
                 Matter.Body.setVelocity(target, {
                     x: target.velocity.x + (Math.random() - 0.5) * 2,
                     y: -15 //gentle bounce if coming down super fast
@@ -969,6 +968,8 @@ const level = {
         }
         let phase = -Math.PI / 2
         level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(-1950, -950, 3900, 1900);
             hazardSlime.drawTides();
 
             //draw center circle lines
@@ -1011,21 +1012,6 @@ const level = {
         // document.body.style.backgroundColor = "#aaa";
         document.body.style.backgroundColor = "#ddd";
 
-        level.fill.push({ //foreground
-            x: -1950,
-            y: -950,
-            width: 3900,
-            height: 1900,
-            color: "rgba(0,0,0,0.1)"
-        });
-        // level.fillBG.push({     //background
-        //   x: 1300,
-        //   y: -1800,
-        //   width: 750,
-        //   height: 1800,
-        //   color: "#d4d4d7"
-        // });
-
         spawn.mapRect(-3000, 800, 5000, 1200); //bottom
         spawn.mapRect(-2000, -2000, 5000, 1200); //ceiling
         spawn.mapRect(-3000, -2000, 1200, 3400); //left
@@ -1034,18 +1020,14 @@ const level = {
         spawn.mapRect(-500, 0, 1000, 1000); //center platform
         spawn.mapRect(-500, -25, 25, 50); //edge shelf
         spawn.mapRect(475, -25, 25, 50); //edge shelf
-        // spawn.mapRect(-500, -820, 50, 25); //edge shelf ceiling
-        // spawn.mapRect(450, -820, 50, 25); //edge shelf ceiling
-        // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
-
-        // spawn.mapRect(-50, -500, 100, 100); //center square
-        // setTimeout(() => { simulation.makeTextLog(`test`) }, 3000);
     },
     testing() {
         const button = level.button(200, -700)
         level.custom = () => {
             button.query();
             button.draw();
+            ctx.fillStyle = "rgba(0,255,255,0.1)";
+            ctx.fillRect(6400, -550, 300, 350);
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
@@ -1066,15 +1048,6 @@ const level = {
         // simulation.draw.mapFill = "#444"
         // simulation.draw.bodyFill = "rgba(140,140,140,0.85)"
         // simulation.draw.bodyStroke = "#222"
-
-        level.fill.push({
-            x: 6400,
-            y: -550,
-            width: 300,
-            height: 350,
-            color: "rgba(0,255,255,0.1)"
-        });
-
         // level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
 
         spawn.mapRect(-950, 0, 8200, 800); //ground
@@ -1163,7 +1136,10 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,255,255,0.1)"
+            ctx.fillRect(5400, -550, 300, 350)
+        };
 
         level.setPosToSpawn(0, -250); //normal spawn
         spawn.mapRect(5500, -330 + 20, 100, 20); //spawn this because the real exit is in the wrong spot
@@ -1175,13 +1151,6 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#ddd";
 
-        level.fill.push({
-            x: 5400,
-            y: -550,
-            width: 300,
-            height: 350,
-            color: "rgba(0,255,255,0.1)"
-        });
         powerUps.spawn(1675, -50, "ammo");
         powerUps.spawn(3350, -75, "ammo");
         powerUps.spawn(3925, -50, "ammo");
@@ -1217,38 +1186,26 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
-
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,255,255,0.1)"
+            ctx.fillRect(6400, -550, 300, 350)
+        };
         level.setPosToSpawn(0, -475); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 6500;
         level.exit.y = -230;
-
         level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#ddd";
 
-        level.fill.push({
-            x: 6400,
-            y: -550,
-            width: 300,
-            height: 350,
-            color: "rgba(0,255,255,0.1)"
-        });
-
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
         spawn.mapRect(-950, -1800, 8200, 800); //roof
-        // spawn.mapRect(-250, -700, 1000, 900); // shelf
-        // spawn.mapRect(-250, -350, 600, 550);
         spawn.mapRect(175, -700, 575, 950);
         spawn.mapRect(-250, -425, 600, 650);
-
         spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
         powerUps.spawnStartingPowerUps(600, -800);
-
         spawn.blockDoor(710, -710);
-
         spawn[spawn.pickList[0]](1500, -200, 150 + Math.random() * 30);
         spawn.mapRect(2500, -1200, 200, 750); //right wall
         spawn.blockDoor(2585, -210)
@@ -1264,17 +1221,10 @@ const level = {
         spawn.mapRect(6400, -200, 400, 300); //right wall
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
-
         for (let i = 0; i < 3; ++i) {
-            if (simulation.difficulty * Math.random() > 15 * i) {
-                spawn.randomGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
-            }
-            if (simulation.difficulty * Math.random() > 10 * i) {
-                spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
-            }
-            if (simulation.difficulty * Math.random() > 7 * i) {
-                spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
-            }
+            if (simulation.difficulty * Math.random() > 15 * i) spawn.randomGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+            if (simulation.difficulty * Math.random() > 10 * i) spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+            if (simulation.difficulty * Math.random() > 7 * i) spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4125, -350);
@@ -1287,7 +1237,7 @@ const level = {
             const width = 8
             const yOff = -40 //-580
             let xOff = -130 //2622
-            ctx.strokeStyle = "#adf"
+            ctx.strokeStyle = "#bff"
             ctx.lineWidth = 1.5;
             ctx.beginPath()
             for (let i = 0; i < binary.length; i++) {
@@ -1521,6 +1471,7 @@ const level = {
 
         const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)") //laser
         const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
+
         const button = level.button(2100, -2600)
 
 
@@ -1581,6 +1532,9 @@ const level = {
             }
             button.query();
             button.draw();
+
+            ctx.fillStyle = "#d4f4f4"
+            ctx.fillRect(-300, -1000, 650, 500)
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
@@ -1619,13 +1573,6 @@ const level = {
         }]);
         powerUps.chooseRandomPowerUp(powerUpPos[0].x, powerUpPos[0].y);
         powerUps.chooseRandomPowerUp(powerUpPos[1].x, powerUpPos[1].y);
-        level.fillBG.push({ //exit room
-            x: -300,
-            y: -1000,
-            width: 650,
-            height: 500,
-            color: "#d4f4f4"
-        });
         //outer wall
         spawn.mapRect(2500, -3700, 1200, 3800); //right map wall
         spawn.mapRect(-1400, -3800, 1100, 3900); //left map wall
@@ -1774,6 +1721,9 @@ const level = {
             hazard.query();
             hazard.level(button.isUp)
             rotor.rotate();
+
+            ctx.fillStyle = "hsl(175, 15%, 76%)"
+            ctx.fillRect(9300, 2200, 600, 400)
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
@@ -1804,21 +1754,6 @@ const level = {
         powerUps.spawnStartingPowerUps(3475, 1775);
         spawn.debris(4575, 2550, 1600, 9); //16 debris per level
         spawn.debris(7000, 2550, 2000, 7); //16 debris per level
-
-        // level.fill.push({
-        //   x: 9325,
-        //   y: 2200,
-        //   width: 575,
-        //   height: 400,
-        //   color: "rgba(0,255,255,0.1)"
-        // });
-        level.fillBG.push({
-            x: 9300,
-            y: 2200,
-            width: 600,
-            height: 400,
-            color: "hsl(175, 15%, 76%)" //c4f4f4
-        });
 
         spawn.mapRect(-500, -600, 200, 800); //left entrance wall
         spawn.mapRect(-400, -600, 3550, 200); //ceiling
@@ -1910,11 +1845,32 @@ const level = {
     satellite() {
         const elevator = level.platform(4210, -1325, 380, 30, -10)
         level.custom = () => {
+            ctx.fillStyle = "#d4f4f4"
+            ctx.fillRect(-250, -750, 420, 450)
+            ctx.fillStyle = "#d0d4d6"
+            ctx.fillRect(-300, -1900, 500, 1100)
+            ctx.fillRect(900, -2450, 450, 2050)
+            ctx.fillRect(2000, -2800, 450, 2500)
+            ctx.fillRect(3125, -3100, 450, 3300)
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
         level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(200,0,255,0.2)";
+            ctx.fillRect(5825, 210, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)";
+            ctx.fillRect(5825, 180, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)";
+            ctx.fillRect(5825, 115, 100, 120);
+
+            ctx.fillStyle = "rgba(0,20,40,0.2)"
+            ctx.fillRect(-250, -400, 1800, 775)
+            ctx.fillRect(1800, -275, 850, 775)
+            ctx.fillRect(5200, 125, 450, 200)
+            ctx.fillStyle = "rgba(0,20,40,0.1)"
+            ctx.fillRect(4000, -1200, 1050, 1500)
+            ctx.fillRect(4100, -3450, 600, 2250)
             if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
                 if (elevator.pointA.y > -1275) { //bottom
                     elevator.plat.speed = -10
@@ -1966,20 +1922,6 @@ const level = {
         spawn.mapRect(150, -800, 50, 110);
         spawn.bodyRect(170, -690, 14, 180, 1, spawn.propsFriction); //door to exit room
         spawn.mapRect(-300, -400, 500, 150); //far left starting ceiling
-        level.fill.push({
-            x: -250,
-            y: -400,
-            width: 1800,
-            height: 775,
-            color: "rgba(0,20,40,0.2)"
-        });
-        level.fillBG.push({
-            x: -250,
-            y: -750,
-            width: 420,
-            height: 450,
-            color: "#d4f4f4"
-        });
 
         //tall platform above exit
         spawn.mapRect(-500, -1900, 400, 50); //super high shade
@@ -1987,78 +1929,29 @@ const level = {
         spawn.mapRect(-150, -1350, 200, 25); //super high shade
         spawn.bodyRect(140, -2100, 150, 200); //shield from laser
 
-        level.fillBG.push({
-            x: -300,
-            y: -1900,
-            width: 500,
-            height: 1100,
-            color: "#d0d4d6"
-        });
         //tall platform
         spawn.mapVertex(1125, -450, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
         spawn.mapRect(150, -500, 1400, 100); //far left starting ceiling
         spawn.mapRect(625, -2450, 1000, 50); //super high shade
         spawn.bodyRect(1300, -3600, 150, 150); //shield from laser
-        level.fillBG.push({
-            x: 900,
-            y: -2450,
-            width: 450,
-            height: 2050,
-            color: "#d0d4d6"
-        });
         //tall platform
         spawn.mapVertex(2225, -250, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
         spawn.mapRect(1725, -2800, 1000, 50); //super high shade
         spawn.mapRect(1800, -300, 850, 100); //far left starting ceiling
         spawn.bodyRect(2400, -2950, 150, 150); //shield from laser
-        level.fillBG.push({
-            x: 2000,
-            y: -2800,
-            width: 450,
-            height: 2500,
-            color: "#d0d4d6"
-        });
-        level.fill.push({
-            x: 1800,
-            y: -275,
-            width: 850,
-            height: 775,
-            color: "rgba(0,20,40,0.2)"
-        });
+
         //tall platform
         spawn.mapVertex(3350, 200, "400 0  -400 0  -275 -275  275 -275"); //base
         spawn.bodyRect(3400, -150, 150, 150);
         spawn.mapRect(2850, -3150, 1000, 50); //super high shade
         spawn.bodyRect(3675, -3470, 525, 20); //plank
         spawn.bodyRect(3600, -3450, 200, 300); //plank support block
-        level.fillBG.push({
-            x: 3125,
-            y: -3100,
-            width: 450,
-            height: 3300,
-            color: "#d0d4d6"
-        });
 
         //far right structure
         spawn.mapRect(5200, -725, 100, 870);
         spawn.mapRect(5300, -1075, 350, 1220);
         spawn.boost(5825, 235, 1400);
-        level.fill.push({
-            x: 5200,
-            y: 125,
-            width: 450,
-            height: 200,
-            color: "rgba(0,20,40,0.25)"
-        });
-
         //structure bellow tall stairs
-        level.fill.push({
-            x: 4000,
-            y: -1200,
-            width: 1050,
-            height: 1500,
-            color: "rgba(0,20,40,0.13)"
-        });
         spawn.mapRect(3925, -300, 425, 50);
         spawn.mapRect(4700, -375, 425, 50);
         // spawn.mapRect(4000, -1300, 1050, 100);
@@ -2069,13 +1962,6 @@ const level = {
         spawn.mapRect(4100, -2250, 100, 650);
         spawn.mapRect(4100, -3450, 100, 650); //left top shelf
         spawn.mapRect(4600, -3450, 100, 1850);
-        level.fill.push({
-            x: 4100,
-            y: -3450,
-            width: 600,
-            height: 2250,
-            color: "rgba(0,20,40,0.13)"
-        });
 
         spawn.randomSmallMob(4400, -3500);
         spawn.randomSmallMob(4800, -800);
@@ -2120,12 +2006,40 @@ const level = {
         level.custom = () => {
             ctx.fillStyle = "#ccc"
             ctx.fillRect(1567, -1990, 5, 1020)
+            ctx.fillStyle = "#d4f4f4"
+            if (isBackwards) {
+                ctx.fillRect(-650, -2300, 440, 300)
+            } else {
+                ctx.fillRect(3460, -700, 1090, 800)
+            }
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {
 
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(200,0,255,0.2)";
+            ctx.fillRect(4950, -25, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)";
+            ctx.fillRect(4950, -55, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)";
+            ctx.fillRect(4950, -120, 100, 120);
+
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(710, -2225, 580, 225)
+            ctx.fillRect(3510, -1550, 330, 300)
+            ctx.fillRect(1735, -900, 1515, 1900)
+            ctx.fillRect(1735, -1550, 1405, 550)
+            ctx.fillRect(1860, -1950, 630, 350)
+            ctx.fillRect(-700, -1950, 2100, 2950)
+            ctx.fillRect(3400, 100, 2150, 900)
+            ctx.fillRect(4550, -725, 900, 725)
+            ctx.fillRect(3460, -1250, 1080, 550)
+            if (isBackwards) {
+                ctx.fillRect(3460, -700, 1090, 800)
+            } else {
+                ctx.fillRect(-650, -2300, 440, 300)
+            }
             if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
                 if (elevator.pointA.y > -980) { //bottom
                     elevator.plat.speed = -2
@@ -2145,7 +2059,7 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#dcdcde";
 
-
+        let isBackwards = false
         if (Math.random() < 0.75) {
             //normal direction start in top left
             level.setPosToSpawn(-450, -2060);
@@ -2157,114 +2071,19 @@ const level = {
             spawn.randomSmallMob(4100, -100);
             spawn.randomSmallMob(4600, -100);
             spawn.randomMob(3765, -450, 0.3);
-            level.fill.push({
-                x: -650,
-                y: -2300,
-                width: 440,
-                height: 300,
-                color: "rgba(0,0,0,0.15)"
-            });
-            level.fillBG.push({
-                x: 3460,
-                y: -700,
-                width: 1090,
-                height: 800,
-                color: "#d4f4f4"
-            });
         } else {
+            isBackwards = true
             //reverse direction, start in bottom right
             level.setPosToSpawn(3650, -325);
             level.exit.x = -550;
             level.exit.y = -2030;
             spawn.mapRect(-550, -2015, 100, 50); //ground bump wall
-            spawn.boost(4950, 0, 1100);
-            level.fillBG.push({
-                x: -650,
-                y: -2300,
-                width: 440,
-                height: 300,
-                color: "#d4f4f4"
-            });
-            level.fill.push({
-                x: 3460,
-                y: -700,
-                width: 1090,
-                height: 800,
-                color: "rgba(0,0,0,0.1)"
-            });
         }
+        spawn.boost(4950, 0, 1100);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
         spawn.debris(1650, -1800, 3800, 16); //16 debris per level
         powerUps.spawnStartingPowerUps(2450, -1675);
-
-        //foreground
-
-        level.fill.push({
-            x: 3460,
-            y: -1250,
-            width: 1080,
-            height: 550,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 4550,
-            y: -725,
-            width: 900,
-            height: 725,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 3400,
-            y: 100,
-            width: 2150,
-            height: 900,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: -700,
-            y: -1950,
-            width: 2100,
-            height: 2950,
-            color: "rgba(0,0,0,0.1)"
-        });
-
-        level.fill.push({
-            x: 1860,
-            y: -1950,
-            width: 630,
-            height: 350,
-            color: "rgba(0,0,0,0.1)"
-        });
-
-        level.fill.push({
-            x: 1735,
-            y: -1550,
-            width: 1405,
-            height: 550,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 1735,
-            y: -900,
-            width: 1515,
-            height: 1900,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 3510,
-            y: -1550,
-            width: 330,
-            height: 300,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 710,
-            y: -2225,
-            width: 580,
-            height: 225,
-            color: "rgba(0,0,0,0.1)"
-        });
 
         //spawn.mapRect(-700, 0, 6250, 100); //ground
         spawn.mapRect(3400, 0, 2150, 100); //ground
@@ -2318,9 +2137,6 @@ const level = {
         spawn.spawnStairs(3800, 0, 3, 150, 206); //stairs top exit
         spawn.mapRect(3400, -275, 450, 275); //exit platform
 
-
-
-
         spawn.randomSmallMob(2200, -1775);
         spawn.randomSmallMob(4000, -825);
         spawn.randomSmallMob(-350, -3400);
@@ -2344,15 +2160,56 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(2175, -2425);
     },
     aerie() {
-        // const elevator = level.platform(4112, -2300, 280, 50)
-        // simulation.g = 0.0012 //0.0024
         level.custom = () => {
+            if (backwards) {
+                ctx.fillStyle = "#d4f4f4"
+                ctx.fillRect(-275, -1275, 425, 300)
+            } else {
+                ctx.fillStyle = "#d4f4f4"
+                ctx.fillRect(3750, -3650, 550, 400)
+            }
+            ctx.fillStyle = "#c7c7ca"
+            ctx.fillRect(4200, -2200, 100, 2600)
+            // ctx.fillStyle = "#c7c7ca"
+            ctx.fillRect(-100, -1000, 1450, 1400)
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            // elevator.move()
+            ctx.fillStyle = "rgba(200,0,255,0.2)"; //boosts
+            ctx.fillRect(-425, 75, 100, 25);
+            ctx.fillRect(5350, 250, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)"; //boosts
+            ctx.fillRect(-425, 45, 100, 55);
+            ctx.fillRect(5350, 220, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)"; //boosts
+            ctx.fillRect(-425, -20, 100, 120);
+            ctx.fillRect(5350, 155, 100, 120);
+
+            if (backwards) {
+                ctx.fillStyle = "rgba(0,0,0,0.1)"
+                ctx.fillRect(3750, -3650, 550, 400)
+            } else {
+                ctx.fillStyle = "rgba(0,0,0,0.1)"
+                ctx.fillRect(-275, -1275, 425, 300)
+            }
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(3700, -3150, 1100, 950)
+            ctx.fillRect(2000, -1110, 450, 1550)
+
+            ctx.fillStyle = "rgba(0,0,0,0.04)"
+            ctx.beginPath()
+            ctx.moveTo(-100, -900)
+            ctx.lineTo(300, -900)
+            ctx.lineTo(150, 100)
+            ctx.lineTo(-100, 100)
+
+            ctx.moveTo(600, -900)
+            ctx.lineTo(1350, -900)
+            ctx.lineTo(1350, 100)
+            ctx.lineTo(750, 100)
+            ctx.fill()
         };
 
         // simulation.difficulty = 4; //for testing to simulate possible mobs spawns
@@ -2376,74 +2233,11 @@ const level = {
         powerUps.spawnStartingPowerUps(1075, -550);
         document.body.style.backgroundColor = "#dcdcde";
 
-        //foreground
-        level.fill.push({
-            x: -100,
-            y: -1000,
-            width: 1450,
-            height: 1400,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 2000,
-            y: -1110,
-            width: 450,
-            height: 1550,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 3700,
-            y: -3150,
-            width: 1100,
-            height: 950,
-            color: "rgba(0,0,0,0.1)"
-        });
-
-        //background
-        level.fillBG.push({
-            x: 4200,
-            y: -2200,
-            width: 100,
-            height: 2600,
-            color: "#c7c7ca"
-        });
-        if (!backwards) {
-            level.fillBG.push({
-                x: 3750,
-                y: -3650,
-                width: 550,
-                height: 400,
-                color: "#d4f4f4"
-            });
-            level.fill.push({
-                x: -275,
-                y: -1275,
-                width: 425,
-                height: 300,
-                color: "rgba(0,0,0,0.1)"
-            });
-        } else {
-            level.fill.push({
-                x: 3750,
-                y: -3650,
-                width: 550,
-                height: 400,
-                color: "rgba(0,0,0,0.1)"
-            });
-            level.fillBG.push({
-                x: -275,
-                y: -1275,
-                width: 425,
-                height: 300,
-                color: "#d4f4f4"
-            });
-        }
-
         // starting room
         spawn.mapRect(-300, -1000, 600, 100);
         spawn.mapRect(-300, -1300, 450, 50);
         spawn.mapRect(-300, -1300, 50, 350);
-        if (!backwards && simulation.difficulty > 1) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
+        if (!backwards) spawn.bodyRect(100, -1250, 200, 240); //remove on backwards
         //left building
         spawn.mapRect(-100, -975, 100, 975);
         spawn.mapRect(-500, 100, 1950, 400);
@@ -2453,8 +2247,8 @@ const level = {
         spawn.mapRect(1250, -975, 100, 375);
         spawn.bodyRect(1250, -600, 100, 100, 0.7);
         spawn.mapRect(1250, -450, 100, 450);
-        if (!backwards) spawn.bodyRect(1250, -1225, 100, 200); //remove on backwards
-        if (!backwards) spawn.bodyRect(1200, -1025, 350, 25); //remove on backwards
+        spawn.bodyRect(1250, -1225, 100, 200, 0.7); //remove on backwards
+        spawn.bodyRect(1200, -1025, 350, 35); //remove on backwards
         //middle super tower
         if (backwards) {
             spawn.bodyRect(2000, -800, 700, 35);
@@ -2486,8 +2280,6 @@ const level = {
         spawn.mapRect(3700, -3700, 50, 500);
         spawn.mapRect(4250, -3700, 50, 300);
         spawn.mapRect(3700, -3250, 1100, 100);
-
-
 
         spawn.randomGroup(350, -500, 1)
         spawn.randomSmallMob(-225, 25);
@@ -2551,11 +2343,37 @@ const level = {
     },
     skyscrapers() {
         level.custom = () => {
+            ctx.fillStyle = "#d4f4f4"
+            ctx.fillRect(1350, -2100, 400, 250)
+            ctx.fillStyle = "#d4d4d7"
+            ctx.fillRect(3350, -1300, 50, 1325)
+            ctx.fillRect(1300, -1800, 750, 1800)
+
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(200,0,255,0.2)";
+            ctx.fillRect(475, -25, 100, 25);
+            ctx.fillRect(4450, -25, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)";
+            ctx.fillRect(475, -55, 100, 55);
+            ctx.fillRect(4450, -55, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)";
+            ctx.fillRect(475, -120, 100, 120);
+            ctx.fillRect(4450, -120, 100, 120);
+
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(2500, -1100, 450, 250)
+            ctx.fillRect(2400, -550, 600, 150)
+            ctx.fillRect(2550, -1650, 250, 200)
+            ctx.fillStyle = "rgba(0,0,0,0.2)"
+            ctx.fillRect(700, -110, 400, 110)
+            ctx.fillRect(3800, -110, 400, 110)
+            ctx.fillStyle = "rgba(0,0,0,0.15)"
+            ctx.fillRect(-250, -300, 450, 300)
+        };
 
         level.setPosToSpawn(-50, -60); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -2574,75 +2392,6 @@ const level = {
         // simulation.draw.mapFill = "#444"
         // simulation.draw.bodyFill = "rgba(140,140,140,0.85)"
         // simulation.draw.bodyStroke = "#222"
-
-        //foreground
-        level.fill.push({
-            x: 2500,
-            y: -1100,
-            width: 450,
-            height: 250,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 2400,
-            y: -550,
-            width: 600,
-            height: 150,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 2550,
-            y: -1650,
-            width: 250,
-            height: 200,
-            color: "rgba(0,0,0,0.1)"
-        });
-        //level.fill.push({ x: 1350, y: -2100, width: 400, height: 250, color: "rgba(0,255,255,0.1)" });
-        level.fill.push({
-            x: 700,
-            y: -110,
-            width: 400,
-            height: 110,
-            color: "rgba(0,0,0,0.2)"
-        });
-        level.fill.push({
-            x: 3800,
-            y: -110,
-            width: 400,
-            height: 110,
-            color: "rgba(0,0,0,0.2)"
-        });
-        level.fill.push({
-            x: -250,
-            y: -300,
-            width: 450,
-            height: 300,
-            color: "rgba(0,0,0,0.15)"
-        });
-
-        //background
-        level.fillBG.push({
-            x: 1300,
-            y: -1800,
-            width: 750,
-            height: 1800,
-            color: "#d4d4d7"
-        });
-        level.fillBG.push({
-            x: 3350,
-            y: -1300,
-            width: 50,
-            height: 1325,
-            color: "#d4d4d7"
-        });
-        level.fillBG.push({
-            x: 1350,
-            y: -2100,
-            width: 400,
-            height: 250,
-            color: "#d4f4f4"
-        });
-
         spawn.mapRect(-300, 0, 5100, 300); //***********ground
         spawn.mapRect(-300, -350, 50, 400); //far left starting left wall
         spawn.mapRect(-300, -10, 500, 50); //far left starting ground
@@ -2716,11 +2465,34 @@ const level = {
     },
     highrise() {
         level.custom = () => {
+            ctx.fillStyle = "#d0d0d2"
+            ctx.fillRect(-2475, -2450, 25, 750)
+            ctx.fillRect(-2975, -2750, 25, 600)
+            ctx.fillRect(-3375, -2875, 25, 725)
+            ctx.fillStyle = "#cff" //exit
+            ctx.fillRect(-4425, -3050, 425, 275)
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+            ctx.fillRect(-4450, -750, 800, 200)
+            ctx.fillStyle = "rgba(0,0,0,0.12)"
+            ctx.fillRect(-1830, -1150, 2030, 1150)
+            ctx.fillRect(-3410, -2150, 495, 1550)
+            ctx.fillRect(-2585, -1675, 420, 1125)
+            ctx.fillRect(-1640, -1575, 540, 425)
+            ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
+            ctx.fillRect(-750, -25, 100, 25);
+            ctx.fillRect(-2800, -625, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
+            ctx.fillRect(-750, -55, 100, 55);
+            ctx.fillRect(-2800, -655, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
+            ctx.fillRect(-750, -120, 100, 120);
+            ctx.fillRect(-2800, -720, 100, 120);
+        };
 
         level.setPosToSpawn(-300, -700); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -2737,36 +2509,6 @@ const level = {
         spawn.debris(-2625, -600, 600, 5); //16 debris per level
         spawn.debris(-2000, -60, 1200, 5); //16 debris per level
 
-        //background
-        level.fillBG.push({
-            x: -4425,
-            y: -3050,
-            width: 425,
-            height: 275,
-            color: "#cff"
-        });
-        level.fillBG.push({
-            x: -3375,
-            y: -2875,
-            width: 25,
-            height: 725,
-            color: "#d0d0d2"
-        });
-        level.fillBG.push({
-            x: -2975,
-            y: -2750,
-            width: 25,
-            height: 600,
-            color: "#d0d0d2"
-        });
-        level.fillBG.push({
-            x: -2475,
-            y: -2450,
-            width: 25,
-            height: 750,
-            color: "#d0d0d2"
-        });
-
         //3 platforms that lead to exit
         spawn.mapRect(-3440, -2875, 155, 25);
         spawn.mapRect(-3025, -2775, 125, 25);
@@ -2774,47 +2516,6 @@ const level = {
         spawn.bodyRect(-2600, -2500, 225, 20, 0.7);
         spawn.bodyRect(-3350, -2900, 25, 25, 0.5);
         spawn.bodyRect(-3400, -2950, 50, 75, 0.5);
-
-
-        //foreground
-        level.fill.push({
-            x: -1650,
-            y: -1575,
-            width: 550,
-            height: 425,
-            color: "rgba(0,0,0,0.12)"
-        });
-        level.fill.push({
-            x: -2600,
-            y: -1675,
-            width: 450,
-            height: 1125,
-            color: "rgba(0,0,0,0.12)"
-        });
-
-        level.fill.push({
-            x: -3425,
-            y: -2150,
-            width: 525,
-            height: 1550,
-            color: "rgba(0,0,0,0.12)"
-        });
-        level.fill.push({
-            x: -1850,
-            y: -1150,
-            width: 2025,
-            height: 1150,
-            color: "rgba(0,0,0,0.12)"
-        });
-
-        //hidden zone
-        level.fill.push({
-            x: -4450,
-            y: -955,
-            width: 1025,
-            height: 360,
-            color: "rgba(64,64,64,0.97)"
-        });
 
         powerUps.spawn(-4300, -700, "heal");
         powerUps.spawn(-4200, -700, "ammo");
@@ -2826,18 +2527,11 @@ const level = {
         spawn.bodyRect(-1000, -675, 25, 25);
         spawn.mapRect(-2225, 0, 2475, 150);
         spawn.mapRect(175, -1000, 75, 1100);
-
-        // spawn.mapRect(-175, -985, 50, 175);
         spawn.mapRect(-600, -1075, 50, 475);
-        // spawn.bodyRect(-170, -810, 14, 160, 1, spawn.propsFriction); //door to starting room
-        // spawn.mapRect(-600, -650, 825, 50);
-        // spawn.mapRect(-600, -1075, 75, 475);
         spawn.mapRect(-600, -650, 625, 50);
         spawn.mapRect(-1300, -650, 500, 50);
         spawn.mapRect(-175, -250, 425, 300);
         spawn.bodyRect(-75, -300, 50, 50);
-
-        // spawn.boost(-750, 0, 0, -0.01);
         spawn.boost(-750, 0, 1700);
         spawn.bodyRect(-425, -1375, 400, 225);
         spawn.mapRect(-1125, -1575, 50, 475);
@@ -2856,10 +2550,10 @@ const level = {
         }
         //building 2
         spawn.mapRect(-4450, -600, 2300, 750);
-        spawn.mapRect(-2225, -500, 175, 550);
+        spawn.mapRect(-2225, -450, 175, 550);
         // spawn.mapRect(-2600, -975, 450, 50);
-        spawn.boost(-2800, -600, 1700);
-        spawn.mapRect(-3450, -1325, 550, 50);
+        spawn.boost(-2800, -600, 950);
+        spawn.mapRect(-3425, -1325, 525, 50);
         spawn.mapRect(-3425, -2200, 525, 50);
         spawn.mapRect(-2600, -1700, 450, 50);
         // spawn.mapRect(-2600, -2450, 450, 50);
@@ -2869,24 +2563,23 @@ const level = {
         spawn.bodyRect(-3400, -1525, 100, 100);
         spawn.bodyRect(-3305, -1425, 100, 100);
         //building 3
-        spawn.mapRect(-4450, -1750, 1025, 1000);
-        spawn.mapRect(-3750, -2000, 175, 275);
-        spawn.mapRect(-4000, -2350, 275, 675);
+        spawn.mapRect(-4450, -1700, 800, 1000);
+        spawn.mapRect(-3850, -2000, 125, 400);
+        spawn.mapRect(-4000, -2350, 200, 800);
         // spawn.mapRect(-4450, -2650, 475, 1000);
         spawn.mapRect(-4450, -2775, 475, 1125);
         spawn.bodyRect(-3715, -2050, 50, 50);
-        spawn.bodyRect(-3570, -1800, 50, 50);
+        // spawn.bodyRect(-3570, -1800, 50, 50);
         spawn.bodyRect(-2970, -2250, 50, 50);
         spawn.bodyRect(-3080, -2250, 40, 40);
         spawn.bodyRect(-3420, -650, 50, 50);
-
 
         //exit
         spawn.mapRect(-4450, -3075, 25, 300);
         spawn.mapRect(-4450, -3075, 450, 25);
         spawn.mapRect(-4025, -3075, 25, 100);
         spawn.mapRect(-4275, -2785, 100, 25);
-        if (simulation.difficulty < 4) spawn.bodyRect(-3760, -2400, 50, 50);
+        spawn.bodyRect(-3830, -2400, 50, 50);
 
         //mobs
         spawn.randomMob(-2500, -2700, 1);
@@ -2920,11 +2613,58 @@ const level = {
     },
     warehouse() {
         level.custom = () => {
+            ctx.fillStyle = "#444" //light fixtures
+            ctx.fillRect(-920, -505, 40, 10)
+            ctx.fillRect(-920, 95, 40, 10)
+            ctx.fillRect(180, 95, 40, 10)
+            ctx.fillRect(-20, 695, 40, 10)
+            ctx.fillRect(-2320, 945, 40, 10)
+
+            ctx.fillStyle = "#cff" //exit
+            ctx.fillRect(300, -250, 350, 250)
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.1)"; //shadows and lights
+            ctx.beginPath()
+            ctx.moveTo(-1800, -500)
+            ctx.lineTo(-910, -500) //3rd floor light
+            ctx.lineTo(-1300, 0)
+            ctx.lineTo(-500, 0)
+            ctx.lineTo(-890, -500)
+            ctx.lineTo(-175, -500)
+            ctx.lineTo(-175, -250)
+            ctx.lineTo(175, -250)
+            ctx.lineTo(175, 0)
+            ctx.lineTo(-910, 100) //2nd floor light left
+            ctx.lineTo(-1300, 600)
+            ctx.lineTo(-500, 600)
+            ctx.lineTo(-890, 100)
+            ctx.lineTo(190, 100) //2nd floor light right
+            ctx.lineTo(-200, 600)
+            ctx.lineTo(600, 600)
+            ctx.lineTo(210, 100)
+            ctx.lineTo(1100, 100)
+            ctx.lineTo(1100, 1400)
+            ctx.lineTo(600, 1400) //1st floor light right
+            ctx.lineTo(10, 700)
+            ctx.lineTo(-10, 700)
+            ctx.lineTo(-600, 1400)
+            ctx.lineTo(-1950, 1400) //1st floor light left
+            ctx.lineTo(-2290, 950)
+            ctx.lineTo(-2310, 950)
+            ctx.lineTo(-2650, 1400)
+            ctx.lineTo(-3025, 1400)
+            ctx.lineTo(-3025, 150)
+            ctx.lineTo(-2590, 150)
+            ctx.lineTo(-2600, -150)
+            ctx.lineTo(-1800, -150)
+            ctx.lineTo(-1800, -500) //top left end/start of path
+            ctx.fill()
+        };
 
         level.setPosToSpawn(25, -55); //normal spawn
         level.exit.x = 425;
@@ -2939,43 +2679,6 @@ const level = {
         powerUps.spawnStartingPowerUps(25, 500);
         document.body.style.backgroundColor = "#dcdcde" //"#f2f5f3";
 
-        //background
-        const BGColor = "rgba(0,0,0,0.1)";
-        level.fill.push({
-            x: -3025,
-            y: 50,
-            width: 4125,
-            height: 1350,
-            color: BGColor
-        });
-        level.fill.push({
-            x: -1800,
-            y: -500,
-            width: 1625,
-            height: 550,
-            color: BGColor
-        });
-        level.fill.push({
-            x: -175,
-            y: -250,
-            width: 350,
-            height: 300,
-            color: BGColor
-        });
-        level.fill.push({
-            x: -2600,
-            y: -150,
-            width: 700,
-            height: 200,
-            color: BGColor
-        });
-        level.fillBG.push({
-            x: 300,
-            y: -250,
-            width: 350,
-            height: 250,
-            color: "#cff"
-        });
         spawn.mapRect(-1500, 0, 2750, 100);
         spawn.mapRect(175, -270, 125, 300);
         spawn.mapRect(-1900, -600, 1775, 100);
@@ -3000,7 +2703,7 @@ const level = {
         spawn.mapRect(-2950, 1250, 175, 250);
         spawn.mapRect(-3050, 1100, 150, 400);
         spawn.mapRect(-3150, 50, 125, 1450);
-        spawn.mapRect(-2375, 600, 3175, 100);
+        spawn.mapRect(-2350, 600, 3150, 100);
         spawn.mapRect(-2125, 400, 250, 275);
         // spawn.mapRect(-1950, -400, 100, 25);
         spawn.mapRect(-3150, 50, 775, 100);
@@ -3133,36 +2836,21 @@ const level = {
     },
     office() {
         let button, door
+        let isReverse = false
         if (Math.random() < 0.75) { //normal direction start in top left
             button = level.button(525, 0)
             door = level.door(1362, -200, 25, 200, 195)
             level.setPosToSpawn(1375, -1550); //normal spawn
             level.exit.x = 3088;
             level.exit.y = -630;
-            // spawn.randomSmallMob(3550, -550);
-            level.fillBG.push({
-                x: 3050,
-                y: -950,
-                width: 625,
-                height: 500,
-                color: "#dff"
-            });
         } else { //reverse direction, start in bottom right
+            isReverse = true
             button = level.button(3800, 0)
             door = level.door(3012, -200, 25, 200, 195)
             level.setPosToSpawn(3137, -650); //normal spawn
             level.exit.x = 1375;
             level.exit.y = -1530;
-            // spawn.bodyRect(3655, -650, 40, 150); //door
-            level.fillBG.push({
-                x: 725,
-                y: -1950,
-                width: 825,
-                height: 450,
-                color: "#dff"
-            });
         }
-
         level.custom = () => {
             button.query();
             button.draw();
@@ -3172,62 +2860,37 @@ const level = {
                 door.isOpen = false
             }
             door.openClose();
+            ctx.fillStyle = "#ccc"
+            ctx.fillRect(2495, -500, 10, 525)
+            ctx.fillStyle = "#dff"
+            if (isReverse) {
+                ctx.fillRect(725, -1950, 825, 450)
+            } else {
+                ctx.fillRect(3050, -950, 625, 500)
+            }
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
         level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(3650, -1300, 1300, 1300)
+            ctx.fillRect(3000, -1000, 650, 1000)
+            ctx.fillRect(750, -1950, 800, 450)
+            ctx.fillRect(750, -1450, 650, 1450)
+            ctx.fillRect(-550, -1700, 1300, 1700)
+            // ctx.fillRect(0, 0, 0, 0)
             door.draw();
         };
-
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom)
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-
         document.body.style.backgroundColor = "#e0e5e0";
-
-        // foreground
-        level.fill.push({
-            x: -550,
-            y: -1700,
-            width: 1300,
-            height: 1700,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 750,
-            y: -1450,
-            width: 650,
-            height: 1450,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 750,
-            y: -1950,
-            width: 800,
-            height: 450,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 3000,
-            y: -1000,
-            width: 650,
-            height: 1000,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({
-            x: 3650,
-            y: -1300,
-            width: 1300,
-            height: 1300,
-            color: "rgba(0,0,0,0.1)"
-        });
 
         spawn.debris(-300, -200, 1000, 6); //ground debris //16 debris per level
         spawn.debris(3500, -200, 800, 5); //ground debris //16 debris per level
         spawn.debris(-300, -650, 1200, 5); //1st floor debris //16 debris per level
-        // spawn.debris(3500, -650, 800, 5); //1st floor debris //16 debris per lesvel
         powerUps.spawnStartingPowerUps(-525, -700);
 
         spawn.mapRect(-600, 0, 2000, 325); //ground
@@ -3279,11 +2942,8 @@ const level = {
         spawn.mapRect(3650, -1300, 50, 700); //exit wall
         spawn.mapRect(3650, -1300, 1350, 50); //exit wall
         spawn.bodyRect(3665, -600, 20, 100); //door
-        // spawn.mapRect(3150, -550, 300, 75);
-        // spawn.mapRect(3225, -600, 175, 75);
         spawn.mapRect(3000, -550, 375, 75);
         spawn.mapRect(3000, -600, 225, 75);
-
 
         spawn.mapRect(3000, -2000 * 0.5, 700, 50); //exit roof
         spawn.mapRect(3000, -2000 * 0.25, 2000 - 300, 50); //1st floor
@@ -3291,7 +2951,6 @@ const level = {
         spawn.randomSmallMob(4575, -560, 1);
         spawn.randomSmallMob(1315, -880, 1);
         spawn.randomSmallMob(800, -600);
-        // spawn.randomSmallMob(-100, -1600);
         spawn.randomMob(4100, -225, 0.8);
         spawn.randomMob(-250, -700, 0.8);
         spawn.randomMob(4500, -225, 0.15);
@@ -3304,17 +2963,8 @@ const level = {
         spawn.randomMob(950, -1150, -0.1);
         spawn.randomGroup(1800, -800, -0.2);
         spawn.randomGroup(4150, -1000, 0.6);
-
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.5) {
-                // tether ball
-                level.fillBG.push({
-                    x: 2495,
-                    y: -500,
-                    width: 10,
-                    height: 525,
-                    color: "#ccc"
-                });
                 spawn.tetherBoss(2850, -80, { x: 2500, y: -500 })
                 //chance to spawn a ring of exploding mobs around this boss
                 if (simulation.difficulty > 6) spawn.nodeGroup(2850, -80, "spawns", 8, 20, 105);
@@ -3327,11 +2977,39 @@ const level = {
     },
     stronghold() { // player made level  by    Francois 👑 from discord
         level.custom = () => {
+            ctx.fillStyle = "#edf9f9";
+            ctx.fillRect(-500, -1220, 550, -480);
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(0, -700, 1050, 700);
+            ctx.fillRect(-550, -1170, 550, 1170);
+            ctx.fillRect(1150, -1700, 250, 1700);
+            ctx.fillRect(1100, -1700, 50, 450);
+            ctx.fillRect(1050, -1200, 100, 1200);
+            ctx.fillRect(1400, -250, 200, -1500);
+            ctx.fillRect(1600, -550, 600, -1150);
+            ctx.fillRect(2530, -550, 430, -1450);
+            ctx.fillRect(3270, -1700, 80, 600);
+            ctx.fillRect(3350, -1350, 700, 230);
+            ctx.fillRect(4050, -1700, 600, 1290);
+            ctx.fillRect(3650, -110, 1000, 170);
+            ctx.fillRect(4865, -55, 100, 55);
+            ctx.fillRect(1470, -305, 100, 55);
+            ctx.fillRect(-370, -55, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.2)";
+            ctx.fillRect(4865, -25, 100, 25);
+            ctx.fillRect(1470, -275, 100, 25);
+            ctx.fillRect(-370, -25, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.05)";
+            ctx.fillRect(4865, -120, 100, 120);
+            ctx.fillRect(1470, -370, 100, 120);
+            ctx.fillRect(-370, -120, 100, 120);
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => {
+
+        };
 
         level.setPosToSpawn(1900, -40); //normal spawn
         level.exit.x = -350;
@@ -3347,101 +3025,6 @@ const level = {
         // simulation.draw.mapFill = "#444"
         // simulation.draw.bodyFill = "rgba(140,140,140,0.85)"
         // simulation.draw.bodyStroke = "#222"
-
-        level.fillBG.push({
-            x: -500,
-            y: -1220,
-            width: 550,
-            height: -480,
-            color: "#edf9f9"
-        });
-        level.fillBG.push({
-            x: 0,
-            y: -700,
-            width: 1050,
-            height: 700,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: -550,
-            y: -1170,
-            width: 550,
-            height: 1170,
-            color: "rgba(0,0,0,0.1)"
-        });
-
-        level.fillBG.push({
-            x: 1150,
-            y: -1700,
-            width: 250,
-            height: 1700,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 1100,
-            y: -1700,
-            width: 50,
-            height: 450,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 1050,
-            y: -1200,
-            width: 100,
-            height: 1200,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 1400,
-            y: -250,
-            width: 200,
-            height: -1500,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 1600,
-            y: -550,
-            width: 600,
-            height: -1150,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 2530,
-            y: -550,
-            width: 430,
-            height: -1450,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 3270,
-            y: -1700,
-            width: 80,
-            height: 600,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 3350,
-            y: -1350,
-            width: 700,
-            height: 230,
-            color: "rgba(0,0,0,0.1)"
-        });
-
-        level.fillBG.push({
-            x: 4050,
-            y: -1700,
-            width: 600,
-            height: 1290,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fillBG.push({
-            x: 3650,
-            y: -110,
-            width: 1000,
-            height: 170,
-            color: "rgba(0,0,0,0.1)"
-        });
-
 
         // __________________________________________________________________________________________________
         // Spawn Box
@@ -3607,6 +3190,13 @@ const level = {
             spawn.bodyRect(8075, -3675, 50, 25);
         }
         level.custom = () => {
+            ctx.fillStyle = "rgba(200,0,255,0.2)";
+            ctx.fillRect(8290, -2125, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)";
+            ctx.fillRect(8290, -2155, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)";
+            ctx.fillRect(8290, -2220, 100, 120);
+
             level.playerExitCheck();
             portal[2].query()
             portal[3].query()
@@ -3633,11 +3223,15 @@ const level = {
                 doorPlateform.openClose();
             }
             hazard.level(button.isUp)
+            hazard.query();
             level.exit.draw();
             level.enter.draw();
         };
 
         level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(61,62,62,0.95)";
+            ctx.fillRect(-750, -900, 750, 450);
+
             if (isLevelReversed === true) {
                 door.draw();
                 doorPlateform.draw();
@@ -3834,14 +3428,6 @@ const level = {
         powerUps.spawn(5450, -3675, "ammo");
 
         // SECRET BOSS AREA //
-        //hidden zone
-        level.fill.push({
-            x: -750,
-            y: -900,
-            width: 750,
-            height: 450,
-            color: "rgba(61,62,62,0.95)"
-        });
         //hidden house
         spawn.mapRect(-850, -2000, 600, 1150); //Toit hidden house
         spawn.mapRect(-2850, -2000, 2150, 4880); //Mur gauche hidden house
@@ -3878,41 +3464,41 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d5d5d5";
         const BGColor = "rgba(0,0,0,0.1)";
-        level.fill.push({
-            x: -150,
-            y: -250,
-            width: 625,
-            height: 325,
-            color: BGColor
-        });
-        level.fill.push({
-            x: 475,
-            y: -520,
-            width: 5375,
-            height: 875,
-            color: BGColor
-        });
-        level.fill.push({
-            x: 5850,
-            y: -1275,
-            width: 2800,
-            height: 2475,
-            color: BGColor
-        });
-        level.fill.push({
-            x: 8650,
-            y: -500,
-            width: 1600,
-            height: 750,
-            color: BGColor
-        });
-        level.fill.push({
-            x: 10250,
-            y: -700,
-            width: 900,
-            height: 950,
-            color: BGColor
-        });
+        // level.fill.push({
+        //     x: -150,
+        //     y: -250,
+        //     width: 625,
+        //     height: 325,
+        //     color: BGColor
+        // });
+        // level.fill.push({
+        //     x: 475,
+        //     y: -520,
+        //     width: 5375,
+        //     height: 875,
+        //     color: BGColor
+        // });
+        // level.fill.push({
+        //     x: 5850,
+        //     y: -1275,
+        //     width: 2800,
+        //     height: 2475,
+        //     color: BGColor
+        // });
+        // level.fill.push({
+        //     x: 8650,
+        //     y: -500,
+        //     width: 1600,
+        //     height: 750,
+        //     color: BGColor
+        // });
+        // level.fill.push({
+        //     x: 10250,
+        //     y: -700,
+        //     width: 900,
+        //     height: 950,
+        //     color: BGColor
+        // });
         const balance = level.spinner(5500, -412.5, 25, 660) //entrance
         const rotor = level.rotor(7000, 580, -0.001);
         const doorSortieSalle = level.door(8590, -520, 20, 800, 750)
@@ -3941,34 +3527,34 @@ const level = {
         }
 
         function spawnCouloirEnHaut() {
-            level.fill.push({
-                x: 2575,
-                y: -1150,
-                width: 2550,
-                height: 630,
-                color: BGColor
-            });
-            level.fill.push({
-                x: 1900,
-                y: -2300,
-                width: 1650,
-                height: 1150,
-                color: BGColor
-            });
-            level.fill.push({
-                x: 3550,
-                y: -1625,
-                width: 1650,
-                height: 475,
-                color: BGColor
-            });
-            level.fill.push({
-                x: 1800,
-                y: -1120,
-                width: 775,
-                height: 600,
-                color: BGColor
-            });
+            // level.fill.push({
+            //     x: 2575,
+            //     y: -1150,
+            //     width: 2550,
+            //     height: 630,
+            //     color: BGColor
+            // });
+            // level.fill.push({
+            //     x: 1900,
+            //     y: -2300,
+            //     width: 1650,
+            //     height: 1150,
+            //     color: BGColor
+            // });
+            // level.fill.push({
+            //     x: 3550,
+            //     y: -1625,
+            //     width: 1650,
+            //     height: 475,
+            //     color: BGColor
+            // });
+            // level.fill.push({
+            //     x: 1800,
+            //     y: -1120,
+            //     width: 775,
+            //     height: 600,
+            //     color: BGColor
+            // });
             drawOnTheMapMapRect(3800, -270, 75, 75);
             drawOnTheMapMapRect(3900, -895, 500, 75);
             drawOnTheMapMapRect(3900, -1195, 75, 375);
@@ -4204,6 +3790,82 @@ const level = {
         document.body.style.backgroundColor = "rgb(170 170 170)"
 
         level.custom = () => {
+            ctx.fillStyle = "rgb(221, 221, 221)";
+            ctx.fillRect(1175, -1425, 4000, 1200);
+            ctx.fillStyle = "rgb(170 170 170)";
+            ctx.fillRect(1650, -1300, 175, 150);
+            ctx.fillStyle = "rgb(77, 76, 76)";
+            ctx.fillRect(624, -1150, 28, 1075);
+            ctx.fillStyle = "#ababab";
+            ctx.fillRect(3420, -380, 285, 40);
+            ctx.fillStyle = "#474747";
+            ctx.fillRect(3555, -367.5, 15, 15);
+            ctx.fillRect(3418, -344, 288, 8);
+            ctx.fillRect(3555, -327.5, 15, 15);
+            ctx.fillRect(3418, -304, 288, 8);
+            ctx.fillRect(3555, -285, 15, 15);
+            ctx.fillStyle = "#ababab";
+            ctx.fillRect(3420, -340, 285, 40);
+            ctx.fillRect(3420, -300, 285, 45);
+            ctx.fillStyle = "rgba(141, 141, 141,1)";
+            ctx.fillRect(3800, -1275, 250, 425);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(3800, -1275, 250, 3);
+            ctx.fillRect(4048, -1275, 3, 425);
+            ctx.fillRect(3800, -1275, 3, 425);
+            ctx.fillRect(3830, -1050, 35, 10);
+            ctx.fillStyle = "rgba(225, 242, 245,0.6)";
+            ctx.fillRect(4050, -1425, 1125, 600);
+            ctx.fillStyle = "#444";
+            ctx.fillRect(1736, -1300, 3, 150);
+            ctx.fillRect(1650, -1224, 175, 3);
+            ctx.fillStyle = "#5806ac";
+            ctx.fillRect(3375, -625, 375, 175);
+            ctx.fillStyle = "rgba(166, 166, 166,0.8)";
+            ctx.fillRect(4050, -1425, 1, 600);
+            ctx.fillRect(4090, -1425, 1, 600);
+            ctx.fillRect(4130, -1425, 1, 600);
+            ctx.fillRect(4170, -1425, 1, 600);
+            ctx.fillRect(4210, -1425, 1, 600);
+            ctx.fillRect(4250, -1425, 1, 600);
+            ctx.fillRect(4290, -1425, 1, 600);
+            ctx.fillRect(4330, -1425, 1, 600);
+            ctx.fillRect(4370, -1425, 1, 600);
+            ctx.fillRect(4410, -1425, 1, 600);
+            ctx.fillRect(4450, -1425, 1, 600);
+            ctx.fillRect(4490, -1425, 1, 600);
+            ctx.fillRect(4530, -1425, 1, 600);
+            ctx.fillRect(4570, -1425, 1, 600);
+            ctx.fillRect(4610, -1425, 1, 600);
+            ctx.fillRect(4650, -1425, 1, 600);
+            ctx.fillRect(4690, -1425, 1, 600);
+            ctx.fillRect(4730, -1425, 1, 600);
+            ctx.fillRect(4770, -1425, 1, 600);
+            ctx.fillRect(4810, -1425, 1, 600);
+            ctx.fillRect(4850, -1425, 1, 600);
+            ctx.fillRect(4890, -1425, 1, 600);
+            ctx.fillRect(4930, -1425, 1, 600);
+            ctx.fillRect(4970, -1425, 1, 600);
+            ctx.fillRect(5010, -1425, 1, 600);
+            ctx.fillRect(5050, -1425, 1, 600);
+            ctx.fillRect(5090, -1425, 1, 600);
+            ctx.fillRect(5130, -1425, 1, 600);
+            ctx.fillRect(4050, -1425, 1125, 2);
+            ctx.fillRect(4050, -1385, 1125, 2);
+            ctx.fillRect(4050, -1345, 1125, 2);
+            ctx.fillRect(4050, -1305, 1125, 2);
+            ctx.fillRect(4050, -1265, 1125, 2);
+            ctx.fillRect(4050, -1225, 1125, 2);
+            ctx.fillRect(4050, -1185, 1125, 2);
+            ctx.fillRect(4050, -1145, 1125, 2);
+            ctx.fillRect(4050, -1105, 1125, 2);
+            ctx.fillRect(4050, -1065, 1125, 2);
+            ctx.fillRect(4050, -1025, 1125, 2);
+            ctx.fillRect(4050, -985, 1125, 2);
+            ctx.fillRect(4050, -945, 1125, 2);
+            ctx.fillRect(4050, -905, 1125, 2);
+            ctx.fillRect(4050, -865, 1125, 2);
+
             hazard.query();
             buttonBedroom.query();
             buttonBedroom.draw();
@@ -4265,6 +3927,9 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(64,64,64,0.97)";
+            ctx.fillRect(1175, -400, 275, 175);
+
             hazard.draw();
             doorBedroom.draw();
             doorGrenier.draw();
@@ -4275,176 +3940,6 @@ const level = {
             voletLucarne5.draw();
             voletLucarne6.draw();
         };
-
-        //colors
-        level.fillBG.push({
-            x: 1175,
-            y: -1425,
-            width: 4000,
-            height: 1200,
-            color: "rgb(221, 221, 221)"
-        })
-        level.fillBG.push({
-            x: 1650,
-            y: -1300,
-            width: 175,
-            height: 150,
-            color: "rgb(170 170 170)"
-        })
-        level.fillBG.push({ //lampadaire
-            x: 624,
-            y: -1150,
-            width: 28,
-            height: 1075,
-            color: "rgb(77, 76, 76)"
-        });
-        //tele
-        level.fillBG.push({ //zone 1 
-            x: 3420,
-            y: -380,
-            width: 285,
-            height: 40,
-            color: "#ababab"
-        })
-        level.fillBG.push({ //poignée 1
-            x: 3555,
-            y: -367.5,
-            width: 15,
-            height: 15,
-            color: "#474747"
-        })
-        level.fillBG.push({ //entre-deux 1
-            x: 3418,
-            y: -344,
-            width: 288,
-            height: 8,
-            color: "#474747"
-        })
-        level.fillBG.push({ //zone 2
-            x: 3420,
-            y: -340,
-            width: 285,
-            height: 40,
-            color: "#ababab"
-        })
-        level.fillBG.push({ //poignée 2
-            x: 3555,
-            y: -327.5,
-            width: 15,
-            height: 15,
-            color: "#474747"
-        })
-        level.fillBG.push({ //entre-deux 2
-            x: 3418,
-            y: -304,
-            width: 288,
-            height: 8,
-            color: "#474747"
-        })
-        level.fillBG.push({ //zone 3
-            x: 3420,
-            y: -300,
-            width: 285,
-            height: 45,
-            color: "#ababab"
-        })
-        level.fillBG.push({ //poignée 3
-            x: 3555,
-            y: -285,
-            width: 15,
-            height: 15,
-            color: "#474747"
-        })
-        level.fillBG.push({ //door bathroom
-            x: 3800,
-            y: -1275,
-            width: 250,
-            height: 425,
-            color: "rgba(141, 141, 141,1)",
-        })
-        level.fillBG.push({ //door bathroom //top border
-            x: 3800,
-            y: -1275,
-            width: 250,
-            height: 3,
-            color: "#000",
-        })
-        level.fillBG.push({ //door bathroom //right border
-            x: 4048,
-            y: -1275,
-            width: 3,
-            height: 425,
-            color: "#000",
-        })
-        level.fillBG.push({ //door bathroom //left border
-            x: 3800,
-            y: -1275,
-            width: 3,
-            height: 425,
-            color: "#000",
-        })
-        level.fillBG.push({ //poignée door bathroom
-            x: 3830,
-            y: -1050,
-            width: 35,
-            height: 10,
-            color: "#000",
-        })
-        level.fillBG.push({ //background bathroom
-            x: 4050,
-            y: -1425,
-            width: 1125,
-            height: 600,
-            // color:"#c1d7db"
-            color: "rgba(225, 242, 245,0.6)"
-        })
-        level.fillBG.push({ //window
-            x: 1736,
-            y: -1300,
-            width: 3,
-            height: 150,
-            color: "#444"
-        })
-        level.fillBG.push({ //window
-            x: 1650,
-            y: -1224,
-            width: 175,
-            height: 3,
-            color: "#444"
-        })
-        let color = Math.random().toString(16).substr(-6);
-        level.fillBG.push({ //écran 
-            x: 3375,
-            y: -625,
-            width: 375,
-            height: 175,
-            color: '#' + color
-        })
-        level.fill.push({ //hidden zone
-            x: 2800,
-            y: -400,
-            width: 275,
-            height: 175,
-            color: "rgba(64,64,64,0.97)"
-        })
-
-
-        function drawCarreaux(x, y, width, height) {
-            level.fillBG.push({ //carreaux
-                x: x,
-                y: y,
-                width: width,
-                height: height,
-                color: "rgba(166, 166, 166,0.8)"
-            })
-        }
-        for (let i = 0; i < 28; i++) {
-            drawCarreaux(4050 + i * 40, -1425, 1, 600);
-        }
-        for (let i = 0; i < 15; i++) {
-            drawCarreaux(4050, -1425 + i * 40, 1125, 2);
-        }
-
         //chairs
         const part1 = Matter.Bodies.rectangle(4525, -255, 25, 200, {
             density: 0.0005,
@@ -4737,7 +4232,6 @@ const level = {
         spawn.randomMob(4630, -425, 0.1);
         spawn.randomGroup(630, -1300, -0.1);
         spawn.randomGroup(3450, -2880, -0.2)
-
         if (simulation.difficulty > 3) {
             if (Math.random() < 0.16) {
                 spawn.tetherBoss(3380, -1775, { x: 3775, y: -1775 })
@@ -4771,13 +4265,15 @@ const level = {
         const rotor = level.rotor(-200, -1950, -0.001)
 
         level.custom = () => {
-            level.playerExitCheck();
-
             portal[2].query(true)
             portal[3].query(true)
             portal2[2].query(true)
             portal2[3].query(true)
             rotor.rotate();
+
+            ctx.fillStyle = "#d4f4f4";
+            ctx.fillRect(375, -3000, 450, 300);
+            level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
@@ -4791,6 +4287,17 @@ const level = {
             portal2[1].draw();
             portal2[2].draw();
             portal2[3].draw();
+            ctx.fillStyle = "rgba(0,0,0,0.03)";
+            ctx.fillRect(-875, -250, 1500, 700);
+            ctx.fillRect(-925, -505, 930, 255);
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(725, -1400, 200, 200);
+            ctx.fillRect(925, -2150, 150, 2175);
+            ctx.fillRect(925, -3400, 150, 850);
+            ctx.fillStyle = "rgba(0,0,0,0.03)";
+            ctx.fillRect(1800, -2600, 400, 400);
+            ctx.fillRect(2200, -2600, 400, 1250);
+
         };
 
         level.defaultZoom = 1700 // 4500 // 1400
@@ -4810,27 +4317,6 @@ const level = {
         spawn.mapRect(-1280, 100, 205, 150); //1-4 floor
         spawn.mapRect(-1280, 245, 360, 455); //bottom left corner
         spawn.mapRect(-1600, -200, 200, 50); //1-4 platform 1
-        level.fill.push({
-            x: -875,
-            y: -250,
-            width: 1500,
-            height: 700,
-            color: "rgba(0,0,0,0.03)"
-        });
-        level.fill.push({
-            x: -925,
-            y: -505,
-            width: 930,
-            height: 255,
-            color: "rgba(0,0,0,0.03)"
-        });
-        // level.fill.push({
-        //     x: -1280,
-        //     y: -700,
-        //     width: 355,
-        //     height: 800,
-        //     color: "rgba(0,0,0,0.03)"
-        // });
 
         //section 2: lower central room (gone through main portals 1 time)
         spawn.mapRect(920, 245, 160, 455); //below right portal
@@ -4852,42 +4338,6 @@ const level = {
         spawn.mapRect(1100, -1100, 50, 300); //shute right 3
         spawn.mapRect(1120, -980, 50, 50); //shute right 4
         spawn.mapRect(1850, -650, 400, 50); //drop from 4-1
-        // level.fill.push({
-        //     x: 150,
-        //     y: -1000,
-        //     width: 775,
-        //     height: 700,
-        //     color: "rgba(0,0,0,0.03)"
-        // });
-        // level.fill.push({
-        //     x: 1075,
-        //     y: -1000,
-        //     width: 500,
-        //     height: 700,
-        //     color: "rgba(0,0,0,0.03)"
-        // });
-        level.fill.push({
-            x: 725,
-            y: -1400,
-            width: 200,
-            height: 200,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({ //lower shute
-            x: 925,
-            y: -2150,
-            width: 150,
-            height: 2175,
-            color: "rgba(0,0,0,0.1)"
-        });
-        level.fill.push({ //upper shute
-            x: 925,
-            y: -3400,
-            width: 150,
-            height: 850,
-            color: "rgba(0,0,0,0.1)"
-        });
-
         //section 3: upper left room and upper central room (gone through main portals 2 times)
         //3-2 is just the upper part of 2-2
         spawn.mapRect(-1775, -1000, 700, 300); //3-1 floor
@@ -4925,27 +4375,6 @@ const level = {
         spawn.mapRect(800, -4200, 1800, -500); //4-2 ceiling
         spawn.mapRect(1075, -3400, 225, 850); //upper shute right wall
         spawn.mapRect(800, -3400, 125, 850); //upper shute left wall
-        // level.fill.push({
-        //     x: 1800,
-        //     y: -2200,
-        //     width: 225,
-        //     height: 550,
-        //     color: "rgba(0,0,0,0.1)"
-        // });
-        level.fill.push({
-            x: 1800,
-            y: -2600,
-            width: 400,
-            height: 400,
-            color: "rgba(0,0,0,0.03)"
-        });
-        level.fill.push({
-            x: 2200,
-            y: -2600,
-            width: 400,
-            height: 1250,
-            color: "rgba(0,0,0,0.03)"
-        });
 
         //section 5: after portals (gone through main portals 3 times)
         spawn.mapRect(-700, -2700, 100, 450); //5-1 right wall
@@ -4953,20 +4382,6 @@ const level = {
         spawn.mapRect(-925, -2300, 325, 50); //5-1 right floor
         spawn.mapRect(-1900, -3000, 450, 50); //stair cover
         spawn.bodyRect(-1150, -2950, 200, 250); //5-2 block
-        // level.fill.push({
-        //     x: -1450,
-        //     y: -2655,
-        //     width: 755,
-        //     height: 355,
-        //     color: "rgba(0,0,0,0.03)"
-        // });
-        // level.fill.push({
-        //     x: -1900,
-        //     y: -3000,
-        //     width: 450,
-        //     height: 700,
-        //     color: "rgba(0,0,0,0.03)"
-        // });
 
         //top left corner stuff
         if (true) {
@@ -4984,13 +4399,6 @@ const level = {
         spawn.bodyRect(350, -2850, 50, 50.5); //door
         spawn.bodyRect(350, -2800, 50, 50.5); //door
         spawn.bodyRect(350, -2750, 50, 50.5); //door
-        level.fillBG.push({
-            x: 375,
-            y: -3000,
-            width: 450,
-            height: 300,
-            color: "#d4f4f4"
-        });
 
         spawn.debris(-400, 450, 400, 5); //16 debris per level
         spawn.debris(-1650, -2300, 250, 4); //16 debris per level

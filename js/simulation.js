@@ -19,7 +19,6 @@ const simulation = {
         simulation.checks();
         ctx.save();
         simulation.camera();
-        level.drawFillBGs();
         level.custom();
         simulation.draw.powerUp();
         mobs.draw();
@@ -30,7 +29,6 @@ const simulation = {
         m.draw();
         m.hold();
         // v.draw(); //working on visibility work in progress
-        level.drawFills();
         level.customTopLayer();
         simulation.draw.drawMapPath();
         b.fire();
@@ -54,13 +52,13 @@ const simulation = {
             m.airControl()
         }
         // level.checkZones();
-        level.custom();
         level.checkQuery();
         m.move();
         m.look();
         simulation.checks();
         ctx.save();
         simulation.camera();
+        level.custom();
         m.draw();
         level.customTopLayer();
         simulation.draw.wireFrame();
@@ -715,8 +713,6 @@ const simulation = {
         m.fireCDcycle = 0
         m.drop();
         m.hole.isOn = false;
-        level.fill = [];
-        level.fillBG = [];
         level.zones = [];
         level.queryList = [];
         simulation.drawList = [];
