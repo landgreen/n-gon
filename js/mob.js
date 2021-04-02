@@ -917,7 +917,6 @@ const mobs = {
                             this.torque -= 0.000004 * this.inertia;
                         } else if (this.noseLength > 1.5 && dot > 0 && dot < 0.03) {
                             //fire
-                            console.log(dot)
                             spawn.bullet(this.vertices[1].x, this.vertices[1].y, 9 + Math.ceil(this.radius / 15));
                             const v = 15;
                             Matter.Body.setVelocity(mob[mob.length - 1], {

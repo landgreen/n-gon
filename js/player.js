@@ -513,7 +513,7 @@ const m = {
         let dmg = 1
         dmg *= m.fieldHarmReduction
         if (tech.isImmortal) dmg *= 0.79
-        if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.25 : 1.25
+        if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.50 : 1.1
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
@@ -1487,6 +1487,8 @@ const m = {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
                 m.fieldHarmReduction = 0.8;
+                m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
+                m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
                 m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);

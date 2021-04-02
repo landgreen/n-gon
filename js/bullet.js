@@ -10,7 +10,11 @@ const b = {
         if (tech.isFireMoveLock) {
             b.fire = b.fireFloat
         } else if (tech.isFireNotMove) {
-            b.fire = b.fireNotMove
+            if (tech.isAlwaysFire) {
+                b.fire = b.fireNotMoveAlwaysFire
+            } else {
+                b.fire = b.fireNotMove
+            }
         } else {
             b.fire = b.fireNormal
         }
@@ -19,92 +23,40 @@ const b = {
     fireNormal() {
         if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && b.inventory.length) {
             if (b.guns[b.activeGun].ammo > 0) {
-                b.guns[b.activeGun].fire();
-                if (tech.isCrouchAmmo && m.crouch) {
-                    if (tech.isCrouchAmmo % 2) {
-                        b.guns[b.activeGun].ammo--;
-                        simulation.updateGunHUD();
-                    }
-                    tech.isCrouchAmmo++ //makes the no ammo toggle off and on
-                } else {
-                    b.guns[b.activeGun].ammo--;
-                    simulation.updateGunHUD();
-                }
+                b.fireWithAmmo()
             } else {
-                if (tech.isAmmoFromHealth) {
-                    if (m.health > 0.05) {
-                        m.damage(0.05 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
-                        if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
-                            for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
-                        }
-                    }
-                } else {
-                    simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
-                }
-                m.fireCDcycle = m.cycle + 30; //fire cooldown        
+                b.outOfAmmo()
             }
             if (m.holdingTarget) m.drop();
         }
     },
-    fireNotMove() {
-        //added  && player.speed < 0.5 && m.onGround ************************* 
+    fireNotMove() { //added  && player.speed < 0.5 && m.onGround  
         if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && b.inventory.length && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
             if (b.guns[b.activeGun].ammo > 0) {
-                b.guns[b.activeGun].fire();
-                if (tech.isCrouchAmmo && m.crouch) {
-                    if (tech.isCrouchAmmo % 2) {
-                        b.guns[b.activeGun].ammo--;
-                        simulation.updateGunHUD();
-                    }
-                    tech.isCrouchAmmo++ //makes the no ammo toggle off and on
-                } else {
-                    b.guns[b.activeGun].ammo--;
-                    simulation.updateGunHUD();
-                }
+                b.fireWithAmmo()
             } else {
-                if (tech.isAmmoFromHealth) {
-                    if (m.health > 0.05) {
-                        m.damage(0.05 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
-                        if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
-                            for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
-                        }
-                    }
-                } else {
-                    simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
-                }
-                m.fireCDcycle = m.cycle + 30; //fire cooldown        
+                b.outOfAmmo()
             }
             if (m.holdingTarget) m.drop();
         }
     },
-    fireFloat() {
-        //added  && player.speed < 0.5 && m.onGround ************************* 
+    fireNotMoveAlwaysFire() { //added  && player.speed < 0.5 && m.onGround  //removed input.fire && (!input.field || m.fieldFire)
+        if (m.fireCDcycle < m.cycle && b.inventory.length && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
+            if (b.guns[b.activeGun].ammo > 0) {
+                b.fireWithAmmo()
+            } else {
+                b.outOfAmmo()
+            }
+            if (m.holdingTarget) m.drop();
+        }
+    },
+    fireFloat() { //added  && player.speed < 0.5 && m.onGround  
         if (input.fire && (!input.field || m.fieldFire) && b.inventory.length) {
             if (m.fireCDcycle < m.cycle) {
                 if (b.guns[b.activeGun].ammo > 0) {
-                    b.guns[b.activeGun].fire();
-                    if (tech.isCrouchAmmo && m.crouch) {
-                        if (tech.isCrouchAmmo % 2) {
-                            b.guns[b.activeGun].ammo--;
-                            simulation.updateGunHUD();
-                        }
-                        tech.isCrouchAmmo++ //makes the no ammo toggle off and on
-                    } else {
-                        b.guns[b.activeGun].ammo--;
-                        simulation.updateGunHUD();
-                    }
+                    b.fireWithAmmo()
                 } else {
-                    if (tech.isAmmoFromHealth) {
-                        if (m.health > 0.05) {
-                            m.damage(0.05 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
-                            if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
-                                for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
-                            }
-                        }
-                    } else {
-                        simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
-                    }
-                    m.fireCDcycle = m.cycle + 30; //fire cooldown        
+                    b.outOfAmmo()
                 }
                 if (m.holdingTarget) m.drop();
             }
@@ -114,6 +66,31 @@ const b = {
             });
             player.force.x = 0
             player.force.y = 0
+        }
+    },
+    fireWithAmmo() { //triggers after firing when you have ammo
+        b.guns[b.activeGun].fire();
+        if (tech.isCrouchAmmo && m.crouch) {
+            if (tech.isCrouchAmmo % 2) {
+                b.guns[b.activeGun].ammo--;
+                simulation.updateGunHUD();
+            }
+            tech.isCrouchAmmo++ //makes the no ammo toggle off and on
+        } else {
+            b.guns[b.activeGun].ammo--;
+            simulation.updateGunHUD();
+        }
+    },
+    outOfAmmo() { //triggers after firing when you have NO ammo
+        simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
+        m.fireCDcycle = m.cycle + 30; //fire cooldown        
+        if (tech.isAmmoFromHealth) {
+            if (m.health > 0.05) {
+                m.damage(0.05 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
+                if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
+                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
+                }
+            }
         }
     },
     giveGuns(gun = "random", ammoPacks = 10) {
@@ -2049,8 +2026,8 @@ const b = {
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             beforeDmg(who) {
-                if (tech.isIncendiary) {
-                    const max = Math.max(Math.min(this.endCycle - simulation.cycle, 1500), 0)
+                if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle) {
+                    const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
                     b.explosion(this.position, max * 0.08 + this.isImproved * 100 + 60 * Math.random()); //makes bullet do explosive damage at end
                     this.endCycle -= max
                 } else {
@@ -2067,12 +2044,23 @@ const b = {
                     }
                 }
             },
-            onEnd() {},
+            onEnd() {
+                if (tech.isDroneRespawn) {
+                    const who = b.guns[b.activeGun]
+                    if (who.name === "drones" && who.ammo > 0 && mob.length) {
+                        b.drone({ x: this.position.x, y: this.position.y }, 0)
+                        if (Math.random() < 0.33) {
+                            b.guns[b.activeGun].ammo--;
+                            simulation.updateGunHUD();
+                        }
+                    }
+                }
+            },
             do() {
                 if (simulation.cycle + this.deathCycles > this.endCycle) { //fall shrink and die
                     this.force.y += this.mass * 0.0012;
                     this.restitution = 0.2;
-                    const scale = 0.99;
+                    const scale = 0.995;
                     Matter.Body.scale(this, scale, scale);
                 } else {
                     this.force.y += this.mass * 0.0002;

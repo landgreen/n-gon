@@ -563,6 +563,7 @@ const simulation = {
         b.setFireMethod()
         b.setFireCD();
         // simulation.updateTechHUD();
+        powerUps.tech.choiceLog = []
         powerUps.totalPowerUps = 0;
         powerUps.research.count = 0;
         m.setFillColors();
@@ -785,7 +786,7 @@ const simulation = {
     //   }
     // },
     checks() {
-        if (!(m.cycle % 60)) { //once a second
+        if (!(simulation.cycle % 60) && !m.isBodiesAsleep) { //once a second
             //energy overfill 
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
             if (tech.isFlipFlopEnergy) {
@@ -839,7 +840,7 @@ const simulation = {
             //   }
             // }
 
-            if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
+            if (m.lastKillCycle + 300 > simulation.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery) m.energy += m.maxEnergy * 0.05
                 if (tech.isHealthRecovery) m.addHealth(0.01 * m.maxHealth)
             }

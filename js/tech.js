@@ -126,7 +126,7 @@
             if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
-            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.66
+            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.75
             if (tech.isTechDamage) dmg *= 2
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -451,6 +451,27 @@
                 }
             },
             {
+                name: "automatic",
+                description: "always <strong>fire</strong> when at <strong>rest</strong><br><strong class='color-g'>ammo</strong> power ups give <strong>250%</strong> <strong class='color-g'>ammo</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 4,
+                allowed() {
+                    return tech.isFireNotMove && !tech.isFireMoveLock
+                },
+                requires: "inertial frame, not Higgs mechanism",
+                effect: () => {
+                    tech.isAlwaysFire = true;
+                    b.setFireMethod();
+                },
+                remove() {
+                    if (tech.isAlwaysFire) {
+                        tech.isAlwaysFire = false
+                        b.setFireMethod();
+                    }
+                }
+            },
+            {
                 name: "dead reckoning",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong> when at <strong>rest</strong>",
                 maxCount: 9,
@@ -475,9 +496,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.isEnergyHealth && !m.isShipMode
+                    return !tech.isEnergyHealth && !m.isShipMode && !tech.isAlwaysFire
                 },
-                requires: "not mass energy, not ship mode",
+                requires: "not mass energy, not ship mode, not automatic",
                 effect: () => {
                     tech.isFireMoveLock = true;
                     b.setFireMethod();
@@ -1167,7 +1188,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "dynamo-bot",
                 description: "a <strong class='color-bot'>bot</strong> <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second when it's near",
                 maxCount: 9,
@@ -1186,7 +1208,8 @@
                 remove() {
                     tech.dynamoBotCount -= this.count;
                 }
-            }, {
+            },
+            {
                 name: "dynamo-bot upgrade",
                 description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>dynamo-bots <strong>regen</strong> <strong>24</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
@@ -1210,7 +1233,8 @@
                         if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = false
                     }
                 }
-            }, {
+            },
+            {
                 name: "bot fabrication",
                 description: "anytime you collect <strong>4</strong> <strong class='color-r'>research</strong><br>use them to build a random <strong class='color-bot'>bot</strong>",
                 maxCount: 1,
@@ -1229,7 +1253,8 @@
                 remove() {
                     tech.isRerollBots = false;
                 }
-            }, {
+            },
+            {
                 name: "robotics",
                 description: "use <strong>1</strong>  <strong class='color-r'>research</strong> to spawn a random <strong>bot</strong><br><strong>quadruple</strong> the <strong class='flicker'>frequency</strong> of finding <strong>bot</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
@@ -1256,7 +1281,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "perimeter defense",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
@@ -1273,7 +1299,8 @@
                 remove() {
                     tech.isBotArmor = false
                 }
-            }, {
+            },
+            {
                 name: "network effect",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
@@ -1290,7 +1317,8 @@
                 remove() {
                     tech.isBotDamage = false
                 }
-            }, {
+            },
+            {
                 name: "ersatz bots",
                 description: "<strong>double</strong> your permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
                 maxCount: 1,
@@ -1325,7 +1353,8 @@
                     tech.missileBotCount *= 2
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "mass driver",
                 description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
                 maxCount: 1,
@@ -1341,7 +1370,8 @@
                 remove() {
                     tech.throwChargeRate = 1
                 }
-            }, {
+            },
+            {
                 name: "restitution",
                 description: "mobs killed by collisions with <strong>blocks</strong><br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -1358,7 +1388,8 @@
                 remove() {
                     tech.isBlockPowerUps = false
                 }
-            }, {
+            },
+            {
                 name: "inelastic collision",
                 description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>",
                 maxCount: 1,
@@ -1375,7 +1406,8 @@
                 remove() {
                     tech.isBlockHarm = false
                 }
-            }, {
+            },
+            {
                 name: "Pauli exclusion",
                 description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds`,
                 maxCount: 9,
@@ -1392,7 +1424,8 @@
                 remove() {
                     tech.collisionImmuneCycles = 30;
                 }
-            }, {
+            },
+            {
                 name: "complex spin-statistics",
                 description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second<br>once every <strong>7</strong> seconds`,
                 maxCount: 3,
@@ -1536,7 +1569,8 @@
                 remove() {
                     tech.isFlipFlopDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "transistor",
                 description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>3.1</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
@@ -1553,7 +1587,8 @@
                 remove() {
                     tech.isFlipFlopEnergy = false;
                 }
-            }, {
+            },
+            {
                 name: "shift registers",
                 description: "set to the <strong class='color-flop'>ON</strong> state<br>at the start of a <strong>level</strong>",
                 maxCount: 1,
@@ -1587,7 +1622,8 @@
                 remove() {
                     tech.isSlowFPS = false;
                 }
-            }, {
+            },
+            {
                 name: "liquid cooling",
                 description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
                 maxCount: 1,
@@ -1604,7 +1640,8 @@
                 remove() {
                     tech.isHarmFreeze = false;
                 }
-            }, {
+            },
+            {
                 name: "osmoprotectant",
                 description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
                 maxCount: 1,
@@ -1657,7 +1694,8 @@
                 remove() {
                     tech.isDroneOnDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "non-Newtonian armor",
                 description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong>",
                 maxCount: 1,
@@ -1673,7 +1711,8 @@
                 remove() {
                     tech.isHarmArmor = false;
                 }
-            }, {
+            },
+            {
                 name: "radiative equilibrium",
                 description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
                 maxCount: 1,
@@ -1689,7 +1728,8 @@
                 remove() {
                     tech.isHarmDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "CPT reversal",
                 description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-harm'>harm</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
                 maxCount: 1,
@@ -1705,7 +1745,8 @@
                 remove() {
                     tech.isRewindAvoidDeath = false;
                 }
-            }, {
+            },
+            {
                 name: "causality bots",
                 description: "when you <strong class='color-rewind'>rewind</strong>, build several <strong class='color-bot'>bots</strong><br>that protect you for about <strong>9</strong> seconds",
                 maxCount: 3,
@@ -1722,7 +1763,8 @@
                 remove() {
                     tech.isRewindBot = 0;
                 }
-            }, {
+            },
+            {
                 name: "causality bombs",
                 description: "before you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong>",
                 maxCount: 1,
@@ -1738,7 +1780,8 @@
                 remove() {
                     tech.isRewindGrenade = false;
                 }
-            }, {
+            },
+            {
                 name: "piezoelectricity",
                 description: "<strong>colliding</strong> with mobs gives you <strong>2048</strong> <strong class='color-f'>energy</strong>", //<br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>
                 maxCount: 1,
@@ -1755,7 +1798,8 @@
                 remove() {
                     tech.isPiezo = false;
                 }
-            }, {
+            },
+            {
                 name: "ground state",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
                 maxCount: 1,
@@ -1773,7 +1817,8 @@
                     tech.energyRegen = 0.001;
                     m.fieldRegen = tech.energyRegen;
                 }
-            }, {
+            },
+            {
                 name: "mass-energy equivalence",
                 description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
                 maxCount: 1,
@@ -1802,7 +1847,8 @@
                     simulation.mobDmgColor = "rgba(255,0,0,0.7)"
                     m.displayHealth();
                 }
-            }, {
+            },
+            {
                 name: "1st ionization energy",
                 description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>5</strong>",
                 maxCount: 1,
@@ -1827,7 +1873,8 @@
                         if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
                     }
                 }
-            }, {
+            },
+            {
                 name: "electrolytes",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
                 maxCount: 1,
@@ -1843,7 +1890,8 @@
                 remove() {
                     tech.isEnergyDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "exciton-lattice",
                 description: `increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
                 maxCount: 1,
@@ -1859,7 +1907,8 @@
                 remove() {
                     tech.isEnergyNoAmmo = false;
                 }
-            }, {
+            },
+            {
                 name: "exothermic process",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
                 maxCount: 1,
@@ -1875,7 +1924,8 @@
                 remove() {
                     tech.isEnergyLoss = false;
                 }
-            }, {
+            },
+            {
                 name: "heat engine",
                 description: `increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br>reduce maximum <strong class='color-f'>energy</strong> by <strong>50</strong>`,
                 maxCount: 1,
@@ -1894,7 +1944,8 @@
                     tech.isMaxEnergyTech = false;
                     m.setMaxEnergy()
                 }
-            }, {
+            },
+            {
                 name: "Gibbs free energy",
                 description: `increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> <strong class='color-f'>energy</strong> below <strong>100</strong>`,
                 maxCount: 1,
@@ -1911,7 +1962,8 @@
                 remove() {
                     tech.isLowEnergyDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "overcharge",
                 description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>50</strong>",
                 maxCount: 9,
@@ -1931,7 +1983,8 @@
                     tech.bonusEnergy = 0;
                     m.setMaxEnergy()
                 }
-            }, {
+            },
+            {
                 name: "supercapacitor",
                 description: "<strong class='color-f'>energy</strong> above your max decays <strong>60%</strong> slower",
                 maxCount: 1,
@@ -1947,7 +2000,8 @@
                 remove() {
                     tech.overfillDrain = 0.75
                 }
-            }, {
+            },
+            {
                 name: "energy conservation",
                 description: "<strong>6%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
                 maxCount: 9,
@@ -1963,7 +2017,8 @@
                 remove() {
                     tech.energySiphon = 0;
                 }
-            }, {
+            },
+            {
                 name: "waste energy recovery",
                 description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regen <strong>5%</strong> of max <strong class='color-f'>energy</strong> every second",
                 maxCount: 1,
@@ -1980,7 +2035,8 @@
                 remove() {
                     tech.isEnergyRecovery = false;
                 }
-            }, {
+            },
+            {
                 name: "scrap recycling",
                 description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regain <strong>1%</strong> of max <strong class='color-h'>health</strong> every second",
                 maxCount: 1,
@@ -1998,9 +2054,10 @@
                 remove() {
                     tech.isHealthRecovery = false;
                 }
-            }, {
+            },
+            {
                 name: "dormancy",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>33%</strong></span>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>25%</strong></span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2014,9 +2071,10 @@
                 remove() {
                     tech.isDamageAfterKill = false;
                 }
-            }, {
+            },
+            {
                 name: "torpor",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>75%</strong> else increase it by <strong>25%</strong>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> else increase it by <strong>10%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -2031,7 +2089,8 @@
                 remove() {
                     tech.isHarmReduceAfterKill = false;
                 }
-            }, {
+            },
+            {
                 name: "negative feedback",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong class='color-h'>health</strong> below <strong>100</strong>",
                 maxCount: 1,
@@ -2047,7 +2106,8 @@
                 remove() {
                     tech.isLowHealthDmg = false;
                 }
-            }, {
+            },
+            {
                 name: "antiscience",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>lose <strong>11</strong> <strong class='color-h'>health</strong> when you pick up a <strong class='color-m'>tech</strong>",
                 maxCount: 1,
@@ -2063,7 +2123,8 @@
                 remove() {
                     tech.isTechDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "entropy exchange",
                 description: "<strong class='color-h'>heal</strong> for <strong>3%</strong> of <strong class='color-d'>damage</strong> done<br>take <strong>8%</strong> more <strong class='color-harm'>harm</strong>",
                 maxCount: 9,
@@ -2080,7 +2141,8 @@
                 remove() {
                     tech.healthDrain = 0;
                 }
-            }, {
+            },
+            {
                 name: "fluoroantimonic acid",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong class='color-h'>health</strong> is above <strong>100</strong>",
                 maxCount: 1,
@@ -2096,7 +2158,8 @@
                 remove() {
                     tech.isAcidDmg = false;
                 }
-            }, {
+            },
+            {
                 name: "supersaturation",
                 description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>50</strong>",
                 maxCount: 9,
@@ -2117,7 +2180,8 @@
                     m.setMaxHealth();
 
                 }
-            }, {
+            },
+            {
                 name: "inductive coupling",
                 description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 3 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 51 health per level)</em>",
                 maxCount: 1,
@@ -2136,7 +2200,8 @@
                     // tech.armorFromPowerUps = 0;  //this is now reset in tech.setupAllTech();
                     m.setMaxHealth();
                 }
-            }, {
+            },
+            {
                 name: "transceiver chip",
                 description: "unused <strong>power ups</strong> at the end of each <strong>level</strong><br>are still activated <em>(selections are random)</em>",
                 maxCount: 1,
@@ -2152,7 +2217,8 @@
                 remove() {
                     tech.isEndLevelPowerUp = false;
                 }
-            }, {
+            },
+            {
                 name: "negentropy",
                 description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>50</strong> missing health`,
                 maxCount: 1,
@@ -2169,7 +2235,8 @@
                 remove() {
                     tech.isHealLowHealth = false;
                 }
-            }, {
+            },
+            {
                 name: "adiabatic healing",
                 description: "<strong class='color-h'>heal</strong> <strong>power ups</strong> are <strong>100%</strong> more effective",
                 maxCount: 3,
@@ -2253,7 +2320,8 @@
                 remove() {
                     tech.isDeathAvoid = false;
                 }
-            }, {
+            },
+            {
                 name: "strong anthropic principle",
                 description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>increase <strong class='color-d'>damage</strong> by <strong>137.03599%</strong> on that level",
                 maxCount: 1,
@@ -2270,7 +2338,8 @@
                 remove() {
                     tech.isAnthropicDamage = false
                 }
-            }, {
+            },
+            {
                 name: "quantum immortality",
                 description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>23%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
                 maxCount: 1,
@@ -2287,7 +2356,8 @@
                 remove() {
                     tech.isImmortal = false;
                 }
-            }, {
+            },
+            {
                 name: "many-worlds",
                 description: "each new <strong>level</strong> is an <strong>alternate reality</strong><br> find <strong>2</strong> <strong class='color-m'>tech</strong> power ups in that reality",
                 maxCount: 1,
@@ -2304,7 +2374,8 @@
                 remove() {
                     tech.isSwitchReality = false;
                 }
-            }, {
+            },
+            {
                 name: "Ψ(t) collapse",
                 description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>11</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2322,7 +2393,8 @@
                 remove() {
                     tech.isResearchReality = false;
                 }
-            }, {
+            },
+            {
                 name: "decoherence",
                 description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>5</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2340,7 +2412,8 @@
                     tech.isBanish = false
                     powerUps.tech.banishLog = [] //reset banish log
                 }
-            }, {
+            },
+            {
                 name: "renormalization",
                 description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2356,7 +2429,8 @@
                 remove() {
                     tech.renormalization = false;
                 }
-            }, {
+            },
+            {
                 name: "perturbation theory",
                 description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
                 maxCount: 1,
@@ -2376,7 +2450,8 @@
                     tech.researchHaste = 1;
                     b.setFireCD();
                 }
-            }, {
+            },
+            {
                 name: "ansatz",
                 description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
                 maxCount: 1,
@@ -2392,7 +2467,8 @@
                 remove() {
                     tech.isAnsatz = false;
                 }
-            }, {
+            },
+            {
                 name: "Bayesian statistics",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>3.9%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
                 maxCount: 1,
@@ -2408,7 +2484,8 @@
                 remove() {
                     tech.isRerollDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "Born rule",
                 description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
                 maxCount: 1,
@@ -2557,7 +2634,8 @@
                     // tech.cancelCount = 0
                     if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
                 }
-            }, {
+            },
+            {
                 name: "commodities exchange",
                 description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>8</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2573,7 +2651,8 @@
                 remove() {
                     tech.isCancelRerolls = false
                 }
-            }, {
+            },
+            {
                 name: "correlated damage",
                 description: "your chance to <strong class='color-dup'>duplicate</strong> power ups<br>increases your <strong class='color-d'>damage</strong> by the same percent",
                 maxCount: 1,
@@ -2589,7 +2668,8 @@
                 remove() {
                     tech.isDupDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "parthenogenesis",
                 description: "each level has a chance to spawn a <strong>level boss</strong><br>equal to <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
@@ -2605,7 +2685,8 @@
                 remove() {
                     tech.isDuplicateBoss = false;
                 }
-            }, {
+            },
+            {
                 name: "apomixis",
                 description: "after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong> chance<br>immediately spawn <strong>4 level bosses</strong>",
                 maxCount: 1,
@@ -2622,7 +2703,8 @@
                 remove() {
                     tech.is100Duplicate = false;
                 }
-            }, {
+            },
+            {
                 name: "exchange symmetry",
                 description: "convert <strong>1</strong> a random <strong class='color-m'>tech</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive tech lose all stacks</em>",
                 maxCount: 1,
@@ -2653,7 +2735,8 @@
                     simulation.updateTechHUD();
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "monte carlo experiment",
                 description: "spawn <strong>2</strong> <strong class='color-m'>tech</strong><br>remove <strong>1</strong> random <strong class='color-m'>tech</strong>",
                 maxCount: 1,
@@ -2671,7 +2754,8 @@
                     for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "strange attractor",
                 description: `use <strong>2</strong> <strong class='color-r'>research</strong> to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
                 maxCount: 1,
@@ -2694,7 +2778,8 @@
                     tech.duplicateChance = chanceStore
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "mine synthesis",
                 description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong>",
                 maxCount: 1,
@@ -2712,7 +2797,8 @@
                 remove() {
                     tech.isMineDrop = false;
                 }
-            }, {
+            },
+            {
                 name: "unified field theory",
                 description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
                 maxCount: 1,
@@ -2822,7 +2908,8 @@
                 remove() {
                     tech.isExtraChoice = false;
                 }
-            }, {
+            },
+            {
                 name: "determinism",
                 description: "spawn <strong>6</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
                 maxCount: 1,
@@ -2843,7 +2930,8 @@
                     tech.isDeterminism = false;
                     for (let i = 0; i < 6; i++) powerUps.removeRandomTech()
                 }
-            }, {
+            },
+            {
                 name: "superdeterminism",
                 description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>research</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
                 maxCount: 1,
@@ -2889,7 +2977,8 @@
                         level.difficultyIncrease(simulation.difficultyMode)
                     }
                 }
-            }, {
+            },
+            {
                 name: "ergodicity",
                 description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>all <strong class='color-h'>healing</strong> has <strong>no</strong> effect",
                 maxCount: 1,
@@ -2966,7 +3055,8 @@
                         tech.isRewindGun = false
                     }
                 }
-            }, {
+            },
+            {
                 name: "needle gun",
                 description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong class='color-g'>ammo</strong>",
                 isGunTech: true,
@@ -3003,7 +3093,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "ceramic needles",
                 description: `your <strong>needles</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
                 isGunTech: true,
@@ -3020,7 +3111,8 @@
                 remove() {
                     tech.isNeedleShieldPierce = false
                 }
-            }, {
+            },
+            {
                 name: "rivet gun",
                 description: "<strong>nail gun</strong> slowly fires a heavy <strong>rivet</strong>",
                 isGunTech: true,
@@ -3051,7 +3143,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "rivet diameter",
                 description: `your <strong>rivets</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
                 isGunTech: true,
@@ -3068,7 +3161,8 @@
                 remove() {
                     tech.rivetSize = 1;
                 }
-            }, {
+            },
+            {
                 name: "ice crystal nucleation",
                 description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
                 isGunTech: true,
@@ -3104,7 +3198,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "pneumatic actuator",
                 description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
                 isGunTech: true,
@@ -3129,7 +3224,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "powder-actuated",
                 description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
                 isGunTech: true,
@@ -3154,7 +3250,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "supercritical fission",
                 description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
                 isGunTech: true,
@@ -3171,7 +3268,8 @@
                 remove() {
                     tech.isNailCrit = false
                 }
-            }, {
+            },
+            {
                 name: "irradiated nails",
                 description: "<strong>nails</strong> and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
                 isGunTech: true,
@@ -3188,7 +3286,8 @@
                 remove() {
                     tech.isNailRadiation = false;
                 }
-            }, {
+            },
+            {
                 name: "4s half-life",
                 description: "<strong>nails</strong> are made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
                 isGunTech: true,
@@ -3205,7 +3304,8 @@
                 remove() {
                     tech.isSlowRadiation = false;
                 }
-            }, {
+            },
+            {
                 name: "1/2s half-life",
                 description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br><strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
                 isGunTech: true,
@@ -3222,7 +3322,8 @@
                 remove() {
                     tech.isFastRadiation = false;
                 }
-            }, {
+            },
+            {
                 name: "shotgun spin-statistics",
                 description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br><strong class='color-g'>ammo</strong> costs are <strong>doubled</strong>",
                 isGunTech: true,
@@ -3261,7 +3362,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "nailshot",
                 description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
                 isGunTech: true,
@@ -3278,7 +3380,8 @@
                 remove() {
                     tech.isNailShot = false;
                 }
-            }, {
+            },
+            {
                 name: "shotgun slug",
                 description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong>",
                 isGunTech: true,
@@ -3295,7 +3398,8 @@
                 remove() {
                     tech.isSlugShot = false;
                 }
-            }, {
+            },
+            {
                 name: "Newton's 3rd law",
                 description: "<strong>shotgun</strong> <strong>recoil</strong> is greatly increased<br>and has a <strong>66%</strong> decreased <strong><em>delay</em></strong> after firing",
                 isGunTech: true,
@@ -3312,7 +3416,8 @@
                 remove() {
                     tech.isShotgunRecoil = false;
                 }
-            }, {
+            },
+            {
                 name: "super duper",
                 description: "fire <strong>1</strong> additional <strong>super ball</strong>",
                 isGunTech: true,
@@ -3329,7 +3434,8 @@
                 remove() {
                     tech.superBallNumber = 4;
                 }
-            }, {
+            },
+            {
                 name: "super ball",
                 description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
                 isGunTech: true,
@@ -3346,7 +3452,8 @@
                 remove() {
                     tech.oneSuperBall = false;
                 }
-            }, {
+            },
+            {
                 name: "super sized",
                 description: `your <strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
                 isGunTech: true,
@@ -3363,7 +3470,8 @@
                 remove() {
                     tech.bulletSize = 1;
                 }
-            }, {
+            },
+            {
                 name: "wave packet",
                 description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
                 isGunTech: true,
@@ -3380,7 +3488,8 @@
                 remove() {
                     tech.waveHelix = 1
                 }
-            }, {
+            },
+            {
                 name: "phase velocity",
                 description: "the <strong>wave beam</strong> propagates faster in solids",
                 isGunTech: true,
@@ -3399,7 +3508,8 @@
                     tech.waveSpeedMap = 0.08
                     tech.waveSpeedBody = 0.25
                 }
-            }, {
+            },
+            {
                 name: "bound state",
                 description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>bound</strong> to a <strong>region</strong> around player",
                 isGunTech: true,
@@ -3416,7 +3526,8 @@
                 remove() {
                     tech.isWaveReflect = false
                 }
-            }, {
+            },
+            {
                 name: "cruise missile",
                 description: "<strong>missiles</strong> travel <strong>50%</strong> slower,<br>but have a <strong>50%</strong> larger <strong class='color-e'>explosive</strong> payload",
                 isGunTech: true,
@@ -3433,7 +3544,8 @@
                 remove() {
                     tech.missileSize = false
                 }
-            }, {
+            },
+            {
                 name: "MIRV",
                 description: "launch <strong>+1</strong> <strong>missile</strong> at a time<br>decrease <strong>size</strong> and <strong>fire rate</strong> by <strong>10%</strong>",
                 isGunTech: true,
@@ -3450,7 +3562,8 @@
                 remove() {
                     tech.missileCount = 1;
                 }
-            }, {
+            },
+            {
                 name: "missile-bot",
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>missiles</strong> at far away mobs",
                 isGunTech: true,
@@ -3470,7 +3583,8 @@
                 remove() {
                     tech.missileBotCount = 0;
                 }
-            }, {
+            },
+            {
                 name: "rocket-propelled grenade",
                 description: "<strong>grenades</strong> rapidly <strong>accelerate</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
                 isGunTech: true,
@@ -3489,7 +3603,8 @@
                     tech.isRPG = false;
                     b.setGrenadeMode()
                 }
-            }, {
+            },
+            {
                 name: "vacuum bomb",
                 description: "<strong>grenades</strong> fire slower, <strong class='color-e'>explode</strong> bigger<br> and, <strong>suck</strong> everything towards them",
                 isGunTech: true,
@@ -3508,7 +3623,8 @@
                     tech.isVacuumBomb = false;
                     b.setGrenadeMode()
                 }
-            }, {
+            },
+            {
                 name: "neutron bomb",
                 description: "<strong>grenades</strong> are irradiated with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
                 isGunTech: true,
@@ -3527,7 +3643,8 @@
                     tech.isNeutronBomb = false;
                     b.setGrenadeMode()
                 }
-            }, {
+            },
+            {
                 name: "water shielding",
                 description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
                 isGunTech: true,
@@ -3544,7 +3661,8 @@
                 remove() {
                     tech.isNeutronImmune = false
                 }
-            }, {
+            },
+            {
                 name: "vacuum permittivity",
                 description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
                 isGunTech: true,
@@ -3561,7 +3679,8 @@
                 remove() {
                     tech.isNeutronSlow = false
                 }
-            }, {
+            },
+            {
                 name: "laser-mines",
                 description: "<strong>mines</strong> hover in place until <strong>mobs</strong> get in range<br><strong>mines</strong> use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong class='color-laser'>lasers</strong>",
                 isGunTech: true,
@@ -3578,7 +3697,8 @@
                 remove() {
                     tech.isLaserMine = false;
                 }
-            }, {
+            },
+            {
                 name: "mine reclamation",
                 description: "retrieve <strong class='color-g'>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
                 isGunTech: true,
@@ -3595,7 +3715,8 @@
                 remove() {
                     tech.isMineAmmoBack = false;
                 }
-            }, {
+            },
+            {
                 name: "sentry",
                 description: "<strong>mines</strong> <strong>target</strong> mobs with nails over time<br>mines last about <strong>12</strong> seconds",
                 isGunTech: true,
@@ -3612,7 +3733,8 @@
                 remove() {
                     tech.isMineSentry = false;
                 }
-            }, {
+            },
+            {
                 name: "mycelial fragmentation",
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release an extra <strong class='color-p' style='letter-spacing: 2px;'>spore</strong><br> once a <strong>second</strong> during their <strong>growth</strong> phase",
                 isGunTech: true,
@@ -3629,7 +3751,8 @@
                 remove() {
                     tech.isSporeGrowth = false
                 }
-            }, {
+            },
+            {
                 name: "tinsellated flagella",
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
                 isGunTech: true,
@@ -3646,7 +3769,8 @@
                 remove() {
                     tech.isFastSpores = false
                 }
-            }, {
+            },
+            {
                 name: "cryodesiccation",
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1.5</strong> second",
                 // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
@@ -3664,7 +3788,8 @@
                 remove() {
                     tech.isSporeFreeze = false
                 }
-            }, {
+            },
+            {
                 name: "diplochory",
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use the player for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
                 isGunTech: true,
@@ -3681,7 +3806,8 @@
                 remove() {
                     tech.isSporeFollow = false
                 }
-            }, {
+            },
+            {
                 name: "mutualism",
                 description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
                 isGunTech: true,
@@ -3698,7 +3824,8 @@
                 remove() {
                     tech.isMutualism = false
                 }
-            }, {
+            },
+            {
                 name: "brushless motor",
                 description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
                 isGunTech: true,
@@ -3715,7 +3842,8 @@
                 remove() {
                     tech.isFastDrones = false
                 }
-            }, {
+            },
+            {
                 name: "delivery drone",
                 description: "if a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it becomes <strong>larger</strong>, <strong>faster</strong>, and more <strong>durable</strong>",
                 isGunTech: true,
@@ -3732,9 +3860,10 @@
                 remove() {
                     tech.isDroneGrab = false
                 }
-            }, {
+            },
+            {
                 name: "reduced tolerances",
-                description: "reduce all <strong>drone</strong> production costs by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
+                description: "reduce <strong>drone</strong> <strong class='color-f'>energy</strong>/<strong class='color-g'>ammo</strong> costs by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -3757,7 +3886,26 @@
                         if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
                     }
                 }
-            }, {
+            },
+            {
+                name: "drone repair",
+                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>33%</strong> chance to use an <strong class='color-g'>ammo</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("drones")
+                },
+                requires: "drone gun",
+                effect() {
+                    tech.isDroneRespawn = true
+                },
+                remove() {
+                    tech.isDroneRespawn = false
+                }
+            },
+            {
                 name: "necrophoresis",
                 description: "<strong>foam</strong> bubbles grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
                 isGunTech: true,
@@ -3774,7 +3922,8 @@
                 remove() {
                     tech.isFoamGrowOnDeath = false;
                 }
-            }, {
+            },
+            {
                 name: "colloidal foam",
                 description: "<strong>foam</strong> bubbles dissipate <strong>40%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>300%</strong>",
                 isGunTech: true,
@@ -3809,7 +3958,8 @@
                 remove() {
                     tech.isFoamAttract = false
                 }
-            }, {
+            },
+            {
                 name: "quantum foam",
                 description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>127%</strong>",
                 isGunTech: true,
@@ -3826,7 +3976,8 @@
                 remove() {
                     tech.foamFutureFire = 0;
                 }
-            }, {
+            },
+            {
                 name: "foam fractionation",
                 description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong class='color-g'>ammo</strong>",
                 isGunTech: true,
@@ -3898,7 +4049,8 @@
                 remove() {
                     tech.isRailEnergyGain = false;
                 }
-            }, {
+            },
+            {
                 name: "dielectric polarization",
                 description: "firing the <strong>rail gun</strong> <strong class='color-d'>damages</strong> nearby <strong>mobs</strong>",
                 isGunTech: true,
@@ -3915,7 +4067,8 @@
                 remove() {
                     tech.isRailAreaDamage = false;
                 }
-            }, {
+            },
+            {
                 name: "capacitor bank",
                 description: "the <strong>rail gun</strong> no longer takes time to <strong>charge</strong><br><strong>rail gun</strong> rods are <strong>66%</strong> less massive",
                 isGunTech: true,
@@ -3932,7 +4085,8 @@
                 remove() {
                     tech.isCapacitor = false;
                 }
-            }, {
+            },
+            {
                 name: "laser diodes",
                 description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
@@ -3949,7 +4103,8 @@
                 remove() {
                     tech.isLaserDiode = 1;
                 }
-            }, {
+            },
+            {
                 name: "relativistic momentum",
                 description: "all <strong class='color-laser'>lasers</strong> push mobs away<br><em>effects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
@@ -3989,7 +4144,8 @@
                     tech.laserDamage = 0.16;
                     tech.laserFieldDrain = 0.0018;
                 }
-            }, {
+            },
+            {
                 name: "diffraction grating",
                 description: `your <strong class='color-laser'>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
                 isGunTech: true,
@@ -4014,7 +4170,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "diffuse beam",
                 description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>200%</strong>",
                 isGunTech: true,
@@ -4041,7 +4198,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "output coupler",
                 description: "<strong>widen</strong> diffuse <strong class='color-laser'>laser</strong> beam by <strong>40%</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>40%</strong>",
                 isGunTech: true,
@@ -4068,7 +4226,8 @@
                         if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
                     }
                 }
-            }, {
+            },
+            {
                 name: "slow light propagation",
                 description: "<strong class='color-laser'>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>",
                 isGunTech: true,
@@ -4095,7 +4254,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "pulse",
                 description: "use <strong>25%</strong> of your <strong class='color-f'>energy</strong> in a pulsed <strong class='color-laser'>laser</strong><br>that instantly initiates a fusion <strong class='color-e'>explosion</strong>",
                 isGunTech: true,
@@ -4120,7 +4280,8 @@
                         }
                     }
                 }
-            }, {
+            },
+            {
                 name: "shock wave",
                 description: "mobs caught in <strong class='color-laser'>pulse</strong>'s explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
                 isGunTech: true,
@@ -4137,7 +4298,8 @@
                 remove() {
                     tech.isPulseStun = false;
                 }
-            }, {
+            },
+            {
                 name: "neocognitron",
                 description: "<strong class='color-laser'>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
                 isGunTech: true,
@@ -4176,7 +4338,8 @@
                 remove() {
                     tech.blockDmg = 0;
                 }
-            }, {
+            },
+            {
                 name: "frequency resonance",
                 description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>50%</strong>",
                 isFieldTech: true,
@@ -4188,14 +4351,17 @@
                 },
                 requires: "standing wave harmonics",
                 effect() {
-                    m.fieldRange += 175 * 0.25
-                    m.fieldShieldingScale *= 0.5
+                    tech.frequencyResonance = this.count + 1 // +1 because count updates later
+                    m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
+                    m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
                 },
                 remove() {
                     m.fieldRange = 175;
                     m.fieldShieldingScale = 1;
+                    tech.frequencyResonance = 0
                 }
-            }, {
+            },
+            {
                 name: "flux pinning",
                 description: "blocking with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
                 isFieldTech: true,
@@ -4212,7 +4378,8 @@
                 remove() {
                     tech.isStunField = 0;
                 }
-            }, {
+            },
+            {
                 name: "fracture analysis",
                 description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
                 isFieldTech: true,
@@ -4229,7 +4396,8 @@
                 remove() {
                     tech.isCrit = false;
                 }
-            }, {
+            },
+            {
                 name: "eddy current brake",
                 description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
                 isFieldTech: true,
@@ -4246,7 +4414,8 @@
                 remove() {
                     tech.isPerfectBrake = false;
                 }
-            }, {
+            },
+            {
                 name: "pair production",
                 description: "picking up a <strong>power up</strong> gives you <strong>250</strong> <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4264,7 +4433,8 @@
                 remove() {
                     tech.isMassEnergy = false;
                 }
-            }, {
+            },
+            {
                 name: "bot manufacturing",
                 description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>3</strong> random <strong class='color-bot'>bots</strong>",
                 isFieldTech: true,
@@ -4286,7 +4456,8 @@
                     b.randomBot()
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "bot prototypes",
                 description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all <strong class='color-bot'>bots</strong> to a random type and <strong>build</strong> <strong>2</strong> <strong class='color-bot'>bots</strong>",
                 isFieldTech: true,
@@ -4373,7 +4544,8 @@
                     notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]()
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "mycelium manufacturing",
                 description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
                 isFieldTech: true,
@@ -4390,7 +4562,8 @@
                 remove() {
                     tech.isSporeField = false;
                 }
-            }, {
+            },
+            {
                 name: "missile manufacturing",
                 description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
                 isFieldTech: true,
@@ -4407,7 +4580,8 @@
                 remove() {
                     tech.isMissileField = false;
                 }
-            }, {
+            },
+            {
                 name: "ice IX manufacturing",
                 description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
                 isFieldTech: true,
@@ -4424,7 +4598,8 @@
                 remove() {
                     tech.isIceField = false;
                 }
-            }, {
+            },
+            {
                 name: "thermoelectric effect",
                 description: "<strong>killing</strong> mobs with <strong class='color-s'>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>80</strong> <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4441,7 +4616,8 @@
                 remove() {
                     tech.iceEnergy = 0;
                 }
-            }, {
+            },
+            {
                 name: "degenerate matter",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong><br>while <strong>negative mass field</strong> is active",
                 isFieldTech: true,
@@ -4458,7 +4634,8 @@
                 remove() {
                     tech.isHarmReduce = false;
                 }
-            }, {
+            },
+            {
                 name: "annihilation",
                 description: "<strong>touching</strong> normal mobs <strong>annihilates</strong> them<br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4475,7 +4652,8 @@
                 remove() {
                     tech.isAnnihilation = false;
                 }
-            }, {
+            },
+            {
                 name: "Bose Einstein condensate",
                 description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
                 isFieldTech: true,
@@ -4567,7 +4745,8 @@
                 remove() {
                     tech.isExtruder = false;
                 }
-            }, {
+            },
+            {
                 name: "timelike world line",
                 description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
                 isFieldTech: true,
@@ -4586,7 +4765,8 @@
                     tech.isTimeSkip = false;
                     b.setFireCD();
                 }
-            }, {
+            },
+            {
                 name: "Lorentz transformation",
                 description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
                 isFieldTech: true,
@@ -4609,7 +4789,8 @@
                     m.setMovement();
                     b.setFireCD();
                 }
-            }, {
+            },
+            {
                 name: "time crystals",
                 description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
                 isFieldTech: true,
@@ -4628,7 +4809,8 @@
                     tech.energyRegen = 0.001;
                     m.fieldRegen = tech.energyRegen;
                 }
-            }, {
+            },
+            {
                 name: "boson composite",
                 description: "<strong>intangible</strong> to blocks and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4645,7 +4827,8 @@
                 remove() {
                     tech.isIntangible = false;
                 }
-            }, {
+            },
+            {
                 name: "dazzler",
                 description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>30%</strong> of your stored <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4662,7 +4845,8 @@
                 remove() {
                     tech.isCloakStun = false;
                 }
-            }, {
+            },
+            {
                 name: "discrete optimization",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
                 isFieldTech: true,
@@ -4681,7 +4865,8 @@
                     tech.aimDamage = 1
                     b.setFireCD();
                 }
-            }, {
+            },
+            {
                 name: "cosmic string",
                 description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
                 isFieldTech: true,
@@ -4698,7 +4883,8 @@
                 remove() {
                     tech.isWormholeDamage = false
                 }
-            }, {
+            },
+            {
                 name: "Penrose process",
                 description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>63</strong> <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4715,7 +4901,8 @@
                 remove() {
                     tech.isWormholeEnergy = false
                 }
-            }, {
+            },
+            {
                 name: "transdimensional spores",
                 description: "when <strong>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
                 isFieldTech: true,
@@ -4732,7 +4919,8 @@
                 remove() {
                     tech.isWormSpores = false
                 }
-            }, {
+            },
+            {
                 name: "traversable geodesics",
                 description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong class='color-g'>ammo</strong>",
                 isFieldTech: true,
@@ -4773,7 +4961,8 @@
                     m.shipMode()
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "quantum leap",
                 description: "<strong>experiment:</strong> every 20 seconds<br>become an alternate version of yourself",
                 maxCount: 1,
@@ -4793,7 +4982,8 @@
                     }, 20000); //every 20 sections
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "shields",
                 description: "<strong>experiment:</strong> every 5 seconds<br>all mobs gain a shield",
                 maxCount: 1,
@@ -4967,7 +5157,8 @@
                     for (let i = 0, len = tech.tech.length; i < len; i++) tech.tech[i].name = tech.tech[i].name.shuffle()
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "transparency",
                 description: "become invisible to yourself<br><em>mobs can still see you</em>",
                 maxCount: 1,
@@ -4984,7 +5175,8 @@
                     m.draw = () => {}
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "quantum leap",
                 description: "become an alternate version of yourself<br>every <strong>20</strong> seconds",
                 maxCount: 1,
@@ -5004,7 +5196,8 @@
                     }, 20000); //every 30 sections
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "pop-ups",
                 description: "sign up to learn endless easy ways to win n-gon<br>that Landgreen doesn't want you to know!!!1!!",
                 maxCount: 1,
@@ -5023,7 +5216,8 @@
                     }, 30000); //every 30 sections
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "music",
                 description: "add music to n-gon",
                 maxCount: 1,
@@ -5040,7 +5234,8 @@
                     window.open('https://www.youtube.com/results?search_query=music', '_blank')
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "performance",
                 description: "display performance stats to n-gon",
                 maxCount: 1,
@@ -5072,7 +5267,8 @@
                     document.getElementById("health-bg").style.left = "86px"
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "repartitioning",
                 description: "set the <strong class='flicker'>frequency</strong> of finding normal <strong class='color-m'>tech</strong> to <strong>0</strong><br>spawn 5 <strong class='color-m'>tech</strong>",
                 maxCount: 1,
@@ -5096,7 +5292,8 @@
                     for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech");
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "defragment",
                 description: "set the <strong class='flicker'>frequency</strong> of finding <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to zero",
                 maxCount: 1,
@@ -5115,7 +5312,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "ship",
                 description: "fly around with no legs<br>reduce combat <strong>difficulty</strong> by <strong>1 level</strong>",
                 maxCount: 1,
@@ -5172,7 +5370,8 @@
                     setInterval(() => { if (!simulation.paused) ctx.rotate(0.001 * Math.sin(simulation.cycle * 0.01)) }, 16);
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "umbra",
                 description: "produce a blue glow around everything<br>and probably some simulation lag",
                 maxCount: 1,
@@ -5190,7 +5389,8 @@
                     ctx.shadowBlur = 25;
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "lighter",
                 description: `ctx.globalCompositeOperation = "lighter"`,
                 maxCount: 1,
@@ -5207,7 +5407,8 @@
                     ctx.globalCompositeOperation = "lighter";
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "rewind",
                 description: "every 5 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds<br>lasts 120 seconds",
                 maxCount: 9,
@@ -5226,7 +5427,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "energy to mass conversion",
                 description: "convert your <strong class='color-f'>energy</strong> into blocks",
                 maxCount: 9,
@@ -5255,7 +5457,8 @@
 
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "level.nextLevel()",
                 description: "advance to the next level",
                 maxCount: 9,
@@ -5272,7 +5475,8 @@
                     level.nextLevel();
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "expert system",
                 description: "spawn a <strong class='color-m'>tech</strong> power up<br>add <strong>64</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
@@ -5290,7 +5494,8 @@
                     tech.addJunkTechToPool(64)
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "energy investment",
                 description: "every 10 seconds drain your <strong class='color-f'>energy</strong><br>return it doubled 10 seconds later<br>lasts 180 seconds",
                 maxCount: 9,
@@ -5315,7 +5520,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "missile Launching System",
                 description: "fire missiles for the next 60 seconds",
                 maxCount: 9,
@@ -5340,7 +5546,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "grenade production",
                 description: "drop grenades for the next 120 seconds",
                 maxCount: 9,
@@ -5439,7 +5646,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "diegesis",
                 description: "indicate gun fire delay<br>through a rotation of your head",
                 maxCount: 1,
@@ -5482,7 +5690,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "pareidolia",
                 description: "don't",
                 maxCount: 1,
@@ -5553,7 +5762,8 @@
                     }
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "prism",
                 description: "you cycle through different <strong>colors</strong>",
                 maxCount: 1,
@@ -5578,7 +5788,8 @@
                     }, 10);
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "assimilation",
                 description: "all your <strong class='color-bot'>bots</strong> are converted to the <strong>same</strong> random model",
                 maxCount: 1,
@@ -5636,7 +5847,8 @@
                     for (let i = 0; i < total; i++) bots[index]()
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "growth hacking",
                 description: "increase combat <strong>difficulty</strong> by <strong>1 level</strong>",
                 maxCount: 1,
@@ -5653,7 +5865,8 @@
                     level.difficultyIncrease(simulation.difficultyMode)
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "stun",
                 description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds",
                 maxCount: 9,
@@ -5670,7 +5883,8 @@
                     for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 480)
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "re-arm",
                 description: "<strong>eject</strong> all your <strong class='color-g'>guns</strong>",
                 maxCount: 9,
@@ -5697,7 +5911,8 @@
                     simulation.makeGunHUD(); //update gun HUD
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "re-research",
                 description: "<strong>eject</strong> all your <strong class='color-r'>research</strong>",
                 maxCount: 9,
@@ -5715,7 +5930,8 @@
                     powerUps.research.count = 0
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "quantum black hole",
                 description: "use all your <strong class='color-f'>energy</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
                 maxCount: 9,
@@ -5733,7 +5949,8 @@
                     spawn.suckerBoss(m.pos.x, m.pos.y - 1000)
                 },
                 remove() {}
-            }, {
+            },
+            {
                 name: "black hole cluster",
                 description: "spawn <strong>2</strong> <strong class='color-r'>research</strong><br><strong>spawn</strong> 40 nearby <strong>black holes</strong>",
                 maxCount: 9,
@@ -6054,4 +6271,7 @@
         droneCycleReduction: null,
         droneEnergyReduction: null,
         isNoHeals: null,
+        frequencyResonance: null,
+        isAlwaysFire: null,
+        isDroneRespawn: null
     }
