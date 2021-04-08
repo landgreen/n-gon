@@ -12,15 +12,15 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(125)
+            // level.difficultyIncrease(50)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
-            // b.giveGuns("spores")
+            // b.giveGuns("shotgun")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
-            // tech.giveTech("needle gun")
-            // tech.giveTech("ceramic needles")
+            // tech.giveTech("incendiary ammunition")
+            // tech.giveTech("flip-flop")
             // tech.giveTech("causality bombs")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
@@ -1077,7 +1077,6 @@ const level = {
         spawn.mapRect(6400, -200, 400, 300); //right wall
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
-        // spawn.boost(1500, 0, 900);
 
         // simulation.difficulty = 30 
         // spawn.starter(1900, -500, 200) //big boy
@@ -1098,7 +1097,7 @@ const level = {
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        spawn.nodeGroup(1200, -500, "sniper")
+        spawn.nodeGroup(1200, -500, "pulsar")
         // spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -1715,7 +1714,30 @@ const level = {
         const balance3 = level.spinner(2608, 1900, 584, 25, 0.001) //falling
         const balance4 = level.spinner(9300, 2205, 25, 380, 0.001) //exit
 
+        const drip = {
+            x: 7150,
+            y: 0,
+            speed: 0
+        }
         level.custom = () => {
+            const dripCycle = (simulation.cycle % 200) //drips
+            if (dripCycle < 70) {
+                if (!m.isBodiesAsleep) {
+                    if (dripCycle === 0) {
+                        drip.y = 1900
+                        drip.x = 4600 + 4400 * Math.random()
+                        drip.speed = 1
+                    }
+                    drip.speed += 0.35 //acceleration from gravity
+                    drip.y += drip.speed
+                }
+                // if (drip.y > 2900)   console.log(dripCycle)
+                ctx.fillStyle = "hsla(160, 100%, 35%, 0.5)" //"hsla(160, 100%, 35%,0.75)"
+                ctx.beginPath();
+                ctx.arc(drip.x, drip.y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
             button.query();
             button.draw();
             hazard.query();
@@ -2579,7 +2601,7 @@ const level = {
         spawn.mapRect(-4450, -3075, 450, 25);
         spawn.mapRect(-4025, -3075, 25, 100);
         spawn.mapRect(-4275, -2785, 100, 25);
-        spawn.bodyRect(-3830, -2400, 50, 50);
+        spawn.bodyRect(-3900, -2400, 50, 50);
 
         //mobs
         spawn.randomMob(-2500, -2700, 1);
@@ -2942,9 +2964,7 @@ const level = {
         spawn.mapRect(3650, -1300, 50, 700); //exit wall
         spawn.mapRect(3650, -1300, 1350, 50); //exit wall
         spawn.bodyRect(3665, -600, 20, 100); //door
-        spawn.mapRect(3000, -550, 375, 75);
-        spawn.mapRect(3000, -600, 225, 75);
-
+        spawn.mapVertex(3160, -525, "625 0   300 0   300 -140   500 -140"); //entrance/exit ramp
         spawn.mapRect(3000, -2000 * 0.5, 700, 50); //exit roof
         spawn.mapRect(3000, -2000 * 0.25, 2000 - 300, 50); //1st floor
         spawn.spawnStairs(3000 + 2000 - 50, 0, 4, 250, 350, true); //stairs ground
@@ -3928,7 +3948,7 @@ const level = {
         };
         level.customTopLayer = () => {
             ctx.fillStyle = "rgba(64,64,64,0.97)";
-            ctx.fillRect(1175, -400, 275, 175);
+            ctx.fillRect(2800, -400, 275, 175);
 
             hazard.draw();
             doorBedroom.draw();

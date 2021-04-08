@@ -1600,16 +1600,23 @@ const m = {
             name: "nano-scale manufacturing",
             description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
             effect: () => {
+                // m.fieldMeterColor = "#0c5"
+                // m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 200 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
-                            // const len = Math.floor(5 + 4 * Math.random())
-                            const len = Math.ceil(m.energy * 10)
-                            m.energy = 0;
-                            for (let i = 0; i < len; i++) b.spore(m.pos)
+                            for (let i = 0; i < 30; i++) {
+                                m.energy -= 0.11
+                                if (m.energy > 0) {
+                                    b.spore(m.pos)
+                                } else {
+                                    m.energy = 0.01
+                                    break;
+                                }
+                            }
                         } else if (tech.isMissileField) {
-                            m.energy -= 0.5;
-                            b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2, 0, 1)
+                            m.energy -= 0.4;
+                            b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
                         } else if (tech.isIceField) {
                             m.energy -= 0.057;
                             b.iceIX(1)
@@ -1907,7 +1914,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>133%</strong>",
+            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>121%</strong>",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -1915,7 +1922,7 @@ const m = {
                 // m.eyeFillColor = '#333'
                 m.fieldPhase = 0;
                 m.isCloak = false
-                m.fieldDamage = 2.33 // 1 + 111/100
+                m.fieldDamage = 2.21 // 1 + 111/100
                 m.fieldDrawRadius = 0
                 const drawRadius = 1000
 

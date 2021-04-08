@@ -793,7 +793,7 @@ const simulation = {
                 if (tech.isFlipFlopOn) {
                     m.energy += 0.22;
                 } else {
-                    m.energy -= 0.031;
+                    m.energy -= 0.041;
                     if (m.energy < 0) m.energy = 0
                 }
             }

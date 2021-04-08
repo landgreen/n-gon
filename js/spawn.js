@@ -1580,6 +1580,8 @@ const spawn = {
                 const sub = Vector.sub(this.homePosition, this.position)
                 const dist = Vector.magnitude(sub)
                 if (dist > 250) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+            } else {
+                this.isFiring = false
             }
         };
     },
@@ -1700,6 +1702,8 @@ const spawn = {
                 const sub = Vector.sub(this.homePosition, this.position)
                 const dist = Vector.magnitude(sub)
                 if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+            } else {
+                this.isFiring = false
             }
         };
     },

@@ -124,31 +124,31 @@
         damageFromTech() {
             let dmg = m.fieldDamage
             if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
-            if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
+            if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
-            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.75
-            if (tech.isTechDamage) dmg *= 2
+            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.4 : 0.85
+            if (tech.isTechDamage) dmg *= 1.9
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
             if (tech.isMaxEnergyTech) dmg *= 1.4
             if (tech.isEnergyNoAmmo) dmg *= 1.5
-            if (tech.isDamageForGuns) dmg *= 1 + 0.17 * b.inventory.length
-            if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - m.health)
+            if (tech.isDamageForGuns) dmg *= 1 + 0.14 * b.inventory.length
+            if (tech.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - m.health)
             if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
-            if (tech.isEnergyLoss) dmg *= 1.5;
-            if (tech.isAcidDmg && m.health > 1) dmg *= 1.4;
+            if (tech.isEnergyLoss) dmg *= 1.45;
+            if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
             if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
             if (tech.isRerollDamage) dmg *= 1 + 0.039 * powerUps.research.count
-            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
-            if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
+            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.22
+            if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
-            if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
+            if (tech.isBotDamage) dmg *= 1 + 0.05 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance
+            return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.043 + tech.duplicateChance + m.duplicateChance
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -163,7 +163,7 @@
         },
         tech: [{
                 name: "integrated armament",
-                description: `increase <strong class='color-d'>damage</strong> by <strong>25%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
+                description: `increase <strong class='color-d'>damage</strong> by <strong>22%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -213,7 +213,7 @@
             },
             {
                 name: "arsenal",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>17%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>14%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -473,7 +473,7 @@
             },
             {
                 name: "dead reckoning",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>33%</strong> when at <strong>rest</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>30%</strong> when at <strong>rest</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 4,
@@ -483,7 +483,7 @@
                 },
                 requires: "inertial frame",
                 effect: () => {
-                    tech.restDamage += 0.33
+                    tech.restDamage += 0.3
                 },
                 remove() {
                     tech.restDamage = 1;
@@ -833,7 +833,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isBotSpawner
+                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner
                 },
                 requires: "an explosive damage source, no other mob death tech",
                 effect: () => {
@@ -850,7 +850,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.isBotSpawner
+                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner
                 },
                 requires: "no other mob death tech",
                 effect: () => {
@@ -867,7 +867,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.isBotSpawner
+                    return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner
                 },
                 requires: "no other mob death tech",
                 effect() {
@@ -887,7 +887,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.isBotSpawner
+                    return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner
                 },
                 requires: "any mob death tech",
                 effect: () => {
@@ -921,7 +921,7 @@
             },
             {
                 name: "anticorrelation",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>90%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -938,20 +938,38 @@
             },
             {
                 name: "scrap bots",
-                description: "<strong>20%</strong> chance to build a <strong class='color-bot'>bot</strong> after killing a mob<br>the <strong class='color-bot'>bot</strong> lasts for about <strong>20</strong> seconds",
+                description: "<strong>33%</strong> chance after killing a mob to build<br>a scrap <strong class='color-bot'>bot</strong> that operates for <strong>10</strong> seconds",
                 maxCount: 3,
                 count: 0,
                 frequency: 1,
                 isBotTech: true,
                 allowed() {
-                    return b.totalBots() > 0 && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob
+                    return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob //b.totalBots() > 0 &&
                 },
-                requires: "a bot and no other mob death tech",
+                requires: "no other mob death tech",
                 effect() {
-                    tech.isBotSpawner += 0.20;
+                    tech.botSpawner += 0.33;
                 },
                 remove() {
-                    tech.isBotSpawner = 0;
+                    tech.botSpawner = 0;
+                }
+            },
+            {
+                name: "scrap refit",
+                description: "killing a mob resets your functional scrap <strong class='color-bot'>bots</strong><br>to <strong>10</strong> seconds of operation",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                isBotTech: true,
+                allowed() {
+                    return tech.botSpawner
+                },
+                requires: "scrap bots",
+                effect() {
+                    tech.isBotSpawnerReset = true;
+                },
+                remove() {
+                    tech.isBotSpawnerReset = false;
                 }
             },
             {
@@ -1211,7 +1229,7 @@
             },
             {
                 name: "dynamo-bot upgrade",
-                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>dynamo-bots <strong>regen</strong> <strong>24</strong> <strong class='color-f'>energy</strong> per second",
+                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>22</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1302,7 +1320,7 @@
             },
             {
                 name: "network effect",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1554,7 +1572,7 @@
             },
             {
                 name: "NAND gate",
-                description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
+                description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>45%</strong> more <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -1572,7 +1590,7 @@
             },
             {
                 name: "transistor",
-                description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>3.1</strong> <strong class='color-f'>energy</strong> per second",
+                description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>4.1</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -1910,7 +1928,7 @@
             },
             {
                 name: "exothermic process",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>45%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1933,9 +1951,9 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.isEnergyLoss && m.maxEnergy < 1.1 && !tech.isSporeField && !tech.isRewindAvoidDeath
+                    return tech.isEnergyLoss && !tech.isRewindAvoidDeath
                 },
-                requires: "exothermic process, not max energy increase, CPT, or spore nano-scale",
+                requires: "exothermic process, CPT",
                 effect() {
                     tech.isMaxEnergyTech = true;
                     m.setMaxEnergy()
@@ -1970,12 +1988,10 @@
                 count: 0,
                 frequency: 1,
                 allowed() {
-                    return m.maxEnergy > 0.99
+                    return true
                 },
-                requires: "max energy >= 1",
+                requires: "",
                 effect() {
-                    // m.maxEnergy += 0.5
-                    // m.energy += 0.5
                     tech.bonusEnergy += 0.5
                     m.setMaxEnergy()
                 },
@@ -2057,7 +2073,7 @@
             },
             {
                 name: "dormancy",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>25%</strong></span>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>40%</strong> else decrease it by <strong>15%</strong></span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2092,7 +2108,7 @@
             },
             {
                 name: "negative feedback",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> <strong class='color-h'>health</strong> below <strong>100</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> <strong class='color-h'>health</strong> below <strong>100</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2109,7 +2125,7 @@
             },
             {
                 name: "antiscience",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>lose <strong>11</strong> <strong class='color-h'>health</strong> when you pick up a <strong class='color-m'>tech</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>90%</strong><br>lose <strong>11</strong> <strong class='color-h'>health</strong> when you pick up a <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2144,7 +2160,7 @@
             },
             {
                 name: "fluoroantimonic acid",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br>when your <strong class='color-h'>health</strong> is above <strong>100</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>35%</strong><br>when your <strong class='color-h'>health</strong> is above <strong>100</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2615,7 +2631,7 @@
             },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.3%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3889,7 +3905,7 @@
             },
             {
                 name: "drone repair",
-                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>33%</strong> chance to use an <strong class='color-g'>ammo</strong>",
+                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>33%</strong> chance to use <strong>1</strong> <strong class='color-g'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4399,7 +4415,7 @@
             },
             {
                 name: "eddy current brake",
-                description: "your stored <strong class='color-f'>energy</strong> projects a field that<br>limits the <strong>top speed</strong> of mobs",
+                description: "project a field that limits the <strong>top speed</strong> of mobs<br>field <strong>radius</strong> scales with stored <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4553,7 +4569,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.maxEnergy > 0.99 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
                 },
                 requires: "nano-scale manufacturing",
                 effect() {
@@ -4848,7 +4864,7 @@
             },
             {
                 name: "discrete optimization",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4858,7 +4874,7 @@
                 },
                 requires: "metamaterial cloaking",
                 effect() {
-                    tech.aimDamage = 1.66
+                    tech.aimDamage = 1.5
                     b.setFireCD();
                 },
                 remove() {
@@ -4946,7 +4962,7 @@
             //************************************************** 
             {
                 name: "ship",
-                description: "<strong>experiment:</strong> fly around with no legs<br>aim with the keyboard",
+                description: "<strong style='color: #f55;'>experiment:</strong> fly around with no legs<br>aim with the keyboard",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -4964,7 +4980,7 @@
             },
             {
                 name: "quantum leap",
-                description: "<strong>experiment:</strong> every 20 seconds<br>become an alternate version of yourself",
+                description: "<strong style='color: #f55;'>experiment:</strong> every 20 seconds<br>become an alternate version of yourself",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -4979,13 +4995,13 @@
                     setInterval(() => {
                         m.switchWorlds()
                         simulation.trails()
-                    }, 20000); //every 20 sections
+                    }, 20000); //every 20 seconds
                 },
                 remove() {}
             },
             {
                 name: "shields",
-                description: "<strong>experiment:</strong> every 5 seconds<br>all mobs gain a shield",
+                description: "<strong style='color: #f55;'>experiment:</strong> every 5 seconds<br>all mobs gain a shield",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5001,13 +5017,13 @@
                         for (let i = 0; i < mob.length; i++) {
                             if (!mob[i].isShielded && !mob[i].shield && mob[i].dropPowerUp) spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
                         }
-                    }, 5000); //every 5 sections
+                    }, 5000); //every 5 seconds
                 },
                 remove() {}
             },
             {
-                name: "aim",
-                description: "<strong>experiment:</strong> your aiming is random",
+                name: "Fourier analysis",
+                description: "<strong style='color: #f55;'>experiment:</strong> your aiming is random",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5027,6 +5043,31 @@
                         m.transX += (m.transSmoothX - m.transX) * 0.07;
                         m.transY += (m.transSmoothY - m.transY) * 0.07;
                     }
+                },
+                remove() {}
+            },
+            {
+                name: "panopticon",
+                description: "<strong style='color: #f55;'>experiment:</strong> mobs can see you all the time",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (!mob[i].shield && mob[i].dropPowerUp) {
+                                mob[i].locatePlayer()
+                                mob[i].seePlayer.yes = true;
+                            }
+                        }
+                    }, 1000); //every 1 seconds
                 },
                 remove() {}
             },
@@ -5053,6 +5094,55 @@
             //     remove() {}
             // },
             {
+                name: "panopticon",
+                description: "<strong>experiment:</strong> mobs can see you all the time",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isNonRefundable: true,
+                isJunk: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (!mob[i].shield && mob[i].dropPowerUp) {
+                                mob[i].locatePlayer()
+                                mob[i].seePlayer.yes = true;
+                            }
+                        }
+                    }, 1000); //every 1 seconds
+                },
+                remove() {}
+            },
+            {
+                name: "inverted mouse",
+                description: "your mouse is scrambled<br>it's fine, just rotate it 90 degrees",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isNonRefundable: true,
+                isJunk: true,
+                allowed() {
+                    return !m.isShipMode
+                },
+                requires: "not ship",
+                effect() {
+                    document.body.addEventListener("mousemove", (e) => {
+                        const ratio = window.innerWidth / window.innerHeight
+                        simulation.mouse.x = e.clientY * ratio
+                        simulation.mouse.y = e.clientX / ratio;
+                    });
+                },
+                remove() {
+                    // m.look = m.lookDefault
+                }
+            },
+            {
                 name: "Fourier analysis",
                 description: "your aiming is now controlled by this equation:<br>2sin(0.0133t) + sin(0.013t) + 0.5sin(0.031t)+ 0.33sin(0.03t)",
                 maxCount: 1,
@@ -5068,6 +5158,7 @@
                     m.look = () => {
                         m.angle = 2 * Math.sin(m.cycle * 0.0133) + Math.sin(m.cycle * 0.013) + 0.5 * Math.sin(m.cycle * 0.031) + 0.33 * Math.sin(m.cycle * 0.03)
                         const scale = 0.8;
+                        simulation.mouse.y
                         m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
                         m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
                         m.transX += (m.transSmoothX - m.transX) * 0.07;
@@ -5193,7 +5284,7 @@
                     setInterval(() => {
                         m.switchWorlds()
                         simulation.trails()
-                    }, 20000); //every 30 sections
+                    }, 20000); //every 30 seconds
                 },
                 remove() {}
             },
@@ -5213,7 +5304,7 @@
                 effect() {
                     setInterval(() => {
                         alert(`The best combo is ${tech.tech[Math.floor(Math.random() * tech.tech.length)].name} with ${tech.tech[Math.floor(Math.random() * tech.tech.length)].name}!`);
-                    }, 30000); //every 30 sections
+                    }, 30000); //every 30 seconds
                 },
                 remove() {}
             },
@@ -6119,7 +6210,8 @@
         renormalization: null,
         fragments: null,
         isEnergyDamage: null,
-        isBotSpawner: null,
+        botSpawner: null,
+        isBotSpawnerReset: null,
         waveHelix: null,
         isSporeFollow: null,
         isNailRadiation: null,

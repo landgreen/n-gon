@@ -1053,9 +1053,14 @@ const mobs = {
                     } else if (tech.nailsDeathMob) {
                         b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
                     }
-                    if (Math.random() < tech.isBotSpawner) {
+                    if (tech.isBotSpawnerReset) {
+                        for (let i = 0, len = bullet.length; i < len; i++) {
+                            if (bullet[i].botType && !bullet[i].isKeep) bullet[i].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
+                        }
+                    }
+                    if (Math.random() < tech.botSpawner) {
                         b.randomBot(this.position, false)
-                        bullet[bullet.length - 1].endCycle = simulation.cycle + 1000 + Math.floor(400 * Math.random())
+                        bullet[bullet.length - 1].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                 } else if (tech.isShieldAmmo && this.shield && !this.isBonusShield) {

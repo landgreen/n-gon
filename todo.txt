@@ -1,9 +1,13 @@
 ******************************************************** NEXT PATCH ********************************************************
  
-tech: automatic - always fire, but get 2.5x ammo
-  requires inertial frame
+experiment and junk: panopticon - mobs can see you all the time
 
-tech: drone repair - while drones are your active gun, drones respawn with a 50% chance to consume ammo
+scrap bots now have a 33% chance to spawn for 10 seconds after killing a mob
+  (was 20% chance for 20 seconds)
+tech: scrap refit - killing a mob resets your functional scrap bots back to 10 seconds of operation
+
+several damage tech have reduced damage by about 10%
+spores do 20% more damage, but last 1 second shorter
 
 ******************************************************** BUGS ********************************************************
 
@@ -33,16 +37,18 @@ fix door.isOpen actually meaning isClosed?
 
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
-
 ******************************************************** TODO ********************************************************
 
+quantum foam:  hold fire to charge up foam, release fire to let go an amount relative to hold long you held fire
+  foam gun fires a bullet that tracks how long mouse is down
+    when mouse is up it streams out a hose of foam based on how long foam was down
+    bullet is small and hidden
+
+make some bullets move super fast, but do collisions checks in .do()
+  check for hitting mobs or map with fractional velocity
+    if velocity is above 40ish
+
 flipflop, but toggles after a kill
-
-tech shotgun - crouching makes your spread very small
-  remove spread reduction on nail shot
-  doesn't apply to slug
-
-add water drops to sewers
 
 new level: procedural generation
   several small rooms are linked by portals

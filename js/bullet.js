@@ -1814,14 +1814,14 @@ const b = {
                 friction: 0,
                 frictionAir: 0.025,
                 thrust: (tech.isFastSpores ? 0.001 : 0.0004) * (1 + 0.3 * (Math.random() - 0.5)),
-                dmg: tech.isMutualism ? 12 : 5, //bonus damage from tech.isMutualism
+                dmg: tech.isMutualism ? 16.8 : 7, //bonus damage from tech.isMutualism
                 lookFrequency: 100 + Math.floor(117 * Math.random()),
                 classType: "bullet",
                 collisionFilter: {
                     category: cat.bullet,
                     mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
                 },
-                endCycle: simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger),
+                endCycle: simulation.cycle + Math.floor((540 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger),
                 minDmgSpeed: 0,
                 playerOffPosition: { //used when moving towards player to keep spores separate
                     x: 100 * (Math.random() - 0.5),
@@ -2301,7 +2301,7 @@ const b = {
         World.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
     },
-    targetedNail(position, num = 1, speed = 50 + 10 * Math.random(), range = 1200, isRandomAim = true) {
+    targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true) {
         const targets = [] //target nearby mobs
         for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].dropPowerUp) {
@@ -2321,7 +2321,7 @@ const b = {
                     x: targets[index].x + SPREAD * (Math.random() - 0.5),
                     y: targets[index].y + SPREAD * (Math.random() - 0.5)
                 }
-                b.nail(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed), 1.1)
+                b.nail(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed))
             } else if (isRandomAim) { // aim in random direction
                 const ANGLE = 2 * Math.PI * Math.random()
                 b.nail(position, {
@@ -2331,7 +2331,7 @@ const b = {
             }
         }
     },
-    nail(pos, velocity, dmg = 0) {
+    nail(pos, velocity, dmg = 1) {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(pos.x, pos.y, 25, 2, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
         Matter.Body.setVelocity(bullet[me], velocity);
@@ -2492,7 +2492,7 @@ const b = {
                         if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
-                                m.energy += 0.12
+                                m.energy += 0.11
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
@@ -2583,16 +2583,16 @@ const b = {
                 } else { //close to player
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
                     if (this.lastLookCycle < simulation.cycle && !m.isCloak) {
-                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 15 : 80)
+                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 21 : 110)
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
                             if (dist < 3000000 && //1400*1400
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
                                 !mob[i].isShielded) {
-                                const SPEED = 40
+                                const SPEED = 35
                                 const unit = Vector.normalise(Vector.sub(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)), this.position))
-                                b.nail(this.position, Vector.mult(unit, SPEED), 0.4)
+                                b.nail(this.position, Vector.mult(unit, SPEED))
                                 this.force = Vector.mult(unit, -0.01 * this.mass)
                                 break;
                             }
@@ -3343,14 +3343,13 @@ const b = {
             },
             baseFire(angle) {
                 const speed = 30 + 6 * Math.random() + 9 * tech.nailInstantFireRate
-                const dmg = 0.9
                 b.nail({
                     x: m.pos.x + 30 * Math.cos(m.angle),
                     y: m.pos.y + 30 * Math.sin(m.angle)
                 }, {
                     x: m.Vx / 2 + speed * Math.cos(angle),
                     y: m.Vy / 2 + speed * Math.sin(angle)
-                }, dmg) //position, velocity, damage
+                }) //position, velocity, damage
                 if (tech.isIceCrystals) {
                     bullet[bullet.length - 1].beforeDmg = function(who) {
                         mobs.statusSlow(who, 60)
@@ -3374,35 +3373,9 @@ const b = {
             defaultAmmoPack: 5.5,
             have: false,
             fire() {
-
-                // if (true) {
-                //     const direction = {
-                //         x: Math.cos(m.angle),
-                //         y: Math.sin(m.angle)
-                //     }
-                //     for (let i = 0; i < 2; i++) {
-                //         const push = Vector.mult(Vector.perp(direction), 0.08)
-                //         const where = {
-                //             x: m.pos.x + 40 * direction.x,
-                //             y: m.pos.y + 40 * direction.y
-                //         }
-                //         b.missile(where, m.angle, 0, 0.5) //where, angle, speed, size = 1) 
-                //         // bullet[bullet.length - 1].force.x += push.x;
-                //         // bullet[bullet.length - 1].force.y += push.y;
-                //     }
-                // }
-
-                // setTimeout(() => {
-                //     if (!simulation.paused) {
-                //         b.foam(position, velocity, radius)
-                //         bullet[bullet.length - 1].damage = (1 + 1.53 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
-                //     }
-                // }, 350 * tech.foamFutureFire);
-
-
                 let knock, spread
                 if (m.crouch) {
-                    spread = 0.75
+                    spread = 0.65
                     m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCD); // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCD); //player is immune to damage for 30 cycles
                     knock = 0.01
@@ -3476,25 +3449,25 @@ const b = {
                         }
                     }
                 } else if (tech.isIncendiary) {
-                    const SPEED = m.crouch ? 35 : 25
-                    const END = Math.floor(m.crouch ? 9 : 6);
-                    const totalBullets = 8
-                    const angleStep = (m.crouch ? 0.15 : 0.4) / totalBullets
+                    spread *= 0.15
+                    const END = Math.floor(m.crouch ? 10 : 7);
+                    const totalBullets = 10
+                    const angleStep = (m.crouch ? 0.4 : 1.3) / totalBullets
                     let dir = m.angle - angleStep * totalBullets / 2;
                     for (let i = 0; i < totalBullets; i++) { //5 -> 7
                         dir += angleStep
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 17, 4, b.fireAttributes(dir));
-                        const end = END + Math.random() * 3
+                        const end = END + Math.random() * 4
                         bullet[me].endCycle = 2 * end + simulation.cycle
-                        const speed = SPEED * end / END
-                        const dirOff = dir + 0.15 * (Math.random() - 0.5)
+                        const speed = 25 * end / END
+                        const dirOff = dir + (Math.random() - 0.5) * spread
                         Matter.Body.setVelocity(bullet[me], {
                             x: speed * Math.cos(dirOff),
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 100 + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 135 + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -3503,33 +3476,32 @@ const b = {
                         World.add(engine.world, bullet[me]); //add bullet to world
                     }
                 } else if (tech.isNailShot) {
+                    spread *= 0.4
                     if (m.crouch) {
-                        for (let i = 0; i < 11; i++) {
-                            const dir = m.angle + (Math.random() - 0.5) * 0.015
+                        for (let i = 0; i < 17; i++) {
+                            const dir = m.angle + (Math.random() - 0.5) * spread
                             const pos = {
                                 x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
                                 y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
                             }
-                            speed = 39 + 7 * Math.random()
-                            const velocity = {
+                            speed = 48 + 8 * Math.random()
+                            b.nail(pos, {
                                 x: speed * Math.cos(dir),
                                 y: speed * Math.sin(dir)
-                            }
-                            b.nail(pos, velocity, 1.2)
+                            })
                         }
                     } else {
-                        for (let i = 0; i < 15; i++) {
-                            const dir = m.angle + (Math.random() - 0.5) * 0.42
+                        for (let i = 0; i < 17; i++) {
+                            const dir = m.angle + (Math.random() - 0.5) * spread
                             const pos = {
                                 x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
                                 y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
                             }
-                            speed = 34 + 6 * Math.random()
-                            const velocity = {
+                            speed = 48 + 8 * Math.random()
+                            b.nail(pos, {
                                 x: speed * Math.cos(dir),
                                 y: speed * Math.sin(dir)
-                            }
-                            b.nail(pos, velocity, 1.2)
+                            })
                         }
                     }
                 } else {
@@ -3888,7 +3860,7 @@ const b = {
             name: "spores",
             description: "fire a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
             ammo: 0,
-            ammoPack: 3.5,
+            ammoPack: 3,
             have: false,
             fire() {
                 const me = bullet.length;
