@@ -12,7 +12,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(50)
+            // level.difficultyIncrease(11)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
@@ -772,6 +772,33 @@ const level = {
         mapB.portalPair = mapA
         return [portalA, portalB, mapA, mapB]
     },
+    drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
+        return {
+            x: x,
+            y: yMin,
+            period: period,
+            dropCycle: 0,
+            speed: 0,
+            draw() {
+                if (!m.isBodiesAsleep) {
+                    if (this.dropCycle < simulation.cycle) { //reset
+                        this.dropCycle = simulation.cycle + this.period + Math.floor(40 * Math.random())
+                        this.y = yMin
+                        this.speed = 1
+                    } else { //fall
+                        this.speed += 0.35 //acceleration from gravity
+                        this.y += this.speed
+                    }
+                }
+                if (this.y < yMax) { //draw
+                    ctx.fillStyle = color //"hsla(160, 100%, 35%,0.75)"
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 8, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+        }
+    },
     hazard(x, y, width, height, damage = 0.003, color = "hsla(160, 100%, 35%,0.75)") {
         return {
             min: {
@@ -1086,18 +1113,18 @@ const level = {
         // spawn.ghoster(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        // spawn.striker(1600, -500)
+        // spawn.striker(4600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
-        // spawn.cellBossCulture(1600, -500)
+        spawn.spawnerBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        spawn.nodeGroup(1200, -500, "pulsar")
+        // spawn.nodeGroup(1200, -500, "pulsar")
         // spawn.snakeBoss(1200, -500)
         // spawn.powerUpBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -1714,29 +1741,13 @@ const level = {
         const balance3 = level.spinner(2608, 1900, 584, 25, 0.001) //falling
         const balance4 = level.spinner(9300, 2205, 25, 380, 0.001) //exit
 
-        const drip = {
-            x: 7150,
-            y: 0,
-            speed: 0
-        }
+        const drip1 = level.drip(6100, 1900, 2900, 100)
+        const drip2 = level.drip(7300, 1900, 2900, 150)
+        const drip3 = level.drip(8750, 1900, 2900, 70)
         level.custom = () => {
-            const dripCycle = (simulation.cycle % 200) //drips
-            if (dripCycle < 70) {
-                if (!m.isBodiesAsleep) {
-                    if (dripCycle === 0) {
-                        drip.y = 1900
-                        drip.x = 4600 + 4400 * Math.random()
-                        drip.speed = 1
-                    }
-                    drip.speed += 0.35 //acceleration from gravity
-                    drip.y += drip.speed
-                }
-                // if (drip.y > 2900)   console.log(dripCycle)
-                ctx.fillStyle = "hsla(160, 100%, 35%, 0.5)" //"hsla(160, 100%, 35%,0.75)"
-                ctx.beginPath();
-                ctx.arc(drip.x, drip.y, 8, 0, 2 * Math.PI);
-                ctx.fill();
-            }
+            drip1.draw();
+            drip2.draw();
+            drip3.draw();
 
             button.query();
             button.draw();

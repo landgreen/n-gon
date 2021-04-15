@@ -710,6 +710,7 @@ const simulation = {
         let holdTarget; //if player is holding something this remembers it before it gets deleted
         if (m.holdingTarget) holdTarget = m.holdingTarget;
 
+        tech.deathSpawnsFromBoss = 0;
         simulation.fallHeight = 3000;
         m.fireCDcycle = 0
         m.drop();

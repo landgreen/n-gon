@@ -208,7 +208,7 @@ const b = {
     fireCD: 1,
     setFireCD() {
         b.fireCD = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
-        if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.83, b.inventory.length)
+        if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.86, b.inventory.length)
         if (tech.isFireNotMove) b.fireCD *= 0.33
     },
     fireAttributes(dir, rotate = true) {
@@ -1102,7 +1102,7 @@ const b = {
                 // const futurePos = this.lockedOn ? :Vector.add(this.position, Vector.mult(this.velocity, 50))
                 for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
-                        mob[i].alive && mob[i].dropPowerUp &&
+                        mob[i].alive && mob[i].isDropPowerUp &&
                         Matter.Query.ray(map, this.position, mob[i].position).length === 0
                         // && Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     ) {
@@ -1605,7 +1605,7 @@ const b = {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (
                             Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 2000000 &&
-                            mob[i].dropPowerUp &&
+                            mob[i].isDropPowerUp &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
@@ -1771,7 +1771,7 @@ const b = {
                             if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
-                                        mob[i].dropPowerUp &&
+                                        // mob[i].isDropPowerUp &&
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                         Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                                         this.endCycle = 0 //end life if mob is near and visible
@@ -1847,7 +1847,7 @@ const b = {
                             this.lockedOn = null;
                             let closeDist = Infinity;
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (mob[i].dropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                if (Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
                                     const targetVector = Vector.sub(this.position, mob[i].position)
                                     const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
                                     if (dist < closeDist) {
@@ -1877,7 +1877,7 @@ const b = {
                     //   this.lockedOn = null;
                     //   let closeDist = Infinity;
                     //   for (let i = 0, len = mob.length; i < len; ++i) {
-                    //     if (mob[i].dropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                    //     if (mob[i].isDropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
                     //       // Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     //       const targetVector = Vector.sub(this.position, mob[i].position)
                     //       const dist = Vector.magnitude(targetVector);
@@ -1948,7 +1948,7 @@ const b = {
                 mobs.statusSlow(who, 180)
                 this.endCycle = simulation.cycle
                 // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
-                if (tech.iceEnergy && !who.shield && !who.isShielded && who.dropPowerUp && who.alive) {
+                if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive) {
                     setTimeout(function() {
                         if (!who.alive) {
                             m.energy += tech.iceEnergy * 0.8
@@ -1968,7 +1968,7 @@ const b = {
                     let closeDist = Infinity;
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (
-                            mob[i].dropPowerUp &&
+                            mob[i].isDropPowerUp &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
@@ -2070,7 +2070,7 @@ const b = {
                         let closeDist = Infinity;
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             if (
-                                mob[i].dropPowerUp &&
+                                mob[i].isDropPowerUp &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0
                             ) {
@@ -2283,7 +2283,7 @@ const b = {
 
                         if (tech.isFoamAttract) {
                             for (let i = 0, len = mob.length; i < len; i++) {
-                                if (mob[i].dropPowerUp && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < 375 && mob[i].alive && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                if (mob[i].isDropPowerUp && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < 375 && mob[i].alive && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
                                     this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * 0.004)
                                     const slow = 0.9
                                     Matter.Body.setVelocity(this, {
@@ -2304,14 +2304,14 @@ const b = {
     targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true) {
         const targets = [] //target nearby mobs
         for (let i = 0, len = mob.length; i < len; i++) {
-            if (mob[i].dropPowerUp) {
-                const dist = Vector.magnitude(Vector.sub(position, mob[i].position));
-                if (dist < range &&
-                    Matter.Query.ray(map, position, mob[i].position).length === 0 &&
-                    Matter.Query.ray(body, position, mob[i].position).length === 0) {
-                    targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
-                }
+            // if (mob[i].isDropPowerUp) {
+            const dist = Vector.magnitude(Vector.sub(position, mob[i].position));
+            if (dist < range &&
+                Matter.Query.ray(map, position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, position, mob[i].position).length === 0) {
+                targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
             }
+            // }
         }
         for (let i = 0; i < num; i++) {
             if (targets.length > 0) { // aim near a random target in array
@@ -2859,7 +2859,7 @@ const b = {
                         let closeDist = this.range;
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
-                            if (DIST < closeDist && mob[i].dropPowerUp &&
+                            if (DIST < closeDist && mob[i].isDropPowerUp &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                                 closeDist = DIST;

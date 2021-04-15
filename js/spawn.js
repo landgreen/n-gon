@@ -83,7 +83,7 @@ const spawn = {
             }
         }
     },
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss"]) {
+    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -472,7 +472,7 @@ const spawn = {
                 //tether to other blocks
                 ctx.beginPath();
                 for (let i = 0, len = mob.length; i < len; i++) {
-                    if (mob[i].isGrouper && mob[i] != this && mob[i].dropPowerUp) { //don't tether to self, bullets, shields, ...
+                    if (mob[i].isGrouper && mob[i] != this && mob[i].isDropPowerUp) { //don't tether to self, bullets, shields, ...
                         const distance2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
                         if (distance2 < this.groupingRangeMax) {
                             if (!mob[i].seePlayer.recall) mob[i].seePlayerCheck(); //wake up sleepy mobs
@@ -529,7 +529,7 @@ const spawn = {
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
-        me.collisionFilter.mask = cat.player | cat.bullet //| cat.map | cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body //| cat.map | cat.body
         Matter.Body.setDensity(me, 0.00035) // normal density is 0.001 // this reduces life by half and decreases knockback
         const k = 642 //k=r^2/m
         me.split = function() {
@@ -584,8 +584,101 @@ const spawn = {
                 powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             } else {
                 this.leaveBody = false;
-                this.dropPowerUp = false;
+                this.isDropPowerUp = false;
             }
+        }
+    },
+    spawnerBossCulture(x, y, radius = 50, num = 8 + Math.min(20, simulation.difficulty * 0.4)) {
+        tech.deathSpawnsFromBoss += 0.4
+        const spawnID = Math.random()
+        for (let i = 0; i < num; i++) spawn.spawnerBoss(x, y, radius, spawnID)
+    },
+    spawnerBoss(x, y, radius, spawnID) {
+        mobs.spawn(x + Math.random(), y + Math.random(), 4, radius, "rgba(255,60,0,0.3)") //);
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        me.isSpawnBoss = true;
+        me.spawnID = spawnID
+        me.accelMag = 0.0002 * simulation.accelScale;
+        me.memory = Infinity;
+        me.showHealthBar = false;
+        me.isVerticesChange = true
+        me.frictionAir = 0.012
+        me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
+        me.seeAtDistance2 = 200000 //1400000;
+        me.cellMassMax = 70
+        me.stroke = "transparent"
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body //| cat.map   //"rgba(255,60,0,0.3)"
+        // Matter.Body.setDensity(me, 0.0014) // normal density is 0.001
+        Matter.Body.setAngularVelocity(me, 0.12 * (Math.random() - 0.5))
+        // spawn.shield(me, x, y, 1);
+
+        me.onHit = function() { //run this function on hitting player
+            this.explode();
+        };
+        me.doAwake = function() {
+            if (!m.isBodiesAsleep) {
+                this.alwaysSeePlayer();
+                this.checkStatus();
+                this.attraction();
+
+                // if (this.seePlayer.recall && this.mass < this.cellMassMax) { //grow cell radius
+                //     const scale = 1 + 0.0002 * this.cellMassMax / this.mass;
+                //     Matter.Body.scale(this, scale, scale);
+                //     this.radius = Math.sqrt(this.mass * k / Math.PI)
+                // }
+                if (!(simulation.cycle % this.seePlayerFreq)) { //move away from other mobs
+                    const repelRange = 40
+                    const attractRange = 240
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (mob[i].isSpawnBoss && mob[i].id !== this.id) {
+                            const sub = Vector.sub(this.position, mob[i].position)
+                            const dist = Vector.magnitude(sub)
+                            if (dist < repelRange) {
+                                this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.002)
+                            } else if (dist > attractRange) {
+                                this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.002)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        me.do = function() {
+            this.checkStatus();
+            if (this.seePlayer.recall) {
+                this.do = this.doAwake
+                //awaken other spawnBosses
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    if (mob[i].isSpawnBoss && mob[i].spawnID === this.spawnID) mob[i].seePlayer.recall = 1
+                }
+            }
+        };
+        me.onDeath = function() {
+            this.isSpawnBoss = false;
+            let count = 0 //count other cells by id
+            // console.log(this.spawnID)
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isSpawnBoss && mob[i].spawnID === this.spawnID) count++
+            }
+            if (count < 1) { //only drop a power up if this is the last cell
+                powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+                tech.deathSpawnsFromBoss -= 0.4
+            } else {
+                this.leaveBody = false;
+                this.isDropPowerUp = false;
+            }
+
+            const spawns = tech.deathSpawns + tech.deathSpawnsFromBoss
+            const len = Math.min(12, spawns * Math.ceil(Math.random() * simulation.difficulty * spawns))
+            for (let i = 0; i < len; i++) {
+                spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2.5, this.position.y + (Math.random() - 0.5) * radius * 2.5);
+                Matter.Body.setVelocity(mob[mob.length - 1], {
+                    x: this.velocity.x + (Math.random() - 0.5) * 10,
+                    y: this.velocity.x + (Math.random() - 0.5) * 10
+                });
+            }
+
         }
     },
     powerUpBoss(x, y, vertices = 9, radius = 130) {
@@ -596,10 +689,9 @@ const spawn = {
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0005 * simulation.accelScale;
         Matter.Body.setDensity(me, 0.00035); //normal is 0.001
-        me.collisionFilter.mask = cat.bullet | cat.player
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body
         me.memory = Infinity;
         me.seePlayerFreq = 30
-
         me.lockedOn = null;
         if (vertices === 9) {
             //on primary spawn
@@ -616,17 +708,15 @@ const spawn = {
         };
         me.onDeath = function() {
             this.leaveBody = false;
-            this.dropPowerUp = false;
             if (vertices > 3) {
+                this.isDropPowerUp = false;
                 spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
                 Matter.Body.setVelocity(mob[mob.length - 1], {
                     x: this.velocity.x,
                     y: this.velocity.y
                 })
             }
-            for (let i = 0; i < powerUp.length; i++) {
-                powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
-            }
+            for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
         me.do = function() {
             this.stroke = `hsl(0,0%,${80+25*Math.sin(simulation.cycle*0.01)}%)`
@@ -829,7 +919,7 @@ const spawn = {
         me.seeAtDistance2 = (me.eventHorizon + 400) * (me.eventHorizon + 400); //vision limit is event horizon
         me.accelMag = 0.0001 * simulation.accelScale;
         me.frictionAir = 0.025;
-        me.collisionFilter.mask = cat.player | cat.bullet
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
         me.memory = Infinity;
         Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
         me.do = function() {
@@ -906,7 +996,7 @@ const spawn = {
         me.eventHorizon = 1100; //required for black hole
         me.seeAtDistance2 = (me.eventHorizon + 1200) * (me.eventHorizon + 1200); //vision limit is event horizon
         me.accelMag = 0.00003 * simulation.accelScale;
-        me.collisionFilter.mask = cat.player | cat.bullet
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
         // me.frictionAir = 0.005;
         me.memory = 1600;
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
@@ -1132,7 +1222,7 @@ const spawn = {
                     this.fill = `rgba(0,0,0,${0.4+0.6*Math.random()})`
                     this.stroke = "#014"
                     this.isShielded = false;
-                    this.dropPowerUp = true;
+                    this.isDropPowerUp = true;
                     this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can't touch bullets
 
                     ctx.beginPath();
@@ -1160,7 +1250,7 @@ const spawn = {
                     // ctx.stroke();
                 } else {
                     this.isShielded = true;
-                    this.dropPowerUp = false;
+                    this.isDropPowerUp = false;
                     this.seePlayer.recall = false
                     this.fill = "transparent"
                     this.stroke = "transparent"
@@ -1192,7 +1282,7 @@ const spawn = {
     },
     historyBoss(x, y, radius = 30) {
         if (tech.dynamoBotCount > 0) {
-            spawn.randomLevelBoss(x, y, ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss"])
+            spawn.randomLevelBoss(x, y, ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture"])
             return
         }
         mobs.spawn(x, y, 0, radius, "transparent");
@@ -1204,7 +1294,7 @@ const spawn = {
         me.delayLimit = 60 + Math.floor(60 * Math.random());
         me.followDelay = 600 - Math.floor(60 * Math.random())
         me.stroke = "transparent"; //used for drawGhost
-        me.collisionFilter.mask = cat.bullet
+        me.collisionFilter.mask = cat.bullet | cat.body
         me.memory = Infinity
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -1505,83 +1595,85 @@ const spawn = {
         }
         me.fire = function() {
             this.checkStatus();
-            if (!m.isBodiesAsleep && !m.isCloak && !this.isStunned) {
-                if (this.isFiring) {
-                    if (this.fireCycle > this.fireDelay) { //fire
-                        this.isFiring = false
-                        this.fireCycle = 0
-                        this.torque += (0.00008 + 0.00007 * Math.random()) * this.inertia * (Math.round(Math.random()) * 2 - 1) //randomly spin around after firing
-                        //is player in beam path
-                        if (Matter.Query.ray([player], this.fireTarget, this.position).length) {
+            if (!m.isBodiesAsleep) {
+                if (!m.isCloak && !this.isStunned) {
+                    if (this.isFiring) {
+                        if (this.fireCycle > this.fireDelay) { //fire
+                            this.isFiring = false
+                            this.fireCycle = 0
+                            this.torque += (0.00008 + 0.00007 * Math.random()) * this.inertia * (Math.round(Math.random()) * 2 - 1) //randomly spin around after firing
+                            //is player in beam path
+                            if (Matter.Query.ray([player], this.fireTarget, this.position).length) {
+                                unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
+                                this.fireTarget = Vector.add(this.vertices[1], unit)
+                            }
+                            //damage player if in range
+                            if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
+                                m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+                                m.damage(0.045 * simulation.dmgScale);
+                            }
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.fireTarget.x,
+                                y: this.fireTarget.y,
+                                radius: this.pulseRadius,
+                                color: "rgba(120,0,255,0.6)",
+                                time: simulation.drawTime
+                            });
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                            ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
+                            ctx.lineWidth = 20;
+                            ctx.strokeStyle = "rgba(120,0,255,0.2)";
+                            ctx.stroke();
+                            ctx.lineWidth = 4;
+                            ctx.strokeStyle = "rgba(120,0,255,1)";
+                            ctx.stroke();
+                        } else { //delay before firing
+                            this.fireCycle++
+                            //draw explosion outline
+                            ctx.beginPath();
+                            ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                            ctx.fillStyle = "rgba(120,0,255,0.05)";
+                            ctx.fill();
+                            //draw path from mob to explosion
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                            ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
+                            ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "rgba(120,0,255,0.2)";
+                            ctx.stroke();
+                            ctx.setLineDash([0, 0]);
+                        }
+                    } else { //aim at player
+                        this.fireCycle++
+                        this.fireDir = Vector.normalise(Vector.sub(m.pos, this.position)); //set direction to turn to fire
+                        //rotate towards fireAngle
+                        const angle = this.angle + Math.PI / 2;
+                        const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                        const threshold = 0.04;
+                        if (c > threshold) {
+                            this.torque += 0.0000015 * this.inertia;
+                        } else if (c < -threshold) {
+                            this.torque -= 0.0000015 * this.inertia;
+                        } else if (this.fireCycle > 45) { //fire
                             unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
                             this.fireTarget = Vector.add(this.vertices[1], unit)
-                        }
-                        //damage player if in range
-                        if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
-                            m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
-                            m.damage(0.045 * simulation.dmgScale);
-                        }
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: this.fireTarget.x,
-                            y: this.fireTarget.y,
-                            radius: this.pulseRadius,
-                            color: "rgba(120,0,255,0.6)",
-                            time: simulation.drawTime
-                        });
-                        ctx.beginPath();
-                        ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
-                        ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
-                        ctx.lineWidth = 20;
-                        ctx.strokeStyle = "rgba(120,0,255,0.2)";
-                        ctx.stroke();
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = "rgba(120,0,255,1)";
-                        ctx.stroke();
-                    } else { //delay before firing
-                        this.fireCycle++
-                        //draw explosion outline
-                        ctx.beginPath();
-                        ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
-                        ctx.fillStyle = "rgba(120,0,255,0.05)";
-                        ctx.fill();
-                        //draw path from mob to explosion
-                        ctx.beginPath();
-                        ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
-                        ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
-                        ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = "rgba(120,0,255,0.2)";
-                        ctx.stroke();
-                        ctx.setLineDash([0, 0]);
-                    }
-                } else { //aim at player
-                    this.fireCycle++
-                    this.fireDir = Vector.normalise(Vector.sub(m.pos, this.position)); //set direction to turn to fire
-                    //rotate towards fireAngle
-                    const angle = this.angle + Math.PI / 2;
-                    const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-                    const threshold = 0.04;
-                    if (c > threshold) {
-                        this.torque += 0.0000015 * this.inertia;
-                    } else if (c < -threshold) {
-                        this.torque -= 0.0000015 * this.inertia;
-                    } else if (this.fireCycle > 45) { //fire
-                        unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
-                        this.fireTarget = Vector.add(this.vertices[1], unit)
-                        if (Vector.magnitude(Vector.sub(m.pos, this.fireTarget)) < 1000) { //if's possible for this to be facing 180 degrees away from the player, this makes sure that doesn't occur
-                            Matter.Body.setAngularVelocity(this, 0)
-                            this.fireLockCount = 0
-                            this.isFiring = true
-                            this.fireCycle = 0
+                            if (Vector.magnitude(Vector.sub(m.pos, this.fireTarget)) < 1000) { //if's possible for this to be facing 180 degrees away from the player, this makes sure that doesn't occur
+                                Matter.Body.setAngularVelocity(this, 0)
+                                this.fireLockCount = 0
+                                this.isFiring = true
+                                this.fireCycle = 0
+                            }
                         }
                     }
+                    //gently return to starting location
+                    const sub = Vector.sub(this.homePosition, this.position)
+                    const dist = Vector.magnitude(sub)
+                    if (dist > 250) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+                } else {
+                    this.isFiring = false
                 }
-                //gently return to starting location
-                const sub = Vector.sub(this.homePosition, this.position)
-                const dist = Vector.magnitude(sub)
-                if (dist > 250) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
-            } else {
-                this.isFiring = false
             }
         };
     },
@@ -1622,88 +1714,90 @@ const spawn = {
         me.do = function() {
             this.seePlayerByLookingAt();
             this.checkStatus();
-            if (!m.isBodiesAsleep && this.seePlayer.recall) {
-                if (this.isFiring) {
-                    if (this.fireCycle > this.fireDelay) { //fire
-                        if (!this.canSeeTarget()) return
-                        this.isFiring = false
-                        this.fireCycle = 0
-                        this.torque += (0.00002 + 0.0002 * Math.random()) * this.inertia * (Math.round(Math.random()) * 2 - 1) //randomly spin around after firing
-                        //is player in beam path
-                        if (Matter.Query.ray([player], this.fireTarget, this.position).length) {
+            if (!m.isBodiesAsleep) {
+                if (this.seePlayer.recall) {
+                    if (this.isFiring) {
+                        if (this.fireCycle > this.fireDelay) { //fire
+                            if (!this.canSeeTarget()) return
+                            this.isFiring = false
+                            this.fireCycle = 0
+                            this.torque += (0.00002 + 0.0002 * Math.random()) * this.inertia * (Math.round(Math.random()) * 2 - 1) //randomly spin around after firing
+                            //is player in beam path
+                            if (Matter.Query.ray([player], this.fireTarget, this.position).length) {
+                                unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
+                                this.fireTarget = Vector.add(this.vertices[1], unit)
+                            }
+                            //damage player if in range
+                            if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
+                                m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+                                m.damage(0.03 * simulation.dmgScale);
+                            }
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.fireTarget.x,
+                                y: this.fireTarget.y,
+                                radius: this.pulseRadius,
+                                color: "rgba(255,0,100,0.6)",
+                                time: simulation.drawTime
+                            });
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                            ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
+                            ctx.lineWidth = 20;
+                            ctx.strokeStyle = "rgba(255,0,100,0.2)";
+                            ctx.stroke();
+                            ctx.lineWidth = 4;
+                            ctx.strokeStyle = "rgba(255,0,100,1)";
+                            ctx.stroke();
+                        } else { //delay before firing
+                            this.fireCycle++
+                            if (!(simulation.cycle % 3)) {
+                                if (!this.canSeeTarget()) return //if can't see stop firing
+                            }
+                            //draw explosion outline
+                            ctx.beginPath();
+                            ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                            ctx.fillStyle = "rgba(255,0,100,0.05)";
+                            ctx.fill();
+                            //draw path from mob to explosion
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                            ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
+                            ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "rgba(255,0,100,0.2)";
+                            ctx.stroke();
+                            ctx.setLineDash([0, 0]);
+                        }
+                    } else { //aim at player
+                        this.fireCycle++
+                        // this.fireDir = ; //set direction to turn to fire
+                        const angle = this.angle + Math.PI / 2;
+                        const dot = Vector.dot({
+                            x: Math.cos(angle),
+                            y: Math.sin(angle)
+                        }, Vector.normalise(Vector.sub(this.seePlayer.position, this.position)))
+                        const threshold = 0.04;
+                        if (dot > threshold) { //rotate towards fireAngle
+                            this.torque += 0.0000015 * this.inertia;
+                        } else if (dot < -threshold) {
+                            this.torque -= 0.0000015 * this.inertia;
+                        } else if (this.fireCycle > 60) { // aim
                             unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
                             this.fireTarget = Vector.add(this.vertices[1], unit)
+                            if (!this.canSeeTarget()) return
+                            Matter.Body.setAngularVelocity(this, 0)
+                            this.fireLockCount = 0
+                            this.isFiring = true
+                            this.fireCycle = 0
                         }
-                        //damage player if in range
-                        if (Vector.magnitude(Vector.sub(player.position, this.fireTarget)) < this.pulseRadius && m.immuneCycle < m.cycle) {
-                            m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
-                            m.damage(0.03 * simulation.dmgScale);
-                        }
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: this.fireTarget.x,
-                            y: this.fireTarget.y,
-                            radius: this.pulseRadius,
-                            color: "rgba(255,0,100,0.6)",
-                            time: simulation.drawTime
-                        });
-                        ctx.beginPath();
-                        ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
-                        ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
-                        ctx.lineWidth = 20;
-                        ctx.strokeStyle = "rgba(255,0,100,0.2)";
-                        ctx.stroke();
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = "rgba(255,0,100,1)";
-                        ctx.stroke();
-                    } else { //delay before firing
-                        this.fireCycle++
-                        if (!(simulation.cycle % 3)) {
-                            if (!this.canSeeTarget()) return //if can't see stop firing
-                        }
-                        //draw explosion outline
-                        ctx.beginPath();
-                        ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
-                        ctx.fillStyle = "rgba(255,0,100,0.05)";
-                        ctx.fill();
-                        //draw path from mob to explosion
-                        ctx.beginPath();
-                        ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
-                        ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
-                        ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = "rgba(255,0,100,0.2)";
-                        ctx.stroke();
-                        ctx.setLineDash([0, 0]);
                     }
-                } else { //aim at player
-                    this.fireCycle++
-                    // this.fireDir = ; //set direction to turn to fire
-                    const angle = this.angle + Math.PI / 2;
-                    const dot = Vector.dot({
-                        x: Math.cos(angle),
-                        y: Math.sin(angle)
-                    }, Vector.normalise(Vector.sub(this.seePlayer.position, this.position)))
-                    const threshold = 0.04;
-                    if (dot > threshold) { //rotate towards fireAngle
-                        this.torque += 0.0000015 * this.inertia;
-                    } else if (dot < -threshold) {
-                        this.torque -= 0.0000015 * this.inertia;
-                    } else if (this.fireCycle > 60) { // aim
-                        unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
-                        this.fireTarget = Vector.add(this.vertices[1], unit)
-                        if (!this.canSeeTarget()) return
-                        Matter.Body.setAngularVelocity(this, 0)
-                        this.fireLockCount = 0
-                        this.isFiring = true
-                        this.fireCycle = 0
-                    }
+                    //gently return to starting location
+                    const sub = Vector.sub(this.homePosition, this.position)
+                    const dist = Vector.magnitude(sub)
+                    if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+                } else {
+                    this.isFiring = false
                 }
-                //gently return to starting location
-                const sub = Vector.sub(this.homePosition, this.position)
-                const dist = Vector.magnitude(sub)
-                if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
-            } else {
-                this.isFiring = false
             }
         };
     },
@@ -2054,7 +2148,7 @@ const spawn = {
         me.alpha = 1; //used in drawGhost
         me.canTouchPlayer = false; //used in drawGhost
         // me.leaveBody = false;
-        me.collisionFilter.mask = cat.bullet
+        me.collisionFilter.mask = cat.bullet | cat.body
         me.showHealthBar = false;
         me.memory = 480;
         me.do = function() {
@@ -2165,7 +2259,7 @@ const spawn = {
         me.memory = Infinity;
         // me.memory = 300;
         // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
-        me.collisionFilter.mask = cat.player | cat.bullet
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
         spawn.shield(me, x, y, 1);
 
 
@@ -2271,7 +2365,7 @@ const spawn = {
         me.frictionAir = 0;
         me.restitution = 0.8;
         me.leaveBody = false;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
 
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
@@ -2322,7 +2416,7 @@ const spawn = {
         me.frictionAir = 0;
         me.restitution = 1;
         me.leaveBody = false;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
@@ -2460,14 +2554,14 @@ const spawn = {
         me.frictionAir = 0;
         me.restitution = 0;
         me.leaveBody = false;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.do = function() {
             this.timeLimit();
             if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 3) {
-                this.dropPowerUp = false;
+                this.isDropPowerUp = false;
                 this.death(); //death with no power up
             }
         };
@@ -2552,6 +2646,7 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.5;
+        me.homePosition = { x: x, y: y };
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
@@ -2582,10 +2677,9 @@ const spawn = {
                     this.cycle = 0
                     ctx.beginPath();
                     for (let i = 0; i < mob.length; i++) {
-                        if (!mob[i].isShielded && !mob[i].shield && mob[i].dropPowerUp && mob[i].alive) {
+                        if (!mob[i].isShielded && !mob[i].shield && mob[i].isDropPowerUp && mob[i].alive) {
                             ctx.moveTo(this.position.x, this.position.y)
                             ctx.lineTo(mob[i].position.x, mob[i].position.y)
-
                             spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
                         }
                     }
@@ -2593,6 +2687,10 @@ const spawn = {
                     // ctx.lineCap = "round";
                     ctx.strokeStyle = "rgba(200,200,255,0.9)"
                     ctx.stroke();
+                    //return to starting location
+                    const sub = Vector.sub(this.homePosition, this.position)
+                    const dist = Vector.magnitude(sub)
+                    if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.05)
                 }
             }
         };
@@ -2690,7 +2788,7 @@ const spawn = {
         me.frictionAir = 0.01 //* (0.8 + 0.4 * Math.random());
         me.restitution = 0.5;
         me.leaveBody = false;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
@@ -2706,7 +2804,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.g = 0.0004; //required if using 'gravity'
         me.leaveBody = false;
-        // me.dropPowerUp = false;
+        // me.isDropPowerUp = false;
         me.onDeath = function() { //run this function on death
             for (let i = 0; i < Math.ceil(this.mass * 0.15 + Math.random() * 2.5); ++i) {
                 spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2.5, this.position.y + (Math.random() - 0.5) * radius * 2.5);
@@ -2724,25 +2822,33 @@ const spawn = {
             this.attraction();
         };
     },
-    spawns(x, y, radius = 15 + Math.ceil(Math.random() * 5)) {
+    spawns(x, y, radius = 15) {
         mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];
         me.onHit = function() {
             //run this function on hitting player
             this.explode();
         };
+        // me.stroke = "transparent"
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body | cat.map
+        me.showHealthBar = false;
         Matter.Body.setDensity(me, 0.0005); //normal is 0.001
         me.g = 0.0001; //required if using 'gravity'
-        me.accelMag = 0.0003 * simulation.accelScale;
+        me.accelMag = 0.00008 * simulation.accelScale;
         me.memory = 30;
         me.leaveBody = false;
+        me.isDropPowerUp = false;
         me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * simulation.lookFreqScale);
-        me.frictionAir = 0.002;
+        me.frictionAir = 0.004;
         me.do = function() {
             this.gravity();
             this.seePlayerCheck();
             this.checkStatus();
             this.attraction();
+
+            // this.alwaysSeePlayer();
+            // this.checkStatus();
+            // this.attraction();
         };
     },
     // exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
@@ -2859,7 +2965,7 @@ const spawn = {
         //     //run this function on hitting player
         //     this.explode();
         // };
-        me.collisionFilter.mask = cat.bullet | cat.player | cat.mob
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.mob | cat.body
         me.accelMag = 0.0004 * simulation.accelScale;
         me.leaveBody = false;
         me.frictionAir = 0.02;
@@ -2943,7 +3049,7 @@ const spawn = {
                 this.fill = `rgba(220,220,255,${0.3 + 0.6 *this.health})`
             };
             me.leaveBody = false;
-            me.dropPowerUp = false;
+            me.isDropPowerUp = false;
             me.showHealthBar = false;
 
             me.shieldTargetID = target.id
@@ -3000,7 +3106,7 @@ const spawn = {
             }
         };
         me.leaveBody = false;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
         mob[mob.length - 1] = mob[mob.length - 1 - nodes];
         mob[mob.length - 1 - nodes] = me;
@@ -3023,7 +3129,7 @@ const spawn = {
         me.stroke = "transparent";
         Matter.Body.setDensity(me, 0.1); //normal is 0.001
         me.leaveBody = false;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
         // me.isShielded = true
         me.collisionFilter.category = cat.mobBullet;
@@ -3062,7 +3168,7 @@ const spawn = {
         me.memory = Infinity;
         me.frictionAir = 0.01;
         me.accelMag = 0.00004 * simulation.accelScale;
-        me.collisionFilter.mask = cat.player | cat.bullet
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
         spawn.shield(me, x, y, 1);
 
         const rangeInnerVsOuter = Math.random()
@@ -3240,7 +3346,7 @@ const spawn = {
         me.frictionStatic = 1;
         me.friction = 1;
         me.frictionAir = 0.01;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
 
         me.do = function() {
@@ -3307,7 +3413,7 @@ const spawn = {
         me.frictionStatic = 1;
         me.friction = 1;
         me.frictionAir = 0.01;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
 
         me.do = function() {
@@ -3357,7 +3463,7 @@ const spawn = {
         me.frictionStatic = 1;
         me.friction = 1;
         me.frictionAir = 0.01;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
 
         me.do = function() {
@@ -3406,7 +3512,7 @@ const spawn = {
         // me.frictionStatic = 1;
         // me.friction = 1;
         me.frictionAir = 0.01;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
 
         me.do = function() {
@@ -3455,7 +3561,7 @@ const spawn = {
         // me.frictionStatic = 1;
         // me.friction = 1;
         me.frictionAir = 0.01;
-        me.dropPowerUp = false;
+        me.isDropPowerUp = false;
         me.showHealthBar = false;
 
         me.do = function() {

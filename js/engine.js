@@ -138,7 +138,7 @@ function collisionChecks(event) {
                             y: mob[k].velocity.y - 8 * Math.sin(angle)
                         });
 
-                        if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].dropPowerUp && m.energy > 0.34 * m.maxEnergy) {
+                        if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy) {
                             m.energy -= 0.33 * m.maxEnergy
                             m.immuneCycle = 0; //player doesn't go immune to collision damage
                             mob[k].death();
@@ -184,7 +184,7 @@ function collisionChecks(event) {
                             let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
                             if (mob[k].isShielded) dmg *= 0.35
                             mob[k].damage(dmg, true);
-                            if (tech.isBlockPowerUps && !mob[k].alive && mob[k].dropPowerUp) {
+                            if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
                                 let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                 if (Math.random() < 0.4) {
                                     type = "heal"

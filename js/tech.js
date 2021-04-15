@@ -154,7 +154,7 @@
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
                 const range = 1000
-                const bossOptions = ["historyBoss", "cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss"]
+                const bossOptions = ["historyBoss", "cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture"]
                 spawn.randomLevelBoss(m.pos.x + range, m.pos.y, bossOptions);
                 spawn.randomLevelBoss(m.pos.x, m.pos.y + range, bossOptions);
                 spawn.randomLevelBoss(m.pos.x - range, m.pos.y, bossOptions);
@@ -230,7 +230,7 @@
             },
             {
                 name: "active cooling",
-                description: "<strong>17%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "<strong>14%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2641,13 +2641,13 @@
                 },
                 requires: "below 100% duplication chance, below level 5, not determinism",
                 effect() {
+                    // tech.cancelCount = 0
                     tech.isCancelDuplication = true
-                    tech.cancelCount = 0
                     simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
                 },
                 remove() {
-                    tech.isCancelDuplication = false
                     // tech.cancelCount = 0
+                    tech.isCancelDuplication = false
                     if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
                 }
             },
@@ -5015,7 +5015,7 @@
                 effect() {
                     setInterval(() => {
                         for (let i = 0; i < mob.length; i++) {
-                            if (!mob[i].isShielded && !mob[i].shield && mob[i].dropPowerUp) spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
+                            if (!mob[i].isShielded && !mob[i].shield && mob[i].isDropPowerUp) spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
                         }
                     }, 5000); //every 5 seconds
                 },
@@ -5048,7 +5048,7 @@
             },
             {
                 name: "panopticon",
-                description: "<strong style='color: #f55;'>experiment:</strong> mobs can see you all the time",
+                description: "<strong style='color: #f55;'>experiment:</strong> mobs can always see you",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5062,7 +5062,7 @@
                 effect() {
                     setInterval(() => {
                         for (let i = 0; i < mob.length; i++) {
-                            if (!mob[i].shield && mob[i].dropPowerUp) {
+                            if (!mob[i].shield && mob[i].isDropPowerUp) {
                                 mob[i].locatePlayer()
                                 mob[i].seePlayer.yes = true;
                             }
@@ -5071,6 +5071,26 @@
                 },
                 remove() {}
             },
+            {
+                name: "decomposers",
+                description: "<strong style='color: #f55;'>experiment:</strong> after they die<br>mobs leave behind spawns",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    tech.deathSpawns = 0.2
+                },
+                remove() {
+                    tech.deathSpawns = 0
+                }
+            },
+
             //************************************************** 
             //************************************************** JUNK
             //************************************************** tech
@@ -5094,8 +5114,28 @@
             //     remove() {}
             // },
             {
+                name: "decomposers",
+                description: "after they die <strong>mobs</strong> leave behind <strong>spawns</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isNonRefundable: true,
+                isJunk: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    tech.deathSpawns = 0.2
+                },
+                remove() {
+                    tech.deathSpawns = 0
+                }
+            },
+            {
                 name: "panopticon",
-                description: "<strong>experiment:</strong> mobs can see you all the time",
+                description: "<strong>mobs</strong> can always see you",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5109,7 +5149,7 @@
                 effect() {
                     setInterval(() => {
                         for (let i = 0; i < mob.length; i++) {
-                            if (!mob[i].shield && mob[i].dropPowerUp) {
+                            if (!mob[i].shield && mob[i].isDropPowerUp) {
                                 mob[i].locatePlayer()
                                 mob[i].seePlayer.yes = true;
                             }
@@ -6365,5 +6405,6 @@
         isNoHeals: null,
         frequencyResonance: null,
         isAlwaysFire: null,
-        isDroneRespawn: null
+        isDroneRespawn: null,
+        deathSpawns: null
     }

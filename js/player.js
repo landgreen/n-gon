@@ -348,6 +348,7 @@ const m = {
         // tech.removeLoreTechFromPool();
         // tech.addLoreTechToPool();
         // tech.removeJunkTechFromPool();
+        tech.cancelCount = 0;
         tech.armorFromPowerUps = 0;
         tech.totalCount = 0;
         const randomBotCount = b.totalBots()
@@ -1317,7 +1318,7 @@ const m = {
                     x: player.velocity.x - (20 * unit.x) / massRoot,
                     y: player.velocity.y - (20 * unit.y) / massRoot
                 });
-                if (who.dropPowerUp && player.speed < 12) {
+                if (who.isDropPowerUp && player.speed < 12) {
                     const massRootCap = Math.sqrt(Math.min(10, Math.max(0.4, who.mass))); // masses above 12 can start to overcome the push back
                     Matter.Body.setVelocity(player, {
                         x: 0.9 * player.velocity.x + 0.6 * unit.x * massRootCap,
@@ -1880,6 +1881,14 @@ const m = {
                                 simulation.isTimeSkipping = true;
                                 m.cycle++;
                                 simulation.gravity();
+                                if (tech.isFireMoveLock && input.fire) {
+                                    // Matter.Body.setVelocity(player, {
+                                    //     x: 0,
+                                    //     y: -55 * player.mass * simulation.g //undo gravity before it is added
+                                    // });
+                                    player.force.x = 0
+                                    player.force.y = 0
+                                }
                                 Engine.update(engine, simulation.delta);
                                 // level.checkZones();
                                 // level.checkQuery();
@@ -2125,7 +2134,7 @@ const m = {
         //                   //draw outline of shield
         //                   ctx.fillStyle = `rgba(140,217,255,0.5)`
         //                   ctx.fill()
-        //                 } else if (tech.superposition && inPlayer[i].dropPowerUp) {
+        //                 } else if (tech.superposition && inPlayer[i].isDropPowerUp) {
         //                   // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
         //                   // m.energy += 0.005;
 
@@ -2919,7 +2928,7 @@ const m = {
                                         y: mob[k].velocity.y - 8 * Math.sin(angle)
                                     });
 
-                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].dropPowerUp && m.energy > 0.34 * m.maxEnergy) {
+                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy) {
                                         m.energy -= 0.33 * m.maxEnergy
                                         m.immuneCycle = 0; //player doesn't go immune to collision damage
                                         mob[k].death();
@@ -2965,7 +2974,7 @@ const m = {
                                         let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
                                         if (mob[k].isShielded) dmg *= 0.35
                                         mob[k].damage(dmg, true);
-                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].dropPowerUp) {
+                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
                                             let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"
