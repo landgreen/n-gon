@@ -919,7 +919,7 @@ const spawn = {
         me.seeAtDistance2 = (me.eventHorizon + 400) * (me.eventHorizon + 400); //vision limit is event horizon
         me.accelMag = 0.0001 * simulation.accelScale;
         me.frictionAir = 0.025;
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         me.memory = Infinity;
         Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
         me.do = function() {
@@ -996,7 +996,7 @@ const spawn = {
         me.eventHorizon = 1100; //required for black hole
         me.seeAtDistance2 = (me.eventHorizon + 1200) * (me.eventHorizon + 1200); //vision limit is event horizon
         me.accelMag = 0.00003 * simulation.accelScale;
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         // me.frictionAir = 0.005;
         me.memory = 1600;
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
@@ -2148,7 +2148,7 @@ const spawn = {
         me.alpha = 1; //used in drawGhost
         me.canTouchPlayer = false; //used in drawGhost
         // me.leaveBody = false;
-        me.collisionFilter.mask = cat.bullet | cat.body
+        me.collisionFilter.mask = cat.bullet //| cat.body
         me.showHealthBar = false;
         me.memory = 480;
         me.do = function() {
@@ -2259,7 +2259,7 @@ const spawn = {
         me.memory = Infinity;
         // me.memory = 300;
         // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         spawn.shield(me, x, y, 1);
 
 
@@ -2485,7 +2485,7 @@ const spawn = {
                         this.torque += 0.000004 * this.inertia;
                     } else if (dot < -threshold) {
                         this.torque -= 0.000004 * this.inertia;
-                    } else if (this.noseLength > 1.5 && dot > 0 && dot < 0.05) {
+                    } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
                         //fire
                         spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 15), 4);
                         const v = 20 * simulation.accelScale;
@@ -2965,7 +2965,7 @@ const spawn = {
         //     //run this function on hitting player
         //     this.explode();
         // };
-        me.collisionFilter.mask = cat.bullet | cat.player | cat.mob | cat.body
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
         me.accelMag = 0.0004 * simulation.accelScale;
         me.leaveBody = false;
         me.frictionAir = 0.02;

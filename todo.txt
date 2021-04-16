@@ -1,16 +1,9 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-experiment and junk tech: decomposers - mobs leave behind spawns when they die
-
-new levelBoss - a cluster of larger spawns
-  while it's alive all mobs other leave behind spawns
-
-added block collisions to most no collide mobs
-  (this should buff block throwing and pilot wave)
+fixed: sniper/shooter issues with aiming
+fixed: Copied build urls
 
 ******************************************************** BUGS ********************************************************
-
-Copied build urls broke. You get the guns but none of the tech
 
 spawns are forming node groups, but why??
 
@@ -41,6 +34,10 @@ fix door.isOpen actually meaning isClosed?
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+Tech: "Spacial Continuity": 12% chance for the block resulting from a slain enemy to be thrown at the nearst mob.
+
+Mobs that travel through walls but get stuck on blocks are annoying
 
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage

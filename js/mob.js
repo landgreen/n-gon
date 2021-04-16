@@ -921,7 +921,7 @@ const mobs = {
                             this.torque += 0.000004 * this.inertia;
                         } else if (dot < -threshold) {
                             this.torque -= 0.000004 * this.inertia;
-                        } else if (this.noseLength > 1.5 && dot > 0 && dot < 0.03) {
+                        } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
                             //fire
                             spawn.bullet(this.vertices[1].x, this.vertices[1].y, 9 + Math.ceil(this.radius / 15));
                             const v = 15;

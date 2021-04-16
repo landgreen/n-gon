@@ -58,7 +58,7 @@ function getUrlVars() {
     });
     return vars;
 }
-window.addEventListener('load', (event) => {
+window.addEventListener('load', () => {
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
         openExperimentMenu();
@@ -332,7 +332,8 @@ const build = {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isExperimentalMode) {
                         // techID.innerHTML = `${tech.tech[i].description}</div>`
-                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div>`
+                        // text += `<div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                     } else {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     }

@@ -1109,8 +1109,8 @@ const level = {
         // spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
-        // spawn.historyBoss(1900, -500)
-        // spawn.ghoster(2900, -500)
+        // spawn.shooterBoss(1900, -500)
+        spawn.shooter(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(4600, -500)
@@ -1119,7 +1119,7 @@ const level = {
         // spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
-        spawn.spawnerBossCulture(1600, -500)
+        // spawn.spawnerBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
