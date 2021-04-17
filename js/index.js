@@ -178,6 +178,16 @@ const build = {
         }
     },
     pauseGrid() {
+        let botText = ""
+        if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
+        if (tech.orbitBotCount) botText += `<br>orbital-bots: ${tech.orbitBotCount}`
+        if (tech.boomBotCount) botText += `<br>boom-bots: ${tech.boomBotCount}`
+        if (tech.laserBotCount) botText += `<br>laser-bots: ${tech.laserBotCount}`
+        if (tech.foamBotCount) botText += `<br>foam-bots: ${tech.foamBotCount}`
+        if (tech.dynamoBotCount) botText += `<br>dynamo-bots: ${tech.dynamoBotCount}`
+        if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
+        if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
+
         const harm = (1 - m.harmReduction()) * 100
         let text = ""
         if (!simulation.isChoosing) text += `<div class="pause-grid-module">
@@ -188,6 +198,7 @@ const build = {
       <br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
       <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(b.fireCD < 0.1 ? 2 : 0)}%
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
+      ${botText}
       <br>
       <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
       <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})

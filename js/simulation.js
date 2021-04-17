@@ -521,10 +521,12 @@ const simulation = {
         if (simulation.isCommunityMaps) {
             level.levels.push("stronghold");
             level.levels.push("basement");
-            // level.levels.push("detours");
+            level.levels.push("crossfire");
             level.levels.push("house");
             level.levels.push("perplex");
             level.levels.push("coliseum");
+
+
             // level.levels.push("vats");
             level.levels.splice(0, 5); //remove some random levels to make up for adding the community levels
 

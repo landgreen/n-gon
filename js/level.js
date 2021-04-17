@@ -12,7 +12,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(11)
+            // level.difficultyIncrease(50)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
@@ -57,6 +57,7 @@ const level = {
             // level.stronghold() //community level
             // level.perplex() //community level
             // level.coliseum() //community level
+            // level.crossfire() //community level
 
             // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
@@ -1110,7 +1111,7 @@ const level = {
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
-        spawn.shooter(2900, -500)
+        spawn.spawns(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(4600, -500)
@@ -4612,5 +4613,175 @@ const level = {
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
 
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(6600, 600, ["historyBoss", "powerUpBoss", "pulsarBoss", "orbitalBoss"]);
+    },
+    crossfire() {
+        //*1.5
+        //Level Setup
+        const slimePitOne = level.hazard(0, 850, 3800, 120, 25);
+        const slimePitTwo = level.hazard(4600, 430, 2000, 120, 35);
+        const slimePitThree = level.hazard(6500, 200, 1000, 170, 50);
+
+        level.custom = () => {
+            slimePitOne.query();
+            slimePitTwo.query();
+            slimePitThree.query();
+            slimePitOne.draw();
+            slimePitTwo.draw();
+            slimePitThree.draw();
+            level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {};
+
+        level.setPosToSpawn(-500, 550); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+
+        level.exit.x = 10300;
+        level.exit.y = -830;
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+
+        level.defaultZoom = 3000
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#dcdcde";
+
+        //Map Elements
+        spawn.mapRect(-800, -600, 800, 200);
+        spawn.mapRect(-200, -600, 200, 800);
+        spawn.mapRect(-800, -600, 200, 800);
+        spawn.mapRect(-1000, 0, 1000, 200);
+        spawn.mapRect(-1000, 0, 200, 800);
+        spawn.mapRect(-1000, 600, 1400, 200);
+        spawn.mapRect(0, 600, 200, 400);
+        spawn.mapRect(0, 950, 4000, 100);
+        spawn.mapRect(800, 800, 600, 200);
+        spawn.mapRect(1700, 700, 500, 300);
+        spawn.mapRect(2500, 600, 400, 400);
+        spawn.mapRect(3200, 600, 1200, 200);
+        spawn.mapRect(3800, 600, 200, 800); //
+        spawn.mapRect(3800, 1200, 800, 200);
+        spawn.mapRect(4400, 400, 300, 1000);
+        spawn.mapRect(4400, 500, 2000, 100);
+        spawn.mapRect(6500, 300, 1000, 100);
+        spawn.mapRect(5000, 200, 700, 400);
+        spawn.mapRect(6000, 0, 650, 600);
+        spawn.mapRect(6900, -300, 700, 100);
+        spawn.mapRect(7400, -600, 200, 1100);
+        spawn.mapRect(7400, 300, 2600, 200);
+        spawn.mapRect(9800, -800, 200, 1300);
+        spawn.mapRect(9800, -800, 1000, 200);
+        spawn.mapRect(10600, -1400, 200, 800);
+        spawn.mapRect(9800, -1400, 200, 400);
+        spawn.mapRect(7400, -1400, 3400, 200);
+        spawn.mapRect(7400, -1600, 200, 800);
+        spawn.mapRect(5400, -1600, 2200, 200);
+        spawn.mapRect(6000, -1600, 200, 800);
+        spawn.mapRect(5400, -1600, 200, 800);
+        spawn.mapRect(4800, -1000, 1400, 200);
+        spawn.mapRect(4800, -1000, 200, 600);
+        spawn.mapRect(3800, -600, 1200, 200);
+        spawn.mapRect(3200, -800, 800, 200);
+        spawn.mapRect(3200, -800, 200, 800);
+        spawn.mapRect(3800, -800, 200, 800);
+        spawn.mapRect(-200, -200, 4200, 200);
+
+        //Boss Room Platforms
+        spawn.mapRect(7700, 100, 300, 40);
+        spawn.mapRect(8600, 0, 300, 40);
+        spawn.mapRect(9200, 100, 300, 40);
+        spawn.mapRect(9400, -200, 300, 40);
+        spawn.mapRect(8000, -200, 300, 40);
+        spawn.mapRect(8500, -400, 300, 40);
+        spawn.mapRect(9000, -600, 300, 40);
+        spawn.mapRect(9400, -800, 300, 40);
+        spawn.mapRect(8600, -1000, 300, 40);
+        spawn.mapRect(7900, -800, 300, 40);
+
+        //Mob Spawning
+        spawn.randomMob(200, 400, 0.7);
+        spawn.randomMob(1200, 400, 0.7);
+        spawn.randomMob(2000, 400, 0.7);
+        spawn.randomMob(3000, 400, 0.7);
+        spawn.randomMob(5000, 0, 0.7);
+        spawn.randomMob(5600, 0, 0.7);
+        spawn.randomMob(6200, -200, 0.7);
+        spawn.randomMob(6600, -200, 0.7);
+        spawn.randomMob(7200, -800, 0.7);
+        spawn.randomSmallMob(800, 400, 0.9);
+        spawn.randomSmallMob(1800, 400, 0.9);
+        spawn.randomSmallMob(2600, 400, 0.9);
+        spawn.randomSmallMob(5200, 0, 0.9);
+        spawn.randomSmallMob(5400, 0, 0.9);
+        spawn.randomSmallMob(6400, -200, 0.9);
+        spawn.randomGroup(3800, 400, 0.5);
+        spawn.randomGroup(4200, 400, 0.5);
+        spawn.randomGroup(4400, 200, 0.5);
+        spawn.randomGroup(7000, -800, 0.5);
+        spawn.randomGroup(7700, 300, 0.5);
+        spawn.randomGroup(9800, 300, 0.5);
+        spawn.randomGroup(7700, -1100, 0.5);
+        spawn.randomGroup(9800, -1100, 0.5);
+
+        if (simulation.difficulty > 10) {
+            spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "snakeBoss", "spiderBoss", "historyBoss"]);
+        }
+        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
+            spawn.randomLevelBoss(7900, -400, ["powerUpBoss", "spiderBoss", "historyBoss"]);
+        }
+
+        //Boss Spawning
+        spawn.pulsarBoss(-400, -200);
+        if (simulation.difficulty > 25) {
+            spawn.pulsarBoss(3600, -400);
+            if (simulation.difficulty > 40) {
+                spawn.pulsarBoss(4200, 1000);
+                if (simulation.difficulty > 65) {
+                    spawn.pulsarBoss(5800, -1200);
+                    spawn.pulsarBoss(-400, -200);
+                    if (simulation.difficulty > 85) {
+                        spawn.pulsarBoss(3600, -400);
+                        spawn.pulsarBoss(4200, 1000);
+                        if (simulation.difficulty > 115) {
+                            spawn.pulsarBoss(5800, -1200);
+                            spawn.pulsarBoss(-400, -200);
+                            spawn.pulsarBoss(3600, -400);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Powerup Spawning
+        powerUps.spawnStartingPowerUps(4000, 400);
+        powerUps.spawnStartingPowerUps(4400, 400);
+        powerUps.chooseRandomPowerUp(4000, 400);
+        powerUps.chooseRandomPowerUp(4000, 400);
+        powerUps.chooseRandomPowerUp(4400, 400);
+        powerUps.chooseRandomPowerUp(4400, 400);
+        powerUps.addRerollToLevel(); //needs to run after mobs are spawned
+
+        //Block Spawning
+        // spawn.bodyRect(-100, 200, 100, 400); //spawn door
+        spawn.bodyRect(7450, -800, 25, 200); //boss room door
+        spawn.bodyRect(9850, -1000, 25, 200); //end door
+        spawn.mapRect(-200, 350, 200, 450);
+
+        // spawn.mapRect(3875, -75, 50, 575);
+        spawn.mapRect(3800, -75, 200, 525);
+        spawn.mapRect(3875, 590, 50, 150);
+        spawn.mapRect(3875, 350, 50, 140);
+
+        const debrisCount = 3
+        spawn.debris(1050, 700, 400, debrisCount);
+        spawn.debris(1900, 600, 400, debrisCount);
+        spawn.debris(2700, 500, 400, debrisCount);
+        // spawn.debris(3500, 450, 400, debrisCount);
+        spawn.debris(4150, 500, 400, debrisCount);
+        spawn.debris(5300, 0, 400, debrisCount);
+        spawn.debris(6300, -100, 400, debrisCount);
+        spawn.debris(7200, -500, 400, debrisCount);
+        spawn.debris(8000, -600, 400, debrisCount);
+        spawn.debris(8700, -700, 400, debrisCount);
+        spawn.debris(9300, -900, 400, debrisCount);
     },
 };

@@ -178,6 +178,7 @@ const spawn = {
         me.onDamage = function() {};
         me.cycle = 420;
         me.endCycle = 780;
+        me.totalCycles = 0
         me.mode = 0;
         me.do = function() {
             Matter.Body.setPosition(this, { //hold position
@@ -191,6 +192,7 @@ const spawn = {
             this.modeDo(); //this does different things based on the mode
             this.checkStatus();
             this.cycle++; //switch modes÷
+            this.totalCycles++;
             // if (!m.isBodiesAsleep) {
             if (this.health > 0.25) {
                 if (this.cycle > this.endCycle) {
@@ -251,23 +253,20 @@ const spawn = {
             if (!(this.cycle % this.spawnInterval) && !m.isBodiesAsleep && mob.length < 40) {
                 if (this.mode !== 3) Matter.Body.setAngularVelocity(this, 0.1)
                 //fire a bullet from each vertex
-                let whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-
-                const step = (this.health > 0.75) ? 2 : 1
-                for (let i = 0, len = this.vertices.length; i < len; i += step) {
-                    spawn[whoSpawn](this.vertices[i].x, this.vertices[i].y);
-                    const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -18) //give the mob a rotational velocity as if they were attached to a vertex
+                const whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+                for (let i = 0, len = 2 + this.totalCycles / 1000; i < len; i++) {
+                    const vertex = this.vertices[i % 6]
+                    spawn[whoSpawn](vertex.x + 50 * (Math.random() - 0.5), vertex.y + 50 * (Math.random() - 0.5));
+                    const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, vertex))), -18) //give the mob a rotational velocity as if they were attached to a vertex
                     Matter.Body.setVelocity(mob[mob.length - 1], {
                         x: this.velocity.x + velocity.x,
                         y: this.velocity.y + velocity.y
                     });
                 }
-
-                if (simulation.difficulty > 60) {
-                    spawn.randomLevelBoss(3000, -1100)
-                    if (simulation.difficulty > 100) {
-                        spawn.randomLevelBoss(3000, -1300)
-                    }
+                const len = (this.totalCycles / 400 + simulation.difficulty / 2 - 30) / 15
+                // console.log(len)
+                for (let i = 0; i < len; i++) {
+                    spawn.randomLevelBoss(3000 + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
                 }
             }
         }
@@ -2830,12 +2829,12 @@ const spawn = {
             this.explode();
         };
         // me.stroke = "transparent"
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body | cat.map
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body | cat.map | cat.mob
         me.showHealthBar = false;
-        Matter.Body.setDensity(me, 0.0005); //normal is 0.001
-        me.g = 0.0001; //required if using 'gravity'
-        me.accelMag = 0.00008 * simulation.accelScale;
-        me.memory = 30;
+        Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+        me.g = 0.00002; //required if using 'gravity' 
+        me.accelMag = 0.00012 * simulation.accelScale;
+        // me.memory = 30;
         me.leaveBody = false;
         me.isDropPowerUp = false;
         me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * simulation.lookFreqScale);

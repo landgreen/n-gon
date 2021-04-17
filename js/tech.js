@@ -272,7 +272,7 @@
             },
             {
                 name: "gun sciences",
-                description: "spawn a <strong class='color-g'>gun</strong> and </strong>double</strong> the <strong class='flicker'>frequency</strong><br>of finding  <strong class='color-m'>tech</strong> for a specific <strong class='color-g'>gun</strong>",
+                description: "spawn a <strong class='color-g'>gun</strong> and </strong>double</strong> the <strong class='flicker'>frequency</strong><br>of finding  <strong class='color-m'>tech</strong> for your <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -978,6 +978,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -989,7 +990,7 @@
                     b.nailBot();
                 },
                 remove() {
-                    tech.nailBotCount -= this.count;
+                    // tech.nailBotCount -= this.count;
                 }
             },
             {
@@ -1023,6 +1024,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1034,7 +1036,7 @@
                     b.foamBot();
                 },
                 remove() {
-                    tech.foamBotCount -= this.count;
+                    // tech.foamBotCount -= this.count;
                 }
             },
             {
@@ -1068,6 +1070,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1079,7 +1082,7 @@
                     b.boomBot();
                 },
                 remove() {
-                    tech.boomBotCount -= this.count;
+                    // tech.boomBotCount -= this.count;
                 }
             },
             {
@@ -1113,6 +1116,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1124,7 +1128,7 @@
                     b.laserBot();
                 },
                 remove() {
-                    tech.laserBotCount -= this.count;
+                    // tech.laserBotCount -= this.count;
                 }
             },
             {
@@ -1158,6 +1162,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1169,7 +1174,7 @@
                     tech.orbitBotCount++;
                 },
                 remove() {
-                    tech.orbitBotCount -= this.count;
+                    // tech.orbitBotCount -= this.count;
                 }
             },
             {
@@ -1213,6 +1218,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1224,7 +1230,7 @@
                     b.dynamoBot();
                 },
                 remove() {
-                    tech.dynamoBotCount -= this.count;
+                    // tech.dynamoBotCount -= this.count;
                 }
             },
             {
@@ -2656,11 +2662,11 @@
                 description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>8</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 allowed() {
-                    return tech.isCancelDuplication
+                    return !tech.isDeterminism
                 },
-                requires: "futures exchange",
+                requires: "not determinism",
                 effect() {
                     tech.isCancelRerolls = true
                 },
@@ -3586,6 +3592,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -3597,7 +3604,7 @@
                     b.missileBot();
                 },
                 remove() {
-                    tech.missileBotCount = 0;
+                    // tech.missileBotCount = 0;
                 }
             },
             {
@@ -4712,6 +4719,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -4723,7 +4731,7 @@
                     b.plasmaBot();
                 },
                 remove() {
-                    tech.plasmaBotCount = 0;
+                    // tech.plasmaBotCount = 0;
                 }
             },
             {

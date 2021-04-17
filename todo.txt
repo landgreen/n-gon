@@ -1,11 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-fixed: sniper/shooter issues with aiming
-fixed: Copied build urls
+bots are now nonrefundable, so they don't display as a tech when you select them
+  this might introduce some errors, please let me know if you see something
+bot counts can be seen in pause menu
+
+the final boss will spawn progressively more mobs if you don't kill it quickly enough
+  levelBosses are also more likely to spawn on the final boss
+
+added community map - crossfire
+  by iNoobBoi
 
 ******************************************************** BUGS ********************************************************
-
-spawns are forming node groups, but why??
 
 you have to press z once to get copy to work for simulation.enableConstructMode() sometimes
   not sure how to reproduce, but it happens often on the first draw
@@ -35,9 +40,9 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-Tech: "Spacial Continuity": 12% chance for the block resulting from a slain enemy to be thrown at the nearst mob.
+import the procedural level generation from one of the older versions of the game as one single level
 
-Mobs that travel through walls but get stuck on blocks are annoying
+Tech: "Spacial Continuity": 12% chance for the block resulting from a slain enemy to be thrown at the nearest mob.
 
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage

@@ -531,30 +531,32 @@ const powerUps = {
     },
     randomPowerUpCounter: 0,
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
-        if (m.fieldMode === 0) {
-            powerUps.spawn(x, y, "field")
-        } else {
-            powerUps.randomPowerUpCounter++;
-            powerUpChance(Math.max(level.levelsCleared, 10) * 0.1)
-        }
-        powerUps.randomPowerUpCounter += 0.6;
-        powerUpChance(Math.max(level.levelsCleared, 6) * 0.1)
-
-        function powerUpChance(chanceToFail) {
-            if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
-                powerUps.randomPowerUpCounter = 0;
-                if (Math.random() < 0.97) {
-                    powerUps.spawn(x, y, "tech")
-                } else {
-                    powerUps.spawn(x, y, "gun")
-                }
+        if (level.levels[level.onLevel] !== "final") {
+            if (m.fieldMode === 0) {
+                powerUps.spawn(x, y, "field")
             } else {
-                if (m.health < 0.65 && !tech.isEnergyHealth) {
-                    powerUps.spawn(x, y, "heal");
-                    powerUps.spawn(x, y, "heal");
+                powerUps.randomPowerUpCounter++;
+                powerUpChance(Math.max(level.levelsCleared, 10) * 0.1)
+            }
+            powerUps.randomPowerUpCounter += 0.6;
+            powerUpChance(Math.max(level.levelsCleared, 6) * 0.1)
+
+            function powerUpChance(chanceToFail) {
+                if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
+                    powerUps.randomPowerUpCounter = 0;
+                    if (Math.random() < 0.97) {
+                        powerUps.spawn(x, y, "tech")
+                    } else {
+                        powerUps.spawn(x, y, "gun")
+                    }
                 } else {
-                    powerUps.spawn(x, y, "ammo");
-                    powerUps.spawn(x, y, "ammo");
+                    if (m.health < 0.65 && !tech.isEnergyHealth) {
+                        powerUps.spawn(x, y, "heal");
+                        powerUps.spawn(x, y, "heal");
+                    } else {
+                        powerUps.spawn(x, y, "ammo");
+                        powerUps.spawn(x, y, "ammo");
+                    }
                 }
             }
         }
