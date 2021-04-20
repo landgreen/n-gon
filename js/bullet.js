@@ -2301,17 +2301,32 @@ const b = {
         World.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
     },
+    targetedBlock(who, isSpin = false, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
+        let closestMob, dist
+        for (let i = 0, len = mob.length; i < len; i++) {
+            if (who !== mob[i]) {
+                dist = Vector.magnitude(Vector.sub(who.position, mob[i].position));
+                if (dist < range && Matter.Query.ray(map, who.position, mob[i].position).length === 0) { //&& Matter.Query.ray(body, position, mob[i].position).length === 0
+                    closestMob = mob[i]
+                    range = dist
+                }
+            }
+        }
+        if (closestMob) {
+            const where = Vector.add(closestMob.position, Vector.mult(closestMob.velocity, dist / 60))
+            const velocity = Vector.mult(Vector.normalise(Vector.sub(where, who.position)), speed)
+            velocity.y -= Math.abs(who.position.x - closestMob.position.x) / 150; //gives an arc, but not a good one
+            Matter.Body.setVelocity(who, velocity);
+            if (isSpin) Matter.Body.setAngularVelocity(who, 2 + 2 * Math.random() * (Math.random() < 0.5 ? -1 : 1));
+        }
+    },
     targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true) {
         const targets = [] //target nearby mobs
         for (let i = 0, len = mob.length; i < len; i++) {
-            // if (mob[i].isDropPowerUp) {
             const dist = Vector.magnitude(Vector.sub(position, mob[i].position));
-            if (dist < range &&
-                Matter.Query.ray(map, position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, position, mob[i].position).length === 0) {
+            if (dist < range && Matter.Query.ray(map, position, mob[i].position).length === 0 && Matter.Query.ray(body, position, mob[i].position).length === 0) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
             }
-            // }
         }
         for (let i = 0; i < num; i++) {
             if (targets.length > 0) { // aim near a random target in array

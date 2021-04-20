@@ -16,7 +16,7 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
-            // b.giveGuns("shotgun")
+            // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
             // tech.giveTech("incendiary ammunition")
@@ -1111,13 +1111,16 @@ const level = {
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
-        spawn.spawns(2900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        // spawn.striker(4600, -500)
+        spawn.striker(1600, -500)
+        spawn.striker(1600, -500)
+        spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.sniper(1800, -120)
+        spawn.sniper(1800, -120)
+        spawn.sniper(1800, -120)
+        spawn.sniper(2800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.spawnerBossCulture(1600, -500)

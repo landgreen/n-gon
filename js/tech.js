@@ -833,7 +833,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner
+                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling
                 },
                 requires: "an explosive damage source, no other mob death tech",
                 effect: () => {
@@ -850,7 +850,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner
+                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling
                 },
                 requires: "no other mob death tech",
                 effect: () => {
@@ -867,7 +867,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner
+                    return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling
                 },
                 requires: "no other mob death tech",
                 effect() {
@@ -887,7 +887,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner
+                    return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner || tech.isMobBlockFling
                 },
                 requires: "any mob death tech",
                 effect: () => {
@@ -944,7 +944,7 @@
                 frequency: 1,
                 isBotTech: true,
                 allowed() {
-                    return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob //b.totalBots() > 0 &&
+                    return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob && !tech.isMobBlockFling
                 },
                 requires: "no other mob death tech",
                 effect() {
@@ -1380,16 +1380,16 @@
             },
             {
                 name: "mass driver",
-                description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
+                description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>200%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 1,
+                frequency: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name !== "wormhole"
                 },
                 requires: "not wormhole",
                 effect() {
-                    tech.throwChargeRate = 2
+                    tech.throwChargeRate = 3
                 },
                 remove() {
                     tech.throwChargeRate = 1
@@ -1411,6 +1411,24 @@
                 },
                 remove() {
                     tech.isBlockPowerUps = false
+                }
+            },
+            {
+                name: "flywheel",
+                description: "after a mob <strong>dies</strong> its body is <strong>spun</strong> and <strong>flung</strong><br>in the general direction of a nearby mob",
+                maxCount: 1,
+                count: 0,
+                frequency: 4,
+                frequencyDefault: 4,
+                allowed() {
+                    return tech.throwChargeRate > 1 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner
+                },
+                requires: "mass driver, no other mob death tech",
+                effect() {
+                    tech.isMobBlockFling = true
+                },
+                remove() {
+                    tech.isMobBlockFling = false
                 }
             },
             {
@@ -6414,5 +6432,6 @@
         frequencyResonance: null,
         isAlwaysFire: null,
         isDroneRespawn: null,
-        deathSpawns: null
+        deathSpawns: null,
+        isMobBlockFling: null
     }

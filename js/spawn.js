@@ -264,7 +264,6 @@ const spawn = {
                     });
                 }
                 const len = (this.totalCycles / 400 + simulation.difficulty / 2 - 30) / 15
-                // console.log(len)
                 for (let i = 0; i < len; i++) {
                     spawn.randomLevelBoss(3000 + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
                 }
@@ -2360,7 +2359,7 @@ const spawn = {
         };
         Matter.Body.setDensity(me, 0.00004); //normal is 0.001
         me.timeLeft = 200;
-        me.g = 0.001; //required if using 'gravity'
+        me.g = 0.001; //required if using 'gravity' 
         me.frictionAir = 0;
         me.restitution = 0.8;
         me.leaveBody = false;

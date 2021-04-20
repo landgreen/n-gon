@@ -181,8 +181,8 @@ function collisionChecks(event) {
                     if (obj.classType === "body" && obj.speed > 6) {
                         const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                         if (v > 9) {
-                            let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
-                            if (mob[k].isShielded) dmg *= 0.35
+                            let dmg = 0.075 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
+                            if (mob[k].isShielded) dmg *= 0.6
                             mob[k].damage(dmg, true);
                             if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
                                 let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
@@ -196,7 +196,7 @@ function collisionChecks(event) {
                             }
 
                             const stunTime = dmg / Math.sqrt(obj.mass)
-                            if (stunTime > 0.5) mobs.statusStun(mob[k], 30 + 60 * Math.sqrt(stunTime))
+                            if (stunTime > 0.5) mobs.statusStun(mob[k], 60 + 60 * Math.sqrt(stunTime))
                             if (mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
                             if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
                                 obj.hasFragmented = true;

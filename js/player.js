@@ -1145,14 +1145,14 @@ const m = {
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
                 //bullet-like collisions
-                m.holdingTarget.collisionFilter.category = cat.body; //cat.bullet;
+                m.holdingTarget.collisionFilter.category = cat.bullet; //cat.body;
                 m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
                 //check every second to see if player is away from thrown body, and make solid
                 const solid = function(that) {
                     const dx = that.position.x - player.position.x;
                     const dy = that.position.y - player.position.y;
                     if (dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
-                        // that.collisionFilter.category = cat.body; //make solid
+                        that.collisionFilter.category = cat.body; //make solid
                         that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
                     } else {
                         setTimeout(solid, 25, that);
@@ -1650,14 +1650,14 @@ const m = {
         },
         {
             name: "negative mass field",
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
-                m.holdingMassScale = 0.03; //can hold heavier blocks with lower cost to jumping
+                m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
                 m.fieldMeterColor = "#333"
                 m.eyeFillColor = m.fieldMeterColor
-                m.fieldHarmReduction = 0.5;
+                m.fieldHarmReduction = 0.55;
                 m.fieldDrawRadius = 0;
 
                 m.hold = function() {

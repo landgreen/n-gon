@@ -1,14 +1,15 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-bots are now nonrefundable, so they don't display as a tech when you select them
-  this might introduce some errors, please let me know if you see something
-bot counts can be seen in pause menu
+thrown blocks can damage intangible mobs for a couple seconds after they are thrown
+  they are set to act like bullets for a few seconds after being thrown
+all blocks do 50% more damage to mobs and 50% longer stun
+blocks do more damage vs. shielded mobs  (damage penalty is 40%, was 66%))
+mass driver - damage increase set to 200% (up from 100%)
+negative mass field can lift blocks twice as heavy as before with little movement reduction
 
-the final boss will spawn progressively more mobs if you don't kill it quickly enough
-  levelBosses are also more likely to spawn on the final boss
+tech: flywheel - when mobs die their body is spun and flung at nearby mobs
+  requires mass driver, no other mob death tech
 
-added community map - crossfire
-  by iNoobBoi
 
 ******************************************************** BUGS ********************************************************
 
@@ -40,9 +41,12 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-import the procedural level generation from one of the older versions of the game as one single level
+chance for the block resulting from a slain enemy to be thrown at the nearest mob.
+  tech: flywheel - after a mob dies their body is fired towards a nearby mob
+    requires: block throwing technology? 
+  adjust for gravity
 
-Tech: "Spacial Continuity": 12% chance for the block resulting from a slain enemy to be thrown at the nearest mob.
+import the procedural level generation from one of the older versions of the game as one single level
 
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage

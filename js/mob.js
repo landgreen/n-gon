@@ -1073,10 +1073,7 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) {
-                                console.log(bullet[i].endCycle)
-                                bullet[i].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
-                            }
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
                         }
                     }
                     if (Math.random() < tech.botSpawner) {
@@ -1199,9 +1196,13 @@ const mobs = {
                         };
                         shrink(body[len], 7 + 4 * Math.random())
                     }
+                    Matter.World.remove(engine.world, this);
+                    mob.splice(i, 1);
+                    if (tech.isMobBlockFling) b.targetedBlock(body[body.length - 1], true)
+                } else {
+                    Matter.World.remove(engine.world, this);
+                    mob.splice(i, 1);
                 }
-                Matter.World.remove(engine.world, this);
-                mob.splice(i, 1);
             }
         });
         mob[i].alertRange2 = Math.pow(mob[i].radius * 3 + 550, 2);
