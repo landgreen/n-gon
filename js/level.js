@@ -16,12 +16,12 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
-            // b.giveGuns("laser")
+            // b.giveGuns("nail gun")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
-            // tech.giveTech("incendiary ammunition")
-            // tech.giveTech("flip-flop")
-            // tech.giveTech("causality bombs")
+            // tech.giveTech("diffraction grating")
+            // tech.giveTech("pulse")
+            // tech.giveTech("needle gun")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
             // tech.isExplodeRadio = true;
@@ -1113,17 +1113,13 @@ const level = {
         // spawn.shooterBoss(1900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        spawn.striker(1600, -500)
-        spawn.striker(1600, -500)
-        spawn.striker(1600, -500)
+        // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        spawn.sniper(1800, -120)
-        spawn.sniper(1800, -120)
-        spawn.sniper(2800, -120)
+        // spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
-        // spawn.spawnerBossCulture(1600, -500)
+        spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);

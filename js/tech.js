@@ -4188,7 +4188,7 @@
             },
             {
                 name: "diffraction grating",
-                description: `your <strong class='color-laser'>laser</strong> gains <strong>2 diverging</strong> beams<br>decrease individual beam <strong class='color-d'>damage</strong> by <strong>10%</strong>`,
+                description: `your <strong class='color-laser'>laser</strong> gains a <strong>diverging</strong> beam`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,

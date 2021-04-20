@@ -527,7 +527,7 @@ const spawn = {
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body //| cat.map | cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body | cat.map
         Matter.Body.setDensity(me, 0.00035) // normal density is 0.001 // this reduces life by half and decreases knockback
         const k = 642 //k=r^2/m
         me.split = function() {

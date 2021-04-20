@@ -1151,14 +1151,14 @@ const m = {
                 const solid = function(that) {
                     const dx = that.position.x - player.position.x;
                     const dy = that.position.y - player.position.y;
-                    if (dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
+                    if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
                         that.collisionFilter.category = cat.body; //make solid
                         that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
                     } else {
-                        setTimeout(solid, 25, that);
+                        setTimeout(solid, 50, that);
                     }
                 };
-                setTimeout(solid, 150, m.holdingTarget);
+                setTimeout(solid, 500, m.holdingTarget);
 
                 const charge = Math.min(m.throwCharge / 5, 1)
                 //***** scale throw speed with the first number, 80 *****

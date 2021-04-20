@@ -1483,26 +1483,12 @@ const b = {
                     color: "rgba(255,0,0,0.5)",
                     time: simulation.drawTime
                 });
-
                 if (tech.isLaserPush) { //push mobs away
-                    // console.log(-0.003 * Math.min(4, best.who.mass), dmg)
                     const index = path.length - 1
-                    // const force = Vector.mult(Vector.normalise(Vector.sub(path[Math.max(0, index - 1)], path[index])), -0.003 * Math.min(4, best.who.mass))
-                    // const push = -0.004 / (1 + tech.beamSplitter + tech.wideLaser + tech.historyLaser)
-                    // console.log(push)
                     const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
-                    // Matter.Body.setVelocity(best.who, { //friction
-                    //     x: best.who.velocity.x * 0.7,
-                    //     y: best.who.velocity.y * 0.7
-                    // });
                 }
-
             }
-            // ctx.fillStyle = color; //draw mob damage circle
-            // ctx.beginPath();
-            // ctx.arc(path[path.length - 1].x, path[path.length - 1].y, Math.sqrt(damage) * 100, 0, 2 * Math.PI);
-            // ctx.fill();
         };
         const reflection = function() { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
             const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
@@ -2317,7 +2303,6 @@ const b = {
             const velocity = Vector.mult(Vector.normalise(Vector.sub(where, who.position)), speed)
             velocity.y -= Math.abs(who.position.x - closestMob.position.x) / 150; //gives an arc, but not a good one
             Matter.Body.setVelocity(who, velocity);
-            if (isSpin) Matter.Body.setAngularVelocity(who, 2 + 2 * Math.random() * (Math.random() < 0.5 ? -1 : 1));
         }
     },
     targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true) {
@@ -3219,7 +3204,7 @@ const b = {
             fireNeedles() {
                 function makeNeedle(angle = m.angle) {
                     const me = bullet.length;
-                    bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 50, 1, b.fireAttributes(angle));
+                    bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75, 0.75, b.fireAttributes(angle));
                     bullet[me].collisionFilter.mask = tech.isNeedleShieldPierce ? cat.body : cat.body | cat.mobShield
                     Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
                     bullet[me].endCycle = simulation.cycle + 180;
@@ -3239,14 +3224,14 @@ const b = {
                                     }
                                     if (!immune) {
                                         if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
-                                            b.explosion(this.position, 220 + 30 * Math.random()); //makes bullet do explosive damage at end
+                                            b.explosion(this.position, 220 + 50 * Math.random()); //makes bullet do explosive damage at end
                                         }
                                         this.immuneList.push(who.id) //remember that this needle has hit this mob once already
                                         who.foundPlayer();
                                         if (tech.isNailRadiation) {
-                                            mobs.statusDoT(who, tech.isFastRadiation ? 9 : 2.25, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+                                            mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                                         } else {
-                                            let dmg = b.dmgScale * 3.5
+                                            let dmg = b.dmgScale * 3.75
                                             if (tech.isCrit && who.isStunned) dmg *= 4
                                             who.damage(dmg, tech.isNeedleShieldPierce);
                                             simulation.drawList.push({ //add dmg to draw queue
@@ -3267,12 +3252,14 @@ const b = {
                                 x: 0,
                                 y: 0
                             });
-                            this.do = function() {}
+                            this.do = function() {
+                                if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
+                            }
                         } else if (this.speed < 30) {
-                            this.force.y += this.mass * 0.0007; //no gravity until it slows down to improve aiming
+                            this.force.y += this.mass * 0.001; //no gravity until it slows down to improve aiming
                         }
                     };
-                    const SPEED = 50
+                    const SPEED = 100
                     Matter.Body.setVelocity(bullet[me], {
                         x: m.Vx / 2 + SPEED * Math.cos(angle),
                         y: m.Vy / 2 + SPEED * Math.sin(angle)
@@ -3285,13 +3272,13 @@ const b = {
                     m.fireCDcycle = m.cycle + 50 * b.fireCD; // cool down
                     makeNeedle()
                     for (let i = 1; i < 4; i++) { //4 total needles
-                        setTimeout(() => { if (!simulation.paused) makeNeedle() }, 40 * i);
+                        setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
                     }
                 } else {
                     m.fireCDcycle = m.cycle + 30 * b.fireCD; // cool down
                     makeNeedle()
                     for (let i = 1; i < 3; i++) { //3 total needles
-                        setTimeout(() => { if (!simulation.paused) makeNeedle() }, 40 * i);
+                        setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
                     }
                 }
 
@@ -3320,7 +3307,7 @@ const b = {
                     if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
                         b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
                     }
-                    if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 12 : 0.3), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+                    if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 1.4 : 0.35), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                 };
 
                 bullet[me].minDmgSpeed = 10
@@ -4483,27 +4470,21 @@ const b = {
                 } else {
                     m.fireCDcycle = m.cycle
                     m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
-                    const divergence = m.crouch ? 0.15 : 0.2
-                    const scale = Math.pow(0.9, tech.beamSplitter)
-                    const pushScale = scale * scale
-                    let dmg = tech.laserDamage * scale //Math.pow(0.9, tech.laserDamage)
+                    // const divergence = m.crouch ? 0.15 : 0.2
+                    // const scale = Math.pow(0.9, tech.beamSplitter)
+                    // const pushScale = scale * scale
+                    let dmg = tech.laserDamage // * scale //Math.pow(0.9, tech.laserDamage)
                     const where = {
                         x: m.pos.x + 20 * Math.cos(m.angle),
                         y: m.pos.y + 20 * Math.sin(m.angle)
                     }
-                    b.laser(where, {
-                        x: where.x + 3000 * Math.cos(m.angle),
-                        y: where.y + 3000 * Math.sin(m.angle)
-                    }, dmg, tech.laserReflections, false, pushScale)
-                    for (let i = 1; i < 1 + tech.beamSplitter; i++) {
+                    const divergence = m.crouch ? 0.2 : 0.5
+                    const angle = m.angle - tech.beamSplitter * divergence / 2
+                    for (let i = 0; i < 1 + tech.beamSplitter; i++) {
                         b.laser(where, {
-                            x: where.x + 3000 * Math.cos(m.angle + i * divergence),
-                            y: where.y + 3000 * Math.sin(m.angle + i * divergence)
-                        }, dmg, tech.laserReflections, false, pushScale)
-                        b.laser(where, {
-                            x: where.x + 3000 * Math.cos(m.angle - i * divergence),
-                            y: where.y + 3000 * Math.sin(m.angle - i * divergence)
-                        }, dmg, tech.laserReflections, false, pushScale)
+                            x: where.x + 3000 * Math.cos(angle + i * divergence),
+                            y: where.y + 3000 * Math.sin(angle + i * divergence)
+                        }, dmg, tech.laserReflections, false)
                     }
                 }
             },
@@ -4608,12 +4589,18 @@ const b = {
                 let energy = 0.3 * Math.min(m.energy, 1.5)
                 m.energy -= energy * tech.isLaserDiode
                 if (tech.beamSplitter) {
-                    energy *= Math.pow(0.85, tech.beamSplitter)
-                    b.pulse(energy, m.angle)
-                    for (let i = 1; i < 1 + tech.beamSplitter; i++) {
-                        b.pulse(energy, m.angle - i * 0.27)
-                        b.pulse(energy, m.angle + i * 0.27)
+                    // energy *= Math.pow(0.9, tech.beamSplitter)
+                    // b.pulse(energy, m.angle)
+                    // for (let i = 1; i < 1 + tech.beamSplitter; i++) {
+                    //     b.pulse(energy, m.angle - i * 0.27)
+                    //     b.pulse(energy, m.angle + i * 0.27)
+                    // }
+                    const divergence = m.crouch ? 0.2 : 0.5
+                    const angle = m.angle - tech.beamSplitter * divergence / 2
+                    for (let i = 0; i < 1 + tech.beamSplitter; i++) {
+                        b.pulse(energy, angle + i * divergence)
                     }
+
                 } else {
                     b.pulse(energy, m.angle)
                 }
