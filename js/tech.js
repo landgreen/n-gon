@@ -678,7 +678,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.relayIce
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.relayIce || tech.blockingIce > 1
                 },
                 requires: "drones, spores, missiles, foam, wave beam, neutron bomb, ice IX",
                 effect() {
@@ -1690,7 +1690,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage
+                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1
                 },
                 requires: "a freezing or stunning effect",
                 effect() {
@@ -1707,7 +1707,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce
+                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1
                 },
                 requires: "a localized freeze effect",
                 effect() {
@@ -2915,7 +2915,7 @@
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
-                    return powerUps.tech.choiceLog.length > 5 && !tech.isDeterminism
+                    return powerUps.tech.choiceLog.length > 10 && !tech.isDeterminism
                 },
                 requires: "rejected an option in the last tech selection",
                 effect: () => {
@@ -4363,21 +4363,39 @@
             //************************************************** tech
             //************************************************** 
             {
-                name: "bremsstrahlung radiation",
+                name: "bremsstrahlung",
                 description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
+                    return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
                 },
-                requires: "standing wave harmonics",
+                requires: "standing wave harmonics, perfect diamagnetism",
                 effect() {
                     tech.blockDmg += 1.25 //if you change this value also update the for loop in the electricity graphics in m.pushMass
                 },
                 remove() {
                     tech.blockDmg = 0;
+                }
+            },
+            {
+                name: "triple point",
+                description: "the pressure from <strong>blocking</strong> is used<br>to condense <strong class='color-s'>ice IX</strong> crystals",
+                isFieldTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+                },
+                requires: "standing wave harmonics, perfect diamagnetism",
+                effect() {
+                    tech.blockingIce++
+                },
+                remove() {
+                    tech.blockingIce = 0;
                 }
             },
             {
@@ -4648,7 +4666,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isIceField || tech.relayIce
+                    return tech.isIceField || tech.relayIce || tech.blockingIce
                 },
                 requires: "ice IX",
                 effect() {
@@ -6433,5 +6451,6 @@
         isAlwaysFire: null,
         isDroneRespawn: null,
         deathSpawns: null,
-        isMobBlockFling: null
+        isMobBlockFling: null,
+        blockingIce: null
     }

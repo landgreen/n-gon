@@ -1106,8 +1106,8 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // simulation.difficulty = 30 
-        // spawn.starter(1900, -500, 200) //big boy
+        // simulation.difficulty = 30
+        spawn.starter(1900, -500, 100) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
@@ -1119,7 +1119,7 @@ const level = {
         // spawn.sniper(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
-        spawn.cellBossCulture(1600, -500)
+        // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
         // spawn.beamer(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);

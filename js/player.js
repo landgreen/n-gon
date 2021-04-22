@@ -1266,8 +1266,14 @@ const m = {
         if (m.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
             m.energy -= fieldBlockCost
             if (m.energy < 0) m.energy = 0;
-            // if (m.energy > m.maxEnergy) m.energy = m.maxEnergy;
-
+            m.fieldCDcycle = m.cycle + m.fieldBlockCD;
+            if (tech.blockingIce) {
+                if (m.fieldShieldingScale) {
+                    for (let i = 0; i < fieldBlockCost * 35 * tech.blockingIce; i++) b.iceIX(3, m.angle + Math.random() - 0.5, m.pos)
+                } else {
+                    for (let i = 0; i < tech.blockingIce; i++) b.iceIX(10, m.angle + Math.random() - 0.5, m.pos)
+                }
+            }
             if (tech.blockDmg) {
                 who.damage(tech.blockDmg * b.dmgScale)
                 //draw electricity
@@ -1299,7 +1305,6 @@ const m = {
                     x: player.velocity.x - (15 * unit.x) / massRoot,
                     y: player.velocity.y - (15 * unit.y) / massRoot
                 });
-                m.fieldCDcycle = m.cycle + m.fieldBlockCD;
                 if (m.crouch) {
                     Matter.Body.setVelocity(player, {
                         x: player.velocity.x + 0.4 * unit.x * massRoot,
@@ -1340,12 +1345,9 @@ const m = {
             }
         }
     },
-    pushMobs360(range = m.fieldRange * 0.75) { // find mobs in range in any direction
+    pushMobs360(range) { // find mobs in range in any direction
         for (let i = 0, len = mob.length; i < len; ++i) {
-            if (
-                Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < range &&
-                Matter.Query.ray(map, mob[i].position, m.pos).length === 0
-            ) {
+            if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < range && Matter.Query.ray(map, mob[i].position, m.pos).length === 0) {
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
             }
@@ -1483,11 +1485,11 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>",
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>25%</strong>",
             effect: () => {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
-                m.fieldHarmReduction = 0.8;
+                m.fieldHarmReduction = 0.75;
                 m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
                 m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
                 m.hold = function() {
@@ -1508,7 +1510,7 @@ const m = {
                         const fieldRange2 = (0.63 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange
                         const fieldRange3 = (0.65 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange
                         const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
-                        ctx.fillStyle = "rgba(110,170,200," + (0.04 + m.energy * (0.12 + 0.13 * Math.random())) + ")";
+                        ctx.fillStyle = "rgba(110,170,200," + Math.min(0.73, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
                         ctx.fill();
@@ -1528,9 +1530,10 @@ const m = {
         {
             name: "perfect diamagnetism",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
-            description: "<strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has no <strong>cool down</strong> and less <strong>recoil</strong><br><strong>attract</strong> power ups from <strong>far away</strong>",
+            description: "<strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has less <strong>recoil</strong><br><strong>attract</strong> power ups from <strong>far away</strong>",
             effect: () => {
                 m.fieldShieldingScale = 0;
+                m.fieldBlockCD = 4;
                 m.grabPowerUpRange2 = 10000000
                 m.hold = function() {
                     const wave = Math.sin(m.cycle * 0.022);
@@ -1676,7 +1679,6 @@ const m = {
                             m.isFieldActive = true; //used with tech.isHarmReduce
                             m.airSpeedLimit = 400 // 7* player.mass * player.mass
                             m.FxAir = 0.005
-                            // m.pushMobs360();
 
                             //repulse mobs
                             // for (let i = 0, len = mob.length; i < len; ++i) {
@@ -1736,7 +1738,7 @@ const m = {
                                 });
                             }
                             if (tech.isFreezeMobs) {
-                                const ICE_DRAIN = 0.0005
+                                const ICE_DRAIN = 0.0002
                                 for (let i = 0, len = mob.length; i < len; i++) {
                                     if (((mob[i].distanceToPlayer() + mob[i].radius) < this.fieldDrawRadius) && !mob[i].shield && !mob[i].isShielded) {
                                         if (m.energy > ICE_DRAIN * 2) {

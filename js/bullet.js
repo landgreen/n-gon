@@ -1908,12 +1908,11 @@ const b = {
             }
         }
     },
-    iceIX(speed = 0, spread = 2 * Math.PI) {
+    iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }) {
         const me = bullet.length;
         const THRUST = 0.004
-        const dir = m.angle + spread * (Math.random() - 0.5);
         const RADIUS = 18
-        bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 3, RADIUS, {
+        bullet[me] = Bodies.polygon(where.x, where.y, 3, RADIUS, {
             angle: dir - Math.PI,
             inertia: Infinity,
             friction: 0,

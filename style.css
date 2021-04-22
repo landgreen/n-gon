@@ -568,19 +568,19 @@ summary {
     /* text-decoration: underline; */
 }
 
-.color-bot {
-    /* background-color: #eee; */
-    /* color: #555; */
-    /* letter-spacing: -1.5px; */
-    /* text-transform: uppercase; */
-    /* font-variant: all-caps; */
-    /* text-decoration: underline solid; */
-    /* border: 1px solid #000; */
-    /* padding: 10px; */
-    /* border-radius: 10%; */
-    /* font-family: Lucida Console, Courier, monospace; */
-    /* color: #777; */
-}
+/* .color-bot { */
+/* background-color: #eee; */
+/* color: #555; */
+/* letter-spacing: -1.5px; */
+/* text-transform: uppercase; */
+/* font-variant: all-caps; */
+/* text-decoration: underline solid; */
+/* border: 1px solid #000; */
+/* padding: 10px; */
+/* border-radius: 10%; */
+/* font-family: Lucida Console, Courier, monospace; */
+/* color: #777; */
+/* } */
 
 .color-cloaked {
     opacity: 0.25;
@@ -679,7 +679,7 @@ summary {
 }
 
 .junk {
-    background: hsl(254, 44%, 75%);
+    background-color: hsl(254, 44%, 75%);
     border-radius: 25%;
     /* animation: 3s linear infinite alternate pulse; */
 }
@@ -705,13 +705,13 @@ summary {
 } */
 
 .field {
-    background: #0cf;
+    background-color: #0cf;
 }
 
 .tech {
     /* background: rgb(116, 102, 238); */
     /* background: hsl(253, 57%, 52%); */
-    background: hsl(255, 100%, 71%);
+    background-color: hsl(255, 100%, 71%);
     /* background: hsl(282, 100%, 64%); */
 }
 
@@ -720,16 +720,16 @@ summary {
 } */
 
 .gun {
-    background: rgb(0, 80, 218);
+    background-color: rgb(0, 80, 218);
 }
 
 .heal {
-    background: #0d9;
+    background-color: #0d9;
 }
 
 .research {
     /* #f84  #f99*/
-    background: #f7b;
+    background-color: #f7b;
 }
 
 .research-select {

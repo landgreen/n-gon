@@ -70,7 +70,7 @@ const mobs = {
                 who.isSlowed = true;
                 who.status.push({
                     effect() {
-                        const speedCap = 3
+                        const speedCap = 2
                         const drag = 0.95
                         Matter.Body.setVelocity(who, {
                             x: Math.min(speedCap, who.velocity.x) * drag,
@@ -1067,7 +1067,7 @@ const mobs = {
                         const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))
                         for (let i = 0; i < len; i++) b.spore(this.position)
                     } else if (tech.isExplodeMob) {
-                        b.explosion(this.position, Math.min(600, Math.sqrt(this.mass + 2.75) * 55))
+                        b.explosion(this.position, Math.min(600, Math.sqrt(this.mass + 1.5) * (22 + 60 * Math.random())))
                     } else if (tech.nailsDeathMob) {
                         b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
                     }

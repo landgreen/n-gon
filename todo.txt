@@ -1,12 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-diffraction grating only gains 1 extra beam, but no longer gets a damage reduction
-  also the beam split is wider than before
+perfect diamagnetism now has a 1/12 of a second cooldown after blocking (1/2 other fields)
+perfect diamagnetism can get bremsstrahlung now
 
-needle move twice as fast (was 50, now is 100)
-  and they are 50% longer and 25% thinner
-  damage was improved about 20%
-  delay between each needle in a volley is slightly longer
+standing wave harmonic field blocks now block large mobs more reliably
+
+tech: triple point - blocking makes iceIX crystals
+  unlocked with: standing wave harmonic field or perfect diamagnetism
 
 ******************************************************** BUGS ********************************************************
 
@@ -38,9 +38,7 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-make some bullets move super fast, but do collisions checks in .do()
-  check for hitting mobs or map with fractional velocity
-    if velocity is above 40ish
+tech: pressing the gun switch keys instead cycles through bot upgrades, switching all of your bots accordingly
 
 import the procedural level generation from one of the older versions of the game as one single level
 
