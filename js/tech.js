@@ -4368,7 +4368,7 @@
             //************************************************** 
             {
                 name: "bremsstrahlung",
-                description: "<strong>blocking</strong> with <strong>standing wave harmonics</strong><br> does <strong class='color-d'>damage</strong> to mobs",
+                description: "<strong>blocking</strong> does <strong class='color-d'>damage</strong> to mobs",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
