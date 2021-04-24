@@ -47,51 +47,55 @@ const mobs = {
         applySlow(who)
         //look for mobs near the target
         if (tech.isAoESlow) {
-            const range = (320 + 150 * Math.random()) ** 2
+            const range2 = (180 + 170 * Math.random()) ** 2
             for (let i = 0, len = mob.length; i < len; i++) {
-                if (Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range) applySlow(mob[i])
+                if (who !== mob[i] && Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range2 + mob[i].radius) {
+                    console.log(mob[i])
+                    applySlow(mob[i])
+                }
             }
             simulation.drawList.push({
                 x: who.position.x,
                 y: who.position.y,
-                radius: Math.sqrt(range),
+                radius: Math.sqrt(range2),
                 color: "rgba(0,100,255,0.05)",
-                time: 3
+                time: simulation.drawTime
             });
         }
 
-        function applySlow() {
-            if (!who.shield && !who.isShielded && !m.isBodiesAsleep) {
-                if (who.isBoss) cycles = Math.floor(cycles * 0.25)
-                let i = who.status.length
+        function applySlow(whom) {
+            console.log()
+            if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep) {
+                if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
+                let i = whom.status.length
                 while (i--) {
-                    if (who.status[i].type === "slow") who.status.splice(i, 1); //remove other "slow" effects on this mob
+                    if (whom.status[i].type === "slow") whom.status.splice(i, 1); //remove other "slow" effects on this mob
                 }
-                who.isSlowed = true;
-                who.status.push({
+                whom.isSlowed = true;
+                whom.status.push({
                     effect() {
                         const speedCap = 2
                         const drag = 0.95
-                        Matter.Body.setVelocity(who, {
-                            x: Math.min(speedCap, who.velocity.x) * drag,
-                            y: Math.min(speedCap, who.velocity.y) * drag
+                        Matter.Body.setVelocity(whom, {
+                            x: Math.min(speedCap, whom.velocity.x) * drag,
+                            y: Math.min(speedCap, whom.velocity.y) * drag
                         });
-                        Matter.Body.setAngularVelocity(who, 0);
+                        Matter.Body.setAngularVelocity(whom, 0);
                         ctx.beginPath();
-                        ctx.moveTo(who.vertices[0].x, who.vertices[0].y);
-                        for (let j = 1, len = who.vertices.length; j < len; ++j) {
-                            ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
+                        ctx.moveTo(whom.vertices[0].x, whom.vertices[0].y);
+                        for (let j = 1, len = whom.vertices.length; j < len; ++j) {
+                            ctx.lineTo(whom.vertices[j].x, whom.vertices[j].y);
                         }
-                        ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
+                        ctx.lineTo(whom.vertices[0].x, whom.vertices[0].y);
                         ctx.strokeStyle = "rgba(0,100,255,0.8)";
                         ctx.lineWidth = 15;
                         ctx.stroke();
-                        ctx.fillStyle = who.fill
+                        ctx.fillStyle = whom.fill
                         ctx.fill();
                     },
                     endEffect() {
                         //check to see if there are not other freeze effects?
-                        who.isSlowed = false;
+                        whom.isSlowed = false;
                     },
                     type: "slow",
                     endCycle: simulation.cycle + cycles,

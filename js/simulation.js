@@ -250,10 +250,9 @@ const simulation = {
             ctx.fillStyle = simulation.drawList[i].color;
             ctx.fill();
             if (simulation.drawList[i].time) {
-                //remove when timer runs out
                 simulation.drawList[i].time--;
             } else {
-                simulation.drawList.splice(i, 1);
+                if (!m.isBodiesAsleep) simulation.drawList.splice(i, 1); //remove when timer runs out
             }
         }
     },

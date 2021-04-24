@@ -29,6 +29,7 @@ const b = {
             }
             if (m.holdingTarget) m.drop();
         }
+        b.guns[b.activeGun].do();
     },
     fireNotMove() { //added  && player.speed < 0.5 && m.onGround  
         if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && b.inventory.length && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
@@ -39,6 +40,7 @@ const b = {
             }
             if (m.holdingTarget) m.drop();
         }
+        b.guns[b.activeGun].do();
     },
     fireNotMoveAlwaysFire() { //added  && player.speed < 0.5 && m.onGround  //removed input.fire && (!input.field || m.fieldFire)
         if (m.fireCDcycle < m.cycle && b.inventory.length && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
@@ -49,6 +51,7 @@ const b = {
             }
             if (m.holdingTarget) m.drop();
         }
+        b.guns[b.activeGun].do();
     },
     fireFloat() { //added  && player.speed < 0.5 && m.onGround  
         if (input.fire && (!input.field || m.fieldFire) && b.inventory.length) {
@@ -67,6 +70,7 @@ const b = {
             player.force.x = 0
             player.force.y = 0
         }
+        b.guns[b.activeGun].do();
     },
     fireWithAmmo() { //triggers after firing when you have ammo
         b.guns[b.activeGun].fire();
@@ -3373,6 +3377,7 @@ const b = {
             ammoPack: 5.5,
             defaultAmmoPack: 5.5,
             have: false,
+            do() {},
             fire() {
                 let knock, spread
                 if (m.crouch) {
@@ -3537,6 +3542,7 @@ const b = {
             ammoPack: 12,
             have: false,
             num: 5,
+            do() {},
             fire() {
                 const SPEED = m.crouch ? 43 : 32
                 m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 18) * b.fireCD); // cool down
@@ -3600,6 +3606,7 @@ const b = {
             ammo: 0,
             ammoPack: 70,
             have: false,
+            do() {},
             fire() {
                 m.fireCDcycle = m.cycle + Math.floor(3 * b.fireCD); // cool down
                 const dir = m.angle
@@ -3712,6 +3719,7 @@ const b = {
             have: false,
             fireCycle: 0,
             ammoLoaded: 0,
+            do() {},
             fire() {
                 const countReduction = Math.pow(0.9, tech.missileCount)
                 if (m.crouch) {
@@ -3826,6 +3834,7 @@ const b = {
             ammo: 0,
             ammoPack: 5,
             have: false,
+            do() {},
             fire() {
                 m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 40 : 30) * b.fireCD); // cool down
                 b.grenade()
@@ -3836,6 +3845,7 @@ const b = {
             ammo: 0,
             ammoPack: 2.7,
             have: false,
+            do() {},
             fire() {
                 if (tech.isLaserMine) { //laser mine
                     const speed = m.crouch ? 50 : 20
@@ -3863,6 +3873,7 @@ const b = {
             ammo: 0,
             ammoPack: 3,
             have: false,
+            do() {},
             fire() {
                 const me = bullet.length;
                 const dir = m.angle;
@@ -3993,6 +4004,7 @@ const b = {
             ammoPack: 14,
             defaultAmmoPack: 14,
             have: false,
+            do() {},
             fire() {
                 if (m.crouch) {
                     b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
@@ -4009,6 +4021,7 @@ const b = {
         //     ammo: 0,
         //     ammoPack: 64,
         //     have: false,
+        //     do() {},
         //     fire() {
         //         if (m.crouch) {
         //             b.iceIX(10, 0.3)
@@ -4026,17 +4039,21 @@ const b = {
             ammo: 0,
             ammoPack: 36,
             have: false,
-            fire() {
-                let radius, spread
-                if (m.crouch) {
-                    spread = 0.2 * (Math.random() - 0.5)
-                    radius = 10 + 5 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                    m.fireCDcycle = m.cycle + Math.floor(15 * b.fireCD); // cool down
-                } else {
-                    spread = 0.5 * (Math.random() - 0.5)
-                    radius = 4 + 6 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                    m.fireCDcycle = m.cycle + Math.floor(5 * b.fireCD); // cool down
+            charge: 0,
+            isCharging: false,
+            do() {
+                if (this.charge > 0 && !input.fire) {
+                    this.charge--
+                    this.fireFoam()
                 }
+            },
+            fire() {
+                this.charge++
+                m.fireCDcycle = m.cycle + Math.floor((1 + 0.35 * this.charge) * b.fireCD);
+            },
+            fireFoam() {
+                const spread = (m.crouch ? 0.05 : 0.6) * (Math.random() - 0.5)
+                const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
                 const SPEED = 18 - radius * 0.4;
                 const dir = m.angle + 0.15 * (Math.random() - 0.5)
                 const velocity = {
@@ -4065,12 +4082,52 @@ const b = {
                     b.foam(position, Vector.rotate(velocity, spread), radius)
                 }
             }
+            // fire() {
+            //     let radius, spread
+            //     if (m.crouch) {
+            //         spread = 0.2 * (Math.random() - 0.5)
+            //         radius = 10 + 5 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+            //         m.fireCDcycle = m.cycle + Math.floor(15 * b.fireCD); // cool down
+            //     } else {
+            //         spread = 0.5 * (Math.random() - 0.5)
+            //         radius = 4 + 6 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+            //         m.fireCDcycle = m.cycle + Math.floor(5 * b.fireCD); // cool down
+            //     }
+            //     const SPEED = 18 - radius * 0.4;
+            //     const dir = m.angle + 0.15 * (Math.random() - 0.5)
+            //     const velocity = {
+            //         x: SPEED * Math.cos(dir),
+            //         y: SPEED * Math.sin(dir)
+            //     }
+            //     const position = {
+            //         x: m.pos.x + 30 * Math.cos(m.angle),
+            //         y: m.pos.y + 30 * Math.sin(m.angle)
+            //     }
+            //     if (tech.foamFutureFire) {
+            //         simulation.drawList.push({ //add dmg to draw queue
+            //             x: position.x,
+            //             y: position.y,
+            //             radius: 5,
+            //             color: "rgba(0,0,0,0.1)",
+            //             time: 15 * tech.foamFutureFire
+            //         });
+            //         setTimeout(() => {
+            //             if (!simulation.paused) {
+            //                 b.foam(position, Vector.rotate(velocity, spread), radius)
+            //                 bullet[bullet.length - 1].damage = (1 + 1.27 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
+            //             }
+            //         }, 250 * tech.foamFutureFire);
+            //     } else {
+            //         b.foam(position, Vector.rotate(velocity, spread), radius)
+            //     }
+            // }
         }, {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
             ammoPack: 3.15,
             have: false,
+            do() {},
             fire() {
                 function pushAway(range) { //push away blocks when firing
                     for (let i = 0, len = mob.length; i < len; ++i) {
@@ -4425,6 +4482,7 @@ const b = {
             ammoPack: Infinity,
             have: false,
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
+            do() {},
             fire() {
 
             },
@@ -4443,10 +4501,10 @@ const b = {
 
                 // this.fire = this.firePhoton
             },
-            firePhoton() {
-                m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCD); // cool down
-                b.photon({ x: m.pos.x + 23 * Math.cos(m.angle), y: m.pos.y + 23 * Math.sin(m.angle) }, m.angle)
-            },
+            // firePhoton() {
+            //     m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCD); // cool down
+            //     b.photon({ x: m.pos.x + 23 * Math.cos(m.angle), y: m.pos.y + 23 * Math.sin(m.angle) }, m.angle)
+            // },
             fireLaser() {
                 if (m.energy < tech.laserFieldDrain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
@@ -4616,6 +4674,7 @@ const b = {
         lastFireCycle: 0,
         holdCount: 0,
         activeGunIndex: null,
+        do() {},
         fire() {
             if (this.lastFireCycle === m.cycle - 1) { //button has been held down
                 this.rewindCount += 8;

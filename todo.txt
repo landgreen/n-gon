@@ -1,14 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-perfect diamagnetism now has a 1/12 of a second cooldown after blocking (1/2 other fields)
-perfect diamagnetism can get bremsstrahlung now
+apomixis spawns 8 bosses (up from 4)
 
-standing wave harmonic field blocks now block large mobs more reliably
-
-tech: triple point - blocking makes iceIX crystals
-  unlocked with: standing wave harmonic field or perfect diamagnetism
+foam gun now charges up until you release the fire button
 
 ******************************************************** BUGS ********************************************************
+
+increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
 you have to press z once to get copy to work for simulation.enableConstructMode() sometimes
   not sure how to reproduce, but it happens often on the first draw
@@ -38,33 +36,9 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-tech: pressing the gun switch keys instead cycles through bot upgrades, switching all of your bots accordingly
-
-import the procedural level generation from one of the older versions of the game as one single level
-
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage
   draw a square (or two) that rapidly spins
-
-blocking produces ice-IX
-  at the block location?
-    how to get bullets to not hit the blocked mob
-  spawn at player head?
-  only applies to blocking with a cool down
-      nano-scale?
-      standing wave harmonics
-      maybe just a chance to proc for perfect diamagnetism
-
-tech field:  while _____ is active take 100% more harm and do 100% more damage
-  while firing
-  or while plasma field is active
-
-quantum foam:  hold fire to charge up foam, release fire to let go an amount relative to hold long you held fire
-  foam gun fires a bullet that tracks how long mouse is down
-    when mouse is up it streams out a hose of foam based on how long foam was down
-    bullet is small and hidden
-
-flipflop, but toggles after a kill
 
 new level: procedural generation
   several small rooms are linked by portals
@@ -93,17 +67,8 @@ mob vision: look at player history
     https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
     write find in spawn undo exploder, but commented out
 
-tech: chitin - take 50% less damage, reduce harm reduction by 5% after each collision
-
 Mob: "Tentacle": Sits on wall. Is a black blob. When you get near it, reaches out and grabs you, similar to wires. Does not deal damage.
   maybe it could be immune to damage? but it is spawned by an actual mob
-
-wormhole, or CPT tech: after taking damage teleport in direction of mouse
-  after collision
-
-mob sniper: draw aim graphics before fire
-
-tech laser: photon - laser, but it can only move 100 pixels a cycle
 
 mob - after taking damage
   attack outwardly
@@ -134,10 +99,6 @@ lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
   put something on the intro map
     maybe a button triggers something
-
-tech:  add an eject button for each power up in the pause menu
-  also list all bot types in pause menu
-    with option to eject?
 
 add back in gamepad support
   but does anyone care?

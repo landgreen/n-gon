@@ -159,6 +159,10 @@
                 spawn.randomLevelBoss(m.pos.x, m.pos.y + range, bossOptions);
                 spawn.randomLevelBoss(m.pos.x - range, m.pos.y, bossOptions);
                 spawn.randomLevelBoss(m.pos.x, m.pos.y - range, bossOptions);
+                spawn.randomLevelBoss(m.pos.x + range, m.pos.y + range, bossOptions);
+                spawn.randomLevelBoss(m.pos.x + range, m.pos.y - range, bossOptions);
+                spawn.randomLevelBoss(m.pos.x - range, m.pos.y + range, bossOptions);
+                spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, bossOptions);
             }
         },
         tech: [{
@@ -2399,7 +2403,7 @@
             },
             {
                 name: "many-worlds",
-                description: "each new <strong>level</strong> is an <strong>alternate reality</strong><br> find <strong>2</strong> <strong class='color-m'>tech</strong> power ups in that reality",
+                description: "each <strong>level</strong> is an <strong>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong>, <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2711,7 +2715,7 @@
             },
             {
                 name: "parthenogenesis",
-                description: "each level has a chance to spawn a <strong>level boss</strong><br>equal to <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance",
+                description: "levels have a chance to spawn a 2nd <strong>boss</strong><br>equal to <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2728,14 +2732,14 @@
             },
             {
                 name: "apomixis",
-                description: "after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong> chance<br>immediately spawn <strong>4 level bosses</strong>",
+                description: "after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong> chance<br>immediately spawn <strong>8 bosses</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 6,
                 allowed() {
-                    return tech.isDuplicateBoss
+                    return tech.duplicationChance() > 0.66
                 },
-                requires: "parthenogenesis",
+                requires: "duplication chance above 66%",
                 effect() {
                     tech.is100Duplicate = true;
                     tech.maxDuplicationEvent()

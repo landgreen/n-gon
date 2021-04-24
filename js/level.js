@@ -16,11 +16,11 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
-            // b.giveGuns("nail gun")
+            // b.giveGuns("foam")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
-            // tech.giveTech("diffraction grating")
-            // tech.giveTech("pulse")
+            // tech.giveTech("superfluidity")
+            // tech.giveTech("ice crystal nucleation")
             // tech.giveTech("needle gun")
             // tech.giveTech("cardinality")
             // tech.giveTech("Bayesian statistics")
@@ -111,7 +111,10 @@ const level = {
             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
             simulation.trails()
-            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "heal", false);
+            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "ammo", false);
+            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "research", false);
         }
         if (tech.isHealLowHealth) {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
@@ -1108,7 +1111,7 @@ const level = {
 
         // simulation.difficulty = 30
         spawn.starter(1900, -500, 100) //big boy
-        // spawn.grower(1900, -500)
+        spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
         // spawn.launcherBoss(1200, -500)

@@ -1660,7 +1660,7 @@ const m = {
                 m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
                 m.fieldMeterColor = "#333"
                 m.eyeFillColor = m.fieldMeterColor
-                m.fieldHarmReduction = 0.55;
+                m.fieldHarmReduction = 0.45; //55% reduction
                 m.fieldDrawRadius = 0;
 
                 m.hold = function() {
