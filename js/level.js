@@ -18,7 +18,7 @@ const level = {
             // m.setField("nano-scale manufacturing")
             // b.giveGuns("foam")
             // tech.isExplodeRadio = true
-            // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
+            // for (let i = 0; i < 9; i++) tech.giveTech("auto-loading heuristics")
             // tech.giveTech("superfluidity")
             // tech.giveTech("ice crystal nucleation")
             // tech.giveTech("needle gun")

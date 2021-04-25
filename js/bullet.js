@@ -140,7 +140,10 @@ const b = {
             if (!b.guns[gun].have) b.inventory.push(gun);
             b.guns[gun].have = true;
             b.guns[gun].ammo = Math.floor(b.guns[gun].ammoPack * ammoPacks);
-            if (b.activeGun === null) b.activeGun = gun //if no active gun switch to new gun
+            if (b.activeGun === null) {
+                b.activeGun = gun //if no active gun switch to new gun
+                if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //set foam charge to zero if foam is a new gun
+            }
         }
         simulation.makeGunHUD();
         b.setFireCD();
@@ -4046,14 +4049,27 @@ const b = {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 36,
+            ammoPack: 30,
             have: false,
             charge: 0,
-            isCharging: false,
+            isDischarge: false,
             do() {
-                if (this.charge > 0 && !input.fire) {
-                    this.charge--
-                    this.fireFoam()
+                if (this.charge > 0) {
+                    //draw charge level
+                    ctx.fillStyle = "rgba(0,50,50,0.2)";
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 10 * Math.sqrt(this.charge), 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    if (this.isDischarge) {
+                        this.charge--
+                        this.fireFoam()
+                        m.fireCDcycle = m.cycle + 1; //disable firing and adding more charge
+                    } else if (!input.fire) {
+                        this.isDischarge = true;
+                    }
+                } else {
+                    this.isDischarge = false
                 }
             },
             fire() {
@@ -4091,45 +4107,6 @@ const b = {
                     b.foam(position, Vector.rotate(velocity, spread), radius)
                 }
             }
-            // fire() {
-            //     let radius, spread
-            //     if (m.crouch) {
-            //         spread = 0.2 * (Math.random() - 0.5)
-            //         radius = 10 + 5 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-            //         m.fireCDcycle = m.cycle + Math.floor(15 * b.fireCD); // cool down
-            //     } else {
-            //         spread = 0.5 * (Math.random() - 0.5)
-            //         radius = 4 + 6 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-            //         m.fireCDcycle = m.cycle + Math.floor(5 * b.fireCD); // cool down
-            //     }
-            //     const SPEED = 18 - radius * 0.4;
-            //     const dir = m.angle + 0.15 * (Math.random() - 0.5)
-            //     const velocity = {
-            //         x: SPEED * Math.cos(dir),
-            //         y: SPEED * Math.sin(dir)
-            //     }
-            //     const position = {
-            //         x: m.pos.x + 30 * Math.cos(m.angle),
-            //         y: m.pos.y + 30 * Math.sin(m.angle)
-            //     }
-            //     if (tech.foamFutureFire) {
-            //         simulation.drawList.push({ //add dmg to draw queue
-            //             x: position.x,
-            //             y: position.y,
-            //             radius: 5,
-            //             color: "rgba(0,0,0,0.1)",
-            //             time: 15 * tech.foamFutureFire
-            //         });
-            //         setTimeout(() => {
-            //             if (!simulation.paused) {
-            //                 b.foam(position, Vector.rotate(velocity, spread), radius)
-            //                 bullet[bullet.length - 1].damage = (1 + 1.27 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
-            //             }
-            //         }, 250 * tech.foamFutureFire);
-            //     } else {
-            //         b.foam(position, Vector.rotate(velocity, spread), radius)
-            //     }
-            // }
         }, {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",

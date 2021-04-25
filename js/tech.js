@@ -5018,7 +5018,7 @@
                 isBadRandomOption: true,
                 isExperimentalMode: true,
                 allowed() {
-                    return build.isExperimentSelection && !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass field"
+                    return build.isExperimentSelection && !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && !tech.isFireNotMove
                 },
                 requires: "",
                 effect() {

@@ -355,6 +355,7 @@ const simulation = {
     switchGun() {
         if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
         b.activeGun = b.inventory[b.inventoryGun];
+        if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //if switching into foam set charge to 0
         simulation.updateGunHUD();
         simulation.boldActiveGunHUD();
     },

@@ -1,8 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-apomixis spawns 8 bosses (up from 4)
-
-foam gun now charges up until you release the fire button
 
 ******************************************************** BUGS ********************************************************
 
@@ -36,7 +33,8 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-edit foam gun text
+edit foam gun text?
+add a foam charge meter would be nice
 
 apply the new gun.do functions to other guns
   rail gun
