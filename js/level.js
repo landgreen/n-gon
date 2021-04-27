@@ -12,14 +12,15 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(50)
+            // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
             // b.giveGuns("foam")
+            // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 9; i++) tech.giveTech("auto-loading heuristics")
-            // tech.giveTech("superfluidity")
+            // tech.giveTech("pulse")
             // tech.giveTech("ice crystal nucleation")
             // tech.giveTech("needle gun")
             // tech.giveTech("cardinality")
@@ -1109,9 +1110,8 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // simulation.difficulty = 30
-        spawn.starter(1900, -500, 100) //big boy
-        spawn.grower(1900, -500)
+        spawn.starter(1900, -500, 200) //big boy
+        // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
         // spawn.launcherBoss(1200, -500)

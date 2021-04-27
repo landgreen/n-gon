@@ -1621,9 +1621,9 @@ const spawn = {
                             ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
                             ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
                             ctx.lineWidth = 20;
-                            ctx.strokeStyle = "rgba(120,0,255,0.2)";
+                            ctx.strokeStyle = "rgba(120,0,255,0.3)";
                             ctx.stroke();
-                            ctx.lineWidth = 4;
+                            ctx.lineWidth = 5;
                             ctx.strokeStyle = "rgba(120,0,255,1)";
                             ctx.stroke();
                         } else { //delay before firing
@@ -1631,7 +1631,7 @@ const spawn = {
                             //draw explosion outline
                             ctx.beginPath();
                             ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
-                            ctx.fillStyle = "rgba(120,0,255,0.05)";
+                            ctx.fillStyle = "rgba(120,0,255,0.07)";
                             ctx.fill();
                             //draw path from mob to explosion
                             ctx.beginPath();
@@ -1639,7 +1639,7 @@ const spawn = {
                             ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
                             ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
                             ctx.lineWidth = 2;
-                            ctx.strokeStyle = "rgba(120,0,255,0.2)";
+                            ctx.strokeStyle = "rgba(120,0,255,0.3)";
                             ctx.stroke();
                             ctx.setLineDash([0, 0]);
                         }
@@ -1741,9 +1741,9 @@ const spawn = {
                             ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
                             ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
                             ctx.lineWidth = 20;
-                            ctx.strokeStyle = "rgba(255,0,100,0.2)";
+                            ctx.strokeStyle = "rgba(255,0,100,0.3)";
                             ctx.stroke();
-                            ctx.lineWidth = 4;
+                            ctx.lineWidth = 5;
                             ctx.strokeStyle = "rgba(255,0,100,1)";
                             ctx.stroke();
                         } else { //delay before firing
@@ -1754,7 +1754,7 @@ const spawn = {
                             //draw explosion outline
                             ctx.beginPath();
                             ctx.arc(this.fireTarget.x, this.fireTarget.y, this.pulseRadius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
-                            ctx.fillStyle = "rgba(255,0,100,0.05)";
+                            ctx.fillStyle = "rgba(255,0,100,0.07)";
                             ctx.fill();
                             //draw path from mob to explosion
                             ctx.beginPath();
@@ -1762,7 +1762,7 @@ const spawn = {
                             ctx.lineTo(this.fireTarget.x, this.fireTarget.y)
                             ctx.setLineDash([40 * Math.random(), 200 * Math.random()]);
                             ctx.lineWidth = 2;
-                            ctx.strokeStyle = "rgba(255,0,100,0.2)";
+                            ctx.strokeStyle = "rgba(255,0,100,0.3)";
                             ctx.stroke();
                             ctx.setLineDash([0, 0]);
                         }

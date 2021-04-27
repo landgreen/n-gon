@@ -794,17 +794,7 @@ window.addEventListener("keydown", function(event) {
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'
-                    if (!simulation.isCheating) {
-                        simulation.isCheating = true;
-                        level.levelAnnounce();
-                        lore.techCount = 0;
-                        for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].isLore) {
-                                tech.tech[i].frequency = 0;
-                                tech.tech[i].count = 0;
-                            }
-                        }
-                    }
+                    if (simulation.testing) tech.setCheating();
                     simulation.makeTextLog(
                         `<table class="pause-table">
                             <tr>

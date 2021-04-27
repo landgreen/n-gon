@@ -1145,20 +1145,20 @@ const m = {
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
                 //bullet-like collisions
-                m.holdingTarget.collisionFilter.category = cat.bullet; //cat.body;
+                // m.holdingTarget.collisionFilter.category = cat.bullet; //cat.body;
                 m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
                 //check every second to see if player is away from thrown body, and make solid
                 const solid = function(that) {
                     const dx = that.position.x - player.position.x;
                     const dy = that.position.y - player.position.y;
                     if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
-                        that.collisionFilter.category = cat.body; //make solid
+                        // that.collisionFilter.category = cat.body; //make solid
                         that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
                     } else {
-                        setTimeout(solid, 50, that);
+                        setTimeout(solid, 40, that);
                     }
                 };
-                setTimeout(solid, 500, m.holdingTarget);
+                setTimeout(solid, 200, m.holdingTarget);
 
                 const charge = Math.min(m.throwCharge / 5, 1)
                 //***** scale throw speed with the first number, 80 *****

@@ -107,6 +107,17 @@
                 }
             }
         },
+        setCheating() {
+            simulation.isCheating = true;
+            level.levelAnnounce();
+            lore.techCount = 0;
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].isLore) {
+                    tech.tech[i].frequency = 0;
+                    tech.tech[i].count = 0;
+                }
+            }
+        },
         haveGunCheck(name) {
             if (
                 !build.isExperimentSelection &&
@@ -745,7 +756,7 @@
             },
             {
                 name: "nitroglycerin",
-                description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>60%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>20%</strong>",
+                description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>66%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>33%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -776,6 +787,24 @@
                 },
                 remove() {
                     tech.isExplosionHarm = false;
+                }
+            },
+            {
+                name: "shock wave",
+                description: "<strong class='color-e'>explosions</strong> <strong>stun</strong> mobs for <strong>1-2</strong> seconds<br>decrease <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>40%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
+                },
+                requires: "an explosive damage source, not iridium-192",
+                effect() {
+                    tech.isExplosionStun = true;
+                },
+                remove() {
+                    tech.isExplosionStun = false;
                 }
             },
             {
@@ -1443,9 +1472,9 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole"
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
                 },
-                requires: "mass driver, a field that can hold things",
+                requires: "mass driver, a field that can hold things, not mass-energy",
                 effect() {
                     tech.isBlockHarm = true
                 },
@@ -1688,23 +1717,6 @@
                 }
             },
             {
-                name: "osmoprotectant",
-                description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.isStunField || tech.isPulseStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1
-                },
-                requires: "a freezing or stunning effect",
-                effect() {
-                    tech.isFreezeHarmImmune = true;
-                },
-                remove() {
-                    tech.isFreezeHarmImmune = false;
-                }
-            },
-            {
                 name: "superfluidity",
                 description: "<strong class='color-s'>freeze</strong> effects are applied to a small area",
                 maxCount: 1,
@@ -1719,6 +1731,40 @@
                 },
                 remove() {
                     tech.isAoESlow = false
+                }
+            },
+            {
+                name: "osmoprotectant",
+                description: `collisions with <strong>stunned</strong> or <strong class='color-s'>frozen</strong> mobs<br>cause you <strong>no</strong> <strong class='color-harm'>harm</strong>`,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1
+                },
+                requires: "a freezing or stunning effect",
+                effect() {
+                    tech.isFreezeHarmImmune = true;
+                },
+                remove() {
+                    tech.isFreezeHarmImmune = false;
+                }
+            },
+            {
+                name: "fracture analysis",
+                description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isPerpetualStun || tech.isExplosionStun
+                },
+                requires: "a stun effect",
+                effect() {
+                    tech.isCrit = true;
+                },
+                remove() {
+                    tech.isCrit = false;
                 }
             },
             {
@@ -2124,9 +2170,9 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.isDamageAfterKill
+                    return tech.isDamageAfterKill && !tech.isEnergyHealth
                 },
-                requires: "dormancy",
+                requires: "dormancy, not mass-energy",
                 effect() {
                     tech.isHarmReduceAfterKill = true;
                 },
@@ -2553,6 +2599,7 @@
                     if (tech.isSuperDeterminism) count -= 4 //remove the bonus tech 
 
                     tech.setupAllTech(); // remove all tech
+                    if (simulation.isCheating) tech.setCheating();
                     lore.techCount = 0;
                     // tech.addLoreTechToPool();
                     for (let i = 0; i < count; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "tech"); // spawn new tech power ups
@@ -4006,7 +4053,7 @@
             },
             {
                 name: "quantum foam",
-                description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>127%</strong>",
+                description: "<strong>foam</strong> gun fires <strong>0.30</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>90%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4302,7 +4349,7 @@
             },
             {
                 name: "pulse",
-                description: "use <strong>25%</strong> of your <strong class='color-f'>energy</strong> in a pulsed <strong class='color-laser'>laser</strong><br>that instantly initiates a fusion <strong class='color-e'>explosion</strong>",
+                description: "charge your <strong class='color-f'>energy</strong> and release it as a<br><strong class='color-laser'>laser</strong> pulse that initiates an <strong class='color-e'>explosion</strong> cluster",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4327,26 +4374,8 @@
                 }
             },
             {
-                name: "shock wave",
-                description: "mobs caught in <strong class='color-laser'>pulse</strong>'s explosion are <strong>stunned</strong><br>for up to <strong>2 seconds</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.isPulseLaser
-                },
-                requires: "pulse",
-                effect() {
-                    tech.isPulseStun = true;
-                },
-                remove() {
-                    tech.isPulseStun = false;
-                }
-            },
-            {
                 name: "neocognitron",
-                description: "<strong class='color-laser'>pulse</strong> automatically <strong>aims</strong> at a nearby mob<br><strong>50%</strong> decreased <strong><em>delay</em></strong> after firing",
+                description: "<strong class='color-laser'>pulse</strong> automatically <strong>aims</strong> at a nearby mob",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4366,6 +4395,28 @@
             //************************************************** field
             //************************************************** tech
             //************************************************** 
+            {
+                name: "frequency resonance",
+                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>50%</strong>",
+                isFieldTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
+                },
+                requires: "standing wave harmonics",
+                effect() {
+                    tech.frequencyResonance = this.count + 1 // +1 because count updates later
+                    m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
+                    m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
+                },
+                remove() {
+                    m.fieldRange = 175;
+                    m.fieldShieldingScale = 1;
+                    tech.frequencyResonance = 0
+                }
+            },
             {
                 name: "bremsstrahlung",
                 description: "<strong>blocking</strong> does <strong class='color-d'>damage</strong> to mobs",
@@ -4403,28 +4454,6 @@
                 }
             },
             {
-                name: "frequency resonance",
-                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>50%</strong>",
-                isFieldTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
-                },
-                requires: "standing wave harmonics",
-                effect() {
-                    tech.frequencyResonance = this.count + 1 // +1 because count updates later
-                    m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
-                    m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
-                },
-                remove() {
-                    m.fieldRange = 175;
-                    m.fieldShieldingScale = 1;
-                    tech.frequencyResonance = 0
-                }
-            },
-            {
                 name: "flux pinning",
                 description: "blocking with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
                 isFieldTech: true,
@@ -4443,24 +4472,6 @@
                 }
             },
             {
-                name: "fracture analysis",
-                description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isPerpetualStun
-                },
-                requires: "a stun effect",
-                effect() {
-                    tech.isCrit = true;
-                },
-                remove() {
-                    tech.isCrit = false;
-                }
-            },
-            {
                 name: "eddy current brake",
                 description: "project a field that limits the <strong>top speed</strong> of mobs<br>field <strong>radius</strong> scales with stored <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -4476,25 +4487,6 @@
                 },
                 remove() {
                     tech.isPerfectBrake = false;
-                }
-            },
-            {
-                name: "pair production",
-                description: "picking up a <strong>power up</strong> gives you <strong>250</strong> <strong class='color-f'>energy</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
-                },
-                requires: "nano-scale manufacturing",
-                effect: () => {
-                    tech.isMassEnergy = true // used in m.grabPowerUp
-                    m.energy += 3
-                },
-                remove() {
-                    tech.isMassEnergy = false;
                 }
             },
             {
@@ -4609,6 +4601,25 @@
                 remove() {}
             },
             {
+                name: "pair production",
+                description: "picking up a <strong>power up</strong> gives you <strong>250</strong> <strong class='color-f'>energy</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                },
+                requires: "nano-scale manufacturing",
+                effect: () => {
+                    tech.isMassEnergy = true // used in m.grabPowerUp
+                    m.energy += 3
+                },
+                remove() {
+                    tech.isMassEnergy = false;
+                }
+            },
+            {
                 name: "mycelium manufacturing",
                 description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
                 isFieldTech: true,
@@ -4688,9 +4699,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field" && !tech.isEnergyHealth
                 },
-                requires: "negative mass field",
+                requires: "negative mass field, not mass-energy",
                 effect() {
                     tech.isHarmReduce = true
                 },
@@ -6304,7 +6315,7 @@
         isSporeFollow: null,
         isNailRadiation: null,
         isEnergyHealth: null,
-        isPulseStun: null,
+        isExplosionStun: null,
         restDamage: null,
         isRPG: null,
         missileCount: null,

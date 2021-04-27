@@ -1,5 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+pulse laser now charges up with energy before you fire, but it fires 3 overlapping explosions
+  please give feedback on balance (too strong, too weak?)
+
+tech shockwave: now applies to all explosions
+
+foam gun now gets 20% less ammo
 
 ******************************************************** BUGS ********************************************************
 
@@ -18,9 +24,9 @@ fix door.isOpen actually meaning isClosed?
   wasn't able to understand bug after extensive testing
   had tech: complex spin statistics
 
-(always) make it so that when you are immune to harm you can either jump on mobs or you pass through them
+make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
-(always) is there a way to check if the player is stuck inside the map or block
+is there a way to check if the player is stuck inside the map or block
   trigger a short term non-collide if that occurs
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
@@ -33,8 +39,16 @@ fix door.isOpen actually meaning isClosed?
 
 ******************************************************** TODO ********************************************************
 
-edit foam gun text?
-add a foam charge meter would be nice
+avoid taking collision damage by teleporting to a random power up
+  removes the power up
+
+make a tech that improves all charge guns
+  for: pulse, foam, rail gun
+  effect:
+    faster charge rate?
+      fire speed already does that...
+    harm reduction while charging
+    less ammo/energy used while charging?
 
 apply the new gun.do functions to other guns
   rail gun
