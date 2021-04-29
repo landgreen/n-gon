@@ -2162,10 +2162,12 @@ const spawn = {
             this.attraction();
             this.search();
             //draw
-            if (this.distanceToPlayer2() - this.seeAtDistance2 < 0) {
-                if (this.alpha < 1) this.alpha += 0.004;
-            } else {
-                if (this.alpha > 0) this.alpha -= 0.03;
+            if (!m.isBodiesAsleep) {
+                if (this.distanceToPlayer2() - this.seeAtDistance2 < 0) {
+                    if (this.alpha < 1) this.alpha += 0.002 * simulation.CDScale;
+                } else {
+                    if (this.alpha > 0) this.alpha -= 0.03;
+                }
             }
             if (this.alpha > 0) {
                 if (this.alpha > 0.9 && this.seePlayer.recall) {

@@ -35,7 +35,7 @@ const b = {
     },
     fireNotMove() { //added  && player.speed < 0.5 && m.onGround  
         if (b.inventory.length) {
-            if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
+            if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && player.speed < 2.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
                 } else {
@@ -2369,8 +2369,7 @@ const b = {
         return tech.isNailBotUpgrade + tech.isFoamBotUpgrade + tech.isBoomBotUpgrade + tech.isLaserBotUpgrade + tech.isOrbitBotUpgrade + tech.isDynamoBotUpgrade
     },
     convertBotsTo(type) { //type can be a string like "dynamoBotCount"
-        //count all bots
-        const totalBots = b.totalBots()
+        const totalPermanentBots = b.totalBots()
         //remove all bots techs and convert them to the new type so that tech refunds work correctly
         let totalTechToConvert = 0 //count how many tech need to be converted
         for (let i = 0; i < tech.tech.length; i++) {
@@ -2379,28 +2378,24 @@ const b = {
                 tech.removeTech(i)
             }
         }
-
-        let name = ""
-        if (type === "nailBotCount") name = "nail-bot"
-        if (type === "orbitBotCount") name = "orbital-bot"
-        if (type === "boomBotCount") name = "boom-bot"
-        if (type === "laserBotCount") name = "laser-bot"
-        if (type === "foamBotCount") name = "foam-bot"
-        if (type === "dynamoBotCount") name = "dynamo-bot"
-        if (type === "plasmaBotCount") name = "plasma-bot"
-        if (type === "missileBotCount") name = "missile-bot"
-        //spawn tech for the correct bot type
-        for (let i = 0; i < totalTechToConvert; i++) tech.giveTech(name)
-
         //remove all bots
         b.zeroBotCount()
-        for (let i = 0; i < bullet.length; i++) {
-            if (bullet[i].botType && bullet[i].endCycle === Infinity) bullet[i].endCycle = 0 //don't remove temp bots
+        b.clearPermanentBots()
+        for (let i = 0; i < totalTechToConvert; i++) tech.giveTech(type) //spawn tech for the correct bot type
+        //find index of new bot type tech effect
+        let index = null
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech[i].name === type) {
+                index = i
+                break
+            }
         }
-        //set all bots to type
-        tech[type] = totalBots
-        //respawn all bots
-        b.respawnBots();
+        for (let i = 0, len = totalPermanentBots - totalTechToConvert; i < len; i++) tech.tech[index].effect(); //also convert any permanent bots that didn't come from a tech
+    },
+    clearPermanentBots() {
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType && bullet[i].endCycle === Infinity) bullet[i].endCycle = 0 //remove active bots, but don't remove temp bots
+        }
     },
     zeroBotCount() { //remove all bots
         tech.dynamoBotCount = 0

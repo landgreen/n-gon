@@ -317,7 +317,7 @@ const build = {
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if (!tech.tech[i].isExperimentHide) {
+            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
@@ -410,7 +410,7 @@ const build = {
         }
 
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isExperimentHide) {
+            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
                 if (tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     if (tech.tech[i].isExperimentalMode) {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`

@@ -22,6 +22,17 @@
             simulation.updateTechHUD();
         },
         removeTech(index) {
+            if (isNaN(index)) { //find index by name
+                let found = false;
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (index === tech.tech[i].name) {
+                        index = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) return //if name not found don't remove any tech
+            }
             tech.tech[index].remove();
             tech.tech[index].count = 0;
             simulation.updateTechHUD();
@@ -1011,7 +1022,6 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1023,7 +1033,11 @@
                     b.nailBot();
                 },
                 remove() {
-                    // tech.nailBotCount -= this.count;
+                    if (this.count) {
+                        tech.nailBotCount -= this.count;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
                 }
             },
             {
@@ -1039,7 +1053,7 @@
                 requires: "2 or more nail bots and only 1 bot upgrade",
                 effect() {
                     tech.isNailBotUpgrade = true
-                    b.convertBotsTo("nailBotCount")
+                    b.convertBotsTo("nail-bot")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'nail') bullet[i].isUpgraded = true
                     }
@@ -1057,7 +1071,6 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1069,7 +1082,11 @@
                     b.foamBot();
                 },
                 remove() {
-                    // tech.foamBotCount -= this.count;
+                    if (this.count) {
+                        tech.foamBotCount -= this.count;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
                 }
             },
             {
@@ -1085,7 +1102,7 @@
                 requires: "2 or more foam bots and only 1 bot upgrade",
                 effect() {
                     tech.isFoamBotUpgrade = true
-                    b.convertBotsTo("foamBotCount")
+                    b.convertBotsTo("foam-bot")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'foam') bullet[i].isUpgraded = true
                     }
@@ -1103,7 +1120,6 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1115,7 +1131,11 @@
                     b.boomBot();
                 },
                 remove() {
-                    // tech.boomBotCount -= this.count;
+                    if (this.count) {
+                        tech.boomBotCount -= this.count;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
                 }
             },
             {
@@ -1131,7 +1151,7 @@
                 requires: "2 or more boom bots and only 1 bot upgrade",
                 effect() {
                     tech.isBoomBotUpgrade = true
-                    b.convertBotsTo("boomBotCount")
+                    b.convertBotsTo("boom-bot")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'boom') bullet[i].isUpgraded = true
                     }
@@ -1149,7 +1169,6 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1161,7 +1180,11 @@
                     b.laserBot();
                 },
                 remove() {
-                    // tech.laserBotCount -= this.count;
+                    if (this.count) {
+                        tech.laserBotCount -= this.count;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
                 }
             },
             {
@@ -1177,7 +1200,7 @@
                 requires: "2 or more laser bots and only 1 bot upgrade",
                 effect() {
                     tech.isLaserBotUpgrade = true
-                    b.convertBotsTo("laserBotCount")
+                    b.convertBotsTo("laser-bot")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'laser') bullet[i].isUpgraded = true
                     }
@@ -1195,7 +1218,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
+
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1207,7 +1230,11 @@
                     tech.orbitBotCount++;
                 },
                 remove() {
-                    // tech.orbitBotCount -= this.count;
+                    if (this.count) {
+                        tech.orbitBotCount -= this.count;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
                 }
             },
             {
@@ -1223,7 +1250,7 @@
                 requires: "2 or more orbital bots and only 1 bot upgrade",
                 effect() {
                     tech.isOrbitBotUpgrade = true
-                    b.convertBotsTo("orbitBotCount")
+                    b.convertBotsTo("orbital-bot")
                     const range = 190 + 60 * tech.isOrbitBotUpgrade
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'orbit') {
@@ -1251,7 +1278,6 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1263,7 +1289,11 @@
                     b.dynamoBot();
                 },
                 remove() {
-                    // tech.dynamoBotCount -= this.count;
+                    if (this.count) {
+                        tech.dynamoBotCount -= this.count;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
                 }
             },
             {
@@ -1279,7 +1309,7 @@
                 requires: "2 or more dynamo bots and only 1 bot upgrade",
                 effect() {
                     tech.isDynamoBotUpgrade = true
-                    b.convertBotsTo("dynamoBotCount")
+                    b.convertBotsTo("dynamo-bot")
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = true
                     }
@@ -1382,13 +1412,15 @@
                 count: 0,
                 frequency: 2,
                 isBotTech: true,
-                isNonRefundable: true,
+                // isNonRefundable: true,
                 isBadRandomOption: true,
+                numberOfGunsLost: 0,
                 allowed() {
                     return b.totalBots() > 3
                 },
                 requires: "at least 4 bots",
                 effect() {
+                    this.numberOfGunsLost = b.inventory.length
                     b.removeAllGuns();
                     simulation.makeGunHUD();
                     //double bots
@@ -1409,7 +1441,25 @@
                     for (let i = 0; i < tech.missileBotCount; i++) b.missileBot();
                     tech.missileBotCount *= 2
                 },
-                remove() {}
+                remove() {
+                    if (this.count) {
+                        //return guns
+                        for (let i = 0; i < this.numberOfGunsLost; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
+                        this.numberOfGunsLost = 0;
+
+                        //half all current guns
+                        tech.nailBotCount = Math.round(tech.nailBotCount / 2)
+                        tech.laserBotCount = Math.round(tech.laserBotCount / 2)
+                        tech.foamBotCount = Math.round(tech.foamBotCount / 2)
+                        tech.boomBotCount = Math.round(tech.boomBotCount / 2)
+                        tech.orbitBotCount = Math.round(tech.orbitBotCount / 2)
+                        tech.dynamoBotCount = Math.round(tech.dynamoBotCount / 2)
+                        tech.plasmaBotCount = Math.round(tech.plasmaBotCount / 2)
+                        tech.missileBotCount = Math.round(tech.missileBotCount / 2)
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    }
+                }
             },
             {
                 name: "mass driver",
@@ -2391,7 +2441,7 @@
                         powerUps.research.changeRerolls(0)
                     }, 1000);
                 },
-                description: "once per level use <strong>1</strong> <strong class='color-r'>research</strong><br>to prevent <strong>dying</strong> and spawn <strong>6</strong> <strong class='color-h'>heals</strong>",
+                description: "once per level, instead of <strong>dying</strong><br>consume <strong>1</strong> <strong class='color-r'>research</strong> and spawn <strong>6</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2662,7 +2712,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong>7.5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2797,7 +2847,7 @@
             },
             {
                 name: "exchange symmetry",
-                description: "convert <strong>1</strong> a random <strong class='color-m'>tech</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive tech lose all stacks</em>",
+                description: "convert <strong>1</strong> random <strong class='color-m'>tech</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive tech lose all stacks</em>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3661,7 +3711,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -3673,7 +3722,9 @@
                     b.missileBot();
                 },
                 remove() {
-                    // tech.missileBotCount = 0;
+                    tech.missileBotCount = 0;
+                    b.clearPermanentBots();
+                    b.respawnBots();
                 }
             },
             {
@@ -4491,7 +4542,7 @@
             },
             {
                 name: "bot manufacturing",
-                description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>3</strong> random <strong class='color-bot'>bots</strong>",
+                description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>2</strong> random <strong class='color-bot'>bots</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4508,13 +4559,13 @@
                     m.energy = 0.01;
                     b.randomBot()
                     b.randomBot()
-                    b.randomBot()
+                    // b.randomBot()
                 },
                 remove() {}
             },
             {
-                name: "bot prototypes",
-                description: "use <strong>nano-scale manufacturing</strong> to <strong>upgrade</strong><br>all <strong class='color-bot'>bots</strong> to a random type and <strong>build</strong> <strong>2</strong> <strong class='color-bot'>bots</strong>",
+                name: "bot prototype",
+                description: "use <strong>nano-scale manufacturing</strong> to build<br>a random <strong class='color-bot'>bot</strong> and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4531,72 +4582,59 @@
                     m.energy = 0.01;
                     //fill array of available bots
                     const notUpgradedBots = []
-                    if (!tech.isNailBotUpgrade) notUpgradedBots.push(() => {
+                    const num = 1
+                    notUpgradedBots.push(() => {
                         tech.giveTech("nail-bot upgrade")
-                        tech.setTechoNonRefundable("nail-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
+                        for (let i = 0; i < num; i++) {
                             b.nailBot()
                             tech.nailBotCount++;
                         }
                         simulation.makeTextLog(`tech.isNailBotUpgrade = true`)
                     })
-                    if (!tech.isFoamBotUpgrade) notUpgradedBots.push(() => {
+                    notUpgradedBots.push(() => {
                         tech.giveTech("foam-bot upgrade")
-                        tech.setTechoNonRefundable("foam-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
+                        for (let i = 0; i < num; i++) {
                             b.foamBot()
                             tech.foamBotCount++;
                         }
                         simulation.makeTextLog(`tech.isFoamBotUpgrade = true`)
                     })
-                    if (!tech.isBoomBotUpgrade) notUpgradedBots.push(() => {
+                    notUpgradedBots.push(() => {
                         tech.giveTech("boom-bot upgrade")
-                        tech.setTechoNonRefundable("boom-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
+                        for (let i = 0; i < num; i++) {
                             b.boomBot()
                             tech.boomBotCount++;
                         }
                         simulation.makeTextLog(`tech.isBoomBotUpgrade = true`)
                     })
-                    if (!tech.isLaserBotUpgrade) notUpgradedBots.push(() => {
+                    notUpgradedBots.push(() => {
                         tech.giveTech("laser-bot upgrade")
-                        tech.setTechoNonRefundable("laser-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
+                        for (let i = 0; i < num; i++) {
                             b.laserBot()
                             tech.laserBotCount++;
                         }
                         simulation.makeTextLog(`tech.isLaserBotUpgrade = true`)
                     })
-                    if (!tech.isOrbitBotUpgrade) notUpgradedBots.push(() => {
+                    notUpgradedBots.push(() => {
                         tech.giveTech("orbital-bot upgrade")
-                        tech.setTechoNonRefundable("orbital-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
+                        for (let i = 0; i < num; i++) {
                             b.orbitBot()
                             tech.orbitBotCount++;
                         }
                         simulation.makeTextLog(`tech.isOrbitalBotUpgrade = true`)
                     })
-                    if (!tech.isDynamoBotUpgrade) notUpgradedBots.push(() => {
-                        tech.giveTech("dynamo-bot upgrade")
-                        tech.setTechoNonRefundable("dynamo-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
-                            b.dynamoBot()
-                            tech.dynamoBotCount++;
-                        }
-                        simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
-                    })
-                    //double chance for dynamo-bot, since it's very good for nano-scale
-                    if (!tech.isDynamoBotUpgrade) notUpgradedBots.push(() => {
-                        tech.giveTech("dynamo-bot upgrade")
-                        tech.setTechoNonRefundable("dynamo-bot upgrade")
-                        for (let i = 0; i < 2; i++) {
-                            b.dynamoBot()
-                            tech.dynamoBotCount++;
-                        }
-                        simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
-                    })
-                    //choose random function from the array and run it
-                    notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]()
+                    for (let i = 0; i < 2; i++) { //double chance for dynamo-bot, since it's very good for nano-scale
+                        notUpgradedBots.push(() => {
+                            tech.giveTech("dynamo-bot upgrade")
+                            for (let i = 0; i < num; i++) {
+                                b.dynamoBot()
+                                tech.dynamoBotCount++;
+                            }
+                            simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
+                        })
+                    }
+
+                    notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]() //choose random function from the array and run it
                 },
                 remove() {}
             },
@@ -4770,7 +4808,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
-                isNonRefundable: true,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -4782,7 +4819,9 @@
                     b.plasmaBot();
                 },
                 remove() {
-                    // tech.plasmaBotCount = 0;
+                    tech.plasmaBotCount = 0;
+                    b.clearPermanentBots();
+                    b.respawnBots();
                 }
             },
             {

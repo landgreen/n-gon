@@ -16,7 +16,7 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
-            // b.giveGuns("foam")
+            // b.giveGuns("wave beam")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 9; i++) tech.giveTech("auto-loading heuristics")
@@ -1110,7 +1110,7 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
@@ -1119,7 +1119,7 @@ const level = {
         // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.sniper(1800, -120)
+        spawn.ghoster(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
@@ -1129,7 +1129,7 @@ const level = {
 
         // spawn.nodeGroup(1200, -500, "pulsar")
         // spawn.snakeBoss(1200, -500)
-        // spawn.powerUpBoss(2900, -500)
+        // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
     template() {

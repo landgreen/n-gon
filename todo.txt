@@ -1,11 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-pulse laser now charges up with energy before you fire, but it fires 3 overlapping explosions
-  please give feedback on balance (too strong, too weak?)
-
-tech shockwave: now applies to all explosions
-
-foam gun now gets 20% less ammo
+some bot related tech is no longer nonRefundable
+nonRefundable tech is now hidden in experiment mode
 
 ******************************************************** BUGS ********************************************************
 
@@ -41,6 +37,7 @@ is there a way to check if the player is stuck inside the map or block
 
 avoid taking collision damage by teleporting to a random power up
   removes the power up
+  what if you get stuck?
 
 make a tech that improves all charge guns
   for: pulse, foam, rail gun
@@ -52,6 +49,9 @@ make a tech that improves all charge guns
 
 apply the new gun.do functions to other guns
   rail gun
+  crouching missile?
+    works similar to foam
+    
 
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage
