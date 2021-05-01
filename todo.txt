@@ -1,9 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-some bot related tech is no longer nonRefundable
-nonRefundable tech is now hidden in experiment mode
+community level crossfire has been nerfed a bit
+
+**wave beam rework**
+
+removed tech: wave packet (this is now the default mode of wave beam)
+tech: imaginary number - 50% more damage, but the wave is a single strand
+
+tech: bound state - wave bullets reflect backwards 2 times
+  now stacks 9 times and works with phase velocity
+
+tech: jabbering - wave beam fires another packet if you hold fire
+  also increases wave damage by 25%
+
 
 ******************************************************** BUGS ********************************************************
+
+wave beam shouldn't hit level.boost
 
 increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
@@ -35,9 +48,28 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-avoid taking collision damage by teleporting to a random power up
-  removes the power up
-  what if you get stuck?
+tech: picking up heal power ups when at full health does harm equal to the heal values
+  benefit on pick up:
+    get ammo
+    get 1% duplication
+    get 1% damage permanent
+
+nail-gun, or ....
+  1s after being fired your bullets turn:
+    towards the nearest mob
+    in your mouse direction
+    back towards the player
+      current location or location when fired?
+  explode when turning back
+
+Tech: "Quantum Tunneling" Foam travels through blocks and walls 50% faster.
+
+wave beam needs another tech
+  bullets slowly get bigger?
+    also increase collision detection range
+  reduce ammo, increase damage
+  longitudinal vibration, increase damage
+
 
 make a tech that improves all charge guns
   for: pulse, foam, rail gun
@@ -51,6 +83,7 @@ apply the new gun.do functions to other guns
   rail gun
   crouching missile?
     works similar to foam
+    performance issues?
     
 
 tech plasma field - plasma field becomes an aoe damage field with the same radius
@@ -334,6 +367,7 @@ possible names for tech
   Gödel's incompleteness
   dynamical systems
   quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
+  counterfactual - something false
 
 
 plot script:

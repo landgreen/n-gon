@@ -20,10 +20,10 @@ const level = {
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 9; i++) tech.giveTech("auto-loading heuristics")
-            // tech.giveTech("pulse")
-            // tech.giveTech("ice crystal nucleation")
-            // tech.giveTech("needle gun")
-            // tech.giveTech("cardinality")
+            // for (let i = 0; i < 2; i++) tech.giveTech("bound state")
+            // for (let i = 0; i < 9; i++) tech.giveTech("jabbering")
+            // tech.giveTech("phase velocity")
+            // tech.giveTech("imaginary number")
             // tech.giveTech("Bayesian statistics")
             // tech.isExplodeRadio = true;
 
@@ -1116,10 +1116,10 @@ const level = {
         // spawn.shooterBoss(1900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        // spawn.striker(1600, -500)
+        spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        spawn.ghoster(1800, -120)
+        // spawn.ghoster(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
@@ -4619,9 +4619,9 @@ const level = {
     crossfire() {
         //*1.5
         //Level Setup
-        const slimePitOne = level.hazard(0, 850, 3800, 120, 25);
-        const slimePitTwo = level.hazard(4600, 430, 2000, 120, 35);
-        const slimePitThree = level.hazard(6500, 200, 1000, 170, 50);
+        const slimePitOne = level.hazard(0, 850, 3800, 120);
+        const slimePitTwo = level.hazard(4600, 430, 2000, 120);
+        const slimePitThree = level.hazard(6500, 200, 1000, 170);
 
         level.custom = () => {
             slimePitOne.query();
@@ -4701,27 +4701,27 @@ const level = {
 
         //Mob Spawning
         spawn.randomMob(200, 400, 0.7);
-        spawn.randomMob(1200, 400, 0.7);
+        // spawn.randomMob(1200, 400, 0.7);
         spawn.randomMob(2000, 400, 0.7);
-        spawn.randomMob(3000, 400, 0.7);
+        // spawn.randomMob(3000, 400, 0.7);
         spawn.randomMob(5000, 0, 0.7);
         spawn.randomMob(5600, 0, 0.7);
         spawn.randomMob(6200, -200, 0.7);
-        spawn.randomMob(6600, -200, 0.7);
+        // spawn.randomMob(6600, -200, 0.7);
         spawn.randomMob(7200, -800, 0.7);
         spawn.randomSmallMob(800, 400, 0.9);
         spawn.randomSmallMob(1800, 400, 0.9);
-        spawn.randomSmallMob(2600, 400, 0.9);
+        // spawn.randomSmallMob(2600, 400, 0.9);
         spawn.randomSmallMob(5200, 0, 0.9);
-        spawn.randomSmallMob(5400, 0, 0.9);
+        // spawn.randomSmallMob(5400, 0, 0.9);
         spawn.randomSmallMob(6400, -200, 0.9);
         spawn.randomGroup(3800, 400, 0.5);
         spawn.randomGroup(4200, 400, 0.5);
-        spawn.randomGroup(4400, 200, 0.5);
+        // spawn.randomGroup(4400, 200, 0.5);
         spawn.randomGroup(7000, -800, 0.5);
-        spawn.randomGroup(7700, 300, 0.5);
+        // spawn.randomGroup(7700, 300, 0.5);
         spawn.randomGroup(9800, 300, 0.5);
-        spawn.randomGroup(7700, -1100, 0.5);
+        // spawn.randomGroup(7700, -1100, 0.5);
         spawn.randomGroup(9800, -1100, 0.5);
 
         if (simulation.difficulty > 10) {
@@ -4732,21 +4732,19 @@ const level = {
         }
 
         //Boss Spawning
-        spawn.pulsarBoss(-400, -200);
-        if (simulation.difficulty > 25) {
-            spawn.pulsarBoss(3600, -400);
+        if (simulation.difficulty > 20) {
+            spawn.pulsarBoss(-400, -200);
             if (simulation.difficulty > 40) {
-                spawn.pulsarBoss(4200, 1000);
-                if (simulation.difficulty > 65) {
-                    spawn.pulsarBoss(5800, -1200);
-                    spawn.pulsarBoss(-400, -200);
-                    if (simulation.difficulty > 85) {
-                        spawn.pulsarBoss(3600, -400);
-                        spawn.pulsarBoss(4200, 1000);
-                        if (simulation.difficulty > 115) {
-                            spawn.pulsarBoss(5800, -1200);
+                spawn.pulsarBoss(3600, -400);
+                if (simulation.difficulty > 60) {
+                    spawn.pulsarBoss(4200, 1000);
+                    if (simulation.difficulty > 80) {
+                        spawn.pulsarBoss(5800, -1200);
+                        if (simulation.difficulty > 100) {
                             spawn.pulsarBoss(-400, -200);
-                            spawn.pulsarBoss(3600, -400);
+                            if (simulation.difficulty > 120) {
+                                spawn.pulsarBoss(3600, -400);
+                            }
                         }
                     }
                 }
@@ -4756,10 +4754,11 @@ const level = {
         //Powerup Spawning
         powerUps.spawnStartingPowerUps(4000, 400);
         powerUps.spawnStartingPowerUps(4400, 400);
-        powerUps.chooseRandomPowerUp(4000, 400);
-        powerUps.chooseRandomPowerUp(4000, 400);
-        powerUps.chooseRandomPowerUp(4400, 400);
-        powerUps.chooseRandomPowerUp(4400, 400);
+        powerUps.chooseRandomPowerUp(4002, 400);
+        powerUps.chooseRandomPowerUp(4004, 400);
+        powerUps.chooseRandomPowerUp(4006, 400);
+        powerUps.chooseRandomPowerUp(4407, 400);
+        powerUps.chooseRandomPowerUp(4409, 400);
         powerUps.addRerollToLevel(); //needs to run after mobs are spawned
 
         //Block Spawning

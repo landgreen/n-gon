@@ -3613,10 +3613,10 @@
                 }
             },
             {
-                name: "wave packet",
-                description: "<strong>wave beam</strong> emits <strong>two</strong> oscillating particles<br>decrease wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
+                name: "jabbering",
+                description: "<strong>wave beam</strong> generates another <strong>packet</strong><br>wave <strong class='color-d'>damage</strong> is increased by <strong>25%</strong>",
                 isGunTech: true,
-                maxCount: 1,
+                maxCount: 9,
                 count: 0,
                 frequency: 2,
                 allowed() {
@@ -3624,10 +3624,10 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.waveHelix = 2
+                    tech.wavePacketLength += 36 //if you change this to not be 36 update /36 in wave .dmg
                 },
                 remove() {
-                    tech.waveHelix = 1
+                    tech.wavePacketLength = 36
                 }
             },
             {
@@ -3638,39 +3638,56 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("wave beam") && !tech.isWaveReflect
+                    return tech.haveGunCheck("wave beam")
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.waveSpeedMap = 3 //needs to be 3 to stop bound state require check
-                    tech.waveSpeedBody = 1.9
+                    tech.isPhaseVelocity = true;
                 },
                 remove() {
-                    tech.waveSpeedMap = 0.08
-                    tech.waveSpeedBody = 0.25
+                    tech.isPhaseVelocity = false;
+
                 }
             },
             {
                 name: "bound state",
-                description: "<strong>wave beam</strong> bullets last <strong>5x</strong> longer<br>bullets are <strong>bound</strong> to a <strong>region</strong> around player",
+                description: "instead of dissipating normally<br><strong>wave beam</strong> bullets <strong>reflect</strong> backwards <strong>2</strong> times",
                 isGunTech: true,
-                maxCount: 1,
+                maxCount: 9,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("wave beam") && tech.waveSpeedMap !== 3
+                    return tech.haveGunCheck("wave beam")
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.isWaveReflect = true
+                    tech.waveReflections += 2
                 },
                 remove() {
-                    tech.isWaveReflect = false
+                    tech.waveReflections = 0
+                }
+            },
+            {
+                name: "imaginary number",
+                description: "the <strong>wave beam</strong> is limited to a <strong>single</strong> strand<br><strong class='color-d'>damage</strong> is increased by <strong>300%</strong>",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam")
+                },
+                requires: "wave beam",
+                effect() {
+                    tech.isImaginaryWave = true
+                },
+                remove() {
+                    tech.isImaginaryWave = false
                 }
             },
             {
                 name: "cruise missile",
-                description: "<strong>missiles</strong> travel <strong>50%</strong> slower,<br>but have a <strong>50%</strong> larger <strong class='color-e'>explosive</strong> payload",
+                description: "<strong>missiles</strong> travel <strong>63%</strong> slower,<br>but have a <strong>50%</strong> larger <strong class='color-e'>explosive</strong> payload",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6330,8 +6347,6 @@
         isEnergyLoss: null,
         isDeathAvoid: null,
         isDeathAvoidedThisLevel: null,
-        waveSpeedMap: null,
-        waveSpeedBody: null,
         isSporeField: null,
         isMissileField: null,
         isIceField: null,
@@ -6350,7 +6365,6 @@
         isEnergyDamage: null,
         botSpawner: null,
         isBotSpawnerReset: null,
-        waveHelix: null,
         isSporeFollow: null,
         isNailRadiation: null,
         isEnergyHealth: null,
@@ -6506,5 +6520,8 @@
         isDroneRespawn: null,
         deathSpawns: null,
         isMobBlockFling: null,
-        blockingIce: null
+        blockingIce: null,
+        isPhaseVelocity: null,
+        wavePacketLength: null,
+        isImaginaryWave: null
     }
