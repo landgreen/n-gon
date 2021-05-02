@@ -20,11 +20,11 @@ const level = {
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 9; i++) tech.giveTech("auto-loading heuristics")
-            // for (let i = 0; i < 2; i++) tech.giveTech("bound state")
+            // for (let i = 0; i < 9; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("jabbering")
             // tech.giveTech("phase velocity")
-            // tech.giveTech("imaginary number")
-            // tech.giveTech("Bayesian statistics")
+            // tech.giveTech("imaginary")
+            // for (let i = 0; i < 9; i++) tech.giveTech("stationary action")
             // tech.isExplodeRadio = true;
 
             // tech.isMineSentry = true

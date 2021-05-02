@@ -3606,7 +3606,7 @@ const b = {
             }
         }, {
             name: "wave beam",
-            description: "emit a <strong>sine wave</strong> of oscillating particles<br>propagates through <strong>walls</strong>",
+            description: "emit a packet of oscillating particles<br>that propagate through <strong>walls</strong>",
             ammo: 0,
             ammoPack: 65,
             have: false,
@@ -3622,19 +3622,18 @@ const b = {
                 }
             },
             fire() {
-                const SPEED = 10
                 for (let i = 0; i < 2; i++) {
                     const me = bullet.length;
                     bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 7, 3.5, {
                         angle: m.angle,
                         cycle: -0.5,
-                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 150) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
+                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 120) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
                         inertia: Infinity,
                         frictionAir: 0,
                         slow: 0,
                         amplitude: (m.crouch ? 10 : 20) * Math.sin(this.packetCounter * 0.088) * ((i % 2) ? (tech.isImaginaryWave ? 1 : -1) : 1),
                         minDmgSpeed: 0,
-                        dmg: b.dmgScale * 0.5 * (tech.isImaginaryWave ? 3 : 1) * (0.75 + 0.25 * tech.wavePacketLength / 36), //control damage also when you divide by mob.mass
+                        dmg: b.dmgScale * tech.waveBeamDamage * (tech.isImaginaryWave ? 3 : 1) * (0.75 + 0.25 * tech.wavePacketLength / 36), //control damage also when you divide by mob.mass
                         classType: "bullet",
                         collisionFilter: {
                             category: 0,
@@ -3653,27 +3652,10 @@ const b = {
                                     slowCheck = waveSpeedBody
                                     Matter.Body.setPosition(this, Vector.add(this.position, q[0].velocity)) //move with the medium
                                 }
-                                // else { // check if inside a mob
-                                //     q = Matter.Query.point(mob, this.position)
-                                //     for (let i = 0; i < q.length; i++) {
-                                //         slowCheck = 0.3;
-                                //         Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                                //         let dmg = this.dmg / Math.min(10, q[i].mass)
-                                //         q[i].damage(dmg);
-                                //         q[i].foundPlayer();
-                                //         simulation.drawList.push({ //add dmg to draw queue
-                                //             x: this.position.x,
-                                //             y: this.position.y,
-                                //             radius: Math.log(2 * dmg + 1.1) * 40,
-                                //             color: 'rgba(0,0,0,0.4)',
-                                //             time: simulation.drawTime
-                                //         });
-                                //     }
-                                // }
                             }
                             if (slowCheck !== this.slow) { //toggle velocity based on inside and outside status change
                                 this.slow = slowCheck
-                                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), SPEED * slowCheck));
+                                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), tech.waveBeamSpeed * slowCheck));
                             }
                             q = Matter.Query.point(mob, this.position) // check if inside a mob
                             for (let i = 0; i < q.length; i++) {
@@ -3705,7 +3687,7 @@ const b = {
                         waveSpeedBody = 1.9
                     }
                     if (tech.waveReflections) {
-                        const range = 120
+                        const range = 100
                         bullet[me].reflectCycle = range
                         bullet[me].do = function() {
                             if (!m.isBodiesAsleep) {
@@ -3728,11 +3710,10 @@ const b = {
                     }
                     World.add(engine.world, bullet[me]); //add bullet to world
                     Matter.Body.setVelocity(bullet[me], {
-                        x: SPEED * Math.cos(m.angle),
-                        y: SPEED * Math.sin(m.angle)
+                        x: tech.waveBeamSpeed * Math.cos(m.angle),
+                        y: tech.waveBeamSpeed * Math.sin(m.angle)
                     });
                     const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
-                    // const transverse = Vector.normalise(player.velocity)
                 }
                 //fire some of bullets then delay for a while
                 this.packetCounter++

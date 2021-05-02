@@ -1,22 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-community level crossfire has been nerfed a bit
+some wave beam bug fixes and balance
 
-**wave beam rework**
-
-removed tech: wave packet (this is now the default mode of wave beam)
-tech: imaginary number - 50% more damage, but the wave is a single strand
-
-tech: bound state - wave bullets reflect backwards 2 times
-  now stacks 9 times and works with phase velocity
-
-tech: jabbering - wave beam fires another packet if you hold fire
-  also increases wave damage by 25%
-
+tech: stationary action - slower wave beam but more damage
 
 ******************************************************** BUGS ********************************************************
-
-wave beam shouldn't hit level.boost
 
 increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
@@ -63,13 +51,6 @@ nail-gun, or ....
   explode when turning back
 
 Tech: "Quantum Tunneling" Foam travels through blocks and walls 50% faster.
-
-wave beam needs another tech
-  bullets slowly get bigger?
-    also increase collision detection range
-  reduce ammo, increase damage
-  longitudinal vibration, increase damage
-
 
 make a tech that improves all charge guns
   for: pulse, foam, rail gun

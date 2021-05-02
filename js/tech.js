@@ -148,7 +148,7 @@
             if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
-            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.4 : 0.85
+            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.85
             if (tech.isTechDamage) dmg *= 1.9
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -2197,7 +2197,7 @@
             },
             {
                 name: "dormancy",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>40%</strong> else decrease it by <strong>15%</strong></span>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>50%</strong> else decrease it by <strong>15%</strong></span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -3614,7 +3614,7 @@
             },
             {
                 name: "jabbering",
-                description: "<strong>wave beam</strong> generates another <strong>packet</strong><br>wave <strong class='color-d'>damage</strong> is increased by <strong>25%</strong>",
+                description: "the <strong>wave beam</strong> generates another <strong>packet</strong><br>wave <strong class='color-d'>damage</strong> is increased by <strong>25%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3650,6 +3650,26 @@
                 }
             },
             {
+                name: "stationary action",
+                description: "the <strong>wave beam</strong> propagates <strong>25%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>40%</strong>",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam")
+                },
+                requires: "wave beam",
+                effect() {
+                    tech.waveBeamSpeed *= 0.75;
+                    tech.waveBeamDamage += 0.5 * 0.4
+                },
+                remove() {
+                    tech.waveBeamSpeed = 10;
+                    tech.waveBeamDamage = 0.5
+                }
+            },
+            {
                 name: "bound state",
                 description: "instead of dissipating normally<br><strong>wave beam</strong> bullets <strong>reflect</strong> backwards <strong>2</strong> times",
                 isGunTech: true,
@@ -3668,10 +3688,10 @@
                 }
             },
             {
-                name: "imaginary number",
-                description: "the <strong>wave beam</strong> is limited to a <strong>single</strong> strand<br><strong class='color-d'>damage</strong> is increased by <strong>300%</strong>",
+                name: "imaginary",
+                description: "the <strong>wave beam</strong> is limited to a <strong>single</strong> strand<br>wave <strong class='color-d'>damage</strong> is increased by <strong>300%</strong>",
                 isGunTech: true,
-                maxCount: 9,
+                maxCount: 1,
                 count: 0,
                 frequency: 2,
                 allowed() {
@@ -6172,7 +6192,7 @@
                 },
                 requires: "at least 4 research",
                 effect() {
-                    for (let i = 0; i < powerUps.research.count; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
+                    for (let i = 0; i < powerUps.research.count; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "research");
                     powerUps.research.count = 0
                 },
                 remove() {}
@@ -6523,5 +6543,6 @@
         blockingIce: null,
         isPhaseVelocity: null,
         wavePacketLength: null,
-        isImaginaryWave: null
+        isImaginaryWave: null,
+        waveBeamSpeed: null
     }
