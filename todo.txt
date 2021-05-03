@@ -1,11 +1,6 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-harm immunity effects now apply to explosion self damage
-tech: CPT grenades no longer harm you
-
-tech: least action - wavelets are slower and do more damage
-tech: amplitude - wavelets are taller and do more damage
-tech: wavelength - wavelets are longer and do more damage
+tech: wavelength - wavelets are longer and have more range
 
 ******************************************************** BUGS ********************************************************
 
@@ -39,10 +34,14 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
+wavelength should do no damage, but give much more length
+
 wave tech: dispersion - add noise and damage to waves
 wave tech: chirp - amplitude increases with time
 
 make a system to show current gun damage in pause menu?
+
+mobs that die while frozen produce ice-IX bullets
 
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up:
