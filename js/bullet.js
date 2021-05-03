@@ -3631,7 +3631,7 @@ const b = {
                     bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 7, 3.5, {
                         angle: m.angle,
                         cycle: -0.5,
-                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 160 * tech.wavePacketLength) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
+                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 4.3 * tech.wavePacketLength) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
                         inertia: Infinity,
                         frictionAir: 0,
                         slow: 0,

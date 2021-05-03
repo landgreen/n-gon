@@ -21,7 +21,7 @@ const level = {
             // tech.isExplodeRadio = true
             // for (let i = 0; i < 1; i++) tech.giveTech("amplitude")
             // tech.giveTech("aerogel")
-            // for (let i = 0; i < 3; i++) tech.giveTech("wavelength")
+            // for (let i = 0; i < 1; i++) tech.giveTech("wavelength")
             // tech.giveTech("phase velocity")
             // tech.giveTech("imaginary")
             // for (let i = 0; i < 2; i++) tech.giveTech("least action")

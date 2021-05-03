@@ -3650,7 +3650,7 @@
             },
             {
                 name: "wavelength",
-                description: "wavelet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>33%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
+                description: "wavelet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>50%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3660,8 +3660,8 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.wavePacketLength *= 1.33 //if you change this to not be 36 update /36 in wave .dmg
-                    tech.wavePacketFrequency *= 0.752
+                    tech.wavePacketLength *= 1.5 //if you change this to not be 36 update /36 in wave .dmg
+                    tech.wavePacketFrequency *= 0.66666
                     tech.waveFrequency *= 0.9
                 },
                 remove() {

@@ -1,6 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: wavelength - wavelets are longer and have more range
 
 ******************************************************** BUGS ********************************************************
 
@@ -33,8 +32,6 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
-
-wavelength should do no damage, but give much more length
 
 wave tech: dispersion - add noise and damage to waves
 wave tech: chirp - amplitude increases with time
