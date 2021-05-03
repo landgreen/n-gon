@@ -17,14 +17,14 @@ const level = {
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
             // b.giveGuns("wave beam")
-            // b.giveGuns("laser")
+            // b.giveGuns("foam")
             // tech.isExplodeRadio = true
-            // for (let i = 0; i < 9; i++) tech.giveTech("auto-loading heuristics")
-            // for (let i = 0; i < 9; i++) tech.giveTech("bound state")
-            // for (let i = 0; i < 9; i++) tech.giveTech("jabbering")
+            // for (let i = 0; i < 1; i++) tech.giveTech("amplitude")
+            // tech.giveTech("aerogel")
+            // for (let i = 0; i < 0; i++) tech.giveTech("jabbering")
             // tech.giveTech("phase velocity")
             // tech.giveTech("imaginary")
-            // for (let i = 0; i < 9; i++) tech.giveTech("stationary action")
+            // for (let i = 0; i < 2; i++) tech.giveTech("least action")
             // tech.isExplodeRadio = true;
 
             // tech.isMineSentry = true

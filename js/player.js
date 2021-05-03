@@ -535,6 +535,9 @@ const m = {
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
+            const immunityCycle = m.cycle + 60
+            if (m.immuneCycle < immunityCycle) m.immuneCycle = immunityCycle; //player is immune to damage until after grenades might explode...
+
             for (let i = 1, len = Math.floor(2 + steps / 40); i < len; i++) {
                 b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
                 const who = bullet[bullet.length - 1]

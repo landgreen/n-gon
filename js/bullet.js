@@ -365,23 +365,25 @@ const b = {
             });
 
             //player damage and knock back
-            sub = Vector.sub(where, player.position);
-            dist = Vector.magnitude(sub);
+            if (m.immuneCycle < m.cycle) {
+                sub = Vector.sub(where, player.position);
+                dist = Vector.magnitude(sub);
 
-            if (dist < radius) {
-                if (tech.isImmuneExplosion) {
-                    const mitigate = Math.min(1, Math.max(1 - m.energy * 0.7, 0))
-                    m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
-                } else {
-                    m.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                if (dist < radius) {
+                    if (tech.isImmuneExplosion) {
+                        const mitigate = Math.min(1, Math.max(1 - m.energy * 0.7, 0))
+                        m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                    } else {
+                        m.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                    }
+                    knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
+                    player.force.x += knock.x;
+                    player.force.y += knock.y;
+                } else if (dist < alertRange) {
+                    knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
+                    player.force.x += knock.x;
+                    player.force.y += knock.y;
                 }
-                knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
-                player.force.x += knock.x;
-                player.force.y += knock.y;
-            } else if (dist < alertRange) {
-                knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
-                player.force.x += knock.x;
-                player.force.y += knock.y;
             }
 
             //body knock backs
@@ -1237,13 +1239,14 @@ const b = {
                                 let dmg = this.dmg / Math.min(10, q[i].mass)
                                 q[i].damage(dmg);
                                 q[i].foundPlayer();
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: this.position.x,
-                                    y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40,
-                                    color: "rgba(255, 0, 119, 0.5)",
-                                    time: simulation.drawTime
-                                });
+                                //removed to improve performance
+                                // simulation.drawList.push({ //add dmg to draw queue
+                                //     x: this.position.x,
+                                //     y: this.position.y,
+                                //     radius: Math.log(2 * dmg + 1.1) * 40,
+                                //     color: "rgba(255, 0, 119, 0.5)",
+                                //     time: simulation.drawTime
+                                // });
                             }
                         }
                         this.cycle++
@@ -2276,7 +2279,7 @@ const b = {
                         Matter.Body.scale(this, SCALE, SCALE);
                         this.radius *= SCALE;
                     } else {
-                        this.force.y += this.mass * 0.00008; //gravity
+                        this.force.y += this.mass * tech.foamGravity; //gravity
 
                         if (tech.isFoamAttract) {
                             for (let i = 0, len = mob.length; i < len; i++) {
@@ -3606,12 +3609,12 @@ const b = {
             }
         }, {
             name: "wave beam",
-            description: "emit a packet of oscillating particles<br>that propagate through <strong>walls</strong>",
+            description: "emit a wavelet of <strong>oscillating</strong> particles<br>that propagate through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 65,
+            ammoPack: 80,
             have: false,
             packetCounter: 0,
-            delay: 72,
+            delay: 44,
             do() {
                 if (this.packetCounter && !input.fire) {
                     this.packetCounter++;
@@ -3620,20 +3623,25 @@ const b = {
                         this.packetCounter = 0;
                     }
                 }
+                //draw cooldown ?
             },
+            calculateDamage() {
+
+            },
+            damage: 1,
             fire() {
                 for (let i = 0; i < 2; i++) {
                     const me = bullet.length;
                     bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 7, 3.5, {
                         angle: m.angle,
                         cycle: -0.5,
-                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 120) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
+                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 160) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
                         inertia: Infinity,
                         frictionAir: 0,
                         slow: 0,
-                        amplitude: (m.crouch ? 10 : 20) * Math.sin(this.packetCounter * 0.088) * ((i % 2) ? (tech.isImaginaryWave ? 1 : -1) : 1),
+                        amplitude: (m.crouch ? 10 : 20) * tech.waveAmplitude * Math.sin(this.packetCounter * tech.wavePacketFrequency) * ((i % 2) ? (tech.isImaginaryWave ? 1 : -1) : 1),
                         minDmgSpeed: 0,
-                        dmg: b.dmgScale * tech.waveBeamDamage * (tech.isImaginaryWave ? 3 : 1) * (0.75 + 0.25 * tech.wavePacketLength / 36), //control damage also when you divide by mob.mass
+                        dmg: b.dmgScale * tech.waveBeamDamage * (tech.isImaginaryWave ? 3 : 1) * tech.waveAmplitude * tech.wavePacketLength / 36, //control damage also when you divide by mob.mass
                         classType: "bullet",
                         collisionFilter: {
                             category: 0,
@@ -3675,7 +3683,10 @@ const b = {
                         },
                         wiggle() {
                             this.cycle++
-                            const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * 0.35))
+                            // const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * 0.35)) // 36
+                            // const where = Vector.mult(transverse, 0.5 * this.amplitude * Math.cos(this.cycle * 0.15)) //36
+                            // const where = Vector.mult(transverse, 0.15 * this.amplitude * Math.cos(this.cycle * 0.05)) //36
+                            const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * tech.waveFrequency))
                             Matter.Body.setPosition(this, Vector.add(this.position, where))
                         }
                     });
