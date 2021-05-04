@@ -3609,19 +3609,16 @@ const b = {
             }
         }, {
             name: "wave beam",
-            description: "emit a <strong>wavelet</strong> of <strong>oscillating</strong> particles<br>that propagate through <strong>solids</strong>",
+            description: "emit a <strong>wave packet</strong> of <strong>oscillating</strong> particles<br>that propagate through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 82,
+            ammoPack: 75,
             have: false,
-            packetCounter: 0,
-            delay: 44,
+            wavePacketCycle: 0,
+            delay: 40,
             do() {
-                if (this.packetCounter && !input.fire) {
-                    this.packetCounter++;
-                    if (this.packetCounter > 36) { // 36 is one wave packet 
-                        m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCD); // cool down
-                        this.packetCounter = 0;
-                    }
+                if (this.wavePacketCycle && !input.fire) {
+                    this.wavePacketCycle = 0;
+                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCD); // cool down
                 }
             },
             damage: 1,
@@ -3631,13 +3628,13 @@ const b = {
                     bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 7, 3.5, {
                         angle: m.angle,
                         cycle: -0.5,
-                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 4.3 * tech.wavePacketLength) * tech.isBulletsLastLonger), // - this.packetCounter + tech.wavePacketLength, //- this.packetCounter + this.packetLength   makes the entire packet go away at the same time
+                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 4.3 * tech.wavePacketLength) * tech.isBulletsLastLonger),
                         inertia: Infinity,
                         frictionAir: 0,
                         slow: 0,
-                        amplitude: (m.crouch ? 10 : 20) * tech.waveAmplitude * Math.sin(this.packetCounter * tech.wavePacketFrequency) * ((i % 2) ? -1 : 1), //(tech.isImaginaryWave ? 1 : -1)
+                        amplitude: (m.crouch ? 10 : 20) * Math.sin(this.wavePacketCycle * tech.wavePacketFrequency) * ((i % 2) ? -1 : 1),
                         minDmgSpeed: 0,
-                        dmg: b.dmgScale * tech.waveBeamDamage * tech.waveAmplitude * tech.wavePacketLength / 36, //control damage also when you divide by mob.mass  //* (tech.isImaginaryWave ? 3 : 1)
+                        dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
                         classType: "bullet",
                         collisionFilter: {
                             category: 0,
@@ -3679,9 +3676,6 @@ const b = {
                         },
                         wiggle() {
                             this.cycle++
-                            // const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * 0.35)) // 36
-                            // const where = Vector.mult(transverse, 0.5 * this.amplitude * Math.cos(this.cycle * 0.15)) //36
-                            // const where = Vector.mult(transverse, 0.15 * this.amplitude * Math.cos(this.cycle * 0.05)) //36
                             const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * tech.waveFrequency))
                             Matter.Body.setPosition(this, Vector.add(this.position, where))
                         }
@@ -3694,7 +3688,7 @@ const b = {
                         waveSpeedBody = 1.9
                     }
                     if (tech.waveReflections) {
-                        const range = 100 / Math.sqrt(tech.waveFrequency)
+                        const range = 100
                         bullet[me].reflectCycle = range
                         bullet[me].do = function() {
                             if (!m.isBodiesAsleep) {
@@ -3723,10 +3717,10 @@ const b = {
                     const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
                 }
                 //fire some of bullets then delay for a while
-                this.packetCounter++
-                if (this.packetCounter > tech.wavePacketLength) {
+                this.wavePacketCycle++
+                if (this.wavePacketCycle > tech.wavePacketLength) {
                     m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCD); // cool down
-                    this.packetCounter = 0;
+                    this.wavePacketCycle = 0;
                 }
             }
         }, {

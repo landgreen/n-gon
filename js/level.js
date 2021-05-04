@@ -17,14 +17,12 @@ const level = {
             // simulation.setZoom();
             // m.setField("nano-scale manufacturing")
             // b.giveGuns("wave beam")
-            // b.giveGuns("foam")
             // tech.isExplodeRadio = true
-            // for (let i = 0; i < 1; i++) tech.giveTech("amplitude")
-            // tech.giveTech("aerogel")
-            // for (let i = 0; i < 1; i++) tech.giveTech("wavelength")
             // tech.giveTech("phase velocity")
-            // tech.giveTech("imaginary")
-            // for (let i = 0; i < 2; i++) tech.giveTech("least action")
+            // for (let i = 0; i < 3; i++) tech.giveTech("wavelength")
+            // for (let i = 0; i < 1; i++) tech.giveTech("bound state")
+            // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
+            // for (let i = 0; i < 3; i++) tech.giveTech("amplitude")
             // tech.isExplodeRadio = true;
 
             // tech.isMineSentry = true
@@ -1110,13 +1108,13 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        spawn.striker(1600, -500)
+        // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.ghoster(1800, -120)

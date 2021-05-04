@@ -3613,8 +3613,92 @@
                 }
             },
             {
+                name: "bound state",
+                description: "instead of dissipating normally<br>wave packets <strong>reflect</strong> backwards <strong>2</strong> times",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam") && tech.wavePacketLength === 36
+                },
+                requires: "wave beam, not wavelength",
+                effect() {
+                    tech.waveReflections += 2
+                    // tech.waveFrequency = 0.2
+                },
+                remove() {
+                    tech.waveReflections = 0
+                    // tech.waveFrequency = 0.35 //this is also set in "wavelength"
+                }
+            },
+            {
+                name: "wavelength",
+                description: "wave packet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>50%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam") && !tech.waveReflections
+                },
+                requires: "wave beam, not bound state",
+                effect() {
+                    const scale = 1.5
+                    tech.wavePacketLength *= scale //if you change this to not be 36 update /36 in wave .dmg
+                    tech.wavePacketFrequency /= scale
+                    // tech.wavePacketLength = tech.wavePacketFrequency * 420 //36 //how many wave packets are released // double this to emit 2 packets
+                    // tech.waveFrequency *= 0.8
+                },
+                remove() {
+                    tech.wavePacketFrequency = 0.088 //shorten wave packet
+                    tech.wavePacketLength = tech.wavePacketFrequency * 408 //36.96 //how many wave packets are released // double this to emit 2 packets
+                    // tech.waveFrequency = 0.35 //this is also set in "bound state"   //increase -> shrink amplitude, add more nodes
+                }
+            },
+            {
+                name: "amplitude",
+                description: "wave packet <strong>amplitude</strong> is <strong>33%</strong> higher<br>wave <strong class='color-d'>damage</strong> is increased by <strong>33%</strong>",
+                isGunTech: true,
+                maxCount: 3,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam")
+                },
+                requires: "wave beam",
+                effect() {
+                    tech.waveFrequency *= 0.5
+                    tech.wavePacketDamage *= 1.33
+                },
+                remove() {
+                    tech.waveFrequency = 0.35
+                    tech.wavePacketDamage = 1
+                }
+            },
+            {
+                name: "propagation",
+                description: "wave packet propagation <strong>speed</strong> is <strong>25%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
+                isGunTech: true,
+                maxCount: 3,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam")
+                },
+                requires: "wave beam",
+                effect() {
+                    tech.waveBeamSpeed *= 0.75;
+                    tech.waveBeamDamage += 0.55 * 0.5
+                },
+                remove() {
+                    tech.waveBeamSpeed = 10;
+                    tech.waveBeamDamage = 0.55 //this sets base wave beam damage
+                }
+            },
+            {
                 name: "phase velocity",
-                description: "wavelets <strong>propagate</strong> faster in solids",
+                description: "wave beam <strong>propagates</strong> faster through solids<br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in blocks",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3630,87 +3714,9 @@
                     tech.isPhaseVelocity = false;
                 }
             },
-            {
-                name: "bound state",
-                description: "instead of dissipating normally<br>wavelets <strong>reflect</strong> backwards <strong>2</strong> times",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.haveGunCheck("wave beam")
-                },
-                requires: "wave beam",
-                effect() {
-                    tech.waveReflections += 2
-                },
-                remove() {
-                    tech.waveReflections = 0
-                }
-            },
-            {
-                name: "wavelength",
-                description: "wavelet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>50%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.haveGunCheck("wave beam")
-                },
-                requires: "wave beam",
-                effect() {
-                    tech.wavePacketLength *= 1.5 //if you change this to not be 36 update /36 in wave .dmg
-                    tech.wavePacketFrequency *= 0.66666
-                    tech.waveFrequency *= 0.9
-                },
-                remove() {
-                    tech.wavePacketLength = 36
-                    tech.waveFrequency = 0.35
-                    tech.wavePacketFrequency = 0.088
-                }
-            },
-            {
-                name: "amplitude",
-                description: "wavelet <strong>amplitude</strong> is <strong>33%</strong> higher<br>wave <strong class='color-d'>damage</strong> is increased by <strong>33%</strong>",
-                isGunTech: true,
-                maxCount: 3,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.haveGunCheck("wave beam")
-                },
-                requires: "wave beam",
-                effect() {
-                    tech.waveAmplitude += 0.33
-                },
-                remove() {
-                    tech.waveAmplitude = 1
-                }
-            },
-            {
-                name: "propagation",
-                description: "wavelet <strong>propagation speed</strong> is <strong>25%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
-                isGunTech: true,
-                maxCount: 3,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.haveGunCheck("wave beam")
-                },
-                requires: "wave beam",
-                effect() {
-                    tech.waveBeamSpeed -= 2.5;
-                    tech.waveBeamDamage += 0.55 * 0.5
-                },
-                remove() {
-                    tech.waveBeamSpeed = 10;
-                    tech.waveBeamDamage = 0.55 //this sets base wave beam damage
-                }
-            },
             // {
             //     name: "imaginary",
-            //     description: "the <strong>wavelet</strong> is limited to a <strong>single</strong> strand<br>wave <strong class='color-d'>damage</strong> is increased by <strong>300%</strong>",
+            //     description: "the <strong>wavePacket</strong> is limited to a <strong>single</strong> strand<br>wave <strong class='color-d'>damage</strong> is increased by <strong>300%</strong>",
             //     isGunTech: true,
             //     maxCount: 1,
             //     count: 0,
@@ -6568,5 +6574,5 @@
         wavePacketLength: null,
         isImaginaryWave: null,
         waveBeamSpeed: null,
-        waveAmplitude: null,
+        wavePacketAmplitude: null,
     }
