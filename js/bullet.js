@@ -342,6 +342,7 @@ const b = {
                         if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
                         if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
                         mobs.statusDoT(mob[i], dmg * damageScale * 0.25, 240) //apply radiation damage status effect on direct hits
+                        if (tech.isExplosionStun) mobs.statusStun(mob[i], 60)
                         mob[i].locatePlayer();
                         damageScale *= 0.87 //reduced damage for each additional explosion target
                     }
@@ -3614,7 +3615,7 @@ const b = {
             ammoPack: 75,
             have: false,
             wavePacketCycle: 0,
-            delay: 40,
+            delay: 45,
             do() {
                 if (this.wavePacketCycle && !input.fire) {
                     this.wavePacketCycle = 0;
@@ -3623,99 +3624,99 @@ const b = {
             },
             damage: 1,
             fire() {
-                for (let i = 0; i < 2; i++) {
-                    const me = bullet.length;
-                    bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 7, 3.5, {
-                        angle: m.angle,
-                        cycle: -0.5,
-                        endCycle: simulation.cycle + Math.floor((tech.waveReflections ? Infinity : 4.3 * tech.wavePacketLength) * tech.isBulletsLastLonger),
-                        inertia: Infinity,
-                        frictionAir: 0,
-                        slow: 0,
-                        amplitude: (m.crouch ? 10 : 20) * Math.sin(this.wavePacketCycle * tech.wavePacketFrequency) * ((i % 2) ? -1 : 1),
-                        minDmgSpeed: 0,
-                        dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
-                        classType: "bullet",
-                        collisionFilter: {
-                            category: 0,
-                            mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
-                        },
-                        beforeDmg() {},
-                        onEnd() {},
-                        do() {},
-                        query() {
-                            let slowCheck = 1
-                            if (Matter.Query.point(map, this.position).length) { //check if inside map                                    
-                                slowCheck = waveSpeedMap
-                            } else { //check if inside a body
-                                let q = Matter.Query.point(body, this.position)
-                                if (q.length) {
-                                    slowCheck = waveSpeedBody
-                                    Matter.Body.setPosition(this, Vector.add(this.position, q[0].velocity)) //move with the medium
-                                }
+                totalCycles = Math.floor(4.3 * tech.wavePacketLength * tech.waveReflections * tech.isBulletsLastLonger)
+                // for (let i = 0; i < 2; i++) {
+                const me = bullet.length;
+                bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 5, 4, {
+                    angle: m.angle,
+                    cycle: -0.5,
+                    endCycle: simulation.cycle + totalCycles,
+                    inertia: Infinity,
+                    frictionAir: 0,
+                    slow: 0,
+                    amplitude: (m.crouch ? 10 : 20) * Math.sin(this.wavePacketCycle * tech.wavePacketFrequency) * ((this.wavePacketCycle % 2) ? -1 : 1),
+                    minDmgSpeed: 0,
+                    dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
+                    classType: "bullet",
+                    collisionFilter: {
+                        category: 0,
+                        mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
+                    },
+                    beforeDmg() {},
+                    onEnd() {},
+                    do() {},
+                    query() {
+                        let slowCheck = 1
+                        if (Matter.Query.point(map, this.position).length) { //check if inside map                                    
+                            slowCheck = waveSpeedMap
+                        } else { //check if inside a body
+                            let q = Matter.Query.point(body, this.position)
+                            if (q.length) {
+                                slowCheck = waveSpeedBody
+                                Matter.Body.setPosition(this, Vector.add(this.position, q[0].velocity)) //move with the medium
                             }
-                            if (slowCheck !== this.slow) { //toggle velocity based on inside and outside status change
-                                this.slow = slowCheck
-                                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), tech.waveBeamSpeed * slowCheck));
-                            }
-                            q = Matter.Query.point(mob, this.position) // check if inside a mob
-                            for (let i = 0; i < q.length; i++) {
-                                let dmg = this.dmg / Math.min(10, q[i].mass)
-                                q[i].damage(dmg);
-                                q[i].foundPlayer();
+                        }
+                        if (slowCheck !== this.slow) { //toggle velocity based on inside and outside status change
+                            this.slow = slowCheck
+                            Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), tech.waveBeamSpeed * slowCheck));
+                        }
+                        q = Matter.Query.point(mob, this.position) // check if inside a mob
+                        for (let i = 0; i < q.length; i++) {
+                            let dmg = this.dmg / Math.min(10, q[i].mass)
+                            q[i].damage(dmg);
+                            q[i].foundPlayer();
 
-                                //this draw circle had to be remove to reduce lag
-                                // simulation.drawList.push({ //add dmg to draw queue
-                                //     x: this.position.x,
-                                //     y: this.position.y,
-                                //     radius: Math.log(2 * dmg + 1.1) * 40,
-                                //     color: 'rgba(0,0,0,0.4)',
-                                //     time: simulation.drawTime
-                                // });
-                            }
-                        },
-                        wiggle() {
-                            this.cycle++
-                            const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * tech.waveFrequency))
-                            Matter.Body.setPosition(this, Vector.add(this.position, where))
+                            //this draw circle had to be remove to reduce lag
+                            // simulation.drawList.push({ //add dmg to draw queue
+                            //     x: this.position.x,
+                            //     y: this.position.y,
+                            //     radius: Math.log(2 * dmg + 1.1) * 40,
+                            //     color: 'rgba(0,0,0,0.4)',
+                            //     time: simulation.drawTime
+                            // });
                         }
-                    });
+                    },
+                    wiggle() {
+                        this.cycle++
+                        const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * tech.waveFrequency))
+                        Matter.Body.setPosition(this, Vector.add(this.position, where))
+                    }
+                });
 
-                    let waveSpeedMap = 0.1
-                    let waveSpeedBody = 0.25
-                    if (tech.isPhaseVelocity) {
-                        waveSpeedMap = 3
-                        waveSpeedBody = 1.9
-                    }
-                    if (tech.waveReflections) {
-                        const range = 100
-                        bullet[me].reflectCycle = range
-                        bullet[me].do = function() {
-                            if (!m.isBodiesAsleep) {
-                                this.query()
-                                if (this.cycle > this.reflectCycle) {
-                                    this.reflectCycle += range
-                                    Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1));
-                                    if (this.reflectCycle > range * (1 + tech.waveReflections)) this.endCycle = 0;
-                                }
-                                this.wiggle()
-                            }
-                        }
-                    } else {
-                        bullet[me].do = function() {
-                            if (!m.isBodiesAsleep) {
-                                this.query()
-                                this.wiggle();
-                            }
-                        }
-                    }
-                    World.add(engine.world, bullet[me]); //add bullet to world
-                    Matter.Body.setVelocity(bullet[me], {
-                        x: tech.waveBeamSpeed * Math.cos(m.angle),
-                        y: tech.waveBeamSpeed * Math.sin(m.angle)
-                    });
-                    const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
+                let waveSpeedMap = 0.1
+                let waveSpeedBody = 0.25
+                if (tech.isPhaseVelocity) {
+                    waveSpeedMap = 3
+                    waveSpeedBody = 1.9
                 }
+                if (tech.waveReflections) {
+                    bullet[me].reflectCycle = totalCycles / tech.waveReflections //tech.waveLengthRange
+                    bullet[me].do = function() {
+                        if (!m.isBodiesAsleep) {
+                            this.query()
+                            if (this.cycle > this.reflectCycle) {
+                                this.reflectCycle += totalCycles / tech.waveReflections
+                                Matter.Body.setVelocity(this, Vector.mult(this.velocity, -1));
+                                // if (this.reflectCycle > tech.waveLengthRange * (1 + tech.waveReflections)) this.endCycle = 0;
+                            }
+                            this.wiggle()
+                        }
+                    }
+                } else {
+                    bullet[me].do = function() {
+                        if (!m.isBodiesAsleep) {
+                            this.query()
+                            this.wiggle();
+                        }
+                    }
+                }
+                World.add(engine.world, bullet[me]); //add bullet to world
+                Matter.Body.setVelocity(bullet[me], {
+                    x: tech.waveBeamSpeed * Math.cos(m.angle),
+                    y: tech.waveBeamSpeed * Math.sin(m.angle)
+                });
+                const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
+                // }
                 //fire some of bullets then delay for a while
                 this.wavePacketCycle++
                 if (this.wavePacketCycle > tech.wavePacketLength) {

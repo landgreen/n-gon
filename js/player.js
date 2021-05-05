@@ -1958,7 +1958,7 @@ const m = {
 
                     //120 cycles after shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
-                    if (m.fireCDcycle + 50 < m.cycle) {
+                    if (m.fireCDcycle + 50 < m.cycle && !input.fire) { //automatically cloak if not firing
                         if (!m.isCloak) {
                             m.isCloak = true //enter cloak
                             if (tech.isIntangible) {

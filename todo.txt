@@ -1,10 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-several small wave beam tech adjustments
+more wave beam balance
 
 ******************************************************** BUGS ********************************************************
-
-power ups don't float up in acid anymore?
 
 increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
@@ -36,11 +34,12 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-wave tech: delay similar to foam
+wave tech: delay similar to quantum foam
+  firing makes the entire packet, but with a delay?
 wave tech: dispersion - add noise and damage to waves
 wave tech: chirp - amplitude and damage increases towards the end of the wavePacket
 wave tech: wave bullets are removed after doing damage, but they do something
-  more damage, explode, freeze, stun radiation
+  more damage, explode, freeze,
 
 tech: mobs that die while frozen produce ice-IX bullets
 

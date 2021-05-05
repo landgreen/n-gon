@@ -15,14 +15,14 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
-            // m.setField("nano-scale manufacturing")
+            // m.setField("metamaterial cloaking")
             // b.giveGuns("wave beam")
             // tech.isExplodeRadio = true
             // tech.giveTech("phase velocity")
-            // for (let i = 0; i < 3; i++) tech.giveTech("wavelength")
-            // for (let i = 0; i < 1; i++) tech.giveTech("bound state")
-            // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
-            // for (let i = 0; i < 3; i++) tech.giveTech("amplitude")
+            // for (let i = 0; i < 9; i++) tech.giveTech("packet length")
+            // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
+            // for (let i = 0; i < 9; i++) tech.giveTech("propagation")
+            // for (let i = 0; i < 9; i++) tech.giveTech("amplitude")
             // tech.isExplodeRadio = true;
 
             // tech.isMineSentry = true
