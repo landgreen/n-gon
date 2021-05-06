@@ -701,8 +701,8 @@ const spawn = {
         }
         me.onHit = function() { //run this function on hitting player
             powerUps.ejectTech()
-            powerUps.spawn(m.pos.x, m.pos.y, "heal");
-            powerUps.spawn(m.pos.x, m.pos.y, "heal");
+            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
+            powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
         };
         me.onDeath = function() {
             this.leaveBody = false;

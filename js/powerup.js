@@ -18,9 +18,9 @@ const powerUps = {
         } else if (type === "tech") {
             setTimeout(() => {
                 powerUps.lastTechIndex = index
-            }, 100);
-            tech.giveTech(index)
+            }, 10);
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
+            tech.giveTech(index)
         }
         powerUps.endDraft(type);
     },
@@ -532,7 +532,7 @@ const powerUps = {
             powerUps.spawn(x, y, "gun");
             return;
         }
-        if (Math.random() < 0.0027 * (25 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 25
+        if (Math.random() < 0.0027 * (22 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 25
             powerUps.spawn(x, y, "tech");
             return;
         }

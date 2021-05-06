@@ -3612,10 +3612,10 @@ const b = {
             name: "wave beam",
             description: "emit a <strong>wave packet</strong> of <strong>oscillating</strong> particles<br>that propagate through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 75,
+            ammoPack: 80,
             have: false,
             wavePacketCycle: 0,
-            delay: 45,
+            delay: 40,
             do() {
                 if (this.wavePacketCycle && !input.fire) {
                     this.wavePacketCycle = 0;
@@ -3634,7 +3634,7 @@ const b = {
                     inertia: Infinity,
                     frictionAir: 0,
                     slow: 0,
-                    amplitude: (m.crouch ? 10 : 20) * Math.sin(this.wavePacketCycle * tech.wavePacketFrequency) * ((this.wavePacketCycle % 2) ? -1 : 1),
+                    amplitude: (m.crouch ? 5 : 10) * Math.sin(this.wavePacketCycle * tech.wavePacketFrequency) * ((this.wavePacketCycle % 2) ? -1 : 1),
                     minDmgSpeed: 0,
                     dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
                     classType: "bullet",

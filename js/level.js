@@ -19,22 +19,10 @@ const level = {
             // b.giveGuns("wave beam")
             // tech.isExplodeRadio = true
             // tech.giveTech("phase velocity")
-            // for (let i = 0; i < 9; i++) tech.giveTech("packet length")
+            // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
-            // for (let i = 0; i < 9; i++) tech.giveTech("propagation")
-            // for (let i = 0; i < 9; i++) tech.giveTech("amplitude")
-            // tech.isExplodeRadio = true;
-
-            // tech.isMineSentry = true
-            // for (let i = 0; i < 60; i++) tech.giveTech("rivet diameter")
-            // tech.giveTech("missile-bot")
-            // for (let i = 0; i < 5; i++) 
-            // tech.giveTech("nail-bot")
-            // for (let i = 0; i < 54; i++) tech.giveTech("foam-bot")
-            // for (let i = 0; i < 15; i++) tech.giveTech("plasma jet")
-            // tech.isBlockPowerUps = true;
-            // m.shipMode()
-            // tech.isBotSwap = true;
+            // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
+            // for (let i = 0; i < 1; i++) tech.giveTech("amplitude")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation

@@ -335,7 +335,8 @@ const m = {
                 if (
                     !tech.tech[i].isNonRefundable &&
                     tech.tech[i].name !== "many-worlds" &&
-                    tech.tech[i].name !== "Ψ(t) collapse"
+                    tech.tech[i].name !== "Ψ(t) collapse" &&
+                    tech.tech[i].name !== "non-unitary operator"
                 ) {
                     totalTech += tech.tech[i].count
                     tech.tech[i].remove();

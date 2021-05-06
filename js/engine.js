@@ -123,6 +123,12 @@ function collisionChecks(event) {
                         } else {
                             m.damage(dmg); //normal damage
                         }
+
+                        if (tech.isCollisionRealitySwitch) {
+                            m.switchWorlds()
+                            simulation.trails()
+                            simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+                        }
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isBayesian) powerUps.ejectTech()
                         if (mob[k].onHit) mob[k].onHit(k);
@@ -158,51 +164,17 @@ function collisionChecks(event) {
                                 time: simulation.drawTime
                             });
                         }
-                        return;
+                        // return;
                         // }
-                    }
-                    //mob + bullet collisions
-                    if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
-                        obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                        let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
-                        if (tech.isCrit && mob[k].isStunned) dmg *= 4
-                        mob[k].foundPlayer();
-                        mob[k].damage(dmg);
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: pairs[i].activeContacts[0].vertex.x,
-                            y: pairs[i].activeContacts[0].vertex.y,
-                            radius: Math.log(2 * dmg + 1.1) * 40,
-                            color: simulation.playerDmgColor,
-                            time: simulation.drawTime
-                        });
-                        return;
-                    }
-                    //mob + body collisions
-                    if (obj.classType === "body" && obj.speed > 6) {
-                        const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
-                        if (v > 9) {
-                            let dmg = 0.075 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
-                            if (mob[k].isShielded) dmg *= 0.6
-                            mob[k].damage(dmg, true);
-                            if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
-                                let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
-                                if (Math.random() < 0.4) {
-                                    type = "heal"
-                                } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
-                                    type = "research"
-                                }
-                                powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
-                                // for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {}
-                            }
-
-                            const stunTime = dmg / Math.sqrt(obj.mass)
-                            if (stunTime > 0.5) mobs.statusStun(mob[k], 60 + 60 * Math.sqrt(stunTime))
-                            if (mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
-                            if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
-                                obj.hasFragmented = true;
-                                b.targetedNail(obj.position, tech.fragments * 4)
-                            }
-                            simulation.drawList.push({
+                    } else {
+                        //mob + bullet collisions
+                        if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
+                            obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
+                            let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                            if (tech.isCrit && mob[k].isStunned) dmg *= 4
+                            mob[k].foundPlayer();
+                            mob[k].damage(dmg);
+                            simulation.drawList.push({ //add dmg to draw queue
                                 x: pairs[i].activeContacts[0].vertex.x,
                                 y: pairs[i].activeContacts[0].vertex.y,
                                 radius: Math.log(2 * dmg + 1.1) * 40,
@@ -210,6 +182,41 @@ function collisionChecks(event) {
                                 time: simulation.drawTime
                             });
                             return;
+                        }
+                        //mob + body collisions
+                        if (obj.classType === "body" && obj.speed > 6) {
+                            const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
+                            if (v > 9) {
+                                let dmg = 0.075 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
+                                if (mob[k].isShielded) dmg *= 0.6
+                                mob[k].damage(dmg, true);
+                                if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
+                                    let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
+                                    if (Math.random() < 0.4) {
+                                        type = "heal"
+                                    } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
+                                        type = "research"
+                                    }
+                                    powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
+                                    // for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {}
+                                }
+
+                                const stunTime = dmg / Math.sqrt(obj.mass)
+                                if (stunTime > 0.5) mobs.statusStun(mob[k], 60 + 60 * Math.sqrt(stunTime))
+                                if (mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
+                                if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
+                                    obj.hasFragmented = true;
+                                    b.targetedNail(obj.position, tech.fragments * 4)
+                                }
+                                simulation.drawList.push({
+                                    x: pairs[i].activeContacts[0].vertex.x,
+                                    y: pairs[i].activeContacts[0].vertex.y,
+                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    color: simulation.playerDmgColor,
+                                    time: simulation.drawTime
+                                });
+                                return;
+                            }
                         }
                     }
                 }

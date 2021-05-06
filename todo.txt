@@ -1,8 +1,17 @@
 ******************************************************** NEXT PATCH ********************************************************
 
 more wave beam balance
+backward induction costs 2 research now, also it is fixed (it would sometimes give an extra tech or the wrong tech)
+powerupBoss now gives research and ammo when it hits you, not 2 heals (it still ejects one of your tech also)
+
+tech: non-unitary operator - taking damage randomizes your run, reduce difficulty by 2 levels
 
 ******************************************************** BUGS ********************************************************
+
+
+(once) CPT gun only rewound 0.25 seconds
+  after a randomize run (non-unityary)
+  had enough energy
 
 increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
@@ -41,6 +50,12 @@ wave tech: chirp - amplitude and damage increases towards the end of the wavePac
 wave tech: wave bullets are removed after doing damage, but they do something
   more damage, explode, freeze,
 
+taking damage randomizes your run
+
+power ups disappear after 3-5 seconds
+  only apply to drops from killing mobs
+  +duplication 20%
+  
 tech: mobs that die while frozen produce ice-IX bullets
 
 tech: picking up heal power ups when at full health does harm equal to the heal values

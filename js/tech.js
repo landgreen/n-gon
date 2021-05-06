@@ -2488,7 +2488,7 @@
                 allowed() {
                     return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid
                 },
-                requires: "anthropic principle, not many-worlds, perturbation theory",
+                requires: "anthropic principle, not many-worlds, Ψ(t) collapse",
                 effect() {
                     tech.isImmortal = true;
                     // for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
@@ -2507,7 +2507,7 @@
                 allowed() {
                     return !tech.isImmortal && !tech.isResearchReality && level.onLevel < 6
                 },
-                requires: "before level 6, not quantum immortality, perturbation theory",
+                requires: "before level 6, not quantum immortality, Ψ(t) collapse",
                 effect() {
                     tech.isSwitchReality = true;
                 },
@@ -2516,8 +2516,30 @@
                 }
             },
             {
+                name: "non-unitary operator",
+                description: "after a <strong>collision</strong> enter an <strong>alternate reality</strong><br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return !tech.isImmortal && !tech.isResearchReality
+                },
+                requires: "not quantum immortality, Ψ(t) collapse",
+                effect() {
+                    tech.isCollisionRealitySwitch = true;
+                    level.difficultyDecrease(simulation.difficultyMode * 2)
+                },
+                remove() {
+                    tech.isCollisionRealitySwitch = false;
+                    if (this.count > 0) {
+                        level.difficultyIncrease(simulation.difficultyMode * 2)
+                    }
+                }
+            },
+            {
                 name: "Ψ(t) collapse",
-                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>11</strong> <strong class='color-r'>research</strong>",
+                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>12</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2528,7 +2550,7 @@
                 requires: "not quantum immortality, many-worlds",
                 effect() {
                     tech.isResearchReality = true;
-                    for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
+                    for (let i = 0; i < 12; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
                 },
                 remove() {
                     tech.isResearchReality = false;
@@ -2908,7 +2930,7 @@
                 allowed() {
                     return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
                 },
-                requires: "at least 1 tech and 1 research, a chance to duplicate power ups",
+                requires: "at least 1 tech and 2 research, a chance to duplicate power ups",
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2
@@ -3007,25 +3029,37 @@
                 }
             },
 
+
+            // allowed() {
+            //     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
+            // },
+            // requires: "at least 2 bots, 1 research",
+            // effect: () => {
+            //     if (powerUps.research.count > 0) {
+            //         powerUps.research.changeRerolls(-1)
+            //         b.randomBot()
+            //     }
+
             {
                 name: "backward induction",
-                description: "<strong>choose</strong> all the <strong class='color-m'>tech</strong> <strong>options</strong> you didn't <strong>choose</strong><br>from your previous <strong class='color-m'>tech</strong> selection",
+                description: "use <strong>2</strong> <strong class='color-r'>research</strong> to <strong>choose</strong> all the unchosen<br> <strong class='color-m'>tech</strong> from your previous <strong class='color-m'>tech</strong> selection",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
-                    return powerUps.tech.choiceLog.length > 10 && !tech.isDeterminism
+                    return powerUps.tech.choiceLog.length > 10 && !tech.isDeterminism && powerUps.research.count > 1
                 },
-                requires: "rejected an option in the last tech selection",
+                requires: "rejected an option in the last tech selection, at least 2 research",
                 effect: () => {
+                    powerUps.research.changeRerolls(-2)
                     let num = 3
                     if (tech.isExtraChoice) num = 5
                     if (tech.isDeterminism) num = 1
-                    for (let i = powerUps.tech.choiceLog.length - 1 - num; i > powerUps.tech.choiceLog.length - 1 - num * 2; i--) {
-                        const index = powerUps.tech.choiceLog[i]
-                        if (powerUps.tech.choiceLog[i] !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed()) {
+                    for (let i = 0; i < num; i++) {
+                        const index = powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - i - 1]
+                        if (index !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed()) {
                             tech.giveTech(index)
                             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>// backward induction</em>`);
                         }
@@ -3068,8 +3102,11 @@
                     for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
-                    tech.isDeterminism = false;
-                    for (let i = 0; i < 6; i++) powerUps.removeRandomTech()
+                    if (tech.isDeterminism) {
+                        tech.isDeterminism = false;
+
+                        for (let i = 0; i < 6; i++) powerUps.removeRandomTech()
+                    }
                 }
             },
             {
@@ -3104,7 +3141,7 @@
                 allowed() {
                     return level.onLevel < 8 && level.onLevel > 0
                 },
-                requires: "between levels 1 and 7",
+                requires: "on levels 1 through 7",
                 effect() {
                     level.difficultyDecrease(simulation.difficultyMode)
                     // simulation.difficulty<span class='color-symbol'>-=</span>
@@ -3632,7 +3669,7 @@
             },
             {
                 name: "packet length",
-                description: "wave packet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>50%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
+                description: "wave packet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>40%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -3642,15 +3679,15 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    const scale = 1.5 - 0.025 * this.count
-                    tech.waveLengthRange *= Math.sqrt(scale)
+                    const scale = 1.4 - 0.025 * this.count
                     tech.wavePacketLength *= scale
                     tech.wavePacketFrequency /= scale
+                    tech.waveLengthRange *= Math.sqrt(scale)
                 },
                 remove() {
-                    tech.wavePacketFrequency = 0.088 //shorten wave packet
-                    tech.wavePacketLength = tech.wavePacketFrequency * 408 //36.96 //how many wave packets are released // double this to emit 2 packets
-                    tech.waveLengthRange = 140;
+                    tech.wavePacketFrequency = 0.088 //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
+                    tech.wavePacketLength = 36 //32.7 //31.3 //28.8 //36 //how many wave packets are released // double this to emit 2 packets
+                    tech.waveLengthRange = 130;
                 }
             },
             {
@@ -3666,16 +3703,16 @@
                 requires: "wave beam",
                 effect() {
                     tech.waveFrequency *= 0.5
-                    tech.wavePacketDamage *= 1.33
+                    tech.wavePacketDamage *= 1.5
                 },
                 remove() {
-                    tech.waveFrequency = 0.35
+                    tech.waveFrequency = 0.2
                     tech.wavePacketDamage = 1
                 }
             },
             {
                 name: "propagation",
-                description: "wave packet propagation <strong>speed</strong> is <strong>25%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
+                description: "wave packet propagation <strong>speed</strong> is <strong>30%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3685,12 +3722,12 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.waveBeamSpeed *= 0.75;
-                    tech.waveBeamDamage += 1.2 * 0.5
+                    tech.waveBeamSpeed *= 0.7;
+                    tech.waveBeamDamage += 1.3 * 0.5
                 },
                 remove() {
                     tech.waveBeamSpeed = 10;
-                    tech.waveBeamDamage = 1.2 //this sets base wave beam damage
+                    tech.waveBeamDamage = 1.3 //this sets base wave beam damage
                 }
             },
             {
@@ -5257,6 +5294,36 @@
             //     remove() {}
             // },
             {
+                name: "spinor",
+                description: "the direction you aim is determined by your position",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isNonRefundable: true,
+                isJunk: true,
+                allowed() {
+                    return !m.isShipMode
+                },
+                requires: "",
+                effect() {
+                    m.look = function() {
+                        //always on mouse look
+                        m.angle = (((m.pos.x + m.pos.y) / 100 + Math.PI) % Math.PI * 2) - Math.PI
+                        //smoothed mouse look translations
+                        const scale = 0.8;
+                        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+
+                        m.transX += (m.transSmoothX - m.transX) * 0.07;
+                        m.transY += (m.transSmoothY - m.transY) * 0.07;
+                    }
+                },
+                remove() {
+                    m.look = m.lookDefault
+                }
+            },
+            {
                 name: "decomposers",
                 description: "after they die <strong>mobs</strong> leave behind <strong>spawns</strong>",
                 maxCount: 1,
@@ -5266,7 +5333,7 @@
                 isNonRefundable: true,
                 isJunk: true,
                 allowed() {
-                    return build.isExperimentSelection
+                    return true
                 },
                 requires: "",
                 effect() {
@@ -5286,7 +5353,7 @@
                 isNonRefundable: true,
                 isJunk: true,
                 allowed() {
-                    return build.isExperimentSelection
+                    return true
                 },
                 requires: "",
                 effect() {
@@ -6555,4 +6622,5 @@
         waveBeamSpeed: null,
         wavePacketAmplitude: null,
         waveLengthRange: null,
+        isCollisionRealitySwitch: null
     }
