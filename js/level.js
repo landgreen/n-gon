@@ -16,7 +16,7 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("metamaterial cloaking")
-            b.giveGuns("wave beam")
+            // b.giveGuns("wave beam")
             // tech.isExplodeRadio = true
             // tech.giveTech("phase velocity")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -24,7 +24,7 @@ const level = {
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("amplitude")
 
-            // level.intro(); //starting level
+            level.intro(); //starting level
             // level.testing(); //not in rotation
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
