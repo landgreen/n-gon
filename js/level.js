@@ -12,19 +12,19 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(30)
+            // level.difficultyIncrease(90)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("metamaterial cloaking")
-            // b.giveGuns("wave beam")
+            b.giveGuns("wave beam")
             // tech.isExplodeRadio = true
             // tech.giveTech("phase velocity")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
-            // for (let i = 0; i < 1; i++) tech.giveTech("amplitude")
+            // for (let i = 0; i < 3; i++) tech.giveTech("amplitude")
 
-            level.intro(); //starting level
+            // level.intro(); //starting level
             // level.testing(); //not in rotation
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
@@ -45,6 +45,7 @@ const level = {
             // level.perplex() //community level
             // level.coliseum() //community level
             // level.crossfire() //community level
+            // level.vats() //community level
 
             // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
@@ -4770,5 +4771,448 @@ const level = {
         spawn.debris(8000, -600, 400, debrisCount);
         spawn.debris(8700, -700, 400, debrisCount);
         spawn.debris(9300, -900, 400, debrisCount);
+    },
+    vats() { // Made by Dablux#6610 on Discord
+        simulation.zoomScale = 1500;
+        level.setPosToSpawn(4400, -1060)
+        spawn.mapRect(level.enter.x, level.enter.y + 30, 100, 20)
+        level.exit.x = 3900;
+        level.exit.y = 1060;
+        spawn.mapRect(level.exit.x, level.exit.y + 30, 100, 20)
+
+        var nextBlockSpawn = simulation.cycle + Math.floor(Math.random() * 60 + 30)
+        const door = level.door(475, 900, 50, 200, 201)
+        const exitDoor = level.door(3375, 900, 50, 200, 201)
+        const deliveryButton = level.button(3500, -410)
+        const buttonGreen = level.button(-1600, 1090)
+        const buttonYellow = level.button(-1600, -1160)
+        const buttonRed = level.button(5874, -2410)
+        let g = false;
+        let y = false;
+        let r = false;
+        const deliverySlime = level.hazard(3700, -940, 100, 480)
+        const deliverySlime2 = level.hazard(3700, -461, 100, 1141)
+        const slimePit = level.hazard(700, 1200, 2500, 1300, 0.004, "hsla(160, 100%, 35%,0.75)")
+        const topSlime = level.hazard(800, -460, 2900, 90, 0.004, "hsla(160, 100%, 35%,0.75)")
+        const rotor = level.rotor(0, -725, 0.001)
+        const portal = level.portal({
+            x: -135,
+            y: 800
+        }, Math.PI / 2, {
+            x: 570,
+            y: -395
+        }, -Math.PI / 2)
+        const portal2 = level.portal({
+            x: -1800,
+            y: 1900
+        }, Math.PI, {
+            x: 200,
+            y: 1105
+        }, -Math.PI / 2)
+        const drip1 = level.drip(1875, -660, -400, 70)
+        const drip2 = level.drip(3525, -940, -400, 150)
+        const drip3 = level.drip(1975, 100, 1200, 100)
+        door.isOpen = true;
+        exitDoor.isOpen = true;
+
+        // UPPER AREA //
+        spawn.mapRect(4500, -2400, 1700, 2050)
+        spawn.mapRect(3800, -1000, 700, 650)
+        spawn.mapRect(4000, -1310, 50, 60)
+        spawn.mapRect(4450, -1310, 50, 60)
+        spawn.mapRect(4000, -1320, 500, 20)
+        level.chain(4025, -1225, 0.5 * Math.PI, false, 5, 25)
+        spawn.mapRect(3650, -460, 50, 90)
+        spawn.mapRect(3525, -1000, 325, 20)
+        spawn.mapRect(3650, -1000, 50, 440)
+        spawn.mapRect(3300, -1000, 50, 450)
+        spawn.mapRect(3325, -725, 150, 25)
+        spawn.mapRect(3500, -980, 175, 35)
+        spawn.mapRect(3325, -980, 50, 35)
+        spawn.mapRect(-1800, -1250, 50, 120)
+        spawn.mapRect(6150, -2500, 50, 120)
+        spawn.bodyRect(3350, -1000, 175, 20, 1, spawn.propsIsNotHoldable) // Cover
+        spawn.boost(4400, -1385, 1200)
+        Matter.Body.setMass(body[body.length - 1], 0.7) // Make cover easier to remove
+        spawn.mapRect(750, -475, 50, 75);
+        for (let i = 1; i < 5; i++) {
+            spawn.mapRect(800 + (i * 100) + (500 * (i - 1)), -460 + (i * -120) + (20 * (i - 1)), 500, 20)
+        }
+
+        // ARENA //
+        spawn.mapRect(400, -400, 2950, 500)
+        spawn.mapRect(-1800, -1150, 1800, 1950)
+        spawn.mapRect(-1800, 1100, 780, 1800)
+        spawn.mapRect(-300, 1100, 1000, 1800)
+        //spawn.mapRect(-1800, -1450, 100, 2000)
+        spawn.blockDoor(-1800, 1070)
+        level.chain(-1000, 1120, 0, true, 18, 20)
+        spawn.mapRect(700, 2500, 2500, 900)
+        spawn.mapRect(400, 100, 200, 599)
+        spawn.mapRect(400, 650, 75, 250)
+        spawn.mapRect(525, 650, 75, 250)
+        spawn.mapRect(3300, 650, 75, 250)
+        spawn.mapRect(3425, 650, 75, 250)
+        spawn.mapRect(3200, 1100, 1800, 2200)
+        //spawn.boost(0, 731, 1500)
+        spawn.mapRect(3300, -400, 200, 1099) // STOP CHANGING THIS ONE!!!! 
+        spawn.mapRect(3450, -400, 250, 1100)
+        spawn.mapRect(3650, 680, 200, 20)
+        spawn.mapRect(3800, -400, 1400, 1100)
+        spawn.mapRect(4100, 700, 100, 300)
+        spawn.mapRect(4900, -400, 1300, 2500)
+        spawn.bodyRect(4100, 1000, 100, 100)
+
+        spawn.bodyRect(-2100, 2050, 290, 30) //Portal platform
+        let b = body[body.length - 1];
+        cons[cons.length] = Constraint.create({
+            pointA: {
+                x: -1820,
+                y: 2065
+            },
+            bodyB: b,
+            pointB: {
+                x: -135,
+                y: 0
+            },
+            stiffness: 1,
+            length: 1
+        });
+        cons[cons.length] = Constraint.create({
+            pointA: {
+                x: -1800,
+                y: 1400
+            },
+            bodyB: b,
+            pointB: {
+                x: 135,
+                y: 0
+            },
+            stiffness: 0.005,
+            length: 700
+        });
+        World.add(engine.world, [cons[cons.length - 2], cons[cons.length - 1]]);
+
+        spawn.bodyRect(5225, -2525, 300, 75);
+        spawn.bodyRect(4700, -2525, 100, 75, 0.5);
+        spawn.bodyRect(4900, -2600, 50, 50, 0.4);
+        spawn.bodyRect(5050, -2475, 500, 100, 0.4);
+        spawn.bodyRect(2950, -950, 175, 75, 0.5);
+        spawn.bodyRect(3050, -1000, 75, 50, 0.3);
+        spawn.bodyRect(2300, -850, 75, 50, 0.7);
+        spawn.bodyRect(2150, -575, 100, 175, 0.6);
+        spawn.bodyRect(2500, -550, 400, 150, 0.2);
+        spawn.bodyRect(1525, -500, 225, 100, 0.2);
+        spawn.bodyRect(1625, -575, 100, 75);
+        spawn.bodyRect(1000, -475, 100, 100, 0.8);
+        spawn.bodyRect(1225, -450, 125, 50, 0.9);
+        spawn.bodyRect(525, -500, 175, 125, 0.75);
+        spawn.bodyRect(575, -600, 100, 75, 0.5);
+        spawn.bodyRect(-925, -1225, 275, 75, 0.4);
+        spawn.bodyRect(-1125, -1300, 200, 150, 0.7);
+        spawn.bodyRect(-475, -1250, 200, 100, 0.8);
+        spawn.bodyRect(-425, -1300, 100, 50, 0.75);
+        spawn.bodyRect(-1225, -1200, 100, 25, 0.45);
+        spawn.bodyRect(-1025, -1350, 75, 50, 0.5);
+        spawn.bodyRect(-450, 1025, 75, 50, 0.5);
+        spawn.bodyRect(-775, 1050, 50, 50, 0.6);
+        spawn.bodyRect(-650, 975, 75, 75, 0.2);
+        spawn.bodyRect(-475, 1025, 100, 50, 0.7);
+        spawn.bodyRect(-450, 1025, 75, 50, 0.6);
+        spawn.bodyRect(-800, 1050, 100, 50, 0.5);
+        spawn.bodyRect(-600, 950, 75, 75, 0.3);
+        spawn.bodyRect(-500, 1000, 75, 25, 0.2);
+        spawn.bodyRect(-900, 1025, 150, 50);
+        spawn.bodyRect(-1350, 1000, 100, 100, 0.4);
+        spawn.bodyRect(-1225, 1075, 100, 25);
+        spawn.debris(900, -1000, 2000, 16);
+
+        // MOBS //
+        spawn.randomSmallMob(2900, -1000)
+        spawn.randomSmallMob(1750, -700)
+        spawn.randomMob(4250, -1400)
+        spawn.randomMob(4800, -2400, 0.3)
+        spawn.randomMob(1000, 600, 0.3)
+        spawn.randomMob(1650, 950, 0.2)
+        spawn.randomMob(1300, -1250, 0)
+        spawn.randomMob(-600, -1250, 0.1)
+        spawn.randomMob(1000, -600, 0.4)
+        spawn.randomMob(1800, -700, 0.4)
+        spawn.randomMob(2200, 950, 0.2)
+        spawn.randomMob(-1900, 1400, 0.3)
+        spawn.randomMob(-750, -1000, 0.3)
+        spawn.randomMob(3250, 1000, 0.1)
+        spawn.randomMob(2000, -2800, 0.4)
+        spawn.randomMob(2200, -500, 0)
+        spawn.randomMob(1800, -450, 0.3)
+        spawn.randomGroup(2300, -450, 1)
+        spawn.randomGroup(3000, -450, 0.3)
+        spawn.randomGroup(6000, -2700, 0)
+        spawn.randomGroup(-1200, -1300, -0.3)
+        powerUps.addRerollToLevel()
+
+        if (simulation.difficulty > 3) {
+            spawn.randomLevelBoss(1900, 400, ["shieldingBoss", "shooterBoss", "launcherBoss", "streamBoss"])
+        } else {
+            exitDoor.isOpen = false;
+        }
+        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(800, -800);
+
+        powerUps.spawn(4450, 1050, "heal");
+        if (Math.random() > (0.2 + (simulation.difficulty / 60))) {
+            powerUps.spawn(4500, 1050, "ammo");
+            powerUps.spawn(4550, 1050, "ammo");
+        } else {
+            powerUps.spawn(4500, 1050, "tech");
+            spawn.randomMob(4550, 1050, Infinity);
+        }
+        powerUps.spawnStartingPowerUps(3750, -940)
+
+        const W = 500;
+        const H = 20;
+        for (let i = 1; i < 5; i++) {
+            spawn.bodyRect(700 + (i * 100) + (W * (i - 1)), 1110, W, H, 1, spawn.propsIsNotHoldable)
+            let b = body[body.length - 1];
+            cons[cons.length] = Constraint.create({
+                pointA: {
+                    x: b.position.x - (W / 2) + 50,
+                    y: b.position.y - 1025
+                },
+                bodyB: b,
+                pointB: {
+                    x: -(W / 2) + 50,
+                    y: 0
+                },
+                stiffness: 0.002,
+                length: 1000
+            });
+            cons[cons.length] = Constraint.create({
+                pointA: {
+                    x: b.position.x + (W / 2) - 50,
+                    y: b.position.y - 1025
+                },
+                bodyB: b,
+                pointB: {
+                    x: (W / 2) - 50,
+                    y: 0
+                },
+                stiffness: 0.002,
+                length: 1000
+            });
+            World.add(engine.world, [cons[cons.length - 1], cons[cons.length - 2]])
+        }
+
+        level.custom = () => {
+            level.playerExitCheck()
+
+            buttonGreen.query()
+            buttonYellow.query()
+            buttonRed.query()
+
+            if (!buttonGreen.isUp) {
+                if (!g) {
+                    Matter.World.remove(engine.world, cons[1])
+                    cons.splice(1, 2)
+                }
+                g = true;
+            }
+            if (!buttonYellow.isUp) {
+                y = true;
+            }
+            if (!buttonRed.isUp) {
+                r = true;
+            }
+
+            if (g && y && r) {
+                door.isOpen = false;
+            } else {
+                door.isOpen = true;
+            }
+
+            door.openClose()
+            exitDoor.openClose()
+
+            if (m.pos.y > 1600 && 700 < m.pos.x && m.pos.x < 3200) { // Saving player from slime pit
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 200,
+                    y: 1000
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+
+            if (simulation.cycle >= nextBlockSpawn && body.length < 100) {
+                var len = body.length;
+                body[len] = Matter.Bodies.polygon(Math.floor(Math.random() * 1700) + 1050, 100, Math.floor(Math.random() * 11) + 10, Math.floor(Math.random() * 20) + 15)
+                body[len].collisionFilter.category = cat.body;
+                body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+                World.add(engine.world, body[len])
+                nextBlockSpawn = simulation.cycle + Math.floor(Math.random() * 60 + 30)
+            }
+
+            if (exitDoor.isOpen) {
+                exitDoor.isOpen = false;
+                for (i = 0; i < mob.length; i++) {
+                    if (mob[i].isBoss && 525 < mob[i].position.x < 3200 && -2500 < mob[i].position.y < 100) {
+                        exitDoor.isOpen = true;
+                    }
+                }
+            }
+
+            for (let i = 0, len = body.length; i < len; i++) {
+                if (body[i].position.x > 700 && body[i].position.x < 3200 && body[i].position.y > 1200 && !body[i].isNotHoldable) {
+                    Matter.Body.scale(body[i], 0.99, 0.99);
+                    if (body[i].velocity.y > 3) body[i].force.y -= 0.96 * body[i].mass * simulation.g
+                    const slowY = (body[i].velocity.y > 0) ? Math.max(0.3, 1 - 0.0015 * body[i].velocity.y * body[i].velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(body[i].velocity.y)) //down : up
+                    Matter.Body.setVelocity(body[i], {
+                        x: Math.max(0.6, 1 - 0.07 * Math.abs(body[i].velocity.x)) * body[i].velocity.x,
+                        y: slowY * body[i].velocity.y
+                    });
+                    if (body[i].mass < 0.05) {
+                        Matter.World.remove(engine.world, body[i])
+                        body.splice(i, 1)
+                        break
+                    }
+                }
+            }
+
+            for (let i = 0, len = mob.length; i < len; ++i) {
+                if (mob[i].position.x > 700 && mob[i].position.x < 3200 && mob[i].alive && !mob[i].isShielded && mob[i].position.y > 1200) {
+                    mobs.statusDoT(mob[i], 0.005, 30)
+                }
+            }
+
+            ctx.beginPath()
+            ctx.fillStyle = "#666";
+            ctx.arc(buttonGreen.min.x - 50, buttonGreen.min.y - 70, 20, 0, 2 * Math.PI)
+            ctx.fillRect(buttonGreen.min.x - 55, buttonGreen.max.y + 25, 10, -95)
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(buttonYellow.min.x - 50, buttonYellow.min.y - 70, 20, 0, 2 * Math.PI)
+            ctx.fillRect(buttonYellow.min.x - 55, buttonYellow.max.y + 25, 10, -95)
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(buttonRed.min.x - 50, buttonRed.min.y - 70, 20, 0, 2 * Math.PI)
+            ctx.fillRect(buttonRed.min.x - 55, buttonRed.max.y + 25, 10, -95)
+            ctx.fill()
+
+            ctx.beginPath()
+            ctx.arc(buttonGreen.min.x - 50, buttonGreen.min.y - 70, 10, 0, 2 * Math.PI)
+            ctx.fillStyle = (g ? `rgba(0, 255, 0, 0.9)` : `rgba(255, 0, 0, 0.9)`);
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(buttonYellow.min.x - 50, buttonYellow.min.y - 70, 10, 0, 2 * Math.PI)
+            ctx.fillStyle = (y ? `rgba(0, 255, 0, 0.9)` : `rgba(255, 0, 0, 0.9)`);
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(buttonRed.min.x - 50, buttonRed.min.y - 70, 10, 0, 2 * Math.PI)
+            ctx.fillStyle = (r ? `rgba(0, 255, 0, 0.9)` : `rgba(255, 0, 0, 0.9)`);
+            ctx.fill()
+
+            slimePit.query();
+            ctx.shadowColor = 'hsla(160, 100%, 50%, 1)'
+            ctx.shadowBlur = 100;
+            slimePit.draw()
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0)'
+            topSlime.query();
+            deliveryButton.query()
+            deliverySlime.query()
+            deliverySlime2.query()
+            portal[2].query()
+            //portal[3].query()
+            portal2[2].query()
+            //portal2[3].query()
+
+            deliverySlime.level(deliveryButton.isUp)
+            topSlime.level(!r)
+            rotor.rotate()
+
+            ctx.fillStyle = "#d4f4f4"
+            ctx.fillRect(3500, 675, 600, 450)
+            level.exit.draw()
+            level.enter.draw()
+        }
+
+        level.customTopLayer = () => {
+            drip1.draw()
+            drip2.draw()
+            drip3.draw()
+
+            ctx.fillStyle = `rgba(68, 68, 68, ${Math.max(0.3, Math.min((4200 - m.pos.x) / 100, 0.99))})`
+            ctx.fillRect(4100, 650, 850, 500)
+
+            ctx.fillStyle = "rgba(200,0,255,0.2)"; //boosts
+            ctx.fillRect(4400, -1410, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)"; //boosts
+            ctx.fillRect(4400, -1440, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)"; //boosts
+            ctx.fillRect(4400, -1505, 100, 120);
+
+            ctx.fillStyle = "rgba(0,20,40,0.1)"
+            ctx.fillRect(4025, -1300, 475, 300)
+            ctx.fillRect(3325, -1000, 375, 600)
+            ctx.fillRect(425, 100, 3050, 2400)
+            ctx.fillRect(-1775, 800, 1750, 2100)
+            ctx.fillStyle = "rgba(0,20,40,0.2)"
+            ctx.fillRect(2725, -860, 450, 460)
+            ctx.fillRect(2125, -760, 450, 360)
+            ctx.fillRect(1525, -660, 450, 260)
+            ctx.fillRect(925, -560, 450, 160)
+            ctx.fillRect(3700, -980, 100, 1200)
+
+            ctx.fillStyle = `#444`;
+            ctx.fillRect(465, 690, 70, 209)
+            ctx.fillRect(3365, 690, 70, 209)
+
+            ctx.beginPath()
+            ctx.arc(500, 870, 20, 0, 2 * Math.PI)
+            ctx.arc(500, 820, 20, 0, 2 * Math.PI)
+            ctx.arc(500, 770, 20, 0, 2 * Math.PI)
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3";
+            ctx.fill()
+
+            ctx.beginPath()
+            ctx.arc(500, 870, 10, 0, 2 * Math.PI)
+            ctx.fillStyle = (g ? `rgba(0, 255, 0, 0.9)` : `rgba(255, 0, 0, 0.9)`);
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(500, 820, 10, 0, 2 * Math.PI)
+            ctx.fillStyle = (y ? `rgba(0, 255, 0, 0.9)` : `rgba(255, 0, 0, 0.9)`);
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(500, 770, 10, 0, 2 * Math.PI)
+            ctx.fillStyle = (r ? `rgba(0, 255, 0, 0.9)` : `rgba(255, 0, 0, 0.9)`);
+            ctx.fill()
+
+            deliveryButton.draw()
+            deliverySlime.draw()
+            deliverySlime2.draw()
+            topSlime.draw()
+            buttonGreen.draw()
+            buttonYellow.draw()
+            buttonRed.draw()
+            portal[0].draw()
+            portal[2].draw()
+            portal2[0].draw()
+            portal2[2].draw()
+        }
     },
 };

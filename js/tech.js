@@ -2484,7 +2484,7 @@
                 description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>23%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 4,
                 allowed() {
                     return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid
                 },
@@ -2505,9 +2505,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isResearchReality && level.onLevel < 6
+                    return !tech.isImmortal && !tech.isResearchReality && level.onLevel < 6 && !tech.isCollisionRealitySwitch
                 },
-                requires: "before level 6, not quantum immortality, Ψ(t) collapse",
+                requires: "before level 6, not quantum immortality, Ψ(t) collapse, non-unitary",
                 effect() {
                     tech.isSwitchReality = true;
                 },
@@ -2517,15 +2517,15 @@
             },
             {
                 name: "non-unitary operator",
-                description: "after a <strong>collision</strong> enter an <strong>alternate reality</strong><br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
+                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>after a <strong>collision</strong> enter an <strong>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isResearchReality
+                    return !tech.isImmortal && !tech.isResearchReality && !tech.isSwitchReality
                 },
-                requires: "not quantum immortality, Ψ(t) collapse",
+                requires: "not quantum immortality, Ψ(t) collapse, many-worlds",
                 effect() {
                     tech.isCollisionRealitySwitch = true;
                     level.difficultyDecrease(simulation.difficultyMode * 2)
@@ -2545,9 +2545,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isSwitchReality
+                    return !tech.isImmortal && !tech.isSwitchReality && !tech.isCollisionRealitySwitch
                 },
-                requires: "not quantum immortality, many-worlds",
+                requires: "not quantum immortality, many-worlds, non-unitary",
                 effect() {
                     tech.isResearchReality = true;
                     for (let i = 0; i < 12; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
@@ -3702,7 +3702,7 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.waveFrequency *= 0.5
+                    tech.waveFrequency *= 0.66
                     tech.wavePacketDamage *= 1.5
                 },
                 remove() {

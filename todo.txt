@@ -1,10 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-more wave beam balance
-backward induction costs 2 research now, also it is fixed (it would sometimes give an extra tech or the wrong tech)
-powerupBoss now gives research and ammo when it hits you, not 2 heals (it still ejects one of your tech also)
-
-tech: non-unitary operator - taking damage randomizes your run, reduce difficulty by 2 levels
+new COMMUNITY LEVEL vats by Dablux on discord!
+(also the community map order wasn't randomizing right and was giving an extra level before the final boss)
 
 ******************************************************** BUGS ********************************************************
 
@@ -42,6 +39,9 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+make all of a packet have the same angle
+  also position? but how
+spawn the entire packet in an instant
 
 wave tech: delay similar to quantum foam
   firing makes the entire packet, but with a delay?

@@ -522,24 +522,23 @@ const simulation = {
             level.levels.push("stronghold");
             level.levels.push("basement");
             level.levels.push("crossfire");
+            level.levels.push("vats")
             level.levels.push("house");
             level.levels.push("perplex");
             level.levels.push("coliseum");
+            level.levels = shuffle(level.levels); //shuffles order of maps
+            level.levels.splice(0, 7); //remove some random levels to make up for adding the community levels
 
-
-            // level.levels.push("vats");
-            level.levels.splice(0, 5); //remove some random levels to make up for adding the community levels
-
-            //remove undefined tech for community maps
-            lore.techCount = 0;
+            lore.techCount = 0; //remove undefined tech for community maps
             for (let i = 0, len = tech.tech.length; i < len; i++) {
                 if (tech.tech[i].isLore) {
                     tech.tech[i].frequency = 0;
                     tech.tech[i].count = 0;
                 }
             }
+        } else {
+            level.levels = shuffle(level.levels); //shuffles order of maps
         }
-        level.levels = shuffle(level.levels); //shuffles order of maps
         level.levels.unshift("intro"); //add level to the start of the randomized levels list
         level.levels.push("gauntlet"); //add level to the end of the randomized levels list
         level.levels.push("final"); //add level to the end of the randomized levels list
