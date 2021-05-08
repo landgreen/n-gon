@@ -115,7 +115,9 @@ const powerUps = {
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
-            if (tech.renormalization && Math.random() < 0.37 && amount < 0) powerUps.spawn(m.pos.x, m.pos.y, "research");
+            if (tech.renormalization && Math.random() < 0.37 && amount < 0) {
+                for (let i = 0, len = -amount; i < len; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
+            }
             if (tech.isRerollHaste) {
                 if (powerUps.research.count === 0) {
                     tech.researchHaste = 0.66;
@@ -532,7 +534,8 @@ const powerUps = {
             powerUps.spawn(x, y, "gun");
             return;
         }
-        if (Math.random() < 0.0027 * (22 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 25
+        // if (Math.random() < 0.0027 * (22 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 25
+        if (Math.random() < 0.005 * (10 - level.levelsCleared)) { //a new tech has a low chance that decreases in later levels
             powerUps.spawn(x, y, "tech");
             return;
         }

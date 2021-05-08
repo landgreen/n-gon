@@ -877,7 +877,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling
+                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
                 requires: "an explosive damage source, no other mob death tech",
                 effect: () => {
@@ -888,13 +888,30 @@
                 }
             },
             {
+                name: "crystallizer",
+                description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong><br>they have a chance shatter into <strong class='color-s'>ice IX</strong> crystals",
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+                },
+                requires: "a localized freeze effect, no other mob death tech",
+                effect() {
+                    tech.iceIXOnDeath++
+                },
+                remove() {
+                    tech.iceIXOnDeath = 0
+                }
+            },
+            {
                 name: "impact shear",
                 description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br><em>nails target nearby mobs</em>",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling
+                    return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
                 requires: "no other mob death tech",
                 effect: () => {
@@ -911,7 +928,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling
+                    return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
                 requires: "no other mob death tech",
                 effect() {
@@ -988,7 +1005,7 @@
                 frequency: 1,
                 isBotTech: true,
                 allowed() {
-                    return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob && !tech.isMobBlockFling
+                    return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
                 requires: "no other mob death tech",
                 effect() {
@@ -1504,7 +1521,7 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.throwChargeRate > 1 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner
+                    return tech.throwChargeRate > 1 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
                 },
                 requires: "mass driver, no other mob death tech",
                 effect() {
@@ -4460,7 +4477,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.isWideLaser
+                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isWideLaser
                 },
                 requires: "laser, not specular reflection, diffraction grating, diffuse beam",
                 effect() {
@@ -4488,7 +4505,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && !tech.historyLaser
+                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser
                 },
                 requires: "laser, not specular reflection, not diffuse",
                 effect() {
@@ -6622,5 +6639,6 @@
         waveBeamSpeed: null,
         wavePacketAmplitude: null,
         waveLengthRange: null,
-        isCollisionRealitySwitch: null
+        isCollisionRealitySwitch: null,
+        iceIXOnDeath: null
     }

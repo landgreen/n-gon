@@ -12,17 +12,19 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(90)
+            // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("metamaterial cloaking")
             // b.giveGuns("wave beam")
+            // b.giveGuns("laser")
             // tech.isExplodeRadio = true
-            // tech.giveTech("phase velocity")
+            // tech.giveTech("pulse")
+            // for (let i = 0; i < 1; i++) tech.giveTech("crystallizer")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
-            // for (let i = 0; i < 3; i++) tech.giveTech("amplitude")
+            // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation

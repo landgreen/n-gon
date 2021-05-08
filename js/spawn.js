@@ -606,7 +606,7 @@ const spawn = {
         me.seeAtDistance2 = 200000 //1400000;
         me.cellMassMax = 70
         me.stroke = "transparent"
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body //| cat.map   //"rgba(255,60,0,0.3)"
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
         // Matter.Body.setDensity(me, 0.0014) // normal density is 0.001
         Matter.Body.setAngularVelocity(me, 0.12 * (Math.random() - 0.5))
         // spawn.shield(me, x, y, 1);
@@ -687,7 +687,7 @@ const spawn = {
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0005 * simulation.accelScale;
         Matter.Body.setDensity(me, 0.00035); //normal is 0.001
-        me.collisionFilter.mask = cat.bullet | cat.player | cat.body
+        me.collisionFilter.mask = cat.bullet | cat.player //| cat.body
         me.memory = Infinity;
         me.seePlayerFreq = 30
         me.lockedOn = null;
@@ -3168,7 +3168,7 @@ const spawn = {
         me.memory = Infinity;
         me.frictionAir = 0.01;
         me.accelMag = 0.00004 * simulation.accelScale;
-        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         spawn.shield(me, x, y, 1);
 
         const rangeInnerVsOuter = Math.random()

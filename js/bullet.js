@@ -445,17 +445,17 @@ const b = {
             }
         }
     },
-    pulse(charge, angle = m.angle) {
+    pulse(charge, angle = m.angle, where = m.pos) {
         let best;
         let explosionRadius = 6 * charge
         let range = 5000
         const path = [{
-                x: m.pos.x + 20 * Math.cos(angle),
-                y: m.pos.y + 20 * Math.sin(angle)
+                x: where.x + 20 * Math.cos(angle),
+                y: where.y + 20 * Math.sin(angle)
             },
             {
-                x: m.pos.x + range * Math.cos(angle),
-                y: m.pos.y + range * Math.sin(angle)
+                x: where.x + range * Math.cos(angle),
+                y: where.y + range * Math.sin(angle)
             }
         ];
         const vertexCollision = function(v1, v1End, domain) {
@@ -4477,7 +4477,6 @@ const b = {
                 this.do = () => {};
                 if (tech.isPulseLaser) {
                     this.fire = () => {
-
                         const drain = 0.01 * tech.isLaserDiode / b.fireCD
                         if (m.energy > drain) {
                             m.energy -= m.fieldRegen
@@ -4487,26 +4486,58 @@ const b = {
                             }
                         }
                     }
-                    this.do = () => {
-                        if (this.charge > 0) {
-                            //draw charge level
-                            ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
-                            ctx.beginPath();
-                            ctx.arc(m.pos.x, m.pos.y, 4.2 * Math.sqrt(this.charge), 0, 2 * Math.PI);
-                            ctx.fill();
-                            if (!input.fire) {
-                                m.fireCDcycle = m.cycle + 10; // cool down
-                                if (tech.beamSplitter) {
-                                    const divergence = m.crouch ? 0.2 : 0.5
-                                    const angle = m.angle - tech.beamSplitter * divergence / 2
-                                    for (let i = 0; i < 1 + tech.beamSplitter; i++) b.pulse(this.charge, angle + i * divergence)
-                                } else {
-                                    b.pulse(1.75 * this.charge, m.angle)
+                    if (tech.historyLaser) {
+                        this.do = () => {
+                            const len = 1 + 2 * tech.historyLaser
+                            const spacing = Math.ceil(40 - 9 * tech.historyLaser)
+                            if (this.charge > 0) {
+                                //draw charge level
+                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
+                                ctx.beginPath();
+                                const mag = 4.5 * Math.sqrt(this.charge)
+                                for (let i = 0; i < len; i++) {
+                                    const history = m.history[(m.cycle - i * spacing) % 600]
+                                    const off = history.yOff - 24.2859
+                                    ctx.moveTo(history.position.x, history.position.y - off);
+                                    ctx.ellipse(history.position.x, history.position.y - off, mag, mag * 0.5, history.angle, 0, 2 * Math.PI)
                                 }
-                                this.charge = 0;
+                                ctx.fill();
+                                //fire
+                                if (!input.fire) {
+                                    m.fireCDcycle = m.cycle + 10; // cool down
+                                    for (let i = 1; i < len; i++) {
+                                        const history = m.history[(m.cycle - i * spacing) % 600]
+                                        const off = history.yOff - 24.2859
+                                        b.pulse(1.4 * this.charge, history.angle, { x: history.position.x, y: history.position.y - off })
+                                    }
+                                    this.charge = 0;
+                                }
                             }
-                        }
-                    };
+                        };
+                    } else {
+                        this.do = () => {
+                            if (this.charge > 0) {
+                                //draw charge level
+                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
+                                ctx.beginPath();
+                                ctx.arc(m.pos.x, m.pos.y, 4.2 * Math.sqrt(this.charge), 0, 2 * Math.PI);
+                                ctx.fill();
+                                //fire  
+                                if (!input.fire) {
+                                    m.fireCDcycle = m.cycle + 10; // cool down
+                                    if (tech.beamSplitter) {
+                                        const divergence = m.crouch ? 0.2 : 0.5
+                                        const angle = m.angle - tech.beamSplitter * divergence / 2
+                                        for (let i = 0; i < 1 + tech.beamSplitter; i++) b.pulse(this.charge, angle + i * divergence)
+                                    } else {
+                                        b.pulse(1.75 * this.charge, m.angle)
+                                    }
+                                    this.charge = 0;
+                                }
+                            }
+                        };
+                    }
+
                 } else if (tech.beamSplitter) {
                     this.fire = this.fireSplit
                 } else if (tech.historyLaser) {
@@ -4532,13 +4563,9 @@ const b = {
                     b.laser();
                 }
             },
-            // laser(where = {
-            //     x: m.pos.x + 20 * Math.cos(m.angle),
-            //     y: m.pos.y + 20 * Math.sin(m.angle)
-            // }, whereEnd = {
-            //     x: where.x + 3000 * Math.cos(m.angle),
-            //     y: where.y + 3000 * Math.sin(m.angle)
-            // }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
+            firePulse() {
+
+            },
             fireSplit() {
                 if (m.energy < tech.laserFieldDrain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy

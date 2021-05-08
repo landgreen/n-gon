@@ -1,13 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-new COMMUNITY LEVEL vats by Dablux on discord!
-(also the community map order wasn't randomizing right and was giving an extra level before the final boss)
+
 
 ******************************************************** BUGS ********************************************************
 
-
 (once) CPT gun only rewound 0.25 seconds
-  after a randomize run (non-unityary)
+  after a randomize run (non-unitary)
   had enough energy
 
 increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
@@ -39,25 +37,11 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
-make all of a packet have the same angle
-  also position? but how
-spawn the entire packet in an instant
-
-wave tech: delay similar to quantum foam
-  firing makes the entire packet, but with a delay?
-wave tech: dispersion - add noise and damage to waves
-wave tech: chirp - amplitude and damage increases towards the end of the wavePacket
-wave tech: wave bullets are removed after doing damage, but they do something
-  more damage, explode, freeze,
-
-taking damage randomizes your run
 
 power ups disappear after 3-5 seconds
   only apply to drops from killing mobs
   +duplication 20%
   
-tech: mobs that die while frozen produce ice-IX bullets
-
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up:
     get ammo
