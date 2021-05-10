@@ -117,7 +117,7 @@ window.addEventListener('load', () => {
 //**********************************************************************
 //set up canvas
 //**********************************************************************
-var canvas = document.getElementById("canvas");
+const canvas = document.getElementById("canvas");
 //using "const" causes problems in safari when an ID shares the same name.
 const ctx = canvas.getContext("2d");
 document.body.style.backgroundColor = "#fff";

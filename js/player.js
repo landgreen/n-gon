@@ -976,7 +976,7 @@ const m = {
         m.fieldHarmReduction = 1;
         m.fieldDamage = 1
         m.duplicateChance = 0
-        if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+        powerUps.setDo();
         m.grabPowerUpRange2 = 156000;
         m.fieldRange = 155;
         m.fieldFire = false;
@@ -2370,7 +2370,7 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
                 m.duplicateChance = 0.07
-                simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+                powerUps.setDo(); //needed after adjusting duplication chance
 
                 m.hold = function() {
                     // m.hole = {  //this is reset with each new field, but I'm leaving it here for reference
@@ -2922,7 +2922,7 @@ const m = {
                                     }
                                     m.damage(dmg);
                                     if (tech.isPiezo) m.energy += 20.48;
-                                    if (tech.isBayesian) powerUps.ejectTech()
+                                    if (tech.isStimulatedEmission) powerUps.ejectTech()
                                     if (mob[k].onHit) mob[k].onHit(k);
                                     if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                                     //extra kick between player and mob              //this section would be better with forces but they don't work...

@@ -1,6 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-
+tech: metastability - 20% dup chance, but duplicated powers up eventually explode
+nerfed tech: electric reactive armor 6% (was 7%) explosion damage reduction for every 10 energy you currently have
 
 ******************************************************** BUGS ********************************************************
 
@@ -37,6 +38,14 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+make wave packets a tech
+  use the tech that makes the wave packets longer?
+  default wave can be two oscillating waves
+
+make beating the final boss without undefined feel like winning, not like dieing
+
+try making more things const to change the color to purple in simulation loop
 
 power ups disappear after 3-5 seconds
   only apply to drops from killing mobs

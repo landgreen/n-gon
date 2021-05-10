@@ -3025,14 +3025,14 @@ const spawn = {
             this.attraction();
         };
     },
-    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2), isBonusShield = false) {
+    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2), isExtraShield = false) {
         if (this.allowShields && Math.random() < chance) {
             mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];
             me.stroke = "rgb(220,220,255)";
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.shield = true;
-            me.isBonusShield = isBonusShield //this prevents spamming with tech.isShieldAmmo
+            me.isExtraShield = isExtraShield //this prevents spamming with tech.isShieldAmmo
             me.collisionFilter.category = cat.mobShield
             me.collisionFilter.mask = cat.bullet;
             consBB[consBB.length] = Constraint.create({

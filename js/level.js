@@ -16,15 +16,16 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("metamaterial cloaking")
-            // b.giveGuns("wave beam")
+            b.giveGuns("wave beam")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // tech.giveTech("pulse")
             // for (let i = 0; i < 1; i++) tech.giveTech("crystallizer")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
-            // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
+            // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
+            tech.giveTech("metastability")
 
             level.intro(); //starting level
             // level.testing(); //not in rotation

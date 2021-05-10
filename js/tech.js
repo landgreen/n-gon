@@ -170,7 +170,7 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.043 + tech.duplicateChance + m.duplicateChance
+            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.043 + tech.duplicateChance + m.duplicateChance
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -821,7 +821,7 @@
             {
                 name: "electric reactive armor",
                 // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-                description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>7%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
+                description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>6%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1790,7 +1790,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1
+                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1 || tech.iceIXOnDeath
                 },
                 requires: "a localized freeze effect",
                 effect() {
@@ -1807,7 +1807,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1
+                    return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath
                 },
                 requires: "a freezing or stunning effect",
                 effect() {
@@ -2762,13 +2762,12 @@
                 requires: "below 100% duplication chance",
                 effect() {
                     tech.duplicateChance += 0.075
-                    tech.maxDuplicationEvent()
-                    simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+                    powerUps.setDo(); //needed after adjusting duplication chance
                     tech.addJunkTechToPool(12)
                 },
                 remove() {
                     tech.duplicateChance = 0
-                    if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+                    powerUps.setDo(); //needed after adjusting duplication chance
                     if (this.count > 1) tech.removeJunkTechFromPool(12)
                 }
             },
@@ -2780,17 +2779,36 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return tech.duplicationChance() < 1 && level.levelsCleared < 6
+                    return tech.duplicationChance() < 1
                 },
                 requires: "below 100% duplication chance",
                 effect: () => {
-                    tech.isBayesian = true
-                    simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
-                    tech.maxDuplicationEvent()
+                    tech.isStimulatedEmission = true
+                    powerUps.setDo(); //needed after adjusting duplication chance
                 },
                 remove() {
-                    tech.isBayesian = false
-                    if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+                    tech.isStimulatedEmission = false
+                    powerUps.setDo(); //needed after adjusting duplication chance
+                }
+            },
+            {
+                name: "metastability",
+                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second half-life",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return tech.duplicationChance() < 1
+                },
+                requires: "below 100% duplication chance",
+                effect: () => {
+                    tech.isPowerUpsVanish = true
+                    powerUps.setDo(); //needed after adjusting duplication chance
+                },
+                remove() {
+                    tech.isPowerUpsVanish = false
+                    powerUps.setDo(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -2801,18 +2819,18 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return tech.duplicationChance() < 1 && !tech.isDeterminism && level.levelsCleared < 4
+                    return tech.duplicationChance() < 1 && !tech.isDeterminism
                 },
                 requires: "below 100% duplication chance, below level 5, not determinism",
                 effect() {
                     // tech.cancelCount = 0
                     tech.isCancelDuplication = true
-                    simulation.draw.powerUp = simulation.draw.powerUpBonus //change power up draw
+                    powerUps.setDo(); //needed after adjusting duplication chance
                 },
                 remove() {
                     // tech.cancelCount = 0
                     tech.isCancelDuplication = false
-                    if (tech.duplicationChance() === 0) simulation.draw.powerUp = simulation.draw.powerUpNormal
+                    powerUps.setDo(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -2953,7 +2971,7 @@
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2
                 <br>${powerUps.research.count}`)
                     const chanceStore = tech.duplicateChance
-                    tech.duplicateChance = (tech.isBayesian ? 0.2 : 0) + tech.cancelCount * 0.045 + m.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
+                    tech.duplicateChance = (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.045 + m.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                     powerUps.spawn(m.pos.x, m.pos.y, "tech");
                     tech.duplicateChance = chanceStore
                 },
@@ -3703,7 +3721,7 @@
                 },
                 remove() {
                     tech.wavePacketFrequency = 0.088 //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
-                    tech.wavePacketLength = 36 //32.7 //31.3 //28.8 //36 //how many wave packets are released // double this to emit 2 packets
+                    tech.wavePacketLength = 34 //32.7 //31.3 //28.8 //36 //how many wave packets are released // double this to emit 2 packets
                     tech.waveLengthRange = 130;
                 }
             },
@@ -4818,7 +4836,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isIceField || tech.relayIce || tech.blockingIce
+                    return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath
                 },
                 requires: "ice IX",
                 effect() {
@@ -6528,7 +6546,7 @@
         isGunCycle: null,
         isFastFoam: null,
         isSporeGrowth: null,
-        isBayesian: null,
+        isStimulatedEmission: null,
         nailGun: null,
         nailInstantFireRate: null,
         isCapacitor: null,

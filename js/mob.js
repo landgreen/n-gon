@@ -155,10 +155,10 @@ const mobs = {
         }
     },
     statusDoT(who, tickDamage, cycles = 180) {
-        if (!who.isShielded && !m.isBodiesAsleep && who.alive) {
+        if (!who.isShielded && who.alive) {
             who.status.push({
                 effect() {
-                    if ((simulation.cycle - this.startCycle) % 30 === 0) {
+                    if ((simulation.cycle - this.startCycle) % 30 === 0 && !m.isBodiesAsleep) {
                         let dmg = b.dmgScale * this.dmg
                         who.damage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
@@ -169,10 +169,6 @@ const mobs = {
                             time: simulation.drawTime
                         });
                     }
-                    // if (true) {
-                    //     //check for nearby mobs
-
-                    // }
                 },
                 endEffect() {},
                 dmg: tickDamage,
@@ -1090,7 +1086,7 @@ const mobs = {
                         bullet[bullet.length - 1].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
                         this.leaveBody = false; // no body since it turned into the bot
                     }
-                } else if (tech.isShieldAmmo && this.shield && !this.isBonusShield) {
+                } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"

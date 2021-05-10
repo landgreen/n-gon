@@ -319,11 +319,8 @@ const b = {
                 time: simulation.drawTime * 2
             });
 
-            //player damage and knock back
-            sub = Vector.sub(where, player.position);
-            dist = Vector.magnitude(sub);
-
-            if (dist < radius) {
+            //player damage
+            if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
                 const drain = (tech.isExplosionHarm ? 0.5 : 0.25) * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1)
                 m.energy -= drain
                 if (m.energy < 0) {
@@ -389,6 +386,7 @@ const b = {
 
             //body knock backs
             for (let i = 0, len = body.length; i < len; ++i) {
+                if (body[i].isNotHoldable) continue
                 sub = Vector.sub(where, body[i].position);
                 dist = Vector.magnitude(sub);
                 if (dist < radius) {
@@ -560,11 +558,11 @@ const b = {
         for (let i = 0, len = Math.floor(mag * 0.0005 * charge); i < len; i++) {
             const dist = Math.random()
             simulation.drawList.push({
-                x: path[0].x + sub.x * dist + 13 * (Math.random() - 0.5),
-                y: path[0].y + sub.y * dist + 13 * (Math.random() - 0.5),
-                radius: 1 + 4 * Math.random(),
+                x: path[0].x + sub.x * dist + 10 * (Math.random() - 0.5),
+                y: path[0].y + sub.y * dist + 10 * (Math.random() - 0.5),
+                radius: 1.5 + 5 * Math.random(),
                 color: "rgba(255,0,0,0.5)",
-                time: Math.floor(2 + 33 * Math.random() * Math.random())
+                time: Math.floor(9 + 25 * Math.random() * Math.random())
             });
         }
     },
@@ -3625,7 +3623,6 @@ const b = {
             damage: 1,
             fire() {
                 totalCycles = Math.floor(4.3 * tech.wavePacketLength * tech.waveReflections * tech.isBulletsLastLonger)
-                // for (let i = 0; i < 2; i++) {
                 const me = bullet.length;
                 bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 5, 4, {
                     angle: m.angle,
@@ -3634,7 +3631,7 @@ const b = {
                     inertia: Infinity,
                     frictionAir: 0,
                     slow: 0,
-                    amplitude: (m.crouch ? 5 : 10) * Math.sin(this.wavePacketCycle * tech.wavePacketFrequency) * ((this.wavePacketCycle % 2) ? -1 : 1),
+                    amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * tech.wavePacketFrequency), //
                     minDmgSpeed: 0,
                     dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
                     classType: "bullet",
@@ -3716,8 +3713,7 @@ const b = {
                     y: tech.waveBeamSpeed * Math.sin(m.angle)
                 });
                 const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
-                // }
-                //fire some of bullets then delay for a while
+                //fire a packet of bullets then delay for a while
                 this.wavePacketCycle++
                 if (this.wavePacketCycle > tech.wavePacketLength) {
                     m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCD); // cool down
@@ -4487,28 +4483,30 @@ const b = {
                         }
                     }
                     if (tech.historyLaser) {
+                        const len = 1 + tech.historyLaser
+                        const spacing = Math.ceil(30 - 2 * tech.historyLaser)
                         this.do = () => {
-                            const len = 1 + 2 * tech.historyLaser
-                            const spacing = Math.ceil(40 - 9 * tech.historyLaser)
                             if (this.charge > 0) {
                                 //draw charge level
-                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
+                                const mag = 4.1 * Math.sqrt(this.charge)
                                 ctx.beginPath();
-                                const mag = 4.5 * Math.sqrt(this.charge)
                                 for (let i = 0; i < len; i++) {
                                     const history = m.history[(m.cycle - i * spacing) % 600]
                                     const off = history.yOff - 24.2859
                                     ctx.moveTo(history.position.x, history.position.y - off);
-                                    ctx.ellipse(history.position.x, history.position.y - off, mag, mag * 0.5, history.angle, 0, 2 * Math.PI)
+                                    ctx.ellipse(history.position.x, history.position.y - off, mag, mag * 0.65, history.angle, 0, 2 * Math.PI)
                                 }
+                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
                                 //fire
                                 if (!input.fire) {
-                                    m.fireCDcycle = m.cycle + 10; // cool down
-                                    for (let i = 1; i < len; i++) {
-                                        const history = m.history[(m.cycle - i * spacing) % 600]
-                                        const off = history.yOff - 24.2859
-                                        b.pulse(1.4 * this.charge, history.angle, { x: history.position.x, y: history.position.y - off })
+                                    if (this.charge > 5) {
+                                        m.fireCDcycle = m.cycle + 40; // cool down
+                                        for (let i = 0; i < len; i++) {
+                                            const history = m.history[(m.cycle - i * spacing) % 600]
+                                            const off = history.yOff - 24.2859
+                                            b.pulse(1.65 * this.charge, history.angle, { x: history.position.x, y: history.position.y - off })
+                                        }
                                     }
                                     this.charge = 0;
                                 }
@@ -4518,19 +4516,21 @@ const b = {
                         this.do = () => {
                             if (this.charge > 0) {
                                 //draw charge level
-                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.beginPath();
                                 ctx.arc(m.pos.x, m.pos.y, 4.2 * Math.sqrt(this.charge), 0, 2 * Math.PI);
+                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
                                 //fire  
                                 if (!input.fire) {
-                                    m.fireCDcycle = m.cycle + 10; // cool down
-                                    if (tech.beamSplitter) {
-                                        const divergence = m.crouch ? 0.2 : 0.5
-                                        const angle = m.angle - tech.beamSplitter * divergence / 2
-                                        for (let i = 0; i < 1 + tech.beamSplitter; i++) b.pulse(this.charge, angle + i * divergence)
-                                    } else {
-                                        b.pulse(1.75 * this.charge, m.angle)
+                                    if (this.charge > 5) {
+                                        m.fireCDcycle = m.cycle + 35; // cool down
+                                        if (tech.beamSplitter) {
+                                            const divergence = m.crouch ? 0.2 : 0.5
+                                            const angle = m.angle - tech.beamSplitter * divergence / 2
+                                            for (let i = 0; i < 1 + tech.beamSplitter; i++) b.pulse(this.charge, angle + i * divergence)
+                                        } else {
+                                            b.pulse(1.8 * this.charge, m.angle)
+                                        }
                                     }
                                     this.charge = 0;
                                 }

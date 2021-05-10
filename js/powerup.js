@@ -3,6 +3,107 @@ let powerUp = [];
 const powerUps = {
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
     lastTechIndex: null,
+    do() {},
+    setDo() {
+        if (tech.duplicationChance() > 0) {
+            if (tech.isPowerUpsVanish) {
+                powerUps.do = powerUps.doDuplicatesVanish
+            } else {
+                powerUps.do = powerUps.doDuplicates
+            }
+            tech.maxDuplicationEvent() //check to see if hitting 100% duplication
+        } else {
+            powerUps.do = powerUps.doDefault
+        }
+    },
+    doDefault() { //draw power ups
+        ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            ctx.beginPath();
+            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+            ctx.fillStyle = powerUp[i].color;
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    },
+    doDuplicates() { //draw power ups but give duplicates some electricity
+        ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            ctx.beginPath();
+            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+            ctx.fillStyle = powerUp[i].color;
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            if (powerUp[i].isDuplicated && Math.random() < 0.1) {
+                //draw electricity
+                const mag = 5 + powerUp[i].size / 5
+                let unit = Vector.rotate({
+                    x: mag,
+                    y: mag
+                }, 2 * Math.PI * Math.random())
+                let path = {
+                    x: powerUp[i].position.x + unit.x,
+                    y: powerUp[i].position.y + unit.y
+                }
+                ctx.beginPath();
+                ctx.moveTo(path.x, path.y);
+                for (let i = 0; i < 6; i++) {
+                    unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
+                    path = Vector.add(path, unit)
+                    ctx.lineTo(path.x, path.y);
+                }
+                ctx.lineWidth = 0.5 + 2 * Math.random();
+                ctx.strokeStyle = "#000"
+                ctx.stroke();
+            }
+        }
+    },
+    doDuplicatesVanish() { //draw power ups but give duplicates some electricity
+        //remove power ups after 3 seconds
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            if (powerUp[i].isDuplicated && Math.random() < 0.004) { //  (1-0.004)^150 = chance to be removed after 3 seconds
+                b.explosion(powerUp[i].position, (10 + 3 * Math.random()) * powerUp[i].size);
+                Matter.World.remove(engine.world, powerUp[i]);
+                powerUp.splice(i, 1);
+                break
+            }
+        }
+
+        ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.25) + 0.6
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            ctx.beginPath();
+            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+            ctx.fillStyle = powerUp[i].color;
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            if (powerUp[i].isDuplicated && Math.random() < 0.3) {
+                //draw electricity
+                const mag = 5 + powerUp[i].size / 5
+                let unit = Vector.rotate({
+                    x: mag,
+                    y: mag
+                }, 2 * Math.PI * Math.random())
+                let path = {
+                    x: powerUp[i].position.x + unit.x,
+                    y: powerUp[i].position.y + unit.y
+                }
+                ctx.beginPath();
+                ctx.moveTo(path.x, path.y);
+                for (let i = 0; i < 6; i++) {
+                    unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
+                    path = Vector.add(path, unit)
+                    ctx.lineTo(path.x, path.y);
+                }
+                ctx.lineWidth = 0.5 + 2 * Math.random();
+                ctx.strokeStyle = "#000"
+                ctx.stroke();
+            }
+        }
+    },
     choose(type, index) {
         if (type === "gun") {
             b.giveGuns(index)
@@ -175,7 +276,7 @@ const powerUps = {
             powerUps.directSpawn(x, y, "heal", false, null, size)
             if (Math.random() < tech.duplicationChance()) {
                 powerUps.directSpawn(x, y, "heal", false, null, size)
-                powerUp[powerUp.length - 1].isBonus = true
+                powerUp[powerUp.length - 1].isDuplicated = true
             }
         }
     },
@@ -640,7 +741,7 @@ const powerUps = {
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-                    powerUp[powerUp.length - 1].isBonus = true
+                    powerUp[powerUp.length - 1].isDuplicated = true
                 }
                 // remove a random tech from the list of tech you have
                 tech.tech[choose].remove();
@@ -655,7 +756,7 @@ const powerUps = {
 
             for (let i = 0; i < tech.tech[choose].count; i++) {
                 powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-                powerUp[powerUp.length - 1].isBonus = true
+                powerUp[powerUp.length - 1].isDuplicated = true
             }
             // remove a random tech from the list of tech you have
             tech.tech[choose].remove();
@@ -720,7 +821,8 @@ const powerUps = {
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < tech.duplicationChance()) {
                 powerUps.directSpawn(x, y, target, moving, mode, size)
-                powerUp[powerUp.length - 1].isBonus = true
+                powerUp[powerUp.length - 1].isDuplicated = true
+                // if (tech.isPowerUpsVanish) powerUp[powerUp.length - 1].endCycle = simulation.cycle + 300
             }
         }
     },

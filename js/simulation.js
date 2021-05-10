@@ -20,7 +20,7 @@ const simulation = {
         ctx.save();
         simulation.camera();
         level.custom();
-        simulation.draw.powerUp();
+        powerUps.do();
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
@@ -900,61 +900,60 @@ const simulation = {
         ctx.fillText(`(${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})`, simulation.mouse.x, simulation.mouse.y - 20);
     },
     draw: {
-        powerUp() { //is set by Bayesian tech
-            // ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
-            // for (let i = 0, len = powerUp.length; i < len; ++i) {
-            //   ctx.beginPath();
-            //   ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-            //   ctx.fillStyle = powerUp[i].color;
-            //   ctx.fill();
-            // }
-            // ctx.globalAlpha = 1;
-        },
-        powerUpNormal() { //back up in case power up draw gets changed
-            ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
-            for (let i = 0, len = powerUp.length; i < len; ++i) {
-                ctx.beginPath();
-                ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-                ctx.fillStyle = powerUp[i].color;
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
-        },
-        powerUpBonus() { //draws crackle effect for bonus power ups
-            ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
-            for (let i = 0, len = powerUp.length; i < len; ++i) {
-                ctx.beginPath();
-                ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-                ctx.fillStyle = powerUp[i].color;
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
-            for (let i = 0, len = powerUp.length; i < len; ++i) {
-                if (powerUp[i].isBonus && Math.random() < 0.1) {
-                    //draw electricity
-                    const mag = 5 + powerUp[i].size / 5
-                    let unit = Vector.rotate({
-                        x: mag,
-                        y: mag
-                    }, 2 * Math.PI * Math.random())
-                    let path = {
-                        x: powerUp[i].position.x + unit.x,
-                        y: powerUp[i].position.y + unit.y
-                    }
-                    ctx.beginPath();
-                    ctx.moveTo(path.x, path.y);
-                    for (let i = 0; i < 6; i++) {
-                        unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
-                        path = Vector.add(path, unit)
-                        ctx.lineTo(path.x, path.y);
-                    }
-                    ctx.lineWidth = 0.5 + 2 * Math.random();
-                    ctx.strokeStyle = "#000"
-                    ctx.stroke();
-                }
-            }
-            // ctx.globalAlpha = 1;
-        },
+        // powerUp() { //is set by Bayesian tech
+        //     // ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+        //     // for (let i = 0, len = powerUp.length; i < len; ++i) {
+        //     //   ctx.beginPath();
+        //     //   ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+        //     //   ctx.fillStyle = powerUp[i].color;
+        //     //   ctx.fill();
+        //     // }
+        //     // ctx.globalAlpha = 1;
+        // },
+        // powerUpNormal() { //back up in case power up draw gets changed
+        //     ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+        //     for (let i = 0, len = powerUp.length; i < len; ++i) {
+        //         ctx.beginPath();
+        //         ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+        //         ctx.fillStyle = powerUp[i].color;
+        //         ctx.fill();
+        //     }
+        //     ctx.globalAlpha = 1;
+        // },
+        // powerUpBonus() { //draws crackle effect for bonus power ups
+        //     ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+        //     for (let i = 0, len = powerUp.length; i < len; ++i) {
+        //         ctx.beginPath();
+        //         ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+        //         ctx.fillStyle = powerUp[i].color;
+        //         ctx.fill();
+        //     }
+        //     ctx.globalAlpha = 1;
+        //     for (let i = 0, len = powerUp.length; i < len; ++i) {
+        //         if (powerUp[i].isDuplicated && Math.random() < 0.1) {
+        //             //draw electricity
+        //             const mag = 5 + powerUp[i].size / 5
+        //             let unit = Vector.rotate({
+        //                 x: mag,
+        //                 y: mag
+        //             }, 2 * Math.PI * Math.random())
+        //             let path = {
+        //                 x: powerUp[i].position.x + unit.x,
+        //                 y: powerUp[i].position.y + unit.y
+        //             }
+        //             ctx.beginPath();
+        //             ctx.moveTo(path.x, path.y);
+        //             for (let i = 0; i < 6; i++) {
+        //                 unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
+        //                 path = Vector.add(path, unit)
+        //                 ctx.lineTo(path.x, path.y);
+        //             }
+        //             ctx.lineWidth = 0.5 + 2 * Math.random();
+        //             ctx.strokeStyle = "#000"
+        //             ctx.stroke();
+        //         }
+        //     }
+        // },
 
         // map: function() {
         //     ctx.beginPath();
