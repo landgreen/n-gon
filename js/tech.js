@@ -1738,7 +1738,7 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.isFlipFlopEnergy || tech.isFlipFlopDamage || tech.isFlipFlopHarm
+                    return tech.isFlipFlopEnergy || tech.isFlipFlopDamage || tech.isFlipFlopHarm || tech.relayIce
                 },
                 requires: "2 ON/OFF techs",
                 effect() {
@@ -1965,9 +1965,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
+                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
                 },
-                requires: "piezoelectricity, Penrose, half-wave, or thermoelectric, but not time crystals",
+                requires: "a way to regen extra energy, but not time crystals",
                 effect: () => {
                     tech.energyRegen = 0;
                     m.fieldRegen = tech.energyRegen;
@@ -2012,7 +2012,7 @@
                 description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>5</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 3,
                 allowed() {
                     return tech.isEnergyHealth && !tech.isNoHeals
                 },
@@ -3686,25 +3686,7 @@
             },
             {
                 name: "bound state",
-                description: "instead of dissipating normally<br>wave packets <strong>reflect</strong> backwards <strong>1</strong> times",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.haveGunCheck("wave beam")
-                },
-                requires: "wave beam",
-                effect() {
-                    tech.waveReflections++
-                },
-                remove() {
-                    tech.waveReflections = 1
-                }
-            },
-            {
-                name: "packet length",
-                description: "wave packet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>40%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
+                description: "instead of dissipating normally<br>wave packets <strong>reflect</strong> backwards <strong>2</strong> times",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -3714,7 +3696,25 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    const scale = 1.4 - 0.025 * this.count
+                    tech.waveReflections += 2
+                },
+                remove() {
+                    tech.waveReflections = 1
+                }
+            },
+            {
+                name: "packet length",
+                description: "wave packet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>50%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
+                isGunTech: true,
+                maxCount: 3,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam")
+                },
+                requires: "wave beam",
+                effect() {
+                    const scale = 1.5 - 0.025 * this.count
                     tech.wavePacketLength *= scale
                     tech.wavePacketFrequency /= scale
                     tech.waveLengthRange *= Math.sqrt(scale)
@@ -3727,7 +3727,7 @@
             },
             {
                 name: "amplitude",
-                description: "wave packet <strong>amplitude</strong> is <strong>33%</strong> higher<br>wave <strong class='color-d'>damage</strong> is increased by <strong>33%</strong>",
+                description: "wave packet <strong>amplitude</strong> is <strong>33%</strong> higher<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -3747,7 +3747,7 @@
             },
             {
                 name: "propagation",
-                description: "wave packet propagation <strong>speed</strong> is <strong>30%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
+                description: "wave packet propagation <strong>speed</strong> is <strong>25%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3757,7 +3757,7 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.waveBeamSpeed *= 0.7;
+                    tech.waveBeamSpeed *= 0.75;
                     tech.waveBeamDamage += 1.3 * 0.5
                 },
                 remove() {
@@ -6025,7 +6025,7 @@
             },
             {
                 name: "diegesis",
-                description: "indicate gun fire delay<br>through a rotation of your head",
+                description: "indicate gun fire <strong><em>delay</em></strong><br>through a rotation of your head",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,

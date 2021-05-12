@@ -1,7 +1,6 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: metastability - 20% dup chance, but duplicated powers up eventually explode
-nerfed tech: electric reactive armor 6% (was 7%) explosion damage reduction for every 10 energy you currently have
+
 
 ******************************************************** BUGS ********************************************************
 
@@ -39,17 +38,16 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-make wave packets a tech
-  use the tech that makes the wave packets longer?
-  default wave can be two oscillating waves
+tech: a slow moving immortal mob follows you forever
+  spawns at exit and just slowing moves towards player
+  benefit:  
 
+tech: use the ability for power ups to have custom code
+  attracted to player
+  attracted to other power ups
+    explode if they touch?
+  
 make beating the final boss without undefined feel like winning, not like dieing
-
-try making more things const to change the color to purple in simulation loop
-
-power ups disappear after 3-5 seconds
-  only apply to drops from killing mobs
-  +duplication 20%
   
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up:

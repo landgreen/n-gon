@@ -3177,7 +3177,7 @@ const b = {
     // **************************************************************************************************
     guns: [{
             name: "nail gun",
-            description: "use compressed air to fire a stream of <strong>nails</strong><br><strong>delay</strong> after firing <strong>decreases</strong> as you shoot",
+            description: "use compressed air to fire a stream of <strong>nails</strong><br><strong><em>delay</em></strong> after firing <strong>decreases</strong> as you shoot",
             ammo: 0,
             ammoPack: 45,
             defaultAmmoPack: 45,
@@ -3608,12 +3608,12 @@ const b = {
             }
         }, {
             name: "wave beam",
-            description: "emit a <strong>wave packet</strong> of <strong>oscillating</strong> particles<br>that propagate through <strong>solids</strong>",
+            description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 80,
+            ammoPack: 100,
             have: false,
             wavePacketCycle: 0,
-            delay: 40,
+            delay: 60,
             do() {
                 if (this.wavePacketCycle && !input.fire) {
                     this.wavePacketCycle = 0;
@@ -3659,18 +3659,19 @@ const b = {
                         }
                         q = Matter.Query.point(mob, this.position) // check if inside a mob
                         for (let i = 0; i < q.length; i++) {
-                            let dmg = this.dmg / Math.min(10, q[i].mass)
+                            let dmg = this.dmg // / Math.min(10, q[i].mass)
                             q[i].damage(dmg);
                             q[i].foundPlayer();
+                            Matter.Body.setVelocity(q[i], Vector.mult(q[i].velocity, 0.9))
 
-                            //this draw circle had to be remove to reduce lag
-                            // simulation.drawList.push({ //add dmg to draw queue
-                            //     x: this.position.x,
-                            //     y: this.position.y,
-                            //     radius: Math.log(2 * dmg + 1.1) * 40,
-                            //     color: 'rgba(0,0,0,0.4)',
-                            //     time: simulation.drawTime
-                            // });
+                            this.endCycle = 0; //bullet ends cycle after doing damage
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                color: 'rgba(0,0,0,0.4)',
+                                time: simulation.drawTime
+                            });
                         }
                     },
                     wiggle() {
