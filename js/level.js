@@ -20,11 +20,11 @@ const level = {
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // tech.giveTech("pulse")
-            // for (let i = 0; i < 1; i++) tech.giveTech("crystallizer")
+            // for (let i = 0; i < 3; i++) tech.giveTech("amplitude")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
-            // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
+            // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
             // tech.giveTech("metastability")
 
             level.intro(); //starting level
@@ -111,6 +111,12 @@ const level = {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
         }
+
+        for (let i = 0; i < tech.wimpCount; i++) {
+            spawn.WIMP()
+            for (let j = 0, len = 1 + 2 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+        }
+        for (let i = 0; i < tech.wimpExperiment; i++) spawn.WIMP()
         // if (tech.isPerpetualReroll) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "research", false);
         // if (tech.isPerpetualAmmo) {
         //     for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "ammo", false);

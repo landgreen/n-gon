@@ -50,7 +50,6 @@ const mobs = {
             const range2 = (180 + 170 * Math.random()) ** 2
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (who !== mob[i] && Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range2 + mob[i].radius) {
-                    console.log(mob[i])
                     applySlow(mob[i])
                 }
             }
@@ -64,7 +63,6 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            console.log()
             if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep) {
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length

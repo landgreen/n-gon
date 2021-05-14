@@ -522,7 +522,7 @@ const m = {
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.019, 0.60)
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
-        if (tech.isHarmReduce && m.fieldUpgrades[m.fieldMode].name === "negative mass field" && m.isFieldActive) dmg *= 0.5
+        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.5
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
@@ -986,7 +986,6 @@ const m = {
         m.airSpeedLimit = 125
         m.drop();
         m.holdingMassScale = 0.5;
-        m.isFieldActive = false; //only being used by negative mass field
         m.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         m.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         m.isBodiesAsleep = true;
@@ -1670,7 +1669,6 @@ const m = {
                 m.hold = function() {
                     m.airSpeedLimit = 125 //5 * player.mass * player.mass
                     m.FxAir = 0.016
-                    m.isFieldActive = false;
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -1680,7 +1678,6 @@ const m = {
                         m.lookForPickUp();
                         const DRAIN = 0.00035
                         if (m.energy > DRAIN) {
-                            m.isFieldActive = true; //used with tech.isHarmReduce
                             m.airSpeedLimit = 400 // 7* player.mass * player.mass
                             m.FxAir = 0.005
 
@@ -2986,7 +2983,7 @@ const m = {
                                             let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"
-                                            } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
+                                            } else if (Math.random() < 0.23 && !tech.isSuperDeterminism) {
                                                 type = "research"
                                             }
                                             powerUps.spawn(mob[k].position.x, mob[k].position.y, type);

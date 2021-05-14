@@ -89,6 +89,83 @@ const spawn = {
     },
     //mob templates *********************************************************************************************
     //***********************************************************************************************************
+    WIMP(x = level.exit.x + 300 * (Math.random() - 0.5), y = level.exit.y + 300 * (Math.random() - 0.5), radius = 75 + 25 * Math.random()) { //immortal mob that follows player
+        //if you have the tech it spawns at start of every level at the exit
+        mobs.spawn(x, y, 3, radius, "transparent");
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent"
+        me.isShielded = true; //makes it immune to damage
+        me.leaveBody = false;
+        me.isDropPowerUp = false;
+        me.showHealthBar = false;
+        me.collisionFilter.mask = 0; //cat.player //| cat.body
+        me.chaseSpeed = 1 + 1.5 * Math.random()
+
+        me.awake = function() {
+            //chase player
+            const sub = Vector.sub(player.position, this.position)
+            const where = Vector.add(this.position, Vector.mult(Vector.normalise(sub), this.chaseSpeed))
+
+            Matter.Body.setPosition(this, { //hold position
+                x: where.x,
+                y: where.y
+            });
+            Matter.Body.setVelocity(this, { x: 0, y: 0 });
+
+            //aoe damage to player
+            if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius && !tech.isNeutronImmune) {
+                const DRAIN = 0.07
+                if (m.energy > DRAIN) {
+                    m.energy -= DRAIN
+                } else {
+                    m.energy = 0;
+                    m.damage(0.007)
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: this.radius,
+                        color: simulation.mobDmgColor,
+                        time: simulation.drawTime
+                    });
+                }
+            }
+
+            //aoe damage to mobs
+            // for (let i = 0, len = mob.length; i < len; i++) {
+            //     if (!mob[i].isShielded && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radius) {
+            //         let dmg = b.dmgScale * 0.082
+            //         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
+            //         if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
+            //         mob[i].damage(dmg);
+            //         if (tech.isNeutronSlow) {
+            //             Matter.Body.setVelocity(mob[i], {
+            //                 x: mob[i].velocity.x * this.vacuumSlow,
+            //                 y: mob[i].velocity.y * this.vacuumSlow
+            //             });
+            //         }
+            //     }
+            // }
+
+            //draw some flashy graphics
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+            // ctx.fillStyle = "hsla(160, 100%, 35%,0.75)" //"rgba(255,0,255,0.2)";
+            // ctx.globalCompositeOperation = "lighter"
+            ctx.fillStyle = `rgba(25,139,170,${0.2+0.12*Math.random()})`;
+            ctx.fill();
+            this.radius = 100 * (1 + 0.25 * Math.sin(simulation.cycle * 0.03))
+            // ctx.fillStyle = "#fff";
+            // ctx.globalCompositeOperation = "difference";
+            // ctx.fill();
+            // ctx.globalCompositeOperation = "source-over"
+        }
+        me.do = function() { //wake up 2 seconds after the player moves
+            if (player.speed > 1 && !m.isCloak) {
+                setTimeout(() => { this.do = this.awake; }, 2000);
+            }
+            this.checkStatus();
+        };
+    },
     finalBoss(x, y, radius = 300) {
         mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
@@ -122,22 +199,39 @@ const spawn = {
                     if (!simulation.paused) {
                         count++
                         if (count < 600) {
+                            if (count === 1) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
                             if (!(count % 60)) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(count/60- Math.random()).toFixed(3)}`);
                         } else if (count === 600) {
-                            simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1`);
+                            simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
                         } else if (count === 720) {
                             simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
                         } else if (count === 900) {
-                            simulation.makeTextLog(`World.clear(engine.world)`);
+                            simulation.makeTextLog(`World.clear(engine.world) <em>//simulation successful</em>`);
                         } else if (count === 1140) {
-                            tech.isImmortal = false;
-                            m.death()
+                            // tech.isImmortal = false;
+                            // m.death()
+                            // m.alive = false;
+                            // simulation.paused = true;
+                            // m.health = 0;
+                            // m.displayHealth();
+                            document.getElementById("health").style.display = "none"
+                            document.getElementById("health-bg").style.display = "none"
+                            document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
+                            document.getElementById("fade-out").style.opacity = 1; //slowly fades out
+                            // build.shareURL(false)
+                            setTimeout(function() {
+                                World.clear(engine.world);
+                                Engine.clear(engine);
+                                simulation.splashReturn();
+                            }, 6000);
                             return
                         }
                     }
                     if (simulation.testing) {
-                        simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
                         unlockExit()
+                        setTimeout(function() {
+                            simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
+                        }, 1500);
                     } else {
                         requestAnimationFrame(loop);
                     }

@@ -1,8 +1,31 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+ice-IX does 15% more damage
 
+tech: WIMPs - an indestructible harmful particle slowly chases you
+  spawn 2-3 research at the end of each level
+experimental mode : WIMPS chase you
+
+beating the final boss looks a bit less like death and a bit more like winning
+  also there are some text directions on how to enter endless mode (press T after you win)
+
+tech removed: 1-body problem
 
 ******************************************************** BUGS ********************************************************
+
+Why does micro-extruder lag so much anyway
+
+blue triangle boss can move backwards and aim away from you if set up properly
+
+HTML build system looks bad since tech does grey out
+
+The html build share system crashing some times
+tech: strange attractor before at least 1 other tech
+  https://landgreen.github.io/sidescroller/index.html?&gun0=rail%20gun&tech18=correlated%20damage&tech20=strange%20attractor
+&tech0=auto-loading%20heuristics as only tech
+  https://landgreen.github.io/sidescroller/index.html?&tech0=auto-loading%20heuristics
+crashed on this
+https://landgreen.github.io/sidescroller/index.html?&gun0=rail%20gun&tech1=mass%20driver&tech2=restitution&tech3=flywheel&tech4=Pauli%20exclusion&tech5=mass-energy%20equivalence&tech6=1st%20ionization%20energy&tech7=electrolytes&tech8=negative%20feedback&tech9=entropy%20exchange&tech10=anthropic%20principle&tech11=renormalization&tech12=Bayesian%20statistics&tech13=bubble%20fusion&tech14=replication&tech15=replication&tech16=futures%20exchange&tech17=commodities%20exchange&tech18=correlated%20damage&tech19=parthenogenesis&tech21=cardinality&tech22=half-wave%20rectifier&tech23=pair%20production&tech24=Lorentz%20transformation&tech25=time%20crystals&tech26=undefined&tech27=undefined&tech28=undefined&tech29=undefined&tech30=undefined&tech31=undefined&tech32=undefined&field=pilot%20wave&difficulty=6
 
 (once) CPT gun only rewound 0.25 seconds
   after a randomize run (non-unitary)
@@ -38,22 +61,24 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-tech: a slow moving immortal mob follows you forever
-  spawns at exit and just slowing moves towards player
-  benefit:  
+tech: MACHO - spawn a mob like WIMP that follows you and gives you a bonus
+  if it touches WIMP they explode
+
+let the player use research more like money
+  spend it to do things
 
 tech: use the ability for power ups to have custom code
   attracted to player
   attracted to other power ups
     explode if they touch?
   
-make beating the final boss without undefined feel like winning, not like dieing
-  
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up:
     get ammo
     get 1% duplication
     get 1% damage permanent
+    turned into drones
+
 
 nail-gun, or ....
   1s after being fired your bullets turn:

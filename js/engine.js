@@ -194,7 +194,7 @@ function collisionChecks(event) {
                                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                     if (Math.random() < 0.4) {
                                         type = "heal"
-                                    } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {
+                                    } else if (Math.random() < 0.23 && !tech.isSuperDeterminism) {
                                         type = "research"
                                     }
                                     powerUps.spawn(mob[k].position.x, mob[k].position.y, type);

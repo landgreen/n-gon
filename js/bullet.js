@@ -1727,7 +1727,7 @@ const b = {
             sentry() {
                 this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet //can now collide with other bullets
                 this.lookFrequency = simulation.cycle + 60
-                this.endCycle = simulation.cycle + 1080
+                this.endCycle = simulation.cycle + 1140
                 this.do = function() { //overwrite the do method for this bullet
                     this.force.y += this.mass * 0.002; //extra gravity
                     if (simulation.cycle > this.lookFrequency) {
@@ -1771,7 +1771,7 @@ const b = {
                             if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
-                                        // mob[i].isDropPowerUp &&
+                                        mob[i].isDropPowerUp &&
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                         Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                                         this.endCycle = 0 //end life if mob is near and visible
@@ -1847,7 +1847,7 @@ const b = {
                             this.lockedOn = null;
                             let closeDist = Infinity;
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                if (mob[i].isDropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
                                     const targetVector = Vector.sub(this.position, mob[i].position)
                                     const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
                                     if (dist < closeDist) {
@@ -1932,7 +1932,7 @@ const b = {
             friction: 0,
             frictionAir: 0.10,
             restitution: 0.3,
-            dmg: 0.29, //damage done in addition to the damage from momentum
+            dmg: 0.33, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 140 * tech.isBulletsLastLonger,
             classType: "bullet",
@@ -1951,7 +1951,7 @@ const b = {
                     setTimeout(function() {
                         if (!who.alive) {
                             m.energy += tech.iceEnergy * 0.8
-                            m.addHealth(tech.iceEnergy * 0.04)
+                            // m.addHealth(tech.iceEnergy * 0.04)
                         }
                     }, 10);
                 }
@@ -2701,7 +2701,7 @@ const b = {
                         let target
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                            if (dist2 < 1000000 && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                            if (dist2 < 1000000 && mob[i].isDropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
                                 this.cd = simulation.cycle + this.delay;
                                 target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60))
                                 const radius = 6 + 7 * Math.random()
@@ -2868,6 +2868,7 @@ const b = {
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
                             if (DIST < closeDist &&
+                                mob[i].isDropPowerUp &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                                 closeDist = DIST;
@@ -2932,6 +2933,7 @@ const b = {
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
                             if (DIST < closeDist &&
+                                mob[i].isDropPowerUp &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                                 closeDist = DIST;
@@ -4111,7 +4113,7 @@ const b = {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
-            ammoPack: 3.15,
+            ammoPack: 2.5,
             have: false,
             do() {},
             fire() {
@@ -4127,7 +4129,7 @@ const b = {
                             if (tech.isRailAreaDamage) {
                                 mob[i].force.x += 2 * FORCE.x;
                                 mob[i].force.y += 2 * FORCE.y;
-                                const damage = b.dmgScale * 0.13 * Math.sqrt(DEPTH)
+                                const damage = b.dmgScale * 0.16 * Math.sqrt(DEPTH)
                                 mob[i].damage(damage);
                                 mob[i].locatePlayer();
                                 simulation.drawList.push({ //add dmg to draw queue

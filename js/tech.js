@@ -145,7 +145,6 @@
         },
         damageFromTech() {
             let dmg = m.fieldDamage
-            if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.85
@@ -662,23 +661,24 @@
                     b.setFireCD();
                 }
             },
-            {
-                name: "1-body problem",
-                description: "if there is exactly <strong>1</strong> active <strong>bullet</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return !tech.foamBotCount && !tech.nailBotCount && m.fieldUpgrades[m.fieldMode].name !== "nano-scale manufacturing" && ((tech.haveGunCheck("missiles") && tech.missileCount === 1) || tech.haveGunCheck("rail gun") || tech.haveGunCheck("grenades") || tech.isRivets || tech.isSlugShot || tech.oneSuperBall)
-                },
-                requires: "missiles, rail gun, grenades, rivets, slugs, super ball, no foam/nail bots, nano-scale",
-                effect() {
-                    tech.isOneBullet = true
-                },
-                remove() {
-                    tech.isOneBullet = false
-                }
-            },
+            // if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
+            // {
+            //     name: "1-body problem",
+            //     description: "if there is exactly <strong>1</strong> active <strong>bullet</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     allowed() {
+            //         return !tech.foamBotCount && !tech.nailBotCount && m.fieldUpgrades[m.fieldMode].name !== "nano-scale manufacturing" && ((tech.haveGunCheck("missiles") && tech.missileCount === 1) || tech.haveGunCheck("rail gun") || tech.haveGunCheck("grenades") || tech.isRivets || tech.isSlugShot || tech.oneSuperBall)
+            //     },
+            //     requires: "missiles, rail gun, grenades, rivets, slugs, super ball, no foam/nail bots, nano-scale",
+            //     effect() {
+            //         tech.isOneBullet = true
+            //     },
+            //     remove() {
+            //         tech.isOneBullet = false
+            //     }
+            // },
             {
                 name: "microstates",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
@@ -888,23 +888,6 @@
                 }
             },
             {
-                name: "crystallizer",
-                description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong><br>they have a chance shatter into <strong class='color-s'>ice IX</strong> crystals",
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
-                },
-                requires: "a localized freeze effect, no other mob death tech",
-                effect() {
-                    tech.iceIXOnDeath++
-                },
-                remove() {
-                    tech.iceIXOnDeath = 0
-                }
-            },
-            {
                 name: "impact shear",
                 description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br><em>nails target nearby mobs</em>",
                 maxCount: 9,
@@ -948,7 +931,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner || tech.isMobBlockFling
+                    return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner || tech.isMobBlockFling || tech.iceIXOnDeath
                 },
                 requires: "any mob death tech",
                 effect: () => {
@@ -1749,38 +1732,37 @@
                 }
             },
             {
-                name: "clock gating",
-                description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
-                maxCount: 1,
+                name: "crystallizer",
+                description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong><br>they have a chance shatter into <strong class='color-s'>ice IX</strong> crystals",
+                maxCount: 9,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
+                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
                 },
-                requires: "FPS above 45",
+                requires: "a localized freeze effect, no other mob death tech",
                 effect() {
-                    tech.isSlowFPS = true;
+                    tech.iceIXOnDeath++
                 },
                 remove() {
-                    tech.isSlowFPS = false;
+                    tech.iceIXOnDeath = 0
                 }
             },
             {
-                name: "liquid cooling",
-                description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
-                maxCount: 1,
+                name: "thermoelectric effect",
+                description: "<strong>killing</strong> mobs with <strong class='color-s'>ice IX</strong><br>generates <strong>100</strong> <strong class='color-f'>energy</strong>",
+                maxCount: 9,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 2,
                 allowed() {
-                    return tech.isSlowFPS
+                    return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath
                 },
-                requires: "clock gating",
+                requires: "ice IX",
                 effect() {
-                    tech.isHarmFreeze = true;
+                    tech.iceEnergy++
                 },
                 remove() {
-                    tech.isHarmFreeze = false;
+                    tech.iceEnergy = 0;
                 }
             },
             {
@@ -1815,6 +1797,41 @@
                 },
                 remove() {
                     tech.isFreezeHarmImmune = false;
+                }
+            },
+            {
+                name: "liquid cooling",
+                description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
+                maxCount: 1,
+                count: 0,
+                frequency: 4,
+                frequencyDefault: 4,
+                allowed() {
+                    return tech.isSlowFPS
+                },
+                requires: "clock gating",
+                effect() {
+                    tech.isHarmFreeze = true;
+                },
+                remove() {
+                    tech.isHarmFreeze = false;
+                }
+            },
+            {
+                name: "clock gating",
+                description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
+                },
+                requires: "FPS above 45",
+                effect() {
+                    tech.isSlowFPS = true;
+                },
+                remove() {
+                    tech.isSlowFPS = false;
                 }
             },
             {
@@ -2696,23 +2713,25 @@
                 },
                 remove() {}
             },
-            // {
-            //     name: "perpetual research",
-            //     description: "find <strong>1</strong> <strong class='color-r'>research</strong> at the start of each <strong>level</strong>",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     allowed() {
-            //         return !tech.isSuperDeterminism && !tech.isPerpetualHeal && !tech.isPerpetualAmmo && !tech.isPerpetualStun
-            //     },
-            //     requires: "only 1 perpetual effect, not superdeterminism",
-            //     effect() {
-            //         tech.isPerpetualReroll = true
-            //     },
-            //     remove() {
-            //         tech.isPerpetualReroll = false
-            //     }
-            // },
+            {
+                name: "WIMPs",
+                //<strong class='color-harm'>harmful</strong>
+                description: "a weak massive particle slowly <strong>chases</strong> you<br>spawn <strong>2-3</strong> <strong class='color-r'>research</strong> at the end of each <strong>level</strong>",
+                maxCount: 9,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect: () => {
+                    tech.wimpCount++
+                },
+                remove() {
+                    tech.wimpCount = 0
+                }
+            },
             {
                 name: "bubble fusion",
                 description: "after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
@@ -3721,7 +3740,7 @@
                 },
                 remove() {
                     tech.wavePacketFrequency = 0.088 //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
-                    tech.wavePacketLength = 34 //32.7 //31.3 //28.8 //36 //how many wave packets are released // double this to emit 2 packets
+                    tech.wavePacketLength = 35 //32.7 //31.3 //28.8 //36 //how many wave packets are released // double this to emit 2 packets
                     tech.waveLengthRange = 130;
                 }
             },
@@ -3976,7 +3995,7 @@
             },
             {
                 name: "sentry",
-                description: "<strong>mines</strong> <strong>target</strong> mobs with nails over time<br>mines last about <strong>12</strong> seconds",
+                description: "<strong>mines</strong> <strong>target</strong> mobs with nails over time<br>mines last about <strong>14</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4623,7 +4642,7 @@
             },
             {
                 name: "flux pinning",
-                description: "blocking with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
+                description: "<strong>blocking</strong> with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4829,32 +4848,14 @@
                 }
             },
             {
-                name: "thermoelectric effect",
-                description: "<strong>killing</strong> mobs with <strong class='color-s'>ice IX</strong> gives <strong>4</strong> <strong class='color-h'>health</strong><br>and <strong>80</strong> <strong class='color-f'>energy</strong>",
-                isFieldTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath
-                },
-                requires: "ice IX",
-                effect() {
-                    tech.iceEnergy++
-                },
-                remove() {
-                    tech.iceEnergy = 0;
-                }
-            },
-            {
                 name: "degenerate matter",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong><br>while <strong>negative mass field</strong> is active",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> while your <strong class='color-f'>field</strong> is active",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field" && !tech.isEnergyHealth
+                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && !tech.isEnergyHealth
                 },
                 requires: "negative mass field, not mass-energy",
                 effect() {
@@ -4872,7 +4873,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
                 },
                 requires: "negative mass field",
                 effect() {
@@ -4961,7 +4962,7 @@
             },
             {
                 name: "micro-extruder",
-                description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> extrudes a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, and <strong class='color-f'>energy</strong> drain",
+                description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> extrudes a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, <strong class='color-f'>energy</strong> drain, and <strong>lag</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5176,7 +5177,7 @@
             //************************************************** modes
             //************************************************** 
             {
-                name: "ship",
+                name: "-ship-",
                 description: "<strong style='color: #f55;'>experiment:</strong> fly around with no legs<br>aim with the keyboard",
                 maxCount: 1,
                 count: 0,
@@ -5194,7 +5195,7 @@
                 remove() {}
             },
             {
-                name: "quantum leap",
+                name: "-quantum leap-",
                 description: "<strong style='color: #f55;'>experiment:</strong> every 20 seconds<br>become an alternate version of yourself",
                 maxCount: 1,
                 count: 0,
@@ -5215,7 +5216,7 @@
                 remove() {}
             },
             {
-                name: "shields",
+                name: "-shields-",
                 description: "<strong style='color: #f55;'>experiment:</strong> every 5 seconds<br>all mobs gain a shield",
                 maxCount: 1,
                 count: 0,
@@ -5237,7 +5238,7 @@
                 remove() {}
             },
             {
-                name: "Fourier analysis",
+                name: "-Fourier analysis-",
                 description: "<strong style='color: #f55;'>experiment:</strong> your aiming is random",
                 maxCount: 1,
                 count: 0,
@@ -5262,7 +5263,7 @@
                 remove() {}
             },
             {
-                name: "panopticon",
+                name: "-panopticon-",
                 description: "<strong style='color: #f55;'>experiment:</strong> mobs can always see you",
                 maxCount: 1,
                 count: 0,
@@ -5287,7 +5288,7 @@
                 remove() {}
             },
             {
-                name: "decomposers",
+                name: "-decomposers-",
                 description: "<strong style='color: #f55;'>experiment:</strong> after they die<br>mobs leave behind spawns",
                 maxCount: 1,
                 count: 0,
@@ -5305,7 +5306,25 @@
                     tech.deathSpawns = 0
                 }
             },
-
+            {
+                name: "-WIMP-",
+                description: "<strong style='color: #f55;'>experiment:</strong> <strong class='color-harm'>harmful</strong> particles slowly <strong>chase</strong> you",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    tech.wimpExperiment = 3
+                },
+                remove() {
+                    tech.wimpExperiment = 0
+                }
+            },
             //************************************************** 
             //************************************************** JUNK
             //************************************************** tech
@@ -5327,6 +5346,25 @@
 
             //     },
             //     remove() {}
+            // },
+            // {
+            //     name: "WIMP",
+            //     description: "<strong class='color-harm'>harmful</strong> particles slowly <strong>chase</strong> you",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 0,
+            //     isExperimentHide: true,
+            //     isJunk: true,
+            //     allowed() {
+            //         return tech.wimpExperiment === 0
+            //     },
+            //     requires: "",
+            //     effect() {
+            //         tech.wimpExperiment = 3
+            //     },
+            //     remove() {
+            //         tech.wimpExperiment = 0
+            //     }
             // },
             {
                 name: "spinor",
@@ -5368,7 +5406,7 @@
                 isNonRefundable: true,
                 isJunk: true,
                 allowed() {
-                    return true
+                    return tech.deathSpawns === 0
                 },
                 requires: "",
                 effect() {
@@ -6658,5 +6696,6 @@
         wavePacketAmplitude: null,
         waveLengthRange: null,
         isCollisionRealitySwitch: null,
-        iceIXOnDeath: null
+        iceIXOnDeath: null,
+        wimpCount: null
     }

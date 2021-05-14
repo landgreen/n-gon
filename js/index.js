@@ -59,8 +59,10 @@ function getUrlVars() {
     return vars;
 }
 window.addEventListener('load', () => {
+
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
+        build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
         openExperimentMenu();
         //add experimental selections based on url
         for (const property in set) {
@@ -103,12 +105,8 @@ window.addEventListener('load', () => {
                 simulation.difficultyMode = Number(set[property])
                 document.getElementById("difficulty-select-experiment").value = Number(set[property])
             }
-            if (property === "level") {
-                document.getElementById("starting-level").value = Number(set[property])
-            }
-            if (property === "noPower") {
-                document.getElementById("no-power-ups").checked = Number(set[property])
-            }
+            if (property === "level") document.getElementById("starting-level").value = Number(set[property])
+            if (property === "noPower") document.getElementById("no-power-ups").checked = Number(set[property])
         }
     }
 });
