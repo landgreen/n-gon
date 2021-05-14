@@ -1018,7 +1018,7 @@ const mobs = {
                     if (this.isBoss) dmg *= 0.25
 
                     //energy and heal drain should be calculated after damage boosts
-                    if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp) m.energy += Math.min(this.health, dmg) * tech.energySiphon
+                    if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
 
                     if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp) {
                         m.addHealth(Math.min(this.health, dmg) * tech.healthDrain)

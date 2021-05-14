@@ -303,7 +303,7 @@
                 frequency: 2,
                 isNonRefundable: true,
                 // isExperimentHide: true,
-                // isBadRandomOption: true,
+                isBadRandomOption: true,
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
@@ -2533,7 +2533,7 @@
             },
             {
                 name: "many-worlds",
-                description: "each <strong>level</strong> is an <strong>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong>, <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
+                description: "each <strong>level</strong> is an <strong>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2701,7 +2701,7 @@
                     for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
                         if (!tech.tech[i].isNonRefundable) count += tech.tech[i].count
                     }
-                    if (tech.isDeterminism) count -= 5 //remove the bonus tech 
+                    if (tech.isDeterminism) count -= 4 //remove the bonus tech 
                     if (tech.isSuperDeterminism) count -= 4 //remove the bonus tech 
 
                     tech.setupAllTech(); // remove all tech
@@ -2770,7 +2770,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>7.5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>12</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong>8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>14</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2780,14 +2780,14 @@
                 },
                 requires: "below 100% duplication chance",
                 effect() {
-                    tech.duplicateChance += 0.075
+                    tech.duplicateChance += 0.08
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    tech.addJunkTechToPool(12)
+                    tech.addJunkTechToPool(14)
                 },
                 remove() {
                     tech.duplicateChance = 0
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    if (this.count > 1) tech.removeJunkTechFromPool(12)
+                    if (this.count > 1) tech.removeJunkTechFromPool(14)
                 }
             },
             {
@@ -3113,7 +3113,7 @@
                     if (tech.isDeterminism) num = 1
                     for (let i = 0; i < num; i++) {
                         const index = powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - i - 1]
-                        if (index !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed()) {
+                        if (index !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed() && tech.tech[index].name !== "backward induction") {
                             tech.giveTech(index)
                             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>// backward induction</em>`);
                         }
@@ -3140,7 +3140,7 @@
             },
             {
                 name: "determinism",
-                description: "spawn <strong>6</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
+                description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3153,13 +3153,12 @@
                 effect: () => {
                     tech.isDeterminism = true;
                     //if you change the number spawned also change it in Born rule
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
                     if (tech.isDeterminism) {
                         tech.isDeterminism = false;
-
-                        for (let i = 0; i < 6; i++) powerUps.removeRandomTech()
+                        for (let i = 0; i < 5; i++) powerUps.removeRandomTech()
                     }
                 }
             },

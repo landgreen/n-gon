@@ -2238,10 +2238,14 @@ const m = {
 
                             if (!m.fieldOn) { // if field was off, and it starting up, teleport to new mouse location
                                 m.fieldOn = true;
-                                m.fieldPosition = { //smooth the mouse position
-                                    x: simulation.mouseInGame.x,
-                                    y: simulation.mouseInGame.y
+                                m.fieldPosition = { //smooth the mouse position,  set to starting at player
+                                    x: m.pos.x,
+                                    y: m.pos.y
                                 }
+                                // m.fieldPosition = { //smooth the mouse position
+                                //     x: simulation.mouseInGame.x,
+                                //     y: simulation.mouseInGame.y
+                                // }
                                 m.lastFieldPosition = { //used to find velocity of field changes
                                     x: m.fieldPosition.x,
                                     y: m.fieldPosition.y
@@ -2251,7 +2255,7 @@ const m = {
                                     x: m.fieldPosition.x,
                                     y: m.fieldPosition.y
                                 }
-                                const smooth = isInMap ? 0.985 : 0.96;
+                                const smooth = isInMap ? 0.985 : 0.97;
                                 m.fieldPosition = { //smooth the mouse position
                                     x: m.fieldPosition.x * smooth + simulation.mouseInGame.x * (1 - smooth),
                                     y: m.fieldPosition.y * smooth + simulation.mouseInGame.y * (1 - smooth),

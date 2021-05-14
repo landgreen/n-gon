@@ -1947,7 +1947,7 @@ const b = {
                 mobs.statusSlow(who, 180)
                 this.endCycle = simulation.cycle
                 // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
-                if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive) {
+                if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
                     setTimeout(function() {
                         if (!who.alive) {
                             m.energy += tech.iceEnergy * 0.8
@@ -2497,7 +2497,7 @@ const b = {
                 //check for damage
                 if (!m.isBodiesAsleep) {
                     if (!((m.cycle + this.phase) % 30)) { //twice a second
-                        if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250) { //give energy
+                        if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
                                 m.energy += 0.11
@@ -4164,7 +4164,7 @@ const b = {
                 }
 
                 if (tech.isCapacitor) {
-                    if (m.energy > 0.16 || tech.isRailEnergyGain) {
+                    if ((m.energy > 0.16 || tech.isRailEnergyGain) && m.immuneCycle < m.cycle) {
                         m.energy += 0.16 * (tech.isRailEnergyGain ? 6 : -1)
                         m.fireCDcycle = m.cycle + Math.floor(30 * b.fireCD);
                         const me = bullet.length;
@@ -4345,7 +4345,7 @@ const b = {
                             let smoothRate = 0.98 * (m.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCD) //small b.fireCD = faster shots, b.fireCD=1 = normal shot,  big b.fireCD = slower chot
                             this.charge = this.charge * smoothRate + 1 * (1 - smoothRate)
                             if (tech.isRailEnergyGain) {
-                                m.energy += (this.charge - previousCharge) * 2 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
+                                if (m.immuneCycle < m.cycle) m.energy += (this.charge - previousCharge) * 2 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             } else {
                                 m.energy -= (this.charge - previousCharge) * 0.33 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             }

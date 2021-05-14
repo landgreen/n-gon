@@ -1,15 +1,15 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-ice-IX does 15% more damage
+spammable methods of energy generation no longer work while immune to damage
+  rail-gun, flip-flop, dynamo-bots, ice-IX, energy siphon
 
-tech: WIMPs - an indestructible harmful particle slowly chases you
-  spawn 2-3 research at the end of each level
-experimental mode : WIMPS chase you
+pilot wave follows the mouse a bit slower
+  (I think this is actually a buff, because blocks stay in the field better)
+a newly clicked pilot wave now begins at the player, not the mouse
+  (this is just because it looks cool)
 
-beating the final boss looks a bit less like death and a bit more like winning
-  also there are some text directions on how to enter endless mode (press T after you win)
-
-tech removed: 1-body problem
+tech: many worlds, now only spawns 1 tech
+  (use to spawn a heal, ammo, research too)
 
 ******************************************************** BUGS ********************************************************
 
@@ -26,10 +26,6 @@ tech: strange attractor before at least 1 other tech
   https://landgreen.github.io/sidescroller/index.html?&tech0=auto-loading%20heuristics
 crashed on this
 https://landgreen.github.io/sidescroller/index.html?&gun0=rail%20gun&tech1=mass%20driver&tech2=restitution&tech3=flywheel&tech4=Pauli%20exclusion&tech5=mass-energy%20equivalence&tech6=1st%20ionization%20energy&tech7=electrolytes&tech8=negative%20feedback&tech9=entropy%20exchange&tech10=anthropic%20principle&tech11=renormalization&tech12=Bayesian%20statistics&tech13=bubble%20fusion&tech14=replication&tech15=replication&tech16=futures%20exchange&tech17=commodities%20exchange&tech18=correlated%20damage&tech19=parthenogenesis&tech21=cardinality&tech22=half-wave%20rectifier&tech23=pair%20production&tech24=Lorentz%20transformation&tech25=time%20crystals&tech26=undefined&tech27=undefined&tech28=undefined&tech29=undefined&tech30=undefined&tech31=undefined&tech32=undefined&field=pilot%20wave&difficulty=6
-
-(once) CPT gun only rewound 0.25 seconds
-  after a randomize run (non-unitary)
-  had enough energy
 
 increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
@@ -66,6 +62,7 @@ tech: MACHO - spawn a mob like WIMP that follows you and gives you a bonus
 
 let the player use research more like money
   spend it to do things
+  buff some special tech and add a research cost
 
 tech: use the ability for power ups to have custom code
   attracted to player
@@ -78,7 +75,6 @@ tech: picking up heal power ups when at full health does harm equal to the heal 
     get 1% duplication
     get 1% damage permanent
     turned into drones
-
 
 nail-gun, or ....
   1s after being fired your bullets turn:

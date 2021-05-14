@@ -15,7 +15,7 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
-            // m.setField("metamaterial cloaking")
+            // m.setField("pilot wave")
             // b.giveGuns("wave beam")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
@@ -103,9 +103,6 @@ const level = {
             m.switchWorlds()
             simulation.trails()
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
-            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "heal", false);
-            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "ammo", false);
-            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "research", false);
         }
         if (tech.isHealLowHealth) {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
