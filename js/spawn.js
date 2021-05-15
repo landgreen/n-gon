@@ -2729,14 +2729,14 @@ const spawn = {
             }
         };
     },
-    shieldingBoss(x, y, radius = 210) {
+    shieldingBoss(x, y, radius = 200) {
         mobs.spawn(x, y, 9, radius, "rgb(150, 150, 255)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, Math.random() * 2 * Math.PI)
         // me.stroke = "rgb(220,220,255)"
         me.isBoss = true;
         me.cycle = 0
-        me.maxCycles = 120;
+        me.maxCycles = 150;
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.5;
@@ -2744,7 +2744,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -3158,8 +3158,7 @@ const spawn = {
                 this.checkStatus();
             };
 
-            //move shield to the front of the array, so that mob is behind shield graphically
-            mob.unshift(me);
+            mob.unshift(me); //move shield to the front of the array, so that mob is behind shield graphically
 
             //swap order of shield and mob, so that mob is behind shield graphically
             // mob[mob.length - 1] = mob[mob.length - 2];

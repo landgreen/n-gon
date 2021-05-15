@@ -1,15 +1,13 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-spammable methods of energy generation no longer work while immune to damage
-  rail-gun, flip-flop, dynamo-bots, ice-IX, energy siphon
+pilot is back to it's previous speed, and spawning at mouse
+pilot wave uses 50% less energy when you are low on energy, but it uses more energy then normal when you have more energy
+pilot wave tech
+  lost: time crystals, Lorentz transformation, annihilation
+  gained: degenerate matter - 60% harm reduction while field is active
+tech: potential well - blocks in pilot wave drift into the center of the field with a much higher force
+  this lets you hold larger blocks and flick them much faster
 
-pilot wave follows the mouse a bit slower
-  (I think this is actually a buff, because blocks stay in the field better)
-a newly clicked pilot wave now begins at the player, not the mouse
-  (this is just because it looks cool)
-
-tech: many worlds, now only spawns 1 tech
-  (use to spawn a heal, ammo, research too)
 
 ******************************************************** BUGS ********************************************************
 
@@ -56,6 +54,13 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+Make ice crystal + rivet gun/needle gun launch freezing rivets/needles with increased energy drain
+
+WIMPS are cool, but the 2-3 research isn't enough incentive
+
+tech: pilot wave is projected from the player, not the mouse
+  give pilot wave a buff?
 
 tech: MACHO - spawn a mob like WIMP that follows you and gives you a bonus
   if it touches WIMP they explode

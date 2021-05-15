@@ -522,7 +522,7 @@ const m = {
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.019, 0.60)
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
-        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.5
+        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
@@ -657,7 +657,7 @@ const m = {
         }
 
         if (tech.isEnergyHealth) {
-            m.energy -= dmg;
+            m.energy -= dmg * 1.1;
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -1827,7 +1827,7 @@ const m = {
         },
         {
             name: "time dilation field",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br>mobs still do <strong class='color-harm'>harm</strong> while time is stopped",
             effect: () => {
                 // m.fieldMeterColor = "#000"
                 m.fieldFire = true;
@@ -2205,7 +2205,7 @@ const m = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br>allows <strong class='color-m'>tech</strong> that normally require other <strong class='color-f'>fields</strong>",
+            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br><strong class='color-f'>energy</strong> drain scales with block <strong>mass</strong>",
             effect: () => {
                 m.fieldPhase = 0;
                 m.fieldPosition = {
@@ -2238,14 +2238,14 @@ const m = {
 
                             if (!m.fieldOn) { // if field was off, and it starting up, teleport to new mouse location
                                 m.fieldOn = true;
-                                m.fieldPosition = { //smooth the mouse position,  set to starting at player
-                                    x: m.pos.x,
-                                    y: m.pos.y
-                                }
-                                // m.fieldPosition = { //smooth the mouse position
-                                //     x: simulation.mouseInGame.x,
-                                //     y: simulation.mouseInGame.y
+                                // m.fieldPosition = { //smooth the mouse position,  set to starting at player
+                                //     x: m.pos.x,
+                                //     y: m.pos.y
                                 // }
+                                m.fieldPosition = { //smooth the mouse position, set to mouse's current location
+                                    x: simulation.mouseInGame.x,
+                                    y: simulation.mouseInGame.y
+                                }
                                 m.lastFieldPosition = { //used to find velocity of field changes
                                     x: m.fieldPosition.x,
                                     y: m.fieldPosition.y
@@ -2255,7 +2255,7 @@ const m = {
                                     x: m.fieldPosition.x,
                                     y: m.fieldPosition.y
                                 }
-                                const smooth = isInMap ? 0.985 : 0.97;
+                                const smooth = isInMap ? 0.985 : 0.96;
                                 m.fieldPosition = { //smooth the mouse position
                                     x: m.fieldPosition.x * smooth + simulation.mouseInGame.x * (1 - smooth),
                                     y: m.fieldPosition.y * smooth + simulation.mouseInGame.y * (1 - smooth),
@@ -2293,7 +2293,7 @@ const m = {
                                 //find mouse velocity
                                 const diff = Vector.sub(m.fieldPosition, m.lastFieldPosition)
                                 const speed = Vector.magnitude(diff)
-                                const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 45)) //limit velocity
+                                const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 40)) //limit velocity
                                 let radius, radiusSmooth
                                 if (Matter.Query.ray(map, m.fieldPosition, player.position).length) { //is there something block the player's view of the field
                                     radius = 0
@@ -2306,7 +2306,7 @@ const m = {
 
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.000013
+                                        const DRAIN = speed * body[i].mass * 0.00001 * (1 + m.energy * m.energy) //drain more energy when you have more energy
                                         if (m.energy > DRAIN) {
                                             m.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
@@ -2314,7 +2314,7 @@ const m = {
                                             // body[i].force.y -= body[i].mass * simulation.g; //remove gravity effects
                                             //blocks drift towards center of pilot wave
                                             const sub = Vector.sub(m.fieldPosition, body[i].position)
-                                            const unit = Vector.mult(Vector.normalise(sub), 0.00005 * Vector.magnitude(sub))
+                                            const unit = Vector.mult(Vector.normalise(sub), body[i].mass * tech.pilotForce * Vector.magnitude(sub))
                                             body[i].force.x += unit.x
                                             body[i].force.y += unit.y - body[i].mass * simulation.g //remove gravity effects
                                         } else {

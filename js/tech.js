@@ -1239,7 +1239,7 @@
             },
             {
                 name: "orbital-bot upgrade",
-                description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>30%</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>40%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1298,7 +1298,7 @@
             },
             {
                 name: "dynamo-bot upgrade",
-                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>22</strong> <strong class='color-f'>energy</strong> per second",
+                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>20</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -4848,7 +4848,7 @@
             },
             {
                 name: "degenerate matter",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong> while your <strong class='color-f'>field</strong> is active",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> while your <strong class='color-f'>field</strong> is active",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5005,7 +5005,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation field" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return m.fieldUpgrades[m.fieldMode].name === "time dilation field" // || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
                 requires: "time dilation field",
                 effect() {
@@ -5029,7 +5029,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation field" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && tech.energyRegen !== 0;
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation field") && tech.energyRegen !== 0; //|| m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
                 requires: "time dilation field",
                 effect: () => {
@@ -5095,6 +5095,24 @@
                 remove() {
                     tech.aimDamage = 1
                     b.setFireCD();
+                }
+            },
+            {
+                name: "potential well",
+                description: "the force that <strong>pilot wave</strong> generates<br>to <strong>trap blocks</strong> is greatly increased",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                },
+                requires: "metamaterial cloaking",
+                effect() {
+                    tech.pilotForce = 0.0006
+                },
+                remove() {
+                    tech.pilotForce = 0.00002
                 }
             },
             {

@@ -2500,7 +2500,7 @@ const b = {
                         if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
-                                m.energy += 0.11
+                                m.energy += 0.1
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
@@ -3111,7 +3111,7 @@ const b = {
                     }
                 }
             },
-            range: 190 + 60 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too! //150 + (80 + 100 * tech.isOrbitBotUpgrade) * Math.random(), // + 5 * tech.orbitBotCount,
+            range: 190 + 100 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too! //150 + (80 + 100 * tech.isOrbitBotUpgrade) * Math.random(), // + 5 * tech.orbitBotCount,
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
