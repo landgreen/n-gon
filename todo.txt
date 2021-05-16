@@ -1,13 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-pilot is back to it's previous speed, and spawning at mouse
-pilot wave uses 50% less energy when you are low on energy, but it uses more energy then normal when you have more energy
-pilot wave tech
-  lost: time crystals, Lorentz transformation, annihilation
-  gained: degenerate matter - 60% harm reduction while field is active
-tech: potential well - blocks in pilot wave drift into the center of the field with a much higher force
-  this lets you hold larger blocks and flick them much faster
+pilot wave energy is back to it's old energy settings
+tech: restitution - now only triggers power ups from blocks thrown by the player
+  (this makes pilot wave and naturally falling blocks not spawn power ups. flywheel will work if a block was thrown in the last 3 seconds)
 
+standing wave harmonic has reduced blocking recoil
 
 ******************************************************** BUGS ********************************************************
 
@@ -24,8 +21,6 @@ tech: strange attractor before at least 1 other tech
   https://landgreen.github.io/sidescroller/index.html?&tech0=auto-loading%20heuristics
 crashed on this
 https://landgreen.github.io/sidescroller/index.html?&gun0=rail%20gun&tech1=mass%20driver&tech2=restitution&tech3=flywheel&tech4=Pauli%20exclusion&tech5=mass-energy%20equivalence&tech6=1st%20ionization%20energy&tech7=electrolytes&tech8=negative%20feedback&tech9=entropy%20exchange&tech10=anthropic%20principle&tech11=renormalization&tech12=Bayesian%20statistics&tech13=bubble%20fusion&tech14=replication&tech15=replication&tech16=futures%20exchange&tech17=commodities%20exchange&tech18=correlated%20damage&tech19=parthenogenesis&tech21=cardinality&tech22=half-wave%20rectifier&tech23=pair%20production&tech24=Lorentz%20transformation&tech25=time%20crystals&tech26=undefined&tech27=undefined&tech28=undefined&tech29=undefined&tech30=undefined&tech31=undefined&tech32=undefined&field=pilot%20wave&difficulty=6
-
-increase the width on the grid by a few pixels so that very small screens or people with odd fonts don't goto a new line
 
 you have to press z once to get copy to work for simulation.enableConstructMode() sometimes
   not sure how to reproduce, but it happens often on the first draw
@@ -55,9 +50,11 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
+pause should show the last in game console message
+
 Make ice crystal + rivet gun/needle gun launch freezing rivets/needles with increased energy drain
 
-WIMPS are cool, but the 2-3 research isn't enough incentive
+WIMPS are cool, but the 2-3 research isn't enough incentive?
 
 tech: pilot wave is projected from the player, not the mouse
   give pilot wave a buff?

@@ -15,12 +15,12 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
-            m.setField("pilot wave")
+            // m.setField("pilot wave")
             // b.giveGuns("wave beam")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // tech.giveTech("pulse")
-            tech.giveTech("potential well")
+            // tech.giveTech("potential well")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")

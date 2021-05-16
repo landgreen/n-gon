@@ -937,6 +937,7 @@ const m = {
     holdingTarget: null,
     timeSkipLastCycle: 0,
     // these values are set on reset by setHoldDefaults()
+    blockingRecoil: 4,
     grabPowerUpRange2: 0,
     isFieldActive: false,
     fieldRange: 155,
@@ -978,6 +979,7 @@ const m = {
         m.duplicateChance = 0
         powerUps.setDo();
         m.grabPowerUpRange2 = 156000;
+        m.blockingRecoil = 4;
         m.fieldRange = 155;
         m.fieldFire = false;
         m.fieldCDcycle = 0;
@@ -1174,6 +1176,7 @@ const m = {
                 }
 
                 m.throwCharge = 0;
+                m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
                 Matter.Body.setVelocity(m.holdingTarget, {
                     x: player.velocity.x * 0.5 + Math.cos(m.angle) * speed,
                     y: player.velocity.y * 0.5 + Math.sin(m.angle) * speed
@@ -1310,13 +1313,13 @@ const m = {
                 });
                 if (m.crouch) {
                     Matter.Body.setVelocity(player, {
-                        x: player.velocity.x + 0.4 * unit.x * massRoot,
-                        y: player.velocity.y + 0.4 * unit.y * massRoot
+                        x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot,
+                        y: player.velocity.y + 0.1 * m.blockingRecoil * unit.y * massRoot
                     });
                 } else {
                     Matter.Body.setVelocity(player, {
-                        x: player.velocity.x + 5 * unit.x * massRoot,
-                        y: player.velocity.y + 5 * unit.y * massRoot
+                        x: player.velocity.x + m.blockingRecoil * unit.x * massRoot,
+                        y: player.velocity.y + m.blockingRecoil * unit.y * massRoot
                     });
                 }
             } else {
@@ -1488,11 +1491,12 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>25%</strong>",
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> and blocking <strong>recoil</strong> by <strong>25%</strong>",
             effect: () => {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
                 m.fieldHarmReduction = 0.75;
+                m.blockingRecoil = 1 //4 is normal
                 m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
                 m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
                 m.hold = function() {
@@ -2306,7 +2310,7 @@ const m = {
 
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.00001 * (1 + m.energy * m.energy) //drain more energy when you have more energy
+                                        const DRAIN = speed * body[i].mass * 0.000013 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
                                         if (m.energy > DRAIN) {
                                             m.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
@@ -2983,7 +2987,7 @@ const m = {
                                         let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
                                         if (mob[k].isShielded) dmg *= 0.35
                                         mob[k].damage(dmg, true);
-                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
+                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
                                             let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"

@@ -84,6 +84,8 @@
                 if (options.length > 0) {
                     let newTech = options[Math.floor(Math.random() * options.length)]
                     tech.giveTech(newTech)
+                    simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[newTech].name}</span>")<em> //random tech</em>`);
+
                 }
             } else {
                 if (isNaN(index)) { //find index by name
@@ -98,6 +100,7 @@
                     if (!found) return //if name not found don't give any tech
                 }
                 if (tech.isMetaAnalysis && tech.tech[index].isJunk) {
+                    simulation.makeTextLog(`//tech: meta-analysis replaced junk tech with random tech`);
                     tech.giveTech('random')
                     for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "research");
                     return
@@ -1480,7 +1483,7 @@
             },
             {
                 name: "restitution",
-                description: "mobs killed by collisions with <strong>blocks</strong><br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                description: "if a <strong>block</strong> you threw kills a mob<br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -3115,7 +3118,7 @@
                         const index = powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - i - 1]
                         if (index !== powerUps.lastTechIndex && tech.tech[index].count < tech.tech[index].maxCount && tech.tech[index].allowed() && tech.tech[index].name !== "backward induction") {
                             tech.giveTech(index)
-                            simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>// backward induction</em>`);
+                            simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em> //backward induction</em>`);
                         }
                     }
                 },
@@ -3922,7 +3925,7 @@
             },
             {
                 name: "water shielding",
-                description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>player is <strong>immune</strong> to its harmful effects",
+                description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>you are <strong>immune</strong> to its harmful effects",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4067,7 +4070,7 @@
             },
             {
                 name: "diplochory",
-                description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use the player for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
+                description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use you for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
