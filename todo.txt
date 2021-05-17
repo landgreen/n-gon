@@ -1,12 +1,13 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-pilot wave energy is back to it's old energy settings
-tech: restitution - now only triggers power ups from blocks thrown by the player
-  (this makes pilot wave and naturally falling blocks not spawn power ups. flywheel will work if a block was thrown in the last 3 seconds)
-
-standing wave harmonic has reduced blocking recoil
+fermions: after a block is affected by pilot wave it collides with intangible mobs, but not you
 
 ******************************************************** BUGS ********************************************************
+
+mine reclamation is giving mine ammo back after you fire, not after explode
+
+undefined count did not seem to reset between games
+  only display not reset
 
 Why does micro-extruder lag so much anyway
 

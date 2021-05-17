@@ -1091,7 +1091,7 @@ const level = {
                 spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
             }
         }
-        // blockDoor(710, -710);
+        blockDoor(710, -710);
         spawn.mapRect(2500, -1200, 200, 750); //right wall
         blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall
@@ -1103,7 +1103,7 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
@@ -1112,7 +1112,10 @@ const level = {
         // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.ghoster(1800, -120)
+        spawn.ghoster(1800, -120)
+        spawn.ghoster(1800, -120)
+        spawn.ghoster(1800, -120)
+        spawn.ghoster(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)

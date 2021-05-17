@@ -1489,9 +1489,9 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.throwChargeRate > 1 && !tech.isNoHeals
+                    return tech.throwChargeRate > 1 && !tech.isNoHeals && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
                 },
-                requires: "mass driver, not ergodicity",
+                requires: "mass driver, not ergodicity, pilot wave",
                 effect() {
                     tech.isBlockPowerUps = true
                 },
@@ -5110,12 +5110,30 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "metamaterial cloaking",
+                requires: "pilot wave",
                 effect() {
                     tech.pilotForce = 0.0006
                 },
                 remove() {
                     tech.pilotForce = 0.00002
+                }
+            },
+            {
+                name: "fermions",
+                description: "after a <strong>block</strong> is affected by <strong>pilot wave</strong> it<br><strong>collides</strong> with <strong>intangible</strong> mobs, but not you",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                },
+                requires: "pilot wave",
+                effect() {
+                    tech.isBlockBullets = true
+                },
+                remove() {
+                    tech.isBlockBullets = false
                 }
             },
             {
@@ -6711,11 +6729,11 @@
         blockingIce: null,
         isPhaseVelocity: null,
         wavePacketLength: null,
-        isImaginaryWave: null,
         waveBeamSpeed: null,
         wavePacketAmplitude: null,
         waveLengthRange: null,
         isCollisionRealitySwitch: null,
         iceIXOnDeath: null,
-        wimpCount: null
+        wimpCount: null,
+        isBlockBullets: null
     }
