@@ -1478,7 +1478,7 @@ const m = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> blocks<br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
                 m.hold = function() {
                     if (m.isHolding) {
@@ -1503,7 +1503,7 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>blocking</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> and blocking <strong>recoil</strong> by <strong>25%</strong>",
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> and deflecting <strong>recoil</strong> by <strong>25%</strong>",
             effect: () => {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
@@ -1549,7 +1549,7 @@ const m = {
         {
             name: "perfect diamagnetism",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
-            description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has <strong>90%</strong> less <strong>recoil</strong>",
+            description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br><strong>deflecting</strong> has <strong>90%</strong> less <strong>recoil</strong>",
             effect: () => {
                 m.fieldShieldingScale = 0;
                 m.fieldBlockCD = 4;
@@ -1621,7 +1621,7 @@ const m = {
         },
         {
             name: "nano-scale manufacturing",
-            description: "use <strong class='color-f'>energy</strong> to <strong>block</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
             effect: () => {
                 // m.fieldMeterColor = "#0c5"
                 // m.eyeFillColor = m.fieldMeterColor
@@ -1672,7 +1672,7 @@ const m = {
         },
         {
             name: "negative mass field",
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br><strong>blocks</strong> held by the field have a lower <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br><strong class='color-block'>blocks</strong> held by the field have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
@@ -2222,7 +2222,7 @@ const m = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br><strong class='color-f'>energy</strong> drain scales with block <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to push <strong class='color-block'>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br><strong class='color-f'>energy</strong> drain scales with <strong>mass</strong>",
             effect: () => {
                 m.fieldPhase = 0;
                 m.fieldPosition = {
@@ -2404,7 +2404,7 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract blocks and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
                 m.duplicateChance = 0.07
                 powerUps.setDo(); //needed after adjusting duplication chance
@@ -3016,8 +3016,8 @@ const m = {
                                 if (obj.classType === "body" && obj.speed > 6) {
                                     const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                                     if (v > 9) {
-                                        let dmg = 0.05 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
-                                        if (mob[k].isShielded) dmg *= 0.35
+                                        let dmg = 0.075 * b.dmgScale * v * obj.mass * (tech.throwChargeRate) * (tech.isBlockHarm ? 2 : 1) * (tech.isMobBlockFling ? 2 : 1);
+                                        if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
                                         if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
                                             let type = tech.isEnergyNoAmmo ? "heal" : "ammo"

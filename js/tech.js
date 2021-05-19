@@ -227,7 +227,7 @@
                 allowed() {
                     return b.inventory.length > 1 && !tech.isEnergyHealth
                 },
-                requires: "at least 2 guns",
+                requires: "at least 2 guns, not mass-energy",
                 effect() {
                     tech.isEntanglement = true
                     setTimeout(function() {
@@ -403,23 +403,6 @@
                     tech.isAmmoFromHealth = false;
                 }
             },
-            // {
-            //     name: "perpetual ammo",
-            //     description: "find <strong>3</strong> <strong class='color-g'>ammo</strong> at the start of each <strong>level</strong>",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     allowed() {
-            //         return !tech.isPerpetualReroll && !tech.isPerpetualHeal && !tech.isPerpetualReroll && !tech.isPerpetualStun && !tech.isEnergyNoAmmo
-            //     },
-            //     requires: "only 1 perpetual effect, not exciton lattice",
-            //     effect() {
-            //         tech.isPerpetualAmmo = true
-            //     },
-            //     remove() {
-            //         tech.isPerpetualAmmo = false
-            //     }
-            // },
             {
                 name: "desublimated ammunition",
                 description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong>",
@@ -1177,7 +1160,7 @@
                 allowed() {
                     return m.maxEnergy > 0.5
                 },
-                requires: "maximum energy above 50%",
+                requires: "maximum energy above 50",
                 effect() {
                     tech.laserBotCount++;
                     b.laserBot();
@@ -1466,7 +1449,7 @@
             },
             {
                 name: "mass driver",
-                description: "increase <strong>block</strong> collision <strong class='color-d'>damage</strong> by <strong>200%</strong><br>charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong>",
+                description: "charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>200%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1483,7 +1466,7 @@
             },
             {
                 name: "flywheel",
-                description: "after a mob <strong>dies</strong> its body is <strong>spun</strong> and <strong>flung</strong><br>in the general direction of a nearby mob",
+                description: "after a mob <strong>dies</strong> its <strong class='color-block'>block</strong> is <strong>flung</strong> at mobs<br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1501,7 +1484,7 @@
             },
             {
                 name: "fermions",
-                description: "<strong>blocks</strong> thrown by you or <strong>pilot wave</strong> will<br><strong>collide</strong> with <strong>intangible</strong> mobs, but not you",
+                description: "<strong class='color-block'>blocks</strong> thrown by you or <strong>pilot wave</strong> will<br><strong>collide</strong> with <strong>intangible</strong> mobs, but not you",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1518,7 +1501,7 @@
             },
             {
                 name: "inflation",
-                description: "<strong>throwing</strong> a <strong>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
+                description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1526,7 +1509,7 @@
                 allowed() {
                     return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
                 },
-                requires: "mass driver, not ergodicity, pilot wave",
+                requires: "mass driver, not pilot wave",
                 effect() {
                     tech.isAddBlockMass = true
                 },
@@ -1536,7 +1519,7 @@
             },
             {
                 name: "restitution",
-                description: "if a <strong>block</strong> you threw kills a mob<br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                description: "if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1554,7 +1537,7 @@
             },
             {
                 name: "inelastic collision",
-                description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>",
+                description: "<strong>holding</strong> a <strong class='color-block'>block</strong> reduces <strong class='color-harm'>harm</strong> by <strong>85%</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1862,7 +1845,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return simulation.fpsCapDefault > 45 && !tech.isRailTimeSlow
+                    return simulation.fpsCapDefault > 45
                 },
                 requires: "FPS above 45",
                 effect() {
@@ -1879,7 +1862,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isPerpetualStun || tech.isExplosionStun
+                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isExplosionStun
                 },
                 requires: "a stun effect",
                 effect() {
@@ -1952,7 +1935,7 @@
                 allowed() { //&& (m.fieldUpgrades[m.fieldMode].name !== "nano-scale manufacturing" || m.maxEnergy > 1)
                     return m.maxEnergy > 0.99 && m.fieldUpgrades[m.fieldMode].name !== "standing wave harmonics" && !tech.isEnergyHealth && !tech.isRewindGun
                 },
-                requires: "not standing wave, mass-energy, piezo, max energy reduction, CPT gun",
+                requires: "not standing wave, mass-energy, max energy reduction, CPT gun",
                 effect() {
                     tech.isRewindAvoidDeath = true;
                 },
@@ -2149,7 +2132,7 @@
                 allowed() {
                     return tech.isEnergyLoss && !tech.isRewindAvoidDeath
                 },
-                requires: "exothermic process, CPT",
+                requires: "exothermic process, not CPT",
                 effect() {
                     tech.isMaxEnergyTech = true;
                     m.setMaxEnergy()
@@ -2311,7 +2294,7 @@
                 allowed() {
                     return m.health < 0.5 || build.isExperimentSelection
                 },
-                requires: "health below 60",
+                requires: "health below 50",
                 effect() {
                     tech.isLowHealthDmg = true; //used in mob.damage()
                 },
@@ -2326,7 +2309,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (m.harmReduction() < 1 || tech.healthDrain || tech.isLowHealthDmg || tech.isHealthRecovery || tech.isHealLowHealth || tech.largerHeals > 1 || tech.isPerpetualHeal) && !tech.isEnergyHealth
+                    return (m.harmReduction() < 1 || tech.healthDrain || tech.isLowHealthDmg || tech.isHealthRecovery || tech.isHealLowHealth || tech.largerHeals > 1) && !tech.isEnergyHealth
                 },
                 requires: "negative feedback or extra healing tech or harm reduction, not mass-energy",
                 effect() {
@@ -2458,7 +2441,7 @@
                 allowed() {
                     return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isEnergyHealth && !tech.isNoHeals
                 },
-                requires: "not mass-energy equivalence, ergodicity",
+                requires: "under 70% health, not mass-energy equivalence, ergodicity",
                 effect() {
                     tech.largerHeals++;
                 },
@@ -2468,7 +2451,7 @@
             },
             {
                 name: "maintenance",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>12</strong> <strong class='color-h'>heals</strong>",
+                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>15</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2478,33 +2461,15 @@
                 allowed() {
                     return (m.health / m.maxHealth) < 0.7 && !tech.isNoHeals
                 },
-                requires: "health > 70%, not ergodicity",
+                requires: "health < 70%, not ergodicity",
                 effect() {
-                    for (let i = 0; i < 12; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+                    for (let i = 0; i < 15; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].isHealTech) tech.tech[i].frequency *= 2
                     }
                 },
                 remove() {}
             },
-            // {
-            //     name: "perpetual heals",
-            //     description: "find <strong>3</strong> <strong class='color-h'>heals</strong> at the start of each <strong>level</strong>",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     isHealTech: true,
-            //     allowed() {
-            //         return !tech.isPerpetualReroll && !tech.isPerpetualAmmo && !tech.isPerpetualStun
-            //     },
-            //     requires: "only 1 perpetual effect",
-            //     effect() {
-            //         tech.isPerpetualHeal = true
-            //     },
-            //     remove() {
-            //         tech.isPerpetualHeal = false
-            //     }
-            // },
             {
                 name: "anthropic principle",
                 nameInfo: "<span id = 'tech-anthropic'></span>",
@@ -2558,9 +2523,9 @@
                 count: 0,
                 frequency: 4,
                 allowed() {
-                    return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid
+                    return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid && !tech.isCollisionRealitySwitch
                 },
-                requires: "anthropic principle, not many-worlds, Ψ(t) collapse",
+                requires: "anthropic principle, not many-worlds, Ψ(t) collapse, non-unitary",
                 effect() {
                     tech.isImmortal = true;
                     // for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
@@ -2673,7 +2638,7 @@
                 allowed() {
                     return powerUps.research.count === 0 && !tech.isAnsatz
                 },
-                requires: "no research",
+                requires: "no research, not ansatz",
                 effect() {
                     tech.isRerollHaste = true;
                     tech.researchHaste = 0.33;
@@ -2694,7 +2659,7 @@
                 allowed() {
                     return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
                 },
-                requires: "not superdeterminism or Ψ(t) collapse, no research",
+                requires: "not superdeterminism or Ψ(t) collapse, no research, perturbation theory",
                 effect: () => {
                     tech.isAnsatz = true;
                 },
@@ -2878,7 +2843,7 @@
                 allowed() {
                     return tech.duplicationChance() < 1 && !tech.isDeterminism
                 },
-                requires: "below 100% duplication chance, below level 5, not determinism",
+                requires: "below 100% duplication chance, not determinism",
                 effect() {
                     // tech.cancelCount = 0
                     tech.isCancelDuplication = true
@@ -2916,7 +2881,7 @@
                 allowed() {
                     return tech.duplicationChance() > 0.15
                 },
-                requires: "some duplication chance",
+                requires: "duplication chance > 15%",
                 effect() {
                     tech.isDupDamage = true;
                 },
@@ -2971,7 +2936,7 @@
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism
                 },
-                requires: "at least 1 tech, a chance to duplicate power ups",
+                requires: "at least 4 tech, not super determinism",
                 effect: () => {
                     const have = [] //find which tech you have
                     for (let i = 0; i < tech.tech.length; i++) {
@@ -3003,7 +2968,7 @@
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism && tech.duplicationChance() > 0
                 },
-                requires: "at least 1 tech, a chance to duplicate power ups",
+                requires: "at least 4 tech, a chance to duplicate power ups",
                 effect: () => {
                     const removeTotal = powerUps.removeRandomTech()
                     for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
@@ -3022,11 +2987,10 @@
                 allowed() {
                     return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
                 },
-                requires: "at least 1 tech and 2 research, a chance to duplicate power ups",
+                requires: "at least 2 research, not super determinism",
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
-                    simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2
-                <br>${powerUps.research.count}`)
+                    simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2<br>${powerUps.research.count}`)
                     const chanceStore = tech.duplicateChance
                     tech.duplicateChance = (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.045 + m.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
                     powerUps.spawn(m.pos.x, m.pos.y, "tech");
@@ -3143,7 +3107,7 @@
                 allowed() {
                     return powerUps.tech.choiceLog.length > 10 && !tech.isDeterminism && powerUps.research.count > 1
                 },
-                requires: "rejected an option in the last tech selection, at least 2 research",
+                requires: "rejected an option in the last tech selection, at least 2 research, not determinism",
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
                     let num = 3
@@ -3211,7 +3175,7 @@
                 allowed() {
                     return tech.isDeterminism && !tech.isAnsatz && !tech.isGunSwitchField
                 },
-                requires: "determinism, not unified field theory",
+                requires: "determinism, not unified field theory, not ansatz",
                 effect: () => {
                     tech.isSuperDeterminism = true;
                     //if you change the number spawned also change it in Born rule
@@ -3504,7 +3468,7 @@
                 allowed() {
                     return tech.haveGunCheck("nail gun") && tech.nailFireRate && !tech.isIceCrystals
                 },
-                requires: "nail gun and pneumatic actuator",
+                requires: "nail gun and pneumatic actuator not ice crystal nucleation",
                 effect() {
                     tech.nailInstantFireRate = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3530,7 +3494,7 @@
                 allowed() {
                     return (tech.isNailShot || tech.nailBotCount > 1 || tech.haveGunCheck("nail gun")) && !tech.isIceCrystals
                 },
-                requires: "nails",
+                requires: "nails, not ice crystal nucleation",
                 effect() {
                     tech.isNailCrit = true
                 },
@@ -3566,7 +3530,7 @@
                 allowed() {
                     return tech.isNailRadiation && !tech.isFastRadiation
                 },
-                requires: "irradiated nails",
+                requires: "irradiated nails, not 1/2s half-life",
                 effect() {
                     tech.isSlowRadiation = true;
                 },
@@ -3584,7 +3548,7 @@
                 allowed() {
                     return tech.isNailRadiation && !tech.isSlowRadiation
                 },
-                requires: "irradiated nails",
+                requires: "irradiated nails, not 4s half-life",
                 effect() {
                     tech.isFastRadiation = true;
                 },
@@ -3823,7 +3787,7 @@
             },
             {
                 name: "phase velocity",
-                description: "wave beam <strong>propagates</strong> faster through solids<br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in blocks",
+                description: "wave beam <strong>propagates</strong> faster through solids<br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3948,7 +3912,7 @@
                 allowed() {
                     return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb
                 },
-                requires: "grenades, not fragmentation",
+                requires: "grenades, not fragmentation, vacuum bomb",
                 effect() {
                     tech.isNeutronBomb = true;
                     b.setGrenadeMode()
@@ -4131,7 +4095,7 @@
                 allowed() {
                     return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField) && !tech.isEnergyHealth
                 },
-                requires: "spores",
+                requires: "spores, not mass-energy",
                 effect() {
                     tech.isMutualism = true
                 },
@@ -4311,43 +4275,6 @@
                     tech.isAmmoFoamSize = false;
                 }
             },
-
-            // {
-            //     name: "foam size",
-            //     description: "increase <strong>foam</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br><strong>foam</strong> dissipates <strong>50%</strong> faster",
-            //     maxCount: 1,
-            //     count: 0,
-            // frequency: 2,
-            //     allowed() {
-            //         return tech.haveGunCheck("foam") || tech.foamBotCount > 2
-            //     },
-            //     requires: "foam",
-            //     effect() {
-            //         tech.isLargeFoam = true
-            //     },
-            //     remove() {
-            //         tech.isLargeFoam = false;
-            //     }
-            // },
-            // {
-            //     name: "frame-dragging",
-            //     description: "<strong>slow time</strong> while charging the <strong>rail gun</strong><br>charging no longer drains <strong class='color-f'>energy</strong>",
-            //     maxCount: 1,
-            //     count: 0,
-            // frequency: 2,
-            //     allowed() {
-            //         return simulation.fpsCapDefault > 45 && tech.haveGunCheck("rail gun") && !tech.isSlowFPS && !tech.isCapacitor
-            //     },
-            //     requires: "rail gun and FPS above 45",
-            //     effect() {
-            //         tech.isRailTimeSlow = true;
-            //     },
-            //     remove() {
-            //         tech.isRailTimeSlow = false;
-            //         simulation.fpsCap = simulation.fpsCapDefault
-            //         simulation.fpsInterval = 1000 / simulation.fpsCap;
-            //     }
-            // },
             {
                 name: "half-wave rectifier",
                 description: "charging the <strong>rail gun</strong> gives you <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
@@ -4430,7 +4357,7 @@
                 allowed() {
                     return (tech.haveGunCheck("laser") && !tech.isPulseLaser) || tech.laserBotCount > 1
                 },
-                requires: "laser",
+                requires: "laser, not pulse",
                 effect() {
                     tech.isLaserPush = true;
                 },
@@ -4449,7 +4376,7 @@
                 allowed() {
                     return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
                 },
-                requires: "laser, not wide beam",
+                requires: "laser, not wide beam, diffuse beam, pulse, or slow light",
                 effect() {
                     tech.laserReflections++;
                     tech.laserDamage += 0.08; //base is 0.12
@@ -4471,7 +4398,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseAim && !tech.historyLaser
                 },
-                requires: "laser, not specular reflection",
+                requires: "laser, not neocognitron, diffuse beam, or slow light",
                 effect() {
                     tech.beamSplitter++
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4497,7 +4424,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.historyLaser
                 },
-                requires: "laser, not specular reflection, diffraction grating, slow light",
+                requires: "laser, not specular reflection, diffraction grating, slow light, pulse",
                 effect() {
                     if (tech.wideLaser === 0) tech.wideLaser = 3
                     tech.isWideLaser = true;
@@ -4525,7 +4452,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.isWideLaser
                 },
-                requires: "laser, not specular reflection, not diffraction grating",
+                requires: "laser, diffuse beam",
                 effect() {
                     tech.wideLaser += 2
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4607,7 +4534,7 @@
                 allowed() {
                     return tech.isPulseLaser && !tech.beamSplitter
                 },
-                requires: "pulse",
+                requires: "pulse, not diffraction grating",
                 effect() {
                     tech.isPulseAim = true;
                 },
@@ -4621,7 +4548,7 @@
             //************************************************** 
             {
                 name: "frequency resonance",
-                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>blocking</strong> efficiency by <strong>50%</strong>",
+                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>deflecting</strong> efficiency by <strong>50%</strong>",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4643,7 +4570,7 @@
             },
             {
                 name: "bremsstrahlung",
-                description: "<strong>blocking</strong> does <strong class='color-d'>damage</strong> to mobs",
+                description: "<strong>deflecting</strong> does <strong class='color-d'>damage</strong> to mobs",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4661,7 +4588,7 @@
             },
             {
                 name: "triple point",
-                description: "the pressure from <strong>blocking</strong> is used<br>to condense <strong class='color-s'>ice IX</strong> crystals",
+                description: "the pressure from <strong>deflecting</strong> is used<br>to condense <strong class='color-s'>ice IX</strong> crystals",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4679,7 +4606,7 @@
             },
             {
                 name: "flux pinning",
-                description: "<strong>blocking</strong> with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
+                description: "<strong>deflecting</strong> with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4748,7 +4675,7 @@
                 isNonRefundable: true,
                 // isExperimentHide: true,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isNailBotUpgrade && tech.isFoamBotUpgrade && tech.isBoomBotUpgrade && tech.isLaserBotUpgrade && tech.isOrbitBotUpgrade)
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
                 },
                 requires: "nano-scale manufacturing",
                 effect: () => {
@@ -4840,7 +4767,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
                 },
-                requires: "nano-scale manufacturing",
+                requires: "nano-scale manufacturing, no other manufacturing",
                 effect() {
                     tech.isSporeField = true;
                 },
@@ -4858,7 +4785,7 @@
                 allowed() {
                     return m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
                 },
-                requires: "nano-scale manufacturing",
+                requires: "nano-scale manufacturing, no other manufacturing",
                 effect() {
                     tech.isMissileField = true;
                 },
@@ -4876,7 +4803,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab)
                 },
-                requires: "nano-scale manufacturing",
+                requires: "nano-scale manufacturing, no other manufacturing",
                 effect() {
                     tech.isIceField = true;
                 },
@@ -5069,7 +4996,7 @@
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "time dilation field") && tech.energyRegen !== 0; //|| m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "time dilation field",
+                requires: "time dilation field, not ground state",
                 effect: () => {
                     tech.energyRegen = 0.004;
                     m.fieldRegen = tech.energyRegen;
@@ -5081,7 +5008,7 @@
             },
             {
                 name: "boson composite",
-                description: "<strong>intangible</strong> to blocks and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
+                description: "<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5137,7 +5064,7 @@
             },
             {
                 name: "potential well",
-                description: "the force that <strong>pilot wave</strong> generates<br>to <strong>trap blocks</strong> is greatly increased",
+                description: "the force that <strong>pilot wave</strong> generates<br>to trap <strong class='color-block'>blocks</strong> is greatly increased",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5173,7 +5100,7 @@
             },
             {
                 name: "Penrose process",
-                description: "after a <strong>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>63</strong> <strong class='color-f'>energy</strong>",
+                description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>63</strong> <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5191,7 +5118,7 @@
             },
             {
                 name: "transdimensional spores",
-                description: "when <strong>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
+                description: "when <strong class='color-block'>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5939,7 +5866,7 @@
             },
             {
                 name: "energy to mass conversion",
-                description: "convert your <strong class='color-f'>energy</strong> into blocks",
+                description: "convert your <strong class='color-f'>energy</strong> into <strong class='color-block'>blocks</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -6669,7 +6596,6 @@
         researchHaste: null,
         isMineDrop: null,
         isRerollBots: null,
-        isRailTimeSlow: null,
         isNailBotUpgrade: null,
         isFoamBotUpgrade: null,
         isLaserBotUpgrade: null,
@@ -6724,10 +6650,6 @@
         isSpeedHarm: null,
         isSpeedDamage: null,
         isTimeSkip: null,
-        isPerpetualReroll: null,
-        isPerpetualAmmo: null,
-        isPerpetualHeal: null,
-        isPerpetualStun: null,
         isCancelDuplication: null,
         cancelCount: null,
         isCancelRerolls: null,

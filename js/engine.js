@@ -187,8 +187,8 @@ function collisionChecks(event) {
                         if (obj.classType === "body" && obj.speed > 6) {
                             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                             if (v > 9) {
-                                let dmg = 0.075 * b.dmgScale * v * obj.mass * tech.throwChargeRate;
-                                if (mob[k].isShielded) dmg *= 0.6
+                                let dmg = 0.075 * b.dmgScale * v * obj.mass * (tech.throwChargeRate) * (tech.isBlockHarm ? 2 : 1) * (tech.isMobBlockFling ? 2 : 1);
+                                if (mob[k].isShielded) dmg *= 0.7
                                 mob[k].damage(dmg, true);
                                 if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
                                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
@@ -197,8 +197,7 @@ function collisionChecks(event) {
                                     } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
                                         type = "research"
                                     }
-                                    powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
-                                    // for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {}
+                                    for (let i = 0; i < 2; i++) powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
                                 }
 
                                 const stunTime = dmg / Math.sqrt(obj.mass)

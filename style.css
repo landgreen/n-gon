@@ -620,6 +620,13 @@ summary {
     font-weight: 100;
 }
 
+.color-block {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    padding: 0.5px;
+    font-weight: 100;
+}
+
 .color-j {
     letter-spacing: 1px;
     /* font-weight: 100; */

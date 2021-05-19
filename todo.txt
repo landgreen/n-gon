@@ -1,6 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+"block" is now styled text
+blocking with a shield is now called deflecting
 
+added 100% block damage buffs to flywheel and inelastic collision
+restitution now spawns 2 power ups (up from 1)
+
+about 75 edits to tech requirement text
 
 ******************************************************** BUGS ********************************************************
 
@@ -45,6 +51,10 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+full block build works for every level except final boss
+
+block custom css style?
 
 tech: pilot wave is projected from the player, not the mouse
   maybe also make field move slower? (adjust smoothing function)

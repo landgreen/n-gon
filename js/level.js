@@ -29,6 +29,7 @@ const level = {
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
+            // level.template(); //blank start new map development
             // level.final() //final boss level
             // level.gauntlet(); //before final boss level
             // level.testChamber() //less mobs, more puzzle
@@ -114,16 +115,6 @@ const level = {
             for (let j = 0, len = 1 + 2 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
         for (let i = 0; i < tech.wimpExperiment; i++) spawn.WIMP()
-        // if (tech.isPerpetualReroll) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "research", false);
-        // if (tech.isPerpetualAmmo) {
-        //     for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "ammo", false);
-        // }
-        // if (tech.isPerpetualHeal) {
-        //     for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
-        // }
-        // if (tech.isPerpetualStun) {
-        //     for (let i = 0; i < mob.length; i++) mobs.statusStun(mob[i], 780)
-        // }
         if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
             m.eyeFillColor = m.fieldMeterColor
