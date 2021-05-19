@@ -1,13 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-fermions: after a block is affected by pilot wave it collides with intangible mobs, but not you
+
 
 ******************************************************** BUGS ********************************************************
-
-mine reclamation is giving mine ammo back after you fire, not after explode
-
-undefined count did not seem to reset between games
-  only display not reset
 
 Why does micro-extruder lag so much anyway
 
@@ -51,14 +46,18 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
+tech: pilot wave is projected from the player, not the mouse
+  maybe also make field move slower? (adjust smoothing function)
+  less energy drain?
+  does damage to mobs caught in field?
+
+tech: wormhole through walls
+
 pause should show the last in game console message
 
 Make ice crystal + rivet gun/needle gun launch freezing rivets/needles with increased energy drain
 
 WIMPS are cool, but the 2-3 research isn't enough incentive?
-
-tech: pilot wave is projected from the player, not the mouse
-  give pilot wave a buff?
 
 tech: MACHO - spawn a mob like WIMP that follows you and gives you a bonus
   if it touches WIMP they explode

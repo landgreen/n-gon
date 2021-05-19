@@ -16,16 +16,16 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // m.setField("pilot wave")
-            // b.giveGuns("wave beam")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
-            // tech.giveTech("pulse")
+            // tech.giveTech("fermions")
             // tech.giveTech("potential well")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
             // tech.giveTech("metastability")
+
 
             level.intro(); //starting level
             // level.testing(); //not in rotation
@@ -1091,7 +1091,9 @@ const level = {
                 spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
             }
         }
-        blockDoor(710, -710);
+        // blockDoor(710, -710);
+        // for (let i = 0; i < 30; i++) powerUps.directSpawn(710, -710, "tech");
+
         spawn.mapRect(2500, -1200, 200, 750); //right wall
         blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall

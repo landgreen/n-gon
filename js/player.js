@@ -152,7 +152,6 @@ const m = {
         m.Vy = player.velocity.y;
 
         //tracks the last 10s of player information
-        // console.log(m.history)
         m.history.splice(m.cycle % 600, 1, {
             position: {
                 x: player.position.x,
@@ -1120,7 +1119,7 @@ const m = {
                 if (m.energy > 0.001) {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
                     m.energy -= 0.001 / tech.throwChargeRate;
-                    m.throwCharge += 0.5 * tech.throwChargeRate / m.holdingTarget.mass
+                    m.throwCharge += 0.5 * (tech.throwChargeRate + 2 * tech.isAddBlockMass) / m.holdingTarget.mass
                     //draw charge
                     const x = m.pos.x + 15 * Math.cos(m.angle);
                     const y = m.pos.y + 15 * Math.sin(m.angle);
@@ -1150,14 +1149,14 @@ const m = {
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
                 //bullet-like collisions
-                m.holdingTarget.collisionFilter.category = cat.body;
+                m.holdingTarget.collisionFilter.category = tech.isBlockBullets ? cat.bullet : cat.body;
                 m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
                 //check every second to see if player is away from thrown body, and make solid
                 const solid = function(that) {
                     const dx = that.position.x - player.position.x;
                     const dy = that.position.y - player.position.y;
                     if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
-                        // that.collisionFilter.category = cat.body; //make solid
+                        that.collisionFilter.category = cat.body; //make solid
                         that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
                     } else {
                         setTimeout(solid, 40, that);
@@ -1188,6 +1187,19 @@ const m = {
                     y: player.velocity.y - Math.sin(m.angle) * speed / 30 * Math.sqrt(m.holdingTarget.mass)
                 });
                 m.definePlayerMass() //return to normal player mass
+
+                if (tech.isAddBlockMass) {
+                    const expand = function(that, massLimit) {
+                        if (that.mass < massLimit) {
+                            const scale = 1.05;
+                            Matter.Body.scale(that, scale, scale);
+                            setTimeout(expand, 20, that, massLimit);
+                        }
+                    };
+                    expand(m.holdingTarget, Math.min(20, m.holdingTarget.mass * 3))
+                }
+
+
             }
         } else {
             m.isHolding = false
@@ -1537,7 +1549,7 @@ const m = {
         {
             name: "perfect diamagnetism",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
-            description: "<strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has less <strong>recoil</strong><br><strong>attract</strong> power ups from <strong>far away</strong>",
+            description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>blocking</strong> does not drain <strong class='color-f'>energy</strong><br><strong>blocking</strong> has <strong>90%</strong> less <strong>recoil</strong>",
             effect: () => {
                 m.fieldShieldingScale = 0;
                 m.fieldBlockCD = 4;
@@ -1906,6 +1918,7 @@ const m = {
                                 m.walk_cycle += m.flipLegs * m.Vx;
                                 // m.hold();
                                 // m.energy += DRAIN; // 1 to undo the energy drain from time speed up, 0.5 to cut energy drain in half
+
                                 b.fire();
                                 // b.bulletRemove();
                                 b.bulletDo();
@@ -3010,7 +3023,7 @@ const m = {
                                             let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"
-                                            } else if (Math.random() < 0.23 && !tech.isSuperDeterminism) {
+                                            } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
                                                 type = "research"
                                             }
                                             powerUps.spawn(mob[k].position.x, mob[k].position.y, type);

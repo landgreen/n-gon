@@ -96,6 +96,7 @@ const spawn = {
         me.stroke = "transparent"
         me.isShielded = true; //makes it immune to damage
         me.leaveBody = false;
+        me.isBadTarget = true;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.collisionFilter.mask = 0; //cat.player //| cat.body
@@ -177,6 +178,24 @@ const spawn = {
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
+
+            //make a block body to replace this one
+            //this body is too big to leave behind in the normal way mobs.replace()
+            const len = body.length;
+            const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
+            body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
+            Matter.Body.setVelocity(body[len], { x: 0, y: -3 });
+            Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
+            body[len].collisionFilter.category = cat.body;
+            body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+            body[len].classType = "body";
+            World.add(engine.world, body[len]); //add to world
+            const expand = function(that, massLimit) {
+                const scale = 1.05;
+                Matter.Body.scale(that, scale, scale);
+                if (that.mass < massLimit) setTimeout(expand, 20, that, massLimit);
+            };
+            expand(body[len], 200)
 
             function unlockExit() {
                 level.exit.x = 5500;
@@ -2460,6 +2479,7 @@ const spawn = {
         me.restitution = 0.8;
         me.leaveBody = false;
         me.isDropPowerUp = false;
+        me.isBadTarget = true;
 
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
@@ -2511,6 +2531,7 @@ const spawn = {
         me.restitution = 1;
         me.leaveBody = false;
         me.isDropPowerUp = false;
+        me.isBadTarget = true;
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
@@ -2649,6 +2670,7 @@ const spawn = {
         me.restitution = 0;
         me.leaveBody = false;
         me.isDropPowerUp = false;
+        me.isBadTarget = true;
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
@@ -2771,12 +2793,13 @@ const spawn = {
                     this.cycle = 0
                     ctx.beginPath();
                     for (let i = 0; i < mob.length; i++) {
-                        if (!mob[i].isShielded && !mob[i].shield && mob[i].isDropPowerUp && mob[i].alive) {
+                        if (!mob[i].isShielded && !mob[i].shield && mob[i].isDropPowerUp && mob[i].alive && !mob[i].isBoss) {
                             ctx.moveTo(this.position.x, this.position.y)
                             ctx.lineTo(mob[i].position.x, mob[i].position.y)
                             spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
                         }
                     }
+                    if (!this.isShielded && this.alive) spawn.shield(this, this.position.x, this.position.y, 1, true);
                     ctx.lineWidth = 20
                     // ctx.lineCap = "round";
                     ctx.strokeStyle = "rgba(200,200,255,0.9)"
@@ -2919,8 +2942,7 @@ const spawn = {
     spawns(x, y, radius = 15) {
         mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];
-        me.onHit = function() {
-            //run this function on hitting player
+        me.onHit = function() { //run this function on hitting player
             this.explode();
         };
         // me.stroke = "transparent"
@@ -2930,8 +2952,8 @@ const spawn = {
         me.g = 0.00002; //required if using 'gravity' 
         me.accelMag = 0.00012 * simulation.accelScale;
         // me.memory = 30;
+        me.isDropPowerUp = false
         me.leaveBody = false;
-        me.isDropPowerUp = false;
         me.seePlayerFreq = Math.round((80 + 50 * Math.random()) * simulation.lookFreqScale);
         me.frictionAir = 0.004;
         me.do = function() {
@@ -3223,6 +3245,7 @@ const spawn = {
         Matter.Body.setDensity(me, 0.1); //normal is 0.001
         me.leaveBody = false;
         me.isDropPowerUp = false;
+        me.isBadTarget = true;
         me.showHealthBar = false;
         // me.isShielded = true
         me.collisionFilter.category = cat.mobBullet;
@@ -3243,7 +3266,15 @@ const spawn = {
             //damage player
             if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                m.damage(0.035 * simulation.dmgScale);
+                const dmg = 0.035 * simulation.dmgScale
+                m.damage(dmg);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: dmg * 500,
+                    color: simulation.mobDmgColor,
+                    time: simulation.drawTime
+                });
                 this.death();
             }
         };
@@ -3441,6 +3472,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
+        me.isBadTarget = true;
 
         me.do = function() {
             let wireX = -50;
@@ -3508,6 +3540,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
+        me.isBadTarget = true;
 
         me.do = function() {
             let wireX = -50 - 20;
@@ -3558,6 +3591,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
+        me.isBadTarget = true;
 
         me.do = function() {
             let wireX = -50 - 35;
@@ -3607,6 +3641,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
+        me.isBadTarget = true;
 
         me.do = function() {
             let wireX = -50 + 16;
@@ -3656,6 +3691,7 @@ const spawn = {
         me.frictionAir = 0.01;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
+        me.isBadTarget = true;
 
         me.do = function() {
             let wireX = -50 + 26;

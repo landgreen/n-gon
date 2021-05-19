@@ -1047,11 +1047,9 @@ const mobs = {
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
 
                 if (this.isDropPowerUp) {
-
-                    if (tech.iceIXOnDeath && this.isSlowed && Math.random() > 0.5) {
-                        for (let i = 0, len = 3 * Math.sqrt(this.mass) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
+                    if (tech.iceIXOnDeath && this.isSlowed) {
+                        for (let i = 0, len = 2 * Math.sqrt(Math.min(this.mass, 25)) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
                     }
-
                     if (tech.deathSpawnsFromBoss || (tech.deathSpawns && this.isDropPowerUp)) {
                         const spawns = tech.deathSpawns + tech.deathSpawnsFromBoss
                         const len = Math.min(12, spawns * Math.ceil(Math.random() * simulation.difficulty * spawns))

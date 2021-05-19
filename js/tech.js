@@ -1482,30 +1482,12 @@
                 }
             },
             {
-                name: "restitution",
-                description: "if a <strong>block</strong> you threw kills a mob<br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
-                allowed() {
-                    return tech.throwChargeRate > 1 && !tech.isNoHeals && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
-                },
-                requires: "mass driver, not ergodicity, pilot wave",
-                effect() {
-                    tech.isBlockPowerUps = true
-                },
-                remove() {
-                    tech.isBlockPowerUps = false
-                }
-            },
-            {
                 name: "flywheel",
                 description: "after a mob <strong>dies</strong> its body is <strong>spun</strong> and <strong>flung</strong><br>in the general direction of a nearby mob",
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.throwChargeRate > 1 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
                 },
@@ -1518,12 +1500,65 @@
                 }
             },
             {
+                name: "fermions",
+                description: "<strong>blocks</strong> thrown by you or <strong>pilot wave</strong> will<br><strong>collide</strong> with <strong>intangible</strong> mobs, but not you",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.throwChargeRate > 1
+                },
+                requires: "mass driver",
+                effect() {
+                    tech.isBlockBullets = true
+                },
+                remove() {
+                    tech.isBlockBullets = false
+                }
+            },
+            {
+                name: "inflation",
+                description: "<strong>throwing</strong> a <strong>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
+                },
+                requires: "mass driver, not ergodicity, pilot wave",
+                effect() {
+                    tech.isAddBlockMass = true
+                },
+                remove() {
+                    tech.isAddBlockMass = false
+                }
+            },
+            {
+                name: "restitution",
+                description: "if a <strong>block</strong> you threw kills a mob<br>spawn a <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return tech.throwChargeRate > 1 && !tech.isNoHeals && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
+                },
+                requires: "mass driver, not ergodicity, pilot wave",
+                effect() {
+                    tech.isBlockPowerUps = true
+                },
+                remove() {
+                    tech.isBlockPowerUps = false
+                }
+            },
+            {
                 name: "inelastic collision",
                 description: "while you are <strong>holding</strong> a <strong>block</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
                 },
@@ -1664,7 +1699,7 @@
             },
             {
                 name: "thermocouple",
-                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-3</strong> <strong class='color-s'>ice IX</strong> crystals every second",
+                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-5</strong> <strong class='color-s'>ice IX</strong> crystals every second",
                 maxCount: 9,
                 count: 0,
                 frequency: 4,
@@ -1736,7 +1771,7 @@
             },
             {
                 name: "crystallizer",
-                description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong><br>they have a chance shatter into <strong class='color-s'>ice IX</strong> crystals",
+                description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong> they<br>shatter into <strong class='color-s'>ice IX</strong> crystals",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
@@ -5119,24 +5154,6 @@
                 }
             },
             {
-                name: "fermions",
-                description: "after a <strong>block</strong> is affected by <strong>pilot wave</strong> it<br><strong>collides</strong> with <strong>intangible</strong> mobs, but not you",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
-                },
-                requires: "pilot wave",
-                effect() {
-                    tech.isBlockBullets = true
-                },
-                remove() {
-                    tech.isBlockBullets = false
-                }
-            },
-            {
                 name: "cosmic string",
                 description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
                 isFieldTech: true,
@@ -5404,6 +5421,46 @@
             //         tech.wimpExperiment = 0
             //     }
             // },
+            {
+                name: "posture",
+                description: "stand a bit taller",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return !m.isShipMode
+                },
+                requires: "",
+                effect() {
+                    m.yOffWhen.stand = 70
+                },
+                remove() {
+                    m.yOffWhen.stand = 49
+                }
+            },
+            {
+                name: "rhythm",
+                description: "you oscillate up and down",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                isNonRefundable: true,
+                allowed() {
+                    return !m.isShipMode
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        m.yOffWhen.stand = 53 + 28 * Math.sin(simulation.cycle * 0.2)
+                        if (m.onGround && !m.crouch) m.yOffGoal = m.yOffWhen.stand
+                    }, 100);
+                },
+                remove() {}
+            },
             {
                 name: "spinor",
                 description: "the direction you aim is determined by your position",
@@ -6464,7 +6521,9 @@
                     }, 1);
                 },
                 remove() {
-                    this.maxCount = lore.techGoal
+                    lore.techCount = 0;
+                    this.maxCount = lore.techGoal;
+                    this.description = `<strong class="lore-text">this</strong>`
                 }
             }
         ],
@@ -6735,5 +6794,6 @@
         isCollisionRealitySwitch: null,
         iceIXOnDeath: null,
         wimpCount: null,
-        isBlockBullets: null
+        isBlockBullets: null,
+        isAddBlockMass: null
     }
