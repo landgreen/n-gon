@@ -3314,7 +3314,7 @@ const b = {
 
                 const me = bullet.length;
                 const size = tech.rivetSize * 6
-                bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
+                bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle+angle), m.pos.y + 35 * Math.sin(m.angle+angle), 5 * size, size, b.fireAttributes(m.angle));
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
                 World.add(engine.world, bullet[me]); //add bullet to world
@@ -3423,52 +3423,96 @@ const b = {
 
                 if (tech.isSlugShot) {
                     const me = bullet.length;
-                    const dir = m.angle + 0.02 * (Math.random() - 0.5)
-                    bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 45, 20, b.fireAttributes(dir));
+                    if (tech.isNailShot) {
+                        function fireRivet() {
+                            const me = bullet.length;
+                            const size = tech.rivetSize * 6
+                            bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle+0.2*(Math.random()-0.5)), m.pos.y + 35 * Math.sin(m.angle+0.1*(Math.random()-0.5)), 5 * size, size, b.fireAttributes(m.angle+0.1*(Math.random()-0.5)));
+                            bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
+                            Matter.Body.setDensity(bullet[me], 0.002);
+                            World.add(engine.world, bullet[me]); //add bullet to world
+                            const SPEED = m.crouch ? 55 : 46
+                            Matter.Body.setVelocity(bullet[me], {
+                                x: SPEED * Math.cos(m.angle+0.1*(Math.random()-0.5)),
+                                y: SPEED * Math.sin(m.angle+0.1*(Math.random()-0.5))
+                            });
+                            bullet[me].endCycle = simulation.cycle + 180
+                            bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
+                                if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
+                                    b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
+                                }
+                                if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 1.4 : 0.35), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+                            };
 
-                    Matter.Body.setDensity(bullet[me], 0.004);
-                    World.add(engine.world, bullet[me]); //add bullet to world
-                    const SPEED = (m.crouch ? 52 : 43) + Math.random() * 7
-                    Matter.Body.setVelocity(bullet[me], {
-                        x: SPEED * Math.cos(dir),
-                        y: SPEED * Math.sin(dir)
-                    });
-                    if (tech.isIncendiary) {
-                        bullet[me].endCycle = simulation.cycle + 60
-                        bullet[me].onEnd = function() {
-                            b.explosion(this.position, 250 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
+                            bullet[me].minDmgSpeed = 10
+                            bullet[me].frictionAir = 0.006;
+                            bullet[me].do = function() {
+                                this.force.y += this.mass * 0.0008
+
+                                //rotates bullet to face current velocity?
+                                if (this.speed > 7) {
+                                    const facing = {
+                                        x: Math.cos(this.angle),
+                                        y: Math.sin(this.angle)
+                                    }
+                                    const mag = 0.002 * this.mass
+                                    if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
+                                        this.torque += mag
+                                    } else {
+                                        this.torque -= mag
+                                    }
+                                }
+                            }
                         }
-                        bullet[me].beforeDmg = function() {
-                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
-                        };
+                        fireRivet();fireRivet();fireRivet();fireRivet();fireRivet();
                     } else {
-                        bullet[me].endCycle = simulation.cycle + 180
-                    }
-                    bullet[me].minDmgSpeed = 15
-                    // bullet[me].restitution = 0.4
-                    bullet[me].frictionAir = 0.006;
-                    bullet[me].do = function() {
-                        this.force.y += this.mass * 0.002
+                        const dir = m.angle + 0.02 * (Math.random() - 0.5)
+                        bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 45, 20, b.fireAttributes(dir));
 
-                        //rotates bullet to face current velocity?
-                        if (this.speed > 6) {
-                            const facing = {
-                                x: Math.cos(this.angle),
-                                y: Math.sin(this.angle)
+                        Matter.Body.setDensity(bullet[me], 0.004);
+                        World.add(engine.world, bullet[me]); //add bullet to world
+                        const SPEED = (m.crouch ? 52 : 43) + Math.random() * 7
+                        Matter.Body.setVelocity(bullet[me], {
+                            x: SPEED * Math.cos(dir),
+                            y: SPEED * Math.sin(dir)
+                        });
+                        if (tech.isIncendiary) {
+                            bullet[me].endCycle = simulation.cycle + 60
+                            bullet[me].onEnd = function() {
+                                b.explosion(this.position, 250 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
                             }
-                            const mag = 0.0033
-                            if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
-                                this.torque += mag
-                            } else {
-                                this.torque -= mag
-                            }
+                            bullet[me].beforeDmg = function() {
+                                this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            };
+                        } else {
+                            bullet[me].endCycle = simulation.cycle + 180
                         }
-                    };
-                    if (tech.fragments) {
-                        bullet[me].beforeDmg = function() {
-                            if (this.speed > 4) {
-                                b.targetedNail(this.position, tech.fragments * 8)
-                                this.endCycle = 0 //triggers despawn
+                        bullet[me].minDmgSpeed = 15
+                        // bullet[me].restitution = 0.4
+                        bullet[me].frictionAir = 0.006;
+                        bullet[me].do = function() {
+                            this.force.y += this.mass * 0.002
+
+                            //rotates bullet to face current velocity?
+                            if (this.speed > 6) {
+                                const facing = {
+                                    x: Math.cos(this.angle),
+                                    y: Math.sin(this.angle)
+                                }
+                                const mag = 0.0033
+                                if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
+                                    this.torque += mag
+                                } else {
+                                    this.torque -= mag
+                                }
+                            }
+                        };
+                        if (tech.fragments) {
+                            bullet[me].beforeDmg = function() {
+                                if (this.speed > 4) {
+                                    b.targetedNail(this.position, tech.fragments * 8)
+                                    this.endCycle = 0 //triggers despawn
+                                }
                             }
                         }
                     }

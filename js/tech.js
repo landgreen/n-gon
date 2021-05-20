@@ -3604,9 +3604,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot
+                    return tech.haveGunCheck("shotgun") && !tech.isIncendiary
                 },
-                requires: "shotgun, not slug",
+                requires: "shotgun, not incendiary",
                 effect() {
                     tech.isNailShot = true;
                 },
@@ -3616,15 +3616,15 @@
             },
             {
                 name: "shotgun slug",
-                description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong>",
+                description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong><br><em>fires 5 rivets paired with nailshot</em>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("shotgun") && !tech.isNailShot
+                    return tech.haveGunCheck("shotgun")
                 },
-                requires: "shotgun, not nailshot",
+                requires: "shotgun",
                 effect() {
                     tech.isSlugShot = true;
                 },
