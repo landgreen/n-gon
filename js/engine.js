@@ -197,7 +197,7 @@ function collisionChecks(event) {
                                     } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
                                         type = "research"
                                     }
-                                    for (let i = 0; i < 2; i++) powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
+                                    powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
                                 }
 
                                 const stunTime = dmg / Math.sqrt(obj.mass)

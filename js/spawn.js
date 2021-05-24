@@ -89,9 +89,8 @@ const spawn = {
     },
     //mob templates *********************************************************************************************
     //***********************************************************************************************************
-    WIMP(x = level.exit.x + 300 * (Math.random() - 0.5), y = level.exit.y + 300 * (Math.random() - 0.5), radius = 75 + 25 * Math.random()) { //immortal mob that follows player
-        //if you have the tech it spawns at start of every level at the exit
-        mobs.spawn(x, y, 3, radius, "transparent");
+    MACHO(x = m.pos.x, y = m.pos.y) { //immortal mob that follows player         //if you have the tech it spawns at start of every level at the player
+        mobs.spawn(x, y, 3, 0.1, "transparent");
         let me = mob[mob.length - 1];
         me.stroke = "transparent"
         me.isShielded = true; //makes it immune to damage
@@ -99,6 +98,63 @@ const spawn = {
         me.isBadTarget = true;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
+        me.collisionFilter.category = 0;
+        me.collisionFilter.mask = 0; //cat.player //| cat.body
+        me.chaseSpeed = 3.3
+        me.isMACHO = true;
+        me.frictionAir = 0.006
+
+        me.do = function() {
+            const sine = Math.sin(simulation.cycle * 0.015)
+            this.radius = 370 * (1 + 0.1 * sine)
+            //chase player
+            const sub = Vector.sub(player.position, this.position)
+            const mag = Vector.magnitude(sub)
+            // follow physics
+            // Matter.Body.setVelocity(this, { x: 0, y: 0 });
+            // const where = Vector.add(this.position, Vector.mult(Vector.normalise(sub), this.chaseSpeed))
+            // if (mag > 10) Matter.Body.setPosition(this, { x: where.x, y: where.y });
+
+            //realistic physics
+            const force = Vector.mult(Vector.normalise(sub), 0.000000003)
+            this.force.x += force.x
+            this.force.y += force.y
+
+
+            if (mag < this.radius) { //buff to player when inside radius
+                tech.isHarmMACHO = true;
+                //draw halo
+                ctx.strokeStyle = "rgba(80,120,200,0.2)" //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
+                ctx.beginPath();
+                ctx.arc(m.pos.x, m.pos.y, 36, 0, 2 * Math.PI);
+                ctx.lineWidth = 10;
+                ctx.stroke();
+                // ctx.strokeStyle = "rgba(255,255,0,0.17)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
+                // ctx.beginPath();
+                // ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+                // ctx.lineWidth = 30;
+                // ctx.stroke();
+            } else {
+                tech.isHarmMACHO = false;
+            }
+            //draw outline
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.radius + 15, 0, 2 * Math.PI);
+            ctx.strokeStyle = "#000"
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    },
+    WIMP(x = level.exit.x + 300 * (Math.random() - 0.5), y = level.exit.y + 300 * (Math.random() - 0.5)) { //immortal mob that follows player //if you have the tech it spawns at start of every level at the exit
+        mobs.spawn(x, y, 3, 0.1, "transparent");
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent"
+        me.isShielded = true; //makes it immune to damage
+        me.leaveBody = false;
+        me.isBadTarget = true;
+        me.isDropPowerUp = false;
+        me.showHealthBar = false;
+        me.collisionFilter.category = 0;
         me.collisionFilter.mask = 0; //cat.player //| cat.body
         me.chaseSpeed = 1 + 1.5 * Math.random()
 
@@ -120,7 +176,7 @@ const spawn = {
                     m.energy -= DRAIN
                 } else {
                     m.energy = 0;
-                    m.damage(0.007)
+                    m.damage(0.007 * simulation.dmgScale)
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -147,7 +203,7 @@ const spawn = {
             //     }
             // }
 
-            //draw some flashy graphics
+            //draw
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
             // ctx.fillStyle = "hsla(160, 100%, 35%,0.75)" //"rgba(255,0,255,0.2)";

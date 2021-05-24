@@ -18,13 +18,14 @@ const level = {
             // m.setField("pilot wave")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
-            // tech.giveTech("fermions")
+            // tech.giveTech("WIMPs")
+            // tech.giveTech("MACHO")
             // tech.giveTech("potential well")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
-            // tech.giveTech("metastability")
+            // tech.giveTech("attract")
 
 
             level.intro(); //starting level
@@ -109,7 +110,7 @@ const level = {
             const len = Math.floor((m.maxHealth - m.health) / 0.5)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
         }
-
+        if (tech.isMACHO) spawn.MACHO()
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
             for (let j = 0, len = 1 + 2 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
@@ -1099,21 +1100,18 @@ const level = {
         // spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
-        // spawn.shooterBoss(1900, -500)
+        spawn.shooterBoss(1900, -500)
         // spawn.launcherBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        spawn.ghoster(1800, -120)
-        spawn.ghoster(1800, -120)
-        spawn.ghoster(1800, -120)
-        spawn.ghoster(1800, -120)
+        // spawn.ghoster(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
-        // spawn.beamer(1200, -500)
+        spawn.laser(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "pulsar")
@@ -4721,9 +4719,9 @@ const level = {
         }
 
         //Boss Spawning
-        if (simulation.difficulty > 20) {
+        if (simulation.difficulty > 10) {
             spawn.pulsarBoss(-400, -200);
-            if (simulation.difficulty > 40) {
+            if (simulation.difficulty > 30) {
                 spawn.pulsarBoss(3600, -400);
                 if (simulation.difficulty > 60) {
                     spawn.pulsarBoss(4200, 1000);

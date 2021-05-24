@@ -8,15 +8,20 @@ const powerUps = {
         if (tech.duplicationChance() > 0) {
             if (tech.isPowerUpsVanish) {
                 powerUps.do = powerUps.doDuplicatesVanish
+            } else if (tech.isPowerUpsAttract) {
+                powerUps.do = powerUps.doAttractDuplicates
             } else {
                 powerUps.do = powerUps.doDuplicates
             }
             tech.maxDuplicationEvent() //check to see if hitting 100% duplication
+        } else if (tech.isPowerUpsAttract) {
+            powerUps.do = powerUps.doAttract
         } else {
             powerUps.do = powerUps.doDefault
         }
     },
-    doDefault() { //draw power ups
+    doDefault() {
+        //draw power ups
         ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             ctx.beginPath();
@@ -25,6 +30,19 @@ const powerUps = {
             ctx.fill();
         }
         ctx.globalAlpha = 1;
+    },
+    doAttract() {
+        powerUps.doDefault();
+        //pull in 
+        for (let i = 0, len = powerUp.length; i < len; ++i) {
+            const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.0015 * powerUp[i].mass)
+            powerUp[i].force.x += force.x
+            powerUp[i].force.y = force.y - simulation.g
+        }
+    },
+    doAttractDuplicates() {
+        powerUps.doDuplicates();
+        //pull in 
     },
     doDuplicates() { //draw power ups but give duplicates some electricity
         ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
@@ -593,7 +611,7 @@ const powerUps = {
     },
     onPickUp(who) {
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
-        if (tech.isMassEnergy) m.energy += 2.5;
+        if (tech.isMassEnergy) m.energy += 2;
         if (tech.isMineDrop) {
             if (tech.isLaserMine) {
                 b.laserMine(who.position)

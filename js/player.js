@@ -513,6 +513,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
+        if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.79
         if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.50 : 1.1
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
@@ -1355,6 +1356,7 @@ const m = {
         for (let i = 0, len = mob.length; i < len; ++i) {
             if (
                 Vector.magnitude(Vector.sub(mob[i].position, player.position)) - mob[i].radius < m.fieldRange &&
+                !mob[i].isShielded &&
                 m.lookingAt(mob[i]) &&
                 Matter.Query.ray(map, mob[i].position, m.pos).length === 0
             ) {
@@ -1365,7 +1367,11 @@ const m = {
     },
     pushMobs360(range) { // find mobs in range in any direction
         for (let i = 0, len = mob.length; i < len; ++i) {
-            if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < range && Matter.Query.ray(map, mob[i].position, m.pos).length === 0) {
+            if (
+                Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < range &&
+                !mob[i].isShielded &&
+                Matter.Query.ray(map, mob[i].position, m.pos).length === 0
+            ) {
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
             }
@@ -1629,7 +1635,7 @@ const m = {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 200 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             for (let i = 0; i < 30; i++) {
-                                m.energy -= 0.11
+                                m.energy -= 0.088
                                 if (m.energy > 0) {
                                     b.spore(m.pos)
                                 } else {
@@ -1638,10 +1644,10 @@ const m = {
                                 }
                             }
                         } else if (tech.isMissileField) {
-                            m.energy -= 0.4;
+                            m.energy -= 0.32;
                             b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
                         } else if (tech.isIceField) {
-                            m.energy -= 0.057;
+                            m.energy -= 0.046;
                             b.iceIX(1)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;

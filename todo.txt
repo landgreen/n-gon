@@ -1,16 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-"block" is now styled text
-blocking with a shield is now called deflecting
+tech: MACHO - an object follows you and gives you harm protection when you are inside it's halo
 
-added 100% block damage buffs to flywheel and inelastic collision
-restitution now spawns 2 power ups (up from 1)
+several nano-scale field tech now require some research, and have been buffed
+  nano-scale mycelium, ice-IX, missile tech now consume 20% less energy to produce bullets
+  nano-scale bot tech: spawn an extra bots
 
-about 75 edits to tech requirement text
+some bug fixes
 
 ******************************************************** BUGS ********************************************************
 
-Why does micro-extruder lag so much anyway
+Why does micro-extruder lag so much
 
 blue triangle boss can move backwards and aim away from you if set up properly
 
@@ -52,34 +52,33 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-full block build works for every level except final boss
+make nano-scale upgrades all cost research, and buff those tech
 
-block custom css style?
+make most future tech for guns / fields
 
-tech: pilot wave is projected from the player, not the mouse
-  maybe also make field move slower? (adjust smoothing function)
-  less energy drain?
-  does damage to mobs caught in field?
+tech: mine - fire the mine into where you were in the past
+  maybe it could check all your past locations and explode there if there is something in range 
 
-tech: wormhole through walls
+tech: increase health and harm taken
 
-pause should show the last in game console message
+remove air control
+  negative tech, junk , experiment?
 
-Make ice crystal + rivet gun/needle gun launch freezing rivets/needles with increased energy drain
-
-WIMPS are cool, but the 2-3 research isn't enough incentive?
-
-tech: MACHO - spawn a mob like WIMP that follows you and gives you a bonus
-  if it touches WIMP they explode
-
-let the player use research more like money
-  spend it to do things
-  buff some special tech and add a research cost
+use name axion as a 3rd dark matter tech
 
 tech: use the ability for power ups to have custom code
+  (note: this code is half way done, it just needs to be completed)
   attracted to player
   attracted to other power ups
     explode if they touch?
+
+tech: wormhole through walls?
+
+pause should show the last in game console message
+
+general idea: let the player use research more like money
+  spend it to do things
+  buff some special tech and add a research cost
   
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up:

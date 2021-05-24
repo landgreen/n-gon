@@ -329,9 +329,9 @@
                 isNonRefundable: true,
                 // isExperimentHide: true,
                 allowed() {
-                    return b.inventory.length > 2
+                    return b.inventory.length > 3
                 },
-                requires: "at least 3 guns",
+                requires: "at least 4 guns",
                 effect() {
                     for (let i = 0; i < b.inventory.length; i++) {
                         if (Math.random() < 0.2) {
@@ -388,7 +388,7 @@
             },
             {
                 name: "catabolism",
-                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>4</strong> <strong class='color-g'>ammo</strong>, but lose <strong>5</strong> <strong class='color-h'>health</strong>",
+                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>4</strong> <strong class='color-g'>ammo</strong>, but lose <strong>3</strong> <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1237,7 +1237,7 @@
                 effect() {
                     tech.isOrbitBotUpgrade = true
                     b.convertBotsTo("orbital-bot")
-                    const range = 190 + 60 * tech.isOrbitBotUpgrade
+                    const range = 190 + 100 * tech.isOrbitBotUpgrade
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'orbit') {
                             bullet[i].isUpgraded = true
@@ -1249,7 +1249,7 @@
                 },
                 remove() {
                     tech.isOrbitBotUpgrade = false
-                    const range = 190 + 60 * tech.isOrbitBotUpgrade
+                    const range = 190 + 100 * tech.isOrbitBotUpgrade
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'orbit') {
                             bullet[i].range = range
@@ -1329,7 +1329,7 @@
             },
             {
                 name: "robotics",
-                description: "use <strong>1</strong>  <strong class='color-r'>research</strong> to spawn a random <strong>bot</strong><br><strong>quadruple</strong> the <strong class='flicker'>frequency</strong> of finding <strong>bot</strong> <strong class='color-m'>tech</strong>",
+                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to spawn a random <strong>bot</strong><br><strong>quadruple</strong> the <strong class='flicker'>frequency</strong> of finding <strong>bot</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -1337,7 +1337,7 @@
                 allowed() {
                     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
                 },
-                requires: "at least 2 bots, 1 research",
+                requires: "at least 2 bots",
                 effect: () => {
                     if (powerUps.research.count > 0) {
                         powerUps.research.changeRerolls(-1)
@@ -1489,9 +1489,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.throwChargeRate > 1
+                    return tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "mass driver",
+                requires: "mass driver or pilot wave",
                 effect() {
                     tech.isBlockBullets = true
                 },
@@ -1519,15 +1519,15 @@
             },
             {
                 name: "restitution",
-                description: "if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                description: "if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>1</strong> <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && !tech.isNoHeals && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
                 },
-                requires: "mass driver, not ergodicity, pilot wave",
+                requires: "mass driver, not pilot wave",
                 effect() {
                     tech.isBlockPowerUps = true
                 },
@@ -2719,7 +2719,7 @@
             {
                 name: "WIMPs",
                 //<strong class='color-harm'>harmful</strong>
-                description: "a weak massive particle slowly <strong>chases</strong> you<br>spawn <strong>2-3</strong> <strong class='color-r'>research</strong> at the end of each <strong>level</strong>",
+                description: "a <strong class='color-harm'>harmful</strong> particle slowly <strong>chases</strong> you<br>spawn <strong>2-3</strong> <strong class='color-r'>research</strong> at the end of each <strong>level</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2733,6 +2733,28 @@
                 },
                 remove() {
                     tech.wimpCount = 0
+                }
+            },
+            {
+                name: "MACHO",
+                description: "a massive but compact object slowly <strong>follows</strong> you<br>take <strong>66%</strong> less <strong class='color-harm'>harm</strong> inside it's <strong>halo</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect: () => {
+                    tech.isMACHO = true; //this harm reduction comes from the particle toggling  tech.isHarmMACHO
+                    spawn.MACHO()
+                },
+                remove() {
+                    tech.isMACHO = false;
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (mob[i].isMACHO) mob[i].alive = false;
+                    }
                 }
             },
             {
@@ -2833,6 +2855,26 @@
                     powerUps.setDo(); //needed after adjusting duplication chance
                 }
             },
+            // {
+            //     name: "attract",
+            //     description: "",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 1,
+            //     frequencyDefault: 1,
+            //     allowed() {
+            //         return true
+            //     },
+            //     requires: "",
+            //     effect: () => {
+            //         tech.isPowerUpsAttract = true
+            //         powerUps.setDo(); //needed after adjusting duplication chance
+            //     },
+            //     remove() {
+            //         tech.isPowerUpsAttract = false
+            //         powerUps.setDo(); //needed after adjusting duplication chance
+            //     }
+            // },
             {
                 name: "futures exchange",
                 description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.3%</strong> power up <strong class='color-dup'>duplication</strong> chance",
@@ -4606,7 +4648,7 @@
             },
             {
                 name: "flux pinning",
-                description: "<strong>deflecting</strong> with your <strong>field</strong><br><strong>stuns</strong> mobs for <strong>+2</strong> second",
+                description: "<strong>deflecting</strong> mobs with your <strong>field</strong><br><strong>stuns</strong> them for <strong>2</strong> seconds",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4642,7 +4684,7 @@
             },
             {
                 name: "bot manufacturing",
-                description: "use <strong>nano-scale manufacturing</strong><br>to build <strong>2</strong> random <strong class='color-bot'>bots</strong>",
+                description: "use <strong>nano-scale manufacturing</strong> and <strong>2</strong> <strong class='color-r'>research</strong><br>to build <strong>3</strong> random <strong class='color-bot'>bots</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4652,10 +4694,13 @@
                 isNonRefundable: true,
                 // isExperimentHide: true,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
+                    return powerUps.research.count > 1 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
                 },
                 requires: "nano-scale manufacturing",
                 effect: () => {
+                    for (let i = 0; i < 2; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
                     m.energy = 0.01;
                     b.randomBot()
                     b.randomBot()
@@ -4664,8 +4709,8 @@
                 remove() {}
             },
             {
-                name: "bot prototype",
-                description: "use <strong>nano-scale manufacturing</strong> to build<br>a random <strong class='color-bot'>bot</strong> and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type",
+                name: "bot prototypes",
+                description: "use <strong>nano-scale</strong> and <strong>3</strong> <strong class='color-r'>research</strong> to build<br><strong>2</strong> random <strong class='color-bot'>bots</strong> and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4675,14 +4720,17 @@
                 isNonRefundable: true,
                 // isExperimentHide: true,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
+                    return powerUps.research.count > 2 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
                 },
                 requires: "nano-scale manufacturing",
                 effect: () => {
-                    m.energy = 0.01;
+                    for (let i = 0; i < 3; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+
                     //fill array of available bots
                     const notUpgradedBots = []
-                    const num = 1
+                    const num = 2
                     notUpgradedBots.push(() => {
                         tech.giveTech("nail-bot upgrade")
                         for (let i = 0; i < num; i++) {
@@ -4733,14 +4781,82 @@
                             simulation.makeTextLog(`tech.isDynamoBotUpgrade = true`)
                         })
                     }
-
                     notUpgradedBots[Math.floor(Math.random() * notUpgradedBots.length)]() //choose random function from the array and run it
                 },
                 remove() {}
             },
             {
+                name: "mycelium manufacturing",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
+                },
+                requires: "nano-scale manufacturing, no other manufacturing",
+                effect() {
+                    if (!build.isExperimentSelection) {
+                        for (let i = 0; i < 3; i++) {
+                            if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                        }
+                    }
+                    tech.isSporeField = true;
+                },
+                remove() {
+                    tech.isSporeField = false;
+                }
+            },
+            {
+                name: "missile manufacturing",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
+                },
+                requires: "nano-scale manufacturing, no other manufacturing",
+                effect() {
+                    if (!build.isExperimentSelection) {
+                        for (let i = 0; i < 3; i++) {
+                            if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                        }
+                    }
+                    tech.isMissileField = true;
+                },
+                remove() {
+                    tech.isMissileField = false;
+                }
+            },
+            {
+                name: "ice IX manufacturing",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab)
+                },
+                requires: "nano-scale manufacturing, no other manufacturing",
+                effect() {
+                    if (!build.isExperimentSelection) {
+                        for (let i = 0; i < 3; i++) {
+                            if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                        }
+                    }
+                    tech.isIceField = true;
+                },
+                remove() {
+                    tech.isIceField = false;
+                }
+            },
+            {
                 name: "pair production",
-                description: "picking up a <strong>power up</strong> gives you <strong>250</strong> <strong class='color-f'>energy</strong>",
+                description: "picking up a <strong>power up</strong> gives you <strong>200</strong> <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4751,64 +4867,10 @@
                 requires: "nano-scale manufacturing",
                 effect: () => {
                     tech.isMassEnergy = true // used in m.grabPowerUp
-                    m.energy += 3
+                    m.energy += 2
                 },
                 remove() {
                     tech.isMassEnergy = false;
-                }
-            },
-            {
-                name: "mycelium manufacturing",
-                description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
-                },
-                requires: "nano-scale manufacturing, no other manufacturing",
-                effect() {
-                    tech.isSporeField = true;
-                },
-                remove() {
-                    tech.isSporeField = false;
-                }
-            },
-            {
-                name: "missile manufacturing",
-                description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
-                },
-                requires: "nano-scale manufacturing, no other manufacturing",
-                effect() {
-                    tech.isMissileField = true;
-                },
-                remove() {
-                    tech.isMissileField = false;
-                }
-            },
-            {
-                name: "ice IX manufacturing",
-                description: "<strong>nano-scale manufacturing</strong> is repurposed<br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab)
-                },
-                requires: "nano-scale manufacturing, no other manufacturing",
-                effect() {
-                    tech.isIceField = true;
-                },
-                remove() {
-                    tech.isIceField = false;
                 }
             },
             {
@@ -6717,5 +6779,7 @@
         iceIXOnDeath: null,
         wimpCount: null,
         isBlockBullets: null,
-        isAddBlockMass: null
+        isAddBlockMass: null,
+        isMACHO: null,
+        isHarmMACHO: null
     }

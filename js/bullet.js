@@ -95,10 +95,10 @@ const b = {
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown        
         if (tech.isAmmoFromHealth) {
-            if (m.health > 0.05) {
-                m.damage(0.05 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
+            if (m.health > 0.03) {
+                m.damage(0.03 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
                 if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
-                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x, m.pos.y, "ammo");
+                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
                 }
             }
         }
@@ -2590,7 +2590,7 @@ const b = {
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
             },
             beforeDmg() {},
             onEnd() {},
@@ -2641,7 +2641,7 @@ const b = {
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
             },
             beforeDmg() {},
             onEnd() {},
@@ -2696,7 +2696,7 @@ const b = {
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
             },
             beforeDmg() {},
             onEnd() {},
@@ -2757,7 +2757,7 @@ const b = {
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
             },
             lockedOn: null,
             beforeDmg() {
@@ -2838,7 +2838,7 @@ const b = {
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
             },
             lockedOn: null,
             explode: 0,
@@ -2922,7 +2922,7 @@ const b = {
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
             },
             lockedOn: null,
             beforeDmg() {
