@@ -379,6 +379,71 @@ const level = {
         World.add(engine.world, constraint);
         return constraint
     },
+    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        x += width / 2
+        y += height / 2
+        maxHeight += height / 2
+        const yTravel = maxHeight - y
+        force += simulation.g
+        const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
+            collisionFilter: {
+                category: cat.body,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+            },
+            inertia: Infinity, //prevents rotation
+            isNotHoldable: true,
+            friction: 1,
+            frictionStatic: 1,
+            restitution: 0,
+            frictionAir: 0.001,
+            move() {
+                if (!m.isBodiesAsleep) {
+                    if (this.isUp) { //moving up still with high air friction
+                        this.force.y -= force * this.mass //hard force propels up, even with high friction
+
+                        if (this.position.y < maxHeight) { //switch to down mode
+                            this.isUp = false
+                            this.frictionAir = friction.down
+                            //adds a hard jerk at the top of vertical motion because it's fun
+                            Matter.Body.setPosition(this, {
+                                x: x,
+                                y: maxHeight
+                            });
+                            Matter.Body.setVelocity(this, {
+                                x: 0,
+                                y: 0
+                            });
+                        }
+                    } else if (this.position.y + 10 * this.velocity.y > y) { //free falling down, with only air friction
+                        Matter.Body.setVelocity(this, { //slow down early to avoid a jerky stop that can pass through blocks
+                            x: 0,
+                            y: this.velocity.y * 0.7
+                        });
+                        if (this.position.y + this.velocity.y > y) { //switch to up mode
+                            this.isUp = true
+                            this.frictionAir = friction.up
+                        }
+                    }
+
+                }
+                // hold horizontal position
+                Matter.Body.setPosition(this, {
+                    x: x,
+                    y: this.position.y
+                });
+                Matter.Body.setVelocity(this, {
+                    x: 0,
+                    y: this.velocity.y
+                });
+            },
+            drawTrack() {
+                ctx.fillStyle = "#ccc"
+                ctx.fillRect(x, y, 5, yTravel)
+            }
+        });
+        Matter.Body.setDensity(who, 0.01) //10x density for added stability
+        return who
+    },
     platform(x, y, width, height, speed = 0, density = 0.001) {
         x = x + width / 2
         y = y + height / 2
@@ -410,6 +475,7 @@ const level = {
             speed: speed,
         }
         constraint.pauseUntilCycle = 0 //to to pause platform at top and bottom
+
         return constraint
     },
     rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
@@ -1866,7 +1932,7 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
     satellite() {
-        const elevator = level.platform(4210, -1325, 380, 30, -10)
+        const elevator = level.elevator(4210, -1297, 380, 85, -3450) //, 0.003, { up: 0.01, down: 0.2 }
         level.custom = () => {
             ctx.fillStyle = "#d4f4f4"
             ctx.fillRect(-250, -750, 420, 450)
@@ -1894,19 +1960,21 @@ const level = {
             ctx.fillStyle = "rgba(0,20,40,0.1)"
             ctx.fillRect(4000, -1200, 1050, 1500)
             ctx.fillRect(4100, -3450, 600, 2250)
-            if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
-                if (elevator.pointA.y > -1275) { //bottom
-                    elevator.plat.speed = -10
-                    elevator.pauseUntilCycle = simulation.cycle + 90
-                } else if (elevator.pointA.y < -3455) { //top
-                    elevator.plat.speed = 30
-                    elevator.pauseUntilCycle = simulation.cycle + 90
-                }
-                elevator.pointA = {
-                    x: elevator.pointA.x,
-                    y: elevator.pointA.y + elevator.plat.speed
-                }
-            }
+            elevator.move()
+            // elevator.drawTrack() //looks ugly
+            // if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
+            //     if (elevator.pointA.y > -1275) { //bottom
+            //         elevator.plat.speed = -10
+            //         elevator.pauseUntilCycle = simulation.cycle + 90
+            //     } else if (elevator.pointA.y < -3455) { //top
+            //         elevator.plat.speed = 30
+            //         elevator.pauseUntilCycle = simulation.cycle + 90
+            //     }
+            //     elevator.pointA = {
+            //         x: elevator.pointA.x,
+            //         y: elevator.pointA.y + elevator.plat.speed
+            //     }
+            // }
         };
 
         level.setPosToSpawn(-100, 210); //normal spawn
@@ -2025,10 +2093,11 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3950, -850);
     },
     rooftops() {
-        const elevator = level.platform(1450, -1000, 235, 30, -2)
+        const elevator = level.elevator(1450, -1000, 235, 50, -2000)
         level.custom = () => {
-            ctx.fillStyle = "#ccc"
-            ctx.fillRect(1567, -1990, 5, 1020)
+            elevator.move();
+            elevator.drawTrack();
+
             ctx.fillStyle = "#d4f4f4"
             if (isBackwards) {
                 ctx.fillRect(-650, -2300, 440, 300)
@@ -2062,19 +2131,6 @@ const level = {
                 ctx.fillRect(3460, -700, 1090, 800)
             } else {
                 ctx.fillRect(-650, -2300, 440, 300)
-            }
-            if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
-                if (elevator.pointA.y > -980) { //bottom
-                    elevator.plat.speed = -2
-                    elevator.pauseUntilCycle = simulation.cycle + 60
-                } else if (elevator.pointA.y < -1980) { //top
-                    elevator.plat.speed = 1
-                    elevator.pauseUntilCycle = simulation.cycle + 60
-                }
-                elevator.pointA = {
-                    x: elevator.pointA.x,
-                    y: elevator.pointA.y + elevator.plat.speed
-                }
             }
         };
 
@@ -2487,6 +2543,54 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3075, -2050);
     },
     highrise() {
+        const isBlockMode = false
+        let slideBlock
+        if (isBlockMode) {
+            const x = -2750
+            const yMax = -1500
+            slideBlock = body[body.length] = Bodies.rectangle(x, -700, 200, 100, {
+                collisionFilter: {
+                    category: cat.body,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                inertia: Infinity, //prevents rotation
+                isNotHoldable: true,
+                friction: 1,
+                frictionStatic: 1,
+                frictionAir: 0.001,
+                // restitution: 0,
+                isUp: true,
+                move() {
+                    if (this.isUp) {
+                        if (this.position.y > yMax) {
+                            this.force.y -= 0.01 * this.mass
+                        } else {
+                            this.isUp = false
+                            Matter.Body.setPosition(this, {
+                                x: x,
+                                y: yMax
+                            });
+                            Matter.Body.setVelocity(this, {
+                                x: 0,
+                                y: 0
+                            });
+                        }
+                    } else if (this.position.y > -800) {
+                        this.isUp = true
+                    }
+                },
+                holdHorizontal() {
+                    Matter.Body.setPosition(this, {
+                        x: x,
+                        y: this.position.y
+                    });
+                    Matter.Body.setVelocity(this, {
+                        x: 0,
+                        y: this.velocity.y
+                    });
+                }
+            });
+        }
         level.custom = () => {
             ctx.fillStyle = "#d0d0d2"
             ctx.fillRect(-2475, -2450, 25, 750)
@@ -2498,24 +2602,43 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {
-            ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
-            ctx.fillRect(-4450, -750, 800, 200)
-            ctx.fillStyle = "rgba(0,0,0,0.12)"
-            ctx.fillRect(-1830, -1150, 2030, 1150)
-            ctx.fillRect(-3410, -2150, 495, 1550)
-            ctx.fillRect(-2585, -1675, 420, 1125)
-            ctx.fillRect(-1640, -1575, 540, 425)
-            ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
-            ctx.fillRect(-750, -25, 100, 25);
-            ctx.fillRect(-2800, -625, 100, 25);
-            ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
-            ctx.fillRect(-750, -55, 100, 55);
-            ctx.fillRect(-2800, -655, 100, 55);
-            ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
-            ctx.fillRect(-750, -120, 100, 120);
-            ctx.fillRect(-2800, -720, 100, 120);
-        };
+        if (isBlockMode) {
+            level.customTopLayer = () => {
+                ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+                ctx.fillRect(-4450, -750, 800, 200)
+                ctx.fillStyle = "rgba(0,0,0,0.12)"
+                ctx.fillRect(-1830, -1150, 2030, 1150)
+                ctx.fillRect(-3410, -2150, 495, 1550)
+                ctx.fillRect(-2585, -1675, 420, 1125)
+                ctx.fillRect(-1640, -1575, 540, 425)
+                //move sliding block
+                slideBlock.move()
+                slideBlock.holdHorizontal() //keep horizontal position constant
+
+
+
+            };
+        } else {
+            level.customTopLayer = () => {
+                ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+                ctx.fillRect(-4450, -750, 800, 200)
+                ctx.fillStyle = "rgba(0,0,0,0.12)"
+                ctx.fillRect(-1830, -1150, 2030, 1150)
+                ctx.fillRect(-3410, -2150, 495, 1550)
+                ctx.fillRect(-2585, -1675, 420, 1125)
+                ctx.fillRect(-1640, -1575, 540, 425)
+                ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
+                ctx.fillRect(-750, -25, 100, 25);
+                ctx.fillRect(-2800, -625, 100, 25);
+                ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
+                ctx.fillRect(-750, -55, 100, 55);
+                ctx.fillRect(-2800, -655, 100, 55);
+                ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
+                ctx.fillRect(-750, -120, 100, 120);
+                ctx.fillRect(-2800, -720, 100, 120);
+            };
+        }
+
 
         level.setPosToSpawn(-300, -700); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -2575,7 +2698,7 @@ const level = {
         spawn.mapRect(-4450, -600, 2300, 750);
         spawn.mapRect(-2225, -450, 175, 550);
         // spawn.mapRect(-2600, -975, 450, 50);
-        spawn.boost(-2800, -600, 950);
+        if (!isBlockMode) spawn.boost(-2800, -600, 950);
         spawn.mapRect(-3425, -1325, 525, 50);
         spawn.mapRect(-3425, -2200, 525, 50);
         spawn.mapRect(-2600, -1700, 450, 50);

@@ -264,10 +264,11 @@ const m = {
                 x: 0,
                 y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5)
             });
+
             player.force.y = -m.jumpForce; //player jump force
             Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
                 x: player.velocity.x,
-                y: 0
+                y: Math.max(-10, Math.min(m.standingOn.velocity.y, 10)) //cap velocity contribution from blocks you are standing on to 10 in the vertical
             });
         }
 
@@ -1632,14 +1633,14 @@ const m = {
                 // m.fieldMeterColor = "#0c5"
                 // m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
-                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 200 && (m.cycle % 2)) {
+                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
-                            for (let i = 0; i < 30; i++) {
-                                m.energy -= 0.088
+                            for (let i = 0, len = Math.random() * 20; i < len; i++) {
+                                m.energy -= 0.085
                                 if (m.energy > 0) {
                                     b.spore(m.pos)
                                 } else {
-                                    m.energy = 0.01
+                                    m.energy = 0.001
                                     break;
                                 }
                             }

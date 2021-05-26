@@ -666,6 +666,23 @@
             //     }
             // },
             {
+                name: "fracture analysis",
+                description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isExplosionStun
+                },
+                requires: "a stun effect",
+                effect() {
+                    tech.isCrit = true;
+                },
+                remove() {
+                    tech.isCrit = false;
+                }
+            },
+            {
                 name: "microstates",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
                 maxCount: 1,
@@ -1856,20 +1873,25 @@
                 }
             },
             {
-                name: "fracture analysis",
-                description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
+                name: "MACHO",
+                description: "a massive but compact object slowly <strong>follows</strong> you<br>take <strong>66%</strong> less <strong class='color-harm'>harm</strong> inside it's <strong>halo</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isExplosionStun
+                    return true
                 },
-                requires: "a stun effect",
-                effect() {
-                    tech.isCrit = true;
+                requires: "",
+                effect: () => {
+                    tech.isMACHO = true; //this harm reduction comes from the particle toggling  tech.isHarmMACHO
+                    spawn.MACHO()
                 },
                 remove() {
-                    tech.isCrit = false;
+                    tech.isMACHO = false;
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (mob[i].isMACHO) mob[i].alive = false;
+                    }
                 }
             },
             {
@@ -2736,28 +2758,6 @@
                 }
             },
             {
-                name: "MACHO",
-                description: "a massive but compact object slowly <strong>follows</strong> you<br>take <strong>66%</strong> less <strong class='color-harm'>harm</strong> inside it's <strong>halo</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return true
-                },
-                requires: "",
-                effect: () => {
-                    tech.isMACHO = true; //this harm reduction comes from the particle toggling  tech.isHarmMACHO
-                    spawn.MACHO()
-                },
-                remove() {
-                    tech.isMACHO = false;
-                    for (let i = 0, len = mob.length; i < len; i++) {
-                        if (mob[i].isMACHO) mob[i].alive = false;
-                    }
-                }
-            },
-            {
                 name: "bubble fusion",
                 description: "after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2795,7 +2795,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>14</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong>8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2807,12 +2807,12 @@
                 effect() {
                     tech.duplicateChance += 0.08
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    tech.addJunkTechToPool(14)
+                    tech.addJunkTechToPool(18)
                 },
                 remove() {
                     tech.duplicateChance = 0
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    if (this.count > 1) tech.removeJunkTechFromPool(14)
+                    if (this.count > 1) tech.removeJunkTechFromPool(18)
                 }
             },
             {
@@ -3230,7 +3230,7 @@
             },
             {
                 name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>21</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3243,12 +3243,12 @@
                     level.difficultyDecrease(simulation.difficultyMode)
                     // simulation.difficulty<span class='color-symbol'>-=</span>
                     simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode)`)
-                    tech.addJunkTechToPool(18)
+                    tech.addJunkTechToPool(21)
                     // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
                 },
                 remove() {
                     if (this.count > 0) {
-                        tech.removeJunkTechFromPool(18)
+                        tech.removeJunkTechFromPool(21)
                         level.difficultyIncrease(simulation.difficultyMode)
                     }
                 }

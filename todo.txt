@@ -1,12 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: MACHO - an object follows you and gives you harm protection when you are inside it's halo
+jump now applies the velocity of the block you jumped off of
+  it might feel slightly different if you play n-gon often
+  it could add some bugs so let me know
 
-several nano-scale field tech now require some research, and have been buffed
-  nano-scale mycelium, ice-IX, missile tech now consume 20% less energy to produce bullets
-  nano-scale bot tech: spawn an extra bots
-
-some bug fixes
+elevators have more realistic physics
+  you can jump off them when they get to the top (fun!)
+  blocks interact with them in a more healthy way (no bleed through)
+  they can have a wider range of healthy speeds
+  it can hurt mobs
 
 ******************************************************** BUGS ********************************************************
 
@@ -51,6 +53,23 @@ is there a way to check if the player is stuck inside the map or block
 (repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
 
 ******************************************************** TODO ********************************************************
+
+platform: jumps a bit before moving up
+  you can't use set position for y, because blocks drag a bit inside the platform
+  get delays working right
+  do something if the force is overwhelmed so much the platform moves backwards, or below lower/upper range
+    apply a constraint when still and remove it when moving
+    also apply thr constraint if the block goes outside normal bounds by too much
+
+should jump velocity add to current velocity?
+  maybe only add the velocity of what the player is standing on
+
+mob: molecule shapes - 2 separate mobs joined by a bond
+  use constraints: just spawn 2x or 3x groupings
+    low friction so they can spin around
+    spin when attacking player?
+      increase constraint length when attacking
+
 
 make nano-scale upgrades all cost research, and buff those tech
 
