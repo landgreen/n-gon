@@ -1,16 +1,13 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-jump now applies the velocity of the block you jumped off of
-  it might feel slightly different if you play n-gon often
-  it could add some bugs so let me know
 
-elevators have more realistic physics
-  you can jump off them when they get to the top (fun!)
-  blocks interact with them in a more healthy way (no bleed through)
-  they can have a wider range of healthy speeds
-  it can hurt mobs
+
 
 ******************************************************** BUGS ********************************************************
+
+figure out how to undo ship mode
+  if you die in ship mode it respawns with m.look set to non ship methods
+    look is set in many tech and in startGame
 
 Why does micro-extruder lag so much
 
@@ -54,24 +51,11 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-platform: jumps a bit before moving up
-  you can't use set position for y, because blocks drag a bit inside the platform
-  get delays working right
-  do something if the force is overwhelmed so much the platform moves backwards, or below lower/upper range
-    apply a constraint when still and remove it when moving
-    also apply thr constraint if the block goes outside normal bounds by too much
-
-should jump velocity add to current velocity?
-  maybe only add the velocity of what the player is standing on
-
 mob: molecule shapes - 2 separate mobs joined by a bond
   use constraints: just spawn 2x or 3x groupings
     low friction so they can spin around
     spin when attacking player?
       increase constraint length when attacking
-
-
-make nano-scale upgrades all cost research, and buff those tech
 
 make most future tech for guns / fields
 
@@ -81,9 +65,10 @@ tech: mine - fire the mine into where you were in the past
 tech: increase health and harm taken
 
 remove air control
-  negative tech, junk , experiment?
+  negative tech aspect, junk , experiment?
 
-use name axion as a 3rd dark matter tech
+add falling damage
+  negative tech aspect
 
 tech: use the ability for power ups to have custom code
   (note: this code is half way done, it just needs to be completed)
@@ -413,6 +398,8 @@ possible names for tech
   dynamical systems
   quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
   counterfactual - something false
+  axion - maybe a 3rd dark matter type tech
+
 
 
 plot script:

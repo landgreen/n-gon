@@ -3625,7 +3625,7 @@ const b = {
             ammoPack: 100,
             have: false,
             wavePacketCycle: 0,
-            delay: 60,
+            delay: 40,
             do() {
                 if (this.wavePacketCycle && !input.fire) {
                     this.wavePacketCycle = 0;

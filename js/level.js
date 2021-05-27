@@ -436,6 +436,32 @@ const level = {
                     y: this.velocity.y
                 });
             },
+            off() {
+                Matter.Body.setPosition(this, {
+                    x: x,
+                    y: this.position.y
+                });
+                Matter.Body.setVelocity(this, {
+                    x: 0,
+                    y: this.velocity.y
+                });
+            },
+            constraint: this.null,
+            addConstraint() {
+                this.constraint = Constraint.create({
+                    pointA: {
+                        x: this.position.x,
+                        y: this.position.y
+                    },
+                    bodyB: this,
+                    stiffness: 0.01,
+                    damping: 0.3
+                });
+                World.add(engine.world, this.constraint);
+            },
+            removeConstraint() {
+                World.remove(engine.world, this.constraint, true)
+            },
             drawTrack() {
                 ctx.fillStyle = "#ccc"
                 ctx.fillRect(x, y, 5, yTravel)
@@ -1932,7 +1958,7 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
     satellite() {
-        const elevator = level.elevator(4210, -1297, 380, 85, -3450) //, 0.003, { up: 0.01, down: 0.2 }
+        const elevator = level.elevator(4210, -1285, 380, 70, -3450) //, 0.003, { up: 0.01, down: 0.2 }
         level.custom = () => {
             ctx.fillStyle = "#d4f4f4"
             ctx.fillRect(-250, -750, 420, 450)
@@ -1961,20 +1987,6 @@ const level = {
             ctx.fillRect(4000, -1200, 1050, 1500)
             ctx.fillRect(4100, -3450, 600, 2250)
             elevator.move()
-            // elevator.drawTrack() //looks ugly
-            // if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) { //elevator move
-            //     if (elevator.pointA.y > -1275) { //bottom
-            //         elevator.plat.speed = -10
-            //         elevator.pauseUntilCycle = simulation.cycle + 90
-            //     } else if (elevator.pointA.y < -3455) { //top
-            //         elevator.plat.speed = 30
-            //         elevator.pauseUntilCycle = simulation.cycle + 90
-            //     }
-            //     elevator.pointA = {
-            //         x: elevator.pointA.x,
-            //         y: elevator.pointA.y + elevator.plat.speed
-            //     }
-            // }
         };
 
         level.setPosToSpawn(-100, 210); //normal spawn
@@ -2051,7 +2063,7 @@ const level = {
 
         //steep stairs
         spawn.mapRect(4100, -2250, 100, 650);
-        spawn.mapRect(4100, -3450, 100, 650); //left top shelf
+        spawn.mapRect(4100, -3450, 100, 850); //left top shelf
         spawn.mapRect(4600, -3450, 100, 1850);
 
         spawn.randomSmallMob(4400, -3500);
@@ -2093,7 +2105,7 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3950, -850);
     },
     rooftops() {
-        const elevator = level.elevator(1450, -1000, 235, 50, -2000)
+        const elevator = level.elevator(1450, -990, 235, 45, -2000)
         level.custom = () => {
             elevator.move();
             elevator.drawTrack();
@@ -2543,54 +2555,6 @@ const level = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3075, -2050);
     },
     highrise() {
-        const isBlockMode = false
-        let slideBlock
-        if (isBlockMode) {
-            const x = -2750
-            const yMax = -1500
-            slideBlock = body[body.length] = Bodies.rectangle(x, -700, 200, 100, {
-                collisionFilter: {
-                    category: cat.body,
-                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-                },
-                inertia: Infinity, //prevents rotation
-                isNotHoldable: true,
-                friction: 1,
-                frictionStatic: 1,
-                frictionAir: 0.001,
-                // restitution: 0,
-                isUp: true,
-                move() {
-                    if (this.isUp) {
-                        if (this.position.y > yMax) {
-                            this.force.y -= 0.01 * this.mass
-                        } else {
-                            this.isUp = false
-                            Matter.Body.setPosition(this, {
-                                x: x,
-                                y: yMax
-                            });
-                            Matter.Body.setVelocity(this, {
-                                x: 0,
-                                y: 0
-                            });
-                        }
-                    } else if (this.position.y > -800) {
-                        this.isUp = true
-                    }
-                },
-                holdHorizontal() {
-                    Matter.Body.setPosition(this, {
-                        x: x,
-                        y: this.position.y
-                    });
-                    Matter.Body.setVelocity(this, {
-                        x: 0,
-                        y: this.velocity.y
-                    });
-                }
-            });
-        }
         level.custom = () => {
             ctx.fillStyle = "#d0d0d2"
             ctx.fillRect(-2475, -2450, 25, 750)
@@ -2602,43 +2566,24 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        if (isBlockMode) {
-            level.customTopLayer = () => {
-                ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
-                ctx.fillRect(-4450, -750, 800, 200)
-                ctx.fillStyle = "rgba(0,0,0,0.12)"
-                ctx.fillRect(-1830, -1150, 2030, 1150)
-                ctx.fillRect(-3410, -2150, 495, 1550)
-                ctx.fillRect(-2585, -1675, 420, 1125)
-                ctx.fillRect(-1640, -1575, 540, 425)
-                //move sliding block
-                slideBlock.move()
-                slideBlock.holdHorizontal() //keep horizontal position constant
-
-
-
-            };
-        } else {
-            level.customTopLayer = () => {
-                ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
-                ctx.fillRect(-4450, -750, 800, 200)
-                ctx.fillStyle = "rgba(0,0,0,0.12)"
-                ctx.fillRect(-1830, -1150, 2030, 1150)
-                ctx.fillRect(-3410, -2150, 495, 1550)
-                ctx.fillRect(-2585, -1675, 420, 1125)
-                ctx.fillRect(-1640, -1575, 540, 425)
-                ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
-                ctx.fillRect(-750, -25, 100, 25);
-                ctx.fillRect(-2800, -625, 100, 25);
-                ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
-                ctx.fillRect(-750, -55, 100, 55);
-                ctx.fillRect(-2800, -655, 100, 55);
-                ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
-                ctx.fillRect(-750, -120, 100, 120);
-                ctx.fillRect(-2800, -720, 100, 120);
-            };
-        }
-
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+            ctx.fillRect(-4450, -750, 800, 200)
+            ctx.fillStyle = "rgba(0,0,0,0.12)"
+            ctx.fillRect(-1830, -1150, 2030, 1150)
+            ctx.fillRect(-3410, -2150, 495, 1550)
+            ctx.fillRect(-2585, -1675, 420, 1125)
+            ctx.fillRect(-1640, -1575, 740, 425)
+            ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
+            ctx.fillRect(-750, -25, 100, 25);
+            ctx.fillRect(-2800, -625, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
+            ctx.fillRect(-750, -55, 100, 55);
+            ctx.fillRect(-2800, -655, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
+            ctx.fillRect(-750, -120, 100, 120);
+            ctx.fillRect(-2800, -720, 100, 120);
+        };
 
         level.setPosToSpawn(-300, -700); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -2676,14 +2621,68 @@ const level = {
         spawn.mapRect(-600, -1075, 50, 475);
         spawn.mapRect(-600, -650, 625, 50);
         spawn.mapRect(-1300, -650, 500, 50);
-        spawn.mapRect(-175, -250, 425, 300);
         spawn.bodyRect(-75, -300, 50, 50);
-        spawn.boost(-750, 0, 1700);
+        if (Math.random() < 0.6) {
+            const elevator = level.elevator(-790, -190, 180, 25, -1150) //, 0.007
+            elevator.addConstraint();
+            button = level.button(-500, -200)
+
+            spawn.mapRect(-600, -200, 500, 250); //ledge for boarding elevator
+            spawn.bodyRect(-250, -300, 100, 100); //a nice block near the elevator
+            level.customTopLayer = () => {
+                button.query();
+                button.draw();
+                if (button.isUp) {
+                    if (elevator.isOn) {
+                        elevator.isOn = false
+                        elevator.frictionAir = 0.2
+                        elevator.addConstraint();
+                    }
+                } else {
+                    if (!elevator.isOn) {
+                        elevator.isOn = true
+                        elevator.isUp = true
+                        elevator.removeConstraint();
+                        elevator.frictionAir = 0.01 //elevator.isUp ? 0.01 : 0.2
+                    }
+                }
+                if (elevator.isOn) {
+                    elevator.move();
+                    ctx.fillStyle = "#000"
+                    ctx.fillRect(-700, -1140, 1, 975)
+                } else {
+                    ctx.fillStyle = "#999"
+                    ctx.fillRect(-700, -1140, 1, 975)
+                }
+
+                ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+                ctx.fillRect(-4450, -750, 800, 200)
+                ctx.fillStyle = "rgba(0,0,0,0.12)"
+                ctx.fillRect(-1830, -1150, 2030, 1150)
+                ctx.fillRect(-3410, -2150, 495, 1550)
+                ctx.fillRect(-2585, -1675, 420, 1125)
+                ctx.fillRect(-1640, -1575, 740, 425)
+                ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
+                ctx.fillRect(-2800, -625, 100, 25);
+                ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
+                ctx.fillRect(-2800, -655, 100, 55);
+                ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
+                ctx.fillRect(-2800, -720, 100, 120);
+            };
+
+        } else {
+            spawn.boost(-750, 0, 1700);
+            spawn.bodyRect(-825, -1160, 250, 10);
+            spawn.mapRect(-175, -250, 425, 300);
+        }
+
+
+
         spawn.bodyRect(-425, -1375, 400, 225);
-        spawn.mapRect(-1125, -1575, 50, 475);
+        spawn.mapRect(-925, -1575, 50, 475);
         spawn.bodyRect(-1475, -1275, 250, 125);
-        spawn.bodyRect(-825, -1160, 250, 10);
-        spawn.mapRect(-1650, -1575, 400, 50);
+
+        spawn.mapRect(-1650, -1575, 600, 50);
         spawn.mapRect(-600, -1150, 850, 175);
         spawn.mapRect(-1850, -1150, 1050, 175);
         spawn.bodyRect(-1907, -1600, 550, 25);
@@ -2698,7 +2697,7 @@ const level = {
         spawn.mapRect(-4450, -600, 2300, 750);
         spawn.mapRect(-2225, -450, 175, 550);
         // spawn.mapRect(-2600, -975, 450, 50);
-        if (!isBlockMode) spawn.boost(-2800, -600, 950);
+        spawn.boost(-2800, -600, 950);
         spawn.mapRect(-3425, -1325, 525, 50);
         spawn.mapRect(-3425, -2200, 525, 50);
         spawn.mapRect(-2600, -1700, 450, 50);

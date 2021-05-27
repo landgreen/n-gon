@@ -2856,12 +2856,6 @@ const m = {
             }
 
             m.look = () => { //disable mouse aiming
-                //always on mouse look
-                // m.angle = Math.atan2(
-                //     simulation.mouseInGame.y - m.pos.y,
-                //     simulation.mouseInGame.x - m.pos.x
-                // );
-                //smoothed mouse look translations
                 const scale = 0.8;
                 m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
                 m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
