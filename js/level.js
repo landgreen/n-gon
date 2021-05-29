@@ -51,6 +51,7 @@ const level = {
             // level.coliseum() //community level
             // level.crossfire() //community level
             // level.vats() //community level
+            // level.n_gon() //community level
 
             // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
@@ -590,20 +591,21 @@ const level = {
                 if (Matter.Query.region(body, this).length === 0 && Matter.Query.region([player], this).length === 0) {
                     this.isUp = true;
                 } else {
-                    // if (this.isUp === true) {
-                    //   const list = Matter.Query.region(body, this)
-                    //   console.log(list)
-                    //   if (list.length > 0) {
-                    //     Matter.Body.setPosition(list[0], {
-                    //       x: this.min.x + width / 2,
-                    //       y: list[0].position.y
-                    //     })
-                    //     Matter.Body.setVelocity(list[0], {
-                    //       x: 0,
-                    //       y: 0
-                    //     });
-                    //   }
-                    // }
+                    if (this.isUp === true) {
+                        const list = Matter.Query.region(body, this)
+                        if (list.length > 0) {
+                            if (list[0].bounds.max.x - list[0].bounds.min.x < 150 && list[0].bounds.max.y - list[0].bounds.min.y < 150) {
+                                Matter.Body.setPosition(list[0], {
+                                    x: this.min.x + width / 2,
+                                    y: list[0].position.y
+                                })
+                            }
+                            Matter.Body.setVelocity(list[0], {
+                                x: 0,
+                                y: 0
+                            });
+                        }
+                    }
                     this.isUp = false;
                 }
             },
@@ -1297,6 +1299,8 @@ const level = {
         level.customTopLayer = () => {
             ctx.fillStyle = "rgba(0,255,255,0.1)"
             ctx.fillRect(6400, -550, 300, 350)
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(-175, -975, 900, 575)
         };
         level.setPosToSpawn(0, -475); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -1305,6 +1309,10 @@ const level = {
         level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#ddd";
+
+        spawn.mapRect(-300, -1050, 300, 200);
+        Matter.Body.setAngle(map[map.length - 1], -Math.PI / 4)
+
 
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
@@ -2573,7 +2581,7 @@ const level = {
             ctx.fillRect(-1830, -1150, 2030, 1150)
             ctx.fillRect(-3410, -2150, 495, 1550)
             ctx.fillRect(-2585, -1675, 420, 1125)
-            ctx.fillRect(-1640, -1575, 740, 425)
+            ctx.fillRect(-1740, -1575, 840, 425)
             ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
             ctx.fillRect(-750, -25, 100, 25);
             ctx.fillRect(-2800, -625, 100, 25);
@@ -2625,7 +2633,11 @@ const level = {
         if (Math.random() < 0.6) {
             const elevator = level.elevator(-790, -190, 180, 25, -1150) //, 0.007
             elevator.addConstraint();
-            button = level.button(-500, -200)
+            const button = level.button(-500, -200)
+            const elevator2 = level.elevator(-3630, -1315, 180, 25, -2190) //, 0.007
+            elevator2.addConstraint();
+            const button2 = level.button(-3100, -1330)
+
 
             spawn.mapRect(-600, -200, 500, 250); //ledge for boarding elevator
             spawn.bodyRect(-250, -300, 100, 100); //a nice block near the elevator
@@ -2638,21 +2650,43 @@ const level = {
                         elevator.frictionAir = 0.2
                         elevator.addConstraint();
                     }
-                } else {
-                    if (!elevator.isOn) {
-                        elevator.isOn = true
-                        elevator.isUp = true
-                        elevator.removeConstraint();
-                        elevator.frictionAir = 0.01 //elevator.isUp ? 0.01 : 0.2
-                    }
+                } else if (!elevator.isOn) {
+                    elevator.isOn = true
+                    elevator.isUp = true
+                    elevator.removeConstraint();
+                    elevator.frictionAir = 0.01 //elevator.isUp ? 0.01 : 0.2
                 }
                 if (elevator.isOn) {
                     elevator.move();
-                    ctx.fillStyle = "#000"
+                    ctx.fillStyle = "#444"
                     ctx.fillRect(-700, -1140, 1, 975)
                 } else {
-                    ctx.fillStyle = "#999"
+                    ctx.fillStyle = "#aaa"
                     ctx.fillRect(-700, -1140, 1, 975)
+                }
+
+                button2.query();
+                button2.draw();
+                if (button2.isUp) {
+                    if (elevator2.isOn) {
+                        elevator2.isOn = false
+                        elevator2.frictionAir = 0.2
+                        elevator2.addConstraint();
+                    }
+                } else if (!elevator2.isOn) {
+                    elevator2.isOn = true
+                    elevator2.isUp = true
+                    elevator2.removeConstraint();
+                    elevator2.frictionAir = 0.01 //elevator.isUp ? 0.01 : 0.2                    
+                }
+
+                if (elevator2.isOn) {
+                    elevator2.move();
+                    ctx.fillStyle = "#444"
+                    ctx.fillRect(-3540, -2170, 1, 870)
+                } else {
+                    ctx.fillStyle = "#aaa"
+                    ctx.fillRect(-3540, -2170, 1, 870)
                 }
 
                 ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
@@ -2661,19 +2695,14 @@ const level = {
                 ctx.fillRect(-1830, -1150, 2030, 1150)
                 ctx.fillRect(-3410, -2150, 495, 1550)
                 ctx.fillRect(-2585, -1675, 420, 1125)
-                ctx.fillRect(-1640, -1575, 740, 425)
-                ctx.fillStyle = "rgba(200,0,255,0.2)"; //boost
-                ctx.fillRect(-2800, -625, 100, 25);
-                ctx.fillStyle = "rgba(200,0,255,0.1)"; //boost
-                ctx.fillRect(-2800, -655, 100, 55);
-                ctx.fillStyle = "rgba(200,0,255,0.05)"; //boost
-                ctx.fillRect(-2800, -720, 100, 120);
+                ctx.fillRect(-1740, -1575, 840, 425)
             };
 
         } else {
             spawn.boost(-750, 0, 1700);
             spawn.bodyRect(-825, -1160, 250, 10);
             spawn.mapRect(-175, -250, 425, 300);
+            spawn.boost(-2800, -600, 950);
         }
 
 
@@ -2682,7 +2711,9 @@ const level = {
         spawn.mapRect(-925, -1575, 50, 475);
         spawn.bodyRect(-1475, -1275, 250, 125);
 
-        spawn.mapRect(-1650, -1575, 600, 50);
+        // spawn.mapRect(-1650, -1575, 600, 50);
+        // spawn.mapRect(-1875, -1575, 850, 50);
+        spawn.mapRect(-1750, -1575, 725, 50);
         spawn.mapRect(-600, -1150, 850, 175);
         spawn.mapRect(-1850, -1150, 1050, 175);
         spawn.bodyRect(-1907, -1600, 550, 25);
@@ -2697,16 +2728,15 @@ const level = {
         spawn.mapRect(-4450, -600, 2300, 750);
         spawn.mapRect(-2225, -450, 175, 550);
         // spawn.mapRect(-2600, -975, 450, 50);
-        spawn.boost(-2800, -600, 950);
         spawn.mapRect(-3425, -1325, 525, 50);
         spawn.mapRect(-3425, -2200, 525, 50);
         spawn.mapRect(-2600, -1700, 450, 50);
         // spawn.mapRect(-2600, -2450, 450, 50);
         spawn.bodyRect(-2275, -2700, 50, 60);
         spawn.bodyRect(-2600, -1925, 250, 225);
-        spawn.bodyRect(-3415, -1425, 100, 100);
-        spawn.bodyRect(-3400, -1525, 100, 100);
-        spawn.bodyRect(-3305, -1425, 100, 100);
+        spawn.bodyRect(-3410, -1425, 100, 100);
+        spawn.bodyRect(-3390, -1525, 100, 100);
+        spawn.bodyRect(-3245, -1425, 100, 100);
         //building 3
         spawn.mapRect(-4450, -1700, 800, 1000);
         spawn.mapRect(-3850, -2000, 125, 400);
@@ -5335,6 +5365,422 @@ const level = {
             portal[2].draw()
             portal2[0].draw()
             portal2[2].draw()
+        }
+    },
+    n_gon() { // Made by Oranger on Discord
+        let needGravity = [];
+        let s = { //mech statue
+            x: -200,
+            y: -2350,
+            angle: 0,
+            scale: 15,
+            h: { //hip
+                x: 12,
+                y: 24
+            },
+            k: { //knee
+                x: -30.96, //-17.38
+                y: 58.34, //70.49
+                x2: -33.96, //x - 3
+                y2: 58.34 //same as y
+            },
+            f: { //foot
+                x: 0,
+                y: 91 //112
+            },
+            fillColor: "#ccc", //white
+            fillColorDark: "#bbb", //25% from white
+            lineColor: "#999", //#333
+            lineColorLight: "#aaa" //#4a4a4a
+        }
+
+        level.custom = () => {
+            level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
+            for (let i = 0; i < needGravity.length; i++) {
+                needGravity[i].force.y += needGravity[i].mass * simulation.g;
+            }
+            ctx.fillStyle = "#444" //light fixtures
+            ctx.fillRect(2350, 995, 40, 10)
+            ctx.fillRect(2280, -6005, 40, 10)
+
+            ctx.save();
+            ctx.translate(s.x, s.y);
+            //statueLeg is at the bottom, below the enemies but above the NGON function
+            statueLeg(-3, s.lineColorLight);
+            statueLeg(0, s.lineColor);
+            //head
+            ctx.rotate(s.angle);
+            ctx.beginPath();
+            ctx.arc(0, 0, 30 * s.scale, 0, 2 * Math.PI);
+            let grd = ctx.createLinearGradient(-30 * s.scale, 0, 30 * s.scale, 0);
+            grd.addColorStop(0, s.fillColorDark);
+            grd.addColorStop(1, s.fillColor);
+            ctx.fillStyle = grd;
+            ctx.fill();
+            ctx.arc(15 * s.scale, 0, 4 * s.scale, 0, 2 * Math.PI);
+            ctx.strokeStyle = s.lineColor;
+            ctx.lineWidth = 2 * s.scale;
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        level.customTopLayer = () => {
+            //boosts
+            ctx.fillStyle = "rgba(200,0,255,0.2)";
+            ctx.fillRect(2550, 1475, 100, 25);
+            ctx.fillRect(-3400, -2075, 100, 25);
+            ctx.fillStyle = "rgba(200,0,255,0.1)";
+            ctx.fillRect(2550, 1445, 100, 55);
+            ctx.fillRect(-3400, -2105, 100, 55);
+            ctx.fillStyle = "rgba(200,0,255,0.05)";
+            ctx.fillRect(2550, 1380, 100, 120);
+            ctx.fillRect(-3400, -2170, 100, 120);
+            //boost chute for lack of a better name
+            ctx.fillStyle = "rgba(60,60,60,0.9)";
+            ctx.fillRect(-3451, -5000, 202, 2500);
+            ctx.fillRect(2499, -170, 202, 1170);
+
+            ctx.fillStyle = "rgba(0,0,0,0.2)";
+            ctx.beginPath(); //basement
+            ctx.moveTo(2360, 1000);
+            ctx.lineTo(2120, 900);
+            ctx.lineTo(1500, 900);
+            ctx.lineTo(1500, 1500);
+            ctx.lineTo(3000, 1500);
+            ctx.lineTo(3000, 1000);
+            ctx.lineTo(2380, 1000);
+            ctx.lineTo(2870, 1500);
+            ctx.lineTo(1870, 1500);
+            ctx.lineTo(2360, 1000);
+            ctx.fill();
+            ctx.beginPath(); //exit
+            ctx.moveTo(1600, -6000);
+            ctx.lineTo(1600, -5000);
+            ctx.lineTo(3000, -5000);
+            ctx.lineTo(3000, -6000);
+            ctx.lineTo(2310, -6000);
+            ctx.lineTo(2600, -5000);
+            ctx.lineTo(2000, -5000);
+            ctx.lineTo(2290, -6000);
+            ctx.lineTo(1600, -6000);
+            ctx.fill();
+
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fillRect(1600, -1000, 1400, 830);
+            ctx.fillRect(1600, -170, 520, 170);
+            ctx.fillRect(-1300, -200, 2200, 200); //statue base
+            ctx.fillRect(-800, -400, 1200, 200);
+            ctx.fillRect(-500, -700, 600, 300);
+            ctx.fillRect(-4000, -6000, 2000, 1000); //left side
+            ctx.fillRect(-4000, -2500, 2000, 2500);
+        };
+
+        level.setPosToSpawn(1810, 1450);
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.exit.x = 2700;
+        level.exit.y = -5030;
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+        level.defaultZoom = 3500
+        simulation.zoomTransition(level.defaultZoom)
+
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        spawn.debris(2750, 1500, 200, 4); //16 debris per level
+        spawn.debris(1770, -350, 120, 4); //16 debris per level
+        spawn.debris(-3200, 0, 1000, 6); //16 debris per level
+
+        //boundaries
+        spawn.mapRect(-8000, 1500, 15000, 3000); //base floor
+        spawn.mapRect(3000, -10000, 4000, 12000); //right barrier
+        spawn.mapRect(-8000, -10000, 4000, 12000); //left barrier
+        spawn.mapRect(1600, -10000, 1500, 4000); //upper right wall
+        spawn.mapRect(-4100, -10000, 2100, 4000); //upper left wall
+        spawn.mapRect(1600, -5000, 1500, 4000); //lower right wall
+        spawn.mapRect(-4100, 0, 5600, 1700); //floor
+
+        //starting room  
+        spawn.mapRect(1500, 0, 700, 900);
+        spawn.mapRect(2120, -170, 380, 1170);
+        spawn.mapRect(2700, -170, 400, 1170);
+        //spawn.mapVertex(2296, 400, "0 0 0 1200 300 1200 400 0");
+        //spawn.mapVertex(2904, 400, "0 0 0 1200 -300 1200 -400 0");
+        spawn.boost(2550, 1500, 1700);
+
+        //left area
+        spawn.mapRect(-3500, -300, 300, 400); //floor 1
+        spawn.mapRect(-3900, -600, 300, 100);
+        spawn.mapRect(-3500, -900, 300, 100);
+        spawn.mapRect(-3100, -1150, 1000, 150); //floor 2
+        spawn.mapRect(-2200, -2600, 200, 1600);
+        spawn.mapRect(-2700, -1450, 300, 100);
+        spawn.mapRect(-3100, -1750, 300, 100);
+        spawn.mapRect(-3500, -2050, 300, 100);
+        spawn.boost(-3400, -2050, 3000);
+        spawn.mapRect(-4100, -5000, 650, 2500); //floor 3
+        spawn.mapRect(-3250, -5000, 1250, 2500);
+
+        //statue base
+        spawn.mapRect(-700, -900, 1000, 200); //top
+        //left
+        spawn.mapRect(-700, -900, 200, 500);
+        spawn.mapRect(-1000, -600, 500, 200);
+        spawn.mapRect(-1000, -600, 200, 400);
+        spawn.mapRect(-1300, -300, 500, 100);
+        //right
+        spawn.mapRect(100, -900, 200, 500);
+        spawn.mapRect(100, -600, 500, 200);
+        spawn.mapRect(400, -600, 200, 400);
+        spawn.mapRect(400, -300, 500, 100);
+
+        hangingNGON(-1900, -5000, 1, 1000, 1, true, {
+            density: 0.001, //default density is 0.001
+            friction: 0.0001,
+            frictionAir: 0.001,
+            frictionStatic: 0,
+            restitution: 0,
+            isNotHoldable: true
+        });
+        hangingNGON(1900, -5600, 0.2, 500, 0.0005, false, {
+            density: 0.00005, //default density is 0.001
+            friction: 0.0001,
+            frictionAir: 0.003,
+            frictionStatic: 0,
+            restitution: 1,
+            isNotHoldable: true
+        });
+
+        // Never gonna give you up
+        spawn.bodyRect(-8000, -10100, 15, 100);
+        // Never gonna let you down
+        spawn.bodyRect(-7915, -10100, 15, 100);
+        // Never gonna run around and desert you
+        body[body.length] = Bodies.polygon(-7950, -10025, 0, 25, { //circle
+            friction: 0.05,
+            frictionAir: 0.001
+        });
+        // Never gonna make you cry
+        spawn.bodyRect(6985, -10100, 15, 100);
+        // Never gonna say goodbye
+        spawn.bodyRect(6900, -10100, 15, 100);
+        // Never gonna tell a lie and hurt you
+        body[body.length] = Bodies.polygon(6950, -10025, 0, 25, { //circle
+            friction: 0.05,
+            frictionAir: 0.001
+        });
+
+        //pile of blocks
+        spawn.bodyRect(1920, -400, 200, 400)
+        spawn.bodyRect(1720, -250, 200, 250)
+        spawn.bodyRect(1770, -300, 150, 50)
+        spawn.bodyRect(2120, -280, 100, 100)
+        spawn.bodyRect(1990, -500, 100, 100)
+
+        //doors under statue
+        spawn.bodyRect(850, -50, 50, 50)
+        spawn.bodyRect(850, -100, 50, 50)
+        spawn.bodyRect(850, -150, 50, 50)
+        spawn.bodyRect(850, -200, 50, 50)
+        spawn.bodyRect(-1300, -50, 50, 50)
+        spawn.bodyRect(-1300, -100, 50, 50)
+        spawn.bodyRect(-1300, -150, 50, 50)
+        spawn.bodyRect(-1300, -200, 50, 50)
+
+        // on the statue base
+        spawn.randomMob(700 + Math.random() * 100, -500 + Math.random() * 100, 1);
+        spawn.randomMob(400 + Math.random() * 100, -800 + Math.random() * 100, 0.4);
+        spawn.randomMob(100 + Math.random() * 100, -1100 + Math.random() * 100, -0.2);
+        spawn.randomGroup(-200, -1400, -0.4);
+        spawn.randomMob(-600 + Math.random() * 100, -1100 + Math.random() * 100, -0.2);
+        spawn.randomMob(-900 + Math.random() * 100, -800 + Math.random() * 100, 0.4);
+        spawn.randomMob(-1200 + Math.random() * 100, -500 + Math.random() * 100, 1);
+
+        //in the statue base
+        spawn.randomSmallMob(400 + Math.random() * 300, -150 + Math.random() * 100, 0.2);
+        spawn.randomSmallMob(-1100 + Math.random() * 300, -150 + Math.random() * 100, 0.2);
+
+        //bottom left
+        spawn.randomMob(-2600 + Math.random() * 300, -700 + Math.random() * 300, 0.6);
+        spawn.randomSmallMob(-3000 + Math.random() * 300, -400 + Math.random() * 300, 0.2);
+        spawn.randomSmallMob(-3000 + Math.random() * 300, -400 + Math.random() * 300, 0);
+        spawn.randomMob(-3900 + Math.random() * 100, -200 + Math.random() * 100, 0.6);
+        spawn.randomMob(-3400 + Math.random() * 100, -400, 0.4);
+        spawn.randomSmallMob(-3800 + Math.random() * 100, -700, -0.4);
+        spawn.randomMob(-3400 + Math.random() * 100, -1000, 0.6);
+        spawn.randomMob(-3000 + Math.random() * 100, -1850, 0);
+        spawn.randomGroup(-2700, -2000, 0.4);
+
+        //top left
+        spawn.randomSmallMob(-3800, -5800, -0.2);
+        spawn.randomSmallMob(-2400, -5200, 0.2);
+
+        //top right
+        spawn.randomGroup(2000, -5700, 0.6);
+
+        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss"];
+        let abc = Math.random();
+        if (simulation.difficulty > 3) {
+            if (abc < 0.6) {
+                spawn.randomLevelBoss(-1500 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
+            } else if (abc < 0.85) {
+                spawn.laserBoss(-350 + Math.random() * 300, -600 + Math.random() * 200);
+            } else {
+                spawn.randomLevelBoss(850 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
+            }
+        }
+        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
+            if (abc < 0.6 * 5 / 8 || abc >= 1 - 0.15 * 5 / 17) {
+                spawn.laserBoss(-350 + Math.random() * 300, -600 + Math.random() * 200);
+            } else if (abc < 0.65) {
+                spawn.randomLevelBoss(850 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
+            } else {
+                spawn.randomLevelBoss(-1500 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
+            }
+        }
+
+        //draw leg for statue
+        function statueLeg(shift, color) {
+            ctx.save();
+            ctx.translate(shift, shift);
+            //front leg
+            let stroke = color;
+            ctx.beginPath();
+            ctx.moveTo((s.h.x + shift) * s.scale, (s.h.y + shift) * s.scale);
+            ctx.lineTo((s.k.x + 2 * shift) * s.scale, (s.k.y + shift) * s.scale);
+            ctx.lineTo((s.f.x + shift) * s.scale, (s.f.y + shift) * s.scale);
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = 7 * s.scale;
+            ctx.stroke();
+            //toe lines
+            ctx.beginPath();
+            ctx.moveTo((s.f.x + shift) * s.scale, (s.f.y + shift) * s.scale);
+            ctx.lineTo((s.f.x - 15 + shift) * s.scale, (s.f.y + 5 + shift) * s.scale);
+            ctx.moveTo((s.f.x + shift) * s.scale, (s.f.y + shift) * s.scale);
+            ctx.lineTo((s.f.x + 15 + shift) * s.scale, (s.f.y + 5 + shift) * s.scale);
+            ctx.lineWidth = 4 * s.scale;
+            ctx.stroke();
+            //hip joint
+            ctx.beginPath();
+            ctx.arc((s.h.x + shift) * s.scale, (s.h.y + shift) * s.scale, 11 * s.scale, 0, 2 * Math.PI);
+            //knee joint
+            ctx.moveTo((s.k.x + 7 + 2 * shift) * s.scale, (s.k.y + shift) * s.scale);
+            ctx.arc((s.k.x + 2 * shift) * s.scale, (s.k.y + shift) * s.scale, 7 * s.scale, 0, 2 * Math.PI);
+            //foot joint
+            ctx.moveTo((s.f.x + 6 + shift) * s.scale, (s.f.y + shift) * s.scale);
+            ctx.arc((s.f.x + shift) * s.scale, (s.f.y + shift) * s.scale, 6 * s.scale, 0, 2 * Math.PI);
+            ctx.fillStyle = s.fillColor;
+            ctx.fill();
+            ctx.lineWidth = 2 * s.scale;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        //       | | | | |
+        //       n - g o n
+        //when s = 1 (scale), it's 3408 long and 800 tall (height of g)
+        function hangingNGON(x, y, s, height, stiffness, pin, properties) {
+            //makes a compound part of 3 bodyVertex parts
+            function compound3Parts(x1, y1, v1, x2, y2, v2, x3, y3, v3, properties) {
+                const part1 = Matter.Bodies.fromVertices(x1, y1, Vertices.fromPath(v1), properties);
+                const part2 = Matter.Bodies.fromVertices(x2, y2, Vertices.fromPath(v2), properties);
+                const part3 = Matter.Bodies.fromVertices(x3, y3, Vertices.fromPath(v3), properties);
+                const compoundParts = Body.create({
+                    parts: [part1, part2, part3],
+                });
+                World.add(engine.world, [compoundParts]);
+                needGravity[needGravity.length] = compoundParts;
+                composite[composite.length] = compoundParts;
+                body[body.length] = part1;
+                body[body.length] = part2;
+                body[body.length] = part3;
+                setTimeout(function() {
+                    compoundParts.collisionFilter.category = cat.body;
+                    compoundParts.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+                }, 1000);
+            }
+
+            //for attaching the block to a point
+            function addConstraint(x, y, px, py, stiff, body, pin = false) {
+                if (pin) {
+                    map[map.length] = Bodies.polygon(x, y, 0, 15); //circle above
+                }
+                cons[cons.length] = Constraint.create({
+                    pointA: {
+                        x: x,
+                        y: y
+                    },
+                    bodyB: body,
+                    pointB: {
+                        x: px,
+                        y: py
+                    },
+                    stiffness: stiff
+                });
+                World.add(engine.world, cons[cons.length - 1]);
+            }
+
+            //I SINCERELY APOLOGIZE FOR THE ILLEGIBLE BLOCKS OF STRING CONCATENATION
+            //s is scale
+
+            //n
+            compound3Parts(
+                x + 100 * s,
+                y + 310 * s,
+                ("0 0 " + 200 * s + " 0 " + 200 * s + " " + 620 * s + " 0 " + 620 * s),
+                x + 300 * s,
+                y + 160 * s,
+                (200 * s + " " + 40 * s + " " + 400 * s + " " + 40 * s + " " + 400 * s + " " + 280 * s + " " + 200 * s + " " + 280 * s),
+                x + 499 * s,
+                y + 333.3 * s,
+                (400 * s + " " + 40 * s + " " + 540 * s + " " + 40 * s + " " + 600 * s + " " + 100 * s + " " + 600 * s + " " + 620 * s + " " + 400 * s + " " + 620 * s + " " + 400 * s + " " + 280 * s),
+                properties
+            );
+            addConstraint(x + 300 * s, y - height, 0, -10 * s, stiffness, composite[composite.length - 1], pin);
+
+            //-
+            spawn.bodyRect(x + 800 * s, y + 250 * s, 200 * s, 100 * s, 1, properties);
+            body[body.length - 1].frictionAir = 0.05
+            addConstraint(x + 900 * s, y - height, 0, -30 * s, stiffness, body[body.length - 1], pin);
+
+            //g
+            compound3Parts(
+                x + 1400 * s,
+                y + 300 * s,
+                ("0 0 " + 250 * s + " 0 " + 425 * s + " " + 175 * s + " " + 425 * s + " " + 450 * s + " " + 275 * s + " " + 600 * s + " 0 " + 600 * s + " " + -175 * s + " " + 425 * s + " " + -175 * s + " " + 175 * s),
+                x + 1636 * s,
+                y + 633 * s,
+                (425 * s + " " + 450 * s + " " + 425 * s + " " + 750 * s + " " + 375 * s + " " + 800 * s + " " + 275 * s + " " + 675 * s + " " + 275 * s + " " + 600 * s),
+                x + 1398 * s,
+                y + 737 * s,
+                (375 * s + " " + 800 * s + " " + -75 * s + " " + 800 * s + " " + -75 * s + " " + 675 * s + " " + 275 * s + " " + 675 * s),
+                properties
+            );
+            addConstraint(x + 1500 * s, y - height, 0, -15 * s, stiffness, composite[composite.length - 1], pin);
+
+            //o
+            spawn.bodyVertex(
+                x + 2300 * s,
+                y + 300 * s,
+                ("0 0 " + 250 * s + " 0 " + 425 * s + " " + 175 * s + " " + 425 * s + " " + 425 * s + " " + 250 * s + " " + 600 * s + " 0 " + 600 * s + " " + -175 * s + " " + 425 * s + " " + -175 * s + " " + 175 * s),
+                properties
+            );
+            addConstraint(x + 2300 * s, y - height, 0, -10 * s, stiffness, body[body.length - 1], pin);
+
+            //n
+            compound3Parts(
+                x + 2900 * s,
+                y + 310 * s,
+                ("0 0 " + 200 * s + " 0 " + 200 * s + " " + 620 * s + " 0 " + 620 * s),
+                x + 3100 * s,
+                y + 160 * s,
+                (200 * s + " " + 40 * s + " " + 400 * s + " " + 40 * s + " " + 400 * s + " " + 280 * s + " " + 200 * s + " " + 280 * s),
+                x + 3300 * s,
+                y + 333.3 * s,
+                (400 * s + " " + 40 * s + " " + 540 * s + " " + 40 * s + " " + 600 * s + " " + 100 * s + " " + 600 * s + " " + 620 * s + " " + 400 * s + " " + 620 * s + " " + 400 * s + " " + 280 * s),
+                properties
+            );
+            addConstraint(x + 3100 * s, y - height, 0, -10 * s, stiffness, composite[composite.length - 1], pin);
         }
     },
 };

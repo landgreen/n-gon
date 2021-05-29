@@ -295,6 +295,7 @@ const spawn = {
                             document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                             // build.shareURL(false)
                             setTimeout(function() {
+                                simulation.paused = true;
                                 World.clear(engine.world);
                                 Engine.clear(engine);
                                 simulation.splashReturn();
@@ -1266,7 +1267,7 @@ const spawn = {
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0035); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         targets.push(me.id) //add to shield protection
         me.friction = 0;

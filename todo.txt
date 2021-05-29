@@ -1,7 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+NEW COMMUNITY LEVEL  n_gon   by Oranger
 
-
+experimenting with some code the automatically positions blocks into the center of buttons
+  let me know if anything acts oddly as a result
+  
+small adjustments to maps around buttons around platforms
+some bug fixes
 
 ******************************************************** BUGS ********************************************************
 

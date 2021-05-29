@@ -3557,13 +3557,13 @@ const b = {
             name: "super balls",
             description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
             ammo: 0,
-            ammoPack: 12,
+            ammoPack: 13,
             have: false,
-            num: 5,
+            // num: 5,
             do() {},
             fire() {
                 const SPEED = m.crouch ? 43 : 32
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 18) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
                 if (tech.oneSuperBall) {
                     let dir = m.angle
                     const me = bullet.length;
@@ -3574,7 +3574,7 @@ const b = {
                         y: SPEED * Math.sin(dir)
                     });
                     // Matter.Body.setDensity(bullet[me], 0.0001);
-                    bullet[me].endCycle = simulation.cycle + Math.floor(300 + 60 * Math.random());
+                    bullet[me].endCycle = simulation.cycle + Math.floor(300 + 90 * Math.random());
                     bullet[me].minDmgSpeed = 0;
                     bullet[me].restitution = 1;
                     bullet[me].friction = 0;
@@ -3584,7 +3584,7 @@ const b = {
                     bullet[me].beforeDmg = function(who) {
                         mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                         if (tech.isIncendiary) {
-                            b.explosion(this.position, this.mass * 250); //makes bullet do explosive damage at end
+                            b.explosion(this.position, this.mass * 265); //makes bullet do explosive damage at end
                             this.endCycle = 0
                         }
                     };
@@ -3601,7 +3601,7 @@ const b = {
                             y: SPEED * Math.sin(dir)
                         });
                         // Matter.Body.setDensity(bullet[me], 0.0001);
-                        bullet[me].endCycle = simulation.cycle + Math.floor((300 + 60 * Math.random()) * tech.isBulletsLastLonger);
+                        bullet[me].endCycle = simulation.cycle + Math.floor((300 + 90 * Math.random()) * tech.isBulletsLastLonger);
                         bullet[me].minDmgSpeed = 0;
                         bullet[me].restitution = 0.99;
                         bullet[me].friction = 0;
@@ -3610,7 +3610,7 @@ const b = {
                         };
                         bullet[me].beforeDmg = function() {
                             if (tech.isIncendiary) {
-                                b.explosion(this.position, this.mass * 330 + 40 * Math.random()); //makes bullet do explosive damage at end
+                                b.explosion(this.position, this.mass * 330 + 60 * Math.random()); //makes bullet do explosive damage at end
                                 this.endCycle = 0
                             }
                         };

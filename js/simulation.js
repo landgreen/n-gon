@@ -524,11 +524,12 @@ const simulation = {
             level.levels.push("basement");
             level.levels.push("crossfire");
             level.levels.push("vats")
+            level.levels.push("n_gon")
             level.levels.push("house");
             level.levels.push("perplex");
             level.levels.push("coliseum");
             level.levels = shuffle(level.levels); //shuffles order of maps
-            level.levels.splice(0, 7); //remove some random levels to make up for adding the community levels
+            level.levels.splice(0, 8); //remove some random levels to make up for adding the community levels
 
             lore.techCount = 0; //remove undefined tech for community maps
             for (let i = 0, len = tech.tech.length; i < len; i++) {
