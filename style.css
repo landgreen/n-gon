@@ -583,8 +583,26 @@ summary {
 /* } */
 
 .color-cloaked {
-    opacity: 0.25;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    animation: cloak 6s linear infinite alternate;
+    color: rgba(0, 0, 0, 0);
+}
+
+@keyframes cloak {
+    0% {
+        text-shadow: 0px 0px 0px #000;
+        opacity: 1;
+    }
+
+    50% {
+        text-shadow: 0px 0px 0px #000;
+        opacity: 1;
+    }
+
+    100% {
+        text-shadow: 0px 0px 15px #000;
+        opacity: 0;
+    }
 }
 
 .color-laser {
@@ -647,6 +665,12 @@ summary {
 }
 
 .color-flop {
+    text-decoration: underline;
+    font-weight: 100;
+    letter-spacing: -1px;
+}
+
+.color-alt {
     text-decoration: underline;
     font-weight: 100;
     letter-spacing: -1px;
@@ -743,6 +767,23 @@ summary {
     float: right;
 }
 
+.alt {
+    animation: alt 8s linear infinite alternate;
+    font-weight: 400;
+    letter-spacing: 1px;
+    /* color: rgba(0, 0, 0, 0.5) */
+}
+
+@keyframes alt {
+    0% {
+        text-shadow: 3px 0px 0px;
+    }
+
+    100% {
+        text-shadow: -3px 0px 0px;
+    }
+
+}
 
 .flicker {
     animation: flicker 4s linear infinite;

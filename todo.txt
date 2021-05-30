@@ -1,12 +1,12 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-NEW COMMUNITY LEVEL  n_gon   by Oranger
+"cloak" and "alternate reality" now have styled text
 
-experimenting with some code the automatically positions blocks into the center of buttons
-  let me know if anything acts oddly as a result
-  
-small adjustments to maps around buttons around platforms
-some bug fixes
+metamaterial field damage increased to 146% (was 121%)
+tech: combinatorial optimization - increase damage by 66% if a mob hasn't died in the last 5 seconds 
+
+fix bugs where some shared build URLs were crashing on some unusual tech, like lore tech and nonrefundable tech
+junk tech: not a bug - crashes the game
 
 ******************************************************** BUGS ********************************************************
 
@@ -20,26 +20,12 @@ blue triangle boss can move backwards and aim away from you if set up properly
 
 HTML build system looks bad since tech does grey out
 
-The html build share system crashing some times
-tech: strange attractor before at least 1 other tech
-  https://landgreen.github.io/sidescroller/index.html?&gun0=rail%20gun&tech18=correlated%20damage&tech20=strange%20attractor
-&tech0=auto-loading%20heuristics as only tech
-  https://landgreen.github.io/sidescroller/index.html?&tech0=auto-loading%20heuristics
-crashed on this
-https://landgreen.github.io/sidescroller/index.html?&gun0=rail%20gun&tech1=mass%20driver&tech2=restitution&tech3=flywheel&tech4=Pauli%20exclusion&tech5=mass-energy%20equivalence&tech6=1st%20ionization%20energy&tech7=electrolytes&tech8=negative%20feedback&tech9=entropy%20exchange&tech10=anthropic%20principle&tech11=renormalization&tech12=Bayesian%20statistics&tech13=bubble%20fusion&tech14=replication&tech15=replication&tech16=futures%20exchange&tech17=commodities%20exchange&tech18=correlated%20damage&tech19=parthenogenesis&tech21=cardinality&tech22=half-wave%20rectifier&tech23=pair%20production&tech24=Lorentz%20transformation&tech25=time%20crystals&tech26=undefined&tech27=undefined&tech28=undefined&tech29=undefined&tech30=undefined&tech31=undefined&tech32=undefined&field=pilot%20wave&difficulty=6
-
 you have to press z once to get copy to work for simulation.enableConstructMode() sometimes
   not sure how to reproduce, but it happens often on the first draw
 
 mouse event e.which is deprecated
 
 fix door.isOpen actually meaning isClosed?
-
-(only once on my computer) once every 7 second check isn't running code
-    power ups don't teleport to exit
-    complex spin statistics isn't activating
-  wasn't able to understand bug after extensive testing
-  had tech: complex spin statistics
 
 make it so that when you are immune to harm you can either jump on mobs or you pass through them
 
@@ -48,13 +34,14 @@ is there a way to check if the player is stuck inside the map or block
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
-(once) bug - mine spawned one new mine every second
-  after sticking to the top right corner of a wall
-  notes: had only gun mine, tech mine reclamation, field plasma,
-
-(repeatable almost every time) bug - mines spawn extra mines when fired at thin map wall while jumping
-
 ******************************************************** TODO ********************************************************
+
+flip left right on some maps
+  some mobs use the original x parameter in their loop, but it doesn't get flipped
+    manually edit each mob's logic
+      finalBoss, shooters?
+
+tech: supersaturation is buffed but add falling damage
 
 mob: molecule shapes - 2 separate mobs joined by a bond
   use constraints: just spawn 2x or 3x groupings
@@ -71,9 +58,6 @@ tech: increase health and harm taken
 
 remove air control
   negative tech aspect, junk , experiment?
-
-add falling damage
-  negative tech aspect
 
 tech: use the ability for power ups to have custom code
   (note: this code is half way done, it just needs to be completed)
@@ -404,6 +388,7 @@ possible names for tech
   quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
   counterfactual - something false
   axion - maybe a 3rd dark matter type tech
+  Pigeonhole principle - if there are several things that are matched up
 
 
 
@@ -424,7 +409,7 @@ chapter 3:  why is the bot attacking things?
         disable lore, but respawn on the level you die at?
   dialogue outline:
     scientist try to think of a way to communicate since the bot can't talk
-    they give up on getting the bot to respond, and just start ask questions and explaining things
+    they give up on getting the bot to respond, and just start ask questions and thinking of explanations with other
     when and how did it become self-aware
     why is the bot fighting things in these simulated locations?
       it wasn't designed to be violent

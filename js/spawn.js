@@ -376,7 +376,7 @@ const spawn = {
                         //push blocks and player away, since this is the end of suck, and suck causes blocks to fall on the boss and stun it
                         Matter.Body.scale(this, 10, 10);
                         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
-                        if (!this.isShielded) spawn.shield(this, x, y, 1); // regen shield to also prevent stun
+                        if (!this.isShielded) spawn.shield(this, this.position.x, this.position.y, 1); // regen shield to also prevent stun
                         for (let i = 0, len = body.length; i < len; ++i) { //push blocks away horizontally
                             if (body[i].position.x > this.position.x) {
                                 body[i].force.x = 0.5

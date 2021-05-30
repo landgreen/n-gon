@@ -101,6 +101,7 @@ window.addEventListener('load', () => {
                     }
                 }
             }
+
             if (property === "difficulty") {
                 simulation.difficultyMode = Number(set[property])
                 document.getElementById("difficulty-select-experiment").value = Number(set[property])
@@ -148,33 +149,33 @@ window.onresize = () => {
 // experimental build grid display and pause
 //**********************************************************************
 const build = {
-    onLoadPowerUps() {
-        const set = getUrlVars()
-        if (Object.keys(set).length !== 0) {
-            for (const property in set) {
-                set[property] = set[property].replace(/%20/g, " ")
-                if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
-                if (property.substring(0, 3) === "tech") tech.giveTech(set[property])
-                if (property === "field") m.setField(set[property])
-                if (property === "difficulty") {
-                    simulation.difficultyMode = Number(set[property])
-                    document.getElementById("difficulty-select").value = Number(set[property])
-                }
-                if (property === "level") {
-                    level.levelsCleared += Number(set[property]);
-                    level.difficultyIncrease(Number(set[property]) * simulation.difficultyMode) //increase difficulty based on modes
-                    spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-                    level.onLevel++
-                }
-            }
-            for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
-            bullet = []; //remove any bullets that might have spawned from tech
-            if (b.inventory.length > 0) {
-                b.activeGun = b.inventory[0] //set first gun to active gun
-                simulation.makeGunHUD();
-            }
-        }
-    },
+    // onLoadPowerUps() {
+    //     const set = getUrlVars()
+    //     if (Object.keys(set).length !== 0) {
+    //         for (const property in set) {
+    //             set[property] = set[property].replace(/%20/g, " ")
+    //             if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
+    //             if (property.substring(0, 3) === "tech") tech.giveTech(set[property])
+    //             if (property === "field") m.setField(set[property])
+    //             if (property === "difficulty") {
+    //                 simulation.difficultyMode = Number(set[property])
+    //                 document.getElementById("difficulty-select").value = Number(set[property])
+    //             }
+    //             if (property === "level") {
+    //                 level.levelsCleared += Number(set[property]);
+    //                 level.difficultyIncrease(Number(set[property]) * simulation.difficultyMode) //increase difficulty based on modes
+    //                 spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+    //                 level.onLevel++
+    //             }
+    //         }
+    //         for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+    //         bullet = []; //remove any bullets that might have spawned from tech
+    //         if (b.inventory.length > 0) {
+    //             b.activeGun = b.inventory[0] //set first gun to active gun
+    //             simulation.makeGunHUD();
+    //         }
+    //     }
+    // },
     pauseGrid() {
         let botText = ""
         if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
@@ -296,20 +297,18 @@ const build = {
                 m.setField(index)
                 who.classList.add("build-field-selected");
             }
-        } else if (type === "tech") { //remove tech if you have too many
+        } else if (type === "tech") {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
-                if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
-                tech.giveTech(index)
+                if (!tech.tech[index].isLore && !tech.tech[index].isNonRefundable && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
             } else if (!tech.tech[index].isNonRefundable) {
                 tech.totalCount -= tech.tech[index].count
                 tech.removeTech(index);
                 who.classList.remove("build-tech-selected");
             } else {
                 who.classList.remove("build-tech-selected")
-                setTimeout(() => { //return energy
+                setTimeout(() => {
                     who.classList.add("build-tech-selected")
                 }, 50);
-
             }
         }
         //update tech text //disable not allowed tech
@@ -321,21 +320,21 @@ const build = {
 
                     if (tech.tech[i].isFieldTech) {
                         techID.innerHTML = ` <div class="grid-title">
-                                                <span style="position:relative;">
-                                                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                                                    <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
-                                                </span>
-                                                &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
+                        <span style="position:relative;">
+                        <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                        <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
+                        </span>
+                        &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
                         // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
                         // border: #fff solid 0px;
                     } else if (tech.tech[i].isGunTech) {
                         techID.innerHTML = ` <div class="grid-title">
-                                                <span style="position:relative;">
-                                                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
-                                                </span>
-                                                &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
+                        <span style="position:relative;">
+                        <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                        <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
+                        </span>
+                        &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isJunk) {
                         // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
@@ -355,6 +354,7 @@ const build = {
                     // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div>`
+                    // console.log(techID)
                     if (!techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.add("experiment-grid-disabled");
                         techID.onclick = null

@@ -151,6 +151,7 @@
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.85
+            if (tech.isSneakAttack && m.cycle > m.lastKillCycle + 300) dmg *= 1.66
             if (tech.isTechDamage) dmg *= 1.9
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -169,6 +170,7 @@
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
             if (tech.isBotDamage) dmg *= 1 + 0.05 * b.totalBots()
+
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
@@ -2540,7 +2542,7 @@
             },
             {
                 name: "quantum immortality",
-                description: "after <strong>dying</strong>, continue in an <strong>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>23%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
+                description: "after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>23%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -2558,7 +2560,7 @@
             },
             {
                 name: "many-worlds",
-                description: "each <strong>level</strong> is an <strong>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
+                description: "each <strong>level</strong> is an <strong class='alt'>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2576,7 +2578,7 @@
             },
             {
                 name: "non-unitary operator",
-                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>after a <strong>collision</strong> enter an <strong>alternate reality</strong>",
+                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2598,7 +2600,7 @@
             },
             {
                 name: "Ψ(t) collapse",
-                description: "enter an <strong>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>12</strong> <strong class='color-r'>research</strong>",
+                description: "enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>12</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -4881,9 +4883,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && !tech.isEnergyHealth
+                    return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && !tech.isEnergyHealth
                 },
-                requires: "negative mass field, not mass-energy",
+                requires: "field: perfect, negative mass, pilot wave, plasma, not mass-energy",
                 effect() {
                     tech.isHarmReduce = true
                 },
@@ -5032,7 +5034,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation field" // || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return m.fieldUpgrades[m.fieldMode].name === "time dilation field"
                 },
                 requires: "time dilation field",
                 effect() {
@@ -5056,7 +5058,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation field") && tech.energyRegen !== 0; //|| m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation field") && tech.energyRegen !== 0
                 },
                 requires: "time dilation field, not ground state",
                 effect: () => {
@@ -5105,6 +5107,24 @@
                 }
             },
             {
+                name: "combinatorial optimization",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>if a mob has <strong>not died</strong> in the last <strong>5 seconds</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+                },
+                requires: "metamaterial cloaking or pilot wave",
+                effect() {
+                    tech.isSneakAttack = true;
+                },
+                remove() {
+                    tech.isSneakAttack = false;
+                }
+            },
+            {
                 name: "discrete optimization",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
                 isFieldTech: true,
@@ -5114,7 +5134,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "metamaterial cloaking",
+                requires: "metamaterial cloaking or pilot wave",
                 effect() {
                     tech.aimDamage = 1.5
                     b.setFireCD();
@@ -5240,7 +5260,7 @@
             },
             {
                 name: "-quantum leap-",
-                description: "<strong style='color: #f55;'>experiment:</strong> every 20 seconds<br>become an alternate version of yourself",
+                description: "<strong style='color: #f55;'>experiment:</strong> every 20 seconds<br>become an <strong class='alt'>alternate</strong> version of yourself",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5410,6 +5430,33 @@
             //         tech.wimpExperiment = 0
             //     }
             // },
+            {
+                name: "not a bug",
+                description: "initiate a totally safe game crash for 5 seconds",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    const savedfunction = simulation.drawCircle
+                    simulation.drawCircle = () => {
+                        const a = mob[Infinity].position //crashed the game in a visually interesting way, because of the ctx.translate command is never reverted in the main game loop
+                    }
+                    setTimeout(() => {
+                        simulation.drawCircle = savedfunction
+                        canvas.width = canvas.width //clears the canvas // works on chrome at least
+                    }, 5000);
+
+                    // for (;;) {} //freezes the tab
+                },
+                remove() {}
+            },
             {
                 name: "posture",
                 description: "stand a bit taller",
@@ -5676,7 +5723,7 @@
             },
             {
                 name: "quantum leap",
-                description: "become an alternate version of yourself<br>every <strong>20</strong> seconds",
+                description: "become an <strong class='alt'>alternate</strong> version of yourself<br>every <strong>20</strong> seconds",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -6781,5 +6828,6 @@
         isBlockBullets: null,
         isAddBlockMass: null,
         isMACHO: null,
-        isHarmMACHO: null
+        isHarmMACHO: null,
+        isSneakAttack: null
     }

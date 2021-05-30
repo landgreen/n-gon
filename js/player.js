@@ -1952,7 +1952,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>121%</strong>",
+            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>146%</strong>",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -1960,7 +1960,7 @@ const m = {
                 // m.eyeFillColor = '#333'
                 m.fieldPhase = 0;
                 m.isCloak = false
-                m.fieldDamage = 2.21 // 1 + 111/100
+                m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 const drawRadius = 1000
 
@@ -1998,7 +1998,7 @@ const m = {
                         }
                         if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
-                            const stunRange = m.fieldDrawRadius * 1.15
+                            const stunRange = m.fieldDrawRadius * 1.2
                             const drain = 0.3 * m.energy
                             for (let i = 0, len = mob.length; i < len; ++i) {
                                 if (
@@ -2006,7 +2006,7 @@ const m = {
                                     Matter.Query.ray(map, mob[i].position, m.pos).length === 0
                                 ) {
                                     isMobsAround = true
-                                    mobs.statusStun(mob[i], 30 + drain * 300)
+                                    mobs.statusStun(mob[i], 60 + drain * 360)
                                 }
                             }
                             if (isMobsAround && m.energy > drain) {

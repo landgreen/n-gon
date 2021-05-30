@@ -9,6 +9,7 @@ const level = {
     levelsCleared: 0,
     playableLevels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
     levels: [],
+
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
@@ -1289,6 +1290,30 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         spawn.mapRect(5425, -650, 375, 450); //blocking exit
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500);
+
+        if (simulation.isHorizontalFlipped) { //flip the map horizontally
+            const flipX = (who) => {
+                for (let i = 0, len = who.length; i < len; i++) {
+                    Matter.Body.setPosition(who[i], { x: -who[i].position.x, y: who[i].position.y })
+                }
+            }
+            flipX(map)
+            flipX(body)
+            flipX(mob)
+            flipX(powerUp)
+
+            level.setPosToSpawn(0, -250);
+            level.exit.x = -level.exit.x - 100 //minus the 100 because of the width of the graphic
+            level.custom = () => {
+                level.playerExitCheck();
+                level.exit.draw();
+                level.enter.draw();
+            };
+            level.customTopLayer = () => {
+                ctx.fillStyle = "rgba(0,255,255,0.1)"
+                ctx.fillRect(-5400 - 300, -550, 300, 350)
+            };
+        }
     },
     gauntlet() {
         level.custom = () => {
@@ -1310,8 +1335,8 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#ddd";
 
-        spawn.mapRect(-300, -1050, 300, 200);
-        Matter.Body.setAngle(map[map.length - 1], -Math.PI / 4)
+        // spawn.mapRect(-300, -1050, 300, 200);
+        // Matter.Body.setAngle(map[map.length - 1], -Math.PI / 4)
 
 
         spawn.mapRect(-950, 0, 8200, 800); //ground
@@ -1344,6 +1369,32 @@ const level = {
         }
         powerUps.addRerollToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4125, -350);
+
+        if (simulation.isHorizontalFlipped) { //flip the map horizontally
+            const flipX = (who) => {
+                for (let i = 0, len = who.length; i < len; i++) {
+                    Matter.Body.setPosition(who[i], { x: -who[i].position.x, y: who[i].position.y })
+                }
+            }
+            flipX(map)
+            flipX(body)
+            flipX(mob)
+            flipX(powerUp)
+
+            level.setPosToSpawn(0, -475);
+            level.exit.x = -level.exit.x - 100 //minus the 100 because of the width of the graphic
+            level.custom = () => {
+                level.playerExitCheck();
+                level.exit.draw();
+                level.enter.draw();
+            };
+            level.customTopLayer = () => {
+                ctx.fillStyle = "rgba(0,255,255,0.1)"
+                ctx.fillRect(-6400 - 300, -550, 300, 350)
+                ctx.fillStyle = "rgba(0,0,0,0.1)"
+                ctx.fillRect(175 - 900, -975, 900, 575)
+            };
+        }
     },
     intro() {
         level.custom = () => {
@@ -3627,7 +3678,7 @@ const level = {
         if (simulation.difficulty > 4) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
         powerUps.chooseRandomPowerUp(3100, 1630);
     },
-    detours() {
+    detours() { //by Francois from discord
         level.setPosToSpawn(0, 0); //lower start
         level.exit.y = 150;
         spawn.mapRect(level.enter.x, 45, 100, 20);
@@ -3938,7 +3989,7 @@ const level = {
             }
         }
     },
-    house() {
+    house() { //by Francois from discord
         const rotor = level.rotor(4315, -315, -0.0002, 120, 20, 200);
         const hazard = level.hazard(4350, -1000, 300, 110);
         const doorBedroom = level.door(1152, -1150, 25, 250, 250);
@@ -4414,7 +4465,7 @@ const level = {
             }
         }
     },
-    perplex() {
+    perplex() { //by Oranger from discord
         level.setPosToSpawn(-600, 400);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 550;
