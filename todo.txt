@@ -1,12 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-"cloak" and "alternate reality" now have styled text
+added 50% chance for elevators on warehouse level
 
-metamaterial field damage increased to 146% (was 121%)
-tech: combinatorial optimization - increase damage by 66% if a mob hasn't died in the last 5 seconds 
+metamaterial cloaking now does 300% more damage if a mob has not died in the last 4 seconds
+  removed: tech: combinatorial optimization - increase damage by 66% if a mob hasn't died in the last 5 seconds 
 
-fix bugs where some shared build URLs were crashing on some unusual tech, like lore tech and nonrefundable tech
-junk tech: not a bug - crashes the game
+fixed bug with experiment not loading tech
 
 ******************************************************** BUGS ********************************************************
 
@@ -35,6 +34,24 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** TODO ********************************************************
+
+MACHOs might clash with cloaking field graphic
+
+
+        things to avoid when designing a map:
+avoid a single path through the map
+  instead have multiple paths through the map
+  or randomize parts of the map
+avoid isolated floating rectangles
+  instead imagine what story you are trying to tell about the buildings and tell that story
+  draw: shadows, color inside of buildings, structural support, pillars, ...
+avoid simple repetitive platforms
+  instead of  - -- -  try  -:_-L -_
+avoid large flat areas; this doesn't produce fun combat
+  instead produce complex places for the player to hide
+break these rules when its important to make a statement in your level
+  
+
 
 flip left right on some maps
   some mobs use the original x parameter in their loop, but it doesn't get flipped

@@ -943,7 +943,8 @@ const m = {
     isFieldActive: false,
     fieldRange: 155,
     fieldShieldingScale: 1,
-    fieldDamage: 1,
+    // fieldDamage: 1,
+    isSneakAttack: false,
     duplicateChance: 0,
     energy: 0,
     fieldRegen: 0,
@@ -976,7 +977,7 @@ const m = {
         m.fieldShieldingScale = 1;
         m.fieldBlockCD = 10;
         m.fieldHarmReduction = 1;
-        m.fieldDamage = 1
+        m.isSneakAttack = false
         m.duplicateChance = 0
         powerUps.setDo();
         m.grabPowerUpRange2 = 156000;
@@ -1952,7 +1953,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "<strong class='color-cloaked'>cloak</strong> after not using your gun or field<br>while <strong class='color-cloaked'>cloaked</strong> mobs can't see you<br>increase <strong class='color-d'>damage</strong> by <strong>146%</strong>",
+            description: "when not firing activate a <strong class='color-cloaked'>cloaking</strong> effect<br>if a mob has <strong>not died</strong> in the last <strong>4 seconds</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong>",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -1960,8 +1961,9 @@ const m = {
                 // m.eyeFillColor = '#333'
                 m.fieldPhase = 0;
                 m.isCloak = false
-                m.fieldDamage = 2.46 // 1 + 146/100
+                // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
+                m.isSneakAttack = true;
                 const drawRadius = 1000
 
                 m.hold = function() {
@@ -2080,14 +2082,23 @@ const m = {
                         if (m.energy < 0) m.energy = 0
                         const xOff = m.pos.x - m.radius * m.maxEnergy
                         const yOff = m.pos.y - 50
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+                        ctx.fillStyle = "rgba(0, 0, 0, 0.3)" //
                         ctx.fillRect(xOff, yOff, 60 * m.maxEnergy, 10);
-                        ctx.fillStyle = "#fff";
+                        ctx.fillStyle = "#fff" //m.cycle > m.lastKillCycle + 300 ? "#000" : "#fff" //"#fff";
                         ctx.fillRect(xOff, yOff, 60 * m.energy, 10);
                         ctx.beginPath()
                         ctx.rect(xOff, yOff, 60 * m.maxEnergy, 10);
                         ctx.strokeStyle = m.fieldMeterColor;
                         ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                    //show sneak attack status 
+
+                    if (m.cycle > m.lastKillCycle + 300) {
+                        ctx.strokeStyle = "rgba(0,0,0,0.4)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
+                        ctx.beginPath();
+                        ctx.arc(m.pos.x, m.pos.y, 28, 0, 2 * Math.PI);
+                        ctx.lineWidth = 2
                         ctx.stroke();
                     }
                 }

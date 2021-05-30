@@ -300,6 +300,7 @@ const build = {
         } else if (type === "tech") {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
                 if (!tech.tech[index].isLore && !tech.tech[index].isNonRefundable && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
+                tech.giveTech(index)
             } else if (!tech.tech[index].isNonRefundable) {
                 tech.totalCount -= tech.tech[index].count
                 tech.removeTech(index);
@@ -311,6 +312,27 @@ const build = {
                 }, 50);
             }
         }
+
+
+        // } else if (type === "tech") { //remove tech if you have too many
+        //     if (tech.tech[index].count < tech.tech[index].maxCount) {
+        //         if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
+        //         tech.giveTech(index)
+        //     } else if (!tech.tech[index].isNonRefundable) {
+        //         tech.totalCount -= tech.tech[index].count
+        //         tech.removeTech(index);
+        //         who.classList.remove("build-tech-selected");
+        //     } else {
+        //         who.classList.remove("build-tech-selected")
+        //         setTimeout(() => { //return energy
+        //             who.classList.add("build-tech-selected")
+        //         }, 50);
+
+        //     }
+        // }
+
+
+
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)

@@ -16,7 +16,7 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
-            // m.setField("pilot wave")
+            // m.setField("metamaterial cloaking")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // tech.giveTech("WIMPs")
@@ -52,7 +52,7 @@ const level = {
             // level.coliseum() //community level
             // level.crossfire() //community level
             // level.vats() //community level
-            // level.n_gon() //community level
+            // level["n-gon"]() //community level
 
             // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
@@ -2934,46 +2934,77 @@ const level = {
         // spawn.mapRect(-1950, -400, 100, 25);
         spawn.mapRect(-3150, 50, 775, 100);
         spawn.mapRect(-2600, -250, 775, 100);
-        spawn.bodyRect(-1450, -125, 125, 125, 1, spawn.propsSlide); //weight
-        spawn.bodyRect(-1800, 0, 300, 100, 1, spawn.propsHoist); //hoist
-        cons[cons.length] = Constraint.create({
-            pointA: {
-                x: -1650,
-                y: -500
-            },
-            bodyB: body[body.length - 1],
-            stiffness: 0.0001815,
-            length: 1
-        });
-        World.add(engine.world, cons[cons.length - 1]);
 
-        spawn.bodyRect(600, 525, 125, 125, 1, spawn.propsSlide); //weight
-        spawn.bodyRect(800, 600, 300, 100, 1, spawn.propsHoist); //hoist
-        cons[cons.length] = Constraint.create({
-            pointA: {
-                x: 950,
-                y: 100
-            },
-            bodyB: body[body.length - 1],
-            stiffness: 0.0001815,
-            length: 1
-        });
-        World.add(engine.world, cons[cons.length - 1]);
+        if (Math.random() < 0.5) {
+            const elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003)
+            const elevator2 = level.elevator(820, 1300, 260, 40, 607, 0.0003)
+            const elevator3 = level.elevator(-2755, 1260, 160, 40, 1000, 0.006)
+            spawn.bodyRect(-2375, 1300, 100, 100);
+            spawn.bodyRect(-2325, 1250, 50, 50);
+            spawn.bodyRect(-2275, 1350, 125, 50);
 
-        spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
-        spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
-        spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
-        cons[cons.length] = Constraint.create({
-            pointA: {
-                x: -2575,
-                y: 150
-            },
-            bodyB: body[body.length - 1],
-            stiffness: 0.0005,
-            length: 566
-        });
-        World.add(engine.world, cons[cons.length - 1]);
+            level.custom = () => {
+                elevator1.move();
+                elevator1.drawTrack();
+                elevator2.move();
+                elevator2.drawTrack();
+                elevator3.move();
+                elevator3.drawTrack();
 
+                ctx.fillStyle = "#444" //light fixtures
+                ctx.fillRect(-920, -505, 40, 10)
+                ctx.fillRect(-920, 95, 40, 10)
+                ctx.fillRect(180, 95, 40, 10)
+                ctx.fillRect(-20, 695, 40, 10)
+                ctx.fillRect(-2320, 945, 40, 10)
+
+                ctx.fillStyle = "#cff" //exit
+                ctx.fillRect(300, -250, 350, 250)
+                level.playerExitCheck();
+                level.exit.draw();
+                level.enter.draw();
+            };
+        } else {
+            spawn.bodyRect(-1450, -125, 125, 125, 1, spawn.propsSlide); //weight
+            spawn.bodyRect(-1800, 0, 300, 100, 1, spawn.propsHoist); //hoist
+            cons[cons.length] = Constraint.create({
+                pointA: {
+                    x: -1650,
+                    y: -500
+                },
+                bodyB: body[body.length - 1],
+                stiffness: 0.0001815,
+                length: 1
+            });
+            World.add(engine.world, cons[cons.length - 1]);
+
+            spawn.bodyRect(600, 525, 125, 125, 1, spawn.propsSlide); //weight
+            spawn.bodyRect(800, 600, 300, 100, 1, spawn.propsHoist); //hoist
+            cons[cons.length] = Constraint.create({
+                pointA: {
+                    x: 950,
+                    y: 100
+                },
+                bodyB: body[body.length - 1],
+                stiffness: 0.0001815,
+                length: 1
+            });
+            World.add(engine.world, cons[cons.length - 1]);
+
+            spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
+            spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
+            spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
+            cons[cons.length] = Constraint.create({
+                pointA: {
+                    x: -2575,
+                    y: 150
+                },
+                bodyB: body[body.length - 1],
+                stiffness: 0.0005,
+                length: 566
+            });
+            World.add(engine.world, cons[cons.length - 1]);
+        }
 
 
 
@@ -5418,7 +5449,7 @@ const level = {
             portal2[2].draw()
         }
     },
-    n_gon() { // Made by Oranger on Discord
+    "n-gon"() { // Made by Oranger on Discord
         let needGravity = [];
         let s = { //mech statue
             x: -200,

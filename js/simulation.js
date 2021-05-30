@@ -525,7 +525,7 @@ const simulation = {
             level.levels.push("basement");
             level.levels.push("crossfire");
             level.levels.push("vats")
-            level.levels.push("n_gon")
+            level.levels.push("n-gon")
             level.levels.push("house");
             level.levels.push("perplex");
             level.levels.push("coliseum");

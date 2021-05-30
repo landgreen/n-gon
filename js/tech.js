@@ -147,11 +147,11 @@
             return false
         },
         damageFromTech() {
-            let dmg = m.fieldDamage
+            let dmg = 1 //m.fieldDamage
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 1.5 : 0.85
-            if (tech.isSneakAttack && m.cycle > m.lastKillCycle + 300) dmg *= 1.66
+            if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= 4
             if (tech.isTechDamage) dmg *= 1.9
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -170,7 +170,6 @@
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
             if (tech.isBotDamage) dmg *= 1 + 0.05 * b.totalBots()
-
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
@@ -5106,24 +5105,24 @@
                     tech.isCloakStun = false;
                 }
             },
-            {
-                name: "combinatorial optimization",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>if a mob has <strong>not died</strong> in the last <strong>5 seconds</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
-                },
-                requires: "metamaterial cloaking or pilot wave",
-                effect() {
-                    tech.isSneakAttack = true;
-                },
-                remove() {
-                    tech.isSneakAttack = false;
-                }
-            },
+            // {
+            //     name: "combinatorial optimization",
+            //     description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>if a mob has <strong>not died</strong> in the last <strong>5 seconds</strong>",
+            //     isFieldTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     allowed() {
+            //         return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+            //     },
+            //     requires: "metamaterial cloaking or pilot wave",
+            //     effect() {
+            //         tech.isSneakAttack = true;
+            //     },
+            //     remove() {
+            //         tech.isSneakAttack = false;
+            //     }
+            // },
             {
                 name: "discrete optimization",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
