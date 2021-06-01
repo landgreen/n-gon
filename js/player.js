@@ -1917,8 +1917,6 @@ const m = {
                                     player.force.y = 0
                                 }
                                 Engine.update(engine, simulation.delta);
-                                // level.checkZones();
-                                // level.checkQuery();
                                 m.move();
                                 simulation.checks();
                                 // mobs.loop();

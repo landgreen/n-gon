@@ -1,11 +1,15 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-added 50% chance for elevators on warehouse level
+levels are now randomly flipped horizontally
 
-metamaterial cloaking now does 300% more damage if a mob has not died in the last 4 seconds
-  removed: tech: combinatorial optimization - increase damage by 66% if a mob hasn't died in the last 5 seconds 
-
-fixed bug with experiment not loading tech
+removed spawn.boost( from n-gon
+make boosts with these commands:
+  const boost1 = level.boost(2550, 1500, 1700) //x,y, boost height
+  const boost2 = level.boost(-3400, -2050, 3000)
+  level.custom = () => {
+      boost1.query();
+      boost2.query();
+also you don't have to draw the boosts any more, the query command does it for you
 
 ******************************************************** BUGS ********************************************************
 
@@ -16,11 +20,7 @@ figure out how to undo ship mode
 Why does micro-extruder lag so much
 
 blue triangle boss can move backwards and aim away from you if set up properly
-
-HTML build system looks bad since tech does grey out
-
-you have to press z once to get copy to work for simulation.enableConstructMode() sometimes
-  not sure how to reproduce, but it happens often on the first draw
+  issues with dot product probably, but might not be worth fixing
 
 mouse event e.which is deprecated
 
@@ -35,8 +35,14 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-MACHOs might clash with cloaking field graphic
+buttons can now on/off boosts
 
+drones should check for power ups even if there are mobs nearby
+  but not travel towards power ups
+
+Weak Anthropic Principle: you get a second chance at life, but now the game has falling damage!
+tech: supersaturation is buffed but add falling damage
+tech: increase health and remove air control
 
         things to avoid when designing a map:
 avoid a single path through the map
@@ -51,30 +57,14 @@ avoid large flat areas; this doesn't produce fun combat
   instead produce complex places for the player to hide
 break these rules when its important to make a statement in your level
   
-
-
-flip left right on some maps
-  some mobs use the original x parameter in their loop, but it doesn't get flipped
-    manually edit each mob's logic
-      finalBoss, shooters?
-
-tech: supersaturation is buffed but add falling damage
-
 mob: molecule shapes - 2 separate mobs joined by a bond
   use constraints: just spawn 2x or 3x groupings
     low friction so they can spin around
     spin when attacking player?
       increase constraint length when attacking
 
-make most future tech for guns / fields
-
 tech: mine - fire the mine into where you were in the past
   maybe it could check all your past locations and explode there if there is something in range 
-
-tech: increase health and harm taken
-
-remove air control
-  negative tech aspect, junk , experiment?
 
 tech: use the ability for power ups to have custom code
   (note: this code is half way done, it just needs to be completed)
@@ -85,10 +75,6 @@ tech: use the ability for power ups to have custom code
 tech: wormhole through walls?
 
 pause should show the last in game console message
-
-general idea: let the player use research more like money
-  spend it to do things
-  buff some special tech and add a research cost
   
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up:
@@ -105,8 +91,6 @@ nail-gun, or ....
       current location or location when fired?
   explode when turning back
 
-Tech: "Quantum Tunneling" Foam travels through blocks and walls 50% faster.
-
 make a tech that improves all charge guns
   for: pulse, foam, rail gun
   effect:
@@ -121,7 +105,6 @@ apply the new gun.do functions to other guns
     works similar to foam
     performance issues?
     
-
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage
   draw a square (or two) that rapidly spins

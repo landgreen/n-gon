@@ -2,25 +2,25 @@
 const spawn = {
     pickList: ["starter", "starter"],
     fullPickList: [
-        "hopper", "hopper", "hopper",
-        "shooter", "shooter",
-        "striker", "striker",
-        "laser", "laser",
-        "exploder", "exploder",
-        "stabber", "stabber",
-        "launcher", "launcher",
+        // "hopper", "hopper", "hopper",
+        // "shooter", "shooter",
+        // "striker", "striker",
+        // "laser", "laser",
+        // "exploder", "exploder",
+        // "stabber", "stabber",
+        // "launcher", "launcher",
         "springer", "springer",
-        "pulsar", "pulsar",
-        "sucker",
-        "chaser",
-        "sniper",
-        "spinner",
-        "grower",
-        "beamer",
-        "focuser",
-        "spawner",
-        "ghoster",
-        "sneaker",
+        // "pulsar", "pulsar",
+        // "sucker",
+        // "chaser",
+        // "sniper",
+        // "spinner",
+        // "grower",
+        // "beamer",
+        // "focuser",
+        // "spawner",
+        // "ghoster",
+        // "sneaker",
     ],
     allowedGroupList: ["chaser", "spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper", "pulsar"],
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
@@ -226,6 +226,19 @@ const spawn = {
     finalBoss(x, y, radius = 300) {
         mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
+        setTimeout(() => { //fix mob in place, but allow rotation
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0.001,
+                damping: 1
+            });
+            World.add(engine.world, me.constraint);
+        }, 2000); //add in a delay in case the level gets flipped left right
+
         me.isBoss = true;
         me.frictionAir = 0.01;
         me.memory = Infinity;
@@ -351,14 +364,14 @@ const spawn = {
         me.totalCycles = 0
         me.mode = 0;
         me.do = function() {
-            Matter.Body.setPosition(this, { //hold position
-                x: x,
-                y: y
-            });
-            Matter.Body.setVelocity(this, {
-                x: 0,
-                y: 0
-            });
+            // Matter.Body.setPosition(this, {
+            //     x: x,
+            //     y: y
+            // });
+            // Matter.Body.setVelocity(this, {
+            //     x: 0,
+            //     y: 0
+            // });
             this.modeDo(); //this does different things based on the mode
             this.checkStatus();
             this.cycle++; //switch modes÷
@@ -979,18 +992,17 @@ const spawn = {
         World.add(engine.world, cons[cons.length - 1]);
         cons[len2].length = 100 + 1.5 * radius;
         me.cons2 = cons[len2];
-
-
-        me.onDeath = function() {
-            this.removeCons();
-        };
-        spawn.shield(me, x, y);
         me.do = function() {
             this.gravity();
             this.searchSpring();
             this.checkStatus();
             this.springAttack();
         };
+
+        me.onDeath = function() {
+            this.removeCons();
+        };
+        spawn.shield(me, x, y);
     },
     hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
@@ -1308,16 +1320,16 @@ const spawn = {
         World.add(engine.world, cons[cons.length - 1]);
         cons[len2].length = 100 + 1.5 * radius;
         me.cons2 = cons[len2];
-
-        me.onDeath = function() {
-            this.removeCons();
-            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-        };
         me.do = function() {
             this.gravity();
             this.searchSpring();
             this.checkStatus();
             this.springAttack();
+        };
+
+        me.onDeath = function() {
+            this.removeCons();
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
 
         radius = 22 // radius of each node mob
@@ -1349,88 +1361,88 @@ const spawn = {
         spawn.groupShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
         spawn.allowShields = true;
     },
-    timeSkipBoss(x, y, radius = 55) {
-        mobs.spawn(x, y, 6, radius, '#000');
-        let me = mob[mob.length - 1];
-        me.isBoss = true;
-        // me.stroke = "transparent"; //used for drawSneaker
-        me.timeSkipLastCycle = 0
-        me.eventHorizon = 1800; //required for black hole
-        me.seeAtDistance2 = (me.eventHorizon + 2000) * (me.eventHorizon + 2000); //vision limit is event horizon + 2000
-        me.accelMag = 0.0004 * simulation.accelScale;
-        // me.frictionAir = 0.005;
-        // me.memory = 1600;
-        // Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
-        Matter.Body.setDensity(me, 0.0005 + 0.00018 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        spawn.shield(me, x, y, 1);
+    // timeSkipBoss(x, y, radius = 55) {
+    //     mobs.spawn(x, y, 6, radius, '#000');
+    //     let me = mob[mob.length - 1];
+    //     me.isBoss = true;
+    //     // me.stroke = "transparent"; //used for drawSneaker
+    //     me.timeSkipLastCycle = 0
+    //     me.eventHorizon = 1800; //required for black hole
+    //     me.seeAtDistance2 = (me.eventHorizon + 2000) * (me.eventHorizon + 2000); //vision limit is event horizon + 2000
+    //     me.accelMag = 0.0004 * simulation.accelScale;
+    //     // me.frictionAir = 0.005;
+    //     // me.memory = 1600;
+    //     // Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
+    //     Matter.Body.setDensity(me, 0.0005 + 0.00018 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    //     spawn.shield(me, x, y, 1);
 
 
-        me.onDeath = function() {
-            //applying forces to player doesn't seem to work inside this method, not sure why
-            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-        };
-        me.do = function() {
-            //keep it slow, to stop issues from explosion knock backs
-            if (this.speed > 8) {
-                Matter.Body.setVelocity(this, {
-                    x: this.velocity.x * 0.99,
-                    y: this.velocity.y * 0.99
-                });
-            }
-            this.seePlayerCheck();
-            this.checkStatus();
-            this.attraction()
-            if (!simulation.isTimeSkipping) {
-                const compress = 1
-                if (this.timeSkipLastCycle < simulation.cycle - compress &&
-                    Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
-                    this.timeSkipLastCycle = simulation.cycle
-                    simulation.timeSkip(compress)
+    //     me.onDeath = function() {
+    //         //applying forces to player doesn't seem to work inside this method, not sure why
+    //         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    //     };
+    //     me.do = function() {
+    //         //keep it slow, to stop issues from explosion knock backs
+    //         if (this.speed > 8) {
+    //             Matter.Body.setVelocity(this, {
+    //                 x: this.velocity.x * 0.99,
+    //                 y: this.velocity.y * 0.99
+    //             });
+    //         }
+    //         this.seePlayerCheck();
+    //         this.checkStatus();
+    //         this.attraction()
+    //         if (!simulation.isTimeSkipping) {
+    //             const compress = 1
+    //             if (this.timeSkipLastCycle < simulation.cycle - compress &&
+    //                 Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
+    //                 this.timeSkipLastCycle = simulation.cycle
+    //                 simulation.timeSkip(compress)
 
-                    this.fill = `rgba(0,0,0,${0.4+0.6*Math.random()})`
-                    this.stroke = "#014"
-                    this.isShielded = false;
-                    this.isDropPowerUp = true;
-                    this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can't touch bullets
+    //                 this.fill = `rgba(0,0,0,${0.4+0.6*Math.random()})`
+    //                 this.stroke = "#014"
+    //                 this.isShielded = false;
+    //                 this.isDropPowerUp = true;
+    //                 this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can't touch bullets
 
-                    ctx.beginPath();
-                    ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-                    ctx.fillStyle = "#fff";
-                    ctx.globalCompositeOperation = "destination-in"; //in or atop
-                    ctx.fill();
-                    ctx.globalCompositeOperation = "source-over";
-                    ctx.beginPath();
-                    ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-                    ctx.clip();
+    //                 ctx.beginPath();
+    //                 ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+    //                 ctx.fillStyle = "#fff";
+    //                 ctx.globalCompositeOperation = "destination-in"; //in or atop
+    //                 ctx.fill();
+    //                 ctx.globalCompositeOperation = "source-over";
+    //                 ctx.beginPath();
+    //                 ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+    //                 ctx.clip();
 
-                    // ctx.beginPath();
-                    // ctx.arc(this.position.x, this.position.y, 9999, 0, 2 * Math.PI);
-                    // ctx.fillStyle = "#000";
-                    // ctx.fill();
-                    // ctx.strokeStyle = "#000";
-                    // ctx.stroke();
+    //                 // ctx.beginPath();
+    //                 // ctx.arc(this.position.x, this.position.y, 9999, 0, 2 * Math.PI);
+    //                 // ctx.fillStyle = "#000";
+    //                 // ctx.fill();
+    //                 // ctx.strokeStyle = "#000";
+    //                 // ctx.stroke();
 
-                    // ctx.beginPath();
-                    // ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-                    // ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
-                    // ctx.fill();
-                    // ctx.strokeStyle = "#000";
-                    // ctx.stroke();
-                } else {
-                    this.isShielded = true;
-                    this.isDropPowerUp = false;
-                    this.seePlayer.recall = false
-                    this.fill = "transparent"
-                    this.stroke = "transparent"
-                    this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob; //can't touch bullets
-                    ctx.beginPath();
-                    ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
-                    ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
-                    ctx.fill();
-                }
-            }
-        }
-    },
+    //                 // ctx.beginPath();
+    //                 // ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+    //                 // ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
+    //                 // ctx.fill();
+    //                 // ctx.strokeStyle = "#000";
+    //                 // ctx.stroke();
+    //             } else {
+    //                 this.isShielded = true;
+    //                 this.isDropPowerUp = false;
+    //                 this.seePlayer.recall = false
+    //                 this.fill = "transparent"
+    //                 this.stroke = "transparent"
+    //                 this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob; //can't touch bullets
+    //                 ctx.beginPath();
+    //                 ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
+    //                 ctx.fillStyle = `rgba(0,0,0,${0.05*Math.random()})`;
+    //                 ctx.fill();
+    //             }
+    //         }
+    //     }
+    // },
     beamer(x, y, radius = 15 + Math.ceil(Math.random() * 15)) {
         mobs.spawn(x, y, 4, radius, "rgb(255,0,190)");
         let me = mob[mob.length - 1];
@@ -1570,13 +1582,14 @@ const spawn = {
                         const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
                         this.force.x += forceMag * Math.cos(angle);
                         this.force.y += forceMag * Math.sin(angle);
-                    } else {
-                        //high friction if can't lock onto player
-                        // Matter.Body.setVelocity(this, {
-                        //   x: this.velocity.x * 0.98,
-                        //   y: this.velocity.y * 0.98
-                        // });
                     }
+                    // else {
+                    //high friction if can't lock onto player
+                    // Matter.Body.setVelocity(this, {
+                    //   x: this.velocity.x * 0.98,
+                    //   y: this.velocity.y * 0.98
+                    // });
+                    // }
                     if (dist2 > 80000) {
                         const laserWidth = 0.002;
                         let laserOffR = Vector.rotateAbout(this.laserPos, (targetDist - r) * laserWidth, this.position);
@@ -1739,12 +1752,26 @@ const spawn = {
     pulsarBoss(x, y, radius = 90) {
         mobs.spawn(x, y, 3, radius, "#a0f");
         let me = mob[mob.length - 1];
+
+        setTimeout(() => { //fix mob in place, but allow rotation
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0.001,
+                damping: 1
+            });
+            World.add(engine.world, me.constraint);
+        }, 2000); //add in a delay in case the level gets flipped left right
+
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.radius *= 1.5
         me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
-        me.homePosition = { x: x, y: y };
+        // me.homePosition = { x: x, y: y };
         me.fireCycle = 0
         me.fireTarget = { x: 0, y: 0 }
         me.pulseRadius = Math.min(500, 230 + simulation.difficulty * 3)
@@ -1836,9 +1863,9 @@ const spawn = {
                         }
                     }
                     //gently return to starting location
-                    const sub = Vector.sub(this.homePosition, this.position)
-                    const dist = Vector.magnitude(sub)
-                    if (dist > 250) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+                    // const sub = Vector.sub(this.homePosition, this.position)
+                    // const dist = Vector.magnitude(sub)
+                    // if (dist > 250) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
                 } else {
                     this.isFiring = false
                 }
@@ -1848,12 +1875,26 @@ const spawn = {
     pulsar(x, y, radius = 40) {
         mobs.spawn(x, y, 3, radius, "#f08");
         let me = mob[mob.length - 1];
+
+        setTimeout(() => { //fix mob in place, but allow rotation
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0.0001,
+                damping: 1
+            });
+            World.add(engine.world, me.constraint);
+        }, 2000); //add in a delay in case the level gets flipped left right
+
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.radius *= 2
         me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
-        me.homePosition = { x: x, y: y };
+        // me.homePosition = { x: x, y: y };
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.fireCycle = Infinity
         me.fireTarget = { x: 0, y: 0 }
@@ -1960,9 +2001,9 @@ const spawn = {
                         }
                     }
                     //gently return to starting location
-                    const sub = Vector.sub(this.homePosition, this.position)
-                    const dist = Vector.magnitude(sub)
-                    if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+                    // const sub = Vector.sub(this.homePosition, this.position)
+                    // const dist = Vector.magnitude(sub)
+                    // if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
                 } else {
                     this.isFiring = false
                 }
@@ -1989,11 +2030,25 @@ const spawn = {
     laserBoss(x, y, radius = 30) {
         mobs.spawn(x, y, 3, radius, "#f00");
         let me = mob[mob.length - 1];
+
+        setTimeout(() => { //fix mob in place, but allow rotation
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0.001,
+                damping: 1
+            });
+            World.add(engine.world, me.constraint);
+        }, 2000); //add in a delay in case the level gets flipped left right
+
         me.isBoss = true;
-        me.startingPosition = {
-            x: x,
-            y: y
-        }
+        // me.startingPosition = {
+        //     x: x,
+        //     y: y
+        // }
         me.count = 0;
         me.frictionAir = 0.03;
         // me.torque -= me.inertia * 0.002
@@ -2039,11 +2094,11 @@ const spawn = {
             }
 
 
-            Matter.Body.setVelocity(this, {
-                x: 0,
-                y: 0
-            });
-            Matter.Body.setPosition(this, this.startingPosition);
+            // Matter.Body.setVelocity(this, {
+            //     x: 0,
+            //     y: 0
+            // });
+            // Matter.Body.setPosition(this, this.startingPosition);
 
         };
         me.laser = function(where, angle) {
@@ -2487,14 +2542,27 @@ const spawn = {
     shooterBoss(x, y, radius = 110) {
         mobs.spawn(x, y, 3, radius, "rgb(255,70,180)");
         let me = mob[mob.length - 1];
+        setTimeout(() => { //fix mob in place, but allow rotation
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0.0002,
+                damping: 1
+            });
+            World.add(engine.world, me.constraint);
+        }, 2000); //add in a delay in case the level gets flipped left right
+
         me.isBoss = true;
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
         me.memory = 240;
-        me.homePosition = {
-            x: x,
-            y: y
-        };
+        // me.homePosition = {
+        //     x: x,
+        //     y: y
+        // };
         me.fireFreq = 0.025;
         me.noseLength = 0;
         me.fireAngle = 0;
@@ -2516,9 +2584,9 @@ const spawn = {
             this.checkStatus();
             this.fire();
             //gently return to starting location
-            const sub = Vector.sub(this.homePosition, this.position)
-            const dist = Vector.magnitude(sub)
-            if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+            // const sub = Vector.sub(this.homePosition, this.position)
+            // const dist = Vector.magnitude(sub)
+            // if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
         };
     },
     bullet(x, y, radius = 9, sides = 0) {
@@ -2811,6 +2879,19 @@ const spawn = {
     shieldingBoss(x, y, radius = 200) {
         mobs.spawn(x, y, 9, radius, "rgb(150, 150, 255)");
         let me = mob[mob.length - 1];
+        setTimeout(() => { //fix mob in place, but allow rotation
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0.001,
+                damping: 1
+            });
+            World.add(engine.world, me.constraint);
+        }, 2000); //add in a delay in case the level gets flipped left right
+
         Matter.Body.rotate(me, Math.random() * 2 * Math.PI)
         // me.stroke = "rgb(220,220,255)"
         me.isBoss = true;
@@ -2819,7 +2900,7 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.5;
-        me.homePosition = { x: x, y: y };
+        // me.homePosition = { x: x, y: y };
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
@@ -2862,9 +2943,9 @@ const spawn = {
                     ctx.strokeStyle = "rgba(200,200,255,0.9)"
                     ctx.stroke();
                     //return to starting location
-                    const sub = Vector.sub(this.homePosition, this.position)
-                    const dist = Vector.magnitude(sub)
-                    if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.05)
+                    // const sub = Vector.sub(this.homePosition, this.position)
+                    // const dist = Vector.magnitude(sub)
+                    // if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.05)
                 }
             }
         };
@@ -3185,6 +3266,7 @@ const spawn = {
             stiffness: 0.00012
         });
         World.add(engine.world, cons[cons.length - 1]);
+
         spawn.shield(me, x, y, 1);
         setTimeout(() => { spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random()) }, 100); //have to wait a sec so the tether constraint doesn't attach to an orbital
         me.onDeath = function() {

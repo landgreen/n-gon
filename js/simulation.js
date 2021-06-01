@@ -12,8 +12,6 @@ const simulation = {
         } else {
             m.airControl()
         }
-        // level.checkZones();
-        level.checkQuery();
         m.move();
         m.look();
         simulation.checks();
@@ -51,8 +49,6 @@ const simulation = {
         } else {
             m.airControl()
         }
-        // level.checkZones();
-        level.checkQuery();
         m.move();
         m.look();
         simulation.checks();
@@ -83,9 +79,6 @@ const simulation = {
             } else {
                 m.airControl()
             }
-
-            level.checkZones();
-            level.checkQuery();
             m.move();
             simulation.checks();
             mobs.loop();
@@ -518,7 +511,7 @@ const simulation = {
         }
         m.look = m.lookDefault
 
-
+        simulation.isHorizontalFlipped = Math.random() < 0.5 ? true : false //if true, some maps are flipped horizontally
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
         if (simulation.isCommunityMaps) {
             level.levels.push("stronghold");
@@ -721,7 +714,6 @@ const simulation = {
         m.drop();
         m.hole.isOn = false;
         level.zones = [];
-        level.queryList = [];
         simulation.drawList = [];
 
         function removeAll(array) {
@@ -1044,18 +1036,6 @@ const simulation = {
             ctx.stroke();
         },
         testing() {
-            //query zones
-            // ctx.beginPath();
-            // for (let i = 0, len = level.queryList.length; i < len; ++i) {
-            //   ctx.rect(
-            //     level.queryList[i].bounds.max.x,
-            //     level.queryList[i].bounds.max.y,
-            //     level.queryList[i].bounds.min.x - level.queryList[i].bounds.max.x,
-            //     level.queryList[i].bounds.min.y - level.queryList[i].bounds.max.y
-            //   );
-            // }
-            // ctx.fillStyle = "rgba(0, 0, 255, 0.2)";
-            // ctx.fill();
             //jump
             ctx.beginPath();
             let bodyDraw = jumpSensor.vertices;
