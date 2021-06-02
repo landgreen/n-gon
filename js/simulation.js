@@ -511,7 +511,7 @@ const simulation = {
         }
         m.look = m.lookDefault
 
-        simulation.isHorizontalFlipped = Math.random() < 0.5 ? true : false //if true, some maps are flipped horizontally
+        simulation.isHorizontalFlipped = (Math.random() < 0.5) ? true : false //if true, some maps are flipped horizontally
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
         if (simulation.isCommunityMaps) {
             level.levels.push("stronghold");
@@ -1183,6 +1183,7 @@ const simulation = {
     },
     enableConstructMode() {
         simulation.isConstructionMode = true;
+        simulation.isHorizontalFlipped = false;
         simulation.isAutoZoom = false;
         simulation.zoomScale = 2600;
         simulation.setZoom();

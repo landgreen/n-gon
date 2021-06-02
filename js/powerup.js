@@ -706,7 +706,7 @@ const powerUps = {
             powerUps.spawn(x, y, "ammo", false);
         }
     },
-    addRerollToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed research
+    addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed research
         if (mob.length && Math.random() < 0.8) { // 80% chance
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");

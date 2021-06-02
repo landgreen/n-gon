@@ -2544,19 +2544,21 @@ const b = {
                             }
                         })
                         for (let i = 0; i < q.length; i++) {
-                            Matter.Body.setAngularVelocity(this, this.spin)
-                            // mobs.statusStun(q[i], 180)
-                            // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
-                            const dmg = 0.5 * b.dmgScale
-                            q[i].damage(dmg);
-                            q[i].foundPlayer();
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: Math.log(2 * dmg + 1.1) * 40,
-                                color: 'rgba(0,0,0,0.4)',
-                                time: simulation.drawTime
-                            });
+                            if (!q[i].isShielded) {
+                                Matter.Body.setAngularVelocity(this, this.spin)
+                                // mobs.statusStun(q[i], 180)
+                                // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
+                                const dmg = 0.5 * b.dmgScale
+                                q[i].damage(dmg);
+                                q[i].foundPlayer();
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    color: 'rgba(0,0,0,0.4)',
+                                    time: simulation.drawTime
+                                });
+                            }
                         }
                     }
                     let history = m.history[(m.cycle - this.followDelay) % 600]
@@ -3142,17 +3144,19 @@ const b = {
                         }
                     })
                     for (let i = 0; i < q.length; i++) {
-                        mobs.statusStun(q[i], 180)
-                        const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3 : 1) * (tech.isCrit ? 4 : 1)
-                        q[i].damage(dmg);
-                        q[i].foundPlayer();
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: this.position.x,
-                            y: this.position.y,
-                            radius: Math.log(2 * dmg + 1.1) * 40,
-                            color: 'rgba(0,0,0,0.4)',
-                            time: simulation.drawTime
-                        });
+                        if (!q[i].isShielded) {
+                            mobs.statusStun(q[i], 180)
+                            const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3 : 1) * (tech.isCrit ? 4 : 1)
+                            q[i].damage(dmg);
+                            q[i].foundPlayer();
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                color: 'rgba(0,0,0,0.4)',
+                                time: simulation.drawTime
+                            });
+                        }
                     }
                 }
                 //orbit player

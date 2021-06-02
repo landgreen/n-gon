@@ -53,29 +53,12 @@ const level = {
             // level.crossfire() //community level
             // level.vats() //community level
             // level["n-gon"]() //community level
-
-            // powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
             // tech.giveTech("undefined")
             // lore.techCount = 6
             // localSettings.loreCount = 1;
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // simulation.isCheating = false //true;
             // level.null()
-            // let text = ''
-            // if (level.fillBG) {
-            //     for (let i = 0; i < level.fillBG.length; i++) {
-            //         text += `ctx.fillStyle = "${level.fillBG[i].color}"; ctx.fillRect(${level.fillBG[i].x}, ${level.fillBG[i].y}, ${level.fillBG[i].width}, ${level.fillBG[i].height});`
-            //     }
-            //     console.log(text)
-            // }
-            // text = ''
-            // if (level.fill) {
-            //     for (let i = 0; i < level.fill.length; i++) {
-            //         text += `ctx.fillStyle = "${level.fill[i].color}"; ctx.fillRect(${level.fill[i].x}, ${level.fill[i].y}, ${level.fill[i].width}, ${level.fill[i].height});`
-            //     }
-            //     console.log(text)
-            // }
-
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -329,7 +312,7 @@ const level = {
                 },
                 max: {
                     x: x + 100,
-                    y: y - 20 + height
+                    y: y
                 }
             },
             yVelocity: -1.21 * Math.sqrt(Math.abs(height)),
@@ -672,6 +655,9 @@ const level = {
         Matter.Body.setStatic(doorBlock, true); //make static
         return doorBlock
     },
+
+
+
     portal(centerA, angleA, centerB, angleB) {
         const width = 50
         const height = 150
@@ -1223,7 +1209,7 @@ const level = {
         // spawn.randomMob(2650, -975, 0.8);
         // spawn.randomGroup(1700, -900, 0.4);
         // if (simulation.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         // if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500); 
     },
     final() {
@@ -1343,7 +1329,7 @@ const level = {
             if (simulation.difficulty * Math.random() > 10 * i) spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
             if (simulation.difficulty * Math.random() > 7 * i) spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4125, -350);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -1758,7 +1744,7 @@ const level = {
                 spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss"]);
             }
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(1925, -1250);
 
 
@@ -1963,7 +1949,7 @@ const level = {
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "shieldingBoss"]);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
 
 
@@ -2013,7 +1999,7 @@ const level = {
     },
     satellite() {
         const boost1 = level.boost(5825, 235, 1400)
-        const elevator = level.elevator(4210, -1285, 380, 70, -3450) //, 0.003, { up: 0.01, down: 0.2 }
+        const elevator = level.elevator(4210, -1265, 380, 50, -3450) //, 0.003, { up: 0.01, down: 0.2 }
         level.custom = () => {
             boost1.query();
 
@@ -2048,7 +2034,7 @@ const level = {
         level.defaultZoom = 1700 // 4500 // 1400
         simulation.zoomTransition(level.defaultZoom)
 
-        powerUps.spawnStartingPowerUps(4900, -500);
+        powerUps.spawnStartingPowerUps(4900, -500); //1 per level
         spawn.debris(1000, 20, 1800, 3); //16 debris per level //but less here because a few mobs die from laser
         spawn.debris(4830, -1330, 850, 3); //16 debris per level
         spawn.debris(3035, -3900, 1500, 3); //16 debris per level
@@ -2105,8 +2091,9 @@ const level = {
         spawn.mapRect(5300, -1075, 350, 1220);
 
         //structure bellow tall stairs
-        spawn.mapRect(3925, -300, 425, 50);
-        spawn.mapRect(4700, -375, 425, 50);
+        spawn.mapRect(3900, -300, 450, 50);
+        spawn.mapRect(4675, -375, 450, 50);
+
         // spawn.mapRect(4000, -1300, 1050, 100);
         spawn.mapRect(4000, -1300, 200, 100);
         spawn.mapRect(4600, -1300, 450, 100);
@@ -2151,7 +2138,7 @@ const level = {
                 spawn.laserBoss(600 + 200 * Math.random(), -2150 + 250 * Math.random());
             }
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3950, -850);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -2322,7 +2309,7 @@ const level = {
         spawn.randomGroup(2225, -1325, 0.4);
         spawn.randomGroup(4900, -1200, 0);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -1900);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(2175, -2425);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -2539,7 +2526,7 @@ const level = {
                 spawn.suckerBoss(4500, -400);
             }
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(5350, -325);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -2707,7 +2694,7 @@ const level = {
         spawn.randomGroup(3700, -1500, 0.4);
         spawn.randomGroup(1700, -900, 0.4);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3075, -2050);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -2749,15 +2736,15 @@ const level = {
         const elevator1 = level.elevator(-790, -190, 180, 25, -1150) //, 0.007
         elevator1.addConstraint();
         const button1 = level.button(-500, -200)
-        const elevator2 = level.elevator(-3630, -1315, 180, 25, -2190) //, 0.007
+        const elevator2 = level.elevator(-3630, -1000, 180, 25, -1740) //, 0.007
         elevator2.addConstraint();
         const button2 = level.button(-3100, -1330)
 
         level.custom = () => {
-            ctx.fillStyle = "#d0d0d2"
-            ctx.fillRect(-2475, -2450, 25, 750)
-            ctx.fillRect(-2975, -2750, 25, 600)
-            ctx.fillRect(-3375, -2875, 25, 725)
+            // ctx.fillStyle = "#d0d0d2"
+            // ctx.fillRect(-2475, -2450, 25, 750)
+            // ctx.fillRect(-2975, -2750, 25, 600)
+            // ctx.fillRect(-3375, -2875, 25, 725)
             ctx.fillStyle = "#cff" //exit
             ctx.fillRect(-4425, -3050, 425, 275)
             level.playerExitCheck();
@@ -2806,19 +2793,20 @@ const level = {
             if (elevator2.isOn) {
                 elevator2.move();
                 ctx.fillStyle = "#444"
-                ctx.fillRect(-3540, -2170, 1, 870)
+                ctx.fillRect(-3540, -1720, 1, 740)
             } else {
                 ctx.fillStyle = "#aaa"
-                ctx.fillRect(-3540, -2170, 1, 870)
+                ctx.fillRect(-3540, -1720, 1, 740)
             }
 
             ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
             ctx.fillRect(-4450, -750, 800, 200)
             ctx.fillStyle = "rgba(0,0,0,0.12)"
+            ctx.fillRect(-2500, -1975, 150, 300);
             ctx.fillRect(-1830, -1150, 2030, 1150)
             ctx.fillRect(-3410, -2150, 495, 1550)
             ctx.fillRect(-2585, -1675, 420, 1125)
-            ctx.fillRect(-1740, -1575, 840, 425)
+            ctx.fillRect(-1650, -1575, 750, 450)
         };
 
         level.setPosToSpawn(-300, -700); //normal spawn
@@ -2837,12 +2825,12 @@ const level = {
         spawn.debris(-2000, -60, 1200, 5); //16 debris per level
 
         //3 platforms that lead to exit
-        spawn.mapRect(-3440, -2875, 155, 25);
-        spawn.mapRect(-3025, -2775, 125, 25);
-        spawn.mapRect(-2525, -2475, 125, 25);
-        spawn.bodyRect(-2600, -2500, 225, 20, 0.7);
-        spawn.bodyRect(-3350, -2900, 25, 25, 0.5);
-        spawn.bodyRect(-3400, -2950, 50, 75, 0.5);
+        // spawn.mapRect(-3440, -2875, 155, 25);
+        // spawn.mapRect(-3025, -2775, 125, 25);
+        // spawn.mapRect(-2525, -2475, 125, 25);
+        // spawn.bodyRect(-2600, -2500, 225, 20, 0.7);
+        // spawn.bodyRect(-3350, -2900, 25, 25, 0.5);
+        // spawn.bodyRect(-3400, -2950, 50, 75, 0.5);
 
         powerUps.spawn(-4300, -700, "heal");
         powerUps.spawn(-4200, -700, "ammo");
@@ -2868,7 +2856,7 @@ const level = {
 
         // spawn.mapRect(-1650, -1575, 600, 50);
         // spawn.mapRect(-1875, -1575, 850, 50);
-        spawn.mapRect(-1750, -1575, 725, 50);
+        spawn.mapRect(-1675, -1575, 650, 50);
         spawn.mapRect(-600, -1150, 850, 175);
         spawn.mapRect(-1850, -1150, 1050, 175);
         spawn.bodyRect(-1907, -1600, 550, 25);
@@ -2888,14 +2876,20 @@ const level = {
         spawn.mapRect(-2600, -1700, 450, 50);
         // spawn.mapRect(-2600, -2450, 450, 50);
         spawn.bodyRect(-2275, -2700, 50, 60);
-        spawn.bodyRect(-2600, -1925, 250, 225);
+
+        // spawn.bodyRect(-2560, -1925, 250, 225);
+        // spawn.mapRect(-2525, -2025, 125, 25);
+        // spawn.mapRect(-2525, -1900, 125, 225);
+        // spawn.mapRect(-2600, -1975, 250, 25);
+        spawn.mapRect(-2515, -2000, 180, 50);
+
         spawn.bodyRect(-3410, -1425, 100, 100);
         spawn.bodyRect(-3390, -1525, 100, 100);
         spawn.bodyRect(-3245, -1425, 100, 100);
         //building 3
-        spawn.mapRect(-4450, -1700, 800, 1000);
-        spawn.mapRect(-3850, -2000, 125, 400);
-        spawn.mapRect(-4000, -2350, 200, 800);
+        spawn.mapRect(-4450, -1750, 800, 1050);
+        // spawn.mapRect(-3850, -2000, 125, 400);
+        spawn.mapRect(-4000, -2390, 200, 800);
         // spawn.mapRect(-4450, -2650, 475, 1000);
         spawn.mapRect(-4450, -2775, 475, 1125);
         spawn.bodyRect(-3715, -2050, 50, 50);
@@ -2937,8 +2931,8 @@ const level = {
         spawn.randomGroup(-3250, -2700, 0.2);
         spawn.randomGroup(-2450, -1100, 0);
 
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(-2400, -3000);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(-2400, -2650);
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(-1825, -1975);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -2959,10 +2953,6 @@ const level = {
             button2.max.x = -button2.max.x + 126 // flip the button horizontally
 
             level.custom = () => {
-                ctx.fillStyle = "#d0d0d2"
-                ctx.fillRect(2475 - 25, -2450, 25, 750)
-                ctx.fillRect(2975 - 25, -2750, 25, 600)
-                ctx.fillRect(3375 - 25, -2875, 25, 725)
                 ctx.fillStyle = "#cff" //exit
                 ctx.fillRect(4425 - 425, -3050, 425, 275)
                 level.playerExitCheck();
@@ -3011,19 +3001,20 @@ const level = {
                 if (elevator2.isOn) {
                     elevator2.move();
                     ctx.fillStyle = "#444"
-                    ctx.fillRect(3540 - 1, -2170, 1, 870)
+                    ctx.fillRect(3540 - 1, -1720, 1, 740)
                 } else {
                     ctx.fillStyle = "#aaa"
-                    ctx.fillRect(3540 - 1, -2170, 1, 870)
+                    ctx.fillRect(3540 - 1, -1720, 1, 740)
                 }
 
                 ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
                 ctx.fillRect(4450 - 800, -750, 800, 200)
                 ctx.fillStyle = "rgba(0,0,0,0.12)"
+                ctx.fillRect(2500 - 150, -1975, 150, 300);
                 ctx.fillRect(1830 - 2030, -1150, 2030, 1150)
                 ctx.fillRect(3410 - 495, -2150, 495, 1550)
                 ctx.fillRect(2585 - 420, -1675, 420, 1125)
-                ctx.fillRect(1740 - 840, -1575, 840, 425)
+                ctx.fillRect(1650 - 750, -1575, 750, 450)
             };
         }
     },
@@ -3246,7 +3237,7 @@ const level = {
             }
         }
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(300, -800);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3476,7 +3467,7 @@ const level = {
                 spawn.randomLevelBoss(2200, -450)
             }
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(1875, -675);
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -3689,7 +3680,7 @@ const level = {
         spawn.randomGroup(100, -450, 0.9);
 
         if (simulation.difficulty > 3) spawn.randomLevelBoss(1850, -1400);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     basement() { // player made level  by    Francois 👑 from discord
         let button, door, buttonDoor, buttonPlateformEnd, doorPlateform
@@ -3960,7 +3951,7 @@ const level = {
         spawn.randomGroup(2980, -400, 0.3);
         spawn.randomGroup(5750, -3860, 0.4);
         spawn.randomGroup(1130, 1300, 0.1);
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         powerUps.spawn(1900, -940, "heal");
         powerUps.spawn(3000, -230, "heal");
         powerUps.spawn(5450, -3675, "ammo");
@@ -4959,7 +4950,7 @@ const level = {
                 spawn.randomLevelBoss(-300, -3200, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "laserBoss"]);
             }
         }
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
     },
     coliseum() {
@@ -5109,7 +5100,7 @@ const level = {
         powerUps.spawn(200, 50, "ammo");
         powerUps.spawn(200, 50, "ammo");
 
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(6600, 600, ["historyBoss", "powerUpBoss", "pulsarBoss", "orbitalBoss"]);
     },
@@ -5256,7 +5247,7 @@ const level = {
         powerUps.chooseRandomPowerUp(4006, 400);
         powerUps.chooseRandomPowerUp(4407, 400);
         powerUps.chooseRandomPowerUp(4409, 400);
-        powerUps.addRerollToLevel(); //needs to run after mobs are spawned
+        powerUps.addResearchToLevel(); //needs to run after mobs are spawned
 
         //Block Spawning
         // spawn.bodyRect(-100, 200, 100, 400); //spawn door
@@ -5457,7 +5448,7 @@ const level = {
         spawn.randomGroup(3000, -450, 0.3)
         spawn.randomGroup(6000, -2700, 0)
         spawn.randomGroup(-1200, -1300, -0.3)
-        powerUps.addRerollToLevel()
+        powerUps.addResearchToLevel()
 
         if (simulation.difficulty > 3) {
             spawn.randomLevelBoss(1900, 400, ["shieldingBoss", "shooterBoss", "launcherBoss", "streamBoss"])
@@ -5961,7 +5952,7 @@ const level = {
         //top right
         spawn.randomGroup(2000, -5700, 0.6);
 
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss"];
         let abc = Math.random();
         if (simulation.difficulty > 3) {

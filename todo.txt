@@ -1,20 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-levels are now randomly flipped horizontally
+some changes to highrise level
 
-removed spawn.boost( from n-gon
-make boosts with these commands:
-  const boost1 = level.boost(2550, 1500, 1700) //x,y, boost height
-  const boost2 = level.boost(-3400, -2050, 3000)
-  level.custom = () => {
-      boost1.query();
-      boost2.query();
-also you don't have to draw the boosts any more, the query command does it for you
+boost bug fix
+MACHO bug fix
 
 ******************************************************** BUGS ********************************************************
 
 figure out how to undo ship mode
-  if you die in ship mode it respawns with m.look set to non ship methods
+  if you die in ship mode it spawns with m.look set to non ship methods
     look is set in many tech and in startGame
 
 Why does micro-extruder lag so much
