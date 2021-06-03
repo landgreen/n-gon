@@ -2073,8 +2073,9 @@ const b = {
                     Matter.Body.scale(this, scale, scale);
                 } else {
                     this.force.y += this.mass * 0.0002;
-                    //find mob targets
+
                     if (!(simulation.cycle % this.lookFrequency)) {
+                        //find mob targets
                         this.lockedOn = null;
                         let closeDist = Infinity;
                         for (let i = 0, len = mob.length; i < len; ++i) {
@@ -2091,15 +2092,24 @@ const b = {
                                 }
                             }
                         }
-                        if (!this.lockedOn && !tech.isArmorFromPowerUps && !this.isImproved) { //grab a power up
-                            let closeDist = Infinity;
-                            for (let i = 0, len = powerUp.length; i < len; ++i) {
-                                if (
-                                    (powerUp[i].name !== "heal" || m.health < 0.9 * m.maxHealth || tech.isDroneGrab) &&
-                                    (powerUp[i].name !== "field" || !tech.isDeterminism)
-                                ) {
-                                    //pick up nearby power ups
-                                    if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 60000 && !simulation.isChoosing) {
+                        //power ups
+                        if (!this.isImproved && !simulation.isChoosing && !tech.isArmorFromPowerUps) {
+                            if (this.lockedOn) {
+                                //grab, but don't lock onto nearby power up
+                                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                                    if (
+                                        (powerUp[i].name !== "heal" || m.health < 0.9 * m.maxHealth || tech.isDroneGrab) &&
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism) &&
+                                        Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000
+                                    ) {
+                                        //draw pickup for a single cycle
+                                        ctx.beginPath();
+                                        ctx.moveTo(this.position.x, this.position.y);
+                                        ctx.lineTo(powerUp[i].position.x, powerUp[i].position.y);
+                                        ctx.strokeStyle = "#000"
+                                        ctx.lineWidth = 4
+                                        ctx.stroke();
+                                        //pick up nearby power ups
                                         powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();
                                         Matter.World.remove(engine.world, powerUp[i]);
@@ -2110,20 +2120,52 @@ const b = {
                                             Matter.Body.scale(this, SCALE, SCALE);
                                             this.lookFrequency = 30 + Math.floor(11 * Math.random());
                                             this.endCycle += 3000 * tech.droneCycleReduction * tech.isBulletsLastLonger
-                                            // this.frictionAir = 0
                                         }
                                         break;
                                     }
-                                    //look for power ups to lock onto
+                                }
+                            } else {
+                                //look for power ups to lock onto
+                                let closeDist = Infinity;
+                                for (let i = 0, len = powerUp.length; i < len; ++i) {
                                     if (
-                                        Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
-                                        Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                                        (powerUp[i].name !== "heal" || m.health < 0.9 * m.maxHealth || tech.isDroneGrab) &&
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism)
                                     ) {
-                                        const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
-                                        const DIST = Vector.magnitude(TARGET_VECTOR);
-                                        if (DIST < closeDist) {
-                                            closeDist = DIST;
-                                            this.lockedOn = powerUp[i]
+                                        if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
+                                            //draw pickup for a single cycle
+                                            ctx.beginPath();
+                                            ctx.moveTo(this.position.x, this.position.y);
+                                            ctx.lineTo(powerUp[i].position.x, powerUp[i].position.y);
+                                            ctx.strokeStyle = "#000"
+                                            ctx.lineWidth = 4
+                                            ctx.stroke();
+                                            //pick up nearby power ups
+                                            powerUps.onPickUp(powerUp[i]);
+                                            powerUp[i].effect();
+                                            Matter.World.remove(engine.world, powerUp[i]);
+                                            powerUp.splice(i, 1);
+                                            if (tech.isDroneGrab) {
+                                                this.isImproved = true;
+                                                const SCALE = 2.25
+                                                Matter.Body.scale(this, SCALE, SCALE);
+                                                this.lookFrequency = 30 + Math.floor(11 * Math.random());
+                                                this.endCycle += 3000 * tech.droneCycleReduction * tech.isBulletsLastLonger
+                                                // this.frictionAir = 0
+                                            }
+                                            break;
+                                        }
+                                        //look for power ups to lock onto
+                                        if (
+                                            Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
+                                            Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                                        ) {
+                                            const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
+                                            const DIST = Vector.magnitude(TARGET_VECTOR);
+                                            if (DIST < closeDist) {
+                                                closeDist = DIST;
+                                                this.lockedOn = powerUp[i]
+                                            }
                                         }
                                     }
                                 }
@@ -3060,11 +3102,11 @@ const b = {
                             }
                         }
                         //draw blowtorch laser beam
-                        ctx.strokeStyle = "rgba(255,0,255,0.1)"
-                        ctx.lineWidth = 14
                         ctx.beginPath();
                         ctx.moveTo(path[0].x, path[0].y);
                         ctx.lineTo(path[1].x, path[1].y);
+                        ctx.strokeStyle = "rgba(255,0,255,0.1)"
+                        ctx.lineWidth = 14
                         ctx.stroke();
                         ctx.strokeStyle = "#f0f";
                         ctx.lineWidth = 2

@@ -1,9 +1,6 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-some changes to highrise level
 
-boost bug fix
-MACHO bug fix
 
 ******************************************************** BUGS ********************************************************
 
@@ -31,34 +28,15 @@ is there a way to check if the player is stuck inside the map or block
 
 buttons can now on/off boosts
 
-drones should check for power ups even if there are mobs nearby
-  but not travel towards power ups
-
 Weak Anthropic Principle: you get a second chance at life, but now the game has falling damage!
 tech: supersaturation is buffed but add falling damage
 tech: increase health and remove air control
-
-        things to avoid when designing a map:
-avoid a single path through the map
-  instead have multiple paths through the map
-  or randomize parts of the map
-avoid isolated floating rectangles
-  instead imagine what story you are trying to tell about the buildings and tell that story
-  draw: shadows, color inside of buildings, structural support, pillars, ...
-avoid simple repetitive platforms
-  instead of  - -- -  try  -:_-L -_
-avoid large flat areas; this doesn't produce fun combat
-  instead produce complex places for the player to hide
-break these rules when its important to make a statement in your level
   
 mob: molecule shapes - 2 separate mobs joined by a bond
   use constraints: just spawn 2x or 3x groupings
     low friction so they can spin around
     spin when attacking player?
       increase constraint length when attacking
-
-tech: mine - fire the mine into where you were in the past
-  maybe it could check all your past locations and explode there if there is something in range 
 
 tech: use the ability for power ups to have custom code
   (note: this code is half way done, it just needs to be completed)

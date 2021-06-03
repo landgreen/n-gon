@@ -16,7 +16,6 @@ const level = {
             // simulation.setZoom();
             // simulation.enableConstructMode() //used to build maps in testing mode
             // m.setField("metamaterial cloaking")
-            // level.difficultyIncrease(30)
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
             // tech.giveTech("WIMPs")
@@ -27,22 +26,23 @@ const level = {
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
             // tech.giveTech("attract")
+            // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing
             // level.template(); //not in rotation, blank start new map development
-            // level.final() //final boss level  //flipped
-            // level.gauntlet(); //before final boss level  //flipped
+            // level.final() //final boss level  
+            // level.gauntlet(); //before final boss level  
             // level.testChamber()
-            // level.sewers(); //flipped
-            // level.satellite(); //flipped
-            // level.skyscrapers(); //flipped
-            // level.aerie(); //flipped
-            // level.rooftops(); //flipped
-            // level.warehouse();  //flipped
-            // level.highrise(); //flipped
-            // level.office(); //flipped
+            // level.sewers(); 
+            // level.satellite(); 
+            // level.skyscrapers(); 
+            // level.aerie(); 
+            // level.rooftops(); 
+            // level.warehouse();  
+            // level.highrise(); 
+            // level.office(); 
             // level.gauntlet(); //only fighting, very simple map, before final boss
             // level.house() //community level
             // level.detours() //community level
@@ -53,6 +53,7 @@ const level = {
             // level.crossfire() //community level
             // level.vats() //community level
             // level["n-gon"]() //community level
+            // level.tunnel() //community level
             // tech.giveTech("undefined")
             // lore.techCount = 6
             // localSettings.loreCount = 1;
@@ -1816,8 +1817,6 @@ const level = {
         const hazard = level.hazard(4550, 2750, 4550, 150)
         let balance1, balance2, balance3, balance4, rotor
 
-
-
         const drip1 = level.drip(6100, 1900, 2900, 100) // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
         const drip2 = level.drip(7300, 1900, 2900, 150)
         const drip3 = level.drip(8750, 1900, 2900, 70)
@@ -1955,7 +1954,7 @@ const level = {
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
-            rotor = level.rotor(-5100, 2475, -0.001)
+            rotor = level.rotor(-5100, 2475, 0.001) //rotates other direction because flipped
             balance1 = level.spinner(-300 - 25, -395, 25, 390, 0.001) //entrance
             balance2 = level.spinner(-2605 - 390, 500, 390, 25, 0.001) //falling
             balance3 = level.spinner(-2608 - 584, 1900, 584, 25, 0.001) //falling
@@ -6118,4 +6117,477 @@ const level = {
             addConstraint(x + 3100 * s, y - height, 0, -10 * s, stiffness, composite[composite.length - 1], pin);
         }
     },
+    tunnel() {
+        level.custom = () => {
+            level.playerExitCheck();
+
+            //enter
+            ctx.beginPath();
+            ctx.moveTo(level.enter.x, level.enter.y + 30);
+            ctx.lineTo(level.enter.x, level.enter.y - 80);
+            ctx.bezierCurveTo(level.enter.x, level.enter.y - 170, level.enter.x + 100, level.enter.y - 170, level.enter.x + 100, level.enter.y - 80);
+            ctx.lineTo(level.enter.x + 100, level.enter.y + 30);
+            ctx.lineTo(level.enter.x, level.enter.y + 30);
+            ctx.fillStyle = "#013";
+            ctx.fill();
+
+            //exit
+            ctx.beginPath();
+            ctx.moveTo(level.exit.x, level.exit.y + 30);
+            ctx.lineTo(level.exit.x, level.exit.y - 80);
+            ctx.bezierCurveTo(level.exit.x, level.exit.y - 170, level.exit.x + 100, level.exit.y - 170, level.exit.x + 100, level.exit.y - 80);
+            ctx.lineTo(level.exit.x + 100, level.exit.y + 30);
+            ctx.lineTo(level.exit.x, level.exit.y + 30);
+            ctx.fillStyle = "#9ff";
+            ctx.fill();
+
+            // hiding rooms in path to second floor
+            ctx.fillStyle = "#322";
+            ctx.fillRect(3750, -1650, 3500, 350);
+
+            // prevent the user from getting into the secreter room without defeating all mobs
+            if (m.pos.x > 1500 && m.pos.x < 2500 && m.pos.y > -4000 && m.pos.y < -3500 && mob.reduce((a, i) => {
+                    return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
+                }, false) && !emergencyActivated) {
+                Matter.Body.setPosition(player, {
+                    x: 2800,
+                    y: m.pos.y
+                });
+            }
+
+            button.query();
+            hazard.query();
+            isButtonTapped = isButtonTapped || !button.isUp;
+            hazard.level(!isButtonTapped);
+            if (Matter.Query.region([player], hazard).length) m.energy -= 0.001;
+
+            buttonSec.query();
+            buttonSec.draw();
+            if (!buttonSec.isUp && !hasSecretButton) {
+                for (var i = 0; i < 5; i++) {
+                    powerUps.spawn(3614, -3700, "ammo");
+                }
+                hasSecretButton = true;
+            }
+            buttonThird.query();
+            buttonThird.draw();
+            if (!buttonThird.isUp && !hasSecretButton2) {
+                for (var i = 0; i < 4; i++) powerUps.spawn(1614, -3700, "research");
+                hasSecretButton2 = true;
+            }
+            if (!buttonSec.isUp) {
+                secretAnimTrans += 2;
+                secretAnimTime = 1;
+                secretAnimTrans = Math.max(0, Math.min(secretAnimTrans, 60));
+            } else {
+                secretAnimTrans--;
+                if (secretAnimTime) secretAnimTrans += 3;
+                secretAnimTrans = Math.min(60, Math.max(secretAnimTrans, 0));
+            }
+            if (secretAnimTime > 0) {
+                secretAnimTime++;
+                if (secretAnimTime > 150) secretAnimTime = 0;
+            }
+
+            if (emergencyActivated || !buttonThird.isUp) {
+                secretAnimTrans2 += 2;
+                secretAnimTime2 = 1;
+                secretAnimTrans2 = Math.max(0, Math.min(secretAnimTrans2, 60));
+            } else {
+                secretAnimTrans2--;
+                if (secretAnimTime2) secretAnimTrans2 += 3;
+                secretAnimTrans2 = Math.min(60, Math.max(secretAnimTrans2, 0));
+            }
+            if (secretAnimTime2 > 0) {
+                secretAnimTime2++;
+                if (secretAnimTime2 > 150) secretAnimTime2 = 0;
+            }
+
+            secretHazard.level(emergencyActivated);
+            secretHazard.query();
+
+            ctx.beginPath();
+            ctx.arc(m.pos.x, m.pos.y, 200, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ff25";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(m.pos.x, m.pos.y, 400, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ff22";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(m.pos.x, m.pos.y, 700, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ff21";
+            ctx.fill();
+            elevator.move();
+            elevator.drawTrack();
+        };
+        level.customTopLayer = () => {
+            hazard.draw();
+            secretHazard.draw();
+            button.draw();
+
+            function drawFlame(x, y, color = "#f81", angle = Math.PI / 2) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 3; i++) {
+                    let randAng = (Math.random() - 0.5) * 2 + angle;
+                    randLen = 30 + Math.random() * 10;
+
+                    x = x + Math.cos(randAng) * randLen;
+                    y = y - Math.sin(randAng) * randLen;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            // Fire damage
+            let isInRange = flames.reduce((a, i) => a || Math.sqrt((m.pos.x - i[0]) * (m.pos.x - i[0]) + (m.pos.y + 90 - i[1]) * (m.pos.y + 90 - i[1])) < 50, false);
+
+            if (isInRange) {
+                fireDmgLevel++;
+                fireDmgLevel = Math.min(fireDmgLevel, 100);
+            } else {
+                fireDmgLevel--;
+                fireDmgLevel = Math.max(fireDmgLevel, -8);
+            }
+
+            if (fireDmgLevel > -8) {
+                ctx.fillStyle = "#fa0b";
+                ctx.fillRect(m.pos.x - 50, m.pos.y - 100, Math.min(fireDmgLevel * 12.5 + 100, 100), 15);
+            }
+
+            if (fireDmgLevel > 0) {
+                ctx.fillStyle = "#f00c";
+                ctx.fillRect(m.pos.x - 50, m.pos.y - 100, fireDmgLevel, 15);
+
+                m.damage(0.001 * (1.5 * isInRange + 1));
+
+                drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 + 1);
+                drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 + 1);
+                drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 + 1);
+                drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 - 1);
+                drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 - 1);
+                drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 - 1);
+                drawFlame(m.pos.x, m.pos.y + 90, "#f70", Math.PI / 2);
+                drawFlame(m.pos.x, m.pos.y + 90, "#f70", Math.PI / 2);
+                drawFlame(m.pos.x, m.pos.y + 90, "#f70", Math.PI / 2);
+            }
+
+            for (let j = 0; j < 5; j++) {
+                drawFlame(1130 + j * 10, -1700)
+                for (let i = 0; i < 7; i++) drawFlame(2550 + i * 200, -2800);
+                for (let i = 0; i < 10; i++) drawFlame(2800 + i * 500, -1650);
+                for (let i = 0; i < 9; i++) drawFlame(1595 + i * 95, -3860);
+                drawFlame(4850, -1300);
+                drawFlame(6350, -1300);
+            }
+            ctx.fillStyle = "#541";
+            for (let i = 0; i < 9; i++) {
+                ctx.fillRect(1592 + i * 95, -3860, 6, 70);
+            }
+
+            if (m.pos.x > 1500 && m.pos.x < 3750 && m.pos.y > -5000 && m.pos.y < -3300) {
+                secretRoomTrans -= 5;
+                secretRoomTrans = Math.max(secretRoomTrans, 85);
+            } else {
+                secretRoomTrans += 5;
+                secretRoomTrans = Math.min(secretRoomTrans, 250);
+            }
+
+
+            let hasMob = mob.reduce((a, i) => {
+                return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
+            }, false) && !emergencyActivated;
+
+            door.isOpen = hasMob;
+
+            door.openClose();
+            ctx.fillStyle = "#444444" + secretRoomTrans.toString(16);
+            ctx.fillRect(1480, -5000, 2270, 1710);
+            if (hasMob) {
+                ctx.fillStyle = "#444";
+                ctx.fillRect(1480, -5000, 1070, 1710);
+            }
+
+            function drawProject(startPos, endPos1, endPos2, tValue, tValueM) {
+                ctx.strokeStyle = "#003";
+                ctx.fillStyle = "#0055aa" + ('0' + (tValue * 60 / tValueM).toString(16)).slice(-2);
+
+                let inter = (tValueM - tValue) / tValueM;
+                let endpos1i = endPos1.map((i, j) => (startPos[j] - i) * inter),
+                    endpos2i = endPos2.map((i, j) => (startPos[j] - i) * inter);
+
+                ctx.beginPath();
+                ctx.moveTo(endPos1[0] + endpos1i[0], endPos1[1] + endpos1i[1]);
+                ctx.lineTo(...startPos);
+                ctx.lineTo(endPos2[0] + endpos2i[0], endPos1[1] + endpos1i[1]);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(endPos1[0] + endpos1i[0], endPos1[1] + endpos1i[1]);
+                ctx.lineTo(...startPos);
+                ctx.lineTo(endPos1[0] + endpos1i[0], endPos2[1] + endpos2i[1]);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(endPos1[0] + endpos1i[0], endPos2[1] + endpos2i[1]);
+                ctx.lineTo(...startPos);
+                ctx.lineTo(endPos2[0] + endpos2i[0], endPos2[1] + endpos2i[1]);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(endPos2[0] + endpos2i[0], endPos2[1] + endpos2i[1]);
+                ctx.lineTo(...startPos);
+                ctx.lineTo(endPos2[0] + endpos2i[0], endPos1[1] + endpos1i[1]);
+                ctx.fill();
+                ctx.stroke();
+
+                if (tValue >= tValueM * 2 / 3) {
+                    ctx.fillStyle = "#0055aa" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 6.25 * 60 / tValueM).toString(16)).slice(-2);
+                    ctx.strokeStyle = "#000033" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 12.75 * 60 / tValueM).toString(16)).slice(-2);
+                    ctx.fillRect(endPos1[0], endPos1[1], endPos2[0] - endPos1[0], endPos2[1] - endPos1[1]);
+                    ctx.shadowColor = "#00aaaa" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 12.75 * 60 / tValueM).toString(16)).slice(-2);
+                    ctx.shadowBlur = 10;
+                    ctx.strokeRect(endPos1[0], endPos1[1], endPos2[0] - endPos1[0], endPos2[1] - endPos1[1]);
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = "#0000";
+                }
+            }
+
+            if (secretAnimTrans > 0) {
+                drawProject([3614, -3530], [2900, -3900], [3400, -3600], secretAnimTrans, 60);
+                if (secretAnimTrans >= 42) {
+                    ctx.font = "27px monospace";
+                    ctx.textAlign = "start"
+                    ctx.fillStyle = "#00ffff" + Math.floor((secretAnimTrans - 40) * 12.75).toString(16);
+                    ctx.fillText("Waste Discharge Interruption:", 2910, -3870);
+                    ctx.fillText("Owner 'Scarlet' not found", 2910, -3830);
+                    ctx.fillText("Detected user: 'm'", 2910, -3790);
+                    ctx.fillStyle = (hasMob ? "#ff6644" : "#ffff44") + Math.floor((secretAnimTrans - 40) * 12.75).toString(16);
+                    ctx.fillText(hasMob ? "AREA HAS MOBS." : "Area clear.", 2910, -3710);
+                    ctx.fillText(hasMob ? "'openDoor' failed." : "'openDoor' complete.", 2910, -3670);
+                    ctx.strokeStyle = "#00ff00" + Math.floor((secretAnimTrans - 40) * 6).toString(16);
+                    ctx.beginPath();
+                    ctx.arc(3300, -3730, 60, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.arc(3330, -3730, 8, 0, 2 * Math.PI);
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#00ffff" + Math.floor((secretAnimTrans - 40) * 12.75).toString(16);
+                    ctx.font = "30px monospace";
+                    ctx.fillText("n-gon inc", 3300, -3630);
+
+                    ctx.font = "25px Arial";
+                }
+            }
+            if (secretAnimTrans2 > 0) {
+                drawProject([1614, -3530], [2050, -3900], [1550, -3600], secretAnimTrans2, 60);
+                if (secretAnimTrans2 >= 42) {
+                    ctx.font = "27px monospace";
+                    ctx.textAlign = "start";
+                    ctx.fillStyle = "#00ffff" + Math.floor((secretAnimTrans2 - 40) * 12.75).toString(16);
+                    ctx.fillText("SECURITY BREACH DETECTED", 1560, -3870);
+                    ctx.fillText("Entity name: m", 1560, -3830);
+                    ctx.fillStyle = (tech.totalCount < 25 ? (tech.totalCount < 10 ? "#ffff44" : "#22ff22") : "#ff6644") + Math.floor((secretAnimTrans2 - 40) * 12.75).toString(16);
+                    ctx.fillText("Threat level: " + (tech.totalCount < 25 ? (tech.totalCount < 10 ? "Low" : "Medium") : "HIGH"), 1560, -3790);
+                    if (tech.totalCount >= 15) ctx.fillText("PROCEDURE ACTIVATED", 1560, -3750);
+                    ctx.strokeStyle = "#00ff00" + Math.floor((secretAnimTrans2 - 40) * 6).toString(16);
+                    ctx.beginPath();
+                    ctx.arc(1950, -3730, 60, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.arc(1980, -3730, 8, 0, 2 * Math.PI);
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#00ffff" + Math.floor((secretAnimTrans2 - 40) * 12.75).toString(16);
+                    ctx.font = "30px monospace";
+                    ctx.fillText("n-gon inc", 1950, -3630);
+
+                    ctx.font = "25px Arial";
+                    if (secretAnimTrans2 >= 60) {
+                        if (!emergencyActivated && tech.totalCount >= 10) {
+                            for (let i = 0; i < 5; i++) {
+                                let randomNum = Math.random() * Math.PI;
+                                spawn.exploder(m.pos.x + Math.cos(randomNum) * 200, m.pos.y + Math.sin(randomNum) * 200);
+                                if (tech.totalCount >= 25) spawn.randomMob(m.pos.x + Math.cos(randomNum) * 200, m.pos.y + Math.sin(randomNum) * 200, Infinity);
+                            }
+                            emergencyActivated = true;
+                        }
+                    }
+                }
+            }
+        };
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 8500;
+        level.exit.y = 680;
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#123";
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        // spawn.debris(750, -2200, 3700, 16); //16 debris per level
+
+        // spawn blocks
+        spawn.mapRect(-100, 0, 1050, 100);
+        spawn.mapRect(900, -300, 50, 300);
+        spawn.mapRect(700, -300, 50, 200);
+
+        // first room
+        spawn.mapRect(-100, -350, 850, 50);
+        spawn.mapRect(900, -350, 850, 50);
+        spawn.mapRect(-100, -1550, 50, 1200);
+        spawn.mapRect(1700, -1550, 50, 1200);
+        spawn.mapRect(-100, -1550, 850, 50);
+        spawn.mapRect(900, -1550, 850, 50);
+        spawn.bodyRect(700, -400, 50, 50);
+        spawn.bodyRect(900, -400, 50, 50);
+
+        spawn.mapRect(500, -650, 650, 25);
+        spawn.mapRect(200, -1000, 200, 25);
+        spawn.mapRect(1250, -1000, 200, 25);
+        spawn.mapRect(600, -1300, 450, 25);
+
+        spawn.mapRect(700, -1650, 50, 100);
+        spawn.mapRect(900, -1650, 50, 100);
+
+
+        // pathway to second room
+        spawn.mapRect(950, -1650, 3050, 50);
+        spawn.mapRect(1100, -1700, 100, 50);
+
+        // second room
+        spawn.mapRect(0, -5000, 1500, 3000);
+        spawn.mapRect(1500, -2050, 300, 50);
+        spawn.mapRect(2000, -3100, 300, 1100);
+        spawn.mapRect(1500, -5000, 2250, 1000);
+        spawn.mapRect(1500, -3500, 1050, 225);
+        spawn.mapRect(4000, -5000, 500, 3000);
+        spawn.mapRect(3748, -5000, 252, 1550);
+
+        spawn.mapRect(1700, -2400, 300, 50);
+        spawn.mapRect(1500, -2750, 300, 50);
+
+        spawn.mapRect(2300, -3000, 1700, 50);
+        spawn.mapRect(2300, -2800, 1700, 800);
+        spawn.mapRect(2450, -3300, 1300, 100);
+
+        // secret room in second room
+        spawn.mapRect(2700, -3500, 1050, 50);
+        spawn.mapRect(2549, -5000, 1201, 1000);
+
+        const buttonSec = level.button(3550, -3500);
+        const buttonThird = level.button(1550, -3500);
+        let hasSecretButton = false,
+            hasSecretButton2 = false,
+            secretAnimTrans = 0,
+            secretAnimTime = 0,
+            secretAnimTrans2 = 0,
+            secretAnimTime2 = 0;
+        let emergencyActivated = false;
+
+        const door = level.door(2450, -4000, 100, 500, 490);
+        const secretHazard = level.hazard(1500, -4000, 1000, 510, 0.01);
+
+        // hazards
+        const button = level.button(3800, -3000);
+        const hazard = level.hazard(2300, -3090, 1700, 110, 0.005);
+        let isButtonTapped = false;
+
+        if (b.inventory.length < 5) powerUps.spawn(3800, -3200, "gun");
+        powerUps.spawn(3900, -3100, "heal", true, null, 30);
+        powerUps.spawn(3900, -3100, "heal", true, null, 30);
+
+        // path to the third room
+        spawn.mapRect(2000, -1850, 50, 200);
+        spawn.mapRect(2200, -2000, 50, 200);
+        spawn.mapRect(2400, -1850, 50, 200);
+
+        spawn.mapRect(4200, -1650, 1300, 50);
+        spawn.mapRect(5700, -1650, 1300, 50);
+        spawn.mapRect(7200, -1650, 750, 50);
+
+        spawn.mapRect(3700, -1600, 50, 350);
+        spawn.mapRect(7250, -1600, 50, 350);
+        spawn.mapRect(3750, -1300, 3500, 50);
+        spawn.mapRect(4500, -2150, 3550, 50)
+
+        // third room
+        spawn.mapRect(7900, -1600, 50, 1000);
+        spawn.mapRect(8050, -3000, 50, 2400);
+        spawn.mapRect(7000, -600, 950, 50);
+        spawn.mapRect(8050, -600, 950, 50);
+        spawn.mapRect(7000, -600, 50, 1000);
+        spawn.mapRect(8950, -600, 50, 1000);
+        spawn.mapRect(7000, 400, 950, 50);
+        spawn.mapRect(8050, 400, 950, 50);
+        spawn.mapRect(7900, 400, 50, 300);
+        spawn.mapRect(7900, 700, 1000, 50);
+
+        const elevator = level.elevator(7962.5, 500, 75, 50, -1800)
+
+
+        // fire damage
+        const flames = [];
+        flames.push([1150, -1700], [1150, -1770]);
+        for (let i = 0; i < 10; i++) flames.push([2800 + i * 500, -1650], [2800 + i * 500, -1720]);
+        flames.push([4850, -1300], [6350, -1300], [4850, -1370], [6350, -1370]);
+
+        let fireDmgLevel = -8;
+
+        let secretRoomTrans = 250;
+
+        // mobs
+        let mobList1 = [
+            [500, -750],
+            [1150, -750],
+            [825, -1100],
+            [300, -1100],
+            [1350, -1100]
+        ];
+        while (mobList1.length > 5 - Math.sqrt(simulation.difficulty * 2.5) && mobList1.length) {
+            let rand = Math.floor(Math.random() * mobList1.length);
+            spawn[["hopper", "sneaker", "striker"][Math.floor(Math.random() * 3)]](mobList1[rand][0], mobList1[rand][1], 60 + Math.random() * 10);
+            mobList1.splice(rand, 1);
+        }
+
+        let hasLaser = spawn.pickList.includes("laser");
+        if (hasLaser) spawn.pickList.splice(spawn.pickList.indexOf("laser"), 1);
+        let mobList2 = [
+            [50, -1400],
+            [1600, -450],
+            [50, -450],
+            [1600, -1400]
+        ];
+        for (let i = 0; i < 10; i++) mobList2.push([2800 + i * 500, -1800]);
+        while (mobList2.length && mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1)) {
+            let rand = Math.floor(Math.random() * mobList2.length);
+            spawn.randomMob(...mobList2[rand]);
+            mobList2.splice(rand, 1);
+        }
+
+        let groupList = ["spawn.randomGroup(8250, 575);",
+            `spawn.randomGroup(3200, -3700);
+        if (simulation.difficulty > 15) 
+            spawn.randomGroup(3500, -3700, 0.3);`,
+            "spawn.randomGroup(7800, -1800, 0.5);"
+        ];
+        while (groupList.length > 0) {
+            let ind = Math.floor(Math.random() * groupList.length);
+            Function(groupList[ind])();
+            groupList.splice(ind, 1);
+        }
+        if (hasLaser) spawn.pickList.push("laser");
+
+        spawn.shieldingBoss(3900, -3200, 70);
+
+        let randomBoss = Math.floor(Math.random() * 2);
+        if (simulation.difficulty > 5) spawn[["shooterBoss", "launcherBoss"][randomBoss]](7500, -150);
+        else spawn[["shooter", "launcher"][randomBoss]](7500, -150, 150);
+        spawn[["shooter", "launcher"][randomBoss]](8500, -150, 150);
+    }
 };

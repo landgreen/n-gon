@@ -2058,7 +2058,8 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.rotateVelocity = Math.min(0.0045, 0.0015 * simulation.accelScale * simulation.accelScale) * (level.levelsCleared > 8 ? 1 : -1)
+
+        me.rotateVelocity = Math.min(0.0045, 0.0015 * simulation.accelScale * simulation.accelScale) * (level.levelsCleared > 8 ? 1 : -1) * (simulation.isHorizontalFlipped ? -1 : 1)
         me.do = function() {
             this.fill = '#' + Math.random().toString(16).substr(-6); //flash colors
             this.checkStatus();
