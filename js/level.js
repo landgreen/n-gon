@@ -6396,7 +6396,7 @@ const level = {
                     ctx.fillText("Entity name: m", 1560, -3830);
                     ctx.fillStyle = (tech.totalCount < 25 ? (tech.totalCount < 10 ? "#ffff44" : "#22ff22") : "#ff6644") + Math.floor((secretAnimTrans2 - 40) * 12.75).toString(16);
                     ctx.fillText("Threat level: " + (tech.totalCount < 25 ? (tech.totalCount < 10 ? "Low" : "Medium") : "HIGH"), 1560, -3790);
-                    if (tech.totalCount >= 15) ctx.fillText("PROCEDURE ACTIVATED", 1560, -3750);
+                    if (tech.totalCount >= 10) ctx.fillText("PROCEDURE ACTIVATED", 1560, -3750);
                     ctx.strokeStyle = "#00ff00" + Math.floor((secretAnimTrans2 - 40) * 6).toString(16);
                     ctx.beginPath();
                     ctx.arc(1950, -3730, 60, 0, 2 * Math.PI);

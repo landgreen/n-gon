@@ -40,6 +40,11 @@ function playerOnGroundCheck(event) {
                     m.doCrouch();
                     m.yOff = m.yOffWhen.jump;
                     m.hardLandCD = m.cycle + Math.min(momentum / 6.5 - 6, 40)
+                    //falling damage
+                    if (tech.isFallingDamage) {
+                        m.damage(Math.min(Math.sqrt(momentum - 125) * 0.01, 0.25));
+                        m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                    }
                 } else {
                     m.yOffGoal = m.yOffWhen.stand;
                 }

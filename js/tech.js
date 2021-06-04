@@ -2203,20 +2203,22 @@
                 }
             },
             {
-                name: "supercapacitor",
-                description: "<strong class='color-f'>energy</strong> above your max decays <strong>60%</strong> slower",
+                name: "Maxwell's demon",
+                description: "<strong class='color-f'>energy</strong> above your max decays <strong>92%</strong> slower<br>add <strong>17</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0
+                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy
                 },
                 requires: "a source of overfilled energy",
                 effect() {
-                    tech.overfillDrain = 0.85
+                    tech.overfillDrain = 0.87 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
+                    tech.addJunkTechToPool(17)
                 },
                 remove() {
                     tech.overfillDrain = 0.75
+                    if (this.count > 0) tech.removeJunkTechFromPool(17)
                 }
             },
             {
@@ -2377,10 +2379,31 @@
                     tech.isAcidDmg = false;
                 }
             },
+            // {
+            //     name: "supersaturation",
+            //     description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>50</strong>",
+            //     maxCount: 9,
+            //     count: 0,
+            //     frequency: 1,
+            //     frequencyDefault: 1,
+            //     allowed() {
+            //         return !tech.isEnergyHealth && !tech.isNoHeals
+            //     },
+            //     requires: "not mass-energy equivalence, ergodicity",
+            //     effect() {
+            //         tech.bonusHealth += 0.5
+            //         m.setMaxHealth();
+            //         m.addHealth(0.50)
+            //     },
+            //     remove() {
+            //         tech.bonusHealth = 0
+            //         m.setMaxHealth();
+            //     }
+            // },
             {
-                name: "supersaturation",
-                description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>50</strong>",
-                maxCount: 9,
+                name: "tungsten carbide",
+                description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>100</strong><br><strong>landings</strong> that force you to crouch cause <strong class='color-harm'>harm</strong>",
+                maxCount: 1,
                 count: 0,
                 frequency: 1,
                 frequencyDefault: 1,
@@ -2389,14 +2412,13 @@
                 },
                 requires: "not mass-energy equivalence, ergodicity",
                 effect() {
-                    tech.bonusHealth += 0.5
-                    m.addHealth(0.50)
+                    tech.isFallingDamage = true;
                     m.setMaxHealth();
+                    m.addHealth(1)
                 },
                 remove() {
-                    tech.bonusHealth = 0
+                    tech.isFallingDamage = false;
                     m.setMaxHealth();
-
                 }
             },
             {
@@ -3042,8 +3064,8 @@
                 remove() {}
             },
             {
-                name: "mine synthesis",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong>",
+                name: "booby trap",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br>add <strong>9</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3055,9 +3077,11 @@
                 effect() {
                     tech.isMineDrop = true;
                     if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
+                    tech.addJunkTechToPool(13)
                 },
                 remove() {
                     tech.isMineDrop = false;
+                    if (this.count > 0) tech.removeJunkTechFromPool(13)
                 }
             },
             {
@@ -6724,7 +6748,7 @@
         isSmallExplosion: null,
         isExplosionHarm: null,
         armorFromPowerUps: null,
-        bonusHealth: null,
+        // bonusHealth: null,
         isIntangible: null,
         isCloakStun: null,
         bonusEnergy: null,
@@ -6828,5 +6852,6 @@
         isAddBlockMass: null,
         isMACHO: null,
         isHarmMACHO: null,
-        isSneakAttack: null
+        isSneakAttack: null,
+        isFallingDamage: null
     }

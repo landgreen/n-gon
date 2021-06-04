@@ -26,11 +26,21 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
+tech: picking up heal power ups when at full health does harm equal to the heal values
+  benefit on pick up: get 1% damage
+
+draw a rotating ring, like a 3-D spinning ring effect
+  an ellipse the has sine function on one of it's parameters
+
 buttons can now on/off boosts
 
-Weak Anthropic Principle: you get a second chance at life, but now the game has falling damage!
-tech: supersaturation is buffed but add falling damage
-tech: increase health and remove air control
+energy conservation 6% damage recovered as energy
+  add a negative effect:
+    junk tech
+
+Weak Anthropic Principle: you get a second chance at life, but ....
+
+negative effect: remove air control
   
 mob: molecule shapes - 2 separate mobs joined by a bond
   use constraints: just spawn 2x or 3x groupings
@@ -48,13 +58,6 @@ tech: wormhole through walls?
 
 pause should show the last in game console message
   
-tech: picking up heal power ups when at full health does harm equal to the heal values
-  benefit on pick up:
-    get ammo
-    get 1% duplication
-    get 1% damage permanent
-    turned into drones
-
 nail-gun, or ....
   1s after being fired your bullets turn:
     towards the nearest mob
@@ -123,18 +126,6 @@ mobile requirements:
     limit items to ones that don't require aiming?
     tap screen regions to move (WASD)
     reduce font size
-
-decrease healing effects by 50%
-decrease level scaling healing reduction
-  net effect: healing at difficulty 40 (level 10 hard) should be 25% higher then current levels
-
-bosses should have 2x health, but only do about 50 health damage
-  options:
-    cap all damage at 50 health
-      this makes high health/energy/harm reduction build much better
-    make boss flag cut damage done to player by 10x
-    boss flag cut damage done to boss by 20x <----
-      make bosses not have extra density
     
 lore: a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -147,41 +138,21 @@ add back in gamepad support
 
 rename intro level to something lore related
 
-give undefined tech different effects at different localSettings.loreCount values
-  or just random effects
-  1. 10/10: send more tech into the pool
-  2. 3/3: lose 3 tech each time, and send more tech into the pool
-  2. 3/3: increase game difficulty, and send more tech into the pool
-  3. 1/1: reduce max energy and take more harm
-  4. 1/1: add 5? more levels
-
 rename ?
   health -> integrity, unity
   heal -> also integrity, unity
 
-bot: ice blast,  long CD AOE freeze
-
 RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
-
-in game console
-  set highlighting rules
-    m, tech, level are all highlighted
-    maybe the first term in each variable should get a highlight
 
 tech: time dilation - when you exit time dilation rewind to the state you entered
   position, velocity, and health
   no energy cost
-
-mechanic - Your energy regen is only active when field and gun have not been used for 5 seconds.
 
 be able to open up custom mode in the normal game
   might need to be rebuilt from scratch
   while in through testing mode?
   have a way to make limited changes as allowed by tech you pick up in game
   disable the in custom setting flag
-
-tech power up magnetism - power ups drift towards player
-  where would this code go?
 
 super balls start at 3, not 4
   have to balance damage

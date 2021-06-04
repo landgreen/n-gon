@@ -207,27 +207,11 @@ const m = {
             m.crouch = true;
             m.yOffGoal = m.yOffWhen.crouch;
             if ((playerHead.position.y - player.position.y) < 0) {
-
                 Matter.Body.setPosition(playerHead, {
                     x: player.position.x,
                     y: player.position.y + 9.1740767
                 })
-
-
-                // Matter.Body.translate(playerHead, {
-                //     x: 0,
-                //     y: 40
-                // });
             }
-            // playerHead.collisionFilter.group = -1
-            // playerHead.collisionFilter.category = 0
-            // playerHead.collisionFilter.mask = -1
-            // playerHead.isSensor = true;  //works, but has a 2 second lag...
-            // collisionFilter: {
-            //     group: 0,
-            //     category: cat.player,
-            //     mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-            // },
         }
     },
     undoCrouch() {
@@ -502,7 +486,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.bonusHealth + tech.armorFromPowerUps
+        m.maxHealth = m.baseHealth + tech.armorFromPowerUps + tech.isFallingDamage //+ tech.bonusHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300*m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
