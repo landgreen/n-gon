@@ -1501,8 +1501,76 @@ const m = {
                 m.fieldBlockCD = 0;
                 m.fieldHarmReduction = 0.75;
                 m.blockingRecoil = 1 //4 is normal
-                m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
-                m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
+                m.fieldRange = 175
+                m.fieldShieldingScale = Math.pow(0.5, (tech.harmonics - 3))
+                m.harmonicRadius = 1 //for smoothing function when player holds mouse (for harmonicAtomic)
+                m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
+                    if (tech.isStandingWaveExpand) {
+                        if (input.field) {
+                            const oldHarmonicRadius = m.harmonicRadius
+                            m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
+                            m.energy -= 0.3 * (m.harmonicRadius - oldHarmonicRadius)
+                        } else {
+                            m.harmonicRadius = 0.998 * m.harmonicRadius + 0.002 * 1
+                        }
+                    }
+                    const fieldRange1 = (0.7 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange2 = (0.63 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange3 = (0.65 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
+                    const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.73, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, fieldRange2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, fieldRange3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    m.pushMobs360(netfieldRange);
+                }
+                m.harmonicAtomic = () => { //several ellipses spinning about different axises
+                    const rotation = simulation.cycle * 0.002
+                    const phase = simulation.cycle * 0.03
+                    if (tech.isStandingWaveExpand) {
+                        if (input.field) {
+                            const oldHarmonicRadius = m.harmonicRadius
+                            m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
+                            m.energy -= 0.3 * (m.harmonicRadius - oldHarmonicRadius)
+                        } else {
+                            m.harmonicRadius = 0.998 * m.harmonicRadius + 0.002 * 1
+                        }
+                    }
+                    const radius = m.fieldRange * m.harmonicRadius //+ 20 * Math.sin(m.cycle * 0.05)
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "rgba(110,170,200,0.9)"
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.13 + 0.15 * Math.random()) * (3 / tech.harmonics)) + ")";
+                    // ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.22 - 0.01 * tech.harmonics) * (0.5 + 0.5 * Math.random())) + ")";
+                    for (let i = 0; i < tech.harmonics; i++) {
+                        ctx.beginPath();
+                        ctx.ellipse(m.pos.x, m.pos.y, radius * Math.abs(Math.sin(phase + i / tech.harmonics * Math.PI)), radius, rotation + i / tech.harmonics * Math.PI, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    m.pushMobs360(radius);
+                }
+                // m.harmonicSameAxis = () => { //several ellipses spinning about the same axis
+                //     const radius = m.fieldRange
+                //     const rotation = simulation.cycle * 0.025
+                //     const phase = simulation.cycle * 0.031
+                //     ctx.lineWidth = 1;
+                //     ctx.fillStyle = "rgba(0,0,0,0.25)"
+                //     ctx.strokeStyle = "#000"
+                //     for (let i = 0, len = 4; i < len; i++) {
+                //         ctx.beginPath();
+                //         ctx.ellipse(m.pos.x, m.pos.y, radius * Math.abs(Math.sin(phase + i / len * Math.PI)), radius, rotation, 0, 2 * Math.PI);
+                //         ctx.fill();
+                //         ctx.stroke();
+                //     }
+                //     m.pushMobs360(radius);
+                // }
+                m.harmonicShield = m.harmonic3Phase
                 m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -1517,23 +1585,10 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
                     if (m.energy > 0.1 && m.fieldCDcycle < m.cycle) {
-                        const fieldRange1 = (0.7 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange
-                        const fieldRange2 = (0.63 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange
-                        const fieldRange3 = (0.65 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange
-                        const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
-                        ctx.fillStyle = "rgba(110,170,200," + Math.min(0.73, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
-                        ctx.beginPath();
-                        ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(m.pos.x, m.pos.y, fieldRange2, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(m.pos.x, m.pos.y, fieldRange3, 0, 2 * Math.PI);
-                        ctx.fill();
-                        m.pushMobs360(netfieldRange);
-                        // m.pushBody360(netfieldRange);  //can't throw block when pushhing blocks away
+                        m.harmonicShield()
                     }
+
+
                     m.drawFieldMeter()
                 }
             }

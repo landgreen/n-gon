@@ -4613,11 +4613,56 @@
             //************************************************** field
             //************************************************** tech
             //************************************************** 
+            // {
+            //     name: "frequency resonance",
+            //     description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>deflecting</strong> efficiency by <strong>50%</strong>",
+            //     isFieldTech: true,
+            //     maxCount: 9,
+            //     count: 0,
+            //     frequency: 2,
+            //     allowed() {
+            //         return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
+            //     },
+            //     requires: "standing wave harmonics",
+            //     effect() {
+            //         tech.frequencyResonance = this.count + 1 // +1 because count updates later
+            //         m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
+            //         m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
+            //     },
+            //     remove() {
+            //         m.fieldRange = 175;
+            //         m.fieldShieldingScale = 1;
+            //         tech.frequencyResonance = 0
+            //     }
+            // },
             {
-                name: "frequency resonance",
-                description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>deflecting</strong> efficiency by <strong>50%</strong>",
+                name: "spherical harmonics",
+                description: "<strong>standing wave</strong> oscillates in a 3rd dimension<br>increasing <strong>deflecting</strong> efficiency by <strong>40%</strong>",
                 isFieldTech: true,
                 maxCount: 9,
+                count: 0,
+                frequency: 4,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
+                },
+                requires: "standing wave harmonics",
+                effect() {
+                    tech.harmonics++
+                    m.fieldShieldingScale = Math.pow(0.6, (tech.harmonics - 2))
+                    m.harmonicShield = m.harmonicAtomic
+                },
+                remove() {
+                    tech.harmonics = 2
+                    m.fieldShieldingScale = Math.pow(0.6, (tech.harmonics - 2))
+                    m.harmonicShield = m.harmonic3Phase
+                }
+            },
+            {
+                name: "expansion",
+                description: "using <strong>standing wave</strong> field drains <strong class='color-f'>energy</strong><br>to temporarily <strong>expand</strong> its <strong>radius</strong>",
+                // description: "use <strong class='color-f'>energy</strong> to <strong>expand</strong> <strong>standing wave</strong><br>the field slowly <strong>contracts</strong> when not used",
+                isFieldTech: true,
+                maxCount: 1,
                 count: 0,
                 frequency: 2,
                 allowed() {
@@ -4625,14 +4670,11 @@
                 },
                 requires: "standing wave harmonics",
                 effect() {
-                    tech.frequencyResonance = this.count + 1 // +1 because count updates later
-                    m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
-                    m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
+                    tech.isStandingWaveExpand = true
                 },
                 remove() {
-                    m.fieldRange = 175;
-                    m.fieldShieldingScale = 1;
-                    tech.frequencyResonance = 0
+                    tech.isStandingWaveExpand = false
+                    m.harmonicRadius = 1
                 }
             },
             {
@@ -6834,7 +6876,7 @@
         droneCycleReduction: null,
         droneEnergyReduction: null,
         isNoHeals: null,
-        frequencyResonance: null,
+        // frequencyResonance: null,
         isAlwaysFire: null,
         isDroneRespawn: null,
         deathSpawns: null,
@@ -6853,5 +6895,7 @@
         isMACHO: null,
         isHarmMACHO: null,
         isSneakAttack: null,
-        isFallingDamage: null
+        isFallingDamage: null,
+        harmonics: null,
+        isStandingWaveExpand: null
     }

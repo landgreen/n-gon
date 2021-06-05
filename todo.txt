@@ -26,6 +26,17 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
+spherical harmonics improve blocking efficiency
+  9x stacks
+  gain cool multi ellipse atomic graphic
+    1st stack gives 3x atomic graphic
+      more stacks give more ellipse for atomic graphic
+spherical harmonics unlocks tech that increases shield radius when you hold field input
+
+
+what about the single axis graphic?
+  maybe just save it for a mob
+
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up: get 1% damage
 
@@ -227,13 +238,6 @@ have some mobs spawn in later in the level  (in hard and why modes)
 look for tech that could update description text with count and tech is information
   can only use variables that change in effect() and remove()
   this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${techduplicateChance}</em>`
-
-standing wave harmonics tech- push things away
-  push scales with mass up to about 4
-    has a 25% effect on shielded mobs?
-  push when using field key
-  or push away at the peak of an oscillation
-  or always push
 
 map element - player rotates a rotor that makes a platform go up or down
 

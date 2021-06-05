@@ -15,10 +15,11 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // m.setField("metamaterial cloaking")
+            // m.setField("standing wave harmonics")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
-            // tech.giveTech("WIMPs")
+            // for (let i = 0; i < 5; i++) tech.giveTech("spherical harmonics")
+            // tech.giveTech("expansion")
             // tech.giveTech("MACHO")
             // tech.giveTech("potential well")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -36,7 +37,7 @@ const level = {
             // level.gauntlet(); //before final boss level  
             // level.testChamber()
             // level.sewers(); 
-            // level.satellite(); 
+            // level.satellite();
             // level.skyscrapers(); 
             // level.aerie(); 
             // level.rooftops(); 
