@@ -1,7 +1,7 @@
 // game Object ********************************************************
 //*********************************************************************
 const simulation = {
-    loop() {}, //main game loop, gets se tto normal or testing loop
+    loop() {}, //main game loop, gets set to normal or testing loop
     normalLoop() {
         simulation.gravity();
         Engine.update(engine, simulation.delta);
@@ -525,18 +525,9 @@ const simulation = {
             level.levels.push("tunnel");
             level.levels = shuffle(level.levels); //shuffles order of maps
             level.levels.splice(0, 9); //remove some random levels to make up for adding the community levels
-
-            lore.techCount = 0; //remove undefined tech for community maps
-            for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].isLore) {
-                    tech.tech[i].frequency = 0;
-                    tech.tech[i].count = 0;
-                }
-            }
         } else {
             level.levels = shuffle(level.levels); //shuffles order of maps
         }
-
         level.levels.unshift("intro"); //add level to the start of the randomized levels list
         level.levels.push("gauntlet"); //add level to the end of the randomized levels list
         level.levels.push("final"); //add level to the end of the randomized levels list
@@ -657,6 +648,7 @@ const simulation = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         simulation.then = Date.now();
         requestAnimationFrame(cycle); //starts game loop
+
     },
     clearTimeouts() {
         let id = window.setTimeout(function() {}, 0);

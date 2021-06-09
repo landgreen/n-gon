@@ -15,11 +15,11 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // m.setField("standing wave harmonics")
+            // m.setField("plasma torch")
+            // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
-            // for (let i = 0; i < 5; i++) tech.giveTech("spherical harmonics")
-            // tech.giveTech("expansion")
+            // tech.giveTech("Z-pinch")
             // tech.giveTech("MACHO")
             // tech.giveTech("potential well")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -55,7 +55,7 @@ const level = {
             // level.vats() //community level
             // level["n-gon"]() //community level
             // level.tunnel() //community level
-            // tech.giveTech("undefined")
+            // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
             // localSettings.loreCount = 1;
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -1152,7 +1152,7 @@ const level = {
                 spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
             }
         }
-        // blockDoor(710, -710);
+        blockDoor(710, -710);
         // for (let i = 0; i < 30; i++) powerUps.directSpawn(710, -710, "tech");
 
         spawn.mapRect(2500, -1200, 200, 750); //right wall

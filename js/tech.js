@@ -14,6 +14,14 @@
                 }
             }
             lore.techCount = 0;
+            if (simulation.isCommunityMaps || simulation.isCheating) {
+                for (let i = 0, len = tech.tech.length; i < len; i++) {
+                    if (tech.tech[i].isLore) {
+                        tech.tech[i].frequency = 0;
+                        tech.tech[i].count = 0;
+                    }
+                }
+            }
             // tech.removeJunkTechFromPool();
             // tech.removeLoreTechFromPool();
             // tech.addLoreTechToPool();
@@ -742,7 +750,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
+                    return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
                 effect: () => {
@@ -759,7 +767,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -776,7 +784,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -794,7 +802,7 @@
                 frequency: 2,
                 isBadRandomOption: true,
                 allowed() {
-                    return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField)
+                    return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not causality bombs",
                 effect: () => {
@@ -812,7 +820,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect() {
@@ -830,7 +838,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser
+                    return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion
                 },
                 requires: "an explosive damage source",
                 effect: () => {
@@ -881,7 +889,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
+                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
                 requires: "an explosive damage source, no other mob death tech",
                 effect: () => {
@@ -3064,27 +3072,6 @@
                 remove() {}
             },
             {
-                name: "booby trap",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br>add <strong>9</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return tech.duplicationChance() > 0
-                },
-                requires: "some power up duplication",
-                effect() {
-                    tech.isMineDrop = true;
-                    if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
-                    tech.addJunkTechToPool(13)
-                },
-                remove() {
-                    tech.isMineDrop = false;
-                    if (this.count > 0) tech.removeJunkTechFromPool(13)
-                }
-            },
-            {
                 name: "unified field theory",
                 description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
                 maxCount: 1,
@@ -4080,6 +4067,27 @@
                 }
             },
             {
+                name: "booby trap",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br>add <strong>13</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isMineSentry === true || tech.isLaserMine === true || tech.isMineAmmoBack === true
+                },
+                requires: "some mine tech",
+                effect() {
+                    tech.isMineDrop = true;
+                    if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
+                    tech.addJunkTechToPool(13)
+                },
+                remove() {
+                    tech.isMineDrop = false;
+                    if (this.count > 0) tech.removeJunkTechFromPool(13)
+                }
+            },
+            {
                 name: "mycelial fragmentation",
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release an extra <strong class='color-p' style='letter-spacing: 2px;'>spore</strong><br> once a <strong>second</strong> during their <strong>growth</strong> phase",
                 isGunTech: true,
@@ -4613,35 +4621,14 @@
             //************************************************** field
             //************************************************** tech
             //************************************************** 
-            // {
-            //     name: "frequency resonance",
-            //     description: "<strong>standing wave harmonics</strong> shield is retuned<br>increase <strong>size</strong> and <strong>deflecting</strong> efficiency by <strong>50%</strong>",
-            //     isFieldTech: true,
-            //     maxCount: 9,
-            //     count: 0,
-            //     frequency: 2,
-            //     allowed() {
-            //         return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
-            //     },
-            //     requires: "standing wave harmonics",
-            //     effect() {
-            //         tech.frequencyResonance = this.count + 1 // +1 because count updates later
-            //         m.fieldRange = 175 + 175 * 0.25 * tech.frequencyResonance
-            //         m.fieldShieldingScale = Math.pow(0.5, tech.frequencyResonance)
-            //     },
-            //     remove() {
-            //         m.fieldRange = 175;
-            //         m.fieldShieldingScale = 1;
-            //         tech.frequencyResonance = 0
-            //     }
-            // },
+
             {
                 name: "spherical harmonics",
                 description: "<strong>standing wave</strong> oscillates in a 3rd dimension<br>increasing <strong>deflecting</strong> efficiency by <strong>40%</strong>",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
-                frequency: 4,
+                frequency: 3,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
                 },
@@ -4659,7 +4646,7 @@
             },
             {
                 name: "expansion",
-                description: "using <strong>standing wave</strong> field drains <strong class='color-f'>energy</strong><br>to temporarily <strong>expand</strong> its <strong>radius</strong>",
+                description: "using <strong>standing wave</strong> field uses <strong class='color-f'>energy</strong><br>to temporarily <strong>expand</strong> its <strong>radius</strong>",
                 // description: "use <strong class='color-f'>energy</strong> to <strong>expand</strong> <strong>standing wave</strong><br>the field slowly <strong>contracts</strong> when not used",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5051,6 +5038,24 @@
                 },
                 remove() {
                     tech.isPlasmaRange = 1;
+                }
+            },
+            {
+                name: "tokamak",
+                description: "throwing a <strong class='color-block'>block</strong> convert it into <strong class='color-f'>energy</strong><br>and a <strong class='color-laser'>laser</strong> pulse <strong class='color-e'>explosion</strong> cluster",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
+                },
+                requires: "plasma torch",
+                effect() {
+                    tech.isBlockExplosion = true;
+                },
+                remove() {
+                    tech.isBlockExplosion = false;
                 }
             },
             {
@@ -6876,7 +6881,6 @@
         droneCycleReduction: null,
         droneEnergyReduction: null,
         isNoHeals: null,
-        // frequencyResonance: null,
         isAlwaysFire: null,
         isDroneRespawn: null,
         deathSpawns: null,
@@ -6897,5 +6901,6 @@
         isSneakAttack: null,
         isFallingDamage: null,
         harmonics: null,
-        isStandingWaveExpand: null
+        isStandingWaveExpand: null,
+        isBlockExplosion: null
     }

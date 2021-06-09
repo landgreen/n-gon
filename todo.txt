@@ -1,8 +1,16 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+tech: tokamak - instead of throwing a block convert it into energy and a pulse explosion
+  requires plasma
 
+standing wave field no longer gives 25% harm reduction
+standing wave field can now block through walls
+
+bug fixes
 
 ******************************************************** BUGS ********************************************************
+
+a couple times people have reported the final boss dropping extra bodies on death
 
 figure out how to undo ship mode
   if you die in ship mode it spawns with m.look set to non ship methods
@@ -26,22 +34,23 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** TODO ********************************************************
 
-spherical harmonics improve blocking efficiency
-  9x stacks
-  gain cool multi ellipse atomic graphic
-    1st stack gives 3x atomic graphic
-      more stacks give more ellipse for atomic graphic
-spherical harmonics unlocks tech that increases shield radius when you hold field input
+throwing a block removes the block and fires a pulse with a size that scales with the size of the block
+  must have a charge above some threshold
+  plasma field tech
+    gain 100 energy?
 
+tech plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
+  grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
+  extra energy is drained when field is longer
 
-what about the single axis graphic?
+tech: at the start of a new level remove 5 research and spawn a second boss
+
+what about the single axis graphic? (find the code in standing wave harmonic)
   maybe just save it for a mob
+  maybe use it on lore
 
 tech: picking up heal power ups when at full health does harm equal to the heal values
   benefit on pick up: get 1% damage
-
-draw a rotating ring, like a 3-D spinning ring effect
-  an ellipse the has sine function on one of it's parameters
 
 buttons can now on/off boosts
 
@@ -50,8 +59,6 @@ energy conservation 6% damage recovered as energy
     junk tech
 
 Weak Anthropic Principle: you get a second chance at life, but ....
-
-negative effect: remove air control
   
 mob: molecule shapes - 2 separate mobs joined by a bond
   use constraints: just spawn 2x or 3x groupings
@@ -192,10 +199,6 @@ flavor - your bullets destroy blocks
   a chance for destroyed blocks to drop stuff
     power ups
     spores
-
-tech plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
-  grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
-  extra energy is drained when field is longer
 
 using a reroll gives 3 options for tech, and 3 options for guns/fields/tech
   or 6 options for tech (rewrite tech selection to work with 1-6 options)

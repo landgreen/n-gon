@@ -1135,58 +1135,73 @@ const m = {
                 //throw the body
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
-                //bullet-like collisions
-                m.holdingTarget.collisionFilter.category = tech.isBlockBullets ? cat.bullet : cat.body;
-                m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
-                //check every second to see if player is away from thrown body, and make solid
-                const solid = function(that) {
-                    const dx = that.position.x - player.position.x;
-                    const dy = that.position.y - player.position.y;
-                    if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
-                        that.collisionFilter.category = cat.body; //make solid
-                        that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
-                    } else {
-                        setTimeout(solid, 40, that);
+
+                if (tech.isBlockExplosion && m.throwCharge > 5) { //remove the block body and pulse  in the direction you are facing
+                    //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
+                    m.throwCharge = 0;
+                    m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
+                    m.definePlayerMass() //return to normal player mass
+                    m.energy += 3 * Math.sqrt(m.holdingTarget.mass)
+                    //remove block before pulse, so it doesn't get in the way
+                    for (let i = 0; i < body.length; i++) {
+                        if (body[i] === m.holdingTarget) {
+                            Matter.World.remove(engine.world, body[i]);
+                            body.splice(i, 1);
+                        }
                     }
-                };
-                setTimeout(solid, 200, m.holdingTarget);
-
-                const charge = Math.min(m.throwCharge / 5, 1)
-                //***** scale throw speed with the first number, 80 *****
-                let speed = 80 * charge * Math.min(1, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
-
-                if (Matter.Query.collides(m.holdingTarget, map).length !== 0) {
-                    speed *= 0.7 //drop speed by 30% if touching map
-                    if (Matter.Query.ray(map, m.holdingTarget.position, m.pos).length !== 0) speed = 0 //drop to zero if the center of the block can't see the center of the player through the map
-                    //|| Matter.Query.ray(body, m.holdingTarget.position, m.pos).length > 1
-                }
-
-                m.throwCharge = 0;
-                m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
-                Matter.Body.setVelocity(m.holdingTarget, {
-                    x: player.velocity.x * 0.5 + Math.cos(m.angle) * speed,
-                    y: player.velocity.y * 0.5 + Math.sin(m.angle) * speed
-                });
-                //player recoil //stronger in x-dir to prevent jump hacking
-
-                Matter.Body.setVelocity(player, {
-                    x: player.velocity.x - Math.cos(m.angle) * speed / (m.crouch ? 30 : 10) * Math.sqrt(m.holdingTarget.mass),
-                    y: player.velocity.y - Math.sin(m.angle) * speed / 30 * Math.sqrt(m.holdingTarget.mass)
-                });
-                m.definePlayerMass() //return to normal player mass
-
-                if (tech.isAddBlockMass) {
-                    const expand = function(that, massLimit) {
-                        if (that.mass < massLimit) {
-                            const scale = 1.05;
-                            Matter.Body.scale(that, scale, scale);
-                            setTimeout(expand, 20, that, massLimit);
+                    b.pulse(50 * Math.pow(m.holdingTarget.mass, 0.25), m.angle)
+                } else { //normal throw
+                    //bullet-like collisions
+                    m.holdingTarget.collisionFilter.category = tech.isBlockBullets ? cat.bullet : cat.body;
+                    m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
+                    //check every second to see if player is away from thrown body, and make solid
+                    const solid = function(that) {
+                        const dx = that.position.x - player.position.x;
+                        const dy = that.position.y - player.position.y;
+                        if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
+                            that.collisionFilter.category = cat.body; //make solid
+                            that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
+                        } else {
+                            setTimeout(solid, 40, that);
                         }
                     };
-                    expand(m.holdingTarget, Math.min(20, m.holdingTarget.mass * 3))
+                    setTimeout(solid, 200, m.holdingTarget);
+
+                    const charge = Math.min(m.throwCharge / 5, 1)
+                    //***** scale throw speed with the first number, 80 *****
+                    let speed = 80 * charge * Math.min(1, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+
+                    if (Matter.Query.collides(m.holdingTarget, map).length !== 0) {
+                        speed *= 0.7 //drop speed by 30% if touching map
+                        if (Matter.Query.ray(map, m.holdingTarget.position, m.pos).length !== 0) speed = 0 //drop to zero if the center of the block can't see the center of the player through the map
+                        //|| Matter.Query.ray(body, m.holdingTarget.position, m.pos).length > 1
+                    }
+
+                    m.throwCharge = 0;
+                    m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
+                    Matter.Body.setVelocity(m.holdingTarget, {
+                        x: player.velocity.x * 0.5 + Math.cos(m.angle) * speed,
+                        y: player.velocity.y * 0.5 + Math.sin(m.angle) * speed
+                    });
+                    //player recoil //stronger in x-dir to prevent jump hacking
+
+                    Matter.Body.setVelocity(player, {
+                        x: player.velocity.x - Math.cos(m.angle) * speed / (m.crouch ? 30 : 10) * Math.sqrt(m.holdingTarget.mass),
+                        y: player.velocity.y - Math.sin(m.angle) * speed / 30 * Math.sqrt(m.holdingTarget.mass)
+                    });
+                    m.definePlayerMass() //return to normal player mass
+
+                    if (tech.isAddBlockMass) {
+                        const expand = function(that, massLimit) {
+                            if (that.mass < massLimit) {
+                                const scale = 1.05;
+                                Matter.Body.scale(that, scale, scale);
+                                setTimeout(expand, 20, that, massLimit);
+                            }
+                        };
+                        expand(m.holdingTarget, Math.min(20, m.holdingTarget.mass * 3))
+                    }
                 }
-
-
             }
         } else {
             m.isHolding = false
@@ -1353,11 +1368,8 @@ const m = {
     },
     pushMobs360(range) { // find mobs in range in any direction
         for (let i = 0, len = mob.length; i < len; ++i) {
-            if (
-                Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < range &&
-                !mob[i].isShielded &&
-                Matter.Query.ray(map, mob[i].position, m.pos).length === 0
-            ) {
+            if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < range && !mob[i].isShielded) {
+                // && Matter.Query.ray(map, mob[i].position, m.pos).length === 0
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
             }
@@ -1495,25 +1507,16 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br>reduce <strong class='color-harm'>harm</strong> and deflecting <strong>recoil</strong> by <strong>25%</strong>",
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br><strong>deflecting</strong> has <strong>75%</strong> less <strong>recoil</strong>", //<strong class='color-harm'>harm</strong> and 
             effect: () => {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
-                m.fieldHarmReduction = 0.75;
+                // m.fieldHarmReduction = 0.75;
                 m.blockingRecoil = 1 //4 is normal
                 m.fieldRange = 175
                 m.fieldShieldingScale = Math.pow(0.5, (tech.harmonics - 3))
                 m.harmonicRadius = 1 //for smoothing function when player holds mouse (for harmonicAtomic)
                 m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
-                    if (tech.isStandingWaveExpand) {
-                        if (input.field) {
-                            const oldHarmonicRadius = m.harmonicRadius
-                            m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
-                            m.energy -= 0.3 * (m.harmonicRadius - oldHarmonicRadius)
-                        } else {
-                            m.harmonicRadius = 0.998 * m.harmonicRadius + 0.002 * 1
-                        }
-                    }
                     const fieldRange1 = (0.7 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
                     const fieldRange2 = (0.63 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
                     const fieldRange3 = (0.65 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
@@ -1533,15 +1536,6 @@ const m = {
                 m.harmonicAtomic = () => { //several ellipses spinning about different axises
                     const rotation = simulation.cycle * 0.002
                     const phase = simulation.cycle * 0.03
-                    if (tech.isStandingWaveExpand) {
-                        if (input.field) {
-                            const oldHarmonicRadius = m.harmonicRadius
-                            m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
-                            m.energy -= 0.3 * (m.harmonicRadius - oldHarmonicRadius)
-                        } else {
-                            m.harmonicRadius = 0.998 * m.harmonicRadius + 0.002 * 1
-                        }
-                    }
                     const radius = m.fieldRange * m.harmonicRadius //+ 20 * Math.sin(m.cycle * 0.05)
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "rgba(110,170,200,0.9)"
@@ -1585,6 +1579,15 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
                     if (m.energy > 0.1 && m.fieldCDcycle < m.cycle) {
+                        if (tech.isStandingWaveExpand) {
+                            if (input.field) {
+                                const oldHarmonicRadius = m.harmonicRadius
+                                m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
+                                m.energy -= 0.45 * (m.harmonicRadius - oldHarmonicRadius)
+                            } else {
+                                m.harmonicRadius = 0.997 * m.harmonicRadius + 0.003 * 1
+                            }
+                        }
                         m.harmonicShield()
                     }
 

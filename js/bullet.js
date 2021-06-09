@@ -1578,7 +1578,7 @@ const b = {
             restitution: 0.5,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 60 + Math.floor(7 * Math.random()),
+            lookFrequency: 67 + Math.floor(7 * Math.random()),
             drain: 0.7 * tech.isLaserDiode * tech.laserFieldDrain,
             isArmed: false,
             torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
@@ -1611,7 +1611,7 @@ const b = {
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
                             this.do = this.laserSpin
-                            this.endCycle = simulation.cycle + 300
+                            this.endCycle = simulation.cycle + 360
                             // if (this.angularSpeed < 0.01) this.torque += this.inertia * this.torqueMagnitude * 5 //spin
                             this.isArmed = true
                         }

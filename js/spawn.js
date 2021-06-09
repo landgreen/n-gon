@@ -242,120 +242,127 @@ const spawn = {
         me.isBoss = true;
         me.frictionAir = 0.01;
         me.memory = Infinity;
+        me.hasRunDeathScript = false
         me.locatePlayer();
         const density = 0.25
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
+            if (!this.hasRunDeathScript) {
+                this.hasRunDeathScript = true
+                //make a block body to replace this one
+                //this body is too big to leave behind in the normal way mobs.replace()
+                const len = body.length;
+                const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
+                body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
+                Matter.Body.setVelocity(body[len], { x: 0, y: -3 });
+                Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
+                body[len].collisionFilter.category = cat.body;
+                body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+                body[len].classType = "body";
+                World.add(engine.world, body[len]); //add to world
+                const expand = function(that, massLimit) {
+                    const scale = 1.05;
+                    Matter.Body.scale(that, scale, scale);
+                    if (that.mass < massLimit) setTimeout(expand, 20, that, massLimit);
+                };
+                expand(body[len], 200)
 
-            //make a block body to replace this one
-            //this body is too big to leave behind in the normal way mobs.replace()
-            const len = body.length;
-            const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
-            body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
-            Matter.Body.setVelocity(body[len], { x: 0, y: -3 });
-            Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
-            body[len].collisionFilter.category = cat.body;
-            body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-            body[len].classType = "body";
-            World.add(engine.world, body[len]); //add to world
-            const expand = function(that, massLimit) {
-                const scale = 1.05;
-                Matter.Body.scale(that, scale, scale);
-                if (that.mass < massLimit) setTimeout(expand, 20, that, massLimit);
-            };
-            expand(body[len], 200)
+                function unlockExit() {
+                    if (simulation.isHorizontalFlipped) {
+                        level.exit.x = -5500 - 100;
+                    } else {
+                        level.exit.x = 5500;
+                    }
+                    level.exit.y = -330;
+                    Matter.World.remove(engine.world, map[map.length - 1]);
+                    map.splice(map.length - 1, 1);
+                    simulation.draw.setPaths(); //redraw map draw path
+                }
 
-            function unlockExit() {
-                level.exit.x = 5500;
-                level.exit.y = -330;
-                Matter.World.remove(engine.world, map[map.length - 1]);
-                map.splice(map.length - 1, 1);
-                simulation.draw.setPaths(); //redraw map draw path
-            }
+                //add lore level as next level if player took lore tech earlier in the game
+                if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
+                    simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("<span class='lore-text'>null</span>")`);
+                    level.levels.push("null")
+                    //remove block map element so exit is clear
+                    unlockExit()
+                } else { //reset game
+                    let count = 0
 
-            //add lore level as next level if player took lore tech earlier in the game
-            if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
-                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("<span class='lore-text'>null</span>")`);
-                level.levels.push("null")
-                //remove block map element so exit is clear
-                unlockExit()
-            } else { //reset game
-                let count = 0
-
-                function loop() {
-                    if (!simulation.paused) {
-                        count++
-                        if (count < 600) {
-                            if (count === 1) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
-                            if (!(count % 60)) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(count/60- Math.random()).toFixed(3)}`);
-                        } else if (count === 600) {
-                            simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
-                        } else if (count === 720) {
-                            simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
-                        } else if (count === 900) {
-                            simulation.makeTextLog(`World.clear(engine.world) <em>//simulation successful</em>`);
-                        } else if (count === 1140) {
-                            // tech.isImmortal = false;
-                            // m.death()
-                            // m.alive = false;
-                            // simulation.paused = true;
-                            // m.health = 0;
-                            // m.displayHealth();
-                            document.getElementById("health").style.display = "none"
-                            document.getElementById("health-bg").style.display = "none"
-                            document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
-                            document.getElementById("fade-out").style.opacity = 1; //slowly fades out
-                            // build.shareURL(false)
+                    function loop() {
+                        if (!simulation.paused) {
+                            count++
+                            if (count < 600) {
+                                if (count === 1) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
+                                if (!(count % 60)) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${(count/60- Math.random()).toFixed(3)}`);
+                            } else if (count === 600) {
+                                simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
+                            } else if (count === 720) {
+                                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
+                            } else if (count === 900) {
+                                simulation.makeTextLog(`World.clear(engine.world) <em>//simulation successful</em>`);
+                            } else if (count === 1140) {
+                                // tech.isImmortal = false;
+                                // m.death()
+                                // m.alive = false;
+                                // simulation.paused = true;
+                                // m.health = 0;
+                                // m.displayHealth();
+                                document.getElementById("health").style.display = "none"
+                                document.getElementById("health-bg").style.display = "none"
+                                document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
+                                document.getElementById("fade-out").style.opacity = 1; //slowly fades out
+                                // build.shareURL(false)
+                                setTimeout(function() {
+                                    simulation.paused = true;
+                                    World.clear(engine.world);
+                                    Engine.clear(engine);
+                                    simulation.splashReturn();
+                                }, 6000);
+                                return
+                            }
+                        }
+                        if (simulation.testing) {
+                            unlockExit()
                             setTimeout(function() {
-                                simulation.paused = true;
-                                World.clear(engine.world);
-                                Engine.clear(engine);
-                                simulation.splashReturn();
-                            }, 6000);
-                            return
+                                simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
+                            }, 1500);
+                        } else {
+                            requestAnimationFrame(loop);
                         }
                     }
-                    if (simulation.testing) {
-                        unlockExit()
-                        setTimeout(function() {
-                            simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
-                        }, 1500);
-                    } else {
-                        requestAnimationFrame(loop);
-                    }
+                    requestAnimationFrame(loop);
                 }
-                requestAnimationFrame(loop);
-            }
-            // for (let i = 0; i < 3; i++)
-            level.difficultyIncrease(simulation.difficultyMode) //ramp up damage
-            //remove power Ups,  to avoid spamming console
-            function removeAll(array) {
-                for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
-            }
-            removeAll(powerUp);
-            powerUp = [];
+                // for (let i = 0; i < 3; i++)
+                level.difficultyIncrease(simulation.difficultyMode) //ramp up damage
+                //remove power Ups,  to avoid spamming console
+                function removeAll(array) {
+                    for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
+                }
+                removeAll(powerUp);
+                powerUp = [];
 
-            //pull in particles
-            for (let i = 0, len = body.length; i < len; ++i) {
-                const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, body[i].position)), 65)
-                const pushUp = Vector.add(velocity, { x: 0, y: -0.5 })
-                Matter.Body.setVelocity(body[i], Vector.add(body[i].velocity, pushUp));
-            }
-            //damage all mobs
-            for (let i = 0, len = mob.length; i < len; ++i) {
-                if (mob[i] !== this) mob[i].damage(Infinity, true);
-            }
+                //pull in particles
+                for (let i = 0, len = body.length; i < len; ++i) {
+                    const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, body[i].position)), 65)
+                    const pushUp = Vector.add(velocity, { x: 0, y: -0.5 })
+                    Matter.Body.setVelocity(body[i], Vector.add(body[i].velocity, pushUp));
+                }
+                //damage all mobs
+                for (let i = 0, len = mob.length; i < len; ++i) {
+                    if (mob[i] !== this) mob[i].damage(Infinity, true);
+                }
 
-            //draw stuff
-            for (let i = 0, len = 22; i < len; i++) {
-                simulation.drawList.push({ //add dmg to draw queue
-                    x: this.position.x,
-                    y: this.position.y,
-                    radius: (i + 1) * 150,
-                    color: `rgba(255,255,255,0.17)`,
-                    time: 5 * (len - i + 1)
-                });
+                //draw stuff
+                for (let i = 0, len = 22; i < len; i++) {
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: (i + 1) * 150,
+                        color: `rgba(255,255,255,0.17)`,
+                        time: 5 * (len - i + 1)
+                    });
+                }
             }
         };
         me.onDamage = function() {};
@@ -448,7 +455,7 @@ const spawn = {
                 }
                 const len = (this.totalCycles / 400 + simulation.difficulty / 2 - 30) / 15
                 for (let i = 0; i < len; i++) {
-                    spawn.randomLevelBoss(3000 + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
+                    spawn.randomLevelBoss(-3000 + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
                 }
             }
         }
@@ -1760,8 +1767,8 @@ const spawn = {
                     y: me.position.y
                 },
                 bodyB: me,
-                stiffness: 0.001,
-                damping: 1
+                stiffness: 0.0001,
+                damping: 0.3
             });
             World.add(engine.world, me.constraint);
         }, 2000); //add in a delay in case the level gets flipped left right
@@ -1876,18 +1883,18 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "#f08");
         let me = mob[mob.length - 1];
 
-        setTimeout(() => { //fix mob in place, but allow rotation
-            me.constraint = Constraint.create({
-                pointA: {
-                    x: me.position.x,
-                    y: me.position.y
-                },
-                bodyB: me,
-                stiffness: 0.0001,
-                damping: 1
-            });
-            World.add(engine.world, me.constraint);
-        }, 2000); //add in a delay in case the level gets flipped left right
+        // setTimeout(() => { //fix mob in place, but allow rotation
+        //     me.constraint = Constraint.create({
+        //         pointA: {
+        //             x: me.position.x,
+        //             y: me.position.y
+        //         },
+        //         bodyB: me,
+        //         stiffness: 0.00001,
+        //         damping: 0.1
+        //     });
+        //     World.add(engine.world, me.constraint);
+        // }, 2000); //add in a delay in case the level gets flipped left right
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
