@@ -455,7 +455,7 @@ const spawn = {
                 }
                 const len = (this.totalCycles / 400 + simulation.difficulty / 2 - 30) / 15
                 for (let i = 0; i < len; i++) {
-                    spawn.randomLevelBoss(-3000 + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
+                    spawn.randomLevelBoss(3000 * (simulation.isHorizontalFlipped ? -1 : 1) + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
                 }
             }
         }
@@ -1475,10 +1475,11 @@ const spawn = {
         mobs.spawn(x, y, 0, radius, "transparent");
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.3); //extra dense //normal is 0.001
-        me.laserRange = 550;
+        me.laserRange = 350;
         me.seeAtDistance2 = 2000000;
+        me.isBoss = true;
         me.showHealthBar = false; //drawn in this.awake
-        me.delayLimit = 60 + Math.floor(60 * Math.random());
+        me.delayLimit = 60 + Math.floor(30 * Math.random());
         me.followDelay = 600 - Math.floor(60 * Math.random())
         me.stroke = "transparent"; //used for drawGhost
         me.collisionFilter.mask = cat.bullet | cat.body
@@ -1509,11 +1510,11 @@ const spawn = {
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
+            ctx.setLineDash([125 * Math.random(), 125 * Math.random()]); //the dashed effect is not set back to normal, because it looks neat for how the player is drawn
             // ctx.lineDashOffset = 6*(simulation.cycle % 215);
             if (this.distanceToPlayer() < this.laserRange) {
-                if (m.energy > 0.002) m.energy -= 0.002
-                if (m.immuneCycle < m.cycle) m.damage(0.0001 * simulation.dmgScale);
+                if (m.energy > 0.002) m.energy -= 0.0035
+                if (m.immuneCycle < m.cycle) m.damage(0.00025 * simulation.dmgScale);
                 ctx.beginPath();
                 ctx.moveTo(eye.x, eye.y);
                 ctx.lineTo(m.pos.x, m.pos.y);
@@ -1526,16 +1527,31 @@ const spawn = {
                 ctx.fillStyle = "rgba(150,0,255,0.15)";
                 ctx.fill();
             }
-            ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);
-            ctx.strokeStyle = "rgba(150,0,255,0.5)";
+
+            //several ellipses spinning about the same axis
+            const rotation = simulation.cycle * 0.015
+            const phase = simulation.cycle * 0.021
             ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = "rgba(150,0,255,0.03)";
-            ctx.fill();
+            ctx.fillStyle = "rgba(150,0,255,0.1)"
+            ctx.strokeStyle = "#70f"
+            for (let i = 0, len = 7; i < len; i++) {
+                ctx.beginPath();
+                ctx.ellipse(this.position.x, this.position.y, this.laserRange * Math.abs(Math.sin(phase + i / len * Math.PI)), this.laserRange, rotation, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+
+            // ctx.beginPath();
+            // ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);
+            // ctx.strokeStyle = "rgba(150,0,255,0.5)";
+            // ctx.lineWidth = 1;
+            // ctx.stroke();
+            // ctx.setLineDash([]);
+            // ctx.fillStyle = "rgba(150,0,255,0.03)";
+            // ctx.fill();
             if (!m.isBodiesAsleep && !this.isStunned && !this.isSlowed) {
-                if (this.followDelay > this.delayLimit) this.followDelay -= 0.2;
+                if (this.followDelay > this.delayLimit) this.followDelay -= 0.3;
                 let history = m.history[(m.cycle - Math.floor(this.followDelay)) % 600]
                 Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }

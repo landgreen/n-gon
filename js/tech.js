@@ -1515,9 +1515,9 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
                 },
-                requires: "mass driver or pilot wave",
+                requires: "mass driver or pilot wave  not tokamak",
                 effect() {
                     tech.isBlockBullets = true
                 },
@@ -1551,9 +1551,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
+                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
                 },
-                requires: "mass driver, not pilot wave",
+                requires: "mass driver, not pilot wave not tokamak",
                 effect() {
                     tech.isBlockPowerUps = true
                 },
@@ -2034,7 +2034,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
+                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isBlockExplosion) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
                 },
                 requires: "a way to regen extra energy, but not time crystals",
                 effect: () => {
@@ -2109,7 +2109,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return m.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0
+                    return m.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isBlockExplosion
                 },
                 requires: "increased energy regen or max energy",
                 effect: () => {
@@ -2217,7 +2217,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy
+                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy || tech.isBlockExplosion
                 },
                 requires: "a source of overfilled energy",
                 effect() {
@@ -4947,7 +4947,7 @@
             },
             {
                 name: "annihilation",
-                description: "<strong>touching</strong> normal mobs <strong>annihilates</strong> them<br>drains <strong>33%</strong> of maximum <strong class='color-f'>energy</strong>",
+                description: "<strong>touching</strong> normal mobs <strong>annihilates</strong> them<br>drains <strong>33%</strong> of your maximum <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4961,6 +4961,24 @@
                 },
                 remove() {
                     tech.isAnnihilation = false;
+                }
+            },
+            {
+                name: "inertial mass",
+                description: "<strong>negative mass field</strong> is larger and <strong>faster</strong><br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
+                },
+                requires: "negative mass field",
+                effect() {
+                    tech.isFlyFaster = true
+                },
+                remove() {
+                    tech.isFlyFaster = false;
                 }
             },
             {
@@ -5042,7 +5060,7 @@
             },
             {
                 name: "tokamak",
-                description: "throwing a <strong class='color-block'>block</strong> convert it into <strong class='color-f'>energy</strong><br>and a <strong class='color-laser'>laser</strong> pulse <strong class='color-e'>explosion</strong> cluster",
+                description: "throwing a <strong class='color-block'>block</strong> converts it into <strong class='color-f'>energy</strong><br>and a pulsed fusion <strong class='color-e'>explosion</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5481,25 +5499,26 @@
             //     },
             //     remove() {}
             // },
-            // {
-            //     name: "WIMP",
-            //     description: "<strong class='color-harm'>harmful</strong> particles slowly <strong>chase</strong> you",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 0,
-            //     isExperimentHide: true,
-            //     isJunk: true,
-            //     allowed() {
-            //         return tech.wimpExperiment === 0
-            //     },
-            //     requires: "",
-            //     effect() {
-            //         tech.wimpExperiment = 3
-            //     },
-            //     remove() {
-            //         tech.wimpExperiment = 0
-            //     }
-            // },
+            {
+                name: "hidden variable",
+                description: "spawn <strong>30</strong> <strong class='color-h'>heal</strong> power ups<br>but hide your <strong class='color-h'>health</strong> bar",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return !tech.isEnergyHealth
+                },
+                requires: "not mass-energy",
+                effect() {
+                    document.getElementById("health").style.display = "none"
+                    document.getElementById("health-bg").style.display = "none"
+                    for (let i = 0; i < 30; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                },
+                remove() {}
+            },
             {
                 name: "not a bug",
                 description: "initiate a totally safe game crash for 5 seconds",

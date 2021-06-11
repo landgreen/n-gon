@@ -1549,21 +1549,6 @@ const m = {
                     }
                     m.pushMobs360(radius);
                 }
-                // m.harmonicSameAxis = () => { //several ellipses spinning about the same axis
-                //     const radius = m.fieldRange
-                //     const rotation = simulation.cycle * 0.025
-                //     const phase = simulation.cycle * 0.031
-                //     ctx.lineWidth = 1;
-                //     ctx.fillStyle = "rgba(0,0,0,0.25)"
-                //     ctx.strokeStyle = "#000"
-                //     for (let i = 0, len = 4; i < len; i++) {
-                //         ctx.beginPath();
-                //         ctx.ellipse(m.pos.x, m.pos.y, radius * Math.abs(Math.sin(phase + i / len * Math.PI)), radius, rotation, 0, 2 * Math.PI);
-                //         ctx.fill();
-                //         ctx.stroke();
-                //     }
-                //     m.pushMobs360(radius);
-                // }
                 m.harmonicShield = m.harmonic3Phase
                 m.hold = function() {
                     if (m.isHolding) {
@@ -1744,50 +1729,82 @@ const m = {
                         m.lookForPickUp();
                         const DRAIN = 0.00035
                         if (m.energy > DRAIN) {
-                            m.airSpeedLimit = 400 // 7* player.mass * player.mass
-                            m.FxAir = 0.005
-
-                            //repulse mobs
-                            // for (let i = 0, len = mob.length; i < len; ++i) {
-                            //   sub = Vector.sub(mob[i].position, m.pos);
-                            //   dist2 = Vector.magnitudeSquared(sub);
-                            //   if (dist2 < this.fieldDrawRadius * this.fieldDrawRadius && mob[i].speed > 6) {
-                            //     const force = Vector.mult(Vector.perp(Vector.normalise(sub)), 0.00004 * mob[i].speed * mob[i].mass)
-                            //     mob[i].force.x = force.x
-                            //     mob[i].force.y = force.y
-                            //   }
-                            // }
-                            //look for nearby objects to make zero-g
-                            function zeroG(who, range, mag = 1.06) {
-                                for (let i = 0, len = who.length; i < len; ++i) {
-                                    sub = Vector.sub(who[i].position, m.pos);
-                                    dist = Vector.magnitude(sub);
-                                    if (dist < range) {
-                                        who[i].force.y -= who[i].mass * (simulation.g * mag); //add a bit more then standard gravity
+                            if (tech.isFlyFaster) {
+                                //look for nearby objects to make zero-g
+                                function moveThis(who, range, mag = 1.06) {
+                                    for (let i = 0, len = who.length; i < len; ++i) {
+                                        sub = Vector.sub(who[i].position, m.pos);
+                                        dist = Vector.magnitude(sub);
+                                        if (dist < range) {
+                                            who[i].force.y -= who[i].mass * (simulation.g * mag); //add a bit more then standard gravity
+                                            if (input.left) { //blocks move horizontally with the same force as the player
+                                                who[i].force.x -= m.FxAir * who[i].mass / 10; // move player   left / a
+                                            } else if (input.right) {
+                                                who[i].force.x += m.FxAir * who[i].mass / 10; //move player  right / d
+                                            }
+                                            //loose attraction to player
+                                            // const sub = Vector.sub(m.pos, body[i].position)
+                                            // const unit = Vector.mult(Vector.normalise(sub), who[i].mass * 0.0000002 * Vector.magnitude(sub))
+                                            // body[i].force.x += unit.x
+                                            // body[i].force.y += unit.y
+                                        }
                                     }
                                 }
-                            }
-                            // zeroG(bullet);  //works fine, but not that noticeable and maybe not worth the possible performance hit
-                            // zeroG(mob);  //mobs are too irregular to make this work?
-
-                            if (input.down) { //down
-                                player.force.y -= 0.5 * player.mass * simulation.g;
-                                this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 400 * 0.03;
-                                zeroG(powerUp, this.fieldDrawRadius, 0.7);
-                                zeroG(body, this.fieldDrawRadius, 0.7);
-                            } else if (input.up) { //up
-                                m.energy -= 5 * DRAIN;
-                                this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
-                                player.force.y -= 1.45 * player.mass * simulation.g;
-                                zeroG(powerUp, this.fieldDrawRadius, 1.38);
-                                zeroG(body, this.fieldDrawRadius, 1.38);
+                                //control horizontal acceleration
+                                m.airSpeedLimit = 1000 // 7* player.mass * player.mass
+                                m.FxAir = 0.01
+                                //control vertical acceleration
+                                if (input.down) { //down
+                                    player.force.y += 0.5 * player.mass * simulation.g;
+                                    this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 500 * 0.03;
+                                    moveThis(powerUp, this.fieldDrawRadius, 0);
+                                    moveThis(body, this.fieldDrawRadius, 0);
+                                } else if (input.up) { //up
+                                    m.energy -= 5 * DRAIN;
+                                    this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 1100 * 0.03;
+                                    player.force.y -= 2.25 * player.mass * simulation.g;
+                                    moveThis(powerUp, this.fieldDrawRadius, 1.8);
+                                    moveThis(body, this.fieldDrawRadius, 1.8);
+                                } else {
+                                    m.energy -= DRAIN;
+                                    this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 800 * 0.03;
+                                    player.force.y -= 1.07 * player.mass * simulation.g; // slow upward drift
+                                    moveThis(powerUp, this.fieldDrawRadius);
+                                    moveThis(body, this.fieldDrawRadius);
+                                }
                             } else {
-                                m.energy -= DRAIN;
-                                this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 650 * 0.03;
-                                player.force.y -= 1.07 * player.mass * simulation.g; // slow upward drift
-                                zeroG(powerUp, this.fieldDrawRadius);
-                                zeroG(body, this.fieldDrawRadius);
+                                //look for nearby objects to make zero-g
+                                function verticalForce(who, range, mag = 1.06) {
+                                    for (let i = 0, len = who.length; i < len; ++i) {
+                                        sub = Vector.sub(who[i].position, m.pos);
+                                        dist = Vector.magnitude(sub);
+                                        if (dist < range) who[i].force.y -= who[i].mass * (simulation.g * mag);
+                                    }
+                                }
+                                //control horizontal acceleration
+                                m.airSpeedLimit = 400 // 7* player.mass * player.mass
+                                m.FxAir = 0.005
+                                //control vertical acceleration
+                                if (input.down) { //down
+                                    player.force.y -= 0.5 * player.mass * simulation.g;
+                                    this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 400 * 0.03;
+                                    verticalForce(powerUp, this.fieldDrawRadius, 0.7);
+                                    verticalForce(body, this.fieldDrawRadius, 0.7);
+                                } else if (input.up) { //up
+                                    m.energy -= 5 * DRAIN;
+                                    this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
+                                    player.force.y -= 1.45 * player.mass * simulation.g;
+                                    verticalForce(powerUp, this.fieldDrawRadius, 1.38);
+                                    verticalForce(body, this.fieldDrawRadius, 1.38);
+                                } else {
+                                    m.energy -= DRAIN;
+                                    this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 650 * 0.03;
+                                    player.force.y -= 1.07 * player.mass * simulation.g; // slow upward drift
+                                    verticalForce(powerUp, this.fieldDrawRadius);
+                                    verticalForce(body, this.fieldDrawRadius);
+                                }
                             }
+
                             if (m.energy < 0.001) {
                                 m.fieldCDcycle = m.cycle + 120;
                                 m.energy = 0;
@@ -3026,7 +3043,7 @@ const m = {
                                     });
 
                                     if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy) {
-                                        m.energy -= 0.33 * m.maxEnergy
+                                        m.energy -= 0.33 * Math.max(m.maxEnergy, m.energy)
                                         m.immuneCycle = 0; //player doesn't go immune to collision damage
                                         mob[k].death();
                                         simulation.drawList.push({ //add dmg to draw queue

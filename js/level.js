@@ -15,7 +15,7 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // m.setField("plasma torch")
+            // m.setField("negative mass field")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // b.giveGuns("laser")
             // tech.isExplodeRadio = true
@@ -29,6 +29,7 @@ const level = {
             // tech.giveTech("attract")
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
+            // tech.isFlyFaster = true
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing
@@ -1169,8 +1170,8 @@ const level = {
         // spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
-        spawn.shooterBoss(1900, -500)
-        // spawn.launcherBoss(1200, -500)
+        // spawn.shooterBoss(1900, -500)
+        spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
@@ -1180,7 +1181,7 @@ const level = {
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
-        spawn.laser(1200, -500)
+        // spawn.laser(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "pulsar")
@@ -5709,7 +5710,7 @@ const level = {
             portal2[2].draw()
         }
     },
-    "n-gon"() { // Made by Oranger on Discord
+    "n-gon"() { //make by Oranger
         let needGravity = [];
         let s = { //mech statue
             x: -200,
@@ -5723,8 +5724,8 @@ const level = {
             k: { //knee
                 x: -30.96, //-17.38
                 y: 58.34, //70.49
-                x2: -33.96, //x - 3
-                y2: 58.34 //same as y
+                //x2: -33.96, //x - 3
+                //y2: 58.34 //same as y
             },
             f: { //foot
                 x: 0,
@@ -5736,7 +5737,8 @@ const level = {
             lineColorLight: "#aaa" //#4a4a4a
         }
         const boost1 = level.boost(2550, 1500, 1700)
-        const boost2 = level.boost(-3400, -2050, 3000)
+        const boost2 = level.boost(-3400, -2050, 2100)
+
         level.custom = () => {
             boost1.query();
             boost2.query();
@@ -5749,8 +5751,9 @@ const level = {
             }
             ctx.fillStyle = "#444" //light fixtures
             ctx.fillRect(2350, 995, 40, 10)
-            ctx.fillRect(2280, -6005, 40, 10)
+            //ctx.fillRect(2280, -6005, 40, 10)
 
+            //statue
             ctx.save();
             ctx.translate(s.x, s.y);
             //statueLeg is at the bottom, below the enemies but above the NGON function
@@ -5773,10 +5776,9 @@ const level = {
         };
 
         level.customTopLayer = () => {
-            //boosts
             //boost chute for lack of a better name
             ctx.fillStyle = "rgba(60,60,60,0.9)";
-            ctx.fillRect(-3451, -5000, 202, 2500);
+            ctx.fillRect(-3451, -4000, 202, 1500);
             ctx.fillRect(2499, -170, 202, 1170);
 
             ctx.fillStyle = "rgba(0,0,0,0.2)";
@@ -5792,17 +5794,17 @@ const level = {
             ctx.lineTo(1870, 1500);
             ctx.lineTo(2360, 1000);
             ctx.fill();
-            ctx.beginPath(); //exit
-            ctx.moveTo(1600, -6000);
-            ctx.lineTo(1600, -5000);
-            ctx.lineTo(3000, -5000);
-            ctx.lineTo(3000, -6000);
-            ctx.lineTo(2310, -6000);
-            ctx.lineTo(2600, -5000);
-            ctx.lineTo(2000, -5000);
-            ctx.lineTo(2290, -6000);
-            ctx.lineTo(1600, -6000);
-            ctx.fill();
+            // ctx.beginPath(); //exit
+            // ctx.moveTo(1600, -6000);
+            // ctx.lineTo(1600, -5000);
+            // ctx.lineTo(3000, -5000);
+            // ctx.lineTo(3000, -6000);
+            // ctx.lineTo(2310, -6000);
+            // ctx.lineTo(2600, -5000);
+            // ctx.lineTo(2000, -5000);
+            // ctx.lineTo(2290, -6000);
+            // ctx.lineTo(1600, -6000);
+            // ctx.fill();
 
             ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fillRect(1600, -1000, 1400, 830);
@@ -5810,14 +5812,14 @@ const level = {
             ctx.fillRect(-1300, -200, 2200, 200); //statue base
             ctx.fillRect(-800, -400, 1200, 200);
             ctx.fillRect(-500, -700, 600, 300);
-            ctx.fillRect(-4000, -6000, 2000, 1000); //left side
+            //ctx.fillRect(-4000, -6000, 2000, 1000); //left side
             ctx.fillRect(-4000, -2500, 2000, 2500);
         };
 
         level.setPosToSpawn(1810, 1450);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 2700;
-        level.exit.y = -5030;
+        level.exit.y = -4030;
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
         level.defaultZoom = 3500
         simulation.zoomTransition(level.defaultZoom)
@@ -5828,13 +5830,13 @@ const level = {
         spawn.debris(-3200, 0, 1000, 6); //16 debris per level
 
         //boundaries
-        spawn.mapRect(-8000, 1500, 15000, 3000); //base floor
-        spawn.mapRect(3000, -10000, 4000, 12000); //right barrier
-        spawn.mapRect(-8000, -10000, 4000, 12000); //left barrier
-        spawn.mapRect(1600, -10000, 1500, 4000); //upper right wall
-        spawn.mapRect(-4100, -10000, 2100, 4000); //upper left wall
-        spawn.mapRect(1600, -5000, 1500, 4000); //lower right wall
-        spawn.mapRect(-4100, 0, 5600, 1700); //floor
+        spawn.mapRect(-4100, 1500, 7200, 100); //base floor
+        spawn.mapRect(3000, -4000, 100, 5600); //right barrier
+        spawn.mapRect(-4100, -4000, 100, 5600); //left barrier
+        //spawn.mapRect(1600, -10000, 1500, 4000); //upper right wall
+        //spawn.mapRect(-4100, -10000, 2100, 4000); //upper left wall
+        spawn.mapRect(1600, -4000, 1500, 3000); //right wall
+        spawn.mapRect(-4100, 0, 5600, 1550); //floor
 
         //starting room  
         spawn.mapRect(1500, 0, 700, 900);
@@ -5852,8 +5854,8 @@ const level = {
         spawn.mapRect(-2700, -1450, 300, 100);
         spawn.mapRect(-3100, -1750, 300, 100);
         spawn.mapRect(-3500, -2050, 300, 100);
-        spawn.mapRect(-4100, -5000, 650, 2500); //floor 3
-        spawn.mapRect(-3250, -5000, 1250, 2500);
+        spawn.mapRect(-4100, -4000, 650, 1500); //floor 3
+        spawn.mapRect(-3250, -4000, 1250, 1500);
 
         //statue base
         spawn.mapRect(-700, -900, 1000, 200); //top
@@ -5868,7 +5870,7 @@ const level = {
         spawn.mapRect(400, -600, 200, 400);
         spawn.mapRect(400, -300, 500, 100);
 
-        hangingNGON(-1900, -5000, 1, 1000, 1, true, {
+        hangingNGON(-1900, -4000, 1, 1000, 1, false, {
             density: 0.001, //default density is 0.001
             friction: 0.0001,
             frictionAir: 0.001,
@@ -5876,7 +5878,7 @@ const level = {
             restitution: 0,
             isNotHoldable: true
         });
-        hangingNGON(1900, -5600, 0.2, 500, 0.0005, false, {
+        hangingNGON(1900, -4600, 0.2, 300, 0.0005, false, {
             density: 0.00005, //default density is 0.001
             friction: 0.0001,
             frictionAir: 0.003,
@@ -5885,24 +5887,24 @@ const level = {
             isNotHoldable: true
         });
 
-        // Never gonna give you up
-        spawn.bodyRect(-8000, -10100, 15, 100);
-        // Never gonna let you down
-        spawn.bodyRect(-7915, -10100, 15, 100);
-        // Never gonna run around and desert you
-        body[body.length] = Bodies.polygon(-7950, -10025, 0, 25, { //circle
-            friction: 0.05,
-            frictionAir: 0.001
-        });
-        // Never gonna make you cry
-        spawn.bodyRect(6985, -10100, 15, 100);
-        // Never gonna say goodbye
-        spawn.bodyRect(6900, -10100, 15, 100);
-        // Never gonna tell a lie and hurt you
-        body[body.length] = Bodies.polygon(6950, -10025, 0, 25, { //circle
-            friction: 0.05,
-            frictionAir: 0.001
-        });
+        // // Never gonna give you up
+        // spawn.bodyRect(-8000, -10100, 15, 100);
+        // // Never gonna let you down
+        // spawn.bodyRect(-7915, -10100, 15, 100);
+        // // Never gonna run around and desert you
+        // body[body.length] = Bodies.polygon(-7950, -10025, 0, 25, { //circle
+        //     friction: 0.05,
+        //     frictionAir: 0.001
+        // });
+        // // Never gonna make you cry
+        // spawn.bodyRect(6985, -10100, 15, 100);
+        // // Never gonna say goodbye
+        // spawn.bodyRect(6900, -10100, 15, 100);
+        // // Never gonna tell a lie and hurt you
+        // body[body.length] = Bodies.polygon(6950, -10025, 0, 25, { //circle
+        //     friction: 0.05,
+        //     frictionAir: 0.001
+        // });
 
         //pile of blocks
         spawn.bodyRect(1920, -400, 200, 400)
@@ -5952,7 +5954,7 @@ const level = {
         //top right
         spawn.randomGroup(2000, -5700, 0.6);
 
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        powerUps.addRerollToLevel() //needs to run after mobs are spawned
         let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss"];
         let abc = Math.random();
         if (simulation.difficulty > 3) {
@@ -6075,7 +6077,7 @@ const level = {
 
             //-
             spawn.bodyRect(x + 800 * s, y + 250 * s, 200 * s, 100 * s, 1, properties);
-            body[body.length - 1].frictionAir = 0.05
+            body[body.length - 1].frictionAir = 0.05 //friction to make jump easier
             addConstraint(x + 900 * s, y - height, 0, -30 * s, stiffness, body[body.length - 1], pin);
 
             //g

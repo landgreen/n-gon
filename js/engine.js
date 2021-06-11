@@ -150,7 +150,7 @@ function collisionChecks(event) {
                         });
 
                         if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy) {
-                            m.energy -= 0.33 * m.maxEnergy
+                            m.energy -= 0.33 * Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
                             m.immuneCycle = 0; //player doesn't go immune to collision damage
                             mob[k].death();
                             simulation.drawList.push({ //add dmg to draw queue
