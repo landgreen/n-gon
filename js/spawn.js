@@ -1474,7 +1474,7 @@ const spawn = {
         }
         mobs.spawn(x, y, 0, radius, "transparent");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.3); //extra dense //normal is 0.001
+        Matter.Body.setDensity(me, 0.25); //extra dense //normal is 0.001
         me.laserRange = 350;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;

@@ -506,10 +506,10 @@ const simulation = {
         if (!m.isShipMode) {
             m.draw = m.drawDefault //set the play draw to normal, undoing some junk tech
             m.spawn(); //spawns the player
+            m.look = m.lookDefault
         } else {
             World.add(engine.world, [player])
         }
-        m.look = m.lookDefault
 
         simulation.isHorizontalFlipped = (Math.random() < 0.5) ? true : false //if true, some maps are flipped horizontally
         level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
@@ -790,7 +790,7 @@ const simulation = {
             }
             if (tech.relayIce && tech.isFlipFlopOn) {
                 for (let j = 0; j < tech.relayIce; j++) {
-                    for (let i = 0, len = Math.ceil(5 * Math.random()); i < len; i++) b.iceIX(2)
+                    for (let i = 0, len = Math.ceil(8 * Math.random()); i < len; i++) b.iceIX(2)
                 }
             }
 

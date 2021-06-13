@@ -37,7 +37,7 @@ const level = {
             // level.final() //final boss level  
             // level.gauntlet(); //before final boss level  
             // level.testChamber()
-            // level.sewers(); 
+            // level.sewers();
             // level.satellite();
             // level.skyscrapers(); 
             // level.aerie(); 
@@ -95,13 +95,13 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            const len = Math.floor((m.maxHealth - m.health) / 0.5)
-            for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 60 * (Math.random() - 0.5), player.position.y + 60 * (Math.random() - 0.5), "heal", false);
+            const len = Math.floor((m.maxHealth - m.health) / 0.33)
+            for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isMACHO) spawn.MACHO()
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
-            for (let j = 0, len = 1 + 2 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 1 + 5 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
         for (let i = 0; i < tech.wimpExperiment; i++) spawn.WIMP()
         if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
@@ -115,24 +115,24 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.94; //damage done by player decreases each level
+            b.dmgScale *= 0.92; //damage done by player decreases each level
             if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.36 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.385 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.94; //damage done by player decreases each level
+            b.dmgScale /= 0.92; //damage done by player decreases each level
             if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale < 5) simulation.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.36 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.385 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
@@ -1569,8 +1569,8 @@ const level = {
         spawn.mapRect(1225, -1955, 175, 30);
         const removeIndex2 = map.length - 1 //so much work to catch blocks caught at the bottom of the vertical portals
         let portal, portal2, portal3
-        const hazard = level.hazard(350, -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)") //laser
-        const hazard2 = level.hazard(1775, -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
+        const hazard = level.hazard((simulation.isHorizontalFlipped ? -350 - 700 : 350), -2025, 700, 10, 0.4, "hsl(0, 100%, 50%)") //laser
+        const hazard2 = level.hazard((simulation.isHorizontalFlipped ? -1775 - 150 : 1775), -2550, 150, 10, 0.4, "hsl(0, 100%, 50%)") //laser
         const button = level.button(2100, -2600)
         const buttonDoor = level.button(600, -550)
         const door = level.door(312, -750, 25, 190, 185)
@@ -1758,11 +1758,13 @@ const level = {
             button.max.x = -button.max.x + 126 // flip the button horizontally
             buttonDoor.min.x = -buttonDoor.min.x - 126 // flip the button horizontally
             buttonDoor.max.x = -buttonDoor.max.x + 126 // flip the button horizontally
-            hazard.min.x = -hazard.min.x - 700 //-x-width
-            hazard.max.x = -hazard.max.x - 700 //-x-width
-            hazard2.min.x = -hazard2.min.x - 150 //-x-width
-            hazard2.max.x = -hazard2.max.x - 150 //-x-width
 
+            //this makes the hazard draw, but not collide for reasons I don't understand
+            //so don't use it, instead just call the hazard differently based on this flip flag
+            // hazard.min.x = -hazard.min.x - hazard.width //-x-width
+            // hazard.max.x = -hazard.max.x - hazard.width //-x-width
+            // hazard2.min.x = -hazard2.min.x - hazard2.width //-x-width
+            // hazard2.max.x = -hazard2.max.x - hazard2.width //-x-width
             portal = level.portal({
                 x: -2475,
                 y: -140
@@ -1789,6 +1791,7 @@ const level = {
 
             // level.custom = () => { };
             // level.customTopLayer = () => {};
+
         } else {
             portal = level.portal({
                 x: 2475,
@@ -1816,7 +1819,8 @@ const level = {
     },
     sewers() {
         const button1 = level.button(6600, 2675)
-        const hazard = level.hazard(4550, 2750, 4550, 150)
+        // const hazard = level.hazard(4550, 2750, 4550, 150)
+        const hazard = level.hazard(simulation.isHorizontalFlipped ? -4550 - 4550 : 4550, 2750, 4550, 150)
         let balance1, balance2, balance3, balance4, rotor
 
         const drip1 = level.drip(6100, 1900, 2900, 100) // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
@@ -1969,8 +1973,6 @@ const level = {
             drip1.x *= -1
             drip2.x *= -1
             drip3.x *= -1
-            hazard.min.x = -hazard.min.x - 4550 //-x-width
-            hazard.max.x = -hazard.max.x - 4550 //-x-width
             level.custom = () => {
                 drip1.draw();
                 drip2.draw();
@@ -6120,7 +6122,7 @@ const level = {
             addConstraint(x + 3100 * s, y - height, 0, -10 * s, stiffness, composite[composite.length - 1], pin);
         }
     },
-    tunnel() {
+    tunnel() { // by Scarlettt
         level.custom = () => {
             level.playerExitCheck();
 
@@ -6229,21 +6231,7 @@ const level = {
             secretHazard.draw();
             button.draw();
 
-            function drawFlame(x, y, color = "#f81", angle = Math.PI / 2) {
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
-                for (let i = 0; i < 3; i++) {
-                    let randAng = (Math.random() - 0.5) * 2 + angle;
-                    randLen = 30 + Math.random() * 10;
 
-                    x = x + Math.cos(randAng) * randLen;
-                    y = y - Math.sin(randAng) * randLen;
-                    ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-            }
 
             // Fire damage
             let isInRange = flames.reduce((a, i) => a || Math.sqrt((m.pos.x - i[0]) * (m.pos.x - i[0]) + (m.pos.y + 90 - i[1]) * (m.pos.y + 90 - i[1])) < 50, false);
@@ -6314,54 +6302,6 @@ const level = {
                 ctx.fillRect(1480, -5000, 1070, 1710);
             }
 
-            function drawProject(startPos, endPos1, endPos2, tValue, tValueM) {
-                ctx.strokeStyle = "#003";
-                ctx.fillStyle = "#0055aa" + ('0' + (tValue * 60 / tValueM).toString(16)).slice(-2);
-
-                let inter = (tValueM - tValue) / tValueM;
-                let endpos1i = endPos1.map((i, j) => (startPos[j] - i) * inter),
-                    endpos2i = endPos2.map((i, j) => (startPos[j] - i) * inter);
-
-                ctx.beginPath();
-                ctx.moveTo(endPos1[0] + endpos1i[0], endPos1[1] + endpos1i[1]);
-                ctx.lineTo(...startPos);
-                ctx.lineTo(endPos2[0] + endpos2i[0], endPos1[1] + endpos1i[1]);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(endPos1[0] + endpos1i[0], endPos1[1] + endpos1i[1]);
-                ctx.lineTo(...startPos);
-                ctx.lineTo(endPos1[0] + endpos1i[0], endPos2[1] + endpos2i[1]);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(endPos1[0] + endpos1i[0], endPos2[1] + endpos2i[1]);
-                ctx.lineTo(...startPos);
-                ctx.lineTo(endPos2[0] + endpos2i[0], endPos2[1] + endpos2i[1]);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(endPos2[0] + endpos2i[0], endPos2[1] + endpos2i[1]);
-                ctx.lineTo(...startPos);
-                ctx.lineTo(endPos2[0] + endpos2i[0], endPos1[1] + endpos1i[1]);
-                ctx.fill();
-                ctx.stroke();
-
-                if (tValue >= tValueM * 2 / 3) {
-                    ctx.fillStyle = "#0055aa" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 6.25 * 60 / tValueM).toString(16)).slice(-2);
-                    ctx.strokeStyle = "#000033" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 12.75 * 60 / tValueM).toString(16)).slice(-2);
-                    ctx.fillRect(endPos1[0], endPos1[1], endPos2[0] - endPos1[0], endPos2[1] - endPos1[1]);
-                    ctx.shadowColor = "#00aaaa" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 12.75 * 60 / tValueM).toString(16)).slice(-2);
-                    ctx.shadowBlur = 10;
-                    ctx.strokeRect(endPos1[0], endPos1[1], endPos2[0] - endPos1[0], endPos2[1] - endPos1[1]);
-                    ctx.shadowBlur = 0;
-                    ctx.shadowColor = "#0000";
-                }
-            }
-
             if (secretAnimTrans > 0) {
                 drawProject([3614, -3530], [2900, -3900], [3400, -3600], secretAnimTrans, 60);
                 if (secretAnimTrans >= 42) {
@@ -6399,7 +6339,7 @@ const level = {
                     ctx.fillText("Entity name: m", 1560, -3830);
                     ctx.fillStyle = (tech.totalCount < 25 ? (tech.totalCount < 10 ? "#ffff44" : "#22ff22") : "#ff6644") + Math.floor((secretAnimTrans2 - 40) * 12.75).toString(16);
                     ctx.fillText("Threat level: " + (tech.totalCount < 25 ? (tech.totalCount < 10 ? "Low" : "Medium") : "HIGH"), 1560, -3790);
-                    if (tech.totalCount >= 10) ctx.fillText("PROCEDURE ACTIVATED", 1560, -3750);
+                    if (tech.totalCount >= 15) ctx.fillText("PROCEDURE ACTIVATED", 1560, -3750);
                     ctx.strokeStyle = "#00ff00" + Math.floor((secretAnimTrans2 - 40) * 6).toString(16);
                     ctx.beginPath();
                     ctx.arc(1950, -3730, 60, 0, 2 * Math.PI);
@@ -6416,9 +6356,8 @@ const level = {
                     if (secretAnimTrans2 >= 60) {
                         if (!emergencyActivated && tech.totalCount >= 10) {
                             for (let i = 0; i < 5; i++) {
-                                let randomNum = Math.random() * Math.PI;
-                                spawn.exploder(m.pos.x + Math.cos(randomNum) * 200, m.pos.y + Math.sin(randomNum) * 200);
-                                if (tech.totalCount >= 25) spawn.randomMob(m.pos.x + Math.cos(randomNum) * 200, m.pos.y + Math.sin(randomNum) * 200, Infinity);
+                                spawn.exploder(1614, -3900);
+                                if (tech.totalCount >= 25) spawn.randomMob(1614, -3900, Infinity);
                             }
                             emergencyActivated = true;
                         }
@@ -6592,5 +6531,70 @@ const level = {
         if (simulation.difficulty > 5) spawn[["shooterBoss", "launcherBoss"][randomBoss]](7500, -150);
         else spawn[["shooter", "launcher"][randomBoss]](7500, -150, 150);
         spawn[["shooter", "launcher"][randomBoss]](8500, -150, 150);
+
+        // canvas stuff
+        function drawFlame(x, y, color = "#f81", angle = Math.PI / 2) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 3; i++) {
+                let randAng = (Math.random() - 0.5) * 2 + angle;
+                randLen = 30 + Math.random() * 10;
+
+                x = x + Math.cos(randAng) * randLen;
+                y = y - Math.sin(randAng) * randLen;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        function drawProject(startPos, endPos1, endPos2, tValue, tValueM) {
+            ctx.strokeStyle = "#003";
+            ctx.fillStyle = "#0055aa" + ('0' + (tValue * 60 / tValueM).toString(16)).slice(-2);
+
+            let inter = (tValueM - tValue) / tValueM;
+            let endpos1i = endPos1.map((i, j) => (startPos[j] - i) * inter),
+                endpos2i = endPos2.map((i, j) => (startPos[j] - i) * inter);
+
+            ctx.beginPath();
+            ctx.moveTo(endPos1[0] + endpos1i[0], endPos1[1] + endpos1i[1]);
+            ctx.lineTo(...startPos);
+            ctx.lineTo(endPos2[0] + endpos2i[0], endPos1[1] + endpos1i[1]);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endPos1[0] + endpos1i[0], endPos1[1] + endpos1i[1]);
+            ctx.lineTo(...startPos);
+            ctx.lineTo(endPos1[0] + endpos1i[0], endPos2[1] + endpos2i[1]);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endPos1[0] + endpos1i[0], endPos2[1] + endpos2i[1]);
+            ctx.lineTo(...startPos);
+            ctx.lineTo(endPos2[0] + endpos2i[0], endPos2[1] + endpos2i[1]);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endPos2[0] + endpos2i[0], endPos2[1] + endpos2i[1]);
+            ctx.lineTo(...startPos);
+            ctx.lineTo(endPos2[0] + endpos2i[0], endPos1[1] + endpos1i[1]);
+            ctx.fill();
+            ctx.stroke();
+
+            if (tValue >= tValueM * 2 / 3) {
+                ctx.fillStyle = "#0055aa" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 6.25 * 60 / tValueM).toString(16)).slice(-2);
+                ctx.strokeStyle = "#000033" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 12.75 * 60 / tValueM).toString(16)).slice(-2);
+                ctx.fillRect(endPos1[0], endPos1[1], endPos2[0] - endPos1[0], endPos2[1] - endPos1[1]);
+                ctx.shadowColor = "#00aaaa" + ('0' + Math.floor((tValue - tValueM * 2 / 3) * 12.75 * 60 / tValueM).toString(16)).slice(-2);
+                ctx.shadowBlur = 10;
+                ctx.strokeRect(endPos1[0], endPos1[1], endPos2[0] - endPos1[0], endPos2[1] - endPos1[1]);
+                ctx.shadowBlur = 0;
+                ctx.shadowColor = "#0000";
+            }
+        }
     }
 };

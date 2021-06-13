@@ -1,5 +1,54 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+over all game difficulty scaling occurs faster
+  your damage will feel lower, and you will take more harm,
+  so you should probably play on a lower difficulty
+
+tech: Higgs manism gives 50% reduced fire delay instead of harm reduction
+tech: inertial frame is removed
+tech: automatic is now a junk tech
+
+balance:
+  dead reckoning gives 36% damage when at rest (was 30%)
+  overcharge gives 10 more energy, but adds 10 junk tech
+  1st ionization energy gives 6 energy per heal (was 5)
+  dormancy increases damage by 100% but lowers it by 33% if no recent kills (was +50%, -15%) 
+  torpor decreases harm by 66% increases harm by 15% if no recent kills (was -50%, +10%)
+  Ψ(t) collapse spawns 3 more research, so it's at 15
+  fragmentation gives 30% more nails for railgun
+  ammonium nitrate +25% (was 20%)
+  generalist gives 8 guns (was 6)
+  arsenal gives 10% per gun (was 14%)
+  rivet gun fires 25% faster, rivets are 15% larger
+  shotgun slug is 33% bigger
+  missile bot fires 10% more often
+  tinsellated flagella gives 40% speed increase (was 50%), base spore speed is 10% faster
+  beamSplitter has a 20% lower divergence
+  nano manufacturing tech is all buffed 15%
+  traversable geodesics gives 2 guns and ammo (was 1)
+  mines have 25% more nails, laser mines use 20% less energy sentry mines last 33% seconds longer
+  zoospore vector has an 11% chance to spawn (was 9%)
+  negentropy spawns a heal for every 33 missing health (was 50 health)
+  exciton-lattice gives 60% damage
+  thermocouple spawns 1-8 ice-IX (was 1-5)
+  WIMPs spawn 2-6 research (was 2-3)
+  quantum immortality reduces harm by 33% (was 23%)
+  commodities exchange gives 10 power ups (was 8)
+  super balls are 17% bigger (this means they do about 25% more damage)
+  exothermic process increases damage by (was 45%)
+  heat engine increases damage by 50% (was 40%)
+  replication gives 10% duplication chance (was 8%)
+  stimulated emission gives 22% duplication chance
+  futures exchange gives 4.7% duplication chance per cancel  (was 4.3%)
+  needles are 10% slower and do 15% more damage
+
+bug fixes:
+  reduced tolerances text rewritten to clarify that it gives more ammo per ammo pack
+  hazards on horizontal flipped levels now correctly do damage
+  ship mode aims properly after you die
+    although it still doesn't reset
+  experiment mode selections are highlighted better
+
 
 
 ******************************************************** BUGS ********************************************************
@@ -27,6 +76,12 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** TODO ********************************************************
+
+* inductive coupling - sucks without catabolism, too much delayed gratification. should probably be bundled with transceiver chip
+
+tech: cloaking field - decrease/increase cooldown on sneak attack?
+  decrease/increase damage bonus?
+  decrease/increase visual radius?
 
 have throw charge scale with fire delay
 

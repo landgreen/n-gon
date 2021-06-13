@@ -299,20 +299,21 @@ const build = {
             }
         } else if (type === "tech") {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
-                if (!tech.tech[index].isLore && !tech.tech[index].isNonRefundable && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
+                // if (!tech.tech[index].isLore && !tech.tech[index].isNonRefundable && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
+                if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
                 tech.giveTech(index)
             } else if (!tech.tech[index].isNonRefundable) {
                 tech.totalCount -= tech.tech[index].count
                 tech.removeTech(index);
                 who.classList.remove("build-tech-selected");
             } else {
+                // for non refundable tech this makes it flash off for a second, but return to on to show that it can't be set off
                 who.classList.remove("build-tech-selected")
                 setTimeout(() => {
                     who.classList.add("build-tech-selected")
                 }, 50);
             }
         }
-
 
         // } else if (type === "tech") { //remove tech if you have too many
         //     if (tech.tech[index].count < tech.tech[index].maxCount) {
@@ -327,11 +328,8 @@ const build = {
         //         setTimeout(() => { //return energy
         //             who.classList.add("build-tech-selected")
         //         }, 50);
-
         //     }
         // }
-
-
 
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -367,12 +365,14 @@ const build = {
                     } else {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     }
+                    //deselect selected tech options if you don't have the tech any more // for example: when bot techs are converted after a bot upgrade tech is taken
+                    if (tech.tech[i].count === 0 && techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
 
                     if (techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.remove("experiment-grid-disabled");
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'tech')`);
                     }
-                } else {
+                } else { //disabled color
                     // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div>`

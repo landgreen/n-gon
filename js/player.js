@@ -499,8 +499,8 @@ const m = {
         let dmg = 1
         dmg *= m.fieldHarmReduction
         if (tech.isHarmMACHO) dmg *= 0.33
-        if (tech.isImmortal) dmg *= 0.79
-        if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.50 : 1.1
+        if (tech.isImmortal) dmg *= 0.66
+        if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.33 : 1.15
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
@@ -513,7 +513,6 @@ const m = {
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
         if (tech.energyRegen === 0) dmg *= 0.34
         if (tech.isTurret && m.crouch) dmg *= 0.55;
-        if (tech.isFireMoveLock && input.fire) dmg *= 0.4;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
@@ -1601,33 +1600,31 @@ const m = {
                     } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
                         m.grabPowerUp();
                         m.lookForPickUp();
-                        if (m.energy > 0.05) {
-                            //draw field
-                            if (m.holdingTarget) {
-                                ctx.fillStyle = "rgba(110,170,200," + (0.06 + 0.03 * Math.random()) + ")";
-                                ctx.strokeStyle = "rgba(110, 200, 235, " + (0.35 + 0.05 * Math.random()) + ")"
-                            } else {
-                                ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
-                                ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"
-                            }
-                            ctx.beginPath();
-                            ctx.arc(m.pos.x, m.pos.y, m.fieldRange, m.angle - Math.PI * m.fieldArc, m.angle + Math.PI * m.fieldArc, false);
-                            ctx.lineWidth = 2.5 - 1.5 * wave;
-                            ctx.lineCap = "butt"
-                            ctx.stroke();
-                            const curve = 0.57 + 0.04 * wave
-                            const aMag = (1 - curve * 1.2) * Math.PI * m.fieldArc
-                            let a = m.angle + aMag
-                            let cp1x = m.pos.x + curve * m.fieldRange * Math.cos(a)
-                            let cp1y = m.pos.y + curve * m.fieldRange * Math.sin(a)
-                            ctx.quadraticCurveTo(cp1x, cp1y, m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle))
-                            a = m.angle - aMag
-                            cp1x = m.pos.x + curve * m.fieldRange * Math.cos(a)
-                            cp1y = m.pos.y + curve * m.fieldRange * Math.sin(a)
-                            ctx.quadraticCurveTo(cp1x, cp1y, m.pos.x + 1 * m.fieldRange * Math.cos(m.angle - Math.PI * m.fieldArc), m.pos.y + 1 * m.fieldRange * Math.sin(m.angle - Math.PI * m.fieldArc))
-                            ctx.fill();
-                            m.pushMobsFacing();
+                        //draw field
+                        if (m.holdingTarget) {
+                            ctx.fillStyle = "rgba(110,170,200," + (0.06 + 0.03 * Math.random()) + ")";
+                            ctx.strokeStyle = "rgba(110, 200, 235, " + (0.35 + 0.05 * Math.random()) + ")"
+                        } else {
+                            ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
+                            ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"
                         }
+                        ctx.beginPath();
+                        ctx.arc(m.pos.x, m.pos.y, m.fieldRange, m.angle - Math.PI * m.fieldArc, m.angle + Math.PI * m.fieldArc, false);
+                        ctx.lineWidth = 2.5 - 1.5 * wave;
+                        ctx.lineCap = "butt"
+                        ctx.stroke();
+                        const curve = 0.57 + 0.04 * wave
+                        const aMag = (1 - curve * 1.2) * Math.PI * m.fieldArc
+                        let a = m.angle + aMag
+                        let cp1x = m.pos.x + curve * m.fieldRange * Math.cos(a)
+                        let cp1y = m.pos.y + curve * m.fieldRange * Math.sin(a)
+                        ctx.quadraticCurveTo(cp1x, cp1y, m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle))
+                        a = m.angle - aMag
+                        cp1x = m.pos.x + curve * m.fieldRange * Math.cos(a)
+                        cp1y = m.pos.y + curve * m.fieldRange * Math.sin(a)
+                        ctx.quadraticCurveTo(cp1x, cp1y, m.pos.x + 1 * m.fieldRange * Math.cos(m.angle - Math.PI * m.fieldArc), m.pos.y + 1 * m.fieldRange * Math.sin(m.angle - Math.PI * m.fieldArc))
+                        ctx.fill();
+                        m.pushMobsFacing();
                     } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                         m.pickUp();
                     } else {
@@ -1664,7 +1661,7 @@ const m = {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             for (let i = 0, len = Math.random() * 20; i < len; i++) {
-                                m.energy -= 0.085
+                                m.energy -= 0.08
                                 if (m.energy > 0) {
                                     b.spore(m.pos)
                                 } else {
@@ -1673,10 +1670,10 @@ const m = {
                                 }
                             }
                         } else if (tech.isMissileField) {
-                            m.energy -= 0.32;
+                            m.energy -= 0.3;
                             b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
                         } else if (tech.isIceField) {
-                            m.energy -= 0.046;
+                            m.energy -= 0.04;
                             b.iceIX(1)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;
