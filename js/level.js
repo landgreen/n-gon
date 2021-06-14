@@ -5956,7 +5956,7 @@ const level = {
         //top right
         spawn.randomGroup(2000, -5700, 0.6);
 
-        powerUps.addRerollToLevel() //needs to run after mobs are spawned
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss"];
         let abc = Math.random();
         if (simulation.difficulty > 3) {

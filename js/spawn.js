@@ -1194,10 +1194,12 @@ const spawn = {
                 //teleport everything to center
                 function toMe(who, where, range) {
                     for (let i = 0, len = who.length; i < len; i++) {
-                        const SUB = Vector.sub(who[i].position, where)
-                        const DISTANCE = Vector.magnitude(SUB)
-                        if (DISTANCE < range) {
-                            Matter.Body.setPosition(who[i], where)
+                        if (!who[i].isNotHoldable) {
+                            const SUB = Vector.sub(who[i].position, where)
+                            const DISTANCE = Vector.magnitude(SUB)
+                            if (DISTANCE < range) {
+                                Matter.Body.setPosition(who[i], where)
+                            }
                         }
                     }
                 }

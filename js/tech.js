@@ -165,7 +165,7 @@
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
             if (tech.isMaxEnergyTech) dmg *= 1.5
             if (tech.isEnergyNoAmmo) dmg *= 1.6
-            if (tech.isDamageForGuns) dmg *= 1 + 0.1 * b.inventory.length
+            if (tech.isDamageForGuns) dmg *= 1 + 0.12 * b.inventory.length
             if (tech.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - m.health)
             if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
             if (tech.isEnergyLoss) dmg *= 1.55;
@@ -250,7 +250,7 @@
             },
             {
                 name: "arsenal",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>10%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>12%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2572,7 +2572,7 @@
             },
             {
                 name: "Ψ(t) collapse",
-                description: "enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>15</strong> <strong class='color-r'>research</strong>",
+                description: "enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>16</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2583,7 +2583,7 @@
                 requires: "not quantum immortality, many-worlds, non-unitary",
                 effect() {
                     tech.isResearchReality = true;
-                    for (let i = 0; i < 15; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
+                    for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
                 },
                 remove() {
                     tech.isResearchReality = false;
@@ -2711,25 +2711,6 @@
                     //have state is checked in m.death()
                 },
                 remove() {}
-            },
-            {
-                name: "WIMPs",
-                //<strong class='color-harm'>harmful</strong>
-                description: "a <strong class='color-harm'>harmful</strong> particle slowly <strong>chases</strong> you<br>spawn <strong>2-6</strong> <strong class='color-r'>research</strong> at the end of each <strong>level</strong>",
-                maxCount: 9,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return true
-                },
-                requires: "",
-                effect: () => {
-                    tech.wimpCount++
-                },
-                remove() {
-                    tech.wimpCount = 0
-                }
             },
             {
                 name: "bubble fusion",
@@ -5191,6 +5172,25 @@
                 },
                 remove() {
                     tech.pilotForce = 0.00002
+                }
+            },
+            {
+                name: "WIMPs",
+                description: "a <strong class='color-harm'>harmful</strong> particle slowly <strong>chases</strong> you<br>spawn <strong>3-9</strong> <strong class='color-r'>research</strong> at the end of each <strong>level</strong>",
+                isFieldTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+                },
+                requires: "wormhole",
+                effect: () => {
+                    tech.wimpCount++
+                },
+                remove() {
+                    tech.wimpCount = 0
                 }
             },
             {

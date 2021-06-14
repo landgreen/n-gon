@@ -1,57 +1,17 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-over all game difficulty scaling occurs faster
-  your damage will feel lower, and you will take more harm,
-  so you should probably play on a lower difficulty
 
-tech: Higgs manism gives 50% reduced fire delay instead of harm reduction
-tech: inertial frame is removed
-tech: automatic is now a junk tech
+tech: WIMPs now requires wormhole
+  gives 3-9 research now (was 2-3)
 
-balance:
-  dead reckoning gives 36% damage when at rest (was 30%)
-  overcharge gives 10 more energy, but adds 10 junk tech
-  1st ionization energy gives 6 energy per heal (was 5)
-  dormancy increases damage by 100% but lowers it by 33% if no recent kills (was +50%, -15%) 
-  torpor decreases harm by 66% increases harm by 15% if no recent kills (was -50%, +10%)
-  Ψ(t) collapse spawns 3 more research, so it's at 15
-  fragmentation gives 30% more nails for railgun
-  ammonium nitrate +25% (was 20%)
-  generalist gives 8 guns (was 6)
-  arsenal gives 10% per gun (was 14%)
-  rivet gun fires 25% faster, rivets are 15% larger
-  shotgun slug is 33% bigger
-  missile bot fires 10% more often
-  tinsellated flagella gives 40% speed increase (was 50%), base spore speed is 10% faster
-  beamSplitter has a 20% lower divergence
-  nano manufacturing tech is all buffed 15%
-  traversable geodesics gives 2 guns and ammo (was 1)
-  mines have 25% more nails, laser mines use 20% less energy sentry mines last 33% seconds longer
-  zoospore vector has an 11% chance to spawn (was 9%)
-  negentropy spawns a heal for every 33 missing health (was 50 health)
-  exciton-lattice gives 60% damage
-  thermocouple spawns 1-8 ice-IX (was 1-5)
-  WIMPs spawn 2-6 research (was 2-3)
-  quantum immortality reduces harm by 33% (was 23%)
-  commodities exchange gives 10 power ups (was 8)
-  super balls are 17% bigger (this means they do about 25% more damage)
-  exothermic process increases damage by (was 45%)
-  heat engine increases damage by 50% (was 40%)
-  replication gives 10% duplication chance (was 8%)
-  stimulated emission gives 22% duplication chance
-  futures exchange gives 4.7% duplication chance per cancel  (was 4.3%)
-  needles are 10% slower and do 15% more damage
+tech: eddy current brake - is 15% larger and caps mob speeds at 20% slower
 
-bug fixes:
-  reduced tolerances text rewritten to clarify that it gives more ammo per ammo pack
-  hazards on horizontal flipped levels now correctly do damage
-  ship mode aims properly after you die
-    although it still doesn't reset
-  experiment mode selections are highlighted better
-
-
+bug fixes
 
 ******************************************************** BUGS ********************************************************
+
+sharing 1 stack of spherical harmonics doesn't activate visually
+https://landgreen.github.io/sidescroller/index.html?&tech0=crystallizer&tech1=thermoelectric%20effect&tech2=thermoelectric%20effect&tech3=spherical%20harmonics&tech4=expansion&tech5=triple%20point&tech6=triple%20point&tech7=flux%20pinning&field=standing%20wave%20harmonics&difficulty=4&level=0&noPower=0
 
 a couple times people have reported the final boss dropping extra bodies on death
 
@@ -75,7 +35,35 @@ is there a way to check if the player is stuck inside the map or block
 
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
+******************************************************** LEVELS ********************************************************
+
+labs - procedural generation
+  science theme, with a cool technology showcased
+  layout:
+    6 total rooms
+    3x2, 2x3, 4 2, 2 4
+    1500px, 3000px per room
+  room types
+    entrance - no mobs, starting power ups`
+    exit - plenty of mobs
+    up, down - 2 paired rooms - boost, elevator, portal
+    boss - standard random boss spawns
+    empty - just a dead end - possible duplication boss spawn location
+    button - opens door to exit room
+  room ideas - 
+    gravity room
+    portal room 
+    endlessly falling blocks down a slide, that the player has to climb up
+    portal + rotor + falling blocks = perpetual motion
+    laser room
+    slime radiation room
+
 ******************************************************** TODO ********************************************************
+
+standing wave harmonics - can block too often on the same mob if you push it into a corner
+  add a small cooldown
+  return to normal knock back // 4
+let standing wave harmonics get tech decorrelation
 
 * inductive coupling - sucks without catabolism, too much delayed gratification. should probably be bundled with transceiver chip
 
@@ -159,21 +147,6 @@ apply the new gun.do functions to other guns
 tech plasma field - plasma field becomes an aoe damage field with the same radius
   200% more energy drain, 100% more damage
   draw a square (or two) that rapidly spins
-
-new level: procedural generation
-  several small rooms are linked by portals
-    the portals have a randomized pattern
-    the rooms can be set out in a grid and linked by physical doors,tunnels,wells
-    choose bosses that can move though walls, so it can track you while you portal
-  the map shuffles it's pattern when the player get to a button
-    shuffle portals or shuffle the physical layout of rooms
-    and then have the player go back through to get to the end?
-  gravity room
-    portal room
-    endlessly falling blocks down a slide, that the player has to climb
-    portal + rotor + falling blocks = perpetual motion
-    laser room
-    slime radiation room
 
 look into improving mouse lag with pointer lock?
 https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
@@ -397,6 +370,7 @@ possible names for tech
   counterfactual - something false
   axion - maybe a 3rd dark matter type tech
   Pigeonhole principle - if there are several things that are matched up
+  regression to the mean
 
 
 

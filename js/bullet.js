@@ -3308,7 +3308,7 @@ const b = {
                                         if (tech.isNailRadiation) {
                                             mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                                         } else {
-                                            let dmg = b.dmgScale * 4.5
+                                            let dmg = b.dmgScale * 5
                                             if (tech.isCrit && who.isStunned) dmg *= 4
                                             who.damage(dmg, tech.isNeedleShieldPierce);
                                             simulation.drawList.push({ //add dmg to draw queue

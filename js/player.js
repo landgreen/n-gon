@@ -308,10 +308,9 @@ const m = {
         //remove all tech and count current tech total
         let totalTech = 0;
         for (let i = 0, len = tech.tech.length; i < len; i++) {
+            if (tech.tech[i].isJunk) tech.tech[i].frequency = 0
             if (tech.tech[i].count > 0 && !tech.tech[i].isLore) {
-                if (tech.tech[i].isJunk) {
-                    tech.tech[i].frequency = 0
-                } else if (tech.tech[i].frequencyDefault) {
+                if (tech.tech[i].frequencyDefault) {
                     tech.tech[i].frequency = tech.tech[i].frequencyDefault
                 } else {
                     tech.tech[i].frequency = 1
@@ -1506,12 +1505,12 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br><strong>deflecting</strong> has <strong>75%</strong> less <strong>recoil</strong>", //<strong class='color-harm'>harm</strong> and 
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br><strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>", //<strong class='color-harm'>harm</strong> and 
             effect: () => {
                 // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
                 // m.fieldHarmReduction = 0.75;
-                m.blockingRecoil = 1 //4 is normal
+                m.blockingRecoil = 2 //4 is normal
                 m.fieldRange = 175
                 m.fieldShieldingScale = Math.pow(0.5, (tech.harmonics - 3))
                 m.harmonicRadius = 1 //for smoothing function when player holds mouse (for harmonicAtomic)
@@ -1548,7 +1547,11 @@ const m = {
                     }
                     m.pushMobs360(radius);
                 }
-                m.harmonicShield = m.harmonic3Phase
+                if (tech.harmonics === 2) {
+                    m.harmonicShield = m.harmonic3Phase
+                } else {
+                    m.harmonicShield = m.harmonicAtomic
+                }
                 m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -1633,11 +1636,11 @@ const m = {
                     m.drawFieldMeter()
 
                     if (tech.isPerfectBrake) { //cap mob speed around player
-                        const range = 160 + 140 * wave + 150 * m.energy
+                        const range = 160 + 140 * wave + 200 * m.energy
                         for (let i = 0; i < mob.length; i++) {
                             const distance = Vector.magnitude(Vector.sub(m.pos, mob[i].position))
                             if (distance < range) {
-                                const cap = mob[i].isShielded ? 8.5 : 4.5
+                                const cap = mob[i].isShielded ? 8 : 4
                                 if (mob[i].speed > cap && Vector.dot(mob[i].velocity, Vector.sub(m.pos, mob[i].position)) > 0) { // if velocity is directed towards player
                                     Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(mob[i].velocity), cap)); //set velocity to cap, but keep the direction
                                 }
