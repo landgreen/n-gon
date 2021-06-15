@@ -540,6 +540,7 @@ const simulation = {
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+            if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
         }
         tech.dynamoBotCount = 0;
         tech.nailBotCount = 0;

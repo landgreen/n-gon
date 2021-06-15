@@ -3643,7 +3643,33 @@
                     tech.superBallNumber++
                 },
                 remove() {
-                    tech.superBallNumber = 4;
+                    tech.superBallNumber = 3;
+                }
+            },
+            {
+                name: "supertemporal",
+                description: "fire <strong>super ball</strong> from the same point in <strong>space</strong><br> but separated by <strong>0.1</strong> seconds in <strong>time</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                allowed() {
+                    return tech.haveGunCheck("super balls") && !tech.oneSuperBall
+                },
+                requires: "super balls, but not the tech super ball or super duper",
+                effect() {
+                    tech.superBallDelay = true
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+                    }
+                },
+                remove() {
+                    if (tech.superBallDelay) {
+                        tech.superBallDelay = false;
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+                        }
+                    }
                 }
             },
             {
@@ -3654,14 +3680,22 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.haveGunCheck("super balls") && tech.superBallNumber === 4
+                    return tech.haveGunCheck("super balls") && tech.superBallNumber === 3 && !tech.superBallDelay
                 },
-                requires: "super balls, but not super duper",
+                requires: "super balls, but not super duper or super queue",
                 effect() {
                     tech.oneSuperBall = true;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+                    }
                 },
                 remove() {
-                    tech.oneSuperBall = false;
+                    if (tech.oneSuperBall) {
+                        tech.oneSuperBall = false;
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+                        }
+                    }
                 }
             },
             {
@@ -4559,12 +4593,12 @@
                 requires: "standing wave harmonics",
                 effect() {
                     tech.harmonics++
-                    m.fieldShieldingScale = Math.pow(0.6, (tech.harmonics - 2))
+                    m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
                     m.harmonicShield = m.harmonicAtomic
                 },
                 remove() {
                     tech.harmonics = 2
-                    m.fieldShieldingScale = Math.pow(0.6, (tech.harmonics - 2))
+                    m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
                     m.harmonicShield = m.harmonic3Phase
                 }
             },
@@ -6893,5 +6927,6 @@
         isFallingDamage: null,
         harmonics: null,
         isStandingWaveExpand: null,
-        isBlockExplosion: null
+        isBlockExplosion: null,
+        superBallDelay: null
     }

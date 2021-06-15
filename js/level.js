@@ -15,21 +15,20 @@ const level = {
             // simulation.zoomScale = 1000;
             // simulation.setZoom();
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // m.setField("negative mass field")
+            // simulation.isHorizontalFlipped = true
+            // level.difficultyIncrease(30)
+            // m.setField("standing wave harmonics")
+            // tech.giveTech("spherical harmonics")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
-            // b.giveGuns("laser")
+            // b.giveGuns("super balls")
             // tech.isExplodeRadio = true
             // tech.giveTech("Z-pinch")
             // tech.giveTech("MACHO")
-            // tech.giveTech("potential well")
+            // tech.giveTech("supertemporal")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
-            // tech.giveTech("attract")
-            // level.difficultyIncrease(30)
-            // simulation.isHorizontalFlipped = true
-            // tech.isFlyFaster = true
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing
@@ -42,8 +41,8 @@ const level = {
             // level.skyscrapers(); 
             // level.aerie(); 
             // level.rooftops(); 
-            // level.warehouse();  
-            // level.highrise(); 
+            // level.warehouse();
+            // level.highrise();
             // level.office(); 
             // level.gauntlet(); //only fighting, very simple map, before final boss
             // level.house() //community level
@@ -260,7 +259,7 @@ const level = {
     },
     addToWorld() { //needs to be run to put bodies into the world
         for (let i = 0; i < body.length; i++) {
-            if (body[i] !== m.holdingTarget) {
+            if (body[i] !== m.holdingTarget && !body[i].isNoSetCollision) {
                 body[i].collisionFilter.category = cat.body;
                 body[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
             }
@@ -547,6 +546,71 @@ const level = {
         }
         composite[composite.length] = rotor
         return rotor
+    },
+    toggle(x, y, isLockOn = false) {
+        spawn.mapVertex(x + 65, y + 2, "70 10 -70 10 -40 -10 40 -10");
+        map[map.length - 1].restitution = 0;
+        map[map.length - 1].friction = 1;
+        map[map.length - 1].frictionStatic = 1;
+
+        spawn.bodyRect(x, y, 125, 15) //Portal platform
+        let flip = body[body.length - 1];
+        flip.isNoSetCollision = true //prevents collision form being rewritten in level.addToWorld
+        flip.collisionFilter.category = cat.body
+        flip.collisionFilter.mask = cat.player | cat.body
+
+        flip.isNotHoldable = true
+        flip.frictionAir = 0.01
+        flip.restitution = 0
+        Matter.Body.setDensity(flip, 0.003)
+        Matter.Body.setAngle(flip, (-0.25 - 0.5) * Math.PI)
+        setTimeout(function() {}, 100);
+
+        cons[cons.length] = Constraint.create({
+            pointA: {
+                x: x + 65,
+                y: y
+            },
+            bodyB: flip,
+            stiffness: 1,
+            length: 0
+        });
+        World.add(engine.world, [cons[cons.length - 1]]);
+
+
+        return {
+            flip: flip,
+            isOn: false,
+            query() {
+                const limit = {
+                    right: (-0.25 - 0.5) * Math.PI,
+                    left: (0.25 - 0.5) * Math.PI
+                }
+                if (flip.angle < limit.right) {
+                    Matter.Body.setAngle(flip, limit.right)
+                    Matter.Body.setAngularVelocity(flip, 0);
+                    if (!isLockOn) this.isOn = false
+                } else if (flip.angle > limit.left) {
+                    Matter.Body.setAngle(flip, limit.left)
+                    Matter.Body.setAngularVelocity(flip, 0);
+                    this.isOn = true
+                }
+
+                if (this.isOn) {
+                    ctx.beginPath();
+                    ctx.moveTo(flip.vertices[0].x, flip.vertices[0].y);
+                    for (let j = 1; j < flip.vertices.length; j++) {
+                        ctx.lineTo(flip.vertices[j].x, flip.vertices[j].y);
+                    }
+                    ctx.lineTo(flip.vertices[0].x, flip.vertices[0].y);
+                    ctx.fillStyle = "#3df"
+                    ctx.fill();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = simulation.draw.bodyStroke;
+                    ctx.stroke();
+                }
+            },
+        }
     },
     button(x, y, width = 126) {
         spawn.mapVertex(x + 65, y + 2, "100 10 -100 10 -70 -10 70 -10");
@@ -1109,17 +1173,19 @@ const level = {
         spawn.mapRect(475, -25, 25, 50); //edge shelf
     },
     testing() {
-        const button = level.button(200, -700)
+        // const button = level.button(200, -700)
+        const toggle = level.toggle(200, -700)
         level.custom = () => {
-            button.query();
-            button.draw();
+            // button.draw();
             ctx.fillStyle = "rgba(0,255,255,0.1)";
             ctx.fillRect(6400, -550, 300, 350);
             level.playerExitCheck();
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => {
+            toggle.query();
+        };
 
         level.setPosToSpawn(0, -750); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -1171,7 +1237,7 @@ const level = {
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
-        spawn.historyBoss(1200, -500)
+        // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.striker(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
@@ -2018,7 +2084,7 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            ctx.fillStyle = "rgba(0,20,40,0.2)"
+            ctx.fillStyle = "rgba(0,20,40,0.25)"
             ctx.fillRect(-250, -400, 1800, 775)
             ctx.fillRect(1800, -275, 850, 775)
             ctx.fillRect(5200, 125, 450, 200)
@@ -2073,18 +2139,18 @@ const level = {
 
         //tall platform
         spawn.mapVertex(1125, -450, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
-        spawn.mapRect(150, -500, 1400, 100); //far left starting ceiling
+        spawn.mapRect(150, -500, 1410, 100); //far left starting ceiling
         spawn.mapRect(625, -2450, 1000, 50); //super high shade
         spawn.bodyRect(1300, -3600, 150, 150); //shield from laser
         //tall platform
         spawn.mapVertex(2225, -250, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80"); //base
         spawn.mapRect(1725, -2800, 1000, 50); //super high shade
-        spawn.mapRect(1800, -300, 850, 100); //far left starting ceiling
+        spawn.mapRect(1790, -300, 870, 100); //far left starting ceiling
         spawn.bodyRect(2400, -2950, 150, 150); //shield from laser
 
         //tall platform
-        spawn.mapVertex(3350, 200, "400 0  -400 0  -275 -275  275 -275"); //base
-        spawn.bodyRect(3400, -150, 150, 150);
+        spawn.mapVertex(3350, 175, "425 0  -425 0  -275 -300  275 -300"); //base
+        spawn.bodyRect(3350, -150, 200, 120);
         spawn.mapRect(2850, -3150, 1000, 50); //super high shade
         spawn.bodyRect(3675, -3470, 525, 20); //plank
         spawn.bodyRect(3600, -3450, 200, 300); //plank support block
@@ -2165,7 +2231,7 @@ const level = {
             };
             level.customTopLayer = () => {
                 elevator.move()
-                ctx.fillStyle = "rgba(0,20,40,0.2)"
+                ctx.fillStyle = "rgba(0,20,40,0.25)"
                 ctx.fillRect(250 - 1800, -400, 1800, 775)
                 ctx.fillRect(-1800 - 850, -275, 850, 775)
                 ctx.fillRect(-5200 - 450, 125, 450, 200)
@@ -2738,10 +2804,14 @@ const level = {
     highrise() {
         const elevator1 = level.elevator(-790, -190, 180, 25, -1150) //, 0.007
         elevator1.addConstraint();
-        const button1 = level.button(-500, -200)
+        // const button1 = level.button(-500, -200)
+        const toggle1 = level.toggle(-500, -200) //(x,y,isLockOn = true/false)
+
         const elevator2 = level.elevator(-3630, -1000, 180, 25, -1740) //, 0.007
         elevator2.addConstraint();
-        const button2 = level.button(-3100, -1330)
+        // const button2 = level.button(-3100, -1330) 
+        const toggle2 = level.toggle(-3100, -1330) //(x,y,isLockOn = true/false)
+
 
         level.custom = () => {
             // ctx.fillStyle = "#d0d0d2"
@@ -2755,9 +2825,9 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            button1.query();
-            button1.draw();
-            if (button1.isUp) {
+            // button1.draw();
+            toggle1.query();
+            if (!toggle1.isOn) {
                 if (elevator1.isOn) {
                     elevator1.isOn = false
                     elevator1.frictionAir = 0.2
@@ -2778,9 +2848,9 @@ const level = {
                 ctx.fillRect(-700, -1140, 1, 975)
             }
 
-            button2.query();
-            button2.draw();
-            if (button2.isUp) {
+            toggle2.query();
+            // button2.draw();
+            if (!toggle2.isOn) {
                 if (elevator2.isOn) {
                     elevator2.isOn = false
                     elevator2.frictionAir = 0.2
@@ -2874,7 +2944,7 @@ const level = {
         spawn.mapRect(-4450, -600, 2300, 750);
         spawn.mapRect(-2225, -450, 175, 550);
         // spawn.mapRect(-2600, -975, 450, 50);
-        spawn.mapRect(-3425, -1325, 525, 50);
+        spawn.mapRect(-3425, -1325, 525, 75);
         spawn.mapRect(-3425, -2200, 525, 50);
         spawn.mapRect(-2600, -1700, 450, 50);
         // spawn.mapRect(-2600, -2450, 450, 50);
@@ -2944,16 +3014,11 @@ const level = {
             // boost1.boostBounds.max.x = -boost1.boostBounds.max.x + 100
             level.setPosToSpawn(300, -700); //-x
             elevator1.holdX = -elevator1.holdX // flip the elevator horizontally
-            elevator2.removeConstraint();
-            elevator2.addConstraint();
+            elevator1.removeConstraint();
+            elevator1.addConstraint();
             elevator2.holdX = -elevator2.holdX // flip the elevator horizontally
             elevator2.removeConstraint();
             elevator2.addConstraint();
-
-            button1.min.x = -button1.min.x - 126 // flip the button horizontally
-            button1.max.x = -button1.max.x + 126 // flip the button horizontally
-            button2.min.x = -button2.min.x - 126 // flip the button horizontally
-            button2.max.x = -button2.max.x + 126 // flip the button horizontally
 
             level.custom = () => {
                 ctx.fillStyle = "#cff" //exit
@@ -2963,9 +3028,8 @@ const level = {
                 level.enter.draw();
             };
             level.customTopLayer = () => {
-                button1.query();
-                button1.draw();
-                if (button1.isUp) {
+                toggle1.query();
+                if (!toggle1.isOn) {
                     if (elevator1.isOn) {
                         elevator1.isOn = false
                         elevator1.frictionAir = 0.2
@@ -2986,9 +3050,8 @@ const level = {
                     ctx.fillRect(700 - 1, -1140, 1, 975)
                 }
 
-                button2.query();
-                button2.draw();
-                if (button2.isUp) {
+                toggle2.query();
+                if (!toggle2.isOn) {
                     if (elevator2.isOn) {
                         elevator2.isOn = false
                         elevator2.frictionAir = 0.2
@@ -3038,7 +3101,7 @@ const level = {
         };
 
         level.customTopLayer = () => {
-            ctx.fillStyle = "rgba(0,0,0,0.1)"; //shadows and lights
+            ctx.fillStyle = "rgba(0,0,0,0.15)"; //shadows and lights
             ctx.beginPath()
             ctx.moveTo(-1800, -500)
             ctx.lineTo(-910, -500) //3rd floor light
@@ -3125,7 +3188,7 @@ const level = {
             isElevators = true
             elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003)
             elevator2 = level.elevator(820, 1300, 260, 40, 607, 0.0003)
-            elevator3 = level.elevator(-2755, 1260, 160, 40, 1000, 0.006)
+            elevator3 = level.elevator(-2755, 1260, 160, 40, 850, 0.003)
             spawn.bodyRect(-2375, 1300, 100, 100);
             spawn.bodyRect(-2325, 1250, 50, 50);
             spawn.bodyRect(-2275, 1350, 125, 50);
@@ -3291,7 +3354,7 @@ const level = {
                 };
             }
             level.customTopLayer = () => {
-                ctx.fillStyle = "rgba(0,0,0,0.1)"; //shadows and lights
+                ctx.fillStyle = "rgba(0,0,0,0.15)"; //shadows and lights
                 ctx.beginPath()
                 ctx.moveTo(1800, -500)
                 ctx.lineTo(910, -500) //3rd floor light

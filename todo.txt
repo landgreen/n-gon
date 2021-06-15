@@ -1,23 +1,27 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+tech supertemporal - fire your super balls at the same place in space, but delayed in time
 
-tech: WIMPs now requires wormhole
-  gives 3-9 research now (was 2-3)
+super ball starts with 3 not 4 balls, but they are is 25% larger, 10% faster, and 25% lower divergence
+  (this makes adding more balls much stronger)
+gun - super balls has 15% less ammo
 
-tech: eddy current brake - is 15% larger and caps mob speeds at 20% slower
+standing wave harmonics - still has no block cooldown, but now it has a cooldown for how often it can drain energy
+  this should make rapidly blocking drain upto 10x less energy
+  base blocking cost have increased by 25%
 
-bug fixes
+wormhole gets 10% duplication (was 7%)
+ice-IX does 15% more damage
+
+new level element - toggle(x, y, isLockOn = false)
+  similar to a button but doesn't require a block
+  used on the level highrise
+  can toggle "off and on" or "lock on"
+
 
 ******************************************************** BUGS ********************************************************
 
-sharing 1 stack of spherical harmonics doesn't activate visually
-https://landgreen.github.io/sidescroller/index.html?&tech0=crystallizer&tech1=thermoelectric%20effect&tech2=thermoelectric%20effect&tech3=spherical%20harmonics&tech4=expansion&tech5=triple%20point&tech6=triple%20point&tech7=flux%20pinning&field=standing%20wave%20harmonics&difficulty=4&level=0&noPower=0
-
 a couple times people have reported the final boss dropping extra bodies on death
-
-figure out how to undo ship mode
-  if you die in ship mode it spawns with m.look set to non ship methods
-    look is set in many tech and in startGame
 
 Why does micro-extruder lag so much
 
@@ -45,27 +49,38 @@ labs - procedural generation
     1500px, 3000px per room
   room types
     entrance - no mobs, starting power ups`
-    exit - plenty of mobs
+    exit - possible duplication boss spawn location
     up, down - 2 paired rooms - boost, elevator, portal
     boss - standard random boss spawns
-    empty - just a dead end - possible duplication boss spawn location
-    button - opens door to exit room
+    empty - a dead end
+    button - like empty, but also has a switch that opens door to exit room
   room ideas - 
-    gravity room
+    low gravity room, controlled with a button?
     portal room 
     endlessly falling blocks down a slide, that the player has to climb up
     portal + rotor + falling blocks = perpetual motion
     laser room
     slime radiation room
+    spinner room
+
+make a switch level element
+  basically button, but go off and on when it hits player (or block?)
+    use a constrained body like a spinner
+      use offset constraint? like in vats
+      can this work?
+      check location of center of mass for on/off state
+      only collide with player, but run code that stops it from rotating too far
+        part of it is inside switch map element
+    player moving left go on, right go off as if they are pushing the switch in that direction  ?
+  indicate on/off
+    angle of stick "light-switch"
+    with colors?
 
 ******************************************************** TODO ********************************************************
 
 standing wave harmonics - can block too often on the same mob if you push it into a corner
-  add a small cooldown
-  return to normal knock back // 4
+  add a cool down that only stops energy drain and iceIX, but still lets you block
 let standing wave harmonics get tech decorrelation
-
-* inductive coupling - sucks without catabolism, too much delayed gratification. should probably be bundled with transceiver chip
 
 tech: cloaking field - decrease/increase cooldown on sneak attack?
   decrease/increase damage bonus?

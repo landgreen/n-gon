@@ -1944,7 +1944,7 @@ const b = {
             friction: 0,
             frictionAir: 0.10,
             restitution: 0.3,
-            dmg: 0.33, //damage done in addition to the damage from momentum
+            dmg: 0.38, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 140 * tech.isBulletsLastLonger,
             classType: "bullet",
@@ -3366,15 +3366,15 @@ const b = {
                 // makeNeedle(m.angle - spread)
             },
             fireRivets() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 17) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
 
                 const me = bullet.length;
-                const size = tech.rivetSize * 7
+                const size = tech.rivetSize * 7.5
                 bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
                 World.add(engine.world, bullet[me]); //add bullet to world
-                const SPEED = m.crouch ? 55 : 46
+                const SPEED = m.crouch ? 55 : 44
                 Matter.Body.setVelocity(bullet[me], {
                     x: SPEED * Math.cos(m.angle),
                     y: SPEED * Math.sin(m.angle)
@@ -3613,67 +3613,113 @@ const b = {
             name: "super balls",
             description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
             ammo: 0,
-            ammoPack: 13,
+            ammoPack: 11,
             have: false,
             // num: 5,
             do() {},
-            fire() {
-                const SPEED = m.crouch ? 43 : 32
+            fireOne() {
+                const SPEED = m.crouch ? 43 : 36
                 m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
-                if (tech.oneSuperBall) {
-                    let dir = m.angle
+                let dir = m.angle
+                const me = bullet.length;
+                bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, 21 * tech.bulletSize, b.fireAttributes(dir, false));
+                World.add(engine.world, bullet[me]); //add bullet to world
+                Matter.Body.setVelocity(bullet[me], {
+                    x: SPEED * Math.cos(dir),
+                    y: SPEED * Math.sin(dir)
+                });
+                // Matter.Body.setDensity(bullet[me], 0.0001);
+                bullet[me].endCycle = simulation.cycle + Math.floor(300 + 90 * Math.random());
+                bullet[me].minDmgSpeed = 0;
+                bullet[me].restitution = 1;
+                bullet[me].friction = 0;
+                bullet[me].do = function() {
+                    this.force.y += this.mass * 0.0012;
+                };
+                bullet[me].beforeDmg = function(who) {
+                    mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+                    if (tech.isIncendiary) {
+                        b.explosion(this.position, this.mass * 285); //makes bullet do explosive damage at end
+                        this.endCycle = 0
+                    }
+                };
+            },
+            fireMulti() {
+                const SPEED = m.crouch ? 43 : 36
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
+                const SPREAD = m.crouch ? 0.08 : 0.13
+                let dir = m.angle - SPREAD * (tech.superBallNumber - 1) / 2;
+                for (let i = 0; i < tech.superBallNumber; i++) {
                     const me = bullet.length;
-                    bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, 21 * tech.bulletSize, b.fireAttributes(dir, false));
+                    bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, 11 * tech.bulletSize, b.fireAttributes(dir, false));
                     World.add(engine.world, bullet[me]); //add bullet to world
                     Matter.Body.setVelocity(bullet[me], {
                         x: SPEED * Math.cos(dir),
                         y: SPEED * Math.sin(dir)
                     });
                     // Matter.Body.setDensity(bullet[me], 0.0001);
-                    bullet[me].endCycle = simulation.cycle + Math.floor(300 + 90 * Math.random());
+                    bullet[me].endCycle = simulation.cycle + Math.floor((300 + 90 * Math.random()) * tech.isBulletsLastLonger);
                     bullet[me].minDmgSpeed = 0;
-                    bullet[me].restitution = 1;
+                    bullet[me].restitution = 0.99;
                     bullet[me].friction = 0;
                     bullet[me].do = function() {
-                        this.force.y += this.mass * 0.0012;
+                        this.force.y += this.mass * 0.001;
                     };
-                    bullet[me].beforeDmg = function(who) {
-                        mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+                    bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
-                            b.explosion(this.position, this.mass * 265); //makes bullet do explosive damage at end
+                            b.explosion(this.position, this.mass * 350 + 60 * Math.random()); //makes bullet do explosive damage at end
                             this.endCycle = 0
                         }
                     };
-                } else {
-                    b.muzzleFlash(20);
-                    const SPREAD = m.crouch ? 0.08 : 0.15
-                    let dir = m.angle - SPREAD * (tech.superBallNumber - 1) / 2;
-                    for (let i = 0; i < tech.superBallNumber; i++) {
-                        const me = bullet.length;
-                        bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, 9 * tech.bulletSize, b.fireAttributes(dir, false));
-                        World.add(engine.world, bullet[me]); //add bullet to world
-                        Matter.Body.setVelocity(bullet[me], {
-                            x: SPEED * Math.cos(dir),
-                            y: SPEED * Math.sin(dir)
-                        });
-                        // Matter.Body.setDensity(bullet[me], 0.0001);
-                        bullet[me].endCycle = simulation.cycle + Math.floor((300 + 90 * Math.random()) * tech.isBulletsLastLonger);
-                        bullet[me].minDmgSpeed = 0;
-                        bullet[me].restitution = 0.99;
-                        bullet[me].friction = 0;
-                        bullet[me].do = function() {
-                            this.force.y += this.mass * 0.001;
-                        };
-                        bullet[me].beforeDmg = function() {
-                            if (tech.isIncendiary) {
-                                b.explosion(this.position, this.mass * 330 + 60 * Math.random()); //makes bullet do explosive damage at end
-                                this.endCycle = 0
-                            }
-                        };
-                        dir += SPREAD;
-                    }
+                    dir += SPREAD;
                 }
-            }
+            },
+            fireQueue() {
+                const SPEED = m.crouch ? 43 : 36
+                const dir = m.angle
+                const x = m.pos.x + 30 * Math.cos(m.angle)
+                const y = m.pos.y + 30 * Math.sin(m.angle)
+                const delay = Math.floor((m.crouch ? 18 : 12) * b.fireCD)
+                m.fireCDcycle = m.cycle + delay; // cool down
+
+                for (let i = 0; i < tech.superBallNumber; i++) {
+                    setTimeout(() => {
+                        if (!simulation.paused) {
+                            const me = bullet.length;
+                            bullet[me] = Bodies.polygon(x, y, 12, 11 * tech.bulletSize, b.fireAttributes(dir, false));
+                            World.add(engine.world, bullet[me]); //add bullet to world
+                            Matter.Body.setVelocity(bullet[me], {
+                                x: SPEED * Math.cos(dir),
+                                y: SPEED * Math.sin(dir)
+                            });
+                            bullet[me].endCycle = simulation.cycle + Math.floor(330 * tech.isBulletsLastLonger);
+                            bullet[me].minDmgSpeed = 0;
+                            bullet[me].restitution = 0.99;
+                            bullet[me].friction = 0;
+                            bullet[me].do = function() {
+                                this.force.y += this.mass * 0.001;
+                            };
+                            bullet[me].beforeDmg = function() {
+                                if (tech.isIncendiary) {
+                                    b.explosion(this.position, this.mass * 350 + 60 * Math.random()); //makes bullet do explosive damage at end
+                                    this.endCycle = 0
+                                }
+                            };
+                            m.fireCDcycle = m.cycle + delay; // cool down
+                        }
+                    }, 50 * i + 100);
+                }
+            },
+            chooseFireMethod() { //set in simulation.startGame
+                if (tech.oneSuperBall) {
+                    this.fire = this.fireOne
+                } else if (tech.superBallDelay) {
+                    this.fire = this.fireQueue
+                } else {
+                    this.fire = this.fireMulti
+                }
+            },
+            fire() {}
         }, {
             name: "wave beam",
             description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",

@@ -1276,11 +1276,7 @@ const m = {
             }
         }
     },
-    pushMass(who) {
-        const speed = Vector.magnitude(Vector.sub(who.velocity, player.velocity))
-        const fieldBlockCost = (0.025 + Math.sqrt(who.mass) * speed * 0.002) * m.fieldShieldingScale;
-        const unit = Vector.normalise(Vector.sub(player.position, who.position))
-
+    pushMass(who, fieldBlockCost = (0.025 + Math.sqrt(who.mass) * Vector.magnitude(Vector.sub(who.velocity, player.velocity)) * 0.002) * m.fieldShieldingScale) {
         if (m.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
             m.energy -= fieldBlockCost
             if (m.energy < 0) m.energy = 0;
@@ -1292,6 +1288,7 @@ const m = {
                     for (let i = 0; i < tech.blockingIce; i++) b.iceIX(10, m.angle + Math.random() - 0.5, m.pos)
                 }
             }
+            const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
                 who.damage(tech.blockDmg * b.dmgScale)
                 //draw electricity
@@ -1359,15 +1356,6 @@ const m = {
                 m.lookingAt(mob[i]) &&
                 Matter.Query.ray(map, mob[i].position, m.pos).length === 0
             ) {
-                mob[i].locatePlayer();
-                m.pushMass(mob[i]);
-            }
-        }
-    },
-    pushMobs360(range) { // find mobs in range in any direction
-        for (let i = 0, len = mob.length; i < len; ++i) {
-            if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < range && !mob[i].isShielded) {
-                // && Matter.Query.ray(map, mob[i].position, m.pos).length === 0
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
             }
@@ -1505,15 +1493,14 @@ const m = {
         },
         {
             name: "standing wave harmonics",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> drains <strong class='color-f'>energy</strong> with no <strong>cool down</strong><br><strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>", //<strong class='color-harm'>harm</strong> and 
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br><strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>", //drains <strong class='color-f'>energy</strong>
+            drainCD: 0,
             effect: () => {
-                // m.fieldHarmReduction = 0.80;
                 m.fieldBlockCD = 0;
-                // m.fieldHarmReduction = 0.75;
                 m.blockingRecoil = 2 //4 is normal
                 m.fieldRange = 175
-                m.fieldShieldingScale = Math.pow(0.5, (tech.harmonics - 3))
-                m.harmonicRadius = 1 //for smoothing function when player holds mouse (for harmonicAtomic)
+                m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
+
                 m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
                     const fieldRange1 = (0.7 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
                     const fieldRange2 = (0.63 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
@@ -1529,12 +1516,24 @@ const m = {
                     ctx.beginPath();
                     ctx.arc(m.pos.x, m.pos.y, fieldRange3, 0, 2 * Math.PI);
                     ctx.fill();
-                    m.pushMobs360(netfieldRange);
+                    //360 block
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < netfieldRange && !mob[i].isShielded) { // && Matter.Query.ray(map, mob[i].position, m.pos).length === 0
+                            mob[i].locatePlayer();
+                            if (this.drainCD > m.cycle) {
+                                m.pushMass(mob[i], 0);
+                            } else {
+                                m.pushMass(mob[i]);
+                                this.drainCD = m.cycle + 10
+                            }
+                        }
+                    }
                 }
+                m.harmonicRadius = 1 //for smoothing function when player holds mouse (for harmonicAtomic)
                 m.harmonicAtomic = () => { //several ellipses spinning about different axises
                     const rotation = simulation.cycle * 0.002
                     const phase = simulation.cycle * 0.03
-                    const radius = m.fieldRange * m.harmonicRadius //+ 20 * Math.sin(m.cycle * 0.05)
+                    const radius = m.fieldRange * m.harmonicRadius
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "rgba(110,170,200,0.9)"
                     ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.13 + 0.15 * Math.random()) * (3 / tech.harmonics)) + ")";
@@ -1545,7 +1544,18 @@ const m = {
                         ctx.fill();
                         ctx.stroke();
                     }
-                    m.pushMobs360(radius);
+                    //360 block
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < radius && !mob[i].isShielded) { // && Matter.Query.ray(map, mob[i].position, m.pos).length === 0
+                            mob[i].locatePlayer();
+                            if (this.drainCD > m.cycle) {
+                                m.pushMass(mob[i], 0);
+                            } else {
+                                m.pushMass(mob[i]);
+                                this.drainCD = m.cycle + 10
+                            }
+                        }
+                    }
                 }
                 if (tech.harmonics === 2) {
                     m.harmonicShield = m.harmonic3Phase
@@ -1577,8 +1587,6 @@ const m = {
                         }
                         m.harmonicShield()
                     }
-
-
                     m.drawFieldMeter()
                 }
             }
@@ -2479,9 +2487,9 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
-                m.duplicateChance = 0.07
+                m.duplicateChance = 0.1
                 powerUps.setDo(); //needed after adjusting duplication chance
 
                 m.hold = function() {
