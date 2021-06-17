@@ -754,12 +754,30 @@
                 }
             },
             {
-                name: "shock wave",
-                description: "<strong class='color-e'>explosions</strong> <strong>stun</strong> mobs for <strong>1-2</strong> seconds<br>decrease <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>40%</strong>",
+                name: "chain reaction",
+                description: "<strong class='color-block'>blocks</strong> caught in <strong class='color-e'>explosions</strong> also <strong class='color-e'>explode</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
+                allowed() {
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                },
+                requires: "an explosive damage source, not iridium-192",
+                effect() {
+                    tech.isBlockExplode = true;
+                },
+                remove() {
+                    tech.isBlockExplode = false;
+                }
+            },
+            {
+                name: "shock wave",
+                description: "<strong class='color-e'>explosions</strong> <strong>stun</strong> mobs for <strong>1-2</strong> seconds<br>decrease <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>30%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
                 allowed() {
                     return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
@@ -3794,7 +3812,7 @@
                 },
                 remove() {
                     tech.waveBeamSpeed = 10;
-                    tech.waveBeamDamage = 1.3 //this sets base wave beam damage
+                    tech.waveBeamDamage = 1.5 //this sets base wave beam damage
                 }
             },
             {
@@ -6928,5 +6946,6 @@
         harmonics: null,
         isStandingWaveExpand: null,
         isBlockExplosion: null,
-        superBallDelay: null
+        superBallDelay: null,
+        isBlockExplode: null
     }

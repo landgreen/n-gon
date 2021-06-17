@@ -1526,7 +1526,7 @@ const spawn = {
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
-                ctx.fillStyle = "rgba(150,0,255,0.15)";
+                ctx.fillStyle = "rgba(150,0,255,0.1)";
                 ctx.fill();
             }
 

@@ -1,23 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech supertemporal - fire your super balls at the same place in space, but delayed in time
+tech: chain reaction - blocks caught in explosions, explode
+tech: shock wave reduces explosion damage by 30% (was 40%)
 
-super ball starts with 3 not 4 balls, but they are is 25% larger, 10% faster, and 25% lower divergence
-  (this makes adding more balls much stronger)
-gun - super balls has 15% less ammo
+slime hazards now draw themselves in hazard.query()
+I updated all the maps to remove hazard.draw()
+    but maybe I missed one let me know if you find a buggy slime
+laser hazards also draw themselves in hazard.opticalQuery()
 
-standing wave harmonics - still has no block cooldown, but now it has a cooldown for how often it can drain energy
-  this should make rapidly blocking drain upto 10x less energy
-  base blocking cost have increased by 25%
-
-wormhole gets 10% duplication (was 7%)
-ice-IX does 15% more damage
-
-new level element - toggle(x, y, isLockOn = false)
-  similar to a button but doesn't require a block
-  used on the level highrise
-  can toggle "off and on" or "lock on"
-
+2/6 rooms for new level.labs() are completed
 
 ******************************************************** BUGS ********************************************************
 
@@ -76,10 +67,12 @@ make a switch level element
     angle of stick "light-switch"
     with colors?
 
+level element: carousel
+  use rotor code
+  add blocks at the 4 ends of the rotor that maintain horizontal angle 
+
 ******************************************************** TODO ********************************************************
 
-standing wave harmonics - can block too often on the same mob if you push it into a corner
-  add a cool down that only stops energy drain and iceIX, but still lets you block
 let standing wave harmonics get tech decorrelation
 
 tech: cloaking field - decrease/increase cooldown on sneak attack?
@@ -89,13 +82,6 @@ tech: cloaking field - decrease/increase cooldown on sneak attack?
 have throw charge scale with fire delay
 
 in testing mode console log the body you click on
-
-default negative mass field- move block horizontally?
-  should this be a tech?
-
-negative mass field tech - increase flight speed
-  use the sphere ellipse graphic?
-  move block horizontally and vertically with player
 
 throwing a block removes the block and rewinds time 10 seconds (including health and energy)
   requires CPT, CPT gun, time dilation field?
@@ -386,6 +372,7 @@ possible names for tech
   axion - maybe a 3rd dark matter type tech
   Pigeonhole principle - if there are several things that are matched up
   regression to the mean
+  tessellation = tiling of a flat surface is the covering of a plane using one or more geometric shapes, called tiles, with no overlaps and no gaps.
 
 
 

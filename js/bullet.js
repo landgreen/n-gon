@@ -302,7 +302,7 @@ const b = {
     explosion(where, radius, color = "rgba(255,25,0,0.6)") { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
         let dist, sub, knock;
-        let dmg = radius * 0.013 * (tech.isExplosionStun ? 0.6 : 1);
+        let dmg = radius * 0.013 * (tech.isExplosionStun ? 0.7 : 1);
         if (tech.isExplosionHarm) radius *= 1.8 //    1/sqrt(2) radius -> area
         if (tech.isSmallExplosion) {
             color = "rgba(255,0,30,0.7)"
@@ -387,18 +387,30 @@ const b = {
             }
 
             //body knock backs
-            for (let i = 0, len = body.length; i < len; ++i) {
-                if (body[i].isNotHoldable) continue
-                sub = Vector.sub(where, body[i].position);
-                dist = Vector.magnitude(sub);
-                if (dist < radius) {
-                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.022);
-                    body[i].force.x += knock.x;
-                    body[i].force.y += knock.y;
-                } else if (dist < alertRange) {
-                    knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.011);
-                    body[i].force.x += knock.x;
-                    body[i].force.y += knock.y;
+            for (let i = body.length - 1; i > -1; i--) {
+                if (!body[i].isNotHoldable) {
+                    sub = Vector.sub(where, body[i].position);
+                    dist = Vector.magnitude(sub);
+                    if (dist < radius) {
+                        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.022);
+                        body[i].force.x += knock.x;
+                        body[i].force.y += knock.y;
+                        if (tech.isBlockExplode) {
+                            if (body[i] === m.holdingTarget) m.drop()
+                            const size = 20 + 350 * Math.pow(body[i].mass, 0.25)
+                            const where = body[i].position
+                            const onLevel = level.onLevel //prevent explosions in the next level
+                            Matter.World.remove(engine.world, body[i]);
+                            body.splice(i, 1);
+                            setTimeout(() => {
+                                if (onLevel === level.onLevel) b.explosion(where, size); //makes bullet do explosive damage at end
+                            }, 150 + 300 * Math.random());
+                        }
+                    } else if (dist < alertRange) {
+                        knock = Vector.mult(Vector.normalise(sub), (-Math.sqrt(dmg) * body[i].mass) * 0.011);
+                        body[i].force.x += knock.x;
+                        body[i].force.y += knock.y;
+                    }
                 }
             }
 
