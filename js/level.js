@@ -21,12 +21,14 @@ const level = {
             // b.giveGuns("grenades")
             // tech.isExplodeRadio = true
             // tech.giveTech("chain reaction")
-            // tech.giveTech("MACHO")
+            // tech.giveTech("quenching")
+            // tech.giveTech("decoherence")
             // tech.giveTech("supertemporal")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
             // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
             // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
+
 
             level.intro(); //starting level
             // level.labs();
@@ -54,6 +56,7 @@ const level = {
             // level.vats() //community level
             // level["n-gon"]() //community level
             // level.tunnel() //community level
+            // for (let i = 0; i < 39; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
             // localSettings.loreCount = 1;
@@ -77,8 +80,8 @@ const level = {
         simulation.draw.setPaths();
         b.respawnBots();
         m.resetHistory();
-        if (tech.isArmorFromPowerUps) {
-            tech.armorFromPowerUps += Math.min(0.03 * powerUps.totalPowerUps, 0.51)
+        if (tech.isExtraMaxHealth) {
+            tech.extraMaxHealth += Math.min(0.03 * powerUps.totalPowerUps, 0.51)
             m.setMaxHealth();
         }
         if (tech.isGunCycle) {
@@ -1101,16 +1104,25 @@ const level = {
                 const y = offset.y
                 level.setPosToSpawn(x + 2300, y - 800);
                 spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-                spawn.mapRect(x + 1450, y - 750, 1300, 50); //entrance shelf
                 spawn.mapRect(x + 1850, y - 1350, 50, 450); //entrance left wall
                 spawn.bodyRect(x + 1860, y - 900, 30, 150); //entrance door
 
                 spawn.mapRect(x + 2000, y - 350, 750, 150); //toggle shelf
                 const toggle = level.toggle(x + 2050, y - 350, true) //(x,y,isOn,isLockOn = true/false)
 
-                const hazard = level.hazard(x + 1040, y - 660, 1700, 10, 0.4) //laser
-                spawn.mapRect(x + 1050, y - 665, 10, 20); //laser nose
-                spawn.mapRect(x + 650, y - 705, 400, 100); //laser body
+                let hazard
+                if (Math.random() > 0.5) {
+                    spawn.mapRect(x + 550, y - 750, 2200, 50); //entrance shelf
+                    hazard = level.hazard(x + 850, y - 920, 1000, 10, 0.4) //laser
+                    spawn.mapRect(x + 860, y - 925, 10, 20); //laser nose
+                    spawn.mapRect(x + 660, y - 975, 200, 120); //laser body
+                } else {
+                    spawn.mapRect(x + 1450, y - 750, 1300, 50); //entrance shelf
+                    hazard = level.hazard(x + 1040, y - 660, 1700, 10, 0.4) //laser
+                    spawn.mapRect(x + 1050, y - 665, 10, 20); //laser nose
+                    spawn.mapRect(x + 650, y - 705, 400, 100); //laser body
+                }
+
                 const hazard2 = level.hazard(x - 150, y - 330, 600, 10, 0.4) //laser
                 spawn.mapRect(x + 440, y - 335, 10, 20); //laser nose
                 spawn.mapRect(x + 450, y - 375, 400, 100); //laser body
@@ -1118,8 +1130,10 @@ const level = {
                 const Xoffset = Math.floor(400 * Math.random())
                 const hazard3 = level.hazard(x + Xoffset, y - 1300, 10, 1300, 0.4) //laser
                 spawn.mapRect(x + Xoffset - 5, y - 1310, 20, 20); //laser nose
-                const hazard4 = level.hazard(x + 2100, y - 200, 10, 200, 0.4) //laser
-                spawn.mapRect(x + 2100 - 5, y - 210, 20, 20); //laser nose
+
+                const Xoffset2 = 2050 + Math.floor(550 * Math.random())
+                const hazard4 = level.hazard(x + Xoffset2, y - 200, 10, 200, 0.4) //laser
+                spawn.mapRect(x + Xoffset2 - 5, y - 210, 20, 20); //laser nose
 
                 spawn.randomSmallMob(x + 2225, y - 100);
                 spawn.randomMob(x + 0, y - 125, 0);
@@ -1149,7 +1163,7 @@ const level = {
             // }
         ]
         exitOptions = [
-            () => { //9 spinners
+            () => { //8 spinners
                 const x = offset.x
                 const y = offset.y
                 level.exit.x = x + 1250;
@@ -1225,6 +1239,78 @@ const level = {
                         ctx.fill();
                     }
                 )
+            },
+            () => { //7 spinners
+                const x = offset.x
+                const y = offset.y
+                level.exit.x = x + 2450;
+                level.exit.y = y - 980;
+                spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+                spawn.mapRect(x + 2250, y - 950, 500, 25); //exit platform
+                spawn.mapRect(x + 2300, y - 1300, 25, 175); //exit side wall
+
+                spawn.bodyRect(x + 1275, y - 475, 125, 125, 0.25);
+                spawn.bodyRect(x + 1825, y - 125, 125, 125, 0.25);
+                spawn.bodyRect(x + 500, y - 100, 125, 100, 0.25);
+                spawn.bodyRect(x + 0, y - 150, 100, 150, 0.25);
+                spawn.bodyRect(x + 2375, y - 150, 125, 150, 0.25);
+
+                if (Math.random() > 0.5) {
+                    const density = 0.0013
+                    const angle = Math.PI / 2
+                    const variance = 0.3 //Math.PI
+                    const frictionAir = 0.01
+                    balance1 = level.spinner(x + 1150, y - 500, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir) //    spinner(x, y, width, height, density = 0.001, angle=0,frictionAir=0.001,angularVelocity=0) {
+                    balance3 = level.spinner(x + 600, y - 600, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance2 = level.spinner(x + 125, y - 850, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance4 = level.spinner(x + 650, y - 1145, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance5 = level.spinner(x + 1100, y - 1145, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance6 = level.spinner(x + 1550, y - 1145, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance7 = level.spinner(x + 2000, y - 1145, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                } else {
+                    const density = 0.0013
+                    const angle = Math.PI / 2
+                    const variance = 0 //Math.PI
+                    const frictionAir = 0.01
+                    balance1 = level.spinner(x + 150, y - 500, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir) //    spinner(x, y, width, height, density = 0.001, angle=0,frictionAir=0.001,angularVelocity=0) {
+                    balance2 = level.spinner(x + 2300, y - 550, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance4 = level.spinner(x + 1850, y - 550, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance3 = level.spinner(x + 650, y - 700, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance5 = level.spinner(x + 1100, y - 900, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance6 = level.spinner(x + 1550, y - 900, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                    balance7 = level.spinner(x + 1970, y - 1150, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
+                }
+                spawn.randomMob(x + 1175, y - 725, 0.1);
+                spawn.randomMob(x + 1450, y - 725, 0.2);
+                spawn.randomMob(x + 425, y - 100, 0.3);
+                spawn.randomMob(x + 2300, y - 125, 0.4);
+                spawn.randomMob(x + 1300, y - 375, 0.5);
+                doCustom.push(
+                    () => {
+                        ctx.fillStyle = "#d4f4f4"
+                        ctx.fillRect(x + 2300, y - 1300, 400, 350)
+                    }
+                )
+                doCustomTopLayer.push(
+                    () => {
+                        ctx.fillStyle = "#233"
+                        ctx.beginPath();
+                        ctx.arc(balance1.pointA.x, balance1.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.moveTo(balance2.pointA.x, balance2.pointA.y)
+                        ctx.arc(balance2.pointA.x, balance2.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.moveTo(balance3.pointA.x, balance3.pointA.y)
+                        ctx.arc(balance3.pointA.x, balance3.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.moveTo(balance4.pointA.x, balance4.pointA.y)
+                        ctx.arc(balance4.pointA.x, balance4.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.moveTo(balance5.pointA.x, balance5.pointA.y)
+                        ctx.arc(balance5.pointA.x, balance5.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.moveTo(balance6.pointA.x, balance6.pointA.y)
+                        ctx.arc(balance6.pointA.x, balance6.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.moveTo(balance7.pointA.x, balance7.pointA.y)
+                        ctx.arc(balance7.pointA.x, balance7.pointA.y, 9, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                )
             }
         ]
         emptyOptions = [ //nothing good here
@@ -1245,7 +1331,17 @@ const level = {
             () => {
                 const x = offset.x
                 const y = offset.y
-                if (simulation.difficulty > 3) spawn.randomLevelBoss(x + 1250, y - 600);
+
+
+                const elevator = level.elevator(x + 1200, y - 100, 380, 50, -2000, 0.001) // elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isTeleport = false) {
+
+                // if (simulation.difficulty > 3) 
+                spawn.randomLevelBoss(x + 1250, y - 1400);
+                doCustomTopLayer.push(
+                    () => {
+                        elevator.move()
+                    }
+                )
 
             }
         ]
@@ -1273,8 +1369,7 @@ const level = {
             if (rooms[i] === "empty") rooms[i] = empty
             if (rooms[i] === "loot") rooms[i] = loot
         }
-        //*********************************DON"T RUN THIS LINE IN THE FINAL VERSION ***************************************
-        rooms = [exit, enter, empty, loot] //this is used to control what level spawns while building
+        rooms = [empty, loot, exit, enter, ] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
 
         outlineDoors = () => {
             spawn.mapRect(offset.x - 200, offset.y, 3000, 100); //floor
@@ -1290,52 +1385,53 @@ const level = {
             }
         }
         outlineUpDown = () => {
-            spawn.mapRect(offset.x - 200, offset.y + 1400, 3000, 100); //floor
-            spawn.mapRect(offset.x - 200, offset.y - 1400, 3000, 100); //ceiling
-            if (!isDoorLeft) spawn.mapRect(offset.x - 200, offset.y - 1400, 100, 2800); //left wall
+            spawn.mapRect(offset.x - 200, offset.y + 0, 3000, 100); //floor
+            spawn.mapRect(offset.x - 200, offset.y - 2800, 3000, 100); //ceiling
+            if (!isDoorLeft) spawn.mapRect(offset.x - 200, offset.y - 2800, 100, 2800); //left wall
             if (isDoorRight) { //if door only add wall on right side
                 //upper door
+                spawn.mapRect(offset.x + 2700, offset.y - 2800, 100, 1225); //right wall
+                spawn.mapRect(offset.x + 2700, offset.y - 1410, 100, 20); //right doorstep
+                const doorWidth = 15 + Math.floor(100 * Math.random() * Math.random())
+                spawn.bodyRect(offset.x + 2750 - doorWidth / 2, offset.y - 1225, doorWidth, 165); //block door
+                //lower door
                 spawn.mapRect(offset.x + 2700, offset.y - 1400, 100, 1225); //right wall
                 spawn.mapRect(offset.x + 2700, offset.y - 10, 100, 20); //right doorstep
-                const doorWidth = 15 + Math.floor(100 * Math.random() * Math.random())
-                spawn.bodyRect(offset.x + 2750 - doorWidth / 2, offset.y - 175, doorWidth, 165); //block door
-                //lower door
-                spawn.mapRect(offset.x + 2700, offset.y - 1400 + 1400, 100, 1225); //right wall
-                spawn.mapRect(offset.x + 2700, offset.y - 10 + 1400, 100, 20); //right doorstep
                 const doorWidth2 = 15 + Math.floor(100 * Math.random() * Math.random())
-                spawn.bodyRect(offset.x + 2750 - doorWidth2 / 2, offset.y - 175 + 1400, doorWidth2, 165); //block door
+                spawn.bodyRect(offset.x + 2750 - doorWidth2 / 2, offset.y - 175, doorWidth2, 165); //block door
             } else {
-                spawn.mapRect(offset.x + 2700, offset.y - 1400, 100, 2800); //right wall
+                spawn.mapRect(offset.x + 2700, offset.y - 2800, 100, 2800); //right wall
             }
         }
 
         let rows = [
             () => {
                 offset.y = 0
-                rooms[0]()
-                outlineDoors()
-
-                offset.y = -1400
-                rooms[1]()
-                outlineDoors()
-            },
-            () => {
-                offset.y = -1400
-                upDown()
                 outlineUpDown()
+                upDown()
             },
             () => {
                 offset.y = 0
-                rooms[2]()
                 outlineDoors()
+                rooms[0]()
 
                 offset.y = -1400
-                rooms[3]()
                 outlineDoors()
+                rooms[1]()
+            },
+            () => {
+                offset.y = 0
+                outlineDoors()
+                rooms[2]()
+
+                offset.y = -1400
+                outlineDoors()
+                rooms[3]()
             }
         ]
-        //*********************************RUN THIS LINE IN THE FINAL VERSION ***************************************
-        // rows = shuffle(rows)
+
+        // rows = shuffle(rows) //********************************* RUN THIS LINE IN THE FINAL VERSION ***************************************
+
         for (let i = 0; i < 3; i++) {
             if (i === 0) {
                 isDoorLeft = false
@@ -1360,6 +1456,8 @@ const level = {
             for (let i = 0, len = doCustomTopLayer.length; i < len; i++) doCustomTopLayer[i]() //runs all the active code from each room
         };
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+
+        level.setPosToSpawn(0, 0); //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
     },
     null() {
         level.levels.pop(); //remove lore level from rotation

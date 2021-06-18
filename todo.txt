@@ -1,14 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: chain reaction - blocks caught in explosions, explode
-tech: shock wave reduces explosion damage by 30% (was 40%)
+tech: quenching - if you're at full health heal power ups do harm but they also increase your max health
 
-slime hazards now draw themselves in hazard.query()
-I updated all the maps to remove hazard.draw()
-    but maybe I missed one let me know if you find a buggy slime
-laser hazards also draw themselves in hazard.opticalQuery()
+you can play with camera smoothing now in the console
+  m.lookSmoothing = 0.07, //1 is instant/jerky,  0.01 is slow zoom, 0.07 is standard
 
-2/6 rooms for new level.labs() are completed
+more progress on level - labs
 
 ******************************************************** BUGS ********************************************************
 
@@ -42,17 +39,15 @@ labs - procedural generation
     entrance - no mobs, starting power ups`
     exit - possible duplication boss spawn location
     up, down - 2 paired rooms - boost, elevator, portal
-    boss - standard random boss spawns
+      standard random boss spawns
+    loot - some power ups
     empty - a dead end
-    button - like empty, but also has a switch that opens door to exit room
   room ideas - 
     low gravity room, controlled with a button?
     portal room 
     endlessly falling blocks down a slide, that the player has to climb up
     portal + rotor + falling blocks = perpetual motion
-    laser room
     slime radiation room
-    spinner room
 
 make a switch level element
   basically button, but go off and on when it hits player (or block?)
@@ -72,6 +67,12 @@ level element: carousel
   add blocks at the 4 ends of the rotor that maintain horizontal angle 
 
 ******************************************************** TODO ********************************************************
+
+tech: picking up heal power ups at max health does harm, but increases max health
+  scales with heal value
+
+does catabolism give too much ammo?
+  synergy with shotgun harm immunity
 
 let standing wave harmonics get tech decorrelation
 
@@ -95,9 +96,6 @@ tech: at the start of a new level remove 5 research and spawn a second boss
 what about the single axis graphic? (find the code in standing wave harmonic)
   maybe just save it for a mob
   maybe use it on lore
-
-tech: picking up heal power ups when at full health does harm equal to the heal values
-  benefit on pick up: get 1% damage
 
 buttons can now on/off boosts
 
@@ -373,7 +371,7 @@ possible names for tech
   Pigeonhole principle - if there are several things that are matched up
   regression to the mean
   tessellation = tiling of a flat surface is the covering of a plane using one or more geometric shapes, called tiles, with no overlaps and no gaps.
-
+  phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
 
 
 plot script:

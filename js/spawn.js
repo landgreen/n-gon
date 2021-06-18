@@ -3412,6 +3412,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.isBadTarget = true;
         me.showHealthBar = false;
+        me.isOrbital = true;
         // me.isShielded = true
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.bullet; //cat.player | cat.map | cat.body

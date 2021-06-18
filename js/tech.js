@@ -25,7 +25,7 @@
             // tech.removeJunkTechFromPool();
             // tech.removeLoreTechFromPool();
             // tech.addLoreTechToPool();
-            tech.armorFromPowerUps = 0;
+            tech.extraMaxHealth = 0;
             tech.totalCount = 0;
             simulation.updateTechHUD();
         },
@@ -2391,6 +2391,24 @@
                 }
             },
             {
+                name: "quenching",
+                description: "if you're at full <strong class='color-h'>health</strong> heal power ups do <strong class='color-harm'>harm</strong><br>but they also increase your <strong>maximum</strong> <strong class='color-h'>health</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return !tech.isEnergyHealth && !tech.isNoHeals
+                },
+                requires: "not mass-energy equivalence, ergodicity",
+                effect() {
+                    tech.isOverHeal = true;
+                },
+                remove() {
+                    tech.isOverHeal = false;
+                }
+            },
+            {
                 name: "inductive coupling",
                 description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 3 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 51 health per level)</em>",
                 maxCount: 1,
@@ -2402,11 +2420,11 @@
                 },
                 requires: "not mass-energy equivalence, not drone harvester, ergodicity",
                 effect() {
-                    tech.isArmorFromPowerUps = true; //tracked by  tech.armorFromPowerUps
+                    tech.isExtraMaxHealth = true; //tracked by  tech.extraMaxHealth
                 },
                 remove() {
-                    tech.isArmorFromPowerUps = false;
-                    // tech.armorFromPowerUps = 0;  //this is now reset in tech.setupAllTech();
+                    tech.isExtraMaxHealth = false;
+                    // tech.extraMaxHealth = 0;  //this is now reset in tech.setupAllTech();
                     m.setMaxHealth();
                 }
             },
@@ -2417,7 +2435,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return tech.isArmorFromPowerUps
+                    return tech.isExtraMaxHealth
                 },
                 requires: "inductive coupling",
                 effect() {
@@ -2435,7 +2453,7 @@
                 frequency: 2,
                 isHealTech: true,
                 allowed() {
-                    return m.health > 0.1 && (m.maxHealth > 1 || tech.isArmorFromPowerUps) && !tech.isNoHeals
+                    return m.health > 0.1 && (m.maxHealth > 1 || tech.isExtraMaxHealth) && !tech.isNoHeals
                 },
                 requires: "increased max health, not ergodicity",
                 effect() {
@@ -4180,7 +4198,7 @@
                 count: 0,
                 frequency: 2,
                 allowed() {
-                    return !tech.isArmorFromPowerUps && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
+                    return !tech.isExtraMaxHealth && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
                 requires: "drones, not inductive coupling",
                 effect() {
@@ -4430,13 +4448,13 @@
                 requires: "laser, not wide beam, diffuse beam, pulse, or slow light",
                 effect() {
                     tech.laserReflections++;
-                    tech.laserDamage += 0.08; //base is 0.12
-                    tech.laserFieldDrain += 0.0009 //base is 0.002
+                    tech.laserDamage += 0.075; //base is 0.12
+                    tech.laserFieldDrain += 0.001 //base is 0.002
                 },
                 remove() {
                     tech.laserReflections = 2;
-                    tech.laserDamage = 0.16;
-                    tech.laserFieldDrain = 0.0018;
+                    tech.laserDamage = 0.15;
+                    tech.laserFieldDrain = 0.002;
                 }
             },
             {
@@ -6802,7 +6820,7 @@
         squirrelJump: null,
         fastTimeJump: null,
         isFastRadiation: null,
-        isArmorFromPowerUps: null,
+        isExtraMaxHealth: null,
         isAmmoForGun: null,
         isRapidPulse: null,
         isPulseAim: null,
@@ -6838,7 +6856,7 @@
         isFreezeHarmImmune: null,
         isSmallExplosion: null,
         isExplosionHarm: null,
-        armorFromPowerUps: null,
+        extraMaxHealth: null,
         // bonusHealth: null,
         isIntangible: null,
         isCloakStun: null,
@@ -6947,5 +6965,6 @@
         isStandingWaveExpand: null,
         isBlockExplosion: null,
         superBallDelay: null,
-        isBlockExplode: null
+        isBlockExplode: null,
+        isOverHeal: null
     }

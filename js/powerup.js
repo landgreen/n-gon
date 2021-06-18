@@ -275,14 +275,32 @@ const powerUps = {
         size() {
             return 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
         },
+        calculateHeal(size) {
+            return tech.largerHeals * (size / 40 / Math.sqrt(tech.largerHeals) / (simulation.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on m.addHealth()
+        },
         effect() {
             if (!tech.isEnergyHealth && m.alive) {
-                const heal = tech.largerHeals * (this.size / 40 / Math.sqrt(tech.largerHeals) / (simulation.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on m.addHealth()
+                const heal = powerUps.heal.calculateHeal(this.size)
                 if (heal > 0) {
-                    const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
-                    m.addHealth(heal);
-                    simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
-                    // simulation.makeTextLog("<div class='circle heal'></div> &nbsp; <span style='font-size:115%;'> <strong style = 'letter-spacing: 2px;'>heal</strong>  " + (Math.min(m.maxHealth - m.health, heal) * simulation.healScale * 100).toFixed(0) + "%</span>", 300)
+                    if (tech.isOverHeal && m.health === m.maxHealth) { //tech quenching
+                        if (m.immuneCycle < m.cycle) {
+                            m.damage(heal * simulation.healScale);
+                            //draw damage
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: m.pos.x,
+                                y: m.pos.y,
+                                radius: heal * 500 * simulation.healScale,
+                                color: simulation.mobDmgColor,
+                                time: simulation.drawTime
+                            });
+                        }
+                        tech.extraMaxHealth += heal * simulation.healScale //increase max health
+                        m.setMaxHealth();
+                    } else {
+                        const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
+                        m.addHealth(heal);
+                        simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                    }
                 }
             }
             if (tech.healGiveMaxEnergy) {

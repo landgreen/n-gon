@@ -15,7 +15,6 @@ const simulation = {
         m.move();
         m.look();
         simulation.checks();
-        ctx.save();
         simulation.camera();
         level.custom();
         powerUps.do();
@@ -52,7 +51,6 @@ const simulation = {
         m.move();
         m.look();
         simulation.checks();
-        ctx.save();
         simulation.camera();
         level.custom();
         m.draw();
@@ -421,7 +419,6 @@ const simulation = {
         const dy = simulation.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
         const d = Math.max(dx * dx, dy * dy)
         simulation.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.04 + simulation.edgeZoomOutSmooth * 0.96
-
 
         ctx.save();
         ctx.translate(canvas.width2, canvas.height2); //center

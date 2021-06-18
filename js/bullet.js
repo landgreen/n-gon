@@ -459,7 +459,7 @@ const b = {
     },
     pulse(charge, angle = m.angle, where = m.pos) {
         let best;
-        let explosionRadius = 6 * charge
+        let explosionRadius = 5.5 * charge
         let range = 5000
         const path = [{
                 x: where.x + 20 * Math.cos(angle),
@@ -547,7 +547,7 @@ const b = {
         }
         if (best.who) {
             b.explosion(path[1], explosionRadius)
-            const off = explosionRadius
+            const off = explosionRadius * 1.2
             b.explosion({ x: path[1].x + off * (Math.random() - 0.5), y: path[1].y + off * (Math.random() - 0.5) }, explosionRadius)
             b.explosion({ x: path[1].x + off * (Math.random() - 0.5), y: path[1].y + off * (Math.random() - 0.5) }, explosionRadius)
         }
@@ -2107,7 +2107,7 @@ const b = {
                             }
                         }
                         //power ups
-                        if (!this.isImproved && !simulation.isChoosing && !tech.isArmorFromPowerUps) {
+                        if (!this.isImproved && !simulation.isChoosing && !tech.isExtraMaxHealth) {
                             if (this.lockedOn) {
                                 //grab, but don't lock onto nearby power up
                                 for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -3623,7 +3623,7 @@ const b = {
             }
         }, {
             name: "super balls",
-            description: "fire <strong>four</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
+            description: "fire <strong>3</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
             ammo: 0,
             ammoPack: 11,
             have: false,

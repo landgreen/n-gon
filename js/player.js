@@ -174,20 +174,8 @@ const m = {
     transSmoothY: 0,
     lastGroundedPositionY: 0,
     // mouseZoom: 0,
-    look() {
-        //always on mouse look
-        m.angle = Math.atan2(
-            simulation.mouseInGame.y - m.pos.y,
-            simulation.mouseInGame.x - m.pos.x
-        );
-        //smoothed mouse look translations
-        const scale = 0.8;
-        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
-        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
-
-        m.transX += (m.transSmoothX - m.transX) * 0.07;
-        m.transY += (m.transSmoothY - m.transY) * 0.07;
-    },
+    lookSmoothing: 0.07, //1 is instant jerky,  0.001 is slow smooth zoom, 0.07 is standard
+    look() {}, //set to lookDefault()
     lookDefault() {
         //always on mouse look
         m.angle = Math.atan2(
@@ -199,8 +187,8 @@ const m = {
         m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
         m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
 
-        m.transX += (m.transSmoothX - m.transX) * 0.07;
-        m.transY += (m.transSmoothY - m.transY) * 0.07;
+        m.transX += (m.transSmoothX - m.transX) * m.lookSmoothing;
+        m.transY += (m.transSmoothY - m.transY) * m.lookSmoothing;
     },
     doCrouch() {
         if (!m.crouch) {
@@ -333,7 +321,7 @@ const m = {
         // tech.addLoreTechToPool();
         // tech.removeJunkTechFromPool();
         tech.cancelCount = 0;
-        tech.armorFromPowerUps = 0;
+        tech.extraMaxHealth = 0;
         tech.totalCount = 0;
         const randomBotCount = b.totalBots()
         b.zeroBotCount()
@@ -485,7 +473,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.armorFromPowerUps + tech.isFallingDamage //+ tech.bonusHealth
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage //+ tech.bonusHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300*m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -1250,9 +1238,9 @@ const m = {
             const dyP = m.pos.y - powerUp[i].position.y;
             const dist2 = dxP * dxP + dyP * dyP;
             // float towards player  if looking at and in range  or  if very close to player
-            if (dist2 < m.grabPowerUpRange2 &&
+            if (
+                dist2 < m.grabPowerUpRange2 &&
                 (m.lookingAt(powerUp[i]) || dist2 < 16000) &&
-                !(m.health === m.maxHealth && powerUp[i].name === "heal") &&
                 Matter.Query.ray(map, powerUp[i].position, m.pos).length === 0
             ) {
                 powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
@@ -1262,7 +1250,11 @@ const m = {
                     x: powerUp[i].velocity.x * 0.11,
                     y: powerUp[i].velocity.y * 0.11
                 });
-                if (dist2 < 5000 && !simulation.isChoosing) { //use power up if it is close enough
+                if ( //use power up if it is close enough
+                    dist2 < 5000 &&
+                    !simulation.isChoosing &&
+                    !(m.health === m.maxHealth && powerUp[i].name === "heal" && !tech.isOverHeal)
+                ) {
                     powerUps.onPickUp(powerUp[i]);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
                         x: player.velocity.x + powerUp[i].velocity.x / player.mass * 5,
@@ -1320,6 +1312,8 @@ const m = {
                     x: player.velocity.x - (15 * unit.x) / massRoot,
                     y: player.velocity.y - (15 * unit.y) / massRoot
                 });
+                if (mob[i].isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
+
                 if (m.crouch) {
                     Matter.Body.setVelocity(player, {
                         x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot,
@@ -1338,6 +1332,8 @@ const m = {
                     x: player.velocity.x - (20 * unit.x) / massRoot,
                     y: player.velocity.y - (20 * unit.y) / massRoot
                 });
+                if (mob[i].isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
+
                 if (who.isDropPowerUp && player.speed < 12) {
                     const massRootCap = Math.sqrt(Math.min(10, Math.max(0.4, who.mass))); // masses above 12 can start to overcome the push back
                     Matter.Body.setVelocity(player, {
@@ -2945,7 +2941,6 @@ const m = {
                 const dy = simulation.mouse.y / window.innerHeight - 0.5 //y distance from mouse to window center scaled by window height
                 const d = Math.max(dx * dx, dy * dy)
                 simulation.edgeZoomOutSmooth = (1 + 4 * d * d) * 0.04 + simulation.edgeZoomOutSmooth * 0.96
-
 
                 ctx.save();
                 ctx.translate(canvas.width2, canvas.height2); //center
