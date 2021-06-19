@@ -1,11 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: quenching - if you're at full health heal power ups do harm but they also increase your max health
+catabolism - lowers your max health by 1 (was 3 harm) and gives 4 ammo
+inductive coupling - gives max energy for leftover power ups (was max health)
+  now requires mass-energy equivalence
 
-you can play with camera smoothing now in the console
-  m.lookSmoothing = 0.07, //1 is instant/jerky,  0.01 is slow zoom, 0.07 is standard
-
-more progress on level - labs
+switched to a newer copy, paste URL
+  this seems to fix issues with failed text copy in the level builder if you hold mouse down for over 6 seconds
 
 ******************************************************** BUGS ********************************************************
 

@@ -96,13 +96,16 @@ const b = {
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown        
-        if (tech.isAmmoFromHealth) {
-            if (m.health > 0.03) {
-                m.damage(0.03 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
-                if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
-                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
-                }
-            }
+        if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
+            tech.extraMaxHealth -= 0.01 //decrease max health
+            m.setMaxHealth();
+            for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
+            // if (m.health > 0.03) {
+            //     m.damage(0.03 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
+            //     if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
+            //         
+            //     }
+            // }
         }
     },
     giveGuns(gun = "random", ammoPacks = 10) {
@@ -1206,7 +1209,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0006 + m.fieldRegen
+        const DRAIN = 0.0007 + m.fieldRegen
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -1225,7 +1228,7 @@ const b = {
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: b.dmgScale * 1.5, //damage also changes when you divide by mob.mass on in .do()
+                dmg: b.dmgScale * 1.4, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -2107,7 +2110,7 @@ const b = {
                             }
                         }
                         //power ups
-                        if (!this.isImproved && !simulation.isChoosing && !tech.isExtraMaxHealth) {
+                        if (!this.isImproved && !simulation.isChoosing && !tech.isExtraMaxEnergy) {
                             if (this.lockedOn) {
                                 //grab, but don't lock onto nearby power up
                                 for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -3460,8 +3463,8 @@ const b = {
             name: "shotgun",
             description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
-            ammoPack: 5.5,
-            defaultAmmoPack: 5.5,
+            ammoPack: 5,
+            defaultAmmoPack: 5,
             have: false,
             do() {},
             fire() {

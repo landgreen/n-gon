@@ -504,13 +504,30 @@ const build = {
         if (isCustom) {
             url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
             url += `&noPower=${Number(document.getElementById("no-power-ups").checked)}`
-            alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
+            // alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         } else {
             simulation.makeTextLog("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
-        simulation.copyToClipBoard(url)
+
+        navigator.clipboard.writeText(url).then(function() {
+            /* clipboard successfully set */
+            if (isCustom) {
+                setTimeout(function() {
+                    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
+                }, 300);
+            }
+        }, function() {
+            /* clipboard write failed */
+            if (isCustom) {
+                setTimeout(function() {
+                    alert('copy failed')
+                }, 300);
+            }
+            console.log('copy failed')
+        });
+
     },
     startExperiment() {
         build.isExperimentSelection = false;
@@ -1165,7 +1182,6 @@ function cycle() {
             simulation.clearMap();
             level.start();
         }
-
         simulation.loop();
         // if (isNaN(m.health) || isNaN(m.energy)) {
         //   console.log(`m.health = ${m.health}`)

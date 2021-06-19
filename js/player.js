@@ -628,7 +628,7 @@ const m = {
         }
 
         if (tech.isEnergyHealth) {
-            m.energy -= dmg * 1.1;
+            m.energy -= dmg * 1.15;
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -1312,7 +1312,7 @@ const m = {
                     x: player.velocity.x - (15 * unit.x) / massRoot,
                     y: player.velocity.y - (15 * unit.y) / massRoot
                 });
-                if (mob[i].isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
+                if (who.isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
 
                 if (m.crouch) {
                     Matter.Body.setVelocity(player, {
@@ -1332,7 +1332,7 @@ const m = {
                     x: player.velocity.x - (20 * unit.x) / massRoot,
                     y: player.velocity.y - (20 * unit.y) / massRoot
                 });
-                if (mob[i].isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
+                if (who.isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
 
                 if (who.isDropPowerUp && player.speed < 12) {
                     const massRootCap = Math.sqrt(Math.min(10, Math.max(0.4, who.mass))); // masses above 12 can start to overcome the push back

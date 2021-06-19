@@ -1104,42 +1104,6 @@ const simulation = {
         // if line1 and line2 are segments, they intersect if both of the above are true
         return result;
     },
-    copyToClipBoard(value) {
-        // Create a fake textarea
-        const textAreaEle = document.createElement('textarea');
-
-        // Reset styles
-        textAreaEle.style.border = '0';
-        textAreaEle.style.padding = '0';
-        textAreaEle.style.margin = '0';
-
-        // Set the absolute position
-        // User won't see the element
-        textAreaEle.style.position = 'absolute';
-        textAreaEle.style.left = '-9999px';
-        textAreaEle.style.top = `0px`;
-
-        // Set the value
-        textAreaEle.value = value
-
-        // Append the textarea to body
-        document.body.appendChild(textAreaEle);
-
-        // Focus and select the text
-        textAreaEle.focus();
-        textAreaEle.select();
-
-        // Execute the "copy" command
-        try {
-            document.execCommand('copy');
-        } catch (err) {
-            // Unable to copy
-            console.log(err)
-        } finally {
-            // Remove the textarea
-            document.body.removeChild(textAreaEle);
-        }
-    },
     constructMouseDownPosition: {
         x: 0,
         y: 0
@@ -1159,18 +1123,6 @@ const simulation = {
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, dx, dy);
         }
-    },
-    outputMapString(string) {
-        if (string) simulation.constructMapString.push(string) //store command as a string in the next element of an array
-        let out = "" //combine set of map strings to one string
-        let outHTML = ""
-        for (let i = 0, len = simulation.constructMapString.length; i < len; i++) {
-            out += simulation.constructMapString[i];
-            outHTML += "<div>" + simulation.constructMapString[i] + "</div>"
-        }
-        console.log(out)
-        simulation.copyToClipBoard(out)
-        document.getElementById("construct").innerHTML = outHTML
     },
     enableConstructMode() {
         simulation.isConstructionMode = true;
@@ -1203,8 +1155,8 @@ const simulation = {
                         map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                         Matter.Body.setStatic(map[len], true); //make static
                         World.add(engine.world, map[len]); //add to world
-
                         simulation.draw.setPaths() //update map graphics
+
                     } else if (e.which === 3) { //add body
                         simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
 
@@ -1246,5 +1198,53 @@ const simulation = {
                 simulation.outputMapString();
             }
         });
-    }
+    },
+    outputMapString(string) {
+        if (string) simulation.constructMapString.push(string) //store command as a string in the next element of an array
+        let out = "" //combine set of map strings to one string
+        let outHTML = ""
+        for (let i = 0, len = simulation.constructMapString.length; i < len; i++) {
+            out += simulation.constructMapString[i];
+            outHTML += "<div>" + simulation.constructMapString[i] + "</div>"
+        }
+        console.log(out)
+        navigator.clipboard.writeText(out).then(function() { /* clipboard successfully set */ }, function() { /* clipboard write failed */ console.log('copy failed') });
+        document.getElementById("construct").innerHTML = outHTML
+    },
+    // copyToClipBoard(value) {
+    //     // Create a fake textarea
+    //     const textAreaEle = document.createElement('textarea');
+
+    //     // Reset styles
+    //     textAreaEle.style.border = '0';
+    //     textAreaEle.style.padding = '0';
+    //     textAreaEle.style.margin = '0';
+
+    //     // Set the absolute position
+    //     // User won't see the element
+    //     textAreaEle.style.position = 'absolute';
+    //     textAreaEle.style.left = '-9999px';
+    //     textAreaEle.style.top = `0px`;
+
+    //     // Set the value
+    //     textAreaEle.value = value
+
+    //     // Append the textarea to body
+    //     document.body.appendChild(textAreaEle);
+
+    //     // Focus and select the text
+    //     textAreaEle.focus();
+    //     textAreaEle.select();
+
+    //     // Execute the "copy" command
+    //     try {
+    //         document.execCommand('copy');
+    //     } catch (err) {
+    //         // Unable to copy
+    //         console.log(err)
+    //     } finally {
+    //         // Remove the textarea
+    //         document.body.removeChild(textAreaEle);
+    //     }
+    // },
 };

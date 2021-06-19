@@ -1477,7 +1477,7 @@ const spawn = {
         mobs.spawn(x, y, 0, radius, "transparent");
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.25); //extra dense //normal is 0.001
-        me.laserRange = 350;
+        me.laserRange = 300;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
         me.showHealthBar = false; //drawn in this.awake
@@ -1534,9 +1534,9 @@ const spawn = {
             const rotation = simulation.cycle * 0.015
             const phase = simulation.cycle * 0.021
             ctx.lineWidth = 1;
-            ctx.fillStyle = "rgba(150,0,255,0.1)"
+            ctx.fillStyle = "rgba(150,0,255,0.05)"
             ctx.strokeStyle = "#70f"
-            for (let i = 0, len = 7; i < len; i++) {
+            for (let i = 0, len = 6; i < len; i++) {
                 ctx.beginPath();
                 ctx.ellipse(this.position.x, this.position.y, this.laserRange * Math.abs(Math.sin(phase + i / len * Math.PI)), this.laserRange, rotation, 0, 2 * Math.PI);
                 ctx.fill();

@@ -181,7 +181,7 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.047 + tech.duplicateChance + m.duplicateChance
+            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.05 + tech.duplicateChance + m.duplicateChance
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -204,6 +204,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return b.inventory.length === 1 //&& !tech.haveGunCheck("CPT gun")
                 },
@@ -233,6 +234,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return b.inventory.length > 1 && !tech.isEnergyHealth
                 },
@@ -254,6 +256,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return b.inventory.length > 1
                 },
@@ -271,6 +274,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return b.inventory.length > 1
                 },
@@ -290,6 +294,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.isDamageForGuns || tech.isFireRateForGuns) && (b.inventory.length + 5) < b.guns.length
                 },
@@ -364,6 +369,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isEnergyNoAmmo
                 },
@@ -381,6 +387,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
@@ -397,14 +404,15 @@
             },
             {
                 name: "catabolism",
-                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>4</strong> <strong class='color-g'>ammo</strong>, but lose <strong>3</strong> <strong class='color-h'>health</strong>",
+                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>4</strong> <strong class='color-g'>ammo</strong>, but lose <strong>1</strong> max <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return m.harmReduction() < 1 && !tech.isEnergyHealth && !tech.isEnergyNoAmmo
+                    return !tech.isEnergyHealth && !tech.isEnergyNoAmmo
                 },
-                requires: "some harm reduction, not mass-energy equivalence, exciton-lattice",
+                requires: "not mass-energy equivalence or exciton-lattice",
                 effect: () => {
                     tech.isAmmoFromHealth = true;
                 },
@@ -418,6 +426,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true
                 },
@@ -471,6 +480,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !m.isShipMode && !tech.isAlwaysFire
                 },
@@ -494,6 +504,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true
                 },
@@ -515,6 +526,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.Fx > 0.016 && !tech.isEnergyHealth
                 },
@@ -532,6 +544,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.Fx > 0.016
                 },
@@ -549,6 +562,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true
                 },
@@ -566,6 +580,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true
                 },
@@ -584,6 +599,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true
                 },
@@ -621,6 +637,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isExplosionStun
                 },
@@ -638,6 +655,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isBulletsLastLonger > 1
                 },
@@ -656,6 +674,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.relayIce || tech.blockingIce > 1
                 },
@@ -673,6 +692,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio
                 },
@@ -690,6 +710,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
@@ -707,6 +728,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
@@ -724,6 +746,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
@@ -760,6 +783,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
@@ -778,6 +802,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
@@ -796,6 +821,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion
                 },
@@ -813,6 +839,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
                 },
@@ -830,6 +857,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
                 },
@@ -847,6 +875,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
@@ -864,6 +893,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
@@ -881,6 +911,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
@@ -901,6 +932,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner || tech.isMobBlockFling || tech.iceIXOnDeath
                 },
@@ -923,6 +955,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (b.totalBots() > 1 || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
                 },
@@ -940,6 +973,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNoFireDefense
                 },
@@ -1438,6 +1472,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name !== "wormhole"
                 },
@@ -1473,6 +1508,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
                 },
@@ -1544,6 +1580,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return true
                 },
@@ -1562,6 +1599,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true //tech.collisionImmuneCycles > 30
                 },
@@ -1611,6 +1649,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isRelay
                 },
@@ -1648,6 +1687,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isFlipFlop
                 },
@@ -1743,6 +1783,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
                 },
@@ -1760,6 +1801,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath
                 },
@@ -1777,6 +1819,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1 || tech.iceIXOnDeath
                 },
@@ -1794,6 +1837,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath
                 },
@@ -1829,6 +1873,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return simulation.fpsCapDefault > 45
                 },
@@ -1868,6 +1913,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.harmReduction() < 1
                 },
@@ -1888,6 +1934,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isEnergyHealth && m.harmReduction() < 1
                 },
@@ -1905,6 +1952,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.harmReduction() < 1
                 },
@@ -1922,6 +1970,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() { //&& (m.fieldUpgrades[m.fieldMode].name !== "nano-scale manufacturing" || m.maxEnergy > 1)
                     return m.maxEnergy > 0.99 && m.fieldUpgrades[m.fieldMode].name !== "standing wave harmonics" && !tech.isEnergyHealth && !tech.isRewindGun
                 },
@@ -1957,6 +2006,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isExplosionHarm && tech.isRewindAvoidDeath
                 },
@@ -1974,6 +2024,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isEnergyHealth && (m.harmReduction() < 1 || tech.isFlipFlopHarm)
                 },
@@ -1992,6 +2043,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isBlockExplosion) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
                 },
@@ -2011,13 +2063,13 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
-                    return !tech.isNoHeals && !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth && !tech.isTechDamage
+                    return !tech.isAmmoFromHealth && !tech.isNoHeals && !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth && !tech.isTechDamage
                 },
                 requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass , ...",
                 effect: () => {
                     m.health = 0
-                    // m.displayHealth();
                     document.getElementById("health").style.display = "none"
                     document.getElementById("health-bg").style.display = "none"
                     document.getElementById("dmg").style.backgroundColor = "#0cf";
@@ -2041,6 +2093,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.isEnergyHealth && !tech.isNoHeals
                 },
@@ -2054,11 +2107,47 @@
                 },
                 remove() {
                     tech.healGiveMaxEnergy = false;
-                    tech.healMaxEnergyBonus = 0
+                    // tech.healMaxEnergyBonus = 0
                     powerUps.heal.color = "#0eb"
                     for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                         if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
                     }
+                }
+            },
+            {
+                name: "inductive coupling",
+                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 3 <strong>max</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isEnergyHealth && !tech.isDroneGrab
+                },
+                requires: "mass-energy equivalence, not drone harvester",
+                effect() {
+                    tech.isExtraMaxEnergy = true; //tracked by  tech.extraMaxHealth
+                },
+                remove() {
+                    tech.isExtraMaxEnergy = false;
+                }
+            },
+            {
+                name: "transceiver chip",
+                description: "unused <strong>power ups</strong> at the end of each <strong>level</strong><br>are still activated <em>(selections are random)</em>",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isExtraMaxEnergy
+                },
+                requires: "inductive coupling",
+                effect() {
+                    tech.isEndLevelPowerUp = true;
+                },
+                remove() {
+                    tech.isEndLevelPowerUp = false;
                 }
             },
             {
@@ -2067,6 +2156,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isBlockExplosion
                 },
@@ -2084,6 +2174,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
@@ -2101,6 +2192,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isEnergyHealth
                 },
@@ -2156,6 +2248,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return true
                 },
@@ -2177,6 +2270,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy || tech.isBlockExplosion
                 },
@@ -2196,6 +2290,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.damageFromTech() > 1
                 },
@@ -2250,6 +2345,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return true
                 },
@@ -2285,6 +2381,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.health < 0.5 || build.isExperimentSelection
                 },
@@ -2302,6 +2399,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (m.harmReduction() < 1 || tech.healthDrain || tech.isLowHealthDmg || tech.isHealthRecovery || tech.isHealLowHealth || tech.largerHeals > 1) && !tech.isEnergyHealth
                 },
@@ -2337,6 +2435,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.maxHealth > 1;
                 },
@@ -2374,8 +2473,8 @@
                 description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>100</strong><br><strong>landings</strong> that force you to crouch cause <strong class='color-harm'>harm</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isEnergyHealth && !tech.isNoHeals
                 },
@@ -2395,8 +2494,8 @@
                 description: "if you're at full <strong class='color-h'>health</strong> heal power ups do <strong class='color-harm'>harm</strong><br>but they also increase your <strong>maximum</strong> <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isEnergyHealth && !tech.isNoHeals
                 },
@@ -2409,53 +2508,17 @@
                 }
             },
             {
-                name: "inductive coupling",
-                description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br>add 3 <strong>max</strong> <strong class='color-h'>health</strong> <em>(up to 51 health per level)</em>",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return !tech.isEnergyHealth && !tech.isDroneGrab && !tech.isNoHeals
-                },
-                requires: "not mass-energy equivalence, not drone harvester, ergodicity",
-                effect() {
-                    tech.isExtraMaxHealth = true; //tracked by  tech.extraMaxHealth
-                },
-                remove() {
-                    tech.isExtraMaxHealth = false;
-                    // tech.extraMaxHealth = 0;  //this is now reset in tech.setupAllTech();
-                    m.setMaxHealth();
-                }
-            },
-            {
-                name: "transceiver chip",
-                description: "unused <strong>power ups</strong> at the end of each <strong>level</strong><br>are still activated <em>(selections are random)</em>",
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                allowed() {
-                    return tech.isExtraMaxHealth
-                },
-                requires: "inductive coupling",
-                effect() {
-                    tech.isEndLevelPowerUp = true;
-                },
-                remove() {
-                    tech.isEndLevelPowerUp = false;
-                }
-            },
-            {
                 name: "negentropy",
                 description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>33</strong> missing health`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 isHealTech: true,
                 allowed() {
-                    return m.health > 0.1 && (m.maxHealth > 1 || tech.isExtraMaxHealth) && !tech.isNoHeals
+                    return m.health > 0.1 && !tech.isNoHeals
                 },
-                requires: "increased max health, not ergodicity",
+                requires: "has some health, not ergodicity",
                 effect() {
                     tech.isHealLowHealth = true;
                 },
@@ -2469,6 +2532,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isHealTech: true,
                 allowed() {
                     return ((m.health / m.maxHealth) < 0.7 || build.isExperimentSelection) && !tech.isEnergyHealth && !tech.isNoHeals
@@ -2514,6 +2578,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isHealTech: true,
                 allowed() {
                     return powerUps.research.count > 0 || build.isExperimentSelection
@@ -2554,6 +2619,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
+                frequencyDefault: 4,
                 allowed() {
                     return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid && !tech.isCollisionRealitySwitch
                 },
@@ -2631,6 +2697,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isDeterminism
                 },
@@ -2650,6 +2717,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (powerUps.research.count > 3 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
                 },
@@ -2667,6 +2735,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return powerUps.research.count === 0 && !tech.isAnsatz
                 },
@@ -2688,6 +2757,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
                 },
@@ -2705,6 +2775,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return powerUps.research.count > 4 || build.isExperimentSelection
                 },
@@ -2722,6 +2793,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
@@ -2846,29 +2918,9 @@
                     powerUps.setDo(); //needed after adjusting duplication chance
                 }
             },
-            // {
-            //     name: "attract",
-            //     description: "",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 1,
-            //     frequencyDefault: 1,
-            //     allowed() {
-            //         return true
-            //     },
-            //     requires: "",
-            //     effect: () => {
-            //         tech.isPowerUpsAttract = true
-            //         powerUps.setDo(); //needed after adjusting duplication chance
-            //     },
-            //     remove() {
-            //         tech.isPowerUpsAttract = false
-            //         powerUps.setDo(); //needed after adjusting duplication chance
-            //     }
-            // },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.7%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2894,6 +2946,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isDeterminism
                 },
@@ -2911,6 +2964,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.duplicationChance() > 0.15
                 },
@@ -2928,6 +2982,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.duplicationChance() > 0
                 },
@@ -2945,6 +3000,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 6,
+                frequencyDefault: 6,
                 allowed() {
                     return tech.duplicationChance() > 0.66
                 },
@@ -3116,6 +3172,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
@@ -3143,6 +3200,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return !tech.isDeterminism
                 },
@@ -3267,6 +3325,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (b.totalBots() > 3 || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
                 },
@@ -3310,6 +3369,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets
                 },
@@ -3348,6 +3408,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNeedles && !tech.isNailRadiation
                 },
@@ -3366,6 +3427,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isNeedles
                 },
@@ -3398,6 +3460,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isRivets
                 },
@@ -3416,6 +3479,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isRivets && !tech.isNeedles && !tech.isNailRadiation && !tech.isNailCrit
                 },
@@ -3453,6 +3517,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles
                 },
@@ -3479,6 +3544,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("nail gun") && tech.nailFireRate && !tech.isIceCrystals
                 },
@@ -3505,6 +3571,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.isNailShot || tech.nailBotCount > 1 || tech.haveGunCheck("nail gun")) && !tech.isIceCrystals
                 },
@@ -3523,6 +3590,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce)) * 2 > 1) && !tech.isIceCrystals
                 },
@@ -3541,6 +3609,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNailRadiation && !tech.isFastRadiation
                 },
@@ -3559,6 +3628,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNailRadiation && !tech.isSlowRadiation
                 },
@@ -3572,11 +3642,12 @@
             },
             {
                 name: "shotgun spin-statistics",
-                description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br><strong class='color-g'>ammo</strong> costs are <strong>doubled</strong>",
+                description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>shotgun <strong class='color-g'>ammo</strong> gives <strong>50%</strong> less shots",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("shotgun")
                 },
@@ -3617,6 +3688,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot
                 },
@@ -3635,6 +3707,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isNailShot
                 },
@@ -3653,6 +3726,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("shotgun")
                 },
@@ -3671,6 +3745,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("super balls") && !tech.oneSuperBall
                 },
@@ -3689,6 +3764,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("super balls") && !tech.oneSuperBall
                 },
@@ -3715,6 +3791,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("super balls") && tech.superBallNumber === 3 && !tech.superBallDelay
                 },
@@ -3741,6 +3818,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("super balls")
                 },
@@ -3759,6 +3837,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("wave beam")
                 },
@@ -3777,6 +3856,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("wave beam")
                 },
@@ -3800,6 +3880,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("wave beam")
                 },
@@ -3820,6 +3901,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("wave beam")
                 },
@@ -3840,6 +3922,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("wave beam")
                 },
@@ -3858,6 +3941,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("missiles") || tech.isMissileField
                 },
@@ -3876,6 +3960,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("missiles")
                 },
@@ -3894,6 +3979,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -3917,6 +4003,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("grenades")
                 },
@@ -3937,6 +4024,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("grenades") && !tech.isNeutronBomb
                 },
@@ -3957,6 +4045,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb
                 },
@@ -3977,6 +4066,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNeutronBomb
                 },
@@ -3995,6 +4085,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isNeutronBomb
                 },
@@ -4013,6 +4104,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("mine") || tech.isMineDrop) && !tech.isMineSentry
                 },
@@ -4031,6 +4123,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("mine") && !tech.isMineSentry
                 },
@@ -4049,6 +4142,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("mine") || tech.isMineDrop) && !tech.isMineAmmoBack && !tech.isLaserMine
                 },
@@ -4088,6 +4182,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("spores")
                 },
@@ -4106,6 +4201,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
                 },
@@ -4125,6 +4221,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
                 },
@@ -4143,6 +4240,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
                 },
@@ -4161,6 +4259,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField) && !tech.isEnergyHealth
                 },
@@ -4179,6 +4278,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
                 },
@@ -4197,8 +4297,9 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExtraMaxHealth && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
+                    return !tech.isExtraMaxEnergy && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
                 requires: "drones, not inductive coupling",
                 effect() {
@@ -4215,6 +4316,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
                 },
@@ -4241,6 +4343,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("drones")
                 },
@@ -4259,6 +4362,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("foam") || tech.foamBotCount > 1
                 },
@@ -4277,6 +4381,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("foam") || tech.foamBotCount > 1
                 },
@@ -4297,6 +4402,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("foam") || tech.foamBotCount > 1
                 },
@@ -4315,6 +4421,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("foam")
                 },
@@ -4333,6 +4440,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("foam")
                 },
@@ -4351,6 +4459,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("rail gun")
                 },
@@ -4369,6 +4478,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("rail gun")
                 },
@@ -4387,6 +4497,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("rail gun")
                 },
@@ -4405,6 +4516,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine
                 },
@@ -4423,6 +4535,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("laser") && !tech.isPulseLaser) || tech.laserBotCount > 1
                 },
@@ -4442,6 +4555,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
                 },
@@ -4464,6 +4578,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseAim && !tech.historyLaser
                 },
@@ -4490,6 +4605,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.historyLaser
                 },
@@ -4518,6 +4634,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.isWideLaser
                 },
@@ -4546,6 +4663,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isWideLaser
                 },
@@ -4574,6 +4692,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser
                 },
@@ -4600,6 +4719,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isPulseLaser && !tech.beamSplitter
                 },
@@ -4623,6 +4743,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
                 },
@@ -4646,6 +4767,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics"
                 },
@@ -4665,6 +4787,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
                 },
@@ -4683,6 +4806,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
                 },
@@ -4701,6 +4825,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
                 },
@@ -4719,6 +4844,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
                 },
@@ -4840,6 +4966,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
                 },
@@ -4863,6 +4990,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
                 },
@@ -4886,6 +5014,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab)
                 },
@@ -4909,6 +5038,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
@@ -4928,6 +5058,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && !tech.isEnergyHealth
                 },
@@ -4946,6 +5077,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
                 },
@@ -4964,6 +5096,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
                 },
@@ -4982,6 +5115,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field" || m.fieldUpgrades[m.fieldMode].name === "time dilation field"
                 },
@@ -5041,6 +5175,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder
                 },
@@ -5059,6 +5194,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
                 },
@@ -5077,6 +5213,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaRange === 1
                 },
@@ -5095,6 +5232,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "time dilation field"
                 },
@@ -5115,6 +5253,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "time dilation field"
                 },
@@ -5139,6 +5278,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "time dilation field") && tech.energyRegen !== 0
                 },
@@ -5159,6 +5299,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
                 },
@@ -5177,6 +5318,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
                 },
@@ -5213,6 +5355,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
@@ -5233,6 +5376,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
@@ -5270,6 +5414,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole"
                 },
@@ -5288,6 +5433,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole"
                 },
@@ -5306,6 +5452,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole"
                 },
@@ -5324,6 +5471,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole"
                 },
@@ -6820,7 +6968,7 @@
         squirrelJump: null,
         fastTimeJump: null,
         isFastRadiation: null,
-        isExtraMaxHealth: null,
+        isExtraMaxEnergy: null,
         isAmmoForGun: null,
         isRapidPulse: null,
         isPulseAim: null,
@@ -6862,7 +7010,7 @@
         isCloakStun: null,
         bonusEnergy: null,
         healGiveMaxEnergy: null,
-        healMaxEnergyBonus: null,
+        healMaxEnergyBonus: 0, //not null
         aimDamage: null,
         isNoFireDefense: null,
         isNoFireDamage: null,
