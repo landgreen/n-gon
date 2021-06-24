@@ -3381,7 +3381,7 @@ const b = {
                 // makeNeedle(m.angle - spread)
             },
             fireRivets() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 17) * b.fireCD); // cool down
 
                 const me = bullet.length;
                 const size = tech.rivetSize * 7.5
@@ -4176,7 +4176,7 @@ const b = {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 27,
+            ammoPack: 22,
             have: false,
             charge: 0,
             isDischarge: false,

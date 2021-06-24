@@ -526,6 +526,7 @@ const simulation = {
             level.levels = shuffle(level.levels); //shuffles order of maps
         }
         level.levels.unshift("intro"); //add level to the start of the randomized levels list
+        level.levels.push("labs"); //add level to the end of the randomized levels list
         level.levels.push("gauntlet"); //add level to the end of the randomized levels list
         level.levels.push("final"); //add level to the end of the randomized levels list
 
@@ -595,6 +596,7 @@ const simulation = {
         m.holdingTarget = null
 
         //set to default field
+        tech.healMaxEnergyBonus = 0
         m.setMaxEnergy();
         m.fieldMode = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
@@ -1125,6 +1127,7 @@ const simulation = {
         }
     },
     enableConstructMode() {
+        level.isProcedural = false //this is set to be true in levels like labs that need x+ and y+ in front of positions
         simulation.isConstructionMode = true;
         simulation.isHorizontalFlipped = false;
         simulation.isAutoZoom = false;
@@ -1143,11 +1146,20 @@ const simulation = {
                 const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
 
                 if (e.which === 2) {
-                    simulation.outputMapString(`spawn.randomMob(${x}, ${y},0.5);`);
+                    if (level.isProcedural) {
+                        simulation.outputMapString(`spawn.randomMob(x+${x}, y+${y},0.5);`);
+                    } else {
+                        simulation.outputMapString(`spawn.randomMob(${x}, ${y},0.5);`);
+                    }
+
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
                     if (e.which === 1) { //add map
-                        simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`);
+                        if (level.isProcedural) {
+                            simulation.outputMapString(`spawn.mapRect(x+${x}, y+${y}, ${dx}, ${dy});`);
+                        } else {
+                            simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`);
 
+                        }
                         //see map in world
                         spawn.mapRect(x, y, dx, dy);
                         len = map.length - 1
@@ -1158,7 +1170,11 @@ const simulation = {
                         simulation.draw.setPaths() //update map graphics
 
                     } else if (e.which === 3) { //add body
-                        simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
+                        if (level.isProcedural) {
+                            simulation.outputMapString(`spawn.bodyRect(x+${x}, y+${y}, ${dx}, ${dy});`);
+                        } else {
+                            simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
+                        }
 
                         //see map in world
                         spawn.bodyRect(x, y, dx, dy);

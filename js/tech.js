@@ -110,7 +110,7 @@
                 if (tech.isMetaAnalysis && tech.tech[index].isJunk) {
                     simulation.makeTextLog(`//tech: meta-analysis replaced junk tech with random tech`);
                     tech.giveTech('random')
-                    for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "research");
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 40 * Math.random(), m.pos.y + 40 * Math.random(), "research");
                     return
                 }
 
@@ -404,7 +404,7 @@
             },
             {
                 name: "catabolism",
-                description: "when you <strong>fire</strong> while <strong>out</strong> of <strong class='color-g'>ammo</strong><br>gain <strong>4</strong> <strong class='color-g'>ammo</strong>, but lose <strong>1</strong> max <strong class='color-h'>health</strong>",
+                description: "firing while <strong>out</strong> of <strong class='color-g'>ammo</strong> spawns <strong>4</strong> <strong class='color-g'>ammo</strong><br>and reduces your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>1</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2119,12 +2119,12 @@
                 description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 3 <strong>max</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return tech.isEnergyHealth && !tech.isDroneGrab
+                    return !tech.isDroneGrab
                 },
-                requires: "mass-energy equivalence, not drone harvester",
+                requires: "not drone harvester",
                 effect() {
                     tech.isExtraMaxEnergy = true; //tracked by  tech.extraMaxHealth
                 },
@@ -2615,7 +2615,7 @@
             },
             {
                 name: "quantum immortality",
-                description: "after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong>", //spawn <strong>4</strong> <strong class='color-r'>research</strong>
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong><br>after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -2626,7 +2626,6 @@
                 requires: "anthropic principle, not many-worlds, Ψ(t) collapse, non-unitary",
                 effect() {
                     tech.isImmortal = true;
-                    // for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + Math.random() * 10, m.pos.y + Math.random() * 10, "research", false);
                 },
                 remove() {
                     tech.isImmortal = false;
@@ -2840,7 +2839,7 @@
             },
             {
                 name: "meta-analysis",
-                description: "if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a <br>random normal <strong class='color-m'>tech</strong> and <strong>2</strong> <strong class='color-r'>research</strong>",
+                description: "if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a <br>random normal <strong class='color-m'>tech</strong> and <strong>5</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -4511,7 +4510,7 @@
             },
             {
                 name: "laser diodes",
-                description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>effects laser-gun, laser-bot, and laser-mines</em>",
+                description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>affects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4530,7 +4529,7 @@
             },
             {
                 name: "relativistic momentum",
-                description: "all <strong class='color-laser'>lasers</strong> push mobs away<br><em>effects laser-gun, laser-bot, and laser-mines</em>",
+                description: "all <strong class='color-laser'>lasers</strong> push mobs away<br><em>affects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5667,6 +5666,102 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "emergency broadcasting",
+                description: "emit 2 sound sine waveforms at 853 Hz and 960 Hz<br><em>lower your volume</em>",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                isNonRefundable: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect: () => {
+                    //setup audio context
+                    function tone(frequency) {
+                        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                        const oscillator1 = audioCtx.createOscillator();
+                        const gainNode1 = audioCtx.createGain();
+                        gainNode1.gain.value = 0.5; //controls volume
+                        oscillator1.connect(gainNode1);
+                        gainNode1.connect(audioCtx.destination);
+                        oscillator1.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+                        oscillator1.frequency.value = frequency; // value in hertz
+                        oscillator1.start();
+                        return audioCtx
+                    }
+                    // let sound = tone(1050)
+
+                    function EBS() {
+                        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+
+                        const oscillator1 = audioCtx.createOscillator();
+                        const gainNode1 = audioCtx.createGain();
+                        gainNode1.gain.value = 0.3; //controls volume
+                        oscillator1.connect(gainNode1);
+                        gainNode1.connect(audioCtx.destination);
+                        oscillator1.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+                        oscillator1.frequency.value = 853; // value in hertz
+                        oscillator1.start();
+
+                        const oscillator2 = audioCtx.createOscillator();
+                        const gainNode2 = audioCtx.createGain();
+                        gainNode2.gain.value = 0.3; //controls volume
+                        oscillator2.connect(gainNode2);
+                        gainNode2.connect(audioCtx.destination);
+                        oscillator2.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+                        oscillator2.frequency.value = 960; // value in hertz
+                        oscillator2.start();
+                        return audioCtx
+                    }
+                    let sound = EBS()
+
+                    delay = 1000
+                    setTimeout(() => {
+                        sound.suspend()
+                        powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                        setTimeout(() => {
+                            sound.resume()
+                            setTimeout(() => {
+                                sound.suspend()
+                                powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                                setTimeout(() => {
+                                    sound.resume()
+                                    setTimeout(() => {
+                                        sound.suspend()
+                                        powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                                        setTimeout(() => {
+                                            sound.resume()
+                                            setTimeout(() => {
+                                                sound.suspend()
+                                                powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                                                setTimeout(() => {
+                                                    sound.resume()
+                                                    setTimeout(() => {
+                                                        sound.suspend()
+                                                        powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                                                        setTimeout(() => {
+                                                            sound.resume()
+                                                            setTimeout(() => {
+                                                                sound.suspend()
+                                                                powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                                                            }, delay);
+                                                        }, delay);
+                                                    }, delay);
+                                                }, delay);
+                                            }, delay);
+                                        }, delay);
+                                    }, delay);
+                                }, delay);
+                            }, delay);
+                        }, delay);
+                    }, delay);
+                },
+                remove() {}
+            },
             {
                 name: "automatic",
                 description: "you can't fire when moving<br>always <strong>fire</strong> when at <strong>rest</strong>",

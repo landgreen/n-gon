@@ -1172,7 +1172,7 @@ const mobs = {
             //replace dead mob with a regular body
             replace(i) {
                 //if there are too many bodies don't turn into blocks to help performance
-                if (this.leaveBody && body.length < 60 && this.mass < 200 && this.radius > 18) {
+                if (this.leaveBody && body.length < 40 && this.mass < 200 && this.radius > 18) {
                     const len = body.length;
                     const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
                     body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);

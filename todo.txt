@@ -1,13 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-catabolism - lowers your max health by 1 (was 3 harm) and gives 4 ammo
-inductive coupling - gives max energy for leftover power ups (was max health)
-  now requires mass-energy equivalence
+new level labs is done (it's kinda randomized, so expect it to feel different each run)
+  (I know there are tons of bugs, but I figure we can find them together :)
 
-switched to a newer copy, paste URL
-  this seems to fix issues with failed text copy in the level builder if you hold mouse down for over 6 seconds
+foam gun now gets about 20% less ammo
+new junk tech: "emergency broadcasting" - plays some fun sounds and gives you health
+
+updated matter.js to a newer build matter-js 0.17.1 by @liabru 
+  (was matter-js 0.14.2 by @liabru 2018-06-11)
+  matter.js patch notes suggest a possible 30% physics performance increase
+  decomp.min.js was removed because I don't think it does anything anymore
+    I did get one error message about it being missing, but there were other bugs too
 
 ******************************************************** BUGS ********************************************************
+
+Final boss acts super weird when hit by explosions
+
+player can become crouched while not touching the ground if they exit the ground while crouched
 
 a couple times people have reported the final boss dropping extra bodies on death
 
@@ -30,41 +39,27 @@ is there a way to check if the player is stuck inside the map or block
 ******************************************************** LEVELS ********************************************************
 
 labs - procedural generation
+  bugs
+    mob spawns shouldn't be based on probability?
+  feel
+      disrupt the flat ground
+      less platforming / easier platforming
+        the spinners on exit are still too hard...
+      make combat more interesting
+      is it laggy?
+      in loot room, spawn mobs after power up is grabbed
+      more background graphics, better colors
   science theme, with a cool technology showcased
-  layout:
-    6 total rooms
-    3x2, 2x3, 4 2, 2 4
-    1500px, 3000px per room
-  room types
-    entrance - no mobs, starting power ups`
-    exit - possible duplication boss spawn location
-    up, down - 2 paired rooms - boost, elevator, portal
-      standard random boss spawns
-    loot - some power ups
-    empty - a dead end
   room ideas - 
-    low gravity room, controlled with a button?
     portal room 
     endlessly falling blocks down a slide, that the player has to climb up
     portal + rotor + falling blocks = perpetual motion
-    slime radiation room
-
-make a switch level element
-  basically button, but go off and on when it hits player (or block?)
-    use a constrained body like a spinner
-      use offset constraint? like in vats
-      can this work?
-      check location of center of mass for on/off state
-      only collide with player, but run code that stops it from rotating too far
-        part of it is inside switch map element
-    player moving left go on, right go off as if they are pushing the switch in that direction  ?
-  indicate on/off
-    angle of stick "light-switch"
-    with colors?
-
-level element: carousel
-  use rotor code
-  add blocks at the 4 ends of the rotor that maintain horizontal angle 
+    slime room
+    sound room, with buttons to control sound
+    color room with r,g,b buttons to control color
+    test fire room,  button fires blocks at a wall
+    mob buff zone: Map element: "Orbital Pickup Zone": Mobs that enter a specific area of the map gain +1 orbital per second, or a shield
+      could put in the loot room
 
 ******************************************************** TODO ********************************************************
 
@@ -372,6 +367,8 @@ possible names for tech
   regression to the mean
   tessellation = tiling of a flat surface is the covering of a plane using one or more geometric shapes, called tiles, with no overlaps and no gaps.
   phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
+  Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
+  Degenerate matter is a highly dense state of fermionic matter in which the Pauli exclusion principle exerts significant pressure in addition to, or in lieu of thermal pressure.
 
 
 plot script:
@@ -472,3 +469,50 @@ AI doesn't know about:
   modern pop culture
   outside the lab
 
+******************************************************** SOUND ********************************************************
+
+add sounds
+  https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode
+  https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques
+  style
+    interesting chords, like music, mixolyd 
+    can fade into the background
+    chords gradual rise and fall in volume
+    shouldn't be traditional effects
+  adjust volume with distance
+  mute option to settings
+  end all sounds with each new level
+  write some functions to produce sounds
+  will this effect performance?
+    https://padenot.github.io/web-audio-perf/
+    "Web Audio API implementation use two threads", so it probably isn't much of an issue
+  when to make sounds?
+    if near some strange thing in the level
+    after grabbing a power up, in the selection menu
+    from mobs, damage,inside field
+    when activating fields: time, negative mass, 
+
+    //setup audio context
+    function tone(frequency) {
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.25; //controls volume
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+        oscillator.frequency.value = frequency; // value in hertz
+        oscillator.start();
+        return { oscillator: oscillator, audioCtx: audioCtx }
+    }
+    // https://www.fresnostate.edu/folklore/Olson/JUSTINT.HTM
+    // mixolyd. C      D       E      F+    G      A+    B
+    // key=G   264    297     330   356.40 396*   445.50 495 
+    // const t264 = tone(264)
+    // t264.oscillator.stop(t264.audioCtx.currentTime + 2) //in seconds, not milliseconds for some reason
+    // tone(297)
+    // tone(330)
+    // tone(356.40)
+    // tone(396)
+    // tone(445.50)
+    // tone(495)
