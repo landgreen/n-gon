@@ -170,13 +170,13 @@ const spawn = {
             Matter.Body.setVelocity(this, { x: 0, y: 0 });
 
             //aoe damage to player
-            if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius && !tech.isNeutronImmune) {
-                const DRAIN = 0.07
+            if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius) {
+                const DRAIN = tech.isRadioactiveResistance ? 0.07 * 0.25 : 0.07
                 if (m.energy > DRAIN) {
                     m.energy -= DRAIN
                 } else {
                     m.energy = 0;
-                    m.damage(0.007 * simulation.dmgScale)
+                    m.damage((tech.isRadioactiveResistance ? 0.007 * 0.25 : 0.007) * simulation.dmgScale)
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -233,7 +233,7 @@ const spawn = {
                     y: me.position.y
                 },
                 bodyB: me,
-                stiffness: 0.001,
+                stiffness: 1,
                 damping: 1
             });
             World.add(engine.world, me.constraint);
@@ -244,7 +244,7 @@ const spawn = {
         me.memory = Infinity;
         me.hasRunDeathScript = false
         me.locatePlayer();
-        const density = 0.25
+        const density = 0.23
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -416,7 +416,7 @@ const spawn = {
                 }
             } else if (this.mode !== 3) { //all three modes at once
                 this.cycle = 0;
-                Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
+                Matter.Body.setDensity(me, 10 * density); //extra dense //normal is 0.001 //makes effective life much larger
                 if (this.mode === 2) {
                     Matter.Body.scale(this, 5, 5);
                 } else {
@@ -1017,6 +1017,8 @@ const spawn = {
         me.accelMag = 0.04;
         me.g = 0.0017; //required if using 'gravity'
         me.frictionAir = 0.01;
+        me.friction = 1
+        me.frictionStatic = 1
         me.restitution = 0;
         me.delay = 120 * simulation.CDScale;
         me.randomHopFrequency = 200 + Math.floor(Math.random() * 150);
@@ -1032,7 +1034,7 @@ const spawn = {
                     const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
                     const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
                     this.force.x += forceMag * Math.cos(angle);
-                    this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.07 + 0.02) * this.mass; //antigravity
+                    this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.07 + 0.06) * this.mass; //antigravity
                 }
             } else {
                 //randomly hob if not aware of player
@@ -1044,6 +1046,96 @@ const spawn = {
                     const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
                     this.force.x += forceMag * Math.cos(angle);
                     this.force.y += forceMag * Math.sin(angle) - 0.05 * this.mass; //antigravity
+                }
+            }
+        };
+    },
+    hopBoss(x, y, radius = 90) {
+        mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        me.g = 0.005; //required if using 'gravity'
+        me.frictionAir = 0.01;
+        me.friction = 1
+        me.frictionStatic = 1
+        me.restitution = 0;
+        me.accelMag = 0.07;
+        me.delay = 120 * simulation.CDScale;
+        me.randomHopFrequency = 200
+        me.randomHopCD = simulation.cycle + me.randomHopFrequency;
+        // me.memory = 420;
+        me.isInAir = false
+        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        spawn.shield(me, x, y, 1);
+        spawn.spawnOrbitals(me, radius + 60, 1)
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.lastSpeed = me.speed
+        me.do = function() {
+            this.gravity();
+            this.seePlayerCheck();
+            this.checkStatus();
+            if (this.seePlayer.recall) {
+                const deltaSpeed = this.lastSpeed - this.speed
+                this.lastSpeed = this.speed
+                if (deltaSpeed > 13 && this.speed < 5) { //if the player slows down greatly in one cycle
+                    //damage and push player away, push away blocks
+                    const range = 800 //Math.min(800, 50 * deltaSpeed)
+                    for (let i = body.length - 1; i > -1; i--) {
+                        if (!body[i].isNotHoldable) {
+                            sub = Vector.sub(body[i].position, this.position);
+                            dist = Vector.magnitude(sub);
+                            if (dist < range) {
+                                knock = Vector.mult(Vector.normalise(sub), Math.min(20, 50 * body[i].mass / dist));
+                                body[i].force.x += knock.x;
+                                body[i].force.y += knock.y;
+                            }
+                        }
+                    }
+
+                    simulation.drawList.push({ //draw radius
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: range,
+                        color: "rgba(0,200,180,0.6)",
+                        time: 4
+                    });
+                }
+
+                if (this.isInAir) {
+                    if (this.velocity.y > -0.01 && Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) { //not moving up, and has hit the map or a body
+                        this.isInAir = false //landing
+                        this.cd = simulation.cycle + this.delay
+
+                    }
+                } else { //on ground
+                    if (this.cd < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) { //jump
+                        this.isInAir = true
+                        const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
+                        const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                        this.force.x += forceMag * Math.cos(angle);
+                        this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.05 + 0.04) * this.mass; //antigravity 
+                    }
+                }
+
+                // if (this.cd < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+                //     this.cd = simulation.cycle + this.delay;
+                //     const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
+                //     const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                //     this.force.x += forceMag * Math.cos(angle);
+                //     this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.05 + 0.04) * this.mass; //antigravity
+                // }
+            } else {
+                //randomly hob if not aware of player
+                if (this.randomHopCD < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+                    this.randomHopCD = simulation.cycle + this.randomHopFrequency;
+                    //slowly change randomHopFrequency after each hop
+                    this.randomHopFrequency = Math.max(100, this.randomHopFrequency + 200 * (0.5 - Math.random()));
+                    const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass * (0.5 + Math.random() * 0.2);
+                    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+                    this.force.x += forceMag * Math.cos(angle);
+                    this.force.y += forceMag * Math.sin(angle) - (0.1 + 0.08 * Math.random()) * this.mass; //antigravity
                 }
             }
         };
@@ -2063,7 +2155,7 @@ const spawn = {
                     y: me.position.y
                 },
                 bodyB: me,
-                stiffness: 0.001,
+                stiffness: 1,
                 damping: 1
             });
             World.add(engine.world, me.constraint);
@@ -2575,8 +2667,8 @@ const spawn = {
                     y: me.position.y
                 },
                 bodyB: me,
-                stiffness: 0.0002,
-                damping: 1
+                stiffness: 0.00004,
+                damping: 0.1
             });
             World.add(engine.world, me.constraint);
         }, 2000); //add in a delay in case the level gets flipped left right
@@ -2912,7 +3004,7 @@ const spawn = {
                     y: me.position.y
                 },
                 bodyB: me,
-                stiffness: 0.001,
+                stiffness: 0.0001,
                 damping: 1
             });
             World.add(engine.world, me.constraint);

@@ -16,12 +16,15 @@ const level = {
             // simulation.difficulty = 20
             // simulation.isHorizontalFlipped = true
             // level.difficultyIncrease(99)
-            // m.setField("standing wave harmonics")
-            // tech.giveTech("spherical harmonics")
-            // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
+            // m.setField("nano-scale manufacturing")
             // b.giveGuns("grenades")
+            // tech.giveTech("neutron bomb")
+            // b.giveGuns("drones")
+            // tech.giveTech("radioactive drones")
+            // tech.isRadioactiveResistance = true
+            // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // tech.isExplodeRadio = true
-            // tech.giveTech("chain reaction")
+            // tech.giveTech("vacuum permittivity")
             // tech.giveTech("quenching")
             // tech.giveTech("decoherence")
             // tech.giveTech("supertemporal")
@@ -96,7 +99,7 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            const len = Math.ceil((m.maxHealth - m.health) / 0.33)
+            const len = Math.ceil((m.maxHealth - m.health) / 0.25)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isMACHO) spawn.MACHO()
@@ -965,23 +968,12 @@ const level = {
                     ctx.fillRect(this.min.x, this.min.y + offset, this.width, this.height - offset)
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
-                        const drain = 0.003 + m.fieldRegen
-                        if (m.energy > drain) {
-                            m.energy -= drain
+                        const DRAIN = 0.003 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
+                        console.log(DRAIN)
+                        if (m.energy > DRAIN) {
+                            m.energy -= DRAIN
                         } else {
-                            if (damage < 0.02) {
-                                m.damage(damage)
-                            } else if (m.immuneCycle < m.cycle) {
-                                m.immuneCycle = m.cycle + tech.collisionImmuneCycles;
-                                m.damage(damage)
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: player.position.x,
-                                    y: player.position.y,
-                                    radius: damage * 1500,
-                                    color: simulation.mobDmgColor,
-                                    time: 20
-                                });
-                            }
+                            m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1))
                         }
                         //float
                         if (player.velocity.y > 5) player.force.y -= 0.95 * player.mass * simulation.g
@@ -1926,7 +1918,7 @@ const level = {
                 const doorWidth2 = 15 + Math.floor(100 * Math.random() * Math.random())
                 spawn.bodyRect(offset.x + 2050 - doorWidth2 / 2, offset.y - 175, doorWidth2, 165); //block door
             } else {
-                spawn.mapRect(offset.x + 2000, offset.y - 2800, 100, 2800); //right wall
+                spawn.mapRect(offset.x + 2000, offset.y - 2800, 100, 2900); //right wall
             }
         }
 
@@ -2086,7 +2078,7 @@ const level = {
     },
     testing() {
         // const button = level.button(200, -700)
-        const toggle = level.toggle(200, -700)
+        // const toggle = level.toggle(200, -700)
         level.custom = () => {
             // button.draw();
             ctx.fillStyle = "rgba(0,255,255,0.1)";
@@ -2096,7 +2088,7 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            toggle.query();
+            // toggle.query();
         };
 
         level.setPosToSpawn(0, -750); //normal spawn
@@ -2127,11 +2119,9 @@ const level = {
         function blockDoor(x, y, blockSize = 58) {
             spawn.mapRect(x, y - 290, 40, 60); // door lip
             spawn.mapRect(x, y, 40, 50); // door lip
-            for (let i = 0; i < 4; ++i) {
-                spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
-            }
+            for (let i = 0; i < 4; ++i) spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
         }
-        blockDoor(710, -710);
+        // blockDoor(710, -710);
         // for (let i = 0; i < 30; i++) powerUps.directSpawn(710, -710, "tech");
 
         spawn.mapRect(2500, -1200, 200, 750); //right wall
@@ -2151,10 +2141,10 @@ const level = {
         // spawn.shooterBoss(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        // spawn.striker(1600, -500)
+        spawn.hopper(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.ghoster(1800, -120)
+        spawn.hopBoss(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
@@ -2962,8 +2952,6 @@ const level = {
 
                 button1.query();
                 button1.draw();
-                hazard.query();
-                hazard.level(button1.isUp)
                 rotor.rotate();
 
                 ctx.fillStyle = "hsl(175, 15%, 76%)"
@@ -4017,43 +4005,54 @@ const level = {
             level.enter.draw();
         };
 
+
+        // simulation.draw.mapPath = new Path2D();
+        // for (let i = 0, len = map.length; i < len; ++i) {
+        //     let vertices = map[i].vertices;
+        //     simulation.draw.mapPath.moveTo(vertices[0].x, vertices[0].y);
+        //     for (let j = 1; j < vertices.length; j += 1) {
+        //         simulation.draw.mapPath.lineTo(vertices[j].x, vertices[j].y);
+        //     }
+        //     simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
+        // }
+        const lightingPath = new Path2D() //pre-draw the complex lighting path to save processing
+        lightingPath.moveTo(-1800, -500)
+        lightingPath.lineTo(-910, -500) //3rd floor light
+        lightingPath.lineTo(-1300, 0)
+        lightingPath.lineTo(-500, 0)
+        lightingPath.lineTo(-890, -500)
+        lightingPath.lineTo(-175, -500)
+        lightingPath.lineTo(-175, -250)
+        lightingPath.lineTo(175, -250)
+        lightingPath.lineTo(175, 0)
+        lightingPath.lineTo(-910, 100) //2nd floor light left
+        lightingPath.lineTo(-1300, 600)
+        lightingPath.lineTo(-500, 600)
+        lightingPath.lineTo(-890, 100)
+        lightingPath.lineTo(190, 100) //2nd floor light right
+        lightingPath.lineTo(-200, 600)
+        lightingPath.lineTo(600, 600)
+        lightingPath.lineTo(210, 100)
+        lightingPath.lineTo(1100, 100)
+        lightingPath.lineTo(1100, 1400)
+        lightingPath.lineTo(600, 1400) //1st floor light right
+        lightingPath.lineTo(10, 700)
+        lightingPath.lineTo(-10, 700)
+        lightingPath.lineTo(-600, 1400)
+        lightingPath.lineTo(-1950, 1400) //1st floor light left
+        lightingPath.lineTo(-2290, 950)
+        lightingPath.lineTo(-2310, 950)
+        lightingPath.lineTo(-2650, 1400)
+        lightingPath.lineTo(-3025, 1400)
+        lightingPath.lineTo(-3025, 150)
+        lightingPath.lineTo(-2590, 150)
+        lightingPath.lineTo(-2600, -150)
+        lightingPath.lineTo(-1800, -150)
+        lightingPath.lineTo(-1800, -500) //top left end/start of path
+
         level.customTopLayer = () => {
             ctx.fillStyle = "rgba(0,0,0,0.15)"; //shadows and lights
-            ctx.beginPath()
-            ctx.moveTo(-1800, -500)
-            ctx.lineTo(-910, -500) //3rd floor light
-            ctx.lineTo(-1300, 0)
-            ctx.lineTo(-500, 0)
-            ctx.lineTo(-890, -500)
-            ctx.lineTo(-175, -500)
-            ctx.lineTo(-175, -250)
-            ctx.lineTo(175, -250)
-            ctx.lineTo(175, 0)
-            ctx.lineTo(-910, 100) //2nd floor light left
-            ctx.lineTo(-1300, 600)
-            ctx.lineTo(-500, 600)
-            ctx.lineTo(-890, 100)
-            ctx.lineTo(190, 100) //2nd floor light right
-            ctx.lineTo(-200, 600)
-            ctx.lineTo(600, 600)
-            ctx.lineTo(210, 100)
-            ctx.lineTo(1100, 100)
-            ctx.lineTo(1100, 1400)
-            ctx.lineTo(600, 1400) //1st floor light right
-            ctx.lineTo(10, 700)
-            ctx.lineTo(-10, 700)
-            ctx.lineTo(-600, 1400)
-            ctx.lineTo(-1950, 1400) //1st floor light left
-            ctx.lineTo(-2290, 950)
-            ctx.lineTo(-2310, 950)
-            ctx.lineTo(-2650, 1400)
-            ctx.lineTo(-3025, 1400)
-            ctx.lineTo(-3025, 150)
-            ctx.lineTo(-2590, 150)
-            ctx.lineTo(-2600, -150)
-            ctx.lineTo(-1800, -150)
-            ctx.lineTo(-1800, -500) //top left end/start of path
-            ctx.fill()
+            ctx.fill(lightingPath);
         };
 
         level.setPosToSpawn(25, -55); //normal spawn

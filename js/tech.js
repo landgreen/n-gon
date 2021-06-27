@@ -177,7 +177,7 @@
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.22
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
-            if (tech.isBotDamage) dmg *= 1 + 0.05 * b.totalBots()
+            if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
@@ -716,7 +716,7 @@
                 },
                 requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
                 effect: () => {
-                    tech.isExplodeRadio = true;
+                    tech.isExplodeRadio = true; //iridium-192
                 },
                 remove() {
                     tech.isExplodeRadio = false;
@@ -823,9 +823,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion)
                 },
-                requires: "an explosive damage source",
+                requires: "an explosive damage source, not iridium-192",
                 effect: () => {
                     tech.isImmuneExplosion = true;
                 },
@@ -841,9 +841,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)) || tech.haveGunCheck("drones") || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
+                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
                 },
-                requires: "drones, super balls, shotgun",
+                requires: "super balls, shotgun, drones, not radioactive drones",
                 effect() {
                     tech.isIncendiary = true
                 },
@@ -1376,7 +1376,7 @@
             },
             {
                 name: "perimeter defense",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>7%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1394,7 +1394,7 @@
             },
             {
                 name: "network effect",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2509,7 +2509,7 @@
             },
             {
                 name: "negentropy",
-                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>33</strong> missing health`,
+                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>25</strong> missing health`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -4039,7 +4039,7 @@
             },
             {
                 name: "neutron bomb",
-                description: "<strong>grenades</strong> are irradiated with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
+                description: "<strong>grenades</strong> are <strong class='color-p'>irradiated</strong> with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4060,35 +4060,35 @@
             },
             {
                 name: "water shielding",
-                description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>you are <strong>immune</strong> to its harmful effects",
+                description: "<strong class='color-p'>radioactive</strong> effects on you are reduced by 75%<br><em>neutron bomb, drones, explosions, slime</em>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isNeutronBomb
+                    return tech.isNeutronBomb || tech.isDroneRadioactive
                 },
-                requires: "neutron bomb",
+                requires: "neutron bomb or radioactive drones",
                 effect() {
-                    tech.isNeutronImmune = true
+                    tech.isRadioactiveResistance = true
                 },
                 remove() {
-                    tech.isNeutronImmune = false
+                    tech.isRadioactiveResistance = false
                 }
             },
             {
                 name: "vacuum permittivity",
-                description: "increase <strong>neutron bomb's</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
+                description: "increase <strong class='color-p'>radioactive</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isNeutronBomb
+                    return tech.isNeutronBomb || tech.isDroneRadioactive
                 },
-                requires: "neutron bomb",
+                requires: "neutron bomb or radioactive drones",
                 effect() {
                     tech.isNeutronSlow = true
                 },
@@ -4271,6 +4271,39 @@
                 }
             },
             {
+                name: "radioisotope generator",
+                description: "<strong class='color-p'>irradiate</strong> <strong>drones</strong>, reduce <strong class='color-g'>ammo</strong> by <strong>75%</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("drones") && tech.droneCycleReduction === 1 && !tech.isIncendiary
+                },
+                requires: "drone gun, not reduced tolerances or incendiary",
+                effect() {
+                    tech.isDroneRadioactive = true
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "drones") {
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.25
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.25)
+                        }
+                    }
+                },
+                remove() {
+                    if (tech.isDroneRadioactive) {
+                        tech.isDroneRadioactive = false
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "drones") {
+                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
+                                b.guns[i].ammo = b.guns[i].ammo * 4
+                            }
+                        }
+                    }
+                }
+            },
+            {
                 name: "brushless motor",
                 description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
                 isGunTech: true,
@@ -4309,33 +4342,6 @@
                 }
             },
             {
-                name: "reduced tolerances",
-                description: "increase <strong>drone</strong> <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
-                isGunTech: true,
-                maxCount: 3,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
-                },
-                requires: "drones",
-                effect() {
-                    tech.droneCycleReduction = Math.pow(0.6, 1 + this.count)
-                    tech.droneEnergyReduction = Math.pow(0.333, 1 + this.count)
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * Math.pow(3, this.count)
-                    }
-                },
-                remove() {
-                    tech.droneCycleReduction = 1
-                    tech.droneEnergyReduction = 1
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
-                    }
-                }
-            },
-            {
                 name: "drone repair",
                 description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>33%</strong> chance to use <strong>1</strong> <strong class='color-g'>ammo</strong>",
                 isGunTech: true,
@@ -4352,6 +4358,36 @@
                 },
                 remove() {
                     tech.isDroneRespawn = false
+                }
+            },
+            {
+                name: "reduced tolerances",
+                description: "increase <strong>drone</strong> <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
+                isGunTech: true,
+                maxCount: 3,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return !tech.isDroneRadioactive && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
+                },
+                requires: "drones",
+                effect() {
+                    tech.droneCycleReduction = Math.pow(0.6, 1 + this.count)
+                    tech.droneEnergyReduction = Math.pow(0.333, 1 + this.count)
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "drones") {
+                            const scale = Math.pow(3, this.count + 1)
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * scale
+                        }
+                    }
+                },
+                remove() {
+                    tech.droneCycleReduction = 1
+                    tech.droneEnergyReduction = 1
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
+                    }
                 }
             },
             {
@@ -7209,5 +7245,6 @@
         isBlockExplosion: null,
         superBallDelay: null,
         isBlockExplode: null,
-        isOverHeal: null
+        isOverHeal: null,
+        isDroneRadioactive: null
     }

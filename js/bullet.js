@@ -326,11 +326,12 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const drain = (tech.isExplosionHarm ? 0.5 : 0.25) * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1)
-                m.energy -= drain
+                const DRAIN = (tech.isExplosionHarm ? 0.5 : 0.25) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                // * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1) 
+                m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
-                    m.damage(0.03);
+                    m.damage(0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
                 }
             }
 
@@ -922,11 +923,10 @@ const b = {
             bullet[me].restitution = 0;
             bullet[me].minDmgSpeed = 0;
             bullet[me].damageRadius = 100;
-            bullet[me].maxDamageRadius = 450 + 130 * tech.isNeutronSlow + 130 * tech.isNeutronImmune //+ 150 * Math.random()
-            bullet[me].radiusDecay = (0.81 + 0.15 * tech.isNeutronSlow + 0.15 * tech.isNeutronImmune) / tech.isBulletsLastLonger
+            bullet[me].maxDamageRadius = 450 + 130 * tech.isNeutronSlow //+ 150 * Math.random()
+            bullet[me].radiusDecay = (0.81 + 0.15 * tech.isNeutronSlow) / tech.isBulletsLastLonger
             bullet[me].stuckTo = null;
             bullet[me].stuckToRelativePosition = null;
-            bullet[me].vacuumSlow = 0.97;
 
             if (tech.isRPG) {
                 const SCALE = 2
@@ -1030,27 +1030,27 @@ const b = {
                         this.endCycle = 0;
                     } else {
                         //aoe damage to player
-                        if (!tech.isNeutronImmune && Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-                            const DRAIN = 0.0023
+                        if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
+                            const DRAIN = tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025
                             if (m.energy > DRAIN) {
                                 m.energy -= DRAIN
                             } else {
                                 m.energy = 0;
-                                m.damage(0.00015)
+                                m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
                             }
                         }
                         //aoe damage to mobs
                         for (let i = 0, len = mob.length; i < len; i++) {
                             if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
-                                let dmg = b.dmgScale * 0.082
+                                let dmg = b.dmgScale * 0.09
                                 if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                                 if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
                                 mob[i].damage(dmg);
                                 mob[i].locatePlayer();
                                 if (tech.isNeutronSlow) {
                                     Matter.Body.setVelocity(mob[i], {
-                                        x: mob[i].velocity.x * this.vacuumSlow,
-                                        y: mob[i].velocity.y * this.vacuumSlow
+                                        x: mob[i].velocity.x * 0.97,
+                                        y: mob[i].velocity.y * 0.97
                                     });
                                 }
                             }
@@ -1062,22 +1062,21 @@ const b = {
                         ctx.fill();
                         ctx.globalCompositeOperation = "source-over"
                         if (tech.isNeutronSlow) {
-                            const that = this
 
-                            function slow(who, radius = that.explodeRad * 3.2) {
+                            let slow = (who, radius = this.explodeRad * 3.2) => {
                                 for (i = 0, len = who.length; i < len; i++) {
-                                    const sub = Vector.sub(that.position, who[i].position);
+                                    const sub = Vector.sub(this.position, who[i].position);
                                     const dist = Vector.magnitude(sub);
                                     if (dist < radius) {
                                         Matter.Body.setVelocity(who[i], {
-                                            x: who[i].velocity.x * that.vacuumSlow,
-                                            y: who[i].velocity.y * that.vacuumSlow
+                                            x: who[i].velocity.x * 0.975,
+                                            y: who[i].velocity.y * 0.975
                                         });
                                     }
                                 }
                             }
                             slow(body, this.damageRadius)
-                            if (!tech.isNeutronImmune) slow([player], this.damageRadius)
+                            slow([player], this.damageRadius)
                         }
                     }
                 }
@@ -2169,6 +2168,242 @@ const b = {
                                                 this.lookFrequency = 30 + Math.floor(11 * Math.random());
                                                 this.endCycle += 3000 * tech.droneCycleReduction * tech.isBulletsLastLonger
                                                 // this.frictionAir = 0
+                                            }
+                                            break;
+                                        }
+                                        //look for power ups to lock onto
+                                        if (
+                                            Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
+                                            Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                                        ) {
+                                            const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
+                                            const DIST = Vector.magnitude(TARGET_VECTOR);
+                                            if (DIST < closeDist) {
+                                                closeDist = DIST;
+                                                this.lockedOn = powerUp[i]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (this.lockedOn) { //accelerate towards mobs
+                        this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+                    } else { //accelerate towards mouse
+                        this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, simulation.mouseInGame)), -this.mass * THRUST)
+                    }
+                    // speed cap instead of friction to give more agility
+                    if (this.speed > 6) {
+                        Matter.Body.setVelocity(this, {
+                            x: this.velocity.x * 0.97,
+                            y: this.velocity.y * 0.97
+                        });
+                    }
+                }
+            }
+        })
+        World.add(engine.world, bullet[me]); //add bullet to world
+        Matter.Body.setVelocity(bullet[me], {
+            x: speed * Math.cos(dir),
+            y: speed * Math.sin(dir)
+        });
+    },
+    droneRadioactive(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
+        const me = bullet.length;
+        const THRUST = tech.isFastDrones ? 0.002 : 0.0012
+        const dir = m.angle + 0.4 * (Math.random() - 0.5);
+        const RADIUS = (4 + 1 * Math.random())
+        bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
+            angle: dir,
+            inertia: Infinity,
+            friction: 0.05,
+            frictionAir: 0,
+            restitution: 1,
+            dmg: 0.24, //damage done in addition to the damage from momentum
+            lookFrequency: 120 + Math.floor(23 * Math.random()),
+            endCycle: simulation.cycle + Math.floor((900 + 400 * Math.random()) * tech.isBulletsLastLonger) + 140 + RADIUS * 5,
+            classType: "bullet",
+            collisionFilter: {
+                category: cat.bullet,
+                mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield //self collide
+            },
+            minDmgSpeed: 0,
+            lockedOn: null,
+            isFollowMouse: true,
+            deathCycles: 110 + RADIUS * 5,
+            isImproved: false,
+            radioRadius: 0,
+            maxRadioRadius: 400 + Math.floor(75 * Math.random()) + 80 * tech.isNeutronSlow,
+            beforeDmg(who) {
+                const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
+                Matter.Body.setVelocity(this, {
+                    x: unit.x,
+                    y: unit.y
+                });
+                this.lockedOn = null
+                if (this.endCycle > simulation.cycle + this.deathCycles) {
+                    this.endCycle -= 60
+                    if (simulation.cycle + this.deathCycles > this.endCycle) this.endCycle = simulation.cycle + this.deathCycles
+                }
+            },
+            onEnd() {
+                if (tech.isDroneRespawn) {
+                    const who = b.guns[b.activeGun]
+                    if (who.name === "drones" && who.ammo > 0 && mob.length) {
+                        b.droneRadioactive({ x: this.position.x, y: this.position.y }, 0)
+                        if (Math.random() < 0.33) {
+                            b.guns[b.activeGun].ammo--;
+                            simulation.updateGunHUD();
+                        }
+                    }
+                }
+            },
+            do() {
+                //radioactive zone
+                this.radioRadius = this.radioRadius * 0.993 + 0.007 * this.maxRadioRadius //smooth radius towards max
+                //aoe damage to player
+                if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radioRadius) {
+                    const DRAIN = tech.isRadioactiveResistance ? 0.0023 * 0.25 : 0.0023
+                    if (m.energy > DRAIN) {
+                        m.energy -= DRAIN
+                    } else {
+                        m.energy = 0;
+                        m.damage(tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) //0.00015
+                    }
+                }
+                //aoe damage to mobs
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius) {
+                        let dmg = b.dmgScale * 0.035 //neutron bombs  dmg = 0.09
+                        if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
+                        if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
+                        mob[i].damage(dmg);
+                        mob[i].locatePlayer();
+                        if (tech.isNeutronSlow) {
+                            Matter.Body.setVelocity(mob[i], {
+                                x: mob[i].velocity.x * 0.97,
+                                y: mob[i].velocity.y * 0.97
+                            });
+                        }
+                    }
+                }
+                //draw
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.radioRadius, 0, 2 * Math.PI);
+                ctx.globalCompositeOperation = "lighter"
+                ctx.fillStyle = `rgba(25,139,170,${0.1+0.05*Math.random()})`;
+                ctx.fill();
+                ctx.globalCompositeOperation = "source-over"
+
+                if (tech.isNeutronSlow) {
+                    const slow = (who, radius = this.radioRadius * 3.2) => {
+                        for (i = 0, len = who.length; i < len; i++) {
+                            const sub = Vector.sub(this.position, who[i].position);
+                            const dist = Vector.magnitude(sub);
+                            if (dist < radius) {
+                                Matter.Body.setVelocity(who[i], {
+                                    x: who[i].velocity.x * 0.975,
+                                    y: who[i].velocity.y * 0.975
+                                });
+                            }
+                        }
+                    }
+                    slow(body, this.radioRadius)
+                    slow([player], this.radioRadius)
+                }
+
+
+                //normal drone actions
+                if (simulation.cycle + this.deathCycles > this.endCycle) { //fall shrink and die
+                    this.force.y += this.mass * 0.0012;
+                    this.restitution = 0.2;
+                    const scale = 0.995;
+                    Matter.Body.scale(this, scale, scale);
+                    this.maxRadioRadius = 0
+                    this.radioRadius = this.radioRadius * 0.98 //let radioactivity decrease
+                } else {
+                    this.force.y += this.mass * 0.0002; //gravity
+
+                    if (!(simulation.cycle % this.lookFrequency)) {
+                        //find mob targets
+                        this.lockedOn = null;
+                        let closeDist = Infinity;
+                        for (let i = 0, len = mob.length; i < len; ++i) {
+                            if (
+                                !mob[i].isBadTarget &&
+                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                                Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            ) {
+                                const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
+                                const DIST = Vector.magnitude(TARGET_VECTOR);
+                                if (DIST < closeDist) {
+                                    closeDist = DIST;
+                                    this.lockedOn = mob[i]
+                                }
+                            }
+                        }
+                        //power ups
+                        if (!this.isImproved && !simulation.isChoosing && !tech.isExtraMaxEnergy) {
+                            if (this.lockedOn) {
+                                //grab, but don't lock onto nearby power up
+                                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                                    if (
+                                        (powerUp[i].name !== "heal" || m.health < 0.9 * m.maxHealth || tech.isDroneGrab) &&
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism) &&
+                                        Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000
+                                    ) {
+                                        //draw pickup for a single cycle
+                                        ctx.beginPath();
+                                        ctx.moveTo(this.position.x, this.position.y);
+                                        ctx.lineTo(powerUp[i].position.x, powerUp[i].position.y);
+                                        ctx.strokeStyle = "#000"
+                                        ctx.lineWidth = 4
+                                        ctx.stroke();
+                                        //pick up nearby power ups
+                                        powerUps.onPickUp(powerUp[i]);
+                                        powerUp[i].effect();
+                                        Matter.World.remove(engine.world, powerUp[i]);
+                                        powerUp.splice(i, 1);
+                                        if (tech.isDroneGrab) {
+                                            this.isImproved = true;
+                                            const SCALE = 2.25
+                                            Matter.Body.scale(this, SCALE, SCALE);
+                                            this.lookFrequency = 30 + Math.floor(11 * Math.random());
+                                            this.endCycle += 1000 * tech.isBulletsLastLonger
+                                            this.maxRadioRadius *= 1.25
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else {
+                                //look for power ups to lock onto
+                                let closeDist = Infinity;
+                                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                                    if (
+                                        (powerUp[i].name !== "heal" || m.health < 0.9 * m.maxHealth || tech.isDroneGrab) &&
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism)
+                                    ) {
+                                        if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
+                                            //draw pickup for a single cycle
+                                            ctx.beginPath();
+                                            ctx.moveTo(this.position.x, this.position.y);
+                                            ctx.lineTo(powerUp[i].position.x, powerUp[i].position.y);
+                                            ctx.strokeStyle = "#000"
+                                            ctx.lineWidth = 4
+                                            ctx.stroke();
+                                            //pick up nearby power ups
+                                            powerUps.onPickUp(powerUp[i]);
+                                            powerUp[i].effect();
+                                            Matter.World.remove(engine.world, powerUp[i]);
+                                            powerUp.splice(i, 1);
+                                            if (tech.isDroneGrab) {
+                                                this.isImproved = true;
+                                                const SCALE = 2.25
+                                                Matter.Body.scale(this, SCALE, SCALE);
+                                                this.lookFrequency = 30 + Math.floor(11 * Math.random());
+                                                this.endCycle += 1000 * tech.isBulletsLastLonger
+                                                this.maxRadioRadius *= 1.25
                                             }
                                             break;
                                         }
@@ -3323,7 +3558,7 @@ const b = {
                                         if (tech.isNailRadiation) {
                                             mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                                         } else {
-                                            let dmg = b.dmgScale * 5
+                                            let dmg = b.dmgScale * 5.5
                                             if (tech.isCrit && who.isStunned) dmg *= 4
                                             who.damage(dmg, tech.isNeedleShieldPierce);
                                             simulation.drawList.push({ //add dmg to draw queue
@@ -3356,18 +3591,18 @@ const b = {
                         x: m.Vx / 2 + SPEED * Math.cos(angle),
                         y: m.Vy / 2 + SPEED * Math.sin(angle)
                     });
-                    Matter.Body.setDensity(bullet[me], 0.00001);
+                    // Matter.Body.setDensity(bullet[me], 0.00001);
                     World.add(engine.world, bullet[me]); //add bullet to world
                 }
 
                 if (m.crouch) {
-                    m.fireCDcycle = m.cycle + 50 * b.fireCD; // cool down
+                    m.fireCDcycle = m.cycle + 45 * b.fireCD; // cool down
                     makeNeedle()
                     for (let i = 1; i < 4; i++) { //4 total needles
                         setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
                     }
                 } else {
-                    m.fireCDcycle = m.cycle + 30 * b.fireCD; // cool down
+                    m.fireCDcycle = m.cycle + 25 * b.fireCD; // cool down
                     makeNeedle()
                     for (let i = 1; i < 3; i++) { //3 total needles
                         setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
@@ -4145,12 +4380,22 @@ const b = {
             have: false,
             do() {},
             fire() {
-                if (m.crouch) {
-                    b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
-                    m.fireCDcycle = m.cycle + Math.floor(13 * b.fireCD); // cool down
+                if (tech.isDroneRadioactive) {
+                    if (m.crouch) {
+                        b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
+                        m.fireCDcycle = m.cycle + Math.floor(7 * 13 * b.fireCD); // cool down
+                    } else {
+                        b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 10)
+                        m.fireCDcycle = m.cycle + Math.floor(7 * 6 * b.fireCD); // cool down
+                    }
                 } else {
-                    b.drone()
-                    m.fireCDcycle = m.cycle + Math.floor(6 * b.fireCD); // cool down
+                    if (m.crouch) {
+                        b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
+                        m.fireCDcycle = m.cycle + Math.floor(13 * b.fireCD); // cool down
+                    } else {
+                        b.drone()
+                        m.fireCDcycle = m.cycle + Math.floor(6 * b.fireCD); // cool down
+                    }
                 }
             }
         },

@@ -736,7 +736,11 @@ const powerUps = {
 
             //bonus power ups for clearing runs in the last game
             if (level.levelsCleared === 0 && !simulation.isCheating && localSettings.levelsClearedLastGame > 1) {
-                for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
+                for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) {
+                    powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
+                    simulation.makeTextLog(`for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++)`);
+                    simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") //simulation superposition }`);
+                }
                 localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }

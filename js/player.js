@@ -495,7 +495,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
-        if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
+        if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
         if (tech.energyRegen === 0) dmg *= 0.34
@@ -1682,6 +1682,9 @@ const m = {
                         } else if (tech.isIceField) {
                             m.energy -= 0.04;
                             b.iceIX(1)
+                        } else if (tech.isDroneRadioactive) {
+                            m.energy -= 1;
+                            b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;
                             b.drone()

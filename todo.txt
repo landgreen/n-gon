@@ -1,20 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-new level labs is done (it's kinda randomized, so expect it to feel different each run)
-  (I know there are tons of bugs, but I figure we can find them together :)
+tech - radioisotope generator - drones have the effect of neutron bomb, but you get less ammo
+bug fix - reduced tolerances now properly gives extra ammo
+water shielding now protects you from all radioactivity, but only gives 75% protection
+  (drones, neutron bomb, radioactive explosions, and even slime)
 
-foam gun now gets about 20% less ammo
-new junk tech: "emergency broadcasting" - plays some fun sounds and gives you health
+final boss has more durability in it's final phase
+final boss no longers gets knocked around as much from explosions
 
-updated matter.js to a newer build matter-js 0.17.1 by @liabru 
-  (was matter-js 0.14.2 by @liabru 2018-06-11)
-  matter.js patch notes suggest a possible 30% physics performance increase
-  decomp.min.js was removed because I don't think it does anything anymore
-    I did get one error message about it being missing, but there were other bugs too
+level.warehouse predraw lighting for performance
+bug fix on sewers where slime was doing too much harm
 
 ******************************************************** BUGS ********************************************************
 
-Final boss acts super weird when hit by explosions
+slime does extra damage on flipped levels?
+
+using time dilatation breaks constraints
+  on map n-gon, toggles
 
 player can become crouched while not touching the ground if they exit the ground while crouched
 
@@ -38,9 +40,18 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** LEVELS ********************************************************
 
+make a power up you can carry around like the heal power up when at full health
+  drop it on a map element to turn it on?
+  use it in combat?
+
 labs - procedural generation
   bugs
     mob spawns shouldn't be based on probability?
+  style
+    graphics look too bright?
+    add shadows and lighting and graphic details?
+      what about performance?
+        with the mobs staggered spawning it should be fine
   feel
       disrupt the flat ground
       less platforming / easier platforming
@@ -49,7 +60,13 @@ labs - procedural generation
       is it laggy?
       in loot room, spawn mobs after power up is grabbed
       more background graphics, better colors
-  science theme, with a cool technology showcased
+  loot room:
+    make it more interesting to get the power up
+      slow player and reduce damage in region
+      increase the size of the region
+        don't have space for much
+      make graphics more unique
+      push player away, so that normal pick up methods don't work, but add a button to disable region
   room ideas - 
     portal room 
     endlessly falling blocks down a slide, that the player has to climb up
@@ -57,17 +74,94 @@ labs - procedural generation
     slime room
     sound room, with buttons to control sound
     color room with r,g,b buttons to control color
-    test fire room,  button fires blocks at a wall
     mob buff zone: Map element: "Orbital Pickup Zone": Mobs that enter a specific area of the map gain +1 orbital per second, or a shield
       could put in the loot room
 
+buttons can now on/off boosts
+
+repeat map in vertical when you fall teleport to above the mab, as if the map repeats
+  camera looks strange when you teleport player with a high velocity
+
+map element - player rotates a rotor that makes a platform go up or down
+
+level element:  a zone with wind, anti-gravity, extra gravity
+  control with button
+
+map: observatory
+  button controls rotation of telescope
+  laser beam shoots out of telescope
+  button opens the dome
+
+map: prison
+  doors linked to buttons
+    mobs inside the doors?
+
+boss levels - small levels just a boss, and maybe a few mobs
+  boss level for timeSkipBoss because of game instability for boss on normal levels
+    this might not fix issues
+
+******************************************************** MOBS ********************************************************
+
+mob mechanics
+  use the force at a location effect, like the plasma field
+
+mob - after taking damage
+  release seekers
+  teleports
+
+hop boss:
+  AoE damage when landing
+    pull in player? and blocks?
+  extra gravity on falling?
+    immune to damage while falling?
+
+mob: molecule shapes - 2 separate mobs joined by a bond
+  use constraints: just spawn 2x or 3x groupings
+    low friction so they can spin around
+    spin when attacking player?
+      increase constraint length when attacking
+
+mob vision: look at player history
+    build a new type of attraction for mobs
+      if mobs can't see player, they check to see if they can see where the player was in the history
+    if mobs can't see player, they could check to see if they can find player in the past
+    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
+    write find in spawn undo exploder, but commented out
+
+Mob: "Tentacle": Sits on wall. Is a black blob. When you get near it, reaches out and grabs you, similar to wires. Does not deal damage.
+  maybe it could be immune to damage? but it is spawned by an actual mob
+
+level Boss: fractal Sierpiński triangle
+  https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
+  spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
+    they spawn once at the start of the level
+    if a version dies, one can be replaced every ten seconds by the largest version
+
+give mobs more animal-like behaviors like rain world
+  mobs play, look for food, explore
+  mobs some times aren't aggressive
+    when low on life or after taking a large hit
+  mobs can fight each other
+    this might be hard to code
+  isolated mobs try to group up
+
+mob: wall mounted guns / lasers
+  not part of randomized mob pool, customized to each level
+
+level boss: fires a line intersection in a random direction every few seconds.
+  the last two intersections have a destructive laser between them.
+
 ******************************************************** TODO ********************************************************
+
+tech foam teleports around, like a quantum wave function collapse
+
+should ammo apply to all guns, or just one of your guns?
+  if one gun only, it would make multi-gun builds weaker
+
+nail bots should benefit from nail gun tech
 
 tech: picking up heal power ups at max health does harm, but increases max health
   scales with heal value
-
-does catabolism give too much ammo?
-  synergy with shotgun harm immunity
 
 let standing wave harmonics get tech decorrelation
 
@@ -88,24 +182,12 @@ tech plasma : plasma length increases then decreases as you hold down the field 
 
 tech: at the start of a new level remove 5 research and spawn a second boss
 
-what about the single axis graphic? (find the code in standing wave harmonic)
-  maybe just save it for a mob
-  maybe use it on lore
-
-buttons can now on/off boosts
-
 energy conservation 6% damage recovered as energy
   add a negative effect:
     junk tech
 
 Weak Anthropic Principle: you get a second chance at life, but ....
   
-mob: molecule shapes - 2 separate mobs joined by a bond
-  use constraints: just spawn 2x or 3x groupings
-    low friction so they can spin around
-    spin when attacking player?
-      increase constraint length when attacking
-
 tech: use the ability for power ups to have custom code
   (note: this code is half way done, it just needs to be completed)
   attracted to player
@@ -137,30 +219,11 @@ apply the new gun.do functions to other guns
   crouching missile?
     works similar to foam
     performance issues?
-    
-tech plasma field - plasma field becomes an aoe damage field with the same radius
-  200% more energy drain, 100% more damage
-  draw a square (or two) that rapidly spins
 
 look into improving mouse lag with pointer lock?
 https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
 https://www.vsynctester.com/game.html
 https://news.ycombinator.com/item?id=26530272
-
-mob vision: look at player history
-    build a new type of attraction for mobs
-      if mobs can't see player, they check to see if they can see where the player was in the history
-    if mobs can't see player, they could check to see if they can find player in the past
-    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
-    write find in spawn undo exploder, but commented out
-
-Mob: "Tentacle": Sits on wall. Is a black blob. When you get near it, reaches out and grabs you, similar to wires. Does not deal damage.
-  maybe it could be immune to damage? but it is spawned by an actual mob
-
-mob - after taking damage
-  attack outwardly
-  grows
-  teleports
 
 mobile requirements:
   detect mobile, flip to landscape
@@ -170,20 +233,12 @@ mobile requirements:
     tap screen regions to move (WASD)
     reduce font size
     
-lore: a tutorial / lore intro
-  needs to be optional so it doesn't slow experienced players
-  put something on the intro map
-    maybe a button triggers something
-
 add back in gamepad support
   but does anyone care?
   https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
 
 rename intro level to something lore related
 
-rename ?
-  health -> integrity, unity
-  heal -> also integrity, unity
 
 RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
 
@@ -219,18 +274,6 @@ tech pilot wave: antigravity - blocks have no gravity for a few seconds after ex
 
 wormhole - make it clear when the wormhole can and can't teleport to a location before the player clicks
 
-flavor - your bullets destroy blocks
-  this isn't really a bonus, so maybe just add this as flavor to another tech field/gun
-  a chance for destroyed blocks to drop stuff
-    power ups
-    spores
-
-using a reroll gives 3 options for tech, and 3 options for guns/fields/tech
-  or 6 options for tech (rewrite tech selection to work with 1-6 options)
-  the second stack of 3 tech could have repeats, so you don't have to write new tech code
-  adjust css to make 2 columns of 3
-  can't use with cardinality
-
 new power up - increase damage and fire speed, for 15 seconds
   named boost?
   enabled by a tech
@@ -242,9 +285,6 @@ tech- do 50% more damage in close, but 50% less at a distance
   code it like techisFarAwayDmg
     have these tech disable each other
 
-repeat map in vertical and horizontal space
-  or at least vertical space
-  camera looks strange when you teleport player with a high velocity
 new status effect: weakness, mobs do 75% les damage
   graphic indication?
 
@@ -267,44 +307,7 @@ look for tech that could update description text with count and tech is informat
   can only use variables that change in effect() and remove()
   this.description = `<strong>8%</strong> chance to <strong>duplicate</strong> spawned <strong>power ups</strong><br><em>chance to duplicate = ${techduplicateChance}</em>`
 
-map element - player rotates a rotor that makes a platform go up or down
-
 use mac automator to speed up your n-gon -> git sync
-
-level Boss: fractal Sierpiński triangle
-  https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
-  spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
-    they spawn once at the start of the level
-    if a version dies, one can be replaced every ten seconds by the largest version
-
-level element:  a zone with wind, anti-gravity, extra gravity
-  control with button
-
-give mobs more animal-like behaviors like rain world
-  mobs play, look for food, explore
-  mobs some times aren't aggressive
-    when low on life or after taking a large hit
-  mobs can fight each other
-    this might be hard to code
-  isolated mobs try to group up
-
-mob: wall mounted guns / lasers
-  not part of randomized mob pool, customized to each level
-
-level boss: fires a line intersection in a random direction every few seconds.
-  the last two intersections have a destructive laser between them.
-
-map: observatory
-  button controls rotation of telescope
-  laser beam shoots out of telescope
-  button opens the dome
-
-map: prison
-  doors linked to buttons
-    mobs inside the doors?
-
-graphic idea:  bezier curve that moves smoothly from mob to mob
-  loops around player
 
 movement fluidity
   let legs jump on mobs, but player will still take damage
@@ -328,14 +331,6 @@ have a mob apply a positive status effect on other mobs,
   damage bonus, but how?
   possible balance issues
 
-boss levels - small levels just a boss, and maybe a few mobs
-  boss level for timeSkipBoss because of game instability for boss on normal levels
-    this might not fix issues
-
-an effect when canceling a power up
-  ammo? heals?
-  50% chance for a tech 25% heal, 25% ammo
-
 css transition for pause menu
 
 animate new level spawn by having the map aspects randomly fly into place
@@ -344,6 +339,7 @@ n-gon outreach ideas
   blips - errant signal on youtube
   reddit - r/IndieGaming
   hacker news - show hacker news post
+  twitch - lets play
 
 
 ******************************************************** LORE ********************************************************
@@ -369,6 +365,17 @@ possible names for tech
   phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
   Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
   Degenerate matter is a highly dense state of fermionic matter in which the Pauli exclusion principle exerts significant pressure in addition to, or in lieu of thermal pressure.
+  evolutionary cosmology
+  eternal inflation
+
+a tutorial / lore intro
+  needs to be optional so it doesn't slow experienced players
+  put something on the intro map
+    maybe a button triggers something
+
+rename ?
+  health -> integrity, unity
+  heal -> also integrity, unity
 
 
 plot script:
