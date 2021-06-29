@@ -843,7 +843,7 @@
                 allowed() {
                     return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
                 },
-                requires: "super balls, shotgun, drones, not radioactive drones",
+                requires: "super balls, shotgun, drones, not irradiated drones",
                 effect() {
                     tech.isIncendiary = true
                 },
@@ -4067,9 +4067,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isNeutronBomb || tech.isDroneRadioactive
+                    return tech.isNeutronBomb || tech.isDroneRadioactive || tech.isExplodeRadio
                 },
-                requires: "neutron bomb or radioactive drones",
+                requires: "neutron bomb or irradiated drones or iridium-192",
                 effect() {
                     tech.isRadioactiveResistance = true
                 },
@@ -4086,9 +4086,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isNeutronBomb || tech.isDroneRadioactive
+                    return tech.isNeutronBomb
                 },
-                requires: "neutron bomb or radioactive drones",
+                requires: "neutron bomb",
                 effect() {
                     tech.isNeutronSlow = true
                 },
@@ -4271,35 +4271,32 @@
                 }
             },
             {
-                name: "radioisotope generator",
-                description: "<strong class='color-p'>irradiate</strong> <strong>drones</strong>, reduce <strong class='color-g'>ammo</strong> by <strong>75%</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
+                name: "reduced tolerances",
+                description: "increase <strong>drone</strong> <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
                 isGunTech: true,
-                maxCount: 1,
+                maxCount: 3,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("drones") && tech.droneCycleReduction === 1 && !tech.isIncendiary
+                    return !tech.isDroneRadioactive && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
-                requires: "drone gun, not reduced tolerances or incendiary",
+                requires: "drones, not irradiated drones",
                 effect() {
-                    tech.isDroneRadioactive = true
+                    tech.droneCycleReduction = Math.pow(0.6, 1 + this.count)
+                    tech.droneEnergyReduction = Math.pow(0.333, 1 + this.count)
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") {
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.25
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.25)
+                            const scale = Math.pow(3, this.count + 1)
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * scale
                         }
                     }
                 },
                 remove() {
-                    if (tech.isDroneRadioactive) {
-                        tech.isDroneRadioactive = false
-                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                            if (b.guns[i].name === "drones") {
-                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
-                                b.guns[i].ammo = b.guns[i].ammo * 4
-                            }
-                        }
+                    tech.droneCycleReduction = 1
+                    tech.droneEnergyReduction = 1
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
                     }
                 }
             },
@@ -4361,33 +4358,56 @@
                 }
             },
             {
-                name: "reduced tolerances",
-                description: "increase <strong>drone</strong> <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
+                name: "irradiated drones",
+                description: "<strong class='color-p'>irradiate</strong> the space around your <strong>drones</strong><br>reduce <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>80%</strong>",
+                //<br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>
                 isGunTech: true,
-                maxCount: 3,
+                maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isDroneRadioactive && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
+                    return tech.droneCycleReduction === 1 && !tech.isIncendiary && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
-                requires: "drones",
+                requires: "drone gun, not reduced tolerances or incendiary",
                 effect() {
-                    tech.droneCycleReduction = Math.pow(0.6, 1 + this.count)
-                    tech.droneEnergyReduction = Math.pow(0.333, 1 + this.count)
+                    tech.isDroneRadioactive = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") {
-                            const scale = Math.pow(3, this.count + 1)
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * scale
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.2
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.2)
                         }
                     }
                 },
                 remove() {
-                    tech.droneCycleReduction = 1
-                    tech.droneEnergyReduction = 1
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
+                    if (tech.isDroneRadioactive) {
+                        tech.isDroneRadioactive = false
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "drones") {
+                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
+                                b.guns[i].ammo = b.guns[i].ammo * 5
+                            }
+                        }
                     }
+                }
+            },
+            {
+                name: "beta radiation", //"control rod ejection",
+                description: "reduce the average <strong>drone</strong> lifetime by <strong>50%</strong><br>increase <strong class='color-p'>radiation</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isDroneRadioactive
+                },
+                requires: "irradiated drones",
+                effect() {
+                    tech.droneRadioDamage = 2
+                },
+                remove() {
+                    tech.droneRadioDamage = 1
                 }
             },
             {
@@ -5000,12 +5020,12 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive)
                 },
-                requires: "nano-scale manufacturing, no other manufacturing",
+                requires: "nano-scale manufacturing, no other manufacturing, no drone tech",
                 effect() {
                     if (!build.isExperimentSelection) {
                         for (let i = 0; i < 3; i++) {
@@ -5024,12 +5044,12 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab)
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive)
                 },
-                requires: "nano-scale manufacturing, no other manufacturing",
+                requires: "nano-scale manufacturing, no other manufacturing, no drone tech",
                 effect() {
                     if (!build.isExperimentSelection) {
                         for (let i = 0; i < 3; i++) {
@@ -5048,12 +5068,12 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab)
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive)
                 },
-                requires: "nano-scale manufacturing, no other manufacturing",
+                requires: "nano-scale manufacturing, no other manufacturing, no drone tech",
                 effect() {
                     if (!build.isExperimentSelection) {
                         for (let i = 0; i < 3; i++) {
@@ -5152,9 +5172,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field" || m.fieldUpgrades[m.fieldMode].name === "time dilation field"
+                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
                 },
-                requires: "pilot wave, negative mass field, time dilation field",
+                requires: "pilot wave, negative mass field, time dilation",
                 effect() {
                     tech.isFreezeMobs = true
                 },
@@ -5269,9 +5289,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation field"
+                    return m.fieldUpgrades[m.fieldMode].name === "time dilation"
                 },
-                requires: "time dilation field",
+                requires: "time dilation",
                 effect() {
                     tech.isTimeSkip = true;
                     b.setFireCD();
@@ -5290,9 +5310,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation field"
+                    return m.fieldUpgrades[m.fieldMode].name === "time dilation"
                 },
-                requires: "time dilation field",
+                requires: "time dilation",
                 effect() {
                     tech.fastTime = 1.40;
                     tech.fastTimeJump = 1.11;
@@ -5315,9 +5335,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation field") && tech.energyRegen !== 0
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation") && tech.energyRegen !== 0
                 },
-                requires: "time dilation field, not ground state",
+                requires: "time dilation, not ground state",
                 effect: () => {
                     tech.energyRegen = 0.004;
                     m.fieldRegen = tech.energyRegen;
@@ -7246,5 +7266,6 @@
         superBallDelay: null,
         isBlockExplode: null,
         isOverHeal: null,
-        isDroneRadioactive: null
+        isDroneRadioactive: null,
+        droneRadioDamage: null
     }

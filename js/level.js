@@ -13,25 +13,14 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // simulation.difficulty = 20
+            // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
-            // level.difficultyIncrease(99)
-            // m.setField("nano-scale manufacturing")
+            // m.setField("time dilation")
             // b.giveGuns("grenades")
             // tech.giveTech("neutron bomb")
-            // b.giveGuns("drones")
-            // tech.giveTech("radioactive drones")
-            // tech.isRadioactiveResistance = true
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
-            // tech.isExplodeRadio = true
-            // tech.giveTech("vacuum permittivity")
-            // tech.giveTech("quenching")
-            // tech.giveTech("decoherence")
             // tech.giveTech("supertemporal")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
-            // for (let i = 0; i < 3; i++) tech.giveTech("propagation")
-            // for (let i = 0; i < 3; i++) tech.giveTech("bound state")
-            // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
 
             level.intro(); //starting level
             // level.labs();
@@ -969,7 +958,6 @@ const level = {
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
                         const DRAIN = 0.003 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
-                        console.log(DRAIN)
                         if (m.energy > DRAIN) {
                             m.energy -= DRAIN
                         } else {
@@ -2091,7 +2079,7 @@ const level = {
             // toggle.query();
         };
 
-        level.setPosToSpawn(0, -750); //normal spawn
+        level.setPosToSpawn(0, -450); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 6500;
         level.exit.y = -230;
@@ -2110,8 +2098,8 @@ const level = {
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
         spawn.mapRect(-950, -1800, 8200, 800); //roof
-        spawn.mapRect(-250, -700, 1000, 900); // shelf
-        spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
+        spawn.mapRect(-250, -400, 1000, 600); // shelf
+        spawn.mapRect(-250, -1200, 1000, 550); // shelf roof
         // powerUps.spawnStartingPowerUps(600, -800);
         // for (let i = 0; i < 50; ++i) powerUps.spawn(550, -800, "research", false);
         // powerUps.spawn(350, -800, "gun", false);
@@ -2135,16 +2123,16 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.grower(1900, -500)
         // spawn.pulsarBoss(1900, -500)
         // spawn.shooterBoss(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        spawn.hopper(1600, -500)
+        // spawn.hopper(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        spawn.hopBoss(1800, -120)
+        // spawn.hopBoss(1800, -120)
         // spawn.streamBoss(1600, -500)
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)

@@ -1041,10 +1041,10 @@ const b = {
                         }
                         //aoe damage to mobs
                         for (let i = 0, len = mob.length; i < len; i++) {
-                            if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius) {
+                            if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
                                 let dmg = b.dmgScale * 0.09
                                 if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-                                if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
+                                if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
                                 mob[i].damage(dmg);
                                 mob[i].locatePlayer();
                                 if (tech.isNeutronSlow) {
@@ -2211,30 +2211,31 @@ const b = {
     },
     droneRadioactive(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
         const me = bullet.length;
-        const THRUST = tech.isFastDrones ? 0.002 : 0.0012
+        const THRUST = tech.isFastDrones ? 0.002 : 0.0012 + 0.0004 * (Math.random() - 0.5)
         const dir = m.angle + 0.4 * (Math.random() - 0.5);
         const RADIUS = (4 + 1 * Math.random())
         bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
             angle: dir,
             inertia: Infinity,
-            friction: 0.05,
+            friction: 0,
             frictionAir: 0,
-            restitution: 1,
+            restitution: 0.8 + 0.199 * Math.random(),
             dmg: 0.24, //damage done in addition to the damage from momentum
             lookFrequency: 120 + Math.floor(23 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((900 + 400 * Math.random()) * tech.isBulletsLastLonger) + 140 + RADIUS * 5,
+            endCycle: simulation.cycle + Math.floor((900 + 120 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 140 + RADIUS * 5,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
                 mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield //self collide
             },
             minDmgSpeed: 0,
+            speedCap: 5 + 2 * Math.random(), //6 is normal
             lockedOn: null,
             isFollowMouse: true,
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             radioRadius: 0,
-            maxRadioRadius: 400 + Math.floor(75 * Math.random()) + 80 * tech.isNeutronSlow,
+            maxRadioRadius: 365 + Math.floor(150 * Math.random()),
             beforeDmg(who) {
                 const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
                 Matter.Body.setVelocity(this, {
@@ -2274,45 +2275,23 @@ const b = {
                 }
                 //aoe damage to mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
-                    if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius) {
-                        let dmg = b.dmgScale * 0.035 //neutron bombs  dmg = 0.09
+                    if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
+                        let dmg = b.dmgScale * 0.055 * tech.droneRadioDamage //neutron bombs  dmg = 0.09
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-                        if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
+                        if (mob[i].shield) dmg *= 3 // to make up for the /5 that shields normally take
                         mob[i].damage(dmg);
                         mob[i].locatePlayer();
-                        if (tech.isNeutronSlow) {
-                            Matter.Body.setVelocity(mob[i], {
-                                x: mob[i].velocity.x * 0.97,
-                                y: mob[i].velocity.y * 0.97
-                            });
-                        }
                     }
                 }
                 //draw
                 ctx.beginPath();
                 ctx.arc(this.position.x, this.position.y, this.radioRadius, 0, 2 * Math.PI);
                 ctx.globalCompositeOperation = "lighter"
-                ctx.fillStyle = `rgba(25,139,170,${0.1+0.05*Math.random()})`;
+                // ctx.fillStyle = `rgba(25,139,170,${0.15+0.05*Math.random()})`;
+                // ctx.fillStyle = `rgba(36, 207, 255,${0.1+0.05*Math.random()})`;
+                ctx.fillStyle = `rgba(28, 175, 217,${0.13+0.07*Math.random()})`;
                 ctx.fill();
                 ctx.globalCompositeOperation = "source-over"
-
-                if (tech.isNeutronSlow) {
-                    const slow = (who, radius = this.radioRadius * 3.2) => {
-                        for (i = 0, len = who.length; i < len; i++) {
-                            const sub = Vector.sub(this.position, who[i].position);
-                            const dist = Vector.magnitude(sub);
-                            if (dist < radius) {
-                                Matter.Body.setVelocity(who[i], {
-                                    x: who[i].velocity.x * 0.975,
-                                    y: who[i].velocity.y * 0.975
-                                });
-                            }
-                        }
-                    }
-                    slow(body, this.radioRadius)
-                    slow([player], this.radioRadius)
-                }
-
 
                 //normal drone actions
                 if (simulation.cycle + this.deathCycles > this.endCycle) { //fall shrink and die
@@ -2430,7 +2409,7 @@ const b = {
                         this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, simulation.mouseInGame)), -this.mass * THRUST)
                     }
                     // speed cap instead of friction to give more agility
-                    if (this.speed > 6) {
+                    if (this.speed > this.speedCap) {
                         Matter.Body.setVelocity(this, {
                             x: this.velocity.x * 0.97,
                             y: this.velocity.y * 0.97
@@ -4383,10 +4362,10 @@ const b = {
                 if (tech.isDroneRadioactive) {
                     if (m.crouch) {
                         b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
-                        m.fireCDcycle = m.cycle + Math.floor(7 * 13 * b.fireCD); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(5 * 13 * b.fireCD); // cool down
                     } else {
                         b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 10)
-                        m.fireCDcycle = m.cycle + Math.floor(7 * 6 * b.fireCD); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(5 * 6 * b.fireCD); // cool down
                     }
                 } else {
                     if (m.crouch) {

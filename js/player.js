@@ -1683,7 +1683,7 @@ const m = {
                             m.energy -= 0.04;
                             b.iceIX(1)
                         } else if (tech.isDroneRadioactive) {
-                            m.energy -= 1;
+                            m.energy -= 1.5; //almost 5x drain of normal drones
                             b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;
@@ -1916,7 +1916,7 @@ const m = {
             }
         },
         {
-            name: "time dilation field",
+            name: "time dilation",
             description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br>mobs still do <strong class='color-harm'>harm</strong> while time is stopped",
             effect: () => {
                 // m.fieldMeterColor = "#000"
@@ -1960,13 +1960,19 @@ const m = {
                             sleep(mob);
                             sleep(body);
                             sleep(bullet);
+                            // for (let i = 0, len = cons.length; i < len; i++) {
+                            //     Matter.Body.setVelocity(cons[i].bodyB, {
+                            //         x: 0,
+                            //         y: 0
+                            //     });
+                            // }
                             //doesn't really work, just slows down constraints
-                            for (let i = 0, len = cons.length; i < len; i++) {
-                                if (cons[i].stiffness !== 0) {
-                                    cons[i].storeStiffness = cons[i].stiffness;
-                                    cons[i].stiffness = 0;
-                                }
-                            }
+                            // for (let i = 0, len = cons.length; i < len; i++) {
+                            //     if (cons[i].stiffness !== 0) {
+                            //         cons[i].storeStiffness = cons[i].stiffness;
+                            //         cons[i].stiffness = 0;
+                            //     }
+                            // }
 
                             simulation.cycle--; //pause all functions that depend on game cycle increasing
                             if (tech.isTimeSkip) {

@@ -1,22 +1,20 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech - radioisotope generator - drones have the effect of neutron bomb, but you get less ammo
-bug fix - reduced tolerances now properly gives extra ammo
-water shielding now protects you from all radioactivity, but only gives 75% protection
-  (drones, neutron bomb, radioactive explosions, and even slime)
+irradiated drones
+  new tech: beta radiation - double damage and half lifespan
+  now don't clump as often, to make the graphics look better
+  effective radius now includes edges of mobs, not just centers
+    so they work better on large radius mobs
+  do 50% more damage, but have a 10% smaller radius and last 3 second shorter time and 80% less ammo  (was 75%)
+  irradiated drones can't get a slowing effect anymore
+    it was just too annoying
+  nano-scale can now unlock irradiated drone tech properly
+  nano-scale now drains more energy per irradiated drone, to scale with the higher ammo costs
 
-final boss has more durability in it's final phase
-final boss no longers gets knocked around as much from explosions
-
-level.warehouse predraw lighting for performance
-bug fix on sewers where slime was doing too much harm
+time dilation field is now just called "time dilation"
+constraints under time dilation is less buggy, but still a bit buggy 
 
 ******************************************************** BUGS ********************************************************
-
-slime does extra damage on flipped levels?
-
-using time dilatation breaks constraints
-  on map n-gon, toggles
 
 player can become crouched while not touching the ground if they exit the ground while crouched
 
@@ -39,10 +37,6 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** LEVELS ********************************************************
-
-make a power up you can carry around like the heal power up when at full health
-  drop it on a map element to turn it on?
-  use it in combat?
 
 labs - procedural generation
   bugs
@@ -92,18 +86,11 @@ map: observatory
   laser beam shoots out of telescope
   button opens the dome
 
-map: prison
-  doors linked to buttons
-    mobs inside the doors?
-
-boss levels - small levels just a boss, and maybe a few mobs
-  boss level for timeSkipBoss because of game instability for boss on normal levels
-    this might not fix issues
-
 ******************************************************** MOBS ********************************************************
 
 mob mechanics
   use the force at a location effect, like the plasma field
+    Matter.Body.applyForce(who, path[1], force)
 
 mob - after taking damage
   release seekers
@@ -153,6 +140,13 @@ level boss: fires a line intersection in a random direction every few seconds.
 
 ******************************************************** TODO ********************************************************
 
+tech - shorter cloaking delay
+
+irradiated drones, get annoying when they go after mobs near the player...
+  should they only follow mouse? or at least show a preference for targets near mouse, not near player
+
+tech - 1/2 your drone ammo/efficiency double the damage?
+
 tech foam teleports around, like a quantum wave function collapse
 
 should ammo apply to all guns, or just one of your guns?
@@ -174,7 +168,7 @@ have throw charge scale with fire delay
 in testing mode console log the body you click on
 
 throwing a block removes the block and rewinds time 10 seconds (including health and energy)
-  requires CPT, CPT gun, time dilation field?
+  requires CPT, CPT gun, time dilation?
 
 tech plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
   grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
