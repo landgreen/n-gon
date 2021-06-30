@@ -66,6 +66,7 @@
             if (options.length) {
                 for (let i = 0; i < num; i++) tech.tech[options[Math.floor(Math.random() * options.length)]].frequency++
             }
+            simulation.makeTextLog(`<span class='color-var'>tech</span>.tech.push(${num} <span class='color-text'>JUNK</span>)`)
         },
         removeJunkTechFromPool(num = 1) {
             for (let j = 0; j < num; j++) {
@@ -77,11 +78,6 @@
                 }
             }
         },
-        // removeJunkTechFromPool() {
-        //     for (let i = tech.tech.length - 1; i > 0; i--) {
-        //         if (tech.tech[i].isJunk && tech.tech[i].count === 0) tech.tech.splice(i, 1)
-        //     }
-        // },
         giveTech(index = 'random') {
             if (index === 'random') {
                 let options = [];
@@ -93,7 +89,6 @@
                     let newTech = options[Math.floor(Math.random() * options.length)]
                     tech.giveTech(newTech)
                     simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[newTech].name}</span>")<em> //random tech</em>`);
-
                 }
             } else {
                 if (isNaN(index)) { //find index by name
@@ -705,6 +700,24 @@
                 }
             },
             {
+                name: "water shielding",
+                description: "<strong class='color-p'>radioactive</strong> effects on you are reduced by 75%<br><em>neutron bomb, drones, explosions, slime</em>",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isNeutronBomb || tech.isDroneRadioactive || tech.isExplodeRadio
+                },
+                requires: "neutron bomb or irradiated drones or iridium-192",
+                effect() {
+                    tech.isRadioactiveResistance = true
+                },
+                remove() {
+                    tech.isRadioactiveResistance = false
+                }
+            },
+            {
                 name: "iridium-192",
                 description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>100%</strong> more <strong class='color-d'>damage</strong>, but over 4 seconds",
                 maxCount: 1,
@@ -951,15 +964,15 @@
             },
             {
                 name: "decorrelation",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong> after not <strong>activating</strong><br>your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (b.totalBots() > 1 || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
+                    return ((m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" && (tech.blockingIce !== 0 || tech.blockDmg !== 0)) || b.totalBots() > 1 || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
                 },
-                requires: "drones, spores, mines, or bots",
+                requires: "drones, spores, mines, or bots, ",
                 effect() {
                     tech.isNoFireDefense = true
                 },
@@ -2244,7 +2257,7 @@
             },
             {
                 name: "overcharge",
-                description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>60</strong><br>add <strong>10</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>60</strong><br><strong>+10</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2266,7 +2279,7 @@
             },
             {
                 name: "Maxwell's demon",
-                description: "<strong class='color-f'>energy</strong> above your max decays <strong>92%</strong> slower<br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong class='color-f'>energy</strong> above your max decays <strong>92%</strong> slower<br><strong>+18</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2712,7 +2725,7 @@
             },
             {
                 name: "renormalization",
-                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>37%</strong> chance to spawn a <strong class='color-r'>research</strong>",
+                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>40%</strong> chance to spawn a <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2820,6 +2833,24 @@
                 remove() {}
             },
             {
+                name: "abiogenesis",
+                description: "at the start of a level spawn a 2nd <strong>boss</strong> for<br><strong>5</strong> <strong class='color-r'>research</strong> or <strong>+49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return (build.isExperimentSelection || powerUps.research.count > 4) && !tech.isDuplicateBoss
+                },
+                requires: "at least 5 research and not parthenogenesis",
+                effect() {
+                    tech.isResearchBoss = true; //abiogenesis
+                },
+                remove() {
+                    tech.isResearchBoss = false;
+                }
+            },
+            {
                 name: "bubble fusion",
                 description: "after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
@@ -2857,7 +2888,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>add <strong>18</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+18</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2983,9 +3014,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.duplicationChance() > 0
+                    return tech.duplicationChance() > 0 && !tech.isResearchBoss
                 },
-                requires: "some duplication chance",
+                requires: "some duplication chance, not abiogenesis",
                 effect() {
                     tech.isDuplicateBoss = true;
                 },
@@ -3259,7 +3290,7 @@
             },
             {
                 name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br>add <strong>21</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br><strong>+21</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -4059,25 +4090,6 @@
                 }
             },
             {
-                name: "water shielding",
-                description: "<strong class='color-p'>radioactive</strong> effects on you are reduced by 75%<br><em>neutron bomb, drones, explosions, slime</em>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.isNeutronBomb || tech.isDroneRadioactive || tech.isExplodeRadio
-                },
-                requires: "neutron bomb or irradiated drones or iridium-192",
-                effect() {
-                    tech.isRadioactiveResistance = true
-                },
-                remove() {
-                    tech.isRadioactiveResistance = false
-                }
-            },
-            {
                 name: "vacuum permittivity",
                 description: "increase <strong class='color-p'>radioactive</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
                 isGunTech: true,
@@ -4155,7 +4167,7 @@
             },
             {
                 name: "booby trap",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br>add <strong>13</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+13</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -4411,6 +4423,25 @@
                 }
             },
             {
+                name: "uncertainty principle",
+                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>66%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return !tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1)
+                },
+                requires: "foam, not electrostatic induction",
+                effect() {
+                    tech.isFoamTeleport = true
+                },
+                remove() {
+                    tech.isFoamTeleport = false;
+                }
+            },
+            {
                 name: "necrophoresis",
                 description: "<strong>foam</strong> bubbles grow and split into 3 <strong>copies</strong><br> when the mob they are stuck to <strong>dies</strong>",
                 isGunTech: true,
@@ -4451,25 +4482,6 @@
                 }
             },
             {
-                name: "electrostatic induction",
-                description: "<strong>foam</strong> bullets are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("foam") || tech.foamBotCount > 1
-                },
-                requires: "foam",
-                effect() {
-                    tech.isFoamAttract = true
-                },
-                remove() {
-                    tech.isFoamAttract = false
-                }
-            },
-            {
                 name: "quantum foam",
                 description: "<strong>foam</strong> gun fires <strong>0.30</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>90%</strong>",
                 isGunTech: true,
@@ -4505,6 +4517,25 @@
                 },
                 remove() {
                     tech.isAmmoFoamSize = false;
+                }
+            },
+            {
+                name: "electrostatic induction",
+                description: "<strong>foam</strong> bullets are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return !tech.isFoamTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1)
+                },
+                requires: "foam, not uncertainty",
+                effect() {
+                    tech.isFoamAttract = true
+                },
+                remove() {
+                    tech.isFoamAttract = false
                 }
             },
             {
@@ -6454,7 +6485,7 @@
             },
             {
                 name: "expert system",
-                description: "spawn a <strong class='color-m'>tech</strong> power up<br>add <strong>64</strong> <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> to the potential pool",
+                description: "spawn a <strong class='color-m'>tech</strong> power up<br><strong>+64</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -6604,10 +6635,7 @@
 
                         ctx.beginPath();
                         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-                        grd.addColorStop(0, m.fillColorDark);
-                        grd.addColorStop(1, m.fillColor);
-                        ctx.fillStyle = grd;
+                        ctx.fillStyle = this.bodyGradient
                         ctx.fill();
                         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
                         ctx.strokeStyle = "#333";
@@ -6652,10 +6680,7 @@
 
                         ctx.beginPath();
                         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-                        grd.addColorStop(0, m.fillColorDark);
-                        grd.addColorStop(1, m.fillColor);
-                        ctx.fillStyle = grd;
+                        ctx.fillStyle = this.bodyGradient
                         ctx.fill();
                         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
                         ctx.strokeStyle = "#333";
@@ -6694,10 +6719,7 @@
                         ctx.rotate(m.angle);
                         ctx.beginPath();
                         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-                        grd.addColorStop(0, m.fillColorDark);
-                        grd.addColorStop(1, m.fillColor);
-                        ctx.fillStyle = grd;
+                        ctx.fillStyle = this.bodyGradient
                         ctx.fill();
                         ctx.strokeStyle = "#333";
                         ctx.lineWidth = 2;
@@ -6909,7 +6931,7 @@
             },
             {
                 name: "quantum black hole",
-                description: "use all your <strong class='color-f'>energy</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
+                description: "use your <strong class='color-f'>energy</strong> and <strong>1</strong> <strong class='color-r'>research</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -6917,12 +6939,14 @@
                 isExperimentHide: true,
                 isJunk: true,
                 allowed() {
-                    return true
+                    return powerUps.research.count > 0
                 },
-                requires: "",
+                requires: "at least 1 research",
                 effect() {
                     m.energy = 0
                     spawn.suckerBoss(m.pos.x, m.pos.y - 1000)
+                    powerUps.research.changeRerolls(-1)
+                    simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                 },
                 remove() {}
             },
@@ -7267,5 +7291,7 @@
         isBlockExplode: null,
         isOverHeal: null,
         isDroneRadioactive: null,
-        droneRadioDamage: null
+        droneRadioDamage: null,
+        isFoamTeleport: null,
+        isResearchBoss: null
     }

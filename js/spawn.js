@@ -87,6 +87,19 @@ const spawn = {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
+    secondaryBossChance(x, y) {
+        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
+            spawn.randomLevelBoss(x, y);
+        } else if (tech.isResearchBoss) {
+            if (powerUps.research.count > 4) {
+                powerUps.research.changeRerolls(-5)
+                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 5<br>${powerUps.research.count}`)
+            } else {
+                tech.addJunkTechToPool(49)
+            }
+            spawn.randomLevelBoss(x, y);
+        }
+    },
     //mob templates *********************************************************************************************
     //***********************************************************************************************************
     MACHO(x = m.pos.x, y = m.pos.y) { //immortal mob that follows player         //if you have the tech it spawns at start of every level at the player

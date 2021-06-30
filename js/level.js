@@ -15,9 +15,9 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
-            // m.setField("time dilation")
-            // b.giveGuns("grenades")
-            // tech.giveTech("neutron bomb")
+            // m.setField("metamaterial cloaking")
+            // b.giveGuns("foam")
+            // tech.giveTech("uncertainty principle")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // tech.giveTech("supertemporal")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -1273,7 +1273,6 @@ const level = {
                             }
                         }
                     )
-                    if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(x + 2000 - 650, y + -875);
                     spawn.randomMob(x + 2000 - 1600, y + -425, Infinity);
                     spawn.randomMob(x + 2000 - 1725, y + -1250, Infinity);
                     spawn.randomMob(x + 2000 - 1250, y + -1200, Infinity);
@@ -1281,6 +1280,7 @@ const level = {
                     spawn.randomMob(x + 2000 - 800, y + -125, Infinity);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
+                    spawn.secondaryBossChance(x + 2000 - 650, y + -875)
                 } else {
                     powerUps.spawnStartingPowerUps(x + 1650, y + -400);
                     spawn.mapRect(x + 1575, y + -625, 25, 375); //wall on top of wall
@@ -1305,7 +1305,6 @@ const level = {
                             }
                         }
                     )
-                    if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(x + 650, y + -875);
                     spawn.randomMob(x + 1600, y + -425, Infinity);
                     spawn.randomMob(x + 1725, y + -1250, Infinity);
                     spawn.randomMob(x + 1250, y + -1200, Infinity);
@@ -1313,6 +1312,7 @@ const level = {
                     spawn.randomMob(x + 800, y + -125, Infinity);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
+                    spawn.secondaryBossChance(x + 650, y + -875)
                 }
             },
             (x = offset.x, y = offset.y) => { //spawn block and fire it
@@ -1365,7 +1365,6 @@ const level = {
                             }
                         }
                     )
-                    if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(x + 650, y + -875);
                     spawn.randomMob(x + 2000 - 1600, y + -425, Infinity);
                     spawn.randomMob(x + 2000 - 1725, y + -1250, Infinity);
                     spawn.randomMob(x + 2000 - 1250, y + -1200, Infinity);
@@ -1373,6 +1372,7 @@ const level = {
                     spawn.randomMob(x + 2000 - 800, y + -125, Infinity);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
+                    spawn.secondaryBossChance(x + 650, y + -875)
                 } else {
                     powerUps.spawnStartingPowerUps(x + 1650, y + -400);
                     spawn.mapRect(x + 1575, y + -625, 25, 375); //wall on top of wall
@@ -1422,7 +1422,6 @@ const level = {
                             }
                         }
                     )
-                    if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(x + 650, y + -875);
                     spawn.randomMob(x + 1600, y + -425, Infinity);
                     spawn.randomMob(x + 1725, y + -1250, Infinity);
                     spawn.randomMob(x + 1250, y + -1200, Infinity);
@@ -1430,6 +1429,7 @@ const level = {
                     spawn.randomMob(x + 800, y + -125, Infinity);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
+                    spawn.secondaryBossChance(x + 650, y - 875)
                 }
             },
             (x = offset.x, y = offset.y) => { //fire an "ammo clip" of blocks
@@ -1493,7 +1493,6 @@ const level = {
                             }
                         }
                     )
-                    if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(x + 650, y + -875);
                     spawn.randomMob(x + 2000 - 1600, y + -425, Infinity);
                     spawn.randomMob(x + 2000 - 1725, y + -1250, Infinity);
                     spawn.randomMob(x + 2000 - 1250, y + -1200, Infinity);
@@ -1501,6 +1500,7 @@ const level = {
                     spawn.randomMob(x + 2000 - 800, y + -125, Infinity);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
+                    spawn.secondaryBossChance(x + 650, y - 875)
                 } else {
                     powerUps.spawnStartingPowerUps(x + 1650, y + -400);
                     spawn.mapRect(x + 1575, y + -625, 25, 375); //wall on top of wall
@@ -1561,7 +1561,6 @@ const level = {
                             }
                         }
                     )
-                    if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(x + 650, y + -875);
                     spawn.randomMob(x + 1600, y + -425, Infinity);
                     spawn.randomMob(x + 1725, y + -1250, Infinity);
                     spawn.randomMob(x + 1250, y + -1200, Infinity);
@@ -1569,6 +1568,7 @@ const level = {
                     spawn.randomMob(x + 800, y + -125, Infinity);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
+                    spawn.secondaryBossChance(x + 650, y - 875)
                 }
             }
         ]
@@ -2169,7 +2169,6 @@ const level = {
         // spawn.randomGroup(1700, -900, 0.4);
         // if (simulation.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        // if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500); 
     },
     final() {
         level.custom = () => {
@@ -2219,7 +2218,7 @@ const level = {
         spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         spawn.mapRect(5425, -650, 375, 450); //blocking exit
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4800, -500);
+        spawn.secondaryBossChance(4800, -500)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -2289,7 +2288,7 @@ const level = {
             if (simulation.difficulty * Math.random() > 7 * i) spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(4125, -350);
+        spawn.secondaryBossChance(4125, -350)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -2509,7 +2508,6 @@ const level = {
             }
         }
         powerUps.spawnStartingPowerUps(2300, -150);
-        // if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(1900, -675);
     },
     testChamber() {
         level.setPosToSpawn(0, -50); //lower start
@@ -2705,8 +2703,7 @@ const level = {
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(1925, -1250);
-
+        spawn.secondaryBossChance(1925, -1250)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -2913,8 +2910,7 @@ const level = {
         spawn.randomMob(2825, 400, 0.9);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "shieldingBoss"]);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
-
+        spawn.secondaryBossChance(7725, 2275)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3101,7 +3097,7 @@ const level = {
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3950, -850);
+        spawn.secondaryBossChance(3950, -850)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3272,7 +3268,7 @@ const level = {
         spawn.randomGroup(4900, -1200, 0);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -1900);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(2175, -2425);
+        spawn.secondaryBossChance(2175, -2425)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3489,7 +3485,7 @@ const level = {
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(5350, -325);
+        spawn.secondaryBossChance(5350, -325)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3657,7 +3653,7 @@ const level = {
         spawn.randomGroup(1700, -900, 0.4);
         if (simulation.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(3075, -2050);
+        spawn.secondaryBossChance(3075, -2050)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3899,7 +3895,7 @@ const level = {
 
         if (simulation.difficulty > 3) spawn.randomLevelBoss(-2400, -2650);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(-1825, -1975);
+        spawn.secondaryBossChance(-1825, -1975)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -4206,8 +4202,8 @@ const level = {
                 spawn.snakeBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head
             }
         }
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(300, -800);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.secondaryBossChance(300, -800)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -4438,7 +4434,7 @@ const level = {
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(1875, -675);
+        spawn.secondaryBossChance(1875, -675)
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -5920,7 +5916,7 @@ const level = {
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(7725, 2275);
+        spawn.secondaryBossChance(7725, 2275)
     },
     coliseum() {
         level.custom = () => {
@@ -6070,8 +6066,7 @@ const level = {
         powerUps.spawn(200, 50, "ammo");
 
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(6600, 600, ["historyBoss", "powerUpBoss", "pulsarBoss", "orbitalBoss"]);
+        spawn.secondaryBossChance(6600, 600)
     },
     crossfire() {
         //*1.5
@@ -6179,12 +6174,8 @@ const level = {
         // spawn.randomGroup(7700, -1100, 0.5);
         spawn.randomGroup(9800, -1100, 0.5);
 
-        if (simulation.difficulty > 10) {
-            spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "snakeBoss", "spiderBoss", "historyBoss"]);
-        }
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
-            spawn.randomLevelBoss(7900, -400, ["powerUpBoss", "spiderBoss", "historyBoss"]);
-        }
+        if (simulation.difficulty > 10) spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "snakeBoss", "spiderBoss", "historyBoss"])
+        spawn.secondaryBossChance(7900, -400)
 
         //Boss Spawning
         if (simulation.difficulty > 10) {
@@ -6422,7 +6413,7 @@ const level = {
         } else {
             exitDoor.isOpen = false;
         }
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) spawn.randomLevelBoss(800, -800);
+        spawn.secondaryBossChance(800, -800)
 
         powerUps.spawn(4450, 1050, "heal");
         if (Math.random() > (0.2 + (simulation.difficulty / 60))) {
@@ -6933,15 +6924,7 @@ const level = {
                 spawn.randomLevelBoss(850 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
             }
         }
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
-            if (abc < 0.6 * 5 / 8 || abc >= 1 - 0.15 * 5 / 17) {
-                spawn.laserBoss(-350 + Math.random() * 300, -600 + Math.random() * 200);
-            } else if (abc < 0.65) {
-                spawn.randomLevelBoss(850 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
-            } else {
-                spawn.randomLevelBoss(-1500 + Math.random() * 250, -1100 + Math.random() * 200, bosses);
-            }
-        }
+        spawn.secondaryBossChance(850 + Math.random() * 250, -1100 + Math.random() * 200)
 
         //draw leg for statue
         function statueLeg(shift, color) {

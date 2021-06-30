@@ -1,169 +1,18 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-irradiated drones
-  new tech: beta radiation - double damage and half lifespan
-  now don't clump as often, to make the graphics look better
-  effective radius now includes edges of mobs, not just centers
-    so they work better on large radius mobs
-  do 50% more damage, but have a 10% smaller radius and last 3 second shorter time and 80% less ammo  (was 75%)
-  irradiated drones can't get a slowing effect anymore
-    it was just too annoying
-  nano-scale can now unlock irradiated drone tech properly
-  nano-scale now drains more energy per irradiated drone, to scale with the higher ammo costs
+tech: abiogenesis - spawn a second level boss on each level, but costs 5 research or if you don't have the research add 49 JUNK tech to the pool
+  note to level builders I rewrote the add duplicate boss code in all levels: spawn.secondaryBossChance(x,y)
 
-time dilation field is now just called "time dilation"
-constraints under time dilation is less buggy, but still a bit buggy 
+foam tech: uncertainty principle - foam bullets change position randomly, increase foam damage by 66%
 
-******************************************************** BUGS ********************************************************
-
-player can become crouched while not touching the ground if they exit the ground while crouched
-
-a couple times people have reported the final boss dropping extra bodies on death
-
-Why does micro-extruder lag so much
-
-blue triangle boss can move backwards and aim away from you if set up properly
-  issues with dot product probably, but might not be worth fixing
-
-mouse event e.which is deprecated
-
-fix door.isOpen actually meaning isClosed?
-
-make it so that when you are immune to harm you can either jump on mobs or you pass through them
-
-is there a way to check if the player is stuck inside the map or block
-  trigger a short term non-collide if that occurs
-
-(intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
-
-******************************************************** LEVELS ********************************************************
-
-labs - procedural generation
-  bugs
-    mob spawns shouldn't be based on probability?
-  style
-    graphics look too bright?
-    add shadows and lighting and graphic details?
-      what about performance?
-        with the mobs staggered spawning it should be fine
-  feel
-      disrupt the flat ground
-      less platforming / easier platforming
-        the spinners on exit are still too hard...
-      make combat more interesting
-      is it laggy?
-      in loot room, spawn mobs after power up is grabbed
-      more background graphics, better colors
-  loot room:
-    make it more interesting to get the power up
-      slow player and reduce damage in region
-      increase the size of the region
-        don't have space for much
-      make graphics more unique
-      push player away, so that normal pick up methods don't work, but add a button to disable region
-  room ideas - 
-    portal room 
-    endlessly falling blocks down a slide, that the player has to climb up
-    portal + rotor + falling blocks = perpetual motion
-    slime room
-    sound room, with buttons to control sound
-    color room with r,g,b buttons to control color
-    mob buff zone: Map element: "Orbital Pickup Zone": Mobs that enter a specific area of the map gain +1 orbital per second, or a shield
-      could put in the loot room
-
-buttons can now on/off boosts
-
-repeat map in vertical when you fall teleport to above the mab, as if the map repeats
-  camera looks strange when you teleport player with a high velocity
-
-map element - player rotates a rotor that makes a platform go up or down
-
-level element:  a zone with wind, anti-gravity, extra gravity
-  control with button
-
-map: observatory
-  button controls rotation of telescope
-  laser beam shoots out of telescope
-  button opens the dome
-
-******************************************************** MOBS ********************************************************
-
-mob mechanics
-  use the force at a location effect, like the plasma field
-    Matter.Body.applyForce(who, path[1], force)
-
-mob - after taking damage
-  release seekers
-  teleports
-
-hop boss:
-  AoE damage when landing
-    pull in player? and blocks?
-  extra gravity on falling?
-    immune to damage while falling?
-
-mob: molecule shapes - 2 separate mobs joined by a bond
-  use constraints: just spawn 2x or 3x groupings
-    low friction so they can spin around
-    spin when attacking player?
-      increase constraint length when attacking
-
-mob vision: look at player history
-    build a new type of attraction for mobs
-      if mobs can't see player, they check to see if they can see where the player was in the history
-    if mobs can't see player, they could check to see if they can find player in the past
-    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
-    write find in spawn undo exploder, but commented out
-
-Mob: "Tentacle": Sits on wall. Is a black blob. When you get near it, reaches out and grabs you, similar to wires. Does not deal damage.
-  maybe it could be immune to damage? but it is spawned by an actual mob
-
-level Boss: fractal Sierpiński triangle
-  https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
-  spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
-    they spawn once at the start of the level
-    if a version dies, one can be replaced every ten seconds by the largest version
-
-give mobs more animal-like behaviors like rain world
-  mobs play, look for food, explore
-  mobs some times aren't aggressive
-    when low on life or after taking a large hit
-  mobs can fight each other
-    this might be hard to code
-  isolated mobs try to group up
-
-mob: wall mounted guns / lasers
-  not part of randomized mob pool, customized to each level
-
-level boss: fires a line intersection in a random direction every few seconds.
-  the last two intersections have a destructive laser between them.
+throwing blocks now charges faster with reduced fire cooldown
+tech renormalization now has a 40% chance to refund a research  (was 37%)
+performance- now precalculate player gradient fill
 
 ******************************************************** TODO ********************************************************
 
-tech - shorter cloaking delay
-
-irradiated drones, get annoying when they go after mobs near the player...
-  should they only follow mouse? or at least show a preference for targets near mouse, not near player
-
-tech - 1/2 your drone ammo/efficiency double the damage?
-
-tech foam teleports around, like a quantum wave function collapse
-
 should ammo apply to all guns, or just one of your guns?
   if one gun only, it would make multi-gun builds weaker
-
-nail bots should benefit from nail gun tech
-
-tech: picking up heal power ups at max health does harm, but increases max health
-  scales with heal value
-
-let standing wave harmonics get tech decorrelation
-
-tech: cloaking field - decrease/increase cooldown on sneak attack?
-  decrease/increase damage bonus?
-  decrease/increase visual radius?
-
-have throw charge scale with fire delay
 
 in testing mode console log the body you click on
 
@@ -173,8 +22,6 @@ throwing a block removes the block and rewinds time 10 seconds (including health
 tech plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
   grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
   extra energy is drained when field is longer
-
-tech: at the start of a new level remove 5 research and spawn a second boss
 
 energy conservation 6% damage recovered as energy
   add a negative effect:
@@ -335,6 +182,129 @@ n-gon outreach ideas
   hacker news - show hacker news post
   twitch - lets play
 
+******************************************************** BUGS ********************************************************
+
+player can become crouched while not touching the ground if they exit the ground while crouched
+
+a couple times people have reported the final boss dropping extra bodies on death
+
+Why does micro-extruder lag so much
+
+blue triangle boss can move backwards and aim away from you if set up properly
+  issues with dot product probably, but might not be worth fixing
+
+mouse event e.which is deprecated
+
+fix door.isOpen actually meaning isClosed?
+
+make it so that when you are immune to harm you can either jump on mobs or you pass through them
+
+is there a way to check if the player is stuck inside the map or block
+  trigger a short term non-collide if that occurs
+
+(intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
+
+******************************************************** LEVELS ********************************************************
+
+labs - procedural generation
+  bugs
+    mob spawns shouldn't be based on probability?
+  style
+    graphics look too bright?
+    add shadows and lighting and graphic details?
+      what about performance?
+        with the mobs staggered spawning it should be fine
+  feel
+      disrupt the flat ground
+      less platforming / easier platforming
+        the spinners on exit are still too hard...
+      make combat more interesting
+      is it laggy?
+      in loot room, spawn mobs after power up is grabbed
+      more background graphics, better colors
+  loot room:
+    make it more interesting to get the power up
+      slow player and reduce damage in region
+      increase the size of the region
+        don't have space for much
+      make graphics more unique
+      push player away, so that normal pick up methods don't work, but add a button to disable region
+  room ideas - 
+    portal room 
+    endlessly falling blocks down a slide, that the player has to climb up
+    portal + rotor + falling blocks = perpetual motion
+    slime room
+    sound room, with buttons to control sound
+    color room with r,g,b buttons to control color
+    mob buff zone: Map element: "Orbital Pickup Zone": Mobs that enter a specific area of the map gain +1 orbital per second, or a shield
+      could put in the loot room
+
+buttons can now on/off boosts
+
+repeat map in vertical when you fall teleport to above the mab, as if the map repeats
+  camera looks strange when you teleport player with a high velocity
+
+map element - player rotates a rotor that makes a platform go up or down
+
+level element:  a zone with wind, anti-gravity, extra gravity
+  control with button
+
+map: observatory
+  button controls rotation of telescope
+  laser beam shoots out of telescope
+  button opens the dome
+
+******************************************************** MOBS ********************************************************
+
+mob mechanics
+  use the force at a location effect, like the plasma field
+    Matter.Body.applyForce(who, path[1], force)
+
+mob - after taking damage
+  release seekers
+  teleports
+
+hop boss:
+  AoE damage when landing
+    pull in player? and blocks?
+  extra gravity on falling?
+    immune to damage while falling?
+
+mob: molecule shapes - 2 separate mobs joined by a bond
+  use constraints: just spawn 2x or 3x groupings
+    low friction so they can spin around
+    spin when attacking player?
+      increase constraint length when attacking
+
+mob vision: look at player history
+    build a new type of attraction for mobs
+      if mobs can't see player, they check to see if they can see where the player was in the history
+    if mobs can't see player, they could check to see if they can find player in the past
+    https://abitawake.com/news/articles/enemy-ai-chasing-a-player-without-navigation2d-or-a-star-pathfinding
+    write find in spawn undo exploder, but commented out
+
+Mob: "Tentacle": Sits on wall. Is a black blob. When you get near it, reaches out and grabs you, similar to wires. Does not deal damage.
+  maybe it could be immune to damage? but it is spawned by an actual mob
+
+level Boss: fractal Sierpiński triangle
+  https://en.wikipedia.org/wiki/Sierpi%C5%84ski_triangle
+  spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
+    they spawn once at the start of the level
+    if a version dies, one can be replaced every ten seconds by the largest version
+
+give mobs more animal-like behaviors like rain world
+  mobs play, look for food, explore
+  mobs some times aren't aggressive
+    when low on life or after taking a large hit
+  mobs can fight each other
+    this might be hard to code
+  isolated mobs try to group up
+
+mob: wall mounted guns / lasers
+  not part of randomized mob pool, customized to each level
+
+level boss: fires a line intersection in a random direction every few seconds.
+  the last two intersections have a destructive laser between them.
 
 ******************************************************** LORE ********************************************************
 
@@ -342,7 +312,6 @@ possible names for tech
   strange loop
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
-  uncertainty principle
   swarm intelligence - for a drone tech
   genetic algorithm
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity

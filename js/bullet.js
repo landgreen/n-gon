@@ -216,18 +216,18 @@ const b = {
         }
     },
     fireProps(cd, speed, dir, me) {
-        m.fireCDcycle = m.cycle + Math.floor(cd * b.fireCD); // cool down
+        m.fireCDcycle = m.cycle + Math.floor(cd * b.fireCDscale); // cool down
         Matter.Body.setVelocity(bullet[me], {
             x: m.Vx / 2 + speed * Math.cos(dir),
             y: m.Vy / 2 + speed * Math.sin(dir)
         });
         World.add(engine.world, bullet[me]); //add bullet to world
     },
-    fireCD: 1,
+    fireCDscale: 1,
     setFireCD() {
-        b.fireCD = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
-        if (tech.isFireRateForGuns) b.fireCD *= Math.pow(0.86, b.inventory.length)
-        if (tech.isFireMoveLock) b.fireCD *= 0.5
+        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
+        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.86, b.inventory.length)
+        if (tech.isFireMoveLock) b.fireCDscale *= 0.5
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -2435,7 +2435,7 @@ const b = {
             // friction: 0.2,
             // restitution: 0.2,
             dmg: 0, //damage on impact
-            damage: tech.isFastFoam ? 0.048 : 0.012, //damage done over time
+            damage: (tech.isFastFoam ? 0.048 : 0.012) * (tech.isFoamTeleport ? 1.66 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.6 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -2449,6 +2449,8 @@ const b = {
             target: null,
             targetVertex: null,
             targetRelativePosition: null,
+            portFrequency: 5 + Math.floor(5 * Math.random()),
+            nextPortCycle: Infinity, //disabled unless you have the teleport tech
             beforeDmg(who) {
                 if (!this.target && who.alive) {
                     this.target = who;
@@ -2493,6 +2495,8 @@ const b = {
                         this.radius *= this.scale;
                         if (this.radius < 8) this.endCycle = 0;
                     }
+
+
 
                     if (this.target && this.target.alive) { //if stuck to a target
                         const rotate = Vector.rotate(this.targetRelativePosition, this.target.angle) //add in the mob's new angle to the relative position vector
@@ -2577,9 +2581,15 @@ const b = {
                             }
                         }
                     }
+                    if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isFoamTeleport
+                        this.nextPortCycle = simulation.cycle + this.portFrequency
+                        const range = 10 * Math.sqrt(this.radius) * Math.random()
+                        Matter.Body.setPosition(this, Vector.add(this.position, Vector.rotate({ x: range, y: 0 }, 2 * Math.PI * Math.random())))
+                    }
                 }
             }
         });
+        if (tech.isFoamTeleport) bullet[me].nextPortCycle = simulation.cycle + bullet[me].portFrequency
         World.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
     },
@@ -3502,9 +3512,9 @@ const b = {
             fireNormal() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
                 const CD = Math.max(11 - 0.06 * (m.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
-                this.nextFireCycle = m.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
+                this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
-                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
             },
             fireNeedles() {
@@ -3575,13 +3585,13 @@ const b = {
                 }
 
                 if (m.crouch) {
-                    m.fireCDcycle = m.cycle + 45 * b.fireCD; // cool down
+                    m.fireCDcycle = m.cycle + 45 * b.fireCDscale; // cool down
                     makeNeedle()
                     for (let i = 1; i < 4; i++) { //4 total needles
                         setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
                     }
                 } else {
-                    m.fireCDcycle = m.cycle + 25 * b.fireCD; // cool down
+                    m.fireCDcycle = m.cycle + 25 * b.fireCDscale; // cool down
                     makeNeedle()
                     for (let i = 1; i < 3; i++) { //3 total needles
                         setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
@@ -3595,7 +3605,7 @@ const b = {
                 // makeNeedle(m.angle - spread)
             },
             fireRivets() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 17) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 17) * b.fireCDscale); // cool down
 
                 const me = bullet.length;
                 const size = tech.rivetSize * 7.5
@@ -3640,13 +3650,13 @@ const b = {
             fireNailFireRate() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
                 const CD = Math.max(7.5 - 0.06 * (m.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
-                this.nextFireCycle = m.cycle + CD * b.fireCD //predict next fire cycle if the fire button is held down
+                this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
-                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
             },
             fireInstantFireRate() {
-                m.fireCDcycle = m.cycle + Math.floor(2 * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor(2 * b.fireCDscale); // cool down
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / 2)
             },
             baseFire(angle) {
@@ -3685,18 +3695,18 @@ const b = {
                 let knock, spread
                 if (m.crouch) {
                     spread = 0.65
-                    m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCD); // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCD); //player is immune to damage for 30 cycles
+                    m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale); // cool down
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCDscale); //player is immune to damage for 30 cycles
                     knock = 0.01
                 } else {
-                    m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCD); // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCD)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCD); //player is immune to damage for 30 cycles
+                    m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCDscale); // cool down
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
                 }
 
                 if (tech.isShotgunRecoil) {
-                    m.fireCDcycle -= 0.66 * (45 * b.fireCD)
+                    m.fireCDcycle -= 0.66 * (45 * b.fireCDscale)
                     player.force.x -= 2 * knock * Math.cos(m.angle)
                     player.force.y -= 2 * knock * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                 } else {
@@ -3848,7 +3858,7 @@ const b = {
             do() {},
             fireOne() {
                 const SPEED = m.crouch ? 43 : 36
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCDscale); // cool down
                 let dir = m.angle
                 const me = bullet.length;
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, 21 * tech.bulletSize, b.fireAttributes(dir, false));
@@ -3875,7 +3885,7 @@ const b = {
             },
             fireMulti() {
                 const SPEED = m.crouch ? 43 : 36
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCDscale); // cool down
                 const SPREAD = m.crouch ? 0.08 : 0.13
                 let dir = m.angle - SPREAD * (tech.superBallNumber - 1) / 2;
                 for (let i = 0; i < tech.superBallNumber; i++) {
@@ -3908,7 +3918,7 @@ const b = {
                 const dir = m.angle
                 const x = m.pos.x + 30 * Math.cos(m.angle)
                 const y = m.pos.y + 30 * Math.sin(m.angle)
-                const delay = Math.floor((m.crouch ? 18 : 12) * b.fireCD)
+                const delay = Math.floor((m.crouch ? 18 : 12) * b.fireCDscale)
                 m.fireCDcycle = m.cycle + delay; // cool down
 
                 for (let i = 0; i < tech.superBallNumber; i++) {
@@ -3960,7 +3970,7 @@ const b = {
             do() {
                 if (this.wavePacketCycle && !input.fire) {
                     this.wavePacketCycle = 0;
-                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCD); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCDscale); // cool down
                 }
             },
             damage: 1,
@@ -4060,7 +4070,7 @@ const b = {
                 //fire a packet of bullets then delay for a while
                 this.wavePacketCycle++
                 if (this.wavePacketCycle > tech.wavePacketLength) {
-                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCD); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCDscale); // cool down
                     this.wavePacketCycle = 0;
                 }
             }
@@ -4076,7 +4086,7 @@ const b = {
             fire() {
                 const countReduction = Math.pow(0.9, tech.missileCount)
                 if (m.crouch) {
-                    m.fireCDcycle = m.cycle + 10 * b.fireCD / countReduction; // cool down
+                    m.fireCDcycle = m.cycle + 10 * b.fireCDscale / countReduction; // cool down
 
                     // for (let i = 0; i < tech.missileCount; i++) {
                     //     b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
@@ -4102,7 +4112,7 @@ const b = {
                         b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5), -2)
                     }
                 } else {
-                    m.fireCDcycle = m.cycle + 50 * b.fireCD / countReduction; // cool down
+                    m.fireCDcycle = m.cycle + 50 * b.fireCDscale / countReduction; // cool down
                     const direction = {
                         x: Math.cos(m.angle),
                         y: Math.sin(m.angle)
@@ -4147,7 +4157,7 @@ const b = {
                 //             bullet[bullet.length - 1].force.x -= 0.015 * (i - 1);
                 //         }
                 //     } else {
-                //         m.fireCDcycle = m.cycle + 80 * b.fireCD; // cool down
+                //         m.fireCDcycle = m.cycle + 80 * b.fireCDscale; // cool down
                 //         const direction = {
                 //             x: Math.cos(m.angle),
                 //             y: Math.sin(m.angle)
@@ -4164,7 +4174,7 @@ const b = {
                 //     }
                 // } else {
                 //     if (m.crouch) {
-                //         m.fireCDcycle = m.cycle + 10 * b.fireCD; // cool down
+                //         m.fireCDcycle = m.cycle + 10 * b.fireCDscale; // cool down
                 //         const off = Math.random() - 0.5
                 //         b.missile({
                 //                 x: m.pos.x,
@@ -4174,7 +4184,7 @@ const b = {
                 //         bullet[bullet.length - 1].force.x += off * 0.03;
                 //         // bullet[bullet.length - 1].force.y += push.y * (i - 1);
                 //     } else {
-                //         m.fireCDcycle = m.cycle + 55 * b.fireCD; // cool down
+                //         m.fireCDcycle = m.cycle + 55 * b.fireCDscale; // cool down
 
                 //         // bullet[bullet.length - 1].force.y += 0.01; //a small push down at first to make it seem like the missile is briefly falling
                 //     }
@@ -4189,7 +4199,7 @@ const b = {
             have: false,
             do() {},
             fire() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 40 : 30) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 40 : 30) * b.fireCDscale); // cool down
                 b.grenade()
             },
         }, {
@@ -4218,7 +4228,7 @@ const b = {
                         y: speed * Math.sin(m.angle)
                     }, 0, tech.isMineAmmoBack)
                 }
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 50 : 25) * b.fireCD); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 50 : 25) * b.fireCDscale); // cool down
             }
         }, {
             name: "spores",
@@ -4362,18 +4372,18 @@ const b = {
                 if (tech.isDroneRadioactive) {
                     if (m.crouch) {
                         b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
-                        m.fireCDcycle = m.cycle + Math.floor(5 * 13 * b.fireCD); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(5 * 13 * b.fireCDscale); // cool down
                     } else {
                         b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 10)
-                        m.fireCDcycle = m.cycle + Math.floor(5 * 6 * b.fireCD); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(5 * 6 * b.fireCDscale); // cool down
                     }
                 } else {
                     if (m.crouch) {
                         b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
-                        m.fireCDcycle = m.cycle + Math.floor(13 * b.fireCD); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(13 * b.fireCDscale); // cool down
                     } else {
                         b.drone()
-                        m.fireCDcycle = m.cycle + Math.floor(6 * b.fireCD); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(6 * b.fireCDscale); // cool down
                     }
                 }
             }
@@ -4388,10 +4398,10 @@ const b = {
         //     fire() {
         //         if (m.crouch) {
         //             b.iceIX(10, 0.3)
-        //             m.fireCDcycle = m.cycle + Math.floor(8 * b.fireCD); // cool down
+        //             m.fireCDcycle = m.cycle + Math.floor(8 * b.fireCDscale); // cool down
         //         } else {
         //             b.iceIX(2)
-        //             m.fireCDcycle = m.cycle + Math.floor(3 * b.fireCD); // cool down
+        //             m.fireCDcycle = m.cycle + Math.floor(3 * b.fireCDscale); // cool down
         //         }
 
         //     }
@@ -4427,7 +4437,7 @@ const b = {
             },
             fire() {
                 this.charge++
-                m.fireCDcycle = m.cycle + Math.floor((1 + 0.35 * this.charge) * b.fireCD);
+                m.fireCDcycle = m.cycle + Math.floor((1 + 0.35 * this.charge) * b.fireCDscale);
             },
             fireFoam() {
                 const spread = (m.crouch ? 0.05 : 0.6) * (Math.random() - 0.5)
@@ -4517,7 +4527,7 @@ const b = {
                 if (tech.isCapacitor) {
                     if ((m.energy > 0.16 || tech.isRailEnergyGain)) { //&& m.immuneCycle < m.cycle
                         m.energy += 0.16 * (tech.isRailEnergyGain ? 6 : -1)
-                        m.fireCDcycle = m.cycle + Math.floor(30 * b.fireCD);
+                        m.fireCDcycle = m.cycle + Math.floor(30 * b.fireCDscale);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 60, 14, {
                             density: 0.005, //0.001 is normal
@@ -4552,7 +4562,7 @@ const b = {
                                 }
                             },
                             onEnd() {},
-                            drawCycle: Math.floor(10 * b.fireCD),
+                            drawCycle: Math.floor(10 * b.fireCDscale),
                             do() {
                                 this.force.y += this.mass * 0.0003; // low gravity that scales with charge
                                 if (this.drawCycle > 0) {
@@ -4693,7 +4703,7 @@ const b = {
 
                             m.fireCDcycle = Infinity //can't fire until mouse is released
                             const previousCharge = this.charge
-                            let smoothRate = 0.98 * (m.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCD) //small b.fireCD = faster shots, b.fireCD=1 = normal shot,  big b.fireCD = slower chot
+                            let smoothRate = 0.98 * (m.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCDscale) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
                             this.charge = this.charge * smoothRate + 1 * (1 - smoothRate)
                             if (tech.isRailEnergyGain) {
                                 if (m.immuneCycle < m.cycle) m.energy += (this.charge - previousCharge) * 2 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
@@ -4827,12 +4837,12 @@ const b = {
                 this.do = () => {};
                 if (tech.isPulseLaser) {
                     this.fire = () => {
-                        const drain = 0.01 * tech.isLaserDiode / b.fireCD
+                        const drain = 0.01 * tech.isLaserDiode / b.fireCDscale
                         if (m.energy > drain) {
                             m.energy -= m.fieldRegen
                             if (this.charge < 50 * m.maxEnergy) {
                                 m.energy -= drain
-                                this.charge += 1 / b.fireCD
+                                this.charge += 1 / b.fireCDscale
                             }
                         }
                     }
@@ -4905,7 +4915,7 @@ const b = {
                 // this.fire = this.firePhoton
             },
             // firePhoton() {
-            //     m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCD); // cool down
+            //     m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCDscale); // cool down
             //     b.photon({ x: m.pos.x + 23 * Math.cos(m.angle), y: m.pos.y + 23 * Math.sin(m.angle) }, m.angle)
             // },
             fireLaser() {
@@ -5041,7 +5051,7 @@ const b = {
                 }
             },
             // firePulse() {
-            //     m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCD); // cool down
+            //     m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCDscale); // cool down
             //     let energy = 0.3 * Math.min(m.energy, 1.5)
             //     m.energy -= energy * tech.isLaserDiode
             //     if (tech.beamSplitter) {
@@ -5082,7 +5092,7 @@ const b = {
                 if (this.rewindCount > 599 || m.energy < DRAIN || history.activeGun !== this.activeGunIndex) {
                     this.rewindCount = 0;
                     m.resetHistory();
-                    m.fireCDcycle = m.cycle + Math.floor(120 * b.fireCD); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(120 * b.fireCDscale); // cool down
                 } else {
                     m.energy -= DRAIN
                     if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //player is immune to damage for 5 cycles

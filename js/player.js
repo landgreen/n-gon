@@ -49,6 +49,7 @@ const m = {
     eyeFillColor: null,
     fillColor: null, //set by setFillColors
     fillColorDark: null, //set by setFillColors
+    bodyGradient: null, //set by setFillColors
     color: {
         hue: 0,
         sat: 0,
@@ -57,6 +58,10 @@ const m = {
     setFillColors() {
         this.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
         this.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light-25}%)`
+        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+        grd.addColorStop(0, m.fillColorDark);
+        grd.addColorStop(1, m.fillColor);
+        this.bodyGradient = grd
     },
     height: 42,
     yOffWhen: {
@@ -803,10 +808,7 @@ const m = {
         ctx.rotate(m.angle);
         ctx.beginPath();
         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-        grd.addColorStop(0, m.fillColorDark);
-        grd.addColorStop(1, m.fillColor);
-        ctx.fillStyle = grd;
+        ctx.fillStyle = this.bodyGradient;
         ctx.fill();
         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
         ctx.strokeStyle = "#333";
@@ -838,10 +840,7 @@ const m = {
         ctx.rotate(m.angle);
         ctx.beginPath();
         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-        grd.addColorStop(0, m.fillColorDark);
-        grd.addColorStop(1, m.fillColor);
-        ctx.fillStyle = grd;
+        ctx.fillStyle = this.bodyGradient
         ctx.fill();
         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
         ctx.strokeStyle = "#333";
@@ -873,10 +872,7 @@ const m = {
         ctx.rotate(m.angle);
         ctx.beginPath();
         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-        let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-        grd.addColorStop(0, m.fillColorDark);
-        grd.addColorStop(1, m.fillColor);
-        ctx.fillStyle = grd;
+        ctx.fillStyle = this.bodyGradient
         ctx.fill();
         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
         ctx.strokeStyle = "#333";
@@ -1091,8 +1087,8 @@ const m = {
             if (input.field) {
                 if (m.energy > 0.001) {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
-                    m.energy -= 0.001 / tech.throwChargeRate;
-                    m.throwCharge += 0.5 * (tech.throwChargeRate + 2 * tech.isAddBlockMass) / m.holdingTarget.mass
+                    m.throwCharge += 0.5 * (tech.throwChargeRate / b.fireCDscale + 2 * tech.isAddBlockMass) / m.holdingTarget.mass
+                    if (m.throwCharge < 6) m.energy -= 0.001 / tech.throwChargeRate / b.fireCDscale; // m.throwCharge caps at 5 
                     //draw charge
                     const x = m.pos.x + 15 * Math.cos(m.angle);
                     const y = m.pos.y + 15 * Math.sin(m.angle);
@@ -2996,10 +2992,7 @@ const m = {
                 //body
                 ctx.beginPath();
                 ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                let grd = ctx.createLinearGradient(-30, 0, 30, 0);
-                grd.addColorStop(0, m.fillColorDark);
-                grd.addColorStop(1, m.fillColor);
-                ctx.fillStyle = grd;
+                ctx.fillStyle = this.bodyGradient
                 ctx.fill();
                 ctx.arc(15, 0, 4, 0, 2 * Math.PI);
                 ctx.strokeStyle = "#333";

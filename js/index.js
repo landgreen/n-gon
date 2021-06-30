@@ -119,6 +119,8 @@ window.addEventListener('load', () => {
 const canvas = document.getElementById("canvas");
 //using "const" causes problems in safari when an ID shares the same name.
 const ctx = canvas.getContext("2d");
+// const ctx = canvas.getContext('2d', { alpha: false });  //optimization, but doesn't work
+
 document.body.style.backgroundColor = "#fff";
 
 //disable pop up menu on right click
@@ -195,7 +197,7 @@ const build = {
         ${simulation.isCheating? "<em>lore disabled</em><br><br>": ""}
       <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
       <br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
-      <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCD)*100).toFixed(b.fireCD < 0.1 ? 2 : 0)}%
+      <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
       <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
       ${botText}
       <br>
