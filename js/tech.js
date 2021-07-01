@@ -2800,6 +2800,24 @@
                 }
             },
             {
+                name: "pseudoscience",
+                description: "renewing power up choices costs no <strong class='color-r'>research</strong><br>but adds <strong>1-5</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return tech.isResearchBoss || tech.isMetaAnalysis || tech.isRerollBots || tech.isDeathAvoid || tech.isRerollDamage || build.isExperimentSelection
+                },
+                requires: "abiogenesis, meta-analysis, bot fabrication, anthropic principle, or Bayesian statistics",
+                effect() {
+                    tech.isJunkResearch = true;
+                },
+                remove() {
+                    tech.isJunkResearch = false;
+                }
+            },
+            {
                 name: "Born rule",
                 description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
                 maxCount: 1,
@@ -3184,18 +3202,6 @@
                     }
                 }
             },
-
-
-            // allowed() {
-            //     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
-            // },
-            // requires: "at least 2 bots, 1 research",
-            // effect: () => {
-            //     if (powerUps.research.count > 0) {
-            //         powerUps.research.changeRerolls(-1)
-            //         b.randomBot()
-            //     }
-
             {
                 name: "backward induction",
                 description: "use <strong>2</strong> <strong class='color-r'>research</strong> to <strong>choose</strong> all the unchosen<br> <strong class='color-m'>tech</strong> from your previous <strong class='color-m'>tech</strong> selection",
@@ -6930,7 +6936,7 @@
                 remove() {}
             },
             {
-                name: "quantum black hole",
+                name: "quantum   hole",
                 description: "use your <strong class='color-f'>energy</strong> and <strong>1</strong> <strong class='color-r'>research</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
                 maxCount: 9,
                 count: 0,
@@ -7293,5 +7299,7 @@
         isDroneRadioactive: null,
         droneRadioDamage: null,
         isFoamTeleport: null,
-        isResearchBoss: null
+        isResearchBoss: null,
+        isJunkResearch: null,
+        junkResearchNumber: null
     }

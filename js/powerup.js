@@ -248,7 +248,11 @@ const powerUps = {
             }
         },
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
-            powerUps.research.changeRerolls(-1)
+            if (tech.isJunkResearch) {
+                tech.addJunkTechToPool(tech.junkResearchNumber)
+            } else {
+                powerUps.research.changeRerolls(-1)
+            }
             // simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
             // <br>${powerUps.research.count}`)
             if (tech.isBanish && type === 'tech') { // banish researched tech
@@ -402,7 +406,12 @@ const powerUps = {
                 powerUps.field.choiceLog.push(choice2)
                 powerUps.field.choiceLog.push(choice3)
 
-                if (powerUps.research.count) {
+                if (tech.isJunkResearch) {
+                    tech.junkResearchNumber = Math.ceil(5 * Math.random())
+                    text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
+                    for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                    text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
+                } else if (powerUps.research.count) {
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
                     for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span>&nbsp; <span class='research-select'>research</span></div></div>`
@@ -510,26 +519,15 @@ const powerUps = {
                     powerUps.tech.choiceLog.push(choice3)
                     // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
-                    if (powerUps.research.count) {
+                    if (tech.isJunkResearch) {
+                        tech.junkResearchNumber = Math.ceil(5 * Math.random())
+                        text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
+                        for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                        text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
+                    } else if (powerUps.research.count) {
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>research</span></div></div>`
-
-
-                        // text += `
-                        // <div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title">
-                        // <span style="position:relative;">
-                        //     <div class="circle-grid research" style="position:absolute; top:0; left:5px;opacity:0.8; border: 1px #fff solid;"></div>
-                        //     <div class="circle-grid research" style="position:absolute; top:0; left:5px;opacity:0.8; border: 1px #fff solid;"></div>
-                        // </span>
-                        // &nbsp; <span class='research-select'>research</span></div></div>`
-
-                        // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">
-                        //                             <span style="position:relative;">
-                        //                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                        //                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
-                        //                             </span>
-                        //                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].description}</div></div>`
                     }
 
                     document.getElementById("choose-grid").innerHTML = text
@@ -612,7 +610,13 @@ const powerUps = {
                 powerUps.gun.choiceLog.push(choice2)
                 powerUps.gun.choiceLog.push(choice3)
                 // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
-                if (powerUps.research.count) {
+
+                if (tech.isJunkResearch) {
+                    tech.junkResearchNumber = Math.ceil(5 * Math.random())
+                    text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
+                    for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+                    text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
+                } else if (powerUps.research.count) {
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
                     for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span>&nbsp; <span class='research-select'>research</span></div></div>`

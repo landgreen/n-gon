@@ -1572,7 +1572,7 @@ const m = {
                             if (input.field) {
                                 const oldHarmonicRadius = m.harmonicRadius
                                 m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
-                                m.energy -= 0.45 * (m.harmonicRadius - oldHarmonicRadius)
+                                m.energy -= 0.35 * (m.harmonicRadius - oldHarmonicRadius)
                             } else {
                                 m.harmonicRadius = 0.997 * m.harmonicRadius + 0.003 * 1
                             }
@@ -2488,9 +2488,9 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
-                m.duplicateChance = 0.1
+                m.duplicateChance = 0.11
                 powerUps.setDo(); //needed after adjusting duplication chance
 
                 m.hold = function() {
@@ -2539,7 +2539,7 @@ const m = {
                                 dyP = dyP2
                             }
                             dist2 = dxP * dxP + dyP * dyP;
-                            if (dist2 < 600000 && !(m.health === m.maxHealth && powerUp[i].name === "heal")) {
+                            if (dist2 < 600000) { //&& !(m.health === m.maxHealth && powerUp[i].name === "heal")
                                 powerUp[i].force.x += 4 * (dxP / dist2) * powerUp[i].mass; // float towards hole
                                 powerUp[i].force.y += 4 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                                 Matter.Body.setVelocity(powerUp[i], { //extra friction

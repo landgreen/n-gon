@@ -1,31 +1,32 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: abiogenesis - spawn a second level boss on each level, but costs 5 research or if you don't have the research add 49 JUNK tech to the pool
-  note to level builders I rewrote the add duplicate boss code in all levels: spawn.secondaryBossChance(x,y)
+tech: pseudoscience - renewing power up choices costs no research, but adds 1-5 JUNK to the potential tech pool
 
-foam tech: uncertainty principle - foam bullets change position randomly, increase foam damage by 66%
-
-throwing blocks now charges faster with reduced fire cooldown
-tech renormalization now has a 40% chance to refund a research  (was 37%)
-performance- now precalculate player gradient fill
+>update text now shows the last 20 updates and has a scroll bar
 
 ******************************************************** TODO ********************************************************
 
-should ammo apply to all guns, or just one of your guns?
-  if one gun only, it would make multi-gun builds weaker
+add a short pause before selection menu pops up 
+  this stops a second selection popping up and a possible wrong selection
+
+make a tech that improves all charge guns
+  for: pulse, foam, rail gun
+  effect:
+    faster charge rate?
+      fire speed already does that...
+    harm reduction while charging
+    less ammo/energy used while charging?
+
+researching new tech doesn't cost any research, but adds 5-10 JUNK to the potential tech pool
 
 in testing mode console log the body you click on
-
-throwing a block removes the block and rewinds time 10 seconds (including health and energy)
-  requires CPT, CPT gun, time dilation?
 
 tech plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
   grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
   extra energy is drained when field is longer
 
 energy conservation 6% damage recovered as energy
-  add a negative effect:
-    junk tech
+  there is space for a negative effect in the text
 
 Weak Anthropic Principle: you get a second chance at life, but ....
   
@@ -34,8 +35,6 @@ tech: use the ability for power ups to have custom code
   attracted to player
   attracted to other power ups
     explode if they touch?
-
-tech: wormhole through walls?
 
 pause should show the last in game console message
   
@@ -46,14 +45,6 @@ nail-gun, or ....
     back towards the player
       current location or location when fired?
   explode when turning back
-
-make a tech that improves all charge guns
-  for: pulse, foam, rail gun
-  effect:
-    faster charge rate?
-      fire speed already does that...
-    harm reduction while charging
-    less ammo/energy used while charging?
 
 apply the new gun.do functions to other guns
   rail gun
@@ -77,9 +68,6 @@ mobile requirements:
 add back in gamepad support
   but does anyone care?
   https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
-
-rename intro level to something lore related
-
 
 RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
 
@@ -205,6 +193,8 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** LEVELS ********************************************************
+
+rename intro level to something lore related
 
 labs - procedural generation
   bugs
