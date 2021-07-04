@@ -1,13 +1,50 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: pseudoscience - renewing power up choices costs no research, but adds 1-5 JUNK to the potential tech pool
+to prevent misclicks when you grab two power ups in a row there is a 1/2 second delay before power up selections can register
+  I also added in a 0.25 fade in effect on the power up selection menu. Can you tell?
 
->update text now shows the last 20 updates and has a scroll bar
+tech: pseudoscience - adds 0-4 JUNK to the potential tech pool (was 1-5 JUNK)
+tech quenching - now increases max health and does harm for over healing from heal power ups
+  (was for heals at max health)
+foam tech necrophoresis now makes less foam spawns if the total number of bullets is high
+  to help with lag when killing packs of mobs
+
+preparation for more lore chapters
+  reworked the lore conversation code to make it easier to write
+    also lore conversations should now have better timing between the text and voice
+  lore conversations can now recover from some speech errors and try again with safer settings
+    this seems to allow speech on my firefox browser
+  added a console command to make it easier to quickly unlock testing mode
+    lore.unlockTesting()
+
+pressing "b" in testing mode now gives you 10000 research and the damage from research tech
 
 ******************************************************** TODO ********************************************************
 
-add a short pause before selection menu pops up 
-  this stops a second selection popping up and a possible wrong selection
+try crosshair invert colors 
+
+tech wave gun - no bullets just draw circle arcs that do damage to mobs near the circle arc
+
+tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
+  draw 1,2,3 levels of the field based on energy?
+  the blocked value only scales up to 2x or 4x (33 energy) blocked
+  doesn't stack with spherical tech
+
+tech: weak anthropic principle - instead of dieing drain 100 energy
+  too similar to MEE?
+  drain all your energy? or just 100
+  possible overpowered synergies
+    piezoelectricity, have to not activate
+
+use SpeechSynthesis.speaking = T/F   to generate the correct wait time on lore speech API and in game console text
+  https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
+
+  or use the event listener to run even when speech ends 
+  utterThis.addEventListener('end', function(event) {
+    console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
+  });
+
+in testing mode console log the body you click on
 
 make a tech that improves all charge guns
   for: pulse, foam, rail gun
@@ -16,10 +53,6 @@ make a tech that improves all charge guns
       fire speed already does that...
     harm reduction while charging
     less ammo/energy used while charging?
-
-researching new tech doesn't cost any research, but adds 5-10 JUNK to the potential tech pool
-
-in testing mode console log the body you click on
 
 tech plasma : plasma length increases then decreases as you hold down the field button (like stabbing with a spear)
   grows to 1.5 longer after 0.3 seconds, then returns to normal length over 1 second, until field is pressed again
@@ -172,6 +205,12 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
+firefox ends if you try to use the voice API with an india voice
+  need to look at all voices and choose one that is available or go to default
+
+death while in power up selection menu doesn't reset properly
+  of course it's not possible to die in this menu unless you use testing and shift+X
+
 player can become crouched while not touching the ground if they exit the ground while crouched
 
 a couple times people have reported the final boss dropping extra bodies on death
@@ -193,6 +232,8 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** LEVELS ********************************************************
+
+try out making the player's "eye" a bigger circle
 
 rename intro level to something lore related
 
@@ -348,7 +389,7 @@ chapter 3:  why is the bot attacking things?
         disable lore, but respawn on the level you die at?
   dialogue outline:
     scientist try to think of a way to communicate since the bot can't talk
-    they give up on getting the bot to respond, and just start ask questions and thinking of explanations with other
+    they give up on getting the bot to respond, and just start ask questions and thinking of explanations with each other
     when and how did it become self-aware
     why is the bot fighting things in these simulated locations?
       it wasn't designed to be violent

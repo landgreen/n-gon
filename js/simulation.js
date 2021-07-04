@@ -469,7 +469,9 @@ const simulation = {
         document.getElementById("splash").onclick = function() {
             simulation.startGame();
         };
-        document.getElementById("choose-grid").style.display = "none"
+        // document.getElementById("choose-grid").style.display = "none"
+        document.getElementById("choose-grid").style.visibility = "hidden"
+        document.getElementById("choose-grid").style.opacity = "0"
         document.getElementById("info").style.display = "inline";
         document.getElementById("experiment-button").style.display = "inline"
         document.getElementById("experiment-grid").style.display = "none"
@@ -489,7 +491,9 @@ const simulation = {
             document.body.style.overflow = "hidden"
         }
         simulation.onTitlePage = false;
-        document.getElementById("choose-grid").style.display = "none"
+        // document.getElementById("choose-grid").style.display = "none"
+        document.getElementById("choose-grid").style.visibility = "hidden"
+        document.getElementById("choose-grid").style.opacity = "0"
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("info").style.display = "none";
         document.getElementById("experiment-button").style.display = "none";

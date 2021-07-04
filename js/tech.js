@@ -2504,7 +2504,7 @@
             },
             {
                 name: "quenching",
-                description: "if you're at full <strong class='color-h'>health</strong> heal power ups do <strong class='color-harm'>harm</strong><br>but they also increase your <strong>maximum</strong> <strong class='color-h'>health</strong>",
+                description: "over healing from <strong class='color-h'>heal</strong> power ups does <strong class='color-harm'>harm</strong><br>but it also increase your <strong>maximum</strong> <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2522,7 +2522,7 @@
             },
             {
                 name: "negentropy",
-                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>25</strong> missing health`,
+                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>22</strong> missing health`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2560,7 +2560,7 @@
             },
             {
                 name: "maintenance",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>15</strong> <strong class='color-h'>heals</strong>",
+                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>14</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2572,7 +2572,7 @@
                 },
                 requires: "health < 70%, not ergodicity",
                 effect() {
-                    for (let i = 0; i < 15; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+                    for (let i = 0; i < 14; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].isHealTech) tech.tech[i].frequency *= 2
                     }
@@ -2634,9 +2634,9 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return !tech.isSwitchReality && !tech.isResearchReality && tech.isDeathAvoid && !tech.isCollisionRealitySwitch
+                    return tech.isDeathAvoid
                 },
-                requires: "anthropic principle, not many-worlds, Ψ(t) collapse, non-unitary",
+                requires: "anthropic principle",
                 effect() {
                     tech.isImmortal = true;
                 },
@@ -2652,9 +2652,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isResearchReality && level.onLevel < 6 && !tech.isCollisionRealitySwitch
+                    return !tech.isResearchReality && level.onLevel < 6 && !tech.isCollisionRealitySwitch
                 },
-                requires: "before level 6, not quantum immortality, Ψ(t) collapse, non-unitary",
+                requires: "before level 6, Ψ(t) collapse, non-unitary",
                 effect() {
                     tech.isSwitchReality = true;
                 },
@@ -2670,9 +2670,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isResearchReality && !tech.isSwitchReality
+                    return !tech.isResearchReality && !tech.isSwitchReality
                 },
-                requires: "not quantum immortality, Ψ(t) collapse, many-worlds",
+                requires: "Ψ(t) collapse, many-worlds",
                 effect() {
                     tech.isCollisionRealitySwitch = true;
                     level.difficultyDecrease(simulation.difficultyMode * 2)
@@ -2692,9 +2692,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isImmortal && !tech.isSwitchReality && !tech.isCollisionRealitySwitch
+                    return !tech.isSwitchReality && !tech.isCollisionRealitySwitch
                 },
-                requires: "not quantum immortality, many-worlds, non-unitary",
+                requires: "many-worlds, non-unitary",
                 effect() {
                     tech.isResearchReality = true;
                     for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
@@ -2801,7 +2801,7 @@
             },
             {
                 name: "pseudoscience",
-                description: "renewing power up choices costs no <strong class='color-r'>research</strong><br>but adds <strong>1-5</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "resetting power up choices costs no <strong class='color-r'>research</strong><br>but adds <strong>0-4</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -6936,7 +6936,7 @@
                 remove() {}
             },
             {
-                name: "quantum   hole",
+                name: "quantum black hole",
                 description: "use your <strong class='color-f'>energy</strong> and <strong>1</strong> <strong class='color-r'>research</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
                 maxCount: 9,
                 count: 0,
@@ -6950,7 +6950,7 @@
                 requires: "at least 1 research",
                 effect() {
                     m.energy = 0
-                    spawn.suckerBoss(m.pos.x, m.pos.y - 1000)
+                    spawn.suckerBoss(m.pos.x, m.pos.y - 700)
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                 },

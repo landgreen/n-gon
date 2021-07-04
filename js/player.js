@@ -480,7 +480,7 @@ const m = {
     setMaxHealth() {
         m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage //+ tech.bonusHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300*m.maxHealth)}px`
-        simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
+        simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(3)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
     },

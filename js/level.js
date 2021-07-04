@@ -14,9 +14,9 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
-            // m.setField("metamaterial cloaking")
+            // m.setField("wormhole")
             // b.giveGuns("foam")
-            // tech.giveTech("uncertainty principle")
+            // tech.giveTech("quenching")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // tech.giveTech("supertemporal")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -47,12 +47,14 @@ const level = {
             // level.vats() //community level
             // level["n-gon"]() //community level
             // level.tunnel() //community level
-            // for (let i = 0; i < 39; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+            // for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
-            // localSettings.loreCount = 1;
-            // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+
             // simulation.isCheating = false //true;
+            // localSettings.loreCount = 2; //this sets what conversation is heard
+            // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
@@ -87,7 +89,7 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            const len = Math.ceil((m.maxHealth - m.health) / 0.25)
+            const len = Math.ceil((m.maxHealth - m.health) / 0.22)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isMACHO) spawn.MACHO()
@@ -1676,6 +1678,119 @@ const level = {
             }
         ]
         upDownOptions = [ //extra tall vertical section 3000x3000  //this is where the level boss is
+            // (x = offset.x, y = offset.y) => {
+            //     // spawn.mapVertex(x + 5, y + -1318, "0 0  0 -250  125 -250"); //left ledges
+            //     // spawn.mapVertex(x + 1995, y + -1318, "0 0  0 -250  -125 -250"); // right ledges
+
+            //     let r = 150
+            //     const hexagon = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0     ${r*Math.cos(2.0944)} ${r*Math.sin(2.0944)}      ${r*Math.cos(1.0472)} ${r*Math.sin(1.0472)}  `
+            //     //450 horizontal spread //  -130-130-130 = 390 vertical
+
+
+            //     let xOff = 100 + 225
+            //     spawn.mapVertex(x + xOff + 0 * 450, y + -260 - 0 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -260 - 0 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -260 - 0 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -260 - 0 * 390, hexagon);
+
+            //     xOff = 100
+            //     // spawn.mapVertex(x + xOff + 0 * 450, y + 1 * -260 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -260 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -260 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -260 - 1 * 390, hexagon);
+            //     // spawn.mapVertex(x + xOff + 4 * 450, y + 1 * -260 - 1 * 390, hexagon);
+
+            //     xOff = 100 + 225
+            //     spawn.mapVertex(x + xOff + 0 * 450, y + -260 - 2 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -260 - 2 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -260 - 2 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -260 - 2 * 390, hexagon);
+
+            //     xOff = 100
+            //     // spawn.mapVertex(x + xOff + 0 * 450, y + 1 * -260 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -260 - 3 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -260 - 3 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -260 - 3 * 390, hexagon);
+            //     // spawn.mapVertex(x + xOff + 4 * 450, y + 1 * -260 - 1 * 390, hexagon);
+
+            //     xOff = 100 + 225
+            //     spawn.mapVertex(x + xOff + 0 * 450, y + -260 - 4 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -260 - 4 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -260 - 4 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -260 - 4 * 390, hexagon);
+
+
+            //     //phase 2
+            //     xOff = 100
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -130 - 0 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -130 - 0 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -130 - 0 * 390, hexagon);
+
+            //     xOff = 100 + 225
+            //     spawn.mapVertex(x + xOff + 0 * 450, y + -130 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -130 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -130 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -130 - 1 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 4 * 450, y + -130 - 1 * 390, hexagon);
+            //     xOff = 100
+            //     spawn.mapVertex(x + xOff + 1 * 450, y + -130 - 2 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 2 * 450, y + -130 - 2 * 390, hexagon);
+            //     spawn.mapVertex(x + xOff + 3 * 450, y + -130 - 2 * 390, hexagon);
+
+            //     // spawn.mapVertex(x + 550, y + 1 * -260, hexagon);
+            //     // spawn.mapVertex(x + 550, y + 2 * -260, hexagon);
+            //     // spawn.mapVertex(x + 550, y + 3 * -260, hexagon);
+            //     // spawn.mapVertex(x + 550, y + 5 * -260, hexagon);
+            //     // spawn.mapVertex(x + 550, y + 4 * -260, hexagon);
+
+            //     // spawn.mapVertex(x + 775, y + -260, hexagon);
+            //     // spawn.mapVertex(x + 1225, y + -260, hexagon);
+
+            //     // spawn.mapVertex(x + 550, y + -650, hexagon);
+            //     // spawn.mapVertex(x + 1000, y + -650, hexagon);
+            //     // spawn.mapVertex(x + 1450, y + -650, hexagon);
+
+            //     // spawn.mapVertex(x + 775, y + -1040, hexagon);
+            //     // spawn.mapVertex(x + 1225, y + -1040, hexagon);
+
+            //     // spawn.mapVertex(x + 550, y + -1430, hexagon);
+            //     // spawn.mapVertex(x + 1000, y + -1430, hexagon);
+            //     // spawn.mapVertex(x + 1450, y + -1430, hexagon);
+
+            //     // spawn.mapVertex(x + 775, y + -1820, hexagon);
+            //     // spawn.mapVertex(x + 1225, y + -1820, hexagon);
+
+            //     let count = 0
+            //     doCustomTopLayer.push(
+            //         () => {
+
+
+
+            //             if (!(count % 60)) {
+            //                 addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+            //                     who.collisionFilter.category = cat.map;
+            //                     who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+            //                     Matter.Body.setStatic(who, true); //make static
+            //                     World.add(engine.world, who); //add to world
+            //                 }
+            //                 const numberOfMapElementsAdded = 0
+            //                 for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+
+            //                 simulation.draw.setPaths() //update map graphics
+            //             }
+            //         })
+            //     spawn.randomMob(x + 225, y + -1025, Infinity);
+            //     spawn.randomMob(x + 200, y + -675, Infinity);
+            //     spawn.randomMob(x + 225, y + -200, Infinity);
+            //     spawn.randomMob(x + 1750, y + -1075, Infinity);
+            //     spawn.randomMob(x + 1700, y + -650, Infinity);
+            //     spawn.randomMob(x + 1675, y + -175, Infinity);
+
+            //     spawn.randomGroup(x + 300, y + -2200);
+            //     spawn.randomGroup(x + 1625, y + -2200);
+            //     spawn.randomLevelBoss(x + 950, y + -2200);
+
+            // },
             (x = offset.x, y = offset.y) => {
                 const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
                 toggle.isAddedElements = false
@@ -1856,7 +1971,7 @@ const level = {
         empty = emptyOptions[Math.floor(Math.random() * emptyOptions.length)];
         loot = lootOptions[Math.floor(Math.random() * lootOptions.length)];
         upDown = upDownOptions[Math.floor(Math.random() * upDownOptions.length)];
-        // empty = emptyOptions[2] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
+        // upDown = upDownOptions[0] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
         //3x2:  4 short rooms (3000x1500),  1 double tall room (3000x3000)
         //rooms
         let rooms = ["loot", "enter", "empty", "exit"]
@@ -1965,7 +2080,14 @@ const level = {
     null() {
         level.levels.pop(); //remove lore level from rotation
         //start a conversation based on the number of conversations seen
-        if (!simulation.isCheating && localSettings.loreCount < lore.conversation.length) lore.conversation[localSettings.loreCount]()
+        if (localSettings.loreCount < lore.conversation.length && !simulation.isCheating) {
+            lore.chapter = localSettings.loreCount //set the chapter to listen to to be the lore level (you can't use the lore level because it changes during conversations)
+            lore.sentence = 0 //what part of the conversation to start on
+            lore.conversation[lore.chapter][lore.sentence]()
+
+            localSettings.loreCount++ //hear the next conversation next time you win
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
 
         const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
         const circle = {

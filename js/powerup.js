@@ -145,10 +145,21 @@ const powerUps = {
     },
     showDraft() {
         // document.getElementById("choose-grid").style.gridTemplateColumns = "repeat(2, minmax(370px, 1fr))"
-        document.getElementById("choose-grid").style.display = "grid"
-        document.getElementById("choose-background").style.display = "inline"
+        // document.getElementById("choose-background").style.display = "inline"
+        document.getElementById("choose-background").style.visibility = "visible"
+        document.getElementById("choose-background").style.opacity = "0.6"
+        // document.getElementById("choose-grid").style.display = "grid"
+        document.getElementById("choose-grid").style.transitionDuration = "0.25s";
+        document.getElementById("choose-grid").style.visibility = "visible"
+        document.getElementById("choose-grid").style.opacity = "1"
+        //disable clicking for 1/2 a second to prevent mistake clicks
+        document.getElementById("choose-grid").style.pointerEvents = "none";
+        setTimeout(() => {
+            document.getElementById("choose-grid").style.pointerEvents = "auto";
+            document.body.style.cursor = "auto";
+            document.getElementById("choose-grid").style.transitionDuration = "0s";
+        }, 500);
 
-        document.body.style.cursor = "auto";
         if (tech.isExtraChoice) {
             document.body.style.overflowY = "scroll";
             document.body.style.overflowX = "hidden";
@@ -187,8 +198,13 @@ const powerUps = {
         if (tech.isAnsatz && powerUps.research.count === 0) {
             for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
-        document.getElementById("choose-grid").style.display = "none"
-        document.getElementById("choose-background").style.display = "none"
+        // document.getElementById("choose-grid").style.display = "none"
+        document.getElementById("choose-grid").style.visibility = "hidden"
+        document.getElementById("choose-grid").style.opacity = "0"
+        // document.getElementById("choose-background").style.display = "none"
+        document.getElementById("choose-background").style.visibility = "hidden"
+        document.getElementById("choose-background").style.opacity = "0"
+
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
         simulation.paused = false;
@@ -283,30 +299,56 @@ const powerUps = {
             return tech.largerHeals * (size / 40 / Math.sqrt(tech.largerHeals) / (simulation.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on m.addHealth()
         },
         effect() {
+            // if (!tech.isEnergyHealth && m.alive) {
+            //     const heal = powerUps.heal.calculateHeal(this.size)
+            //     if (heal > 0) {
+            //         if (tech.isOverHeal && m.health === m.maxHealth) { //tech quenching
+            //             m.damage(heal * simulation.healScale);
+            //             //draw damage
+            //             simulation.drawList.push({ //add dmg to draw queue
+            //                 x: m.pos.x,
+            //                 y: m.pos.y,
+            //                 radius: heal * 500 * simulation.healScale,
+            //                 color: simulation.mobDmgColor,
+            //                 time: simulation.drawTime
+            //             });
+            //             tech.extraMaxHealth += heal * simulation.healScale //increase max health
+            //             m.setMaxHealth();
+            //         } else {
+            //             const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
+            //             m.addHealth(heal);
+            //             simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+            //         }
+            //     }
+            // }
             if (!tech.isEnergyHealth && m.alive) {
                 const heal = powerUps.heal.calculateHeal(this.size)
                 if (heal > 0) {
-                    if (tech.isOverHeal && m.health === m.maxHealth) { //tech quenching
-                        if (m.immuneCycle < m.cycle) {
-                            m.damage(heal * simulation.healScale);
-                            //draw damage
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: m.pos.x,
-                                y: m.pos.y,
-                                radius: heal * 500 * simulation.healScale,
-                                color: simulation.mobDmgColor,
-                                time: simulation.drawTime
-                            });
-                        }
-                        tech.extraMaxHealth += heal * simulation.healScale //increase max health
+                    const overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
+
+                    const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
+                    m.addHealth(heal);
+                    simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+
+                    if (tech.isOverHeal && overHeal > 0) { //tech quenching
+                        const scaledOverHeal = overHeal * 0.8
+                        m.damage(scaledOverHeal);
+                        simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(scaledOverHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+
+                        //draw damage
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: m.pos.x,
+                            y: m.pos.y,
+                            radius: scaledOverHeal * 500 * simulation.healScale,
+                            color: simulation.mobDmgColor,
+                            time: simulation.drawTime
+                        });
+                        tech.extraMaxHealth += scaledOverHeal * simulation.healScale //increase max health
                         m.setMaxHealth();
-                    } else {
-                        const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
-                        m.addHealth(heal);
-                        simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     }
                 }
             }
+
             if (tech.healGiveMaxEnergy) {
                 tech.healMaxEnergyBonus += 0.06
                 m.setMaxEnergy();
@@ -407,7 +449,7 @@ const powerUps = {
                 powerUps.field.choiceLog.push(choice3)
 
                 if (tech.isJunkResearch) {
-                    tech.junkResearchNumber = Math.ceil(5 * Math.random())
+                    tech.junkResearchNumber = Math.floor(5 * Math.random())
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
                     for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -520,7 +562,7 @@ const powerUps = {
                     // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
                     if (tech.isJunkResearch) {
-                        tech.junkResearchNumber = Math.ceil(5 * Math.random())
+                        tech.junkResearchNumber = Math.floor(5 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -612,7 +654,7 @@ const powerUps = {
                 // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
                 if (tech.isJunkResearch) {
-                    tech.junkResearchNumber = Math.ceil(5 * Math.random())
+                    tech.junkResearchNumber = Math.floor(5 * Math.random())
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
                     for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`

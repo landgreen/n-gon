@@ -2522,7 +2522,7 @@ const b = {
                         this.target = null
                         this.collisionFilter.category = cat.bullet;
                         this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-                        if (tech.isFoamGrowOnDeath && bullet.length < 250) {
+                        if (tech.isFoamGrowOnDeath && bullet.length < 200) {
                             let targets = []
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -2531,7 +2531,8 @@ const b = {
                                 }
                             }
                             const radius = Math.min(this.radius * 0.5, 10)
-                            for (let i = 0; i < 2; i++) {
+                            const len = bullet.length < 100 ? 2 : 1
+                            for (let i = 0; i < len; i++) {
                                 if (targets.length - i > 0) {
                                     const index = Math.floor(Math.random() * targets.length)
                                     const speed = 10 + 10 * Math.random()

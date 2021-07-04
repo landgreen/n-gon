@@ -854,7 +854,11 @@ window.addEventListener("keydown", function(event) {
                             </tr>                            
                             <tr>
                                 <td class='key-input-pause'>H</td>
-                                <td class='key-used'>brief harm immunity</td>
+                                <td class='key-used'>harm immunity</td>
+                            </tr>
+                            <tr>
+                                <td class='key-input-pause'>B</td>
+                                <td class='key-used'>damage, research</td>
                             </tr>
                             <tr>
                                 <td class='key-input-pause'>N</td>
@@ -955,6 +959,10 @@ window.addEventListener("keydown", function(event) {
                 break
             case "y":
                 tech.giveTech()
+                break
+            case "b":
+                tech.isRerollDamage = true
+                powerUps.research.changeRerolls(100000)
                 break
             case "r":
                 m.resetHistory();
