@@ -1,23 +1,8 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-to prevent misclicks when you grab two power ups in a row there is a 1/2 second delay before power up selections can register
-  I also added in a 0.25 fade in effect on the power up selection menu. Can you tell?
+new mobs - grenadier and grenadierBoss
 
-tech: pseudoscience - adds 0-4 JUNK to the potential tech pool (was 1-5 JUNK)
-tech quenching - now increases max health and does harm for over healing from heal power ups
-  (was for heals at max health)
-foam tech necrophoresis now makes less foam spawns if the total number of bullets is high
-  to help with lag when killing packs of mobs
-
-preparation for more lore chapters
-  reworked the lore conversation code to make it easier to write
-    also lore conversations should now have better timing between the text and voice
-  lore conversations can now recover from some speech errors and try again with safer settings
-    this seems to allow speech on my firefox browser
-  added a console command to make it easier to quickly unlock testing mode
-    lore.unlockTesting()
-
-pressing "b" in testing mode now gives you 10000 research and the damage from research tech
+tech drone repair has a 25% chance to use ammo, was 33%
 
 ******************************************************** TODO ********************************************************
 
@@ -29,20 +14,6 @@ tech: quantized shields - harmonic standing wave field can only lose 33 energy p
   draw 1,2,3 levels of the field based on energy?
   the blocked value only scales up to 2x or 4x (33 energy) blocked
   doesn't stack with spherical tech
-
-tech: weak anthropic principle - instead of dieing drain 100 energy
-  too similar to MEE?
-  drain all your energy? or just 100
-  possible overpowered synergies
-    piezoelectricity, have to not activate
-
-use SpeechSynthesis.speaking = T/F   to generate the correct wait time on lore speech API and in game console text
-  https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
-
-  or use the event listener to run even when speech ends 
-  utterThis.addEventListener('end', function(event) {
-    console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
-  });
 
 in testing mode console log the body you click on
 
@@ -205,9 +176,6 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
-firefox ends if you try to use the voice API with an india voice
-  need to look at all voices and choose one that is available or go to default
-
 death while in power up selection menu doesn't reset properly
   of course it's not possible to die in this menu unless you use testing and shift+X
 
@@ -286,6 +254,9 @@ map: observatory
   button opens the dome
 
 ******************************************************** MOBS ********************************************************
+
+mob bullets that explode (use the pulsar effect)
+mobs that explode before they die (use the pulsar effect)
 
 mob mechanics
   use the force at a location effect, like the plasma field

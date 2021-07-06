@@ -2074,7 +2074,7 @@ const b = {
                     const who = b.guns[b.activeGun]
                     if (who.name === "drones" && who.ammo > 0 && mob.length) {
                         b.drone({ x: this.position.x, y: this.position.y }, 0)
-                        if (Math.random() < 0.33) {
+                        if (Math.random() < 0.25) {
                             b.guns[b.activeGun].ammo--;
                             simulation.updateGunHUD();
                         }
@@ -2213,7 +2213,7 @@ const b = {
         const me = bullet.length;
         const THRUST = tech.isFastDrones ? 0.002 : 0.0012 + 0.0004 * (Math.random() - 0.5)
         const dir = m.angle + 0.4 * (Math.random() - 0.5);
-        const RADIUS = (4 + 1 * Math.random())
+        const RADIUS = 3
         bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
             angle: dir,
             inertia: Infinity,
@@ -2235,7 +2235,7 @@ const b = {
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             radioRadius: 0,
-            maxRadioRadius: 365 + Math.floor(150 * Math.random()),
+            maxRadioRadius: 355 + Math.floor(150 * Math.random()),
             beforeDmg(who) {
                 const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
                 Matter.Body.setVelocity(this, {
@@ -2253,7 +2253,7 @@ const b = {
                     const who = b.guns[b.activeGun]
                     if (who.name === "drones" && who.ammo > 0 && mob.length) {
                         b.droneRadioactive({ x: this.position.x, y: this.position.y }, 0)
-                        if (Math.random() < 0.33) {
+                        if (Math.random() < 0.25) {
                             b.guns[b.activeGun].ammo--;
                             simulation.updateGunHUD();
                         }
@@ -2276,7 +2276,7 @@ const b = {
                 //aoe damage to mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
-                        let dmg = b.dmgScale * 0.055 * tech.droneRadioDamage //neutron bombs  dmg = 0.09
+                        let dmg = b.dmgScale * 0.06 * tech.droneRadioDamage //neutron bombs  dmg = 0.09
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                         if (mob[i].shield) dmg *= 3 // to make up for the /5 that shields normally take
                         mob[i].damage(dmg);

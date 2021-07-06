@@ -2244,10 +2244,12 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        spawn.starter(1900, -500, 200) //big boy
-        // spawn.grower(1900, -500)
+        // spawn.starter(1900, -500, 200) //big boy
+        // spawn.pulseShooter(1900, -500)
         // spawn.pulsarBoss(1900, -500)
-        // spawn.shooterBoss(1900, -500)
+        spawn.grenadierBoss(1900, -500)
+
+        spawn.shieldingBoss(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.hopper(1600, -500)
@@ -2261,7 +2263,7 @@ const level = {
         // spawn.laser(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        // spawn.nodeGroup(1200, -500, "pulsar")
+        // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.snakeBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)

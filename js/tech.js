@@ -14,7 +14,7 @@
                 }
             }
             lore.techCount = 0;
-            if (simulation.isCommunityMaps || simulation.isCheating) {
+            if (simulation.isCheating) { //simulation.isCommunityMaps ||
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
                     if (tech.tech[i].isLore) {
                         tech.tech[i].frequency = 0;
@@ -2521,7 +2521,7 @@
                 }
             },
             {
-                name: "negentropy",
+                name: "negative entropy",
                 description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>22</strong> missing health`,
                 maxCount: 1,
                 count: 0,
@@ -4358,7 +4358,7 @@
             },
             {
                 name: "drone repair",
-                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>33%</strong> chance to use <strong>1</strong> <strong class='color-g'>ammo</strong>",
+                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong class='color-g'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5840,6 +5840,7 @@
                                                             sound.resume()
                                                             setTimeout(() => {
                                                                 sound.suspend()
+                                                                sound.close()
                                                                 powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
                                                             }, delay);
                                                         }, delay);
