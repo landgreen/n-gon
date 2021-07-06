@@ -3017,8 +3017,8 @@ const spawn = {
             for (let i = 0; i < 6; i++) {
                 spawn.grenade(this.position.x, this.position.y, 2, 4, 75 * simulation.CDScale);
                 const who = mob[mob.length - 1]
-                who.collisionFilter.category = 0
-                who.collisionFilter.mask = 0
+                // who.collisionFilter.category = 0
+                who.collisionFilter.mask = cat.player | cat.map;
                 const speed = 4 * simulation.accelScale;
                 const angle = 2 * Math.PI * i / 6
                 Matter.Body.setVelocity(who, {
@@ -3034,8 +3034,8 @@ const spawn = {
                 this.grenadeLimiter += 60
                 spawn.grenade(this.position.x, this.position.y, 2, 4, 80 + Math.floor(60 * Math.random()));
                 const who = mob[mob.length - 1]
-                who.collisionFilter.category = 0
-                who.collisionFilter.mask = 0
+                // who.collisionFilter.category = 0
+                who.collisionFilter.mask = cat.player | cat.map;
                 const velocity = Vector.mult(Vector.normalise(Vector.sub(player.position, who.position)), 3 * Math.sqrt(simulation.accelScale) + 4 * Math.random())
                 Matter.Body.setVelocity(who, {
                     x: this.velocity.x + velocity.x,
@@ -3174,8 +3174,8 @@ const spawn = {
         };
         me.onDeath = function() { //helps collisions functions work better after vertex have been changed
             spawn.grenade(this.position.x, this.position.y, 2, 4, 75 * simulation.CDScale);
-            mob[mob.length - 1].collisionFilter.category = 0
-            mob[mob.length - 1].collisionFilter.mask = 0
+            // mob[mob.length - 1].collisionFilter.category = 0
+            mob[mob.length - 1].collisionFilter.mask = cat.player | cat.map;
         }
         // spawn.shield(me, x, y);
         me.do = function() {

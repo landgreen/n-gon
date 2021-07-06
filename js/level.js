@@ -2249,7 +2249,7 @@ const level = {
         // spawn.pulsarBoss(1900, -500)
         spawn.grenadierBoss(1900, -500)
 
-        spawn.shieldingBoss(1900, -500)
+        // spawn.shieldingBoss(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.hopper(1600, -500)
@@ -2263,7 +2263,7 @@ const level = {
         // spawn.laser(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        // spawn.nodeGroup(1200, -500, "grenadier")
+        spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.snakeBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -3921,7 +3921,7 @@ const level = {
         powerUps.spawn(-4200, -700, "ammo");
         powerUps.spawn(-4000, -700, "ammo");
         spawn.mapRect(-4450, -1000, 100, 500);
-        spawn.bodyRect(-3576, -750, 150, 150);
+        spawn.bodyRect(-3500, -750, 150, 150);
 
         //building 1
         spawn.bodyRect(-1000, -675, 25, 25);
