@@ -1,18 +1,9 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-
-tech: pressure wave - wave beam fires lower frequency, higher damage, wide arcs that propagate through solids
-
-tech: gamma-ray laser - increase laser damage by 150% and energy drain by 200%
-  works for all lasers except pulse
-
-tech: specular reflection - now just gives +2 laser reflections (was +1, and damage/energy increase)
-
-you, pilot wave, and drones can't pick up ammo if you have Infinite ammo on your current gun
-  wormhole still eats everything
-
-Bayesian statistics gives 4.2% damage per research (was 3.9%)
-bot fabrication needs 3 research to make a random bot  (was 4)
+pressure wave balance - slightly more ammo
+gamma-ray laser does 200% damage and 250% more drain  (was 150% damage, 200% drain)
+gamma ray now doesn't lock out other laser tech
+hidden variable now gives 15, not 30 heals
 
 ******************************************************** TODO ********************************************************
 

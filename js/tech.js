@@ -1906,9 +1906,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return true
+                    return !tech.isEnergyHealth
                 },
-                requires: "",
+                requires: "not mass-energy",
                 effect: () => {
                     tech.isMACHO = true; //this harm reduction comes from the particle toggling  tech.isHarmMACHO
                     spawn.MACHO()
@@ -2560,7 +2560,7 @@
             },
             {
                 name: "maintenance",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>14</strong> <strong class='color-h'>heals</strong>",
+                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>11</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2568,11 +2568,11 @@
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
-                    return (m.health / m.maxHealth) < 0.7 && !tech.isNoHeals
+                    return !tech.isNoHeals
                 },
-                requires: "health < 70%, not ergodicity",
+                requires: "not ergodicity",
                 effect() {
-                    for (let i = 0; i < 14; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+                    for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].isHealTech) tech.tech[i].frequency *= 2
                     }
@@ -3984,8 +3984,8 @@
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "wave beam") {
                             b.guns[i].chooseFireMethod()
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.1
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.1);
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.125
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.125);
                             simulation.updateGunHUD();
                             break
                         }
@@ -3997,7 +3997,7 @@
                             b.guns[i].chooseFireMethod()
                             if (tech.isLongitudinal) {
                                 b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
-                                b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 10);
+                                b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 8);
                                 simulation.updateGunHUD();
                             }
                             break
@@ -4658,19 +4658,19 @@
             },
             {
                 name: "gamma-ray laser",
-                description: "increase all <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br>increase all <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> drain by <strong>200%</strong>",
+                description: "increase all <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br>increase all <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> drain by <strong>250%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
+                    return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isPulseLaser
                 },
                 requires: "laser, not pulse",
                 effect() {
-                    tech.laserFieldDrain = 0.006 //base is 0.002
-                    tech.laserDamage = 0.375; //base is 0.15
+                    tech.laserFieldDrain = 0.007 //base is 0.002
+                    tech.laserDamage = 0.45; //base is 0.15
                     tech.laserColor = "#83f"
                     tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
                 },
@@ -5937,7 +5937,7 @@
             },
             {
                 name: "hidden variable",
-                description: "spawn <strong>30</strong> <strong class='color-h'>heal</strong> power ups<br>but hide your <strong class='color-h'>health</strong> bar",
+                description: "spawn <strong>15</strong> <strong class='color-h'>heal</strong> power ups<br>but hide your <strong class='color-h'>health</strong> bar",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -5951,7 +5951,7 @@
                 effect() {
                     document.getElementById("health").style.display = "none"
                     document.getElementById("health-bg").style.display = "none"
-                    for (let i = 0; i < 30; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                    for (let i = 0; i < 15; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
                 },
                 remove() {}
             },
@@ -6802,7 +6802,7 @@
                         ctx.stroke();
                         ctx.beginPath();
                         ctx.arc(18, 13, 10, 0, 2 * Math.PI);
-                        ctx.fillStyle = grd;
+                        ctx.fillStyle = this.bodyGradient;
                         ctx.fill();
                         ctx.stroke();
                         ctx.beginPath();

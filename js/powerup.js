@@ -488,7 +488,10 @@ const powerUps = {
                     if (tech.isBanish) { //remove banished tech from last selection
                         for (let i = 0; i < powerUps.tech.banishLog.length; i++) {
                             for (let j = 0; j < options.length; j++) {
-                                if (powerUps.tech.banishLog[i] === options[j]) options.splice(j, 1)
+                                if (powerUps.tech.banishLog[i] === options[j]) {
+                                    options.splice(j, 1)
+                                    break
+                                }
                             }
                         }
                     } else { //remove repeats from last selection
@@ -497,7 +500,10 @@ const powerUps = {
                             for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
                                 if (options.length > totalChoices) {
                                     for (let j = 0, len = options.length; j < len; j++) {
-                                        if (powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i] === options[j]) options.splice(j, 1) //remove previous choice from option pool
+                                        if (powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i] === options[j]) {
+                                            options.splice(j, 1) //remove previous choice from option pool
+                                            break;
+                                        }
                                     }
                                 }
                             }

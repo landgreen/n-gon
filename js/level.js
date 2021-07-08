@@ -18,7 +18,7 @@ const level = {
             // b.giveGuns("wave beam")
             // tech.giveTech("pressure wave")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
-            // tech.giveTech("supertemporal")
+            // tech.giveTech("decoherence")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
 
             level.intro(); //starting level
@@ -47,7 +47,8 @@ const level = {
             // level.vats() //community level
             // level["n-gon"]() //community level
             // level.tunnel() //community level
-            // for (let i = 0; i < 3; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+            // powerUps.research.changeRerolls(3000)
+            // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
 
