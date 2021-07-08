@@ -15,8 +15,8 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("foam")
-            // tech.giveTech("quenching")
+            // b.giveGuns("wave beam")
+            // tech.giveTech("pressure wave")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // tech.giveTech("supertemporal")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -2244,10 +2244,10 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.pulseShooter(1900, -500)
         // spawn.pulsarBoss(1900, -500)
-        spawn.grenadierBoss(1900, -500)
+        // spawn.grenadierBoss(1900, -500)
 
         // spawn.shieldingBoss(1900, -500)
         // spawn.historyBoss(1200, -500)

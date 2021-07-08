@@ -234,11 +234,10 @@ const powerUps = {
                 }
             }
             if (tech.isRerollBots) {
-                const limit = 4
-                for (; powerUps.research.count > limit - 1; powerUps.research.count -= limit) {
+                for (const cost = 3; powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
                     b.randomBot()
                     if (tech.renormalization) {
-                        for (let i = 0; i < limit; i++) {
+                        for (let i = 0; i < cost; i++) {
                             if (Math.random() < 0.4) {
                                 m.fieldCDcycle = m.cycle + 30;
                                 powerUps.spawn(m.pos.x, m.pos.y, "research");

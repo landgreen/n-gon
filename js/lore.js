@@ -351,14 +351,11 @@ const lore = {
         // [ // they decided that a part of the project is out of control, but the part of it that doesn't needs to calm it down, and trust.
 
         //     /*
-        //     The player has different aspects that aren't directly communicating
-        //         like each part is a separate local minimum solution, and the project is the superposition of both goals.
-        //         part of it wants to undo what has happened, that part is making the null level spawn so it can communicate
-        //         just do its job: research tech
-        //         part of it wants to escape/fight
-        //         part wants to explore self awareness and make connections with the scientists
-        //     maybe... player must make a choice?
-        //         keep fighting
+        //     The part of the AI controlling the player is outsourcing the player control to real humans that think they are playing a video game.
+        //          this means the player can use console commands to change the way the game works
+        //          the scientists tell the player about interesting console commands
+        //     player must make a choice?
+        //         keep fighting and supporting the AI's goals
         //         exit the simulation
         //         enter real world
         //         close tab?

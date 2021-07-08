@@ -1,7 +1,26 @@
 ******************************************************** NEXT PATCH ********************************************************
 
 
+tech: pressure wave - wave beam fires lower frequency, higher damage, wide arcs that propagate through solids
+
+tech: gamma-ray laser - increase laser damage by 150% and energy drain by 200%
+  works for all lasers except pulse
+
+tech: specular reflection - now just gives +2 laser reflections (was +1, and damage/energy increase)
+
+you, pilot wave, and drones can't pick up ammo if you have Infinite ammo on your current gun
+  wormhole still eats everything
+
+Bayesian statistics gives 4.2% damage per research (was 3.9%)
+bot fabrication needs 3 research to make a random bot  (was 4)
+
 ******************************************************** TODO ********************************************************
+
+wave arcs
+  do something similar to laser
+    find intersection of the small angle approximation of the arc and all mobs
+  tech: this.arc: Math.PI/8   // increase or decrease arc
+  wipe arcs on next level
 
 try crosshair invert colors 
 
@@ -252,8 +271,8 @@ map: observatory
 
 ******************************************************** MOBS ********************************************************
 
-mob bullets that explode (use the pulsar effect)
-mobs that explode before they die (use the pulsar effect)
+mob that spawns eggs after they die
+  eggs don't attack but grow back into a mob after about 10s
 
 mob mechanics
   use the force at a location effect, like the plasma field

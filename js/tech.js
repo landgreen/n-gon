@@ -168,7 +168,7 @@
             if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
-            if (tech.isRerollDamage) dmg *= 1 + 0.039 * powerUps.research.count
+            if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.22
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
@@ -1341,15 +1341,15 @@
             },
             {
                 name: "bot fabrication",
-                description: "anytime you collect <strong>4</strong> <strong class='color-r'>research</strong><br>use them to build a random <strong class='color-bot'>bot</strong>",
+                description: "anytime you collect <strong>3</strong> <strong class='color-r'>research</strong><br>use them to build a random <strong class='color-bot'>bot</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 isBotTech: true,
                 allowed() {
-                    return powerUps.research.count > 3 || build.isExperimentSelection
+                    return powerUps.research.count > 2 || build.isExperimentSelection
                 },
-                requires: "at least 4 research",
+                requires: "at least 3 research",
                 effect() {
                     tech.isRerollBots = true;
                     powerUps.research.changeRerolls(0)
@@ -2783,7 +2783,7 @@
             },
             {
                 name: "Bayesian statistics",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>3.9%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>4.2%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2801,7 +2801,7 @@
             },
             {
                 name: "pseudoscience",
-                description: "resetting power up choices costs no <strong class='color-r'>research</strong><br>but adds <strong>0-4</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "<strong>rerolling</strong> choices no longer costs <strong class='color-r'>research</strong><br>instead it adds <strong>0-4</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3695,24 +3695,21 @@
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "shotgun") {
                             b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.5);
-                            break;
-                        }
-                    }
-                    simulation.updateGunHUD();
-
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "shotgun") {
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.5
                             break;
                         }
                     }
+                    simulation.updateGunHUD();
                 },
                 remove() {
-                    tech.isShotgunImmune = false;
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "shotgun") {
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-                            break;
+                    if (tech.isShotgunImmune) {
+                        tech.isShotgunImmune = false;
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "shotgun") {
+                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                                b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 2);
+                                break;
+                            }
                         }
                     }
                 }
@@ -3875,7 +3872,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("wave beam")
+                    return tech.haveGunCheck("wave beam") && !tech.isLongitudinal
                 },
                 requires: "wave beam",
                 effect() {
@@ -3883,6 +3880,25 @@
                 },
                 remove() {
                     tech.waveReflections = 1
+                }
+            },
+            {
+                name: "phase velocity",
+                description: "wave beam <strong>propagates</strong> faster through solids<br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("wave beam") && !tech.isLongitudinal
+                },
+                requires: "wave beam",
+                effect() {
+                    tech.isPhaseVelocity = true;
+                },
+                remove() {
+                    tech.isPhaseVelocity = false;
                 }
             },
             {
@@ -3894,7 +3910,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("wave beam")
+                    return tech.haveGunCheck("wave beam") && !tech.isLongitudinal
                 },
                 requires: "wave beam",
                 effect() {
@@ -3952,22 +3968,42 @@
                 }
             },
             {
-                name: "phase velocity",
-                description: "wave beam <strong>propagates</strong> faster through solids<br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
+                name: "pressure wave", //longitudinal  //gravitational wave?
+                description: "wave beam emits low <strong>frequency</strong>, high <strong class='color-d'>damage</strong><br><strong>expanding arcs</strong> that propagate through solids",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 4,
+                frequencyDefault: 4,
                 allowed() {
-                    return tech.haveGunCheck("wave beam")
+                    return tech.haveGunCheck("wave beam") && !tech.isPhaseVelocity && tech.waveLengthRange === 130 && tech.waveReflections === 1
                 },
-                requires: "wave beam",
+                requires: "wave beam, not phase velocity, packet length, bound state",
                 effect() {
-                    tech.isPhaseVelocity = true;
+                    tech.isLongitudinal = true;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "wave beam") {
+                            b.guns[i].chooseFireMethod()
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.1
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.1);
+                            simulation.updateGunHUD();
+                            break
+                        }
+                    }
                 },
                 remove() {
-                    tech.isPhaseVelocity = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "wave beam") {
+                            b.guns[i].chooseFireMethod()
+                            if (tech.isLongitudinal) {
+                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
+                                b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 10);
+                                simulation.updateGunHUD();
+                            }
+                            break
+                        }
+                    }
+                    tech.isLongitudinal = false;
                 }
             },
             {
@@ -4621,6 +4657,31 @@
                 }
             },
             {
+                name: "gamma-ray laser",
+                description: "increase all <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br>increase all <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> drain by <strong>200%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
+                },
+                requires: "laser, not pulse",
+                effect() {
+                    tech.laserFieldDrain = 0.006 //base is 0.002
+                    tech.laserDamage = 0.375; //base is 0.15
+                    tech.laserColor = "#83f"
+                    tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
+                },
+                remove() {
+                    tech.laserFieldDrain = 0.002;
+                    tech.laserDamage = 0.15; //used in check on pulse: tech.laserDamage === 0.15
+                    tech.laserColor = "#f00"
+                    tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
+                }
+            },
+            {
                 name: "relativistic momentum",
                 description: "all <strong class='color-laser'>lasers</strong> push mobs away<br><em>affects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
@@ -4639,12 +4700,11 @@
                     tech.isLaserPush = false;
                 }
             },
-
             {
                 name: "specular reflection",
-                description: "increase <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain by <strong>50%</strong><br>and <strong>+1</strong> reflection for all <strong class='color-laser'>lasers</strong> <em>(gun, bot, mine)</em>",
+                description: "<strong>+2</strong> reflection for all <strong class='color-laser'>lasers</strong><br><em>affects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
-                maxCount: 9,
+                maxCount: 3,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
@@ -4653,14 +4713,10 @@
                 },
                 requires: "laser, not wide beam, diffuse beam, pulse, or slow light",
                 effect() {
-                    tech.laserReflections++;
-                    tech.laserDamage += 0.075; //base is 0.12
-                    tech.laserFieldDrain += 0.001 //base is 0.002
+                    tech.laserReflections += 2;
                 },
                 remove() {
                     tech.laserReflections = 2;
-                    tech.laserDamage = 0.15;
-                    tech.laserFieldDrain = 0.002;
                 }
             },
             {
@@ -4786,9 +4842,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser
+                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.15
                 },
-                requires: "laser, not specular reflection, not diffuse",
+                requires: "laser, not specular reflection, diffuse, solid-state",
                 effect() {
                     tech.isPulseLaser = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -7302,5 +7358,8 @@
         isFoamTeleport: null,
         isResearchBoss: null,
         isJunkResearch: null,
-        junkResearchNumber: null
+        junkResearchNumber: null,
+        laserColor: null,
+        laserColorAlpha: null,
+        isLongitudinal: null
     }

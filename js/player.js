@@ -1232,7 +1232,7 @@ const m = {
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             const dxP = m.pos.x - powerUp[i].position.x;
             const dyP = m.pos.y - powerUp[i].position.y;
-            const dist2 = dxP * dxP + dyP * dyP;
+            const dist2 = dxP * dxP + dyP * dyP + 10;
             // float towards player  if looking at and in range  or  if very close to player
             if (
                 dist2 < m.grabPowerUpRange2 &&
@@ -1249,7 +1249,8 @@ const m = {
                 if ( //use power up if it is close enough
                     dist2 < 5000 &&
                     !simulation.isChoosing &&
-                    !(m.health === m.maxHealth && powerUp[i].name === "heal" && !tech.isOverHeal)
+                    (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) &&
+                    (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
                 ) {
                     powerUps.onPickUp(powerUp[i]);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
@@ -2367,17 +2368,25 @@ const m = {
                             for (let i = 0, len = powerUp.length; i < len; ++i) {
                                 const dxP = m.fieldPosition.x - powerUp[i].position.x;
                                 const dyP = m.fieldPosition.y - powerUp[i].position.y;
-                                const dist2 = dxP * dxP + dyP * dyP;
+                                const dist2 = dxP * dxP + dyP * dyP + 200;
                                 // float towards field  if looking at and in range  or  if very close to player
-                                if (dist2 < m.fieldRadius * m.fieldRadius && (m.lookingAt(powerUp[i]) || dist2 < 16000) && !(m.health === m.maxHealth && powerUp[i].name === "heal")) {
-                                    powerUp[i].force.x += 7 * (dxP / dist2) * powerUp[i].mass;
-                                    powerUp[i].force.y += 7 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
+                                if (
+                                    dist2 < m.fieldRadius * m.fieldRadius &&
+                                    (m.lookingAt(powerUp[i]) || dist2 < 16000)
+                                ) {
+                                    powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
+                                    powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                                     //extra friction
                                     Matter.Body.setVelocity(powerUp[i], {
                                         x: powerUp[i].velocity.x * 0.11,
                                         y: powerUp[i].velocity.y * 0.11
                                     });
-                                    if (dist2 < 5000 && !simulation.isChoosing) { //use power up if it is close enough
+                                    if (
+                                        dist2 < 5000 &&
+                                        !simulation.isChoosing &&
+                                        (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth) &&
+                                        (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
+                                    ) { //use power up if it is close enough
                                         powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();
                                         Matter.World.remove(engine.world, powerUp[i]);
