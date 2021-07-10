@@ -713,7 +713,7 @@ const b = {
             bullet[me].explodeRad = 275;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 5)
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -738,7 +738,7 @@ const b = {
             bullet[me].explodeRad = 300;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 5)
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -773,7 +773,7 @@ const b = {
             bullet[me].explodeRad = 350 + Math.floor(Math.random() * 50);;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 5)
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -849,7 +849,7 @@ const b = {
             bullet[me].explodeRad = 325 + Math.floor(Math.random() * 50);;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 7)
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 6)
             }
             bullet[me].beforeDmg = function() {};
             bullet[me].restitution = 0.4;
@@ -1124,7 +1124,7 @@ const b = {
             },
             onEnd() {
                 b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 5)
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
             },
             lockedOn: null,
             tryToLockOn() {
@@ -1572,7 +1572,7 @@ const b = {
         } else {
             ctx.strokeStyle = tech.laserColor;
             ctx.lineWidth = 2
-            ctx.lineDashOffset = 300 * Math.random()
+            ctx.lineDashOffset = 900 * Math.random()
             ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
             for (let i = 1, len = path.length; i < len; ++i) {
                 ctx.beginPath();
@@ -1650,7 +1650,7 @@ const b = {
                     for (let i = 0; i < 3; i++) {
                         const where = this.vertices[i]
                         const endPoint = Vector.add(where, Vector.mult(Vector.normalise(Vector.sub(where, this.position)), 2500))
-                        b.laser(where, endPoint, tech.laserDamage * 10, this.reflections, true)
+                        b.laser(where, endPoint, tech.laserDamage * 12, this.reflections, true)
                     }
                     ctx.stroke();
                     // ctx.globalAlpha = 1;
@@ -1959,7 +1959,7 @@ const b = {
             friction: 0,
             frictionAir: 0.10,
             restitution: 0.3,
-            dmg: 0.38, //damage done in addition to the damage from momentum
+            dmg: 0.42, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 140 * tech.isBulletsLastLonger,
             classType: "bullet",
@@ -2633,13 +2633,13 @@ const b = {
                     x: targets[index].x + SPREAD * (Math.random() - 0.5),
                     y: targets[index].y + SPREAD * (Math.random() - 0.5)
                 }
-                b.nail(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed))
+                b.nail(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed), 1.4)
             } else if (isRandomAim) { // aim in random direction
                 const ANGLE = 2 * Math.PI * Math.random()
                 b.nail(position, {
                     x: speed * Math.cos(ANGLE),
                     y: speed * Math.sin(ANGLE)
-                })
+                }, 1.4)
             }
         }
     },
@@ -3727,9 +3727,9 @@ const b = {
                     const dir = m.angle + 0.02 * (Math.random() - 0.5)
                     bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 60, 27, b.fireAttributes(dir));
 
-                    Matter.Body.setDensity(bullet[me], 0.004);
+                    Matter.Body.setDensity(bullet[me], 0.007);
                     World.add(engine.world, bullet[me]); //add bullet to world
-                    const SPEED = (m.crouch ? 52 : 43) + Math.random() * 7
+                    const SPEED = (m.crouch ? 45 : 35) + Math.random() * 6
                     Matter.Body.setVelocity(bullet[me], {
                         x: SPEED * Math.cos(dir),
                         y: SPEED * Math.sin(dir)
@@ -3737,7 +3737,7 @@ const b = {
                     if (tech.isIncendiary) {
                         bullet[me].endCycle = simulation.cycle + 60
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 250 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 300 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -3749,7 +3749,7 @@ const b = {
                     // bullet[me].restitution = 0.4
                     bullet[me].frictionAir = 0.006;
                     bullet[me].do = function() {
-                        this.force.y += this.mass * 0.002
+                        this.force.y += this.mass * 0.0022
 
                         //rotates bullet to face current velocity?
                         if (this.speed > 6) {
@@ -3757,7 +3757,7 @@ const b = {
                                 x: Math.cos(this.angle),
                                 y: Math.sin(this.angle)
                             }
-                            const mag = 0.017
+                            const mag = 0.04
                             if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
                                 this.torque += mag
                             } else {
@@ -3801,32 +3801,32 @@ const b = {
                         World.add(engine.world, bullet[me]); //add bullet to world
                     }
                 } else if (tech.isNailShot) {
-                    spread *= 0.4
+                    spread *= 0.65
                     if (m.crouch) {
                         for (let i = 0; i < 17; i++) {
+                            speed = 38 + 15 * Math.random()
                             const dir = m.angle + (Math.random() - 0.5) * spread
                             const pos = {
                                 x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
                                 y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
                             }
-                            speed = 48 + 8 * Math.random()
                             b.nail(pos, {
                                 x: speed * Math.cos(dir),
                                 y: speed * Math.sin(dir)
-                            })
+                            }, 1.4)
                         }
                     } else {
                         for (let i = 0; i < 17; i++) {
+                            speed = 38 + 15 * Math.random()
                             const dir = m.angle + (Math.random() - 0.5) * spread
                             const pos = {
                                 x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
                                 y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
                             }
-                            speed = 48 + 8 * Math.random()
                             b.nail(pos, {
                                 x: speed * Math.cos(dir),
                                 y: speed * Math.sin(dir)
-                            })
+                            }, 1.4)
                         }
                     }
                 } else {
@@ -3991,62 +3991,65 @@ const b = {
                 ctx.strokeStyle = "rgba(0,0,0,0.2)" //"000";
                 ctx.lineWidth = 2
                 ctx.beginPath();
+
                 for (let i = this.waves.length - 1; i > -1; i--) {
                     const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
                     const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
-                    // collisions
-                    //using small angle linear approximation of circle arc, this will not work if the arc gets large   // https://stackoverflow.com/questions/13652518/efficiently-find-points-inside-a-circle-sector
-                    let hits = Matter.Query.ray(mob, v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
-                    for (let j = 0; j < hits.length; j++) {
-                        const who = hits[j].body
-                        //make them shake around
-                        who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
-                        who.force.y += 0.01 * (Math.random() - 0.5) * who.mass
-                        Matter.Body.setVelocity(who, { //friction
-                            x: who.velocity.x * 0.95,
-                            y: who.velocity.y * 0.95
-                        });
-
-                        let vertices = who.vertices;
-                        const vibe = 50 + who.radius * 0.15
-                        ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                        for (let j = 1; j < vertices.length; j++) {
-                            ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
-                        }
-                        ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                        const damage = 1.65 * b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage / Math.sqrt(who.radius) //damage is lower for large radius mobs, since they feel the waves longer
-                        who.locatePlayer();
-                        who.damage(damage);
-                    }
-
-                    hits = Matter.Query.ray(body, v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
-                    for (let j = 0; j < hits.length; j++) {
-                        const who = hits[j].body
-                        //make them shake around
-                        who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
-                        who.force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * who.mass //remove force of gravity
-
-                        let vertices = who.vertices;
-                        const vibe = 25
-                        ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                        for (let j = 1; j < vertices.length; j++) {
-                            ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
-                        }
-                        ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                    }
-                    ctx.stroke(); //draw vibes
-
-                    // ctx.beginPath(); //draw wave
+                    //draw wave
                     ctx.moveTo(v1.x, v1.y)
                     ctx.arc(this.waves[i].position.x, this.waves[i].position.y, this.waves[i].radius, this.waves[i].angle, this.waves[i].angle + this.waves[i].arc);
-                    if (!m.isBodiesAsleep) this.waves[i].radius += tech.waveBeamSpeed * 2 //expand / move
+                    // collisions
+                    //using small angle linear approximation of circle arc, this will not work if the arc gets large   // https://stackoverflow.com/questions/13652518/efficiently-find-points-inside-a-circle-sector
+                    if (!m.isBodiesAsleep) {
+                        let hits = Matter.Query.ray(mob, v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
+                        for (let j = 0; j < hits.length; j++) {
+                            const who = hits[j].body
+                            //make them shake around
+                            who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
+                            who.force.y += 0.01 * (Math.random() - 0.5) * who.mass
+                            Matter.Body.setVelocity(who, { //friction
+                                x: who.velocity.x * 0.95,
+                                y: who.velocity.y * 0.95
+                            });
+
+                            let vertices = who.vertices;
+                            const vibe = 50 + who.radius * 0.15
+                            ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                            for (let j = 1; j < vertices.length; j++) {
+                                ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
+                            }
+                            ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                            const damage = 1.75 * b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage / Math.sqrt(who.radius) //damage is lower for large radius mobs, since they feel the waves longer
+                            who.locatePlayer();
+                            who.damage(damage);
+                        }
+
+                        hits = Matter.Query.ray(body, v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
+                        for (let j = 0; j < hits.length; j++) {
+                            const who = hits[j].body
+                            //make them shake around
+                            who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
+                            who.force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * who.mass //remove force of gravity
+
+                            let vertices = who.vertices;
+                            const vibe = 25
+                            ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                            for (let j = 1; j < vertices.length; j++) {
+                                ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
+                            }
+                            ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                        }
+                        ctx.stroke(); //draw vibes
+
+                        this.waves[i].radius += tech.waveBeamSpeed * 2 //expand / move
+                    }
                     if (this.waves[i].radius > 1800 * tech.isBulletsLastLonger) this.waves.splice(i, 1) //end
                 }
                 ctx.stroke();
             },
             fireLongitudinal() {
-                m.fireCDcycle = m.cycle + Math.floor(8 * b.fireCDscale); // cool down
-                const halfArc = Math.PI / 8 * (m.crouch ? 0.7 : 0.5)
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 3 : 8) * b.fireCDscale); // cool down
+                const halfArc = m.crouch ? 0.0785 : 0.275 //6.28 is a full circle, but these arcs needs to stay small because we are using small angle linear approximation, for collisions
                 this.waves.push({
                     position: {
                         x: m.pos.x + 25 * Math.cos(m.angle),
@@ -4299,7 +4302,7 @@ const b = {
             name: "mine",
             description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
             ammo: 0,
-            ammoPack: 2.7,
+            ammoPack: 2,
             have: false,
             do() {},
             fire() {

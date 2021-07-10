@@ -169,7 +169,7 @@
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
             if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
-            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.22
+            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.35
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
@@ -195,7 +195,7 @@
         },
         tech: [{
                 name: "integrated armament",
-                description: `increase <strong class='color-d'>damage</strong> by <strong>22%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
+                description: `increase <strong class='color-d'>damage</strong> by <strong>35%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2522,7 +2522,7 @@
             },
             {
                 name: "negative entropy",
-                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>22</strong> missing health`,
+                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>26</strong> missing health`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3984,8 +3984,8 @@
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "wave beam") {
                             b.guns[i].chooseFireMethod()
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.125
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.125);
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack / 8
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 8);
                             simulation.updateGunHUD();
                             break
                         }
@@ -4638,7 +4638,7 @@
                 }
             },
             {
-                name: "laser diodes",
+                name: "laser diode",
                 description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>affects laser-gun, laser-bot, and laser-mines</em>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4646,18 +4646,22 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine
+                    return (tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine) && tech.laserDamage === 0.15
                 },
-                requires: "laser",
+                requires: "laser, not free-electron",
                 effect() {
                     tech.isLaserDiode = 0.70; //100%-37%
+                    tech.laserColor = "rgb(0, 11, 255)"
+                    tech.laserColorAlpha = "rgba(0, 11, 255,0.5)"
                 },
                 remove() {
                     tech.isLaserDiode = 1;
+                    tech.laserColor = "#f02"
+                    tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
                 }
             },
             {
-                name: "gamma-ray laser",
+                name: "free-electron laser",
                 description: "increase all <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> by <strong>200%</strong><br>increase all <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> drain by <strong>250%</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4665,9 +4669,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isPulseLaser
+                    return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isPulseLaser && tech.isLaserDiode === 1
                 },
-                requires: "laser, not pulse",
+                requires: "laser, not pulse, diodes",
                 effect() {
                     tech.laserFieldDrain = 0.007 //base is 0.002
                     tech.laserDamage = 0.45; //base is 0.15

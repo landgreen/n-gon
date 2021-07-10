@@ -345,6 +345,14 @@ const simulation = {
         }
     },
     switchGun() {
+        if (tech.isLongitudinal && b.guns[b.activeGun].name === "wave beam") {
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+                if (b.guns[i].name === "wave beam") {
+                    b.guns[i].waves = []; //empty array of wave bullets
+                    break;
+                }
+            }
+        }
         if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
         b.activeGun = b.inventory[b.inventoryGun];
         if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //if switching into foam set charge to 0
@@ -662,6 +670,14 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
+        if (tech.isLongitudinal) {
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+                if (b.guns[i].name === "wave beam") {
+                    b.guns[i].waves = []; //empty array of wave bullets
+                    break;
+                }
+            }
+        }
         if (tech.isMineAmmoBack) {
             let count = 0;
             for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
@@ -676,7 +692,6 @@ const simulation = {
                 }
             }
         }
-
         if (tech.isMutualism && !tech.isEnergyHealth) {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].isMutualismActive) {
@@ -686,7 +701,6 @@ const simulation = {
                 }
             }
         }
-
         if (tech.isEndLevelPowerUp) {
             for (let i = 0; i < powerUp.length; i++) {
                 if (powerUp[i].name === "tech") {
@@ -701,10 +715,7 @@ const simulation = {
             }
         }
         powerUps.totalPowerUps = powerUp.length
-
-        let holdTarget; //if player is holding something this remembers it before it gets deleted
-        if (m.holdingTarget) holdTarget = m.holdingTarget;
-
+        let holdTarget = (m.holdingTarget) ? m.holdingTarget : undefined //if player is holding something this remembers it before it gets deleted
         tech.deathSpawnsFromBoss = 0;
         simulation.fallHeight = 3000;
         m.fireCDcycle = 0

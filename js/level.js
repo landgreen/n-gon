@@ -15,8 +15,9 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("wave beam")
-            // tech.giveTech("pressure wave")
+            // b.giveGuns("laser")
+            // tech.giveTech("laser diode")
+            // tech.giveTech("free-electron laser")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // tech.giveTech("decoherence")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -53,7 +54,7 @@ const level = {
             // lore.techCount = 6
 
             // simulation.isCheating = false //true;
-            // localSettings.loreCount = 2; //this sets what conversation is heard
+            // localSettings.loreCount = 0; //this sets what conversation is heard
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
@@ -90,7 +91,7 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            const len = Math.ceil((m.maxHealth - m.health) / 0.22)
+            const len = Math.ceil((m.maxHealth - m.health) / 0.26)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isMACHO) spawn.MACHO()
@@ -110,24 +111,24 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.92; //damage done by player decreases each level
+            b.dmgScale *= 0.91; //damage done by player decreases each level
             if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.385 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.92; //damage done by player decreases each level
+            b.dmgScale /= 0.91; //damage done by player decreases each level
             if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale < 5) simulation.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.385 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
@@ -2821,9 +2822,9 @@ const level = {
             powerUps.spawnBossPowerUp(-125, -1760);
         } else {
             if (Math.random() < 0.5) {
-                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss"]);
+                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "grenadierBoss"]);
             } else {
-                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss"]);
+                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "grenadierBoss"]);
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
@@ -3032,7 +3033,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "shieldingBoss"]);
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss"]);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(7725, 2275)
 
@@ -6362,6 +6363,7 @@ const level = {
         level.exit.x = 3900;
         level.exit.y = 1060;
         spawn.mapRect(level.exit.x, level.exit.y + 30, 100, 20)
+        document.body.style.backgroundColor = "#dcdcde";
 
         var nextBlockSpawn = simulation.cycle + Math.floor(Math.random() * 60 + 30)
         const door = level.door(475, 900, 50, 200, 201)

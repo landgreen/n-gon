@@ -258,7 +258,7 @@ const spawn = {
         me.memory = Infinity;
         me.hasRunDeathScript = false
         me.locatePlayer();
-        const density = 0.23
+        const density = 0.2
         Matter.Body.setDensity(me, density); //extra dense //normal is 0.001 //makes effective life much larger
         // spawn.shield(me, x, y, 1);
         me.onDeath = function() {

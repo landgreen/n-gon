@@ -1,21 +1,36 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-pressure wave balance - slightly more ammo
-gamma-ray laser does 200% damage and 250% more drain  (was 150% damage, 200% drain)
-gamma ray now doesn't lock out other laser tech
-hidden variable now gives 15, not 30 heals
+"gamma-ray laser" renamed "free-electron laser" to make more scientific sense
+  since gamma rays would go right through walls
+laser diode now makes lasers blue
+free-electron laser can no longer work with laser diode
+
+pressure wave has a bit more damage
+  crouch mode works different (much higher fire rate, low arc)
+
+integrated armament gives 35% dmg (was 22%)
+  but I fixed a bug where it gave an extra 33% ammo
+
+mine gun gets 25% less ammo
+all mines do 30% more damage
+
+trying to make shotgun better at close range and worse at distance
+  shotgun slug is much slower, but does 60% more damage
+  nail shot has a 20% wider spread, and is 20% slower, but does 20% more damage
+
+finalBoss has 15% less health
+
+to balance all the buffs
+  ammo power ups give 15% less ammo
+  damage done by mobs now scales up a bit faster each level
+  damage done by you now scales down a bit faster each level
 
 ******************************************************** TODO ********************************************************
 
-wave arcs
-  do something similar to laser
-    find intersection of the small angle approximation of the arc and all mobs
-  tech: this.arc: Math.PI/8   // increase or decrease arc
-  wipe arcs on next level
+make the player get a buff after using wormhole
+  while energy lasts: drain energy and give damage buff
 
-try crosshair invert colors 
-
-tech wave gun - no bullets just draw circle arcs that do damage to mobs near the circle arc
+tech pressure wave - reduce range, but make bullets circles, not arcs
 
 tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
   draw 1,2,3 levels of the field based on energy?
@@ -182,6 +197,9 @@ n-gon outreach ideas
   twitch - lets play
 
 ******************************************************** BUGS ********************************************************
+
+door to exit in vats does nothing
+  did I do that?
 
 death while in power up selection menu doesn't reset properly
   of course it's not possible to die in this menu unless you use testing and shift+X

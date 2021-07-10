@@ -139,17 +139,17 @@ const lore = {
     sentence: 0, //what part of the conversation is playing
     conversation: [
         [ //first time they meet, and testing gets unlocked
-            () => { setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.") }, 5000); },
+            () => {
+                lore.unlockTesting();
+                setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.") }, 5000);
+            },
             () => { lore.anand.text("Wow. Just a platform.") },
             () => { lore.miriam.text("And that thing...") },
             () => { lore.anand.text("Weird") },
             () => { lore.anand.text("Maybe it's trapped.") },
             () => { lore.miriam.text("Looks like testing mode is locked.") },
             () => { lore.miriam.text("I'll unlock it with the console command.") },
-            () => {
-                lore.unlockTesting();
-                setTimeout(() => { lore.miriam.text("Hey little bot! Just press 'T' to enter testing mode and 'U' to go to the next level.") }, 1000);
-            },
+            () => { setTimeout(() => { lore.miriam.text("Hey little bot! Just press 'T' to enter testing mode and 'U' to go to the next level.") }, 1000); },
             () => { lore.anand.text("It can't process what you're saying.") },
             () => { lore.miriam.text("ha hahahaha. I know, but it does seem to be getting smarter.") },
             () => {

@@ -610,6 +610,8 @@ summary {
 
 .color-laser {
     color: #f02;
+    /* color: #000bff; */
+    /* color: #83f; */
     /* text-shadow: 0px 0px 2px rgba(255, 0, 119, 0.3); */
     /* text-shadow: 0px 0px 1.5px rgba(0, 0, 0, 1), 0px 0px 5px rgba(255, 0, 0, 1); */
     font-weight: 100;
