@@ -169,7 +169,7 @@
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
             if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
-            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.35
+            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.3
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
@@ -195,7 +195,7 @@
         },
         tech: [{
                 name: "integrated armament",
-                description: `increase <strong class='color-d'>damage</strong> by <strong>35%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
+                description: `increase <strong class='color-d'>damage</strong> by <strong>30%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -360,7 +360,7 @@
             },
             {
                 name: "logistics",
-                description: "<strong class='color-g'>ammo</strong> power ups give <strong>200%</strong> <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your current <strong class='color-g'>gun</strong>",
+                description: "<strong class='color-g'>ammo</strong> power ups give <strong>80%</strong> more <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your current <strong class='color-g'>gun</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,

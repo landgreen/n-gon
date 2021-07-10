@@ -1,29 +1,5 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-"gamma-ray laser" renamed "free-electron laser" to make more scientific sense
-  since gamma rays would go right through walls
-laser diode now makes lasers blue
-free-electron laser can no longer work with laser diode
-
-pressure wave has a bit more damage
-  crouch mode works different (much higher fire rate, low arc)
-
-integrated armament gives 35% dmg (was 22%)
-  but I fixed a bug where it gave an extra 33% ammo
-
-mine gun gets 25% less ammo
-all mines do 30% more damage
-
-trying to make shotgun better at close range and worse at distance
-  shotgun slug is much slower, but does 60% more damage
-  nail shot has a 20% wider spread, and is 20% slower, but does 20% more damage
-
-finalBoss has 15% less health
-
-to balance all the buffs
-  ammo power ups give 15% less ammo
-  damage done by mobs now scales up a bit faster each level
-  damage done by you now scales down a bit faster each level
 
 ******************************************************** TODO ********************************************************
 
