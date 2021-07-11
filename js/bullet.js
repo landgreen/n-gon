@@ -225,8 +225,9 @@ const b = {
     },
     fireCDscale: 1,
     setFireCD() {
-        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage / tech.fastTime
-        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.86, b.inventory.length)
+        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage
+        if (tech.isFastTime) b.fireCDscale *= 0.5
+        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.85, b.inventory.length)
         if (tech.isFireMoveLock) b.fireCDscale *= 0.5
     },
     fireAttributes(dir, rotate = true) {
@@ -1517,7 +1518,7 @@ const b = {
                 });
                 if (tech.isLaserPush) { //push mobs away
                     const index = path.length - 1
-                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
+                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.0035 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                 }
             }
@@ -3443,7 +3444,7 @@ const b = {
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
                             mobs.statusStun(q[i], 180)
-                            const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3 : 1) * (tech.isCrit ? 4 : 1)
+                            const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3.5 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
                             q[i].foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
@@ -3711,13 +3712,16 @@ const b = {
                     knock = 0.1
                 }
 
-                if (tech.isShotgunRecoil) {
+                if (tech.isShotgunReversed) {
+                    player.force.x += 2 * knock * Math.cos(m.angle)
+                    player.force.y += 2 * knock * Math.sin(m.angle) - 6 * player.mass * simulation.g
+                } else if (tech.isShotgunRecoil) {
                     m.fireCDcycle -= 0.66 * (45 * b.fireCDscale)
                     player.force.x -= 2 * knock * Math.cos(m.angle)
-                    player.force.y -= 2 * knock * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                    player.force.y -= 2 * knock * Math.sin(m.angle)
                 } else {
                     player.force.x -= knock * Math.cos(m.angle)
-                    player.force.y -= knock * Math.sin(m.angle) * 0.3 //reduce knock back in vertical direction to stop super jumps
+                    player.force.y -= knock * Math.sin(m.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps
                 }
 
                 b.muzzleFlash(35);
@@ -3727,7 +3731,7 @@ const b = {
                     const dir = m.angle + 0.02 * (Math.random() - 0.5)
                     bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 60, 27, b.fireAttributes(dir));
 
-                    Matter.Body.setDensity(bullet[me], 0.007);
+                    Matter.Body.setDensity(bullet[me], 0.007 * (tech.isShotgunReversed ? 1.6 : 1));
                     World.add(engine.world, bullet[me]); //add bullet to world
                     const SPEED = (m.crouch ? 45 : 35) + Math.random() * 6
                     Matter.Body.setVelocity(bullet[me], {
@@ -3792,7 +3796,7 @@ const b = {
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 135 + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 135 * (tech.isShotgunReversed ? 1.6 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -3802,6 +3806,7 @@ const b = {
                     }
                 } else if (tech.isNailShot) {
                     spread *= 0.65
+                    const dmg = 1.4 * (tech.isShotgunReversed ? 1.6 : 1)
                     if (m.crouch) {
                         for (let i = 0; i < 17; i++) {
                             speed = 38 + 15 * Math.random()
@@ -3813,7 +3818,7 @@ const b = {
                             b.nail(pos, {
                                 x: speed * Math.cos(dir),
                                 y: speed * Math.sin(dir)
-                            }, 1.4)
+                            }, dmg)
                         }
                     } else {
                         for (let i = 0; i < 17; i++) {
@@ -3826,7 +3831,7 @@ const b = {
                             b.nail(pos, {
                                 x: speed * Math.cos(dir),
                                 y: speed * Math.sin(dir)
-                            }, 1.4)
+                            }, dmg)
                         }
                     }
                 } else {
@@ -3843,6 +3848,7 @@ const b = {
                         });
                         bullet[me].endCycle = simulation.cycle + 40
                         bullet[me].minDmgSpeed = 15
+                        if (tech.isShotgunReversed) Matter.Body.setDensity(bullet[me], 0.0016)
                         // bullet[me].restitution = 0.4
                         bullet[me].frictionAir = 0.034;
                         bullet[me].do = function() {
@@ -3922,38 +3928,45 @@ const b = {
             fireQueue() {
                 const SPEED = m.crouch ? 43 : 36
                 const dir = m.angle
-                const x = m.pos.x + 30 * Math.cos(m.angle)
-                const y = m.pos.y + 30 * Math.sin(m.angle)
+                const x = m.pos.x
+                const y = m.pos.y
                 const delay = Math.floor((m.crouch ? 18 : 12) * b.fireCDscale)
                 m.fireCDcycle = m.cycle + delay; // cool down
 
-                for (let i = 0; i < tech.superBallNumber; i++) {
-                    setTimeout(() => {
-                        if (!simulation.paused) {
-                            const me = bullet.length;
-                            bullet[me] = Bodies.polygon(x, y, 12, 11 * tech.bulletSize, b.fireAttributes(dir, false));
-                            World.add(engine.world, bullet[me]); //add bullet to world
-                            Matter.Body.setVelocity(bullet[me], {
-                                x: SPEED * Math.cos(dir),
-                                y: SPEED * Math.sin(dir)
-                            });
-                            bullet[me].endCycle = simulation.cycle + Math.floor(330 * tech.isBulletsLastLonger);
-                            bullet[me].minDmgSpeed = 0;
-                            bullet[me].restitution = 0.99;
-                            bullet[me].friction = 0;
-                            bullet[me].do = function() {
-                                this.force.y += this.mass * 0.001;
-                            };
-                            bullet[me].beforeDmg = function() {
-                                if (tech.isIncendiary) {
-                                    b.explosion(this.position, this.mass * 350 + 60 * Math.random()); //makes bullet do explosive damage at end
-                                    this.endCycle = 0
-                                }
-                            };
-                            m.fireCDcycle = m.cycle + delay; // cool down
+                const fireBall = () => {
+                    const me = bullet.length;
+                    bullet[me] = Bodies.polygon(x, y, 12, 11 * tech.bulletSize, b.fireAttributes(dir, false));
+                    World.add(engine.world, bullet[me]); //add bullet to world
+                    Matter.Body.setVelocity(bullet[me], {
+                        x: SPEED * Math.cos(dir),
+                        y: SPEED * Math.sin(dir)
+                    });
+                    bullet[me].endCycle = simulation.cycle + Math.floor(330 * tech.isBulletsLastLonger);
+                    bullet[me].minDmgSpeed = 0;
+                    bullet[me].restitution = 0.99;
+                    bullet[me].friction = 0;
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.001;
+                    };
+                    bullet[me].beforeDmg = function() {
+                        if (tech.isIncendiary) {
+                            b.explosion(this.position, this.mass * 350 + 60 * Math.random()); //makes bullet do explosive damage at end
+                            this.endCycle = 0
                         }
-                    }, 50 * i + 100);
+                    };
+                    m.fireCDcycle = m.cycle + delay; // cool down
                 }
+
+                function cycle() {
+                    if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                        count++
+                        if (count % 2) fireBall()
+                        if (count < tech.superBallNumber * 2 && m.alive) requestAnimationFrame(cycle);
+                    }
+                }
+                let count = 0
+                requestAnimationFrame(cycle);
+                // fireBall();
             },
             chooseFireMethod() { //set in simulation.startGame
                 if (tech.oneSuperBall) {
@@ -4702,7 +4715,7 @@ const b = {
                         });
 
                         //knock back
-                        const KNOCK = m.crouch ? 0.08 : 0.34
+                        const KNOCK = (m.crouch ? 0.08 : 0.34) * (tech.isShotgunReversed ? -2 : 1)
                         player.force.x -= KNOCK * Math.cos(m.angle)
                         player.force.y -= KNOCK * Math.sin(m.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
 
@@ -4714,9 +4727,6 @@ const b = {
                     const me = bullet.length;
                     bullet[me] = Bodies.rectangle(0, 0, 0.015, 0.0015, {
                         density: 0.008, //0.001 is normal
-                        //frictionAir: 0.01,			//restitution: 0,
-                        // angle: 0,
-                        // friction: 0.5,
                         restitution: 0,
                         frictionAir: 0,
                         dmg: 0, //damage done in addition to the damage from momentum
@@ -4738,7 +4748,6 @@ const b = {
                                     x: -0.5 * this.velocity.x,
                                     y: -0.5 * this.velocity.y
                                 });
-                                // Matter.Body.setDensity(this, 0.001);
                             }
                             if (tech.fragments && this.speed > 10) {
                                 b.targetedNail(this.position, tech.fragments * 20)
@@ -4781,7 +4790,7 @@ const b = {
                             });
 
                             //knock back
-                            const KNOCK = ((m.crouch) ? 0.1 : 0.5) * this.charge * this.charge
+                            const KNOCK = ((m.crouch) ? 0.1 : 0.5) * this.charge * this.charge * (tech.isShotgunReversed ? -2 : 1)
                             player.force.x -= KNOCK * Math.cos(m.angle)
                             player.force.y -= KNOCK * Math.sin(m.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
                             pushAway(1200 * this.charge)

@@ -151,6 +151,7 @@
         },
         damageFromTech() {
             let dmg = 1 //m.fieldDamage
+            if (tech.isCloakingDamage) dmg *= 1.35
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 2 : 0.66
@@ -160,23 +161,23 @@
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
             if (tech.isMaxEnergyTech) dmg *= 1.5
             if (tech.isEnergyNoAmmo) dmg *= 1.6
-            if (tech.isDamageForGuns) dmg *= 1 + 0.12 * b.inventory.length
+            if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
             if (tech.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - m.health)
             if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
             if (tech.isEnergyLoss) dmg *= 1.55;
             if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
             if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
-            if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.0038
+            if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
             if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.3
-            if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 1.9
-            if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.43, player.speed * 0.015)
+            if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
+            if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.022)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.05 + tech.duplicateChance + m.duplicateChance
+            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.05 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -247,15 +248,15 @@
             },
             {
                 name: "arsenal",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>12%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>13%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return b.inventory.length > 1
+                    return b.inventory.length > 0
                 },
-                requires: "at least 2 guns",
+                requires: "at least 1 gun",
                 effect() {
                     tech.isDamageForGuns = true;
                 },
@@ -265,15 +266,15 @@
             },
             {
                 name: "active cooling",
-                description: "<strong>14%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "<strong>15%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return b.inventory.length > 1
+                    return b.inventory.length > 0
                 },
-                requires: "at least 2 guns",
+                requires: "at least 1 gun",
                 effect() {
                     tech.isFireRateForGuns = true;
                     b.setFireCD();
@@ -517,15 +518,15 @@
             },
             {
                 name: "Newton's 1st law",
-                description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>60%</strong>",
+                description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>66%</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return m.Fx > 0.016 && !tech.isEnergyHealth
+                    return !tech.isEnergyHealth
                 },
-                requires: "speed increase, not mass-energy equivalence",
+                requires: "not mass-energy equivalence",
                 effect() {
                     tech.isSpeedHarm = true
                 },
@@ -535,15 +536,15 @@
             },
             {
                 name: "Newton's 2nd law",
-                description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>43%</strong>",
+                description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>66%</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return m.Fx > 0.016
+                    return true
                 },
-                requires: "speed increase",
+                requires: "",
                 effect() {
                     tech.isSpeedDamage = true
                 },
@@ -646,15 +647,15 @@
             },
             {
                 name: "microstates",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isBulletsLastLonger > 1
+                    return true
                 },
-                requires: "anti-shear topology",
+                requires: "",
                 effect() {
                     tech.isDamageFromBulletCount = true
                 },
@@ -964,15 +965,15 @@
             },
             {
                 name: "decorrelation",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong> after not <strong>activating</strong><br>your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>70%</strong> after not <strong>activating</strong><br>your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" && (tech.blockingIce !== 0 || tech.blockDmg !== 0)) || b.totalBots() > 1 || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && !tech.isEnergyHealth
+                    return !tech.isEnergyHealth //((m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" && (tech.blockingIce !== 0 || tech.blockDmg !== 0)) || b.totalBots() > 1 || tech.haveGunCheck("mine") || tech.haveGunCheck("spores") || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing") && 
                 },
-                requires: "drones, spores, mines, or bots, ",
+                requires: "not mass-energy",
                 effect() {
                     tech.isNoFireDefense = true
                 },
@@ -982,7 +983,7 @@
             },
             {
                 name: "anticorrelation",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>90%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1000,7 +1001,7 @@
             },
             {
                 name: "scrap bots",
-                description: "<strong>33%</strong> chance after killing a mob to build<br>a scrap <strong class='color-bot'>bot</strong> that operates for <strong>10</strong> seconds",
+                description: "<strong>33%</strong> chance after killing a mob to build<br>a scrap <strong class='color-bot'>bot</strong> that operates for <strong>14</strong> seconds",
                 maxCount: 3,
                 count: 0,
                 frequency: 1,
@@ -1018,7 +1019,7 @@
             },
             {
                 name: "scrap refit",
-                description: "killing a mob resets your functional scrap <strong class='color-bot'>bots</strong><br>to <strong>10</strong> seconds of operation",
+                description: "killing a mob resets your functional scrap <strong class='color-bot'>bots</strong><br>to <strong>14</strong> seconds of operation",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -1257,7 +1258,7 @@
             },
             {
                 name: "orbital-bot upgrade",
-                description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong> and <strong>radius</strong> by <strong>40%</strong>",
+                description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>250%</strong> and <strong>radius</strong> by <strong>40%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2129,7 +2130,7 @@
             },
             {
                 name: "inductive coupling",
-                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 3 <strong>max</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
+                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 3 <strong>maximum</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2354,7 +2355,7 @@
             },
             {
                 name: "dormancy",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:93%;'>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> else decrease it by <strong>33%</strong></span>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:90%;'>increase <strong class='color-d'>damage</strong> by <strong>99%</strong> else decrease it by <strong>33%</strong></span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2852,15 +2853,15 @@
             },
             {
                 name: "abiogenesis",
-                description: "at the start of a level spawn a 2nd <strong>boss</strong> for<br><strong>5</strong> <strong class='color-r'>research</strong> or <strong>+49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+                description: "at the start of a level spawn a 2nd <strong>boss</strong> for<br><strong>4</strong> <strong class='color-r'>research</strong> or <strong>+49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 4) && !tech.isDuplicateBoss
+                    return (build.isExperimentSelection || powerUps.research.count > 3) && !tech.isDuplicateBoss
                 },
-                requires: "at least 5 research and not parthenogenesis",
+                requires: "at least 4 research and not parthenogenesis",
                 effect() {
                     tech.isResearchBoss = true; //abiogenesis
                 },
@@ -3754,21 +3755,40 @@
             },
             {
                 name: "Newton's 3rd law",
-                description: "<strong>shotgun</strong> <strong>recoil</strong> is greatly increased<br>and has a <strong>66%</strong> decreased <strong><em>delay</em></strong> after firing",
+                description: "<strong>shotgun</strong> <strong>recoil</strong> is increased<br>decrease <strong>shotgun</strong> <strong><em>delay</em></strong> after firing by <strong>66%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("shotgun")
+                    return tech.haveGunCheck("shotgun") && !tech.isShotgunReversed
                 },
-                requires: "shotgun",
+                requires: "shotgun, not Noether violation",
                 effect() {
                     tech.isShotgunRecoil = true;
                 },
                 remove() {
                     tech.isShotgunRecoil = false;
+                }
+            },
+            {
+                name: "Noether violation",
+                description: "increase <strong>shotgun</strong> and <strong>rail gun</strong> <strong class='color-d'>damage</strong> <strong>60%</strong><br>their <strong>recoil</strong> is increased and <strong>reversed</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (tech.haveGunCheck("shotgun") || tech.haveGunCheck("rail gun")) && !tech.isShotgunRecoil
+                },
+                requires: "shotgun or rail gun, not Newton's 3rd law",
+                effect() {
+                    tech.isShotgunReversed = true;
+                },
+                remove() {
+                    tech.isShotgunReversed = false;
                 }
             },
             {
@@ -4887,7 +4907,30 @@
             //************************************************** field
             //************************************************** tech
             //************************************************** 
-
+            {
+                name: "zero point energy",
+                description: "use <strong>2</strong> <strong class='color-r'>research</strong> to<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
+                },
+                requires: "standing wave harmonics or pilot wave",
+                effect() {
+                    tech.harmonicEnergy = 0.74
+                    m.setMaxEnergy()
+                    for (let i = 0; i < 2; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                },
+                remove() {
+                    tech.harmonicEnergy = 0;
+                    m.setMaxEnergy()
+                }
+            },
             {
                 name: "spherical harmonics",
                 description: "<strong>standing wave</strong> oscillates in a 3rd dimension<br>increasing <strong>deflecting</strong> efficiency by <strong>40%</strong>",
@@ -5006,6 +5049,104 @@
                 },
                 remove() {
                     tech.isPerfectBrake = false;
+                }
+            },
+            {
+                name: "tessellation",
+                description: "use <strong>4</strong> <strong class='color-r'>research</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && (build.isExperimentSelection || powerUps.research.count > 3)
+                },
+                requires: "perfect diamagnetism or negative mass field",
+                effect() {
+                    tech.isFieldHarmReduction = true
+                    for (let i = 0; i < 4; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                },
+                remove() {
+                    tech.isFieldHarmReduction = false
+                }
+            },
+            {
+                name: "degenerate matter",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> while your <strong class='color-f'>field</strong> is active",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && !tech.isEnergyHealth
+                },
+                requires: "field: perfect, negative mass, pilot wave, plasma, not mass-energy",
+                effect() {
+                    tech.isHarmReduce = true
+                },
+                remove() {
+                    tech.isHarmReduce = false;
+                }
+            },
+            {
+                name: "annihilation",
+                description: "<strong>touching</strong> normal mobs <strong>annihilates</strong> them<br>but drains <strong>33%</strong> of your maximum <strong class='color-f'>energy</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
+                },
+                requires: "negative mass field",
+                effect() {
+                    tech.isAnnihilation = true
+                },
+                remove() {
+                    tech.isAnnihilation = false;
+                }
+            },
+            {
+                name: "inertial mass",
+                description: "<strong>negative mass field</strong> is larger and <strong>faster</strong><br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
+                },
+                requires: "negative mass field",
+                effect() {
+                    tech.isFlyFaster = true
+                },
+                remove() {
+                    tech.isFlyFaster = false;
+                }
+            },
+            {
+                name: "Bose Einstein condensate",
+                description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
+                },
+                requires: "pilot wave, negative mass field, time dilation",
+                effect() {
+                    tech.isFreezeMobs = true
+                },
+                remove() {
+                    tech.isFreezeMobs = false
                 }
             },
             {
@@ -5203,82 +5344,6 @@
                     tech.isMassEnergy = false;
                 }
             },
-            {
-                name: "degenerate matter",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> while your <strong class='color-f'>field</strong> is active",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && !tech.isEnergyHealth
-                },
-                requires: "field: perfect, negative mass, pilot wave, plasma, not mass-energy",
-                effect() {
-                    tech.isHarmReduce = true
-                },
-                remove() {
-                    tech.isHarmReduce = false;
-                }
-            },
-            {
-                name: "annihilation",
-                description: "<strong>touching</strong> normal mobs <strong>annihilates</strong> them<br>but drains <strong>33%</strong> of your maximum <strong class='color-f'>energy</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
-                },
-                requires: "negative mass field",
-                effect() {
-                    tech.isAnnihilation = true
-                },
-                remove() {
-                    tech.isAnnihilation = false;
-                }
-            },
-            {
-                name: "inertial mass",
-                description: "<strong>negative mass field</strong> is larger and <strong>faster</strong><br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "negative mass field"
-                },
-                requires: "negative mass field",
-                effect() {
-                    tech.isFlyFaster = true
-                },
-                remove() {
-                    tech.isFlyFaster = false;
-                }
-            },
-            {
-                name: "Bose Einstein condensate",
-                description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass field" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
-                },
-                requires: "pilot wave, negative mass field, time dilation",
-                effect() {
-                    tech.isFreezeMobs = true
-                },
-                remove() {
-                    tech.isFreezeMobs = false
-                }
-            },
             // {
             //     name: "thermal reservoir",
             //     description: "increase your <strong class='color-plasma'>plasma</strong> <strong class='color-d'>damage</strong> by <strong>100%</strong><br><strong class='color-plasma'>plasma</strong> temporarily lowers health not <strong class='color-f'>energy</strong>",
@@ -5299,7 +5364,7 @@
             // },
             {
                 name: "plasma-bot",
-                description: "a <strong class='color-bot'>bot</strong> uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong><br>that <strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs",
+                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5307,12 +5372,15 @@
                 isBot: true,
                 isBotTech: true,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && (build.isExperimentSelection || powerUps.research.count > 0)
                 },
                 requires: "plasma torch",
                 effect() {
                     tech.plasmaBotCount++;
                     b.plasmaBot();
+                    for (let i = 0; i < 1; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
                 },
                 remove() {
                     tech.plasmaBotCount = 0;
@@ -5400,25 +5468,26 @@
             },
             {
                 name: "Lorentz transformation",
-                description: "permanently increase your relative time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>40%</strong> faster",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to increase your time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>50%</strong> faster",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation"
+                    return m.fieldUpgrades[m.fieldMode].name === "time dilation" && (build.isExperimentSelection || powerUps.research.count > 2)
                 },
                 requires: "time dilation",
                 effect() {
-                    tech.fastTime = 1.40;
-                    tech.fastTimeJump = 1.11;
+                    tech.isFastTime = true
                     m.setMovement();
                     b.setFireCD();
+                    for (let i = 0; i < 3; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
                 },
                 remove() {
-                    tech.fastTime = 1;
-                    tech.fastTimeJump = 1;
+                    tech.isFastTime = false
                     m.setMovement();
                     b.setFireCD();
                 }
@@ -5482,24 +5551,28 @@
                     tech.isCloakStun = false;
                 }
             },
-            // {
-            //     name: "combinatorial optimization",
-            //     description: "increase <strong class='color-d'>damage</strong> by <strong>66%</strong><br>if a mob has <strong>not died</strong> in the last <strong>5 seconds</strong>",
-            //     isFieldTech: true,
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     allowed() {
-            //         return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
-            //     },
-            //     requires: "metamaterial cloaking or pilot wave",
-            //     effect() {
-            //         tech.isSneakAttack = true;
-            //     },
-            //     remove() {
-            //         tech.isSneakAttack = false;
-            //     }
-            // },
+            {
+                name: "dynamical systems",
+                description: "use <strong>1</strong> <strong class='color-r'>research</strong><br>increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 0)
+                },
+                requires: "metamaterial cloaking or pilot wave",
+                effect() {
+                    tech.isCloakingDamage = true
+                    for (let i = 0; i < 1; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                },
+                remove() {
+                    tech.isCloakingDamage = false
+                }
+            },
             {
                 name: "discrete optimization",
                 description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
@@ -5576,6 +5649,30 @@
                 },
                 remove() {
                     tech.isWormholeDamage = false
+                }
+            },
+            {
+                name: "virtual particles",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to exploit your <strong>wormhole</strong> for<br><strong>19%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 2)
+                },
+                requires: "wormhole",
+                effect() {
+                    tech.wormDuplicate = 0.19
+                    powerUps.setDo(); //needed after adjusting duplication chance
+                    for (let i = 0; i < 3; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                },
+                remove() {
+                    tech.wormDuplicate = 0
+                    powerUps.setDo(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -7208,7 +7305,6 @@
         slowFire: null,
         fastTime: null,
         squirrelJump: null,
-        fastTimeJump: null,
         isFastRadiation: null,
         isExtraMaxEnergy: null,
         isAmmoForGun: null,
@@ -7365,5 +7461,11 @@
         junkResearchNumber: null,
         laserColor: null,
         laserColorAlpha: null,
-        isLongitudinal: null
+        isLongitudinal: null,
+        isShotgunReversed: null,
+        wormDuplicate: null,
+        isCloakingDamage: null,
+        harmonicEnergy: null,
+        isFieldHarmReduction: null,
+        isFastTime: null
     }

@@ -15,8 +15,10 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("laser")
-            // tech.giveTech("laser diode")
+            // b.giveGuns("shotgun")
+            // tech.isShotgunRecoil = true
+            // tech.isShotgunReversed = true
+            // tech.giveTech("supertemporal")
             // tech.giveTech("free-electron laser")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // tech.giveTech("decoherence")
@@ -2265,7 +2267,7 @@ const level = {
         // spawn.laser(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
-        spawn.nodeGroup(1200, -500, "grenadier")
+        // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.snakeBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)
@@ -2616,10 +2618,9 @@ const level = {
 
         // localSettings.levelsClearedLastGame = 20
         if (level.levelsCleared === 0) {
-            // powerUps.spawn(-100, 0, "heal", false); //starting gun
-            powerUps.spawn(1900, -150, "heal", false); //starting gun
-            powerUps.spawn(2050, -150, "heal", false); //starting gun
-            // powerUps.spawn(2050, -150, "field", false); //starting gun
+            powerUps.spawn(2500, -50, "research", false);
+            powerUps.spawn(1900, -50, "heal", false);
+            powerUps.spawn(2050, -50, "heal", false);
             if (localSettings.levelsClearedLastGame < 6) {
                 if (!simulation.isCheating && !m.isShipMode) {
                     spawn.wireFoot();
@@ -2632,7 +2633,7 @@ const level = {
                 simulation.trails()
             }
         }
-        powerUps.spawnStartingPowerUps(2300, -150);
+        powerUps.spawnStartingPowerUps(2300, -50);
     },
     testChamber() {
         level.setPosToSpawn(0, -50); //lower start

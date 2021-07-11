@@ -1074,12 +1074,12 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 840 //14 seconds
                         }
                     }
                     if (Math.random() < tech.botSpawner) {
                         b.randomBot(this.position, false)
-                        bullet[bullet.length - 1].endCycle = simulation.cycle + 660 //10 seconds and 1 extra second for fun
+                        bullet[bullet.length - 1].endCycle = simulation.cycle + 840 //14 seconds
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                 } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {

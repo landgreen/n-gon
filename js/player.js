@@ -75,8 +75,8 @@ const m = {
     Fx: 0.016, //run Force on ground //
     jumpForce: 0.42,
     setMovement() {
-        m.Fx = 0.016 * tech.squirrelFx * tech.fastTime;
-        m.jumpForce = 0.42 * tech.squirrelJump * tech.fastTimeJump;
+        m.Fx = 0.016 * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1);
+        m.jumpForce = 0.42 * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1)
     },
     FxAir: 0.016, // 0.4/5/5  run Force in Air
     yOff: 70,
@@ -490,19 +490,20 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
+        if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
         if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.33 : 1.15
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
-        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.019, 0.60)
+        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.022, 0.66)
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
         if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
-        if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.34
+        if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34
         if (tech.isTurret && m.crouch) dmg *= 0.55;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
@@ -512,7 +513,7 @@ const m = {
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
-            const immunityCycle = m.cycle + 60
+            const immunityCycle = m.cycle + 90
             if (m.immuneCycle < immunityCycle) m.immuneCycle = immunityCycle; //player is immune to damage until after grenades might explode...
 
             for (let i = 1, len = Math.floor(2 + steps / 40); i < len; i++) {
@@ -605,7 +606,7 @@ const m = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         m.defaultFPSCycle = m.cycle
         if (tech.isRewindBot) {
-            const len = steps * 0.052 * tech.isRewindBot
+            const len = steps * 0.07 * tech.isRewindBot
             const botStep = Math.floor(steps / len)
             for (let i = 0; i < len; i++) {
                 const where = m.history[Math.abs(m.cycle - i * botStep) % 600].position //spread out spawn locations along past history
@@ -975,7 +976,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -1656,60 +1657,6 @@ const m = {
             }
         },
         {
-            name: "nano-scale manufacturing",
-            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
-            effect: () => {
-                // m.fieldMeterColor = "#0c5"
-                // m.eyeFillColor = m.fieldMeterColor
-                m.hold = function() {
-                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
-                        if (tech.isSporeField) {
-                            for (let i = 0, len = Math.random() * 20; i < len; i++) {
-                                m.energy -= 0.08
-                                if (m.energy > 0) {
-                                    b.spore(m.pos)
-                                } else {
-                                    m.energy = 0.001
-                                    break;
-                                }
-                            }
-                        } else if (tech.isMissileField) {
-                            m.energy -= 0.3;
-                            b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
-                        } else if (tech.isIceField) {
-                            m.energy -= 0.04;
-                            b.iceIX(1)
-                        } else if (tech.isDroneRadioactive) {
-                            m.energy -= 1.5; //almost 5x drain of normal drones
-                            b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
-                        } else {
-                            m.energy -= 0.45 * tech.droneEnergyReduction;
-                            b.drone()
-                        }
-                    }
-
-                    if (m.isHolding) {
-                        m.drawHold(m.holdingTarget);
-                        m.holding();
-                        m.throwBlock();
-                    } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
-                        m.grabPowerUp();
-                        m.lookForPickUp();
-                        if (m.energy > 0.05) {
-                            m.drawField();
-                            m.pushMobsFacing();
-                        }
-                    } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                        m.pickUp();
-                    } else {
-                        m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                    }
-                    m.energy += m.fieldRegen;
-                    m.drawFieldMeter()
-                }
-            }
-        },
-        {
             name: "negative mass field",
             description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br><strong class='color-block'>blocks</strong> held by the field have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
@@ -1856,6 +1803,60 @@ const m = {
                         this.fieldDrawRadius = 0
                     }
                     m.drawFieldMeter("rgba(0,0,0,0.2)")
+                }
+            }
+        },
+        {
+            name: "nano-scale manufacturing",
+            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            effect: () => {
+                // m.fieldMeterColor = "#0c5"
+                // m.eyeFillColor = m.fieldMeterColor
+                m.hold = function() {
+                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
+                        if (tech.isSporeField) {
+                            for (let i = 0, len = Math.random() * 20; i < len; i++) {
+                                m.energy -= 0.08
+                                if (m.energy > 0) {
+                                    b.spore(m.pos)
+                                } else {
+                                    m.energy = 0.001
+                                    break;
+                                }
+                            }
+                        } else if (tech.isMissileField) {
+                            m.energy -= 0.3;
+                            b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
+                        } else if (tech.isIceField) {
+                            m.energy -= 0.04;
+                            b.iceIX(1)
+                        } else if (tech.isDroneRadioactive) {
+                            m.energy -= 1.5; //almost 5x drain of normal drones
+                            b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
+                        } else {
+                            m.energy -= 0.45 * tech.droneEnergyReduction;
+                            b.drone()
+                        }
+                    }
+
+                    if (m.isHolding) {
+                        m.drawHold(m.holdingTarget);
+                        m.holding();
+                        m.throwBlock();
+                    } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
+                        m.grabPowerUp();
+                        m.lookForPickUp();
+                        if (m.energy > 0.05) {
+                            m.drawField();
+                            m.pushMobsFacing();
+                        }
+                    } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                        m.pickUp();
+                    } else {
+                        m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                    }
+                    m.energy += m.fieldRegen;
+                    m.drawFieldMeter()
                 }
             }
         },
@@ -2020,7 +2021,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "when not firing activate a <strong class='color-cloaked'>cloaking</strong> effect<br>if a mob has <strong>not died</strong> in the last <strong>4 seconds</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong>",
+            description: "when not firing activate a <strong class='color-cloaked'>cloaking</strong> effect<br>if a mob has <strong>not died</strong> in the last <strong>3 seconds</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong>",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -2031,7 +2032,7 @@ const m = {
                 // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 m.isSneakAttack = true;
-                const drawRadius = 1000
+                const drawRadius = 1100
 
                 m.hold = function() {
                     if (m.isHolding) {
@@ -2047,9 +2048,9 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
 
-                    //120 cycles after shooting (or using field) enable cloak
+                    //shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
-                    if (m.fireCDcycle + 50 < m.cycle && !input.fire) { //automatically cloak if not firing
+                    if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
                         if (!m.isCloak) {
                             m.isCloak = true //enter cloak
                             if (tech.isIntangible) {
@@ -2161,7 +2162,7 @@ const m = {
                     }
                     //show sneak attack status 
 
-                    if (m.cycle > m.lastKillCycle + 300) {
+                    if (m.cycle > m.lastKillCycle + 240) {
                         ctx.strokeStyle = "rgba(0,0,0,0.4)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 28, 0, 2 * Math.PI);

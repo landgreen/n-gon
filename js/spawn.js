@@ -92,8 +92,8 @@ const spawn = {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
             spawn.randomLevelBoss(x, y);
         } else if (tech.isResearchBoss) {
-            if (powerUps.research.count > 4) {
-                powerUps.research.changeRerolls(-5)
+            if (powerUps.research.count > 3) {
+                powerUps.research.changeRerolls(-4)
                 simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 5<br>${powerUps.research.count}`)
             } else {
                 tech.addJunkTechToPool(49)
