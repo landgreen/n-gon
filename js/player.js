@@ -497,7 +497,7 @@ const m = {
         if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
-        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.022, 0.66)
+        if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
@@ -1250,8 +1250,7 @@ const m = {
                 if ( //use power up if it is close enough
                     dist2 < 5000 &&
                     !simulation.isChoosing &&
-                    (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) &&
-                    (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
+                    (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
                 ) {
                     powerUps.onPickUp(powerUp[i]);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
@@ -2068,15 +2067,15 @@ const m = {
                         }
                         if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
-                            const stunRange = m.fieldDrawRadius * 1.2
-                            const drain = 0.3 * m.energy
+                            const stunRange = m.fieldDrawRadius * 1.3
+                            const drain = 0.25 * m.energy
                             for (let i = 0, len = mob.length; i < len; ++i) {
                                 if (
                                     Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange &&
                                     Matter.Query.ray(map, mob[i].position, m.pos).length === 0
                                 ) {
                                     isMobsAround = true
-                                    mobs.statusStun(mob[i], 60 + drain * 360)
+                                    mobs.statusStun(mob[i], 120 + drain * 360)
                                 }
                             }
                             if (isMobsAround && m.energy > drain) {
@@ -2385,8 +2384,8 @@ const m = {
                                     if (
                                         dist2 < 5000 &&
                                         !simulation.isChoosing &&
-                                        (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth) &&
-                                        (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
+                                        (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
+                                        // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
                                     ) { //use power up if it is close enough
                                         powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();

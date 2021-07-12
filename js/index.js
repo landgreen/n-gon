@@ -212,11 +212,10 @@ const build = {
       <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
       <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
       <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
-      <br><svg class="SVG-button" onclick="build.shareURL(false)" width="110" height="25" style="padding:2px; margin: 10px;">
-      <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-          <text x="5" y="18">copy build url</text>
-      </g>
-  </svg>
+      <br>
+      <svg class="SVG-button" onclick="build.shareURL(false)" width="110" height="25" style="padding:2px; margin: 10px;">
+        <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif"> <text x="5" y="18">copy build url</text> </g>
+      </svg>
 </div>`;
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[b.inventory[i]].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
@@ -257,6 +256,11 @@ const build = {
                 text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div></div>`
             }
         }
+
+
+        // text +=``
+
+
         el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text

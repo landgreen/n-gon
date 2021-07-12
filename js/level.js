@@ -25,11 +25,11 @@ const level = {
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
 
             level.intro(); //starting level
-            // level.labs();
             // level.testing(); //not in rotation, used for testing
             // level.template(); //not in rotation, blank start new map development
             // level.final() //final boss level  
             // level.gauntlet(); //before final boss level  
+            // level.labs(); //always before gauntlet level
             // level.testChamber()
             // level.sewers();
             // level.satellite();
@@ -113,24 +113,24 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.91; //damage done by player decreases each level
+            b.dmgScale *= 0.915; //damage done by player decreases each level
             if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.39 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.91; //damage done by player decreases each level
+            b.dmgScale /= 0.915; //damage done by player decreases each level
             if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale < 5) simulation.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.39 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
@@ -754,8 +754,10 @@ const level = {
                 player.isInPortal = this.portalPair
                 //teleport
                 if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
+                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     Matter.Body.setPosition(player, this.portalPair.portal.position);
                 } else { //if at some odd angle
+                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     Matter.Body.setPosition(player, this.portalPair.position);
                 }
                 //rotate velocity
@@ -2085,6 +2087,7 @@ const level = {
         level.levels.pop(); //remove lore level from rotation
         //start a conversation based on the number of conversations seen
         if (localSettings.loreCount < lore.conversation.length && !simulation.isCheating) {
+            lore.testSpeechAPI() //see if speech is working
             lore.chapter = localSettings.loreCount //set the chapter to listen to to be the lore level (you can't use the lore level because it changes during conversations)
             lore.sentence = 0 //what part of the conversation to start on
             lore.conversation[lore.chapter][lore.sentence]()
@@ -2248,9 +2251,9 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.pulseShooter(1900, -500)
-        // spawn.pulsarBoss(1900, -500)
+        spawn.shieldingBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
 
         // spawn.shieldingBoss(1900, -500)
@@ -4194,13 +4197,11 @@ const level = {
         spawn.mapRect(425, -20, 100, 25);
         // spawn.mapRect(-1900, 600, 2700, 100);
         spawn.mapRect(1100, 0, 150, 1500);
-        spawn.mapRect(-2850, 1400, 4100, 100);
+        spawn.mapRect(-3150, 1400, 4400, 100);
         spawn.mapRect(-2375, 875, 1775, 75);
         spawn.mapRect(-1450, 865, 75, 435);
         spawn.mapRect(-1450, 662, 75, 100);
         spawn.bodyRect(-1418, 773, 11, 102, 1, spawn.propsFriction); //blocking path
-        spawn.mapRect(-2950, 1250, 175, 250);
-        spawn.mapRect(-3050, 1100, 150, 400);
         spawn.mapRect(-3150, 50, 125, 1450);
         spawn.mapRect(-2350, 600, 3150, 100);
         spawn.mapRect(-2125, 400, 250, 275);
@@ -4212,12 +4213,19 @@ const level = {
         let elevator1, elevator2, elevator3
         if (Math.random() < 0.5) {
             isElevators = true
-            elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003)
+            elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003) //    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
             elevator2 = level.elevator(820, 1300, 260, 40, 607, 0.0003)
-            elevator3 = level.elevator(-2755, 1260, 160, 40, 850, 0.003)
+            elevator3 = level.elevator(-2850, 1300, 160, 40, 700, 0.007)
+            if (simulation.isHorizontalFlipped) {
+                spawn.mapVertex(-2900, 225, "0 0  0 -500  -500 -500")
+            } else {
+                spawn.mapVertex(-2900, 225, "0 0  0 -500  500 -500")
+            }
+            spawn.mapRect(-3050, 1275, 175, 200);
             spawn.bodyRect(-2375, 1300, 100, 100);
             spawn.bodyRect(-2325, 1250, 50, 50);
             spawn.bodyRect(-2275, 1350, 125, 50);
+
 
             level.custom = () => {
                 elevator1.move();
@@ -4241,6 +4249,9 @@ const level = {
                 level.enter.draw();
             };
         } else {
+            spawn.mapRect(-2950, 1250, 175, 250);
+            spawn.mapRect(-3050, 1100, 150, 400);
+
             spawn.bodyRect(-1450, -125, 125, 125, 1, spawn.propsSlide); //weight
             spawn.bodyRect(-1800, 0, 300, 100, 1, spawn.propsHoist); //hoist
             cons[cons.length] = Constraint.create({

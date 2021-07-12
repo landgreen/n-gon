@@ -54,6 +54,7 @@ const simulation = {
         simulation.camera();
         level.custom();
         m.draw();
+        m.hold();
         level.customTopLayer();
         simulation.draw.wireFrame();
         simulation.draw.cons();
@@ -109,7 +110,7 @@ const simulation = {
     fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
     isCommunityMaps: false,
     cyclePaused: 0,
-    fallHeight: 3000, //below this y position the player dies
+    fallHeight: 5000, //below this y position the player dies
     lastTimeStamp: 0, //tracks time stamps for measuring delta
     delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
     buttonCD: 0,

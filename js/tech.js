@@ -172,7 +172,7 @@
             if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.3
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
-            if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.022)
+            if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
@@ -528,7 +528,7 @@
                 },
                 requires: "not mass-energy equivalence",
                 effect() {
-                    tech.isSpeedHarm = true
+                    tech.isSpeedHarm = true //max at speed = 40
                 },
                 remove() {
                     tech.isSpeedHarm = false
@@ -546,7 +546,7 @@
                 },
                 requires: "",
                 effect() {
-                    tech.isSpeedDamage = true
+                    tech.isSpeedDamage = true //max at speed = 40
                 },
                 remove() {
                     tech.isSpeedDamage = false
@@ -4929,6 +4929,7 @@
                 remove() {
                     tech.harmonicEnergy = 0;
                     m.setMaxEnergy()
+                    if (this.count > 0) powerUps.research.changeRerolls(2)
                 }
             },
             {
@@ -5071,6 +5072,7 @@
                 },
                 remove() {
                     tech.isFieldHarmReduction = false
+                    if (this.count > 0) powerUps.research.changeRerolls(4)
                 }
             },
             {
@@ -5274,6 +5276,7 @@
                 },
                 remove() {
                     tech.isSporeField = false;
+                    if (this.count > 0) powerUps.research.changeRerolls(3)
                 }
             },
             {
@@ -5298,6 +5301,7 @@
                 },
                 remove() {
                     tech.isMissileField = false;
+                    if (this.count > 0) powerUps.research.changeRerolls(3)
                 }
             },
             {
@@ -5322,6 +5326,7 @@
                 },
                 remove() {
                     tech.isIceField = false;
+                    if (this.count > 0) powerUps.research.changeRerolls(3)
                 }
             },
             {
@@ -5386,6 +5391,7 @@
                     tech.plasmaBotCount = 0;
                     b.clearPermanentBots();
                     b.respawnBots();
+                    if (this.count > 0) powerUps.research.changeRerolls(1)
                 }
             },
             {
@@ -5490,6 +5496,7 @@
                     tech.isFastTime = false
                     m.setMovement();
                     b.setFireCD();
+                    if (this.count > 0) powerUps.research.changeRerolls(3)
                 }
             },
             {
@@ -5534,7 +5541,7 @@
             },
             {
                 name: "dazzler",
-                description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>30%</strong> of your stored <strong class='color-f'>energy</strong>",
+                description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>25%</strong> of your stored <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5571,6 +5578,7 @@
                 },
                 remove() {
                     tech.isCloakingDamage = false
+                    if (this.count > 0) powerUps.research.changeRerolls(1)
                 }
             },
             {
@@ -5615,7 +5623,7 @@
             },
             {
                 name: "WIMPs",
-                description: "a <strong class='color-harm'>harmful</strong> particle slowly <strong>chases</strong> you<br>spawn <strong>3-9</strong> <strong class='color-r'>research</strong> at the end of each <strong>level</strong>",
+                description: "at the end of each <strong>level</strong> spawn <strong>3-9</strong> <strong class='color-r'>research</strong><br> and a <strong class='color-harm'>harmful</strong> particle that slowly <strong>chases</strong> you",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5627,6 +5635,8 @@
                 requires: "wormhole",
                 effect: () => {
                     tech.wimpCount++
+                    spawn.WIMP()
+                    for (let j = 0, len = 1 + 5 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
                 },
                 remove() {
                     tech.wimpCount = 0
@@ -5653,7 +5663,7 @@
             },
             {
                 name: "virtual particles",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to exploit your <strong>wormhole</strong> for<br><strong>19%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to exploit your <strong>wormhole</strong> for a<br><strong>19%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5673,6 +5683,7 @@
                 remove() {
                     tech.wormDuplicate = 0
                     powerUps.setDo(); //needed after adjusting duplication chance
+                    if (this.count > 0) powerUps.research.changeRerolls(3)
                 }
             },
             {

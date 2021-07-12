@@ -3293,7 +3293,7 @@ const spawn = {
         // me.stroke = "rgb(220,220,255)"
         me.isBoss = true;
         me.cycle = 0
-        me.maxCycles = 150;
+        me.maxCycles = 120;
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.5;
@@ -3301,17 +3301,18 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
-        me.onDamage = function() {};
+        me.onDamage = function() {
+            this.cycle = 0
+        };
         me.do = function() {
             this.checkStatus();
 
-            //draw cycle timer
-            ctx.beginPath();
+            ctx.beginPath(); //draw cycle timer
             ctx.moveTo(this.vertices[this.vertices.length - 1].x, this.vertices[this.vertices.length - 1].y)
             const phase = (this.vertices.length + 1) * this.cycle / this.maxCycles
             if (phase > 1) ctx.lineTo(this.vertices[0].x, this.vertices[0].y)
@@ -3336,13 +3337,8 @@ const spawn = {
                     }
                     if (!this.isShielded && this.alive) spawn.shield(this, this.position.x, this.position.y, 1, true);
                     ctx.lineWidth = 20
-                    // ctx.lineCap = "round";
-                    ctx.strokeStyle = "rgba(200,200,255,0.9)"
+                    ctx.strokeStyle = "rgb(200,200,255)"
                     ctx.stroke();
-                    //return to starting location
-                    // const sub = Vector.sub(this.homePosition, this.position)
-                    // const dist = Vector.magnitude(sub)
-                    // if (dist > 350) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.05)
                 }
             }
         };
@@ -3827,8 +3823,8 @@ const spawn = {
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 2000000;
         me.memory = Infinity;
-        me.frictionAir = 0.01;
-        me.accelMag = 0.00003 * simulation.accelScale;
+        me.frictionAir = 0.02;
+        me.accelMag = 0.00014 * Math.sqrt(simulation.accelScale)
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         spawn.shield(me, x, y, 1);
 

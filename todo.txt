@@ -1,45 +1,32 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: Noether violation - shotgun and railgun recoil is increased and it's direction is reversed, +60% damage for shot/rail gun
+shieldingBoss stops re-shielding after taking damage
+  25% more health
+  re-shielding Cooldown is 25% shorter
 
-each field now has a tech that uses research to give a simple bonus
-  wormhole: virtual particles - 3 research for 19% duplication chance
-  cloaking field, pilot wave: dynamical systems - 2 research for 35% damage
-  standing wave harmonics, pilot wave: zero point energy - 2 research for 74% max energy
-  perfect diamagnetism or negative mass field: tessellation - 50% harm reduction for 4 research cost
-  time dilation field - Lorentz transformation now uses 4 research for a 50% speed increase  (was 40% for no research)
-  plasma-bot - now also requires 1 research
-  nano-scale already has several research deals
+you can pick up ammo with laser again
+  it was too annoying to switch guns
 
-added a research to the intro level
-Newton's 1st law reduces harm by up to 66% (was 60%) when moving at up to 30 
-Newton's 2nd law increases damage by up to 66% (was 43%) when moving at up to 30 
-  also they both have no requirements anymore
-super ball tech supertemporal now fires with much less delay
-  and it syncs with frame rate much cleaner
-metamaterial cloaking
-  now gets the damage buff after 3 seconds of no kills (was 4s)
-  recloaks 1/2 second faster
-  cloaked vision has a 10% larger radius
-6 situational tech can now show up in situations where they are only "OK", but not "great" choices
+you have 1/2 second harm immunity after leaving a portal
+
+lore conversations are better at recovering from speech API freezes
+  (if the speech API doesn't work after 10 seconds it switches to pure text)
 
 ******************************************************** TODO ********************************************************
 
-undo the research lost when you refund researched tech???
-  this only really matters for many worlds type runs,  would yield an general research drain?
+so JUNK tech in experiment mode?
+
+new wave tech - reduce range, but make bullets circles, not arcs
+
+scrolling console history in pause menu?
+  also make tech, guns scrolling?
 
 consider executables:
   press F to do things
   ideas:
 
-at the start of the null level use speech API to say something short,
-  if the on end event runs set the lore.isVoiceWorking flag to be true
-  if lore.isVoiceWorking is false, skip voice and just move through each sentence with a short delay
-
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
-
-tech pressure wave - reduce range, but make bullets circles, not arcs
 
 tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
   draw 1,2,3 levels of the field based on energy?
@@ -100,7 +87,7 @@ mobile requirements:
     tap screen regions to move (WASD)
     reduce font size
     
-add back in gamepad support
+add back in gamepad support?
   but does anyone care?
   https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
 
@@ -206,6 +193,8 @@ n-gon outreach ideas
   twitch - lets play
 
 ******************************************************** BUGS ********************************************************
+
+ants marching outline doesn't sync right on safari anymore.
 
 door to exit in vats does nothing
   did I do that?

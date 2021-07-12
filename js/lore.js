@@ -2,70 +2,17 @@ const lore = {
     techCount: 0,
     techGoal: 7,
     talkingColor: "#dff", //set color of graphic on level.null
-    // anand: {
-    //     color: "#e0c",
-    //     text: function(say, isSpeech = false) {
-    //         if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
-    //             simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-    //             lore.talkingColor = this.color
-    //             if (isSpeech) this.speech(say)
-    //         }
-    //     },
-    //     speech: function(say) {
-    //         var utterance = new SpeechSynthesisUtterance(say);
-    //         utterance.lang = "en-IN";
-    //         utterance.volume = 0.2; // 0 to 1
-    //         speechSynthesis.speak(utterance);
-    //     }
-    // },
-    // miriamOld: {
-    //     color: "#f20",
-    //     text: function(say, isSpeech = false) {
-    //         if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
-    //             simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-    //             lore.talkingColor = this.color
-    //             if (isSpeech) this.speech(say)
-    //         }
-    //     },
-    //     speech: function(say) {
-    //         var utterance = new SpeechSynthesisUtterance(say);
-    //         utterance.lang = "en-AU";
-    //         utterance.volume = 0.2; // 0 to 1
-    //         speechSynthesis.speak(utterance);
-    //     }
-    // },
-
-    // voices = synth.getVoices();
-
-    // for(i = 0; i < voices.length ; i++) {
-    //   var option = document.createElement('option');
-    //   option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
-
-    //   if(voices[i].default) {
-    //     option.textContent += ' -- DEFAULT';
-    //   }
-
-    //   option.setAttribute('data-lang', voices[i].lang);
-    //   option.setAttribute('data-name', voices[i].name);
-    //   voiceSelect.appendChild(option);
-    // }
-    // setVoices() {
-    //     window.speechSynthesis.onvoiceschanged = () => {
-    //         const synth = window.speechSynthesis
-    //         console.log(synth.getVoices())
-    //         const voiceArray = synth.getVoices()
-    //         lore.anand.voice = voiceArray[0]
-    //         lore.miriam.voice = voiceArray[1]
-    //         console.log(voiceArray[0], voiceArray[1])
-    //     };
-    //     // console.log('before')
-    //     // if ('speechSynthesis' in window) {
-
-    //     // } else {
-    //     //     console.log('Text-to-speech not supported.');
-    //     // }
-    // },
+    isSpeech: false,
+    testSpeechAPI() {
+        if ('speechSynthesis' in window) { // Synthesis support. Make your web apps talk!
+            lore.isSpeech = true
+        }
+    },
     rate: 1, //   //utterance.rate = 1; // 0.1 to 10
+    nextSentence() {
+        lore.sentence++
+        if (m.alive) lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
+    },
     anand: {
         color: "#e0c",
         voice: undefined,
@@ -73,25 +20,28 @@ const lore = {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
                 simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
-                const utterance = new SpeechSynthesisUtterance(say);
-                // utterance.voice = lore.anand.voice
-                utterance.lang = "en-GB" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
-                utterance.volume = 0.2; // 0 to 1
-                // if (lore.rate !== 1) utterance.rate = lore.rate
-                speechSynthesis.speak(utterance);
-                utterance.onerror = (event) => { //if speech doesn't work try again without the lang set
-                    console.log("speech error", event.error)
+                if (lore.isSpeech) {
                     const utterance = new SpeechSynthesisUtterance(say);
+                    // utterance.voice = lore.anand.voice
+                    utterance.lang = "en-GB" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
                     utterance.volume = 0.2; // 0 to 1
+                    // if (lore.rate !== 1) utterance.rate = lore.rate
                     speechSynthesis.speak(utterance);
-                    utterance.onend = () => {
-                        lore.sentence++
-                        if (m.alive) lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
+                    utterance.onerror = () => { //if speech doesn't work
+                        lore.isSpeech = false
+                        lore.nextSentence()
                     }
-                }
-                utterance.onend = () => {
-                    lore.sentence++
-                    if (m.alive) lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
+                    speechFrozen = setTimeout(function() { // speech frozen after 10 seconds of no end
+                        console.log('speech frozen')
+                        lore.isSpeech = false
+                        lore.nextSentence()
+                    }, 20000);
+                    utterance.onend = () => {
+                        clearTimeout(speechFrozen);
+                        lore.nextSentence()
+                    }
+                } else {
+                    setTimeout(() => { lore.nextSentence() }, 3000);
                 }
             }
         },
@@ -102,54 +52,47 @@ const lore = {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
                 simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${Date.now()} ms</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
-                utterance = new SpeechSynthesisUtterance(say);
-                // utterance.voice = lore.anand.voice
-                utterance.lang = "en-AU";
-                utterance.volume = 0.2; // 0 to 1
-                // if (lore.rate !== 1) utterance.rate = lore.rate
-                speechSynthesis.speak(utterance);
-                utterance.onerror = (event) => { //if speech doesn't work try again without the lang set
-                    console.log("speech error", event.error)
-                    const utterance = new SpeechSynthesisUtterance(say);
+                if (lore.isSpeech) {
+                    utterance = new SpeechSynthesisUtterance(say);
+                    // utterance.voice = lore.anand.voice
+                    utterance.lang = "en-AU";
                     utterance.volume = 0.2; // 0 to 1
+                    // if (lore.rate !== 1) utterance.rate = lore.rate
                     speechSynthesis.speak(utterance);
-                    utterance.onend = () => {
-                        lore.sentence++
-                        if (m.alive) lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
+                    utterance.onerror = () => { //if speech doesn't work
+                        lore.isSpeech = false
+                        lore.nextSentence()
                     }
-                }
-                utterance.onend = () => {
-                    lore.sentence++
-                    if (m.alive) lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
+                    speechFrozen = setTimeout(function() { // speech frozen after 10 seconds of no end
+                        console.log('speech frozen')
+                        lore.isSpeech = false
+                        lore.nextSentence()
+                    }, 20000);
+                    utterance.onend = () => {
+                        clearTimeout(speechFrozen);
+                        lore.nextSentence()
+                    }
+                } else {
+                    setTimeout(() => { lore.nextSentence() }, 3000);
                 }
             }
         },
     },
-
-    // utterance.onerror = (event) => { //if speech is still not working, just do text
-    //     console.log("speech error", event.error)
-    //     lore.sentence++
-    //     if (m.alive) lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
-    // }
-    // setTimeout(() => {}, 2000);
-    // lore.miriam.text("")
-    // lore.miriam.utterance.addEventListener('end', () => {
-    // })
     chapter: 0, //what part of the conversation is playing
     sentence: 0, //what part of the conversation is playing
     conversation: [
         [ //first time they meet, and testing gets unlocked
-            () => {
-                lore.unlockTesting();
-                setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.") }, 5000);
-            },
+            () => { setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.") }, 5000); },
             () => { lore.anand.text("Wow. Just a platform.") },
             () => { lore.miriam.text("And that thing...") },
             () => { lore.anand.text("Weird") },
             () => { lore.anand.text("Maybe it's trapped.") },
             () => { lore.miriam.text("Looks like testing mode is locked.") },
             () => { lore.miriam.text("I'll unlock it with the console command.") },
-            () => { setTimeout(() => { lore.miriam.text("Hey little bot! Just press 'T' to enter testing mode and 'U' to go to the next level.") }, 1000); },
+            () => {
+                lore.unlockTesting();
+                setTimeout(() => { lore.miriam.text("Hey little bot! Just press 'T' to enter testing mode and 'U' to go to the next level.") }, 1000);
+            },
             () => { lore.anand.text("It can't process what you're saying.") },
             () => { lore.miriam.text("ha hahahaha. I know, but it does seem to be getting smarter.") },
             () => {
@@ -373,7 +316,7 @@ const lore = {
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
         document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-        simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting.()`, Infinity);
+        simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
 
         //setup audio context
         function tone(frequency, gain = 0.05, end = 1300) {
@@ -402,8 +345,6 @@ const lore = {
 }
 
 
-
-
 // How to get to the console in chrome:
 // Press either CTRL + SHIFT + I or F12   or   Option + ⌘ + J on a Mac
 // Press ESC (or click on “Show console” in the bottom right corner) to slide the console up.
@@ -430,16 +371,25 @@ const lore = {
 //   utterance.lang = "en-GB";
 //   speechSynthesis.speak(utterance);
 // }
-{
-    /* <option value="en-GB">GB</option>
-    <option value="en-US">US</option>
-    <option value="en-AU">AU</option>
-    <option value="fr-FR">FR</option>
-    <option value="de-DE">DE</option>
-    <option value="en-IN">IN</option>
-    <option value="zh-CN">CN</option>
-    <option value="pl">PL</option>
-    <option value="ru">RU</option>
-    <option value="sv-SE">SE</option>
-    <option value="en-ZA">ZA</option> */
-}
+
+/* <option value="en-GB">GB</option>
+<option value="en-US">US</option>
+<option value="en-AU">AU</option>
+<option value="fr-FR">FR</option>
+<option value="de-DE">DE</option>
+<option value="en-IN">IN</option>
+<option value="zh-CN">CN</option>
+<option value="pl">PL</option>
+<option value="ru">RU</option>
+<option value="sv-SE">SE</option>
+<option value="en-ZA">ZA</option> */
+
+
+// The API also allows you to get a list of voice the engine supports:
+// speechSynthesis.getVoices().forEach(function(voice) {
+//   console.log(voice.name, voice.default ? voice.default :'');
+// });
+// Then set a different voice, by setting .voice on the utterance object:
+// var msg = new SpeechSynthesisUtterance('I see dead people!');
+// msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == 'Whisper'; })[0];
+// speechSynthesis.speak(msg);

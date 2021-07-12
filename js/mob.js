@@ -122,6 +122,7 @@ const mobs = {
                         x: who.position.x + 100 * (Math.random() - 0.5),
                         y: who.position.y + 100 * (Math.random() - 0.5)
                     }
+                    // && !who.isBoss
                     if (who.velocity.y < 2) who.force.y += who.mass * 0.0004 //extra gravity
 
                     //draw health bar

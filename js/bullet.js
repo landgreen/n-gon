@@ -2118,8 +2118,8 @@ const b = {
                                     if (
                                         Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
                                         (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth || tech.isDroneGrab) &&
-                                        (powerUp[i].name !== "field" || !tech.isDeterminism) &&
-                                        (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism)
+                                        // &&(b.inventory.length > 1 || powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
                                     ) {
                                         //draw pickup for a single cycle
                                         ctx.beginPath();
@@ -2149,8 +2149,8 @@ const b = {
                                 for (let i = 0, len = powerUp.length; i < len; ++i) {
                                     if (
                                         (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth || tech.isDroneGrab) &&
-                                        (powerUp[i].name !== "field" || !tech.isDeterminism) &&
-                                        (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism)
+                                        // &&(b.inventory.length > 1 || powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
                                     ) {
                                         if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
                                             //draw pickup for a single cycle
@@ -2334,8 +2334,8 @@ const b = {
                                     if (
                                         Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
                                         (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth || tech.isDroneGrab) &&
-                                        (powerUp[i].name !== "field" || !tech.isDeterminism) &&
-                                        (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism)
+                                        // &&(powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
                                     ) {
                                         //draw pickup for a single cycle
                                         ctx.beginPath();
@@ -2366,8 +2366,8 @@ const b = {
                                 for (let i = 0, len = powerUp.length; i < len; ++i) {
                                     if (
                                         (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth || tech.isDroneGrab) &&
-                                        (powerUp[i].name !== "field" || !tech.isDeterminism) &&
-                                        (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
+                                        (powerUp[i].name !== "field" || !tech.isDeterminism)
+                                        // &&(powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
                                     ) {
                                         if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
                                             //draw pickup for a single cycle
@@ -4032,7 +4032,7 @@ const b = {
                                 ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
                             }
                             ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                            const damage = 1.75 * b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage / Math.sqrt(who.radius) //damage is lower for large radius mobs, since they feel the waves longer
+                            const damage = 1.9 * b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage / Math.sqrt(who.radius) //damage is lower for large radius mobs, since they feel the waves longer
                             who.locatePlayer();
                             who.damage(damage);
                         }
