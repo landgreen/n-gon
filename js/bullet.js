@@ -4015,7 +4015,7 @@ const b = {
                 ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
-                const end = 75 * Math.sqrt(tech.isBulletsLastLonger) * tech.waveBeamSpeed / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
+                const end = 750 * Math.sqrt(tech.isBulletsLastLonger) / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
                 const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
@@ -4097,7 +4097,7 @@ const b = {
                 ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
-                const end = 125 * tech.isBulletsLastLonger * tech.waveBeamSpeed / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
+                const end = 1250 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
                 const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {

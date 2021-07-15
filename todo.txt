@@ -1,17 +1,6 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-"pressure wave" renamed "phonon"
-  tech packet length removed
-  most wave beam tech is now compatible with phonon
 
-wave beam tech: isotropic radiator - phonon has shorter range but expands in every direction
-
-drone tech: torque bursts - teleport towards targets and do 30% more collision damage
-
-irradiated drones do 33% more damage, 33% less collisions damage
-   5% more ammo, 30% less range, don't lose duration on collisions
-
-pseudoscience only gets 3 free rerolls per tech
 
 ******************************************************** TODO ********************************************************
 
