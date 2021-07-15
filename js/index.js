@@ -257,7 +257,7 @@ const build = {
             }
         }
 
-
+        //show in game console with scroll bar?
         // text +=``
 
 
@@ -434,7 +434,6 @@ const build = {
         for (let i = 0, len = b.guns.length; i < len; i++) {
             text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
         }
-
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
                 if (tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
@@ -457,7 +456,6 @@ const build = {
             document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-experiment").value
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         });
-
         //add tooltips
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (document.getElementById(`tech-${i}`)) {
@@ -470,9 +468,7 @@ const build = {
         simulation.startGame(true); //starts game, but pauses it
         build.isExperimentSelection = true;
         simulation.paused = true;
-
         m.setField(0)
-
         b.inventory = []; //removes guns and ammo  
         for (let i = 0, len = b.guns.length; i < len; ++i) {
             b.guns[i].count = 0;
@@ -481,7 +477,6 @@ const build = {
         }
         b.activeGun = null;
         simulation.makeGunHUD();
-
         tech.setupAllTech();
         build.populateGrid();
         document.getElementById("field-0").classList.add("build-field-selected");
@@ -490,14 +485,12 @@ const build = {
     shareURL(isCustom = false) {
         let url = "https://landgreen.github.io/sidescroller/index.html?"
         let count = 0;
-
         for (let i = 0; i < b.inventory.length; i++) {
             if (b.guns[b.inventory[i]].have) {
                 url += `&gun${count}=${encodeURIComponent(b.guns[b.inventory[i]].name.trim())}`
                 count++
             }
         }
-
         count = 0;
         for (let i = 0; i < tech.tech.length; i++) {
             for (let j = 0; j < tech.tech[i].count; j++) {
@@ -516,7 +509,6 @@ const build = {
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
-
         navigator.clipboard.writeText(url).then(function() {
             /* clipboard successfully set */
             if (isCustom) {

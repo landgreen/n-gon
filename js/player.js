@@ -1830,7 +1830,7 @@ const m = {
                             m.energy -= 0.04;
                             b.iceIX(1)
                         } else if (tech.isDroneRadioactive) {
-                            m.energy -= 1.5; //almost 5x drain of normal drones
+                            m.energy -= 0.9;
                             b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;

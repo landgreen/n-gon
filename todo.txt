@@ -1,29 +1,30 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-shieldingBoss stops re-shielding after taking damage
-  25% more health
-  re-shielding Cooldown is 25% shorter
+"pressure wave" renamed "phonon"
+  tech packet length removed
+  most wave beam tech is now compatible with phonon
 
-you can pick up ammo with laser again
-  it was too annoying to switch guns
+wave beam tech: isotropic radiator - phonon has shorter range but expands in every direction
 
-you have 1/2 second harm immunity after leaving a portal
+drone tech: torque bursts - teleport towards targets and do 30% more collision damage
 
-lore conversations are better at recovering from speech API freezes
-  (if the speech API doesn't work after 10 seconds it switches to pure text)
+irradiated drones do 33% more damage, 33% less collisions damage
+   5% more ammo, 30% less range, don't lose duration on collisions
+
+pseudoscience only gets 3 free rerolls per tech
 
 ******************************************************** TODO ********************************************************
 
-so JUNK tech in experiment mode?
+give drones or spores some mobs abilities
+  striker: teleport towards target  
 
-new wave tech - reduce range, but make bullets circles, not arcs
+drone tech: snakes
+  I haven't thought about this much, but I don't know make them look like snakes...
 
 scrolling console history in pause menu?
   also make tech, guns scrolling?
-
-consider executables:
-  press F to do things
-  ideas:
+in testing mode console log the body you click on
+pause should at least show the last in game console message
 
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
@@ -32,8 +33,6 @@ tech: quantized shields - harmonic standing wave field can only lose 33 energy p
   draw 1,2,3 levels of the field based on energy?
   the blocked value only scales up to 2x or 4x (33 energy) blocked
   doesn't stack with spherical tech
-
-in testing mode console log the body you click on
 
 make a tech that improves all charge guns
   for: pulse, foam, rail gun
@@ -58,8 +57,10 @@ tech: use the ability for power ups to have custom code
   attracted to other power ups
     explode if they touch?
 
-pause should show the last in game console message
-  
+consider executables:
+  press F to do things
+  ideas:
+
 nail-gun, or ....
   1s after being fired your bullets turn:
     towards the nearest mob
@@ -352,6 +353,8 @@ possible names for tech
   Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
   evolutionary cosmology
   eternal inflation
+  hypergraph
+  gnarl
 
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

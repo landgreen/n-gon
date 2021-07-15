@@ -2039,8 +2039,8 @@ const b = {
             friction: 0.05,
             frictionAir: 0,
             restitution: 1,
-            dmg: 0.24, //damage done in addition to the damage from momentum
-            lookFrequency: 80 + Math.floor(23 * Math.random()),
+            dmg: 0.24 + 0.12 * tech.isDroneTeleport, //damage done in addition to the damage from momentum
+            lookFrequency: 70 + Math.floor(17 * Math.random()),
             endCycle: simulation.cycle + Math.floor((950 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 140 + RADIUS * 5,
             classType: "bullet",
             collisionFilter: {
@@ -2110,11 +2110,24 @@ const b = {
                                 }
                             }
                         }
+                        //blink towards mobs
+                        if (tech.isDroneTeleport && this.lockedOn) {
+                            const sub = Vector.sub(this.lockedOn.position, this.position);
+                            const distMag = Vector.magnitude(sub);
+                            const unit = Vector.normalise(sub)
+                            Matter.Body.setVelocity(this, Vector.mult(unit, Math.max(20, this.speed * 1.5)));
+                            ctx.beginPath();
+                            ctx.moveTo(this.position.x, this.position.y);
+                            Matter.Body.translate(this, Vector.mult(unit, Math.min(350, distMag - this.lockedOn.radius + 10)));
+                            ctx.lineTo(this.position.x, this.position.y);
+                            ctx.lineWidth = RADIUS * 2;
+                            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                            ctx.stroke();
+                        }
                         //power ups
                         if (!this.isImproved && !simulation.isChoosing && !tech.isExtraMaxEnergy) {
                             if (this.lockedOn) {
-                                //grab, but don't lock onto nearby power up
-                                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                                for (let i = 0, len = powerUp.length; i < len; ++i) { //grab, but don't lock onto nearby power up
                                     if (
                                         Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
                                         (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth || tech.isDroneGrab) &&
@@ -2223,8 +2236,8 @@ const b = {
             inertia: Infinity,
             friction: 0,
             frictionAir: 0,
-            restitution: 0.8 + 0.199 * Math.random(),
-            dmg: 0.24, //damage done in addition to the damage from momentum
+            restitution: 0.4 + 0.199 * Math.random(),
+            dmg: 0, //0.24   damage done in addition to the damage from momentum   and radiation
             lookFrequency: 120 + Math.floor(23 * Math.random()),
             endCycle: simulation.cycle + Math.floor((900 + 120 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 140 + RADIUS * 5,
             classType: "bullet",
@@ -2239,7 +2252,7 @@ const b = {
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             radioRadius: 0,
-            maxRadioRadius: 355 + Math.floor(150 * Math.random()),
+            maxRadioRadius: 300 + Math.floor(100 * Math.random()),
             beforeDmg(who) {
                 const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
                 Matter.Body.setVelocity(this, {
@@ -2247,10 +2260,10 @@ const b = {
                     y: unit.y
                 });
                 this.lockedOn = null
-                if (this.endCycle > simulation.cycle + this.deathCycles) {
-                    this.endCycle -= 60
-                    if (simulation.cycle + this.deathCycles > this.endCycle) this.endCycle = simulation.cycle + this.deathCycles
-                }
+                // if (this.endCycle > simulation.cycle + this.deathCycles) {
+                // this.endCycle -= 60
+                // if (simulation.cycle + this.deathCycles > this.endCycle) this.endCycle = simulation.cycle + this.deathCycles
+                // }
             },
             onEnd() {
                 if (tech.isDroneRespawn) {
@@ -2280,7 +2293,7 @@ const b = {
                 //aoe damage to mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
-                        let dmg = b.dmgScale * 0.06 * tech.droneRadioDamage //neutron bombs  dmg = 0.09
+                        let dmg = b.dmgScale * 0.1 * tech.droneRadioDamage //neutron bombs  dmg = 0.09
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                         if (mob[i].shield) dmg *= 3 // to make up for the /5 that shields normally take
                         mob[i].damage(dmg);
@@ -2695,12 +2708,7 @@ const b = {
         }
         for (let i = 0, len = totalPermanentBots - totalTechToConvert; i < len; i++) tech.tech[index].effect(); //also convert any permanent bots that didn't come from a tech
         //in experiment mode set the unselect color for bot tech that was converted
-        if (build.isExperimentSelection) {
-
-
-
-
-        }
+        // if (build.isExperimentSelection) {        }
     },
     clearPermanentBots() {
         for (let i = 0; i < bullet.length; i++) {
@@ -3991,7 +3999,10 @@ const b = {
             propagationRate: 20,
             waves: [], //used in longitudinal mode
             chooseFireMethod() { //set in simulation.startGame
-                if (tech.isLongitudinal) {
+                if (tech.is360Longitudinal) {
+                    this.fire = this.fire360Longitudinal
+                    this.do = this.do360Longitudinal
+                } else if (tech.isLongitudinal) {
                     this.fire = this.fireLongitudinal
                     this.do = this.doLongitudinal
                 } else {
@@ -4000,10 +4011,94 @@ const b = {
                 }
             },
             do() {},
-            doLongitudinal() {
-                ctx.strokeStyle = "rgba(0,0,0,0.2)" //"000";
-                ctx.lineWidth = 2
+            do360Longitudinal() {
+                ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
+                ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
+                const end = 75 * Math.sqrt(tech.isBulletsLastLonger) * tech.waveBeamSpeed / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
+                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
+
+                for (let i = this.waves.length - 1; i > -1; i--) {
+                    //draw wave
+                    ctx.moveTo(this.waves[i].position.x + this.waves[i].radius, this.waves[i].position.y)
+                    ctx.arc(this.waves[i].position.x, this.waves[i].position.y, this.waves[i].radius, 0, 2 * Math.PI);
+                    // collisions
+                    if (!m.isBodiesAsleep) {
+                        for (let j = 0, len = mob.length; j < len; j++) {
+                            const dist = Vector.magnitude(Vector.sub(this.waves[i].position, mob[j].position))
+                            const r = mob[j].radius + 30
+                            if (dist + r > this.waves[i].radius && dist - r < this.waves[i].radius) {
+                                //make them shake around
+                                if (!mob[j].isBadTarget) {
+                                    mob[j].force.x += 0.01 * (Math.random() - 0.5) * mob[j].mass
+                                    mob[j].force.y += 0.01 * (Math.random() - 0.5) * mob[j].mass
+                                }
+                                if (!mob[j].isShielded) {
+                                    Matter.Body.setVelocity(mob[j], { //friction
+                                        x: mob[j].velocity.x * 0.93,
+                                        y: mob[j].velocity.y * 0.93
+                                    });
+                                    //draw vibes
+                                    let vertices = mob[j].vertices;
+                                    const vibe = 50 + mob[j].radius * 0.15
+                                    ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                                    for (let k = 1; k < vertices.length; k++) {
+                                        ctx.lineTo(vertices[k].x + vibe * (Math.random() - 0.5), vertices[k].y + vibe * (Math.random() - 0.5));
+                                    }
+                                    ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                                    //damage
+                                    mob[j].locatePlayer();
+                                    mob[j].damage(damage / Math.sqrt(mob[j].radius));
+                                }
+                            }
+                        }
+                        for (let j = 0, len = body.length; j < len; j++) {
+                            const dist = Vector.magnitude(Vector.sub(this.waves[i].position, body[j].position))
+                            const r = 20
+                            if (dist + r > this.waves[i].radius && dist - r < this.waves[i].radius) {
+                                //make them shake around
+                                body[j].force.x += 0.01 * (Math.random() - 0.5) * body[j].mass
+                                body[j].force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * body[j].mass //remove force of gravity
+                                //draw vibes
+                                let vertices = body[j].vertices;
+                                const vibe = 25
+                                ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                                for (let k = 1; k < vertices.length; k++) {
+                                    ctx.lineTo(vertices[k].x + vibe * (Math.random() - 0.5), vertices[k].y + vibe * (Math.random() - 0.5));
+                                }
+                                ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                            }
+                        }
+                        this.waves[i].radius += tech.waveBeamSpeed * this.waves[i].expanding //expand / move
+                    }
+                    // if (this.waves[i].radius > end) this.waves.splice(i, 1) //end
+                    if (this.waves[i].radius > end) {
+                        this.waves[i].expanding = -1
+                        this.waves[i].reflection--
+                        if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
+                    } else if (this.waves[i].radius < 25) {
+                        this.waves[i].expanding = 1
+                        this.waves[i].reflection--
+                        if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
+                    }
+                }
+                ctx.stroke();
+            },
+            fire360Longitudinal() {
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 3 : 8) * b.fireCDscale); // cool down
+                this.waves.push({
+                    position: { x: m.pos.x, y: m.pos.y, },
+                    radius: 25,
+                    reflection: tech.waveReflections,
+                    expanding: true
+                })
+            },
+            doLongitudinal() {
+                ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
+                ctx.lineWidth = 2 * tech.wavePacketDamage
+                ctx.beginPath();
+                const end = 125 * tech.isBulletsLastLonger * tech.waveBeamSpeed / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
+                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
                     const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
@@ -4018,23 +4113,25 @@ const b = {
                         for (let j = 0; j < hits.length; j++) {
                             const who = hits[j].body
                             //make them shake around
-                            who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
-                            who.force.y += 0.01 * (Math.random() - 0.5) * who.mass
-                            Matter.Body.setVelocity(who, { //friction
-                                x: who.velocity.x * 0.95,
-                                y: who.velocity.y * 0.95
-                            });
-
-                            let vertices = who.vertices;
-                            const vibe = 50 + who.radius * 0.15
-                            ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                            for (let j = 1; j < vertices.length; j++) {
-                                ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
+                            if (!who.isBadTarget) {
+                                who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
+                                who.force.y += 0.01 * (Math.random() - 0.5) * who.mass
                             }
-                            ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
-                            const damage = 1.9 * b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage / Math.sqrt(who.radius) //damage is lower for large radius mobs, since they feel the waves longer
-                            who.locatePlayer();
-                            who.damage(damage);
+                            if (!who.isShielded) {
+                                Matter.Body.setVelocity(who, { //friction
+                                    x: who.velocity.x * 0.95,
+                                    y: who.velocity.y * 0.95
+                                });
+                                let vertices = who.vertices;
+                                const vibe = 50 + who.radius * 0.15
+                                ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                                for (let j = 1; j < vertices.length; j++) {
+                                    ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
+                                }
+                                ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                                who.locatePlayer();
+                                who.damage(damage / Math.sqrt(who.radius));
+                            }
                         }
 
                         hits = Matter.Query.ray(body, v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
@@ -4052,11 +4149,19 @@ const b = {
                             }
                             ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
                         }
-                        ctx.stroke(); //draw vibes
+                        // ctx.stroke(); //draw vibes
 
-                        this.waves[i].radius += tech.waveBeamSpeed * 2 //expand / move
+                        this.waves[i].radius += tech.waveBeamSpeed * 2 * this.waves[i].expanding //expand / move
                     }
-                    if (this.waves[i].radius > 1800 * tech.isBulletsLastLonger) this.waves.splice(i, 1) //end
+                    if (this.waves[i].radius > end) {
+                        this.waves[i].expanding = -1
+                        this.waves[i].reflection--
+                        if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
+                    } else if (this.waves[i].radius < 25) {
+                        this.waves[i].expanding = 1
+                        this.waves[i].reflection--
+                        if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
+                    }
                 }
                 ctx.stroke();
             },
@@ -4072,7 +4177,9 @@ const b = {
                     unit1: { x: Math.cos(m.angle - halfArc), y: Math.sin(m.angle - halfArc) }, //used for collision
                     unit2: { x: Math.cos(m.angle + halfArc), y: Math.sin(m.angle + halfArc) }, //used for collision
                     arc: halfArc * 2,
-                    radius: 25
+                    radius: 25,
+                    reflection: tech.waveReflections,
+                    expanding: 1
                 })
             },
             doTransverse() {
@@ -4082,7 +4189,7 @@ const b = {
                 }
             },
             fireTransverse() {
-                totalCycles = Math.floor(4.3 * tech.wavePacketLength * tech.waveReflections * tech.isBulletsLastLonger)
+                totalCycles = Math.floor(4.3 * 35 * tech.waveReflections * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5))
                 const me = bullet.length;
                 bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 5, 4, {
                     angle: m.angle,
@@ -4091,7 +4198,7 @@ const b = {
                     inertia: Infinity,
                     frictionAir: 0,
                     slow: 0,
-                    amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * tech.wavePacketFrequency), //
+                    amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     minDmgSpeed: 0,
                     dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
                     classType: "bullet",
@@ -4176,7 +4283,7 @@ const b = {
                 const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
                 //fire a packet of bullets then delay for a while
                 this.wavePacketCycle++
-                if (this.wavePacketCycle > tech.wavePacketLength) {
+                if (this.wavePacketCycle > 35) {
                     m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCDscale); // cool down
                     this.wavePacketCycle = 0;
                 }

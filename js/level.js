@@ -15,13 +15,15 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("shotgun")
-            // tech.isShotgunRecoil = true
-            // tech.isShotgunReversed = true
-            // tech.giveTech("supertemporal")
-            // tech.giveTech("free-electron laser")
+            // b.giveGuns("drones")
+            // tech.giveTech("torque bursts")
+            // b.giveGuns("wave beam")
+            // tech.giveTech("phonon")
+            // tech.giveTech("bound state")
+            // tech.giveTech("bound state")
+            // tech.giveTech("bound state")
+            // tech.giveTech("isotropic radiator")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
-            // tech.giveTech("decoherence")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
 
             level.intro(); //starting level
@@ -2252,14 +2254,14 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
         // spawn.starter(1900, -500, 200) //big boy
-        // spawn.pulseShooter(1900, -500)
-        spawn.shieldingBoss(1900, -500)
+        // spawn.pulsarBoss(1900, -500)
+        // spawn.shieldingBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
 
         // spawn.shieldingBoss(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        // spawn.hopper(1600, -500)
+        // spawn.focuser(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.hopBoss(1800, -120)
@@ -2267,7 +2269,7 @@ const level = {
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
-        // spawn.laser(1200, -500)
+        spawn.grenadier(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "grenadier")
@@ -2621,7 +2623,7 @@ const level = {
 
         // localSettings.levelsClearedLastGame = 20
         if (level.levelsCleared === 0) {
-            powerUps.spawn(2500, -50, "research", false);
+            // powerUps.spawn(2500, -50, "research", false);
             powerUps.spawn(1900, -50, "heal", false);
             powerUps.spawn(2050, -50, "heal", false);
             if (localSettings.levelsClearedLastGame < 6) {

@@ -262,12 +262,14 @@ const powerUps = {
                 }
             }
         },
+        currentRerollCount: 0,
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
-            if (tech.isJunkResearch) {
+            if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                 tech.addJunkTechToPool(tech.junkResearchNumber)
             } else {
                 powerUps.research.changeRerolls(-1)
             }
+            powerUps.research.currentRerollCount++
             // simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
             // <br>${powerUps.research.count}`)
             if (tech.isBanish && type === 'tech') { // banish researched tech
@@ -447,8 +449,8 @@ const powerUps = {
                 powerUps.field.choiceLog.push(choice2)
                 powerUps.field.choiceLog.push(choice3)
 
-                if (tech.isJunkResearch) {
-                    tech.junkResearchNumber = Math.floor(5 * Math.random())
+                if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
+                    tech.junkResearchNumber = Math.floor(4 * Math.random())
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
                     for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                     text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -461,8 +463,6 @@ const powerUps = {
                 // text += `<div style = 'color:#fff'>${simulation.SVGrightMouse} activate the shield with the right mouse<br>fields shield you from damage <br>and let you pick up and throw blocks</div>`
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
-            } else {
-                powerUps.giveRandomAmmo()
             }
         }
     },
@@ -566,7 +566,7 @@ const powerUps = {
                     powerUps.tech.choiceLog.push(choice3)
                     // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
-                    if (tech.isJunkResearch) {
+                    if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                         tech.junkResearchNumber = Math.floor(5 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
@@ -579,19 +579,16 @@ const powerUps = {
 
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
-                } else {
-                    if (tech.isBanish) {
-                        for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
-                        }
-                        // simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
-                        simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
-                        // powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                        powerUps.endDraft("tech");
-                    } else {
-                        powerUps.giveRandomAmmo()
+                } else if (tech.isBanish) {
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
                     }
+                    // simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
+                    simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
+                    // powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                    powerUps.endDraft("tech");
                 }
+
             }
         }
     },
@@ -658,7 +655,7 @@ const powerUps = {
                 powerUps.gun.choiceLog.push(choice3)
                 // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
-                if (tech.isJunkResearch) {
+                if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                     tech.junkResearchNumber = Math.floor(5 * Math.random())
                     text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
                     for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
@@ -673,12 +670,11 @@ const powerUps = {
                 if (tech.isOneGun && b.inventory.length > 0) text += `<div style = "color: #f24">replaces your current gun</div>`
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
-            } else {
-                powerUps.giveRandomAmmo()
             }
         }
     },
     onPickUp(who) {
+        powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
         if (tech.isMassEnergy) m.energy += 2;
         if (tech.isMineDrop) {
@@ -700,15 +696,15 @@ const powerUps = {
             }
         }
     },
-    giveRandomAmmo() {
-        const ammoTarget = Math.floor(Math.random() * (b.guns.length));
-        const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 6);
-        if (ammo !== Infinity) {
-            b.guns[ammoTarget].ammo += ammo;
-            simulation.updateGunHUD();
-            simulation.makeTextLog(`${b.guns[ammoTarget].name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammo}`);
-        }
-    },
+    // giveRandomAmmo() {
+    //     const ammoTarget = Math.floor(Math.random() * (b.guns.length));
+    //     const ammo = Math.ceil(b.guns[ammoTarget].ammoPack * 6);
+    //     if (ammo !== Infinity) {
+    //         b.guns[ammoTarget].ammo += ammo;
+    //         simulation.updateGunHUD();
+    //         simulation.makeTextLog(`${b.guns[ammoTarget].name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammo}`);
+    //     }
+    // },
     spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
         if ((Math.random() * Math.random() - 0.3 > Math.sqrt(m.health) && !tech.isEnergyHealth) || Math.random() < 0.04) { //spawn heal chance is higher at low health
             powerUps.spawn(x, y, "heal");

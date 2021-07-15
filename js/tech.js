@@ -647,7 +647,7 @@
             },
             {
                 name: "microstates",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> active <strong>bullets</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> active <strong>projectiles</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -665,7 +665,7 @@
             },
             {
                 name: "anti-shear topology",
-                description: "some <strong>bullets</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
+                description: "some <strong>projectiles</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
                 // isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -2802,7 +2802,7 @@
             },
             {
                 name: "pseudoscience",
-                description: "<strong>rerolling</strong> choices no longer costs <strong class='color-r'>research</strong><br>instead it adds <strong>0-4</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+                description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>0-3</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3884,27 +3884,8 @@
                 }
             },
             {
-                name: "bound state",
-                description: "instead of dissipating normally<br>wave packets <strong>reflect</strong> backwards <strong>2</strong> times",
-                isGunTech: true,
-                maxCount: 3,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("wave beam") && !tech.isLongitudinal
-                },
-                requires: "wave beam",
-                effect() {
-                    tech.waveReflections += 2
-                },
-                remove() {
-                    tech.waveReflections = 1
-                }
-            },
-            {
                 name: "phase velocity",
-                description: "wave beam <strong>propagates</strong> faster through solids<br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
+                description: "wave beam <strong>propagates</strong> faster through <strong>solids</strong><br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3913,7 +3894,7 @@
                 allowed() {
                     return tech.haveGunCheck("wave beam") && !tech.isLongitudinal
                 },
-                requires: "wave beam",
+                requires: "wave beam, not phonon",
                 effect() {
                     tech.isPhaseVelocity = true;
                 },
@@ -3922,27 +3903,22 @@
                 }
             },
             {
-                name: "packet length",
-                description: "wave packet <strong>length</strong> and <strong>duration</strong><br>is increased by <strong>50%</strong>", //    description: "holding fire allows the <strong>wave beam</strong> to emits a second <strong>packet</strong><br>at zero ammo cost",
+                name: "bound state",
+                description: "wave packets <strong>reflect</strong> backwards <strong>2</strong> times<br><strong>range</strong> is reduced by <strong>25%</strong>",
                 isGunTech: true,
-                maxCount: 3,
+                maxCount: 9,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("wave beam") && !tech.isLongitudinal
+                    return tech.haveGunCheck("wave beam")
                 },
                 requires: "wave beam",
                 effect() {
-                    const scale = 1.5 - 0.025 * this.count
-                    tech.wavePacketLength *= scale
-                    tech.wavePacketFrequency /= scale
-                    tech.waveLengthRange *= Math.sqrt(scale)
+                    tech.waveReflections += 2
                 },
                 remove() {
-                    tech.wavePacketFrequency = 0.088 //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
-                    tech.wavePacketLength = 35 //32.7 //31.3 //28.8 //36 //how many wave packets are released // double this to emit 2 packets
-                    tech.waveLengthRange = 130;
+                    tech.waveReflections = 1
                 }
             },
             {
@@ -3968,7 +3944,7 @@
             },
             {
                 name: "propagation",
-                description: "wave packet propagation <strong>speed</strong> is <strong>25%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
+                description: "wave packet propagation <strong>speed</strong> is <strong>20%</strong> slower<br>wave <strong class='color-d'>damage</strong> is increased by <strong>50%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3979,26 +3955,26 @@
                 },
                 requires: "wave beam",
                 effect() {
-                    tech.waveBeamSpeed *= 0.75;
-                    tech.waveBeamDamage += 1.3 * 0.5
+                    tech.waveBeamSpeed *= 0.8;
+                    tech.waveBeamDamage += 1.5 * 0.5 //this sets base wave beam damage, not used by arcs or circles
                 },
                 remove() {
                     tech.waveBeamSpeed = 10;
-                    tech.waveBeamDamage = 1.5 //this sets base wave beam damage
+                    tech.waveBeamDamage = 1.5 //this sets base wave beam damage, not used by arcs or circles
                 }
             },
             {
-                name: "pressure wave", //longitudinal  //gravitational wave?
-                description: "wave beam emits low <strong>frequency</strong>, high <strong class='color-d'>damage</strong><br><strong>expanding arcs</strong> that propagate through solids",
+                name: "phonon", //longitudinal  //gravitational wave?
+                description: "wave beam emits low <strong>frequency</strong>, high <strong class='color-d'>damage</strong><br><strong>expanding arcs</strong> that propagate through <strong>solids</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.haveGunCheck("wave beam") && !tech.isPhaseVelocity && tech.waveLengthRange === 130 && tech.waveReflections === 1
+                    return tech.haveGunCheck("wave beam") && !tech.isPhaseVelocity
                 },
-                requires: "wave beam, not phase velocity, packet length, bound state",
+                requires: "wave beam, not phase velocity ",
                 effect() {
                     tech.isLongitudinal = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4024,6 +4000,37 @@
                         }
                     }
                     tech.isLongitudinal = false;
+                }
+            },
+            {
+                name: "isotropic radiator",
+                description: "<strong>wave beam</strong> expands in <strong>all</strong> directions<br><span style = 'font-size:90%;'><strong>range</strong> reduced <strong>40%</strong> and <strong class='color-d'>damage</strong> increased <strong>50%</strong></span>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 4,
+                frequencyDefault: 4,
+                allowed() {
+                    return tech.isLongitudinal
+                },
+                requires: "phonon",
+                effect() {
+                    tech.is360Longitudinal = true;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "wave beam") {
+                            b.guns[i].chooseFireMethod()
+                            break
+                        }
+                    }
+                },
+                remove() {
+                    tech.is360Longitudinal = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "wave beam") {
+                            b.guns[i].chooseFireMethod()
+                            break
+                        }
+                    }
                 }
             },
             {
@@ -4432,24 +4439,42 @@
                 }
             },
             {
-                name: "irradiated drones",
-                description: "<strong class='color-p'>irradiate</strong> the space around your <strong>drones</strong><br>reduce <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>80%</strong>",
-                //<br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>
+                name: "torque bursts",
+                description: "<strong>drones</strong> rapidly <strong>rush</strong> towards their target<br>increase <strong>drone</strong> collision <strong class='color-d'>damage</strong> by <strong>33%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.droneCycleReduction === 1 && !tech.isIncendiary && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
+                    return tech.haveGunCheck("drones") && !tech.isDroneRadioactive
+                },
+                requires: "drone gun",
+                effect() {
+                    tech.isDroneTeleport = true
+                },
+                remove() {
+                    tech.isDroneTeleport = false
+                }
+            },
+            {
+                name: "irradiated drones",
+                description: "<strong class='color-p'>irradiate</strong> the space around your <strong>drones</strong><br>reduce <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>75%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.droneCycleReduction === 1 && !tech.isIncendiary && !tech.isDroneTeleport && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
                 requires: "drone gun, not reduced tolerances or incendiary",
                 effect() {
                     tech.isDroneRadioactive = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") {
-                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.2
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.2)
+                            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.25
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.25)
                         }
                     }
                 },
@@ -4459,7 +4484,7 @@
                         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                             if (b.guns[i].name === "drones") {
                                 b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
-                                b.guns[i].ammo = b.guns[i].ammo * 5
+                                b.guns[i].ammo = b.guns[i].ammo * 4
                             }
                         }
                     }
@@ -4583,7 +4608,7 @@
             },
             {
                 name: "electrostatic induction",
-                description: "<strong>foam</strong> bullets are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
+                description: "<strong>foam</strong> bubbles are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5173,7 +5198,7 @@
                     m.energy = 0.01;
                     b.randomBot()
                     b.randomBot()
-                    // b.randomBot()
+                    b.randomBot()
                 },
                 remove() {}
             },
@@ -5726,7 +5751,7 @@
             },
             {
                 name: "traversable geodesics",
-                description: "your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and <strong class='color-g'>ammo</strong>",
+                description: "your <strong>projectiles</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and <strong class='color-g'>ammo</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6299,13 +6324,16 @@
                         if (
                             tech.tech[i].count < tech.tech[i].maxCount &&
                             tech.tech[i].allowed() &&
-                            !tech.tech[i].isJunk
+                            !tech.tech[i].isJunk &&
+                            !tech.tech.isLore
                         ) {
-                            for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
+                            options.push(i);
                         }
                     }
-                    const index = options[Math.floor(Math.random() * options.length)]
-                    tech.tech[index].frequency = 100
+                    if (options.length) {
+                        const index = options[Math.floor(Math.random() * options.length)]
+                        tech.tech[index].frequency = 100
+                    }
                 },
                 remove() {}
             },
@@ -7445,10 +7473,8 @@
         isMobBlockFling: null,
         blockingIce: null,
         isPhaseVelocity: null,
-        wavePacketLength: null,
         waveBeamSpeed: null,
         wavePacketAmplitude: null,
-        waveLengthRange: null,
         isCollisionRealitySwitch: null,
         iceIXOnDeath: null,
         wimpCount: null,
@@ -7473,10 +7499,12 @@
         laserColor: null,
         laserColorAlpha: null,
         isLongitudinal: null,
+        is360Longitudinal: null,
         isShotgunReversed: null,
         wormDuplicate: null,
         isCloakingDamage: null,
         harmonicEnergy: null,
         isFieldHarmReduction: null,
-        isFastTime: null
+        isFastTime: null,
+        isDroneTeleport: null
     }

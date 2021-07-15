@@ -332,14 +332,14 @@ const simulation = {
         }
     },
     nextGun() {
-        if (b.inventory.length > 0 && !tech.isGunCycle) {
+        if (b.inventory.length > 1 && !tech.isGunCycle) {
             b.inventoryGun++;
             if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
             simulation.switchGun();
         }
     },
     previousGun() {
-        if (b.inventory.length > 0 && !tech.isGunCycle) {
+        if (b.inventory.length > 1 && !tech.isGunCycle) {
             b.inventoryGun--;
             if (b.inventoryGun < 0) b.inventoryGun = b.inventory.length - 1;
             simulation.switchGun();
