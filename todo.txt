@@ -1,14 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+spore tech - nematodes - replace spores with 1/2 as many worms that do 200% more damage
+  worms are also a bit faster, last longer, have better reaction times
+  a cool worm graphic, and a simple searching behavior if they haven't found a mob
 
+mycelial fragmentation - makes 6 extra spores during growth phase (was 4)
+
+historyBoss has less health, slower tracking, and more damage
 
 ******************************************************** TODO ********************************************************
-
-give drones or spores some mobs abilities
-  striker: teleport towards target  
-
-drone tech: snakes
-  I haven't thought about this much, but I don't know make them look like snakes...
 
 scrolling console history in pause menu?
   also make tech, guns scrolling?
@@ -17,6 +17,8 @@ pause should at least show the last in game console message
 
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
+
+Tech: "Induced Oscillation": When using phonon, if a block vibrates after it gets hit from a phonon, it has a chance of oscillating and creating an additional phonon coming from the block. The chance is higher the closer the block is to the source of the oscillation.
 
 tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
   draw 1,2,3 levels of the field based on energy?

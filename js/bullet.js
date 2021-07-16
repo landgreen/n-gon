@@ -1830,10 +1830,106 @@ const b = {
         Matter.Body.setVelocity(bullet[bIndex], velocity);
         World.add(engine.world, bullet[bIndex]); //add bullet to world
     },
+    worm(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
+        const bIndex = bullet.length;
+        const size = 3
+        if (bIndex < 500) { //can't make over 500 spores
+            bullet[bIndex] = Bodies.polygon(where.x, where.y, size, size, {
+                inertia: Infinity,
+                isFreeze: isFreeze,
+                restitution: 0.5,
+                // angle: Math.random() * 2 * Math.PI,
+                friction: 0,
+                frictionAir: 0.025,
+                thrust: (tech.isFastSpores ? 0.001 : 0.0005) * (1 + 0.5 * (Math.random() - 0.5)),
+                dmg: (tech.isMutualism ? 16.8 : 7) * 3, //bonus damage from tech.isMutualism //3 is extra damage as worm
+                lookFrequency: 100 + Math.floor(37 * Math.random()),
+                classType: "bullet",
+                collisionFilter: {
+                    category: cat.bullet,
+                    mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
+                },
+                endCycle: simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger),
+                minDmgSpeed: 0,
+                playerOffPosition: { //used when moving towards player to keep spores separate
+                    x: 100 * (Math.random() - 0.5),
+                    y: 100 * (Math.random() - 0.5)
+                },
+                beforeDmg(who) {
+                    this.endCycle = 0; //bullet ends cycle after doing damage 
+                    if (this.isFreeze) mobs.statusSlow(who, 90)
+                },
+                onEnd() {
+                    if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
+                        m.health += 0.005
+                        if (m.health > m.maxHealth) m.health = m.maxHealth;
+                        m.displayHealth();
+                    }
+                },
+                do() {
+                    ctx.beginPath(); //draw nematode
+                    ctx.moveTo(this.position.x, this.position.y);
+                    const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(80, 7 * this.speed))
+                    const tail = Vector.add(this.position, dir)
+                    ctx.lineTo(tail.x, tail.y);
+                    ctx.lineWidth = 6;
+                    ctx.strokeStyle = "#000";
+                    ctx.stroke();
+
+                    if (this.lockedOn && this.lockedOn.alive) {
+                        this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+                    } else {
+                        if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
+                            this.closestTarget = null;
+                            this.lockedOn = null;
+                            let closeDist = Infinity;
+                            for (let i = 0, len = mob.length; i < len; ++i) {
+                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                    const targetVector = Vector.sub(this.position, mob[i].position)
+                                    const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
+                                    if (dist < closeDist) {
+                                        this.closestTarget = mob[i].position;
+                                        closeDist = dist;
+                                        this.lockedOn = mob[i]
+                                        if (0.3 > Math.random()) break //doesn't always target the closest mob
+                                    }
+                                }
+                            }
+                        }
+                        if (tech.isSporeFollow && this.lockedOn === null) { //move towards player //checking for null means that the spores don't go after the player until it has looked and not found a target
+                            const dx = this.position.x - m.pos.x;
+                            const dy = this.position.y - m.pos.y;
+                            if (dx * dx + dy * dy > 10000) {
+                                this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+                            }
+                        } else {
+                            const unit = Vector.normalise(this.velocity)
+                            const force = Vector.mult(Vector.rotate(unit, 0.005 * this.playerOffPosition.x), 0.000003)
+                            this.force.x += force.x
+                            this.force.y += force.y
+                        }
+                    }
+                },
+            });
+            const SPEED = 2 + 1 * Math.random();
+            const ANGLE = 2 * Math.PI * Math.random()
+            Matter.Body.setVelocity(bullet[bIndex], {
+                x: SPEED * Math.cos(ANGLE),
+                y: SPEED * Math.sin(ANGLE)
+            });
+            World.add(engine.world, bullet[bIndex]); //add bullet to world
+            if (tech.isMutualism && m.health > 0.02) {
+                m.health -= 0.005
+                m.displayHealth();
+                bullet[bIndex].isMutualismActive = true
+            }
+        }
+    },
     spore(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
+        const size = 4
         if (bIndex < 500) { //can't make over 500 spores
-            bullet[bIndex] = Bodies.polygon(where.x, where.y, 4, 4, {
+            bullet[bIndex] = Bodies.polygon(where.x, where.y, size, size, {
                 // density: 0.0015,			//frictionAir: 0.01,
                 inertia: Infinity,
                 isFreeze: isFreeze,
@@ -2055,7 +2151,7 @@ const b = {
             beforeDmg(who) {
                 if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle) {
                     const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
-                    b.explosion(this.position, max * 0.08 + this.isImproved * 100 + 60 * Math.random()); //makes bullet do explosive damage at end
+                    b.explosion(this.position, max * 0.09 + this.isImproved * 100 + 60 * Math.random()); //makes bullet do explosive damage at end
                     this.endCycle -= max
                 } else {
                     //move away from target after hitting
@@ -3749,7 +3845,7 @@ const b = {
                     if (tech.isIncendiary) {
                         bullet[me].endCycle = simulation.cycle + 60
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 300 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 320 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -3804,7 +3900,7 @@ const b = {
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 135 * (tech.isShotgunReversed ? 1.6 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.6 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -3898,7 +3994,7 @@ const b = {
                 bullet[me].beforeDmg = function(who) {
                     mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                     if (tech.isIncendiary) {
-                        b.explosion(this.position, this.mass * 285); //makes bullet do explosive damage at end
+                        b.explosion(this.position, this.mass * 300); //makes bullet do explosive damage at end
                         this.endCycle = 0
                     }
                 };
@@ -3926,7 +4022,7 @@ const b = {
                     };
                     bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
-                            b.explosion(this.position, this.mass * 350 + 60 * Math.random()); //makes bullet do explosive damage at end
+                            b.explosion(this.position, this.mass * 355 + 70 * Math.random()); //makes bullet do explosive damage at end
                             this.endCycle = 0
                         }
                     };
@@ -3958,7 +4054,7 @@ const b = {
                     };
                     bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
-                            b.explosion(this.position, this.mass * 350 + 60 * Math.random()); //makes bullet do explosive damage at end
+                            b.explosion(this.position, this.mass * 355 + 70 * Math.random()); //makes bullet do explosive damage at end
                             this.endCycle = 0
                         }
                     };
@@ -4466,7 +4562,7 @@ const b = {
                 bullet[me].maxRadius = 30;
                 bullet[me].restitution = 0.3;
                 bullet[me].minDmgSpeed = 0;
-                bullet[me].totalSpores = 8 + 2 * tech.isFastSpores + 2 * tech.isSporeFreeze
+                bullet[me].totalSpores = 8 + 2 * tech.isFastSpores + 2 * tech.isSporeFreeze * (tech.isSporeWorm ? 0.5 : 1)
                 bullet[me].stuck = function() {};
                 bullet[me].beforeDmg = function() {};
                 bullet[me].do = function() {
@@ -4544,11 +4640,15 @@ const b = {
                     this.stuck(); //runs different code based on what the bullet is stuck to
                     if (!m.isBodiesAsleep) {
                         let scale = 1.01
-                        if (tech.isSporeGrowth && !(simulation.cycle % 60)) { //release a spore
-                            b.spore(this.position)
+                        if (tech.isSporeGrowth && !(simulation.cycle % 40)) { //release a spore
+                            if (tech.isSporeWorm) {
+                                if (!(simulation.cycle % 80)) b.worm(this.position)
+                            } else {
+                                b.spore(this.position)
+                            }
                             // this.totalSpores--
-                            scale = 0.94
-                            if (this.stuckTo && this.stuckTo.alive) scale = 0.88
+                            scale = 0.96
+                            if (this.stuckTo && this.stuckTo.alive) scale = 0.9
                             Matter.Body.scale(this, scale, scale);
                             this.radius *= scale
                         } else {
@@ -4570,9 +4670,10 @@ const b = {
 
                 //spawn bullets on end
                 bullet[me].onEnd = function() {
-                    const NUM = this.totalSpores
-                    for (let i = 0; i < NUM; i++) {
-                        b.spore(this.position)
+                    if (tech.isSporeWorm) {
+                        for (let i = 0, len = this.totalSpores * 0.5; i < len; i++) b.worm(this.position)
+                    } else {
+                        for (let i = 0; i < this.totalSpores; i++) b.spore(this.position)
                     }
                 }
             }

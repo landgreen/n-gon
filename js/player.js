@@ -1814,15 +1814,29 @@ const m = {
                 m.hold = function() {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
-                            for (let i = 0, len = Math.random() * 20; i < len; i++) {
-                                m.energy -= 0.08
-                                if (m.energy > 0) {
-                                    b.spore(m.pos)
-                                } else {
-                                    m.energy = 0.001
-                                    break;
+                            if (tech.isSporeWorm) {
+                                for (let i = 0, len = Math.random() * 20; i < len; i++) {
+                                    m.energy -= 0.15
+                                    if (m.energy > 0) {
+                                        b.worm(m.pos)
+                                    } else {
+                                        m.energy = 0.001
+                                        break;
+                                    }
+                                }
+                            } else {
+                                for (let i = 0, len = Math.random() * 20; i < len; i++) {
+                                    m.energy -= 0.08
+                                    if (m.energy > 0) {
+                                        b.spore(m.pos)
+                                    } else {
+                                        m.energy = 0.001
+                                        break;
+                                    }
                                 }
                             }
+
+
                         } else if (tech.isMissileField) {
                             m.energy -= 0.3;
                             b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
@@ -2588,7 +2602,7 @@ const m = {
                                                 m.fieldRange *= 0.8
                                                 if (tech.isWormholeEnergy) m.energy += 0.63
                                                 if (tech.isWormSpores) { //pandimensionalspermia
-                                                    for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
+                                                    for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         b.spore(Vector.add(m.hole.pos2, Vector.rotate({
                                                             x: m.fieldRange * 0.4,
                                                             y: 0
@@ -2614,7 +2628,7 @@ const m = {
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
                                             if (tech.isWormholeEnergy) m.energy += 0.63
                                             if (tech.isWormSpores) { //pandimensionalspermia
-                                                for (let i = 0, len = Math.ceil(3 * Math.random()); i < len; i++) {
+                                                for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                     b.spore(Vector.add(m.hole.pos1, Vector.rotate({
                                                         x: m.fieldRange * 0.4,
                                                         y: 0

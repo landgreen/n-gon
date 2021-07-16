@@ -1582,7 +1582,7 @@ const spawn = {
         }
         mobs.spawn(x, y, 0, radius, "transparent");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.25); //extra dense //normal is 0.001
+        Matter.Body.setDensity(me, 0.20); //extra dense //normal is 0.001
         me.laserRange = 300;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
@@ -1621,8 +1621,11 @@ const spawn = {
             ctx.setLineDash([125 * Math.random(), 125 * Math.random()]); //the dashed effect is not set back to normal, because it looks neat for how the player is drawn
             // ctx.lineDashOffset = 6*(simulation.cycle % 215);
             if (this.distanceToPlayer() < this.laserRange) {
-                if (m.energy > 0.002) m.energy -= 0.0035
-                if (m.immuneCycle < m.cycle) m.damage(0.00025 * simulation.dmgScale);
+                if (m.energy > 0.002) {
+                    m.energy -= 0.0035
+                } else if (m.immuneCycle < m.cycle) {
+                    m.damage(0.0003 * simulation.dmgScale)
+                }
                 ctx.beginPath();
                 ctx.moveTo(eye.x, eye.y);
                 ctx.lineTo(m.pos.x, m.pos.y);
@@ -1659,7 +1662,7 @@ const spawn = {
             // ctx.fillStyle = "rgba(150,0,255,0.03)";
             // ctx.fill();
             if (!m.isBodiesAsleep && !this.isStunned && !this.isSlowed) {
-                if (this.followDelay > this.delayLimit) this.followDelay -= 0.3;
+                if (this.followDelay > this.delayLimit) this.followDelay -= 0.2;
                 let history = m.history[(m.cycle - Math.floor(this.followDelay)) % 600]
                 Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }

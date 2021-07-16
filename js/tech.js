@@ -852,8 +852,8 @@
                 description: "<strong>shotgun</strong>, <strong>super balls</strong>, and <strong>drones</strong><br>are loaded with <strong class='color-e'>explosives</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
                 },
@@ -932,8 +932,11 @@
                 requires: "no other mob death tech",
                 effect() {
                     tech.sporesOnDeath += 0.11;
-                    for (let i = 0; i < 8; i++) {
-                        b.spore(m.pos)
+                    if (tech.isSporeWorm) {
+                        for (let i = 0; i < 4; i++) b.worm(m.pos)
+
+                    } else {
+                        for (let i = 0; i < 8; i++) b.spore(m.pos)
                     }
                 },
                 remove() {
@@ -4257,7 +4260,7 @@
             },
             {
                 name: "mycelial fragmentation",
-                description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release an extra <strong class='color-p' style='letter-spacing: 2px;'>spore</strong><br> once a <strong>second</strong> during their <strong>growth</strong> phase",
+                description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>6</strong> extra <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br>during their <strong>growth</strong> phase",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4330,6 +4333,25 @@
                 },
                 remove() {
                     tech.isSporeFollow = false
+                }
+            },
+            {
+                name: "nematodes",
+                description: "replace <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> with <strong>50%</strong> fewer <strong class='color-p'>worms</strong><br><strong class='color-p'>worms</strong> do <strong>200%</strong> more <strong class='color-d'>damage</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 4,
+                frequencyDefault: 4,
+                allowed() {
+                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
+                },
+                requires: "spores",
+                effect() {
+                    tech.isSporeWorm = true
+                },
+                remove() {
+                    tech.isSporeWorm = false
                 }
             },
             {
@@ -5805,20 +5827,24 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
-                isNonRefundable: true,
                 isBadRandomOption: true,
                 isExperimentalMode: true,
                 allowed() {
                     return build.isExperimentSelection
                 },
                 requires: "",
+                interval: undefined,
                 effect() {
-                    setInterval(() => {
-                        m.switchWorlds()
-                        simulation.trails()
+                    this.interval = setInterval(() => {
+                        if (!build.isExperimentSelection) {
+                            m.switchWorlds()
+                            simulation.trails()
+                        }
                     }, 20000); //every 20 seconds
                 },
-                remove() {}
+                remove() {
+                    if (this.count > 0) clearTimeout(this.interval);
+                }
             },
             {
                 name: "-shields-",
@@ -5826,7 +5852,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
-                isNonRefundable: true,
                 isBadRandomOption: true,
                 isExperimentalMode: true,
                 allowed() {
@@ -5834,13 +5859,18 @@
                 },
                 requires: "",
                 effect() {
-                    setInterval(() => {
-                        for (let i = 0; i < mob.length; i++) {
-                            if (!mob[i].isShielded && !mob[i].shield && mob[i].isDropPowerUp) spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
+                    this.interval = setInterval(() => {
+                        if (!build.isExperimentSelection) {
+                            for (let i = 0; i < mob.length; i++) {
+                                if (!mob[i].isShielded && !mob[i].shield && mob[i].isDropPowerUp) spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
+                            }
                         }
                     }, 5000); //every 5 seconds
                 },
-                remove() {}
+                interval: undefined,
+                remove() {
+                    if (this.count > 0) clearTimeout(this.interval);
+                }
             },
             {
                 name: "-Fourier analysis-",
@@ -5848,7 +5878,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
-                isNonRefundable: true,
                 isBadRandomOption: true,
                 isExperimentalMode: true,
                 allowed() {
@@ -5865,7 +5894,9 @@
                         m.transY += (m.transSmoothY - m.transY) * 0.07;
                     }
                 },
-                remove() {}
+                remove() {
+                    if (this.count > 0) m.look = m.lookDefault()
+                }
             },
             {
                 name: "-panopticon-",
@@ -5873,7 +5904,6 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
-                isNonRefundable: true,
                 isBadRandomOption: true,
                 isExperimentalMode: true,
                 allowed() {
@@ -5881,16 +5911,21 @@
                 },
                 requires: "",
                 effect() {
-                    setInterval(() => {
-                        for (let i = 0; i < mob.length; i++) {
-                            if (!mob[i].shield && mob[i].isDropPowerUp) {
-                                mob[i].locatePlayer()
-                                mob[i].seePlayer.yes = true;
+                    this.interval = setInterval(() => {
+                        if (!build.isExperimentSelection) {
+                            for (let i = 0; i < mob.length; i++) {
+                                if (!mob[i].shield && mob[i].isDropPowerUp) {
+                                    mob[i].locatePlayer()
+                                    mob[i].seePlayer.yes = true;
+                                }
                             }
                         }
                     }, 1000); //every 1 seconds
                 },
-                remove() {}
+                interval: undefined,
+                remove() {
+                    if (this.count > 0) clearTimeout(this.interval);
+                }
             },
             {
                 name: "-decomposers-",
@@ -7506,5 +7541,6 @@
         harmonicEnergy: null,
         isFieldHarmReduction: null,
         isFastTime: null,
-        isDroneTeleport: null
+        isDroneTeleport: null,
+        isSporeWorm: null
     }

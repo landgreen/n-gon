@@ -15,11 +15,12 @@ const level = {
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("drones")
+            // b.giveGuns("spores")
+            // tech.isSporeWorm = true
+            // tech.giveTech("tinsellated flagella")
             // tech.giveTech("torque bursts")
             // b.giveGuns("wave beam")
             // tech.giveTech("phonon")
-            // tech.giveTech("bound state")
             // tech.giveTech("bound state")
             // tech.giveTech("bound state")
             // tech.giveTech("isotropic radiator")
@@ -2253,7 +2254,7 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.pulsarBoss(1900, -500)
         // spawn.shieldingBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
@@ -2269,7 +2270,7 @@ const level = {
         // spawn.orbitalBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
-        spawn.grenadier(1200, -500)
+        // spawn.grenadier(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "grenadier")
@@ -6313,15 +6314,21 @@ const level = {
         // spawn.randomGroup(7700, -1100, 0.5);
         spawn.randomGroup(9800, -1100, 0.5);
 
-        if (simulation.difficulty > 10) spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "snakeBoss", "spiderBoss", "historyBoss"])
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "snakeBoss", "spiderBoss", "historyBoss"])
         spawn.secondaryBossChance(7900, -400)
 
         //Boss Spawning
         if (simulation.difficulty > 10) {
             spawn.pulsarBoss(-400, -200);
+            powerUps.chooseRandomPowerUp(4006, 400);
+            powerUps.chooseRandomPowerUp(4407, 400);
+            powerUps.spawnStartingPowerUps(4400, 400);
             if (simulation.difficulty > 30) {
+                powerUps.chooseRandomPowerUp(4002, 400);
+                powerUps.chooseRandomPowerUp(4004, 400);
                 spawn.pulsarBoss(3600, -400);
                 if (simulation.difficulty > 60) {
+                    powerUps.chooseRandomPowerUp(4409, 400);
                     spawn.pulsarBoss(4200, 1000);
                     if (simulation.difficulty > 80) {
                         spawn.pulsarBoss(5800, -1200);
@@ -6338,12 +6345,6 @@ const level = {
 
         //Powerup Spawning
         powerUps.spawnStartingPowerUps(4000, 400);
-        powerUps.spawnStartingPowerUps(4400, 400);
-        powerUps.chooseRandomPowerUp(4002, 400);
-        powerUps.chooseRandomPowerUp(4004, 400);
-        powerUps.chooseRandomPowerUp(4006, 400);
-        powerUps.chooseRandomPowerUp(4407, 400);
-        powerUps.chooseRandomPowerUp(4409, 400);
         powerUps.addResearchToLevel(); //needs to run after mobs are spawned
 
         //Block Spawning
