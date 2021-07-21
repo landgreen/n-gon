@@ -1,14 +1,58 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-spore tech - nematodes - replace spores with 1/2 as many worms that do 200% more damage
-  worms are also a bit faster, last longer, have better reaction times
-  a cool worm graphic, and a simple searching behavior if they haven't found a mob
+2 more lore chapters (5 total now)
+entering testing mode makes a sound now
 
-mycelial fragmentation - makes 6 extra spores during growth phase (was 4)
+reduced the requirements and frequency for many tech so that they may show up in "less optimal" situations
+  I hope this will increase build variety and also give more value to making good tech choices
+countless bug fixes and wording fixes
 
-historyBoss has less health, slower tracking, and more damage
+mobs have a new trait mob[i].damageReduction
 
 ******************************************************** TODO ********************************************************
+  
+
+
+perfect diamagnetism field stays when you aren't holding field
+  good for perfect because it doesn't use energy
+  holding field moves it the player
+
+level with mobs that follow a genetic algorithm
+  mobs have genes
+  the last mob that did damage saves it's genes to local storage
+  new mobs have the saved genes, but with some random mutations
+  mutations need to be balanced to prevent a gene from moving towards infinity
+    total genome must equal 1   (100%)
+    binary genes have a flat cost
+      example: phasing through walls might cost 0.2
+    spectrum genes have a rate
+      example: acceleration cost 0.01 per 0.001
+  possible genes
+    genes should only effect it's ability to touch the player
+      so not damage?
+    genome: spectrum
+      acceleration
+      top speed / air friction
+      damageReduction
+      duration?
+        health decreases naturally?
+        or they just go away like bullets?
+      spawn rate
+      look frequency / memory?
+    genome: binary
+      go through walls
+      blink/teleport (like striker)
+      grow when near target
+      split into two
+      shielded
+  occurs in a specialized level
+    named: gene lab, gene factory, genetic lab, genome facility
+    in the level sequence after lab and before gauntlet?
+    level ends after a period of time
+      exit is hidden until time is up and it appears
+      the level tests player durability/evasion
+        this is a nice contrast to the final level that tests damage output, and the gauntlet which tests AoE damage
+
 
 scrolling console history in pause menu?
   also make tech, guns scrolling?
@@ -17,8 +61,6 @@ pause should at least show the last in game console message
 
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
-
-Tech: "Induced Oscillation": When using phonon, if a block vibrates after it gets hit from a phonon, it has a chance of oscillating and creating an additional phonon coming from the block. The chance is higher the closer the block is to the source of the oscillation.
 
 tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
   draw 1,2,3 levels of the field based on energy?
@@ -186,6 +228,9 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
+blocks on buttons teleport into the button endlessly if they are being slowly floated away
+  maybe add a cooldown?
+
 ants marching outline doesn't sync right on safari anymore.
 
 door to exit in vats does nothing
@@ -270,6 +315,12 @@ map: observatory
 
 ******************************************************** MOBS ********************************************************
 
+mobs that buff the stats of mobs when they die
+  nearby mobs
+  boss is a group of mobs, they buff each other
+  give the buff a ramp up time
+    so there is an advantage to kill them all at once
+
 mob that spawns eggs after they die
   eggs don't attack but grow back into a mob after about 10s
 
@@ -346,6 +397,7 @@ possible names for tech
   eternal inflation
   hypergraph
   gnarl
+  SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
 
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

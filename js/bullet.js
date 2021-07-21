@@ -1869,7 +1869,7 @@ const b = {
                 do() {
                     ctx.beginPath(); //draw nematode
                     ctx.moveTo(this.position.x, this.position.y);
-                    const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(80, 7 * this.speed))
+                    const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(45, 7 * this.speed))
                     const tail = Vector.add(this.position, dir)
                     ctx.lineTo(tail.x, tail.y);
                     ctx.lineWidth = 6;

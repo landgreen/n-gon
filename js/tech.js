@@ -125,14 +125,19 @@
             }
         },
         setCheating() {
-            simulation.isCheating = true;
-            level.levelAnnounce();
-            lore.techCount = 0;
-            for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].isLore) {
-                    tech.tech[i].frequency = 0;
-                    tech.tech[i].count = 0;
+            if (!simulation.isCheating) {
+                simulation.isCheating = true;
+                level.levelAnnounce();
+                lore.techCount = 0;
+                for (let i = 0, len = tech.tech.length; i < len; i++) {
+                    if (tech.tech[i].isLore) {
+                        tech.tech[i].frequency = 0;
+                        tech.tech[i].count = 0;
+                    }
                 }
+                sound.tone(250)
+                sound.tone(300)
+                sound.tone(375)
             }
         },
         haveGunCheck(name) {
@@ -182,7 +187,7 @@
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
-                const range = 1000
+                const range = 700
                 const bossOptions = ["historyBoss", "cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture"]
                 spawn.randomLevelBoss(m.pos.x + range, m.pos.y, bossOptions);
                 spawn.randomLevelBoss(m.pos.x, m.pos.y + range, bossOptions);
@@ -1529,7 +1534,7 @@
                 allowed() {
                     return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
                 },
-                requires: "mass driver or pilot wave  not tokamak",
+                requires: "mass driver or pilot wave, not tokamak",
                 effect() {
                     tech.isBlockBullets = true
                 },
@@ -1871,8 +1876,8 @@
                 description: `<strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds<br>after receiving <strong class='color-harm'>harm</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.isSlowFPS
                 },
@@ -1889,8 +1894,8 @@
                 description: `<strong>slow</strong> <strong>time</strong> by <strong>50%</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>20%</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return simulation.fpsCapDefault > 45
                 },
@@ -2005,6 +2010,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.isRewindAvoidDeath
@@ -2025,9 +2031,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplosionHarm && tech.isRewindAvoidDeath
+                    return tech.isRewindAvoidDeath
                 },
-                requires: "CPT, not acetone peroxide",
+                requires: "CPT",
                 effect() {
                     tech.isRewindGrenade = true;
                 },
@@ -2040,12 +2046,12 @@
                 description: "<strong>colliding</strong> with mobs gives you <strong>2048</strong> <strong class='color-f'>energy</strong>", //<br>reduce <strong class='color-harm'>harm</strong> by <strong>15%</strong>
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return !tech.isEnergyHealth && (m.harmReduction() < 1 || tech.isFlipFlopHarm)
+                    return !tech.isEnergyHealth
                 },
-                requires: "not mass-energy, some harm reduction",
+                requires: "not mass-energy",
                 effect() {
                     tech.isPiezo = true;
                     m.energy += 20.48;
@@ -2175,9 +2181,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isBlockExplosion
+                    return true //m.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isBlockExplosion
                 },
-                requires: "increased energy regen or max energy",
+                requires: "", //"increased energy regen or max energy",
                 effect: () => {
                     tech.isEnergyDamage = true
                 },
@@ -2190,12 +2196,12 @@
                 description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return (tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return true //(tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "energy based damage",
+                requires: "", //"energy based damage",
                 effect() {
                     tech.isEnergyNoAmmo = true;
                 },
@@ -2249,7 +2255,7 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.isEnergyLoss && m.maxEnergy < 1.1
+                    return tech.isEnergyLoss && m.maxEnergy < 1.01
                 },
                 requires: "exothermic process, not max energy increase",
                 effect() {
@@ -2271,7 +2277,7 @@
                 },
                 requires: "",
                 effect() {
-                    tech.bonusEnergy += 0.5
+                    tech.bonusEnergy += 0.6
                     m.setMaxEnergy()
                     tech.addJunkTechToPool(10)
                 },
@@ -2306,12 +2312,12 @@
                 description: "<strong>6%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return tech.damageFromTech() > 1
+                    return true
                 },
-                requires: "some increased damage",
+                requires: "",
                 effect() {
                     tech.energySiphon += 0.06;
                 },
@@ -2327,9 +2333,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return m.maxEnergy > 0.99
+                    return true
                 },
-                requires: "max energy >= 1",
+                requires: "",
                 effect() {
                     tech.isEnergyRecovery = true;
                 },
@@ -2361,8 +2367,8 @@
                 description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:90%;'>increase <strong class='color-d'>damage</strong> by <strong>99%</strong> else decrease it by <strong>33%</strong></span>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return true
                 },
@@ -2379,8 +2385,8 @@
                 description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong> else increase it by <strong>15%</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.isDamageAfterKill && !tech.isEnergyHealth
                 },
@@ -2400,9 +2406,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.health < 0.5 || build.isExperimentSelection
+                    return m.health < 0.6 || build.isExperimentSelection
                 },
-                requires: "health below 50",
+                requires: "health below 60",
                 effect() {
                     tech.isLowHealthDmg = true; //used in mob.damage()
                 },
@@ -2415,12 +2421,12 @@
                 description: "increase <strong class='color-d'>damage</strong> by <strong>90%</strong><br>lose <strong>11</strong> <strong class='color-h'>health</strong> when you pick up a <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return (m.harmReduction() < 1 || tech.healthDrain || tech.isLowHealthDmg || tech.isHealthRecovery || tech.isHealLowHealth || tech.largerHeals > 1) && !tech.isEnergyHealth
+                    return !tech.isEnergyHealth
                 },
-                requires: "negative feedback or extra healing tech or harm reduction, not mass-energy",
+                requires: "not mass-energy",
                 effect() {
                     tech.isTechDamage = true;
                 },
@@ -2434,11 +2440,12 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isHealTech: true,
                 allowed() {
-                    return !tech.isEnergyHealth && tech.damageFromTech() > 1 && !tech.isNoHeals
+                    return !tech.isEnergyHealth && !tech.isNoHeals
                 },
-                requires: "some increased damage, not mass-energy equivalence, ergodicity",
+                requires: "not mass-energy equivalence, ergodicity",
                 effect() {
                     tech.healthDrain += 0.03;
                 },
@@ -2464,27 +2471,6 @@
                     tech.isAcidDmg = false;
                 }
             },
-            // {
-            //     name: "supersaturation",
-            //     description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>50</strong>",
-            //     maxCount: 9,
-            //     count: 0,
-            //     frequency: 1,
-            //     frequencyDefault: 1,
-            //     allowed() {
-            //         return !tech.isEnergyHealth && !tech.isNoHeals
-            //     },
-            //     requires: "not mass-energy equivalence, ergodicity",
-            //     effect() {
-            //         tech.bonusHealth += 0.5
-            //         m.setMaxHealth();
-            //         m.addHealth(0.50)
-            //     },
-            //     remove() {
-            //         tech.bonusHealth = 0
-            //         m.setMaxHealth();
-            //     }
-            // },
             {
                 name: "tungsten carbide",
                 description: "increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>100</strong><br><strong>landings</strong> that force you to crouch cause <strong class='color-harm'>harm</strong>",
@@ -2617,8 +2603,8 @@
                 description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>increase <strong class='color-d'>damage</strong> by <strong>137.03599%</strong> on that level",
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.isDeathAvoid
                 },
@@ -2635,8 +2621,8 @@
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong><br>after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.isDeathAvoid
                 },
@@ -2656,9 +2642,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isResearchReality && level.onLevel < 6 && !tech.isCollisionRealitySwitch
+                    return !tech.isResearchReality && !tech.isCollisionRealitySwitch
                 },
-                requires: "before level 6, Ψ(t) collapse, non-unitary",
+                requires: "not Ψ(t) collapse, non-unitary",
                 effect() {
                     tech.isSwitchReality = true;
                 },
@@ -2735,9 +2721,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (powerUps.research.count > 3 || build.isExperimentSelection) && !tech.isSuperDeterminism && !tech.isRerollHaste
+                    return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isSuperDeterminism
                 },
-                requires: "not superdeterminism or Ψ(t) collapse<br>at least 4 research",
+                requires: "at least 3 research and not superdeterminism",
                 effect() {
                     tech.renormalization = true;
                 },
@@ -2750,12 +2736,12 @@
                 description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return powerUps.research.count === 0 && !tech.isAnsatz
+                    return powerUps.research.count === 0
                 },
-                requires: "no research, not ansatz",
+                requires: "no research",
                 effect() {
                     tech.isRerollHaste = true;
                     tech.researchHaste = 0.33;
@@ -2775,9 +2761,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste
+                    return powerUps.research.count === 0 && !tech.isSuperDeterminism && !tech.isRerollHaste && !tech.isResearchReality
                 },
-                requires: "not superdeterminism or Ψ(t) collapse, no research, perturbation theory",
+                requires: "no research, not superdeterminism, Ψ(t) collapse, perturbation theory",
                 effect: () => {
                     tech.isAnsatz = true;
                 },
@@ -3051,12 +3037,12 @@
                 description: "after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong> chance<br>immediately spawn <strong>8 bosses</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 6,
-                frequencyDefault: 6,
+                frequency: 4,
+                frequencyDefault: 4,
                 allowed() {
-                    return tech.duplicationChance() > 0.66
+                    return tech.duplicationChance() > 0.6
                 },
-                requires: "duplication chance above 66%",
+                requires: "duplication chance above 60%",
                 effect() {
                     tech.is100Duplicate = true;
                     tech.maxDuplicationEvent()
@@ -3077,7 +3063,7 @@
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism
                 },
-                requires: "at least 4 tech, not super determinism",
+                requires: "at least 4 tech, not superdeterminism",
                 effect: () => {
                     const have = [] //find which tech you have
                     for (let i = 0; i < tech.tech.length; i++) {
@@ -3109,7 +3095,7 @@
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism && tech.duplicationChance() > 0
                 },
-                requires: "at least 4 tech, a chance to duplicate power ups",
+                requires: "at least 4 tech, a chance to duplicate power ups, not superdeterminism",
                 effect: () => {
                     const removeTotal = powerUps.removeRandomTech()
                     for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
@@ -3186,7 +3172,7 @@
             },
             {
                 name: "reinforcement learning",
-                description: "increase the <strong class='flicker'>frequency</strong> of finding copies of<br>recursive <strong class='color-m'>tech</strong> you already have by <strong>10000%</strong>",
+                description: "increase the <strong class='flicker'>frequency</strong> of finding copies of<br>recursive <strong class='color-m'>tech</strong> you already have by <strong>1000%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3197,12 +3183,12 @@
                 requires: "at least 10 tech",
                 effect: () => {
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].count > 0) tech.tech[i].frequency *= 100
+                        if (tech.tech[i].count > 0) tech.tech[i].frequency *= 10
                     }
                 },
                 remove() {
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].count > 0 && tech.tech[i].frequency > 1) tech.tech[i].frequency /= 100
+                        if (tech.tech[i].count > 0 && tech.tech[i].frequency > 1) tech.tech[i].frequency /= 10
                     }
                 }
             },
@@ -3729,7 +3715,7 @@
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot
                 },
-                requires: "shotgun, not slug",
+                requires: "shotgun, not slug, incendiary",
                 effect() {
                     tech.isNailShot = true;
                 },
@@ -3824,7 +3810,7 @@
                 allowed() {
                     return tech.haveGunCheck("super balls") && !tech.oneSuperBall
                 },
-                requires: "super balls, but not the tech super ball or super duper",
+                requires: "super balls, but not the tech super ball",
                 effect() {
                     tech.superBallDelay = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3851,7 +3837,7 @@
                 allowed() {
                     return tech.haveGunCheck("super balls") && tech.superBallNumber === 3 && !tech.superBallDelay
                 },
-                requires: "super balls, but not super duper or super queue",
+                requires: "super balls, but not super duper or supertemporal",
                 effect() {
                     tech.oneSuperBall = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3991,15 +3977,16 @@
                     }
                 },
                 remove() {
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "wave beam") {
-                            b.guns[i].chooseFireMethod()
-                            if (tech.isLongitudinal) {
+                    if (tech.isLongitudinal) {
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "wave beam") {
+                                tech.isLongitudinal = false;
+                                b.guns[i].chooseFireMethod()
                                 b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
                                 b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 8);
                                 simulation.updateGunHUD();
+                                break
                             }
-                            break
                         }
                     }
                     tech.isLongitudinal = false;
@@ -4337,14 +4324,14 @@
             },
             {
                 name: "nematodes",
-                description: "replace <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> with <strong>50%</strong> fewer <strong class='color-p'>worms</strong><br><strong class='color-p'>worms</strong> do <strong>200%</strong> more <strong class='color-d'>damage</strong>",
+                description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> develop into <strong>1/2</strong> as many <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> do <strong>200%</strong> more <strong class='color-d'>damage</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
+                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormSpores
                 },
                 requires: "spores",
                 effect() {
@@ -4471,7 +4458,7 @@
                 allowed() {
                     return tech.haveGunCheck("drones") && !tech.isDroneRadioactive
                 },
-                requires: "drone gun",
+                requires: "drone gun, not irradiated drones",
                 effect() {
                     tech.isDroneTeleport = true
                 },
@@ -4490,7 +4477,7 @@
                 allowed() {
                     return tech.droneCycleReduction === 1 && !tech.isIncendiary && !tech.isDroneTeleport && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
-                requires: "drone gun, not reduced tolerances or incendiary",
+                requires: "drones, not reduced tolerances, incendiary, torque bursts",
                 effect() {
                     tech.isDroneRadioactive = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4601,7 +4588,7 @@
                 allowed() {
                     return tech.haveGunCheck("foam")
                 },
-                requires: "foam",
+                requires: "foam gun",
                 effect() {
                     tech.foamFutureFire++
                 },
@@ -4620,7 +4607,7 @@
                 allowed() {
                     return tech.haveGunCheck("foam")
                 },
-                requires: "foam",
+                requires: "foam gun",
                 effect() {
                     tech.isAmmoFoamSize = true
                 },
@@ -4801,7 +4788,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseAim && !tech.historyLaser
                 },
-                requires: "laser, not neocognitron, diffuse beam, or slow light",
+                requires: "laser gun, not neocognitron, diffuse beam, or slow light",
                 effect() {
                     tech.beamSplitter++
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4828,7 +4815,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.historyLaser
                 },
-                requires: "laser, not specular reflection, diffraction grating, slow light, pulse",
+                requires: "laser gun, not specular reflection, diffraction grating, slow light, pulse",
                 effect() {
                     if (tech.wideLaser === 0) tech.wideLaser = 3
                     tech.isWideLaser = true;
@@ -4855,9 +4842,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") && tech.isWideLaser
+                    return tech.isWideLaser
                 },
-                requires: "laser, diffuse beam",
+                requires: "diffuse beam",
                 effect() {
                     tech.wideLaser += 2
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4886,7 +4873,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isWideLaser
                 },
-                requires: "laser, not specular reflection, diffraction grating, diffuse beam",
+                requires: "laser gun, not specular reflection, diffraction grating, diffuse beam",
                 effect() {
                     // this.description = `add 5 more <strong>laser</strong> beams into into your past`
                     tech.historyLaser++
@@ -4915,7 +4902,7 @@
                 allowed() {
                     return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.15
                 },
-                requires: "laser, not specular reflection, diffuse, solid-state",
+                requires: "laser gun, not specular reflection, diffuse, free-electron laser",
                 effect() {
                     tech.isPulseLaser = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -5310,7 +5297,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive)
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
                 },
                 requires: "nano-scale manufacturing, no other manufacturing, no drone tech",
                 effect() {
@@ -5335,7 +5322,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive)
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
                 },
                 requires: "nano-scale manufacturing, no other manufacturing, no drone tech",
                 effect() {
@@ -5360,7 +5347,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive)
+                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
                 },
                 requires: "nano-scale manufacturing, no other manufacturing, no drone tech",
                 effect() {
@@ -5387,7 +5374,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "nano-scale manufacturing",
+                requires: "nano-scale manufacturing or pilot wave",
                 effect: () => {
                     tech.isMassEnergy = true // used in m.grabPowerUp
                     m.energy += 2
@@ -5717,9 +5704,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 2)
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 2) && tech.duplicationChance() < 1
                 },
-                requires: "wormhole",
+                requires: "wormhole,below 100% duplication chance",
                 effect() {
                     tech.wormDuplicate = 0.19
                     powerUps.setDo(); //needed after adjusting duplication chance

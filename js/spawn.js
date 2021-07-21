@@ -94,7 +94,7 @@ const spawn = {
         } else if (tech.isResearchBoss) {
             if (powerUps.research.count > 3) {
                 powerUps.research.changeRerolls(-4)
-                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 5<br>${powerUps.research.count}`)
+                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 4<br>${powerUps.research.count}`)
             } else {
                 tech.addJunkTechToPool(49)
             }
@@ -254,6 +254,8 @@ const spawn = {
         }, 2000); //add in a delay in case the level gets flipped left right
 
         me.isBoss = true;
+        me.damageReduction = 0.25;
+        me.damageReduction = 0.25;
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.hasRunDeathScript = false
@@ -722,6 +724,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.stroke = "transparent"
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.isCell = true;
         me.cellID = cellID
         me.accelMag = 0.00016 * simulation.accelScale;
@@ -799,6 +802,7 @@ const spawn = {
         mobs.spawn(x + Math.random(), y + Math.random(), 4, radius, "rgba(255,60,0,0.3)") //);
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.isSpawnBoss = true;
         me.spawnID = spawnID
         me.accelMag = 0.0002 * simulation.accelScale;
@@ -887,6 +891,7 @@ const spawn = {
         mobs.spawn(x, y, vertices, radius, "transparent");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.frictionAir = 0.01
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0005 * simulation.accelScale;
@@ -1068,6 +1073,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.g = 0.005; //required if using 'gravity'
         me.frictionAir = 0.01;
         me.friction = 1
@@ -1285,6 +1291,7 @@ const spawn = {
         mobs.spawn(x, y, 12, radius, "#000");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = 1100; //required for black hole
         me.seeAtDistance2 = (me.eventHorizon + 1200) * (me.eventHorizon + 1200); //vision limit is event horizon
@@ -1396,6 +1403,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.0035); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
+        me.damageReduction = 0.25;
         targets.push(me.id) //add to shield protection
         me.friction = 0;
         me.frictionAir = 0.0065;
@@ -1479,7 +1487,7 @@ const spawn = {
     // timeSkipBoss(x, y, radius = 55) {
     //     mobs.spawn(x, y, 6, radius, '#000');
     //     let me = mob[mob.length - 1];
-    //     me.isBoss = true;
+    //     me.isBoss = true; me.damageReduction = 0.25;
     //     // me.stroke = "transparent"; //used for drawSneaker
     //     me.timeSkipLastCycle = 0
     //     me.eventHorizon = 1800; //required for black hole
@@ -1586,6 +1594,7 @@ const spawn = {
         me.laserRange = 300;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.showHealthBar = false; //drawn in this.awake
         me.delayLimit = 60 + Math.floor(30 * Math.random());
         me.followDelay = 600 - Math.floor(60 * Math.random())
@@ -1749,6 +1758,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, color);
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.accelMag = 0.00018 * Math.sqrt(simulation.accelScale);
@@ -1913,6 +1923,7 @@ const spawn = {
         me.isFiring = false
         Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
+        me.damageReduction = 0.25;
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random(), 1)
         me.onDeath = function() {
@@ -2165,6 +2176,7 @@ const spawn = {
         }, 2000); //add in a delay in case the level gets flipped left right
 
         me.isBoss = true;
+        me.damageReduction = 0.25;
         // me.startingPosition = {
         //     x: x,
         //     y: y
@@ -2589,6 +2601,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "rgba(255,0,200,0.5)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         Matter.Body.setDensity(me, 0.002 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.stroke = "transparent"; //used for drawGhost
@@ -2677,6 +2690,7 @@ const spawn = {
         }, 2000); //add in a delay in case the level gets flipped left right
 
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
         me.memory = 240;
@@ -2965,6 +2979,7 @@ const spawn = {
         mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.accelMag = 0.00008 * simulation.accelScale;
         me.fireFreq = Math.floor(360 * simulation.CDScale)
         me.frictionStatic = 0;
@@ -3005,6 +3020,7 @@ const spawn = {
         mobs.spawn(x, y, 6, radius, "rgb(215,80,190)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.accelMag = 0.0001 * simulation.accelScale;
         me.fireFreq = Math.floor(360 * simulation.CDScale)
         me.frictionStatic = 0;
@@ -3194,6 +3210,7 @@ const spawn = {
         Matter.Body.rotate(me, Math.random() * 2 * Math.PI)
         // me.stroke = "rgb(220,220,255)"
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.cycle = 0
         me.maxCycles = 120;
         me.frictionStatic = 0;
@@ -3249,6 +3266,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(245,180,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         // me.accelMag = 0.00023 * simulation.accelScale;
         me.accelMag = 0.00008 * simulation.accelScale;
         // me.fireFreq = Math.floor(30 * simulation.CDScale)
@@ -3462,6 +3480,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgb(55,170,170)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.accelMag = 0.00075 * simulation.accelScale;
         me.memory = 250;
         me.laserRange = 500;
@@ -3547,6 +3566,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         me.g = 0.0001; //required if using 'gravity'
         me.accelMag = 0.002 * simulation.accelScale;
         me.memory = 20;
@@ -3582,6 +3602,7 @@ const spawn = {
             me.stroke = "rgb(220,220,255)";
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.shield = true;
+            me.damageReduction = 0.075
             me.isExtraShield = isExtraShield //this prevents spamming with tech.isShieldAmmo
             me.collisionFilter.category = cat.mobShield
             me.collisionFilter.mask = cat.bullet;
@@ -3629,6 +3650,7 @@ const spawn = {
         Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
         me.frictionAir = 0;
         me.shield = true;
+        me.damageReduction = 0.075
         me.collisionFilter.category = cat.mobShield
         me.collisionFilter.mask = cat.bullet;
         for (let i = 0; i < nodes; ++i) {
@@ -3720,6 +3742,7 @@ const spawn = {
         mobs.spawn(x, y, nodes, radius, "rgb(255,0,150)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25;
         Matter.Body.setDensity(me, 0.002 + 0.00015 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.stroke = "transparent"; //used for drawGhost

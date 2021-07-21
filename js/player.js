@@ -516,7 +516,7 @@ const m = {
             const immunityCycle = m.cycle + 90
             if (m.immuneCycle < immunityCycle) m.immuneCycle = immunityCycle; //player is immune to damage until after grenades might explode...
 
-            for (let i = 1, len = Math.floor(2 + steps / 40); i < len; i++) {
+            for (let i = 1, len = Math.floor(4 + steps / 40); i < len; i++) {
                 b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
                 const who = bullet[bullet.length - 1]
                 if (tech.isVacuumBomb) {
@@ -525,7 +525,7 @@ const m = {
                         y: who.velocity.y * 0.5
                     });
                 } else if (tech.isRPG) {
-                    who.endCycle = (who.endCycle - simulation.cycle) * 0.2 + simulation.cycle
+                    who.endCycle = (who.endCycle - simulation.cycle) * 0.2 + simulation.cycle + 10 * Math.random()
                 } else if (tech.isNeutronBomb) {
                     Matter.Body.setVelocity(who, {
                         x: who.velocity.x * 0.3,
@@ -536,7 +536,7 @@ const m = {
                         x: who.velocity.x * 0.5,
                         y: who.velocity.y * 0.5
                     });
-                    who.endCycle = (who.endCycle - simulation.cycle) * 0.5 + simulation.cycle
+                    who.endCycle = (who.endCycle - simulation.cycle) * 0.5 + simulation.cycle + 10 * Math.random()
                 }
             }
         }
@@ -1815,14 +1815,15 @@ const m = {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             if (tech.isSporeWorm) {
-                                for (let i = 0, len = Math.random() * 20; i < len; i++) {
+                                if (m.energy > 0.15) {
                                     m.energy -= 0.15
-                                    if (m.energy > 0) {
-                                        b.worm(m.pos)
-                                    } else {
-                                        m.energy = 0.001
-                                        break;
-                                    }
+                                    b.worm({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) })
+                                    const SPEED = 2 + 1 * Math.random();
+                                    Matter.Body.setVelocity(bullet[bullet.length - 1], {
+                                        x: SPEED * Math.cos(m.angle),
+                                        y: SPEED * Math.sin(m.angle)
+                                    });
+
                                 }
                             } else {
                                 for (let i = 0, len = Math.random() * 20; i < len; i++) {
@@ -2603,11 +2604,19 @@ const m = {
                                                 if (tech.isWormholeEnergy) m.energy += 0.63
                                                 if (tech.isWormSpores) { //pandimensionalspermia
                                                     for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
-                                                        b.spore(Vector.add(m.hole.pos2, Vector.rotate({
-                                                            x: m.fieldRange * 0.4,
-                                                            y: 0
-                                                        }, 2 * Math.PI * Math.random())))
-                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -15));
+                                                        if (tech.isSporeWorm) {
+                                                            b.worm(Vector.add(m.hole.pos2, Vector.rotate({
+                                                                x: m.fieldRange * 0.4,
+                                                                y: 0
+                                                            }, 2 * Math.PI * Math.random())))
+                                                            Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -5));
+                                                        } else {
+                                                            b.spore(Vector.add(m.hole.pos2, Vector.rotate({
+                                                                x: m.fieldRange * 0.4,
+                                                                y: 0
+                                                            }, 2 * Math.PI * Math.random())))
+                                                            Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -15));
+                                                        }
                                                     }
                                                 }
                                                 break
@@ -2629,11 +2638,19 @@ const m = {
                                             if (tech.isWormholeEnergy) m.energy += 0.63
                                             if (tech.isWormSpores) { //pandimensionalspermia
                                                 for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
-                                                    b.spore(Vector.add(m.hole.pos1, Vector.rotate({
-                                                        x: m.fieldRange * 0.4,
-                                                        y: 0
-                                                    }, 2 * Math.PI * Math.random())))
-                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 15));
+                                                    if (tech.isSporeWorm) {
+                                                        b.worm(Vector.add(m.hole.pos1, Vector.rotate({
+                                                            x: m.fieldRange * 0.4,
+                                                            y: 0
+                                                        }, 2 * Math.PI * Math.random())))
+                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
+                                                    } else {
+                                                        b.spore(Vector.add(m.hole.pos1, Vector.rotate({
+                                                            x: m.fieldRange * 0.4,
+                                                            y: 0
+                                                        }, 2 * Math.PI * Math.random())))
+                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 15));
+                                                    }
                                                 }
                                             }
                                             break

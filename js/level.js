@@ -14,14 +14,12 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.difficultyIncrease(30)
             // simulation.isHorizontalFlipped = true
-            // m.setField("wormhole")
+            // m.setField("perfect diamagnetism")
             // b.giveGuns("spores")
-            // tech.isSporeWorm = true
-            // tech.giveTech("tinsellated flagella")
-            // tech.giveTech("torque bursts")
+            // tech.giveTech("CPT reversal")
+            // tech.giveTech("causality bombs")
             // b.giveGuns("wave beam")
             // tech.giveTech("phonon")
-            // tech.giveTech("bound state")
             // tech.giveTech("bound state")
             // tech.giveTech("isotropic radiator")
             // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
@@ -59,7 +57,7 @@ const level = {
             // lore.techCount = 6
 
             // simulation.isCheating = false //true;
-            // localSettings.loreCount = 0; //this sets what conversation is heard
+            // localSettings.loreCount = 4; //this sets what conversation is heard
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
@@ -925,6 +923,7 @@ const level = {
             }
         }
     },
+    isHazardRise: false,
     hazard(x, y, width, height, damage = 0.003) {
         return {
             min: {
@@ -967,9 +966,10 @@ const level = {
                     ctx.fillRect(this.min.x, this.min.y + offset, this.width, this.height - offset)
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
-                        const DRAIN = 0.003 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
+                        const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
                         if (m.energy > DRAIN) {
                             m.energy -= DRAIN
+                            m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
                         } else {
                             m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1))
                         }
@@ -2094,20 +2094,21 @@ const level = {
             lore.chapter = localSettings.loreCount //set the chapter to listen to to be the lore level (you can't use the lore level because it changes during conversations)
             lore.sentence = 0 //what part of the conversation to start on
             lore.conversation[lore.chapter][lore.sentence]()
-
             localSettings.loreCount++ //hear the next conversation next time you win
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
 
-        const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
+        // const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
+        const hazardSlime = level.hazard(-1800, -800, 3600, 1600, 0.004, "hsla(160, 100%, 35%,0.75)")
+        hazardSlime.height -= 950
+        hazardSlime.min.y += 950
+        hazardSlime.max.y = hazardSlime.min.y + hazardSlime.height
         const circle = {
             x: 0,
             y: -500,
             radius: 50
         }
         level.custom = () => {
-            hazardSlime.query();
-
             //draw wide line
             ctx.beginPath();
             ctx.moveTo(circle.x, -800)
@@ -2117,6 +2118,9 @@ const level = {
             ctx.globalAlpha = 0.03;
             ctx.stroke();
             ctx.globalAlpha = 1;
+            //support pillar
+            ctx.fillStyle = "rgba(0,0,0,0.2)";
+            ctx.fillRect(-25, 0, 50, 1000);
 
             //draw circles
             ctx.beginPath();
@@ -2132,25 +2136,18 @@ const level = {
             ctx.fillStyle = lore.talkingColor //"#dff"
             ctx.fill();
 
-            level.enter.draw();
-            // level.exit.draw();
-            // level.playerExitCheck();
+            // level.enter.draw();
         };
-        let sway = {
-            x: 0,
-            y: 0
-        }
+        let sway = { x: 0, y: 0 }
         let phase = -Math.PI / 2
         level.customTopLayer = () => {
             ctx.fillStyle = "rgba(0,0,0,0.1)";
             ctx.fillRect(-1950, -950, 3900, 1900);
-            // hazardSlime.drawTides();
-
             //draw center circle lines
             ctx.beginPath();
             const step = Math.PI / 20
             const horizontalStep = 85
-            if (simulation.isCheating) phase += 0.01 //(m.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
+            if (simulation.isCheating) phase += 0.3 * Math.random() * Math.random() //(m.pos.x - circle.x) * 0.0005 //0.05 * Math.sin(simulation.cycle * 0.030)
             // const sway = 5 * Math.cos(simulation.cycle * 0.007)
             sway.x = sway.x * 0.995 + 0.005 * (m.pos.x - circle.x) * 0.05 //+ 0.04 * Math.cos(simulation.cycle * 0.01)
             sway.y = 2.5 * Math.sin(simulation.cycle * 0.015)
@@ -2167,6 +2164,8 @@ const level = {
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = "#899";
             ctx.stroke();
+            hazardSlime.query();
+            if (level.isHazardRise) hazardSlime.level(true)
             //draw wires
             // ctx.beginPath();
             // ctx.moveTo(-500, -800);
@@ -2191,7 +2190,7 @@ const level = {
         spawn.mapRect(-3000, -2000, 1200, 3400); //left
         spawn.mapRect(1800, -1400, 1200, 3400); //right
 
-        spawn.mapRect(-500, 0, 1000, 1000); //center platform
+        spawn.mapRect(-500, 0, 1000, 50); //center platform
         spawn.mapRect(-500, -25, 25, 50); //edge shelf
         spawn.mapRect(475, -25, 25, 50); //edge shelf
     },
@@ -2255,6 +2254,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
         spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500)
+
         // spawn.pulsarBoss(1900, -500)
         // spawn.shieldingBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
@@ -6810,6 +6811,7 @@ const level = {
         }
     },
     "n-gon"() { //make by Oranger
+        document.body.style.backgroundColor = "#dcdcde";
         let needGravity = [];
         let s = { //mech statue
             x: -200,

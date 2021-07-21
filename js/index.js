@@ -1089,6 +1089,7 @@ if (localSettings) {
         runCount: 0,
         levelsClearedLastGame: 0,
         loreCount: 0,
+        isHuman: false,
         key: undefined
     };
     input.setDefault()
@@ -1168,7 +1169,41 @@ document.getElementById("updates").addEventListener("toggle", function() {
         }
     );
 })
-
+const sound = {
+    tone(frequency, end = 1000, gain = 0.05) {
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)(); //setup audio context
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = gain; //controls volume
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+        oscillator.frequency.value = frequency; // value in hertz
+        oscillator.start();
+        setTimeout(() => {
+            audioCtx.suspend()
+            audioCtx.close()
+        }, end)
+        // return audioCtx
+    },
+    portamento(frequency, end = 1000, shiftRate = 10, gain = 0.05) {
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)(); //setup audio context
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = gain; //controls volume
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+        oscillator.frequency.value = frequency; // value in hertz
+        oscillator.start();
+        for (let i = 0, len = end * 0.1; i < len; i++) oscillator.frequency.setValueAtTime(frequency + i * shiftRate, audioCtx.currentTime + i * 0.01);
+        setTimeout(() => {
+            audioCtx.suspend()
+            audioCtx.close()
+        }, end)
+        // return audioCtx
+    }
+}
 //**********************************************************************
 // main loop 
 //**********************************************************************

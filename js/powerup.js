@@ -82,7 +82,7 @@ const powerUps = {
         //remove power ups after 3 seconds
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             if (powerUp[i].isDuplicated && Math.random() < 0.004) { //  (1-0.004)^150 = chance to be removed after 3 seconds
-                b.explosion(powerUp[i].position, (10 + 3 * Math.random()) * powerUp[i].size);
+                b.explosion(powerUp[i].position, 150 + (10 + 3 * Math.random()) * powerUp[i].size);
                 Matter.World.remove(engine.world, powerUp[i]);
                 powerUp.splice(i, 1);
                 break
@@ -239,7 +239,7 @@ const powerUps = {
                     if (tech.renormalization) {
                         for (let i = 0; i < cost; i++) {
                             if (Math.random() < 0.4) {
-                                m.fieldCDcycle = m.cycle + 30;
+                                m.fieldCDcycle = m.cycle + 20;
                                 powerUps.spawn(m.pos.x, m.pos.y, "research");
                             }
                         }
@@ -783,11 +783,9 @@ const powerUps = {
 
             //bonus power ups for clearing runs in the last game
             if (level.levelsCleared === 0 && !simulation.isCheating && localSettings.levelsClearedLastGame > 1) {
-                for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
-                    simulation.makeTextLog(`for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++)`);
-                    simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") //simulation superposition }`);
-                }
+                for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
+                simulation.makeTextLog(`for (let i <span class='color-symbol'>=</span> 0; i <span class='color-symbol'><</span> localSettings.levelsClearedLastGame <span class='color-symbol'>/</span> 3; i<span class='color-symbol'>++</span>)`);
+                simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") <em>//simulation superposition</em>}`);
                 localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
