@@ -188,15 +188,14 @@
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
                 const range = 700
-                const bossOptions = ["historyBoss", "cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture"]
-                spawn.randomLevelBoss(m.pos.x + range, m.pos.y, bossOptions);
-                spawn.randomLevelBoss(m.pos.x, m.pos.y + range, bossOptions);
-                spawn.randomLevelBoss(m.pos.x - range, m.pos.y, bossOptions);
-                spawn.randomLevelBoss(m.pos.x, m.pos.y - range, bossOptions);
-                spawn.randomLevelBoss(m.pos.x + range, m.pos.y + range, bossOptions);
-                spawn.randomLevelBoss(m.pos.x + range, m.pos.y - range, bossOptions);
-                spawn.randomLevelBoss(m.pos.x - range, m.pos.y + range, bossOptions);
-                spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, bossOptions);
+                spawn.randomLevelBoss(m.pos.x + range, m.pos.y, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x, m.pos.y + range, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x - range, m.pos.y, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x, m.pos.y - range, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x + range, m.pos.y + range, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x + range, m.pos.y - range, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x - range, m.pos.y + range, spawn.nonCollideBossList);
+                spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, spawn.nonCollideBossList);
             }
         },
         tech: [{
@@ -1524,24 +1523,24 @@
                     tech.isMobBlockFling = false
                 }
             },
-            {
-                name: "fermions",
-                description: "<strong class='color-block'>blocks</strong> thrown by you or <strong>pilot wave</strong> will<br><strong>collide</strong> with <strong>intangible</strong> mobs, but not you",
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
-                },
-                requires: "mass driver or pilot wave, not tokamak",
-                effect() {
-                    tech.isBlockBullets = true
-                },
-                remove() {
-                    tech.isBlockBullets = false
-                }
-            },
+            // {
+            //     name: "fermions",
+            //     description: "<strong class='color-block'>blocks</strong> thrown by you or <strong>pilot wave</strong> will<br><strong>collide</strong> with <strong>intangible</strong> mobs, but not you",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+            //     },
+            //     requires: "mass driver or pilot wave, not tokamak",
+            //     effect() {
+            //         tech.isBlockBullets = true
+            //     },
+            //     remove() {
+            //         tech.isBlockBullets = false
+            //     }
+            // },
             {
                 name: "inflation",
                 description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
@@ -1617,17 +1616,17 @@
             },
             {
                 name: "complex spin-statistics",
-                description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> second<br>once every <strong>7</strong> seconds`,
+                description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1.5</strong> seconds<br>once every <strong>7</strong> seconds`,
                 maxCount: 3,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return true //tech.collisionImmuneCycles > 30
                 },
                 requires: "",
                 effect() {
-                    tech.cyclicImmunity += 60;
+                    tech.cyclicImmunity += 90;
                 },
                 remove() {
                     tech.cyclicImmunity = 0;
@@ -7500,7 +7499,6 @@
         isCollisionRealitySwitch: null,
         iceIXOnDeath: null,
         wimpCount: null,
-        isBlockBullets: null,
         isAddBlockMass: null,
         isMACHO: null,
         isHarmMACHO: null,

@@ -351,7 +351,12 @@ const lore = {
                     lore.miriam.text("The exact coordinates are blocked.")
                 } else {
                     console.log('Locating…')
-                    navigator.geolocation.getCurrentPosition(success, error);
+                    const options = {
+                        enableHighAccuracy: true,
+                        maximumAge: 30000,
+                        timeout: 27000
+                    };
+                    navigator.geolocation.getCurrentPosition(success, error, options);
                 }
             },
             () => { lore.anand.text("This location is sending and receiving data from the satellite.") },
@@ -401,7 +406,6 @@ const lore = {
             () => { lore.talkingColor = "#dff" },
         ],
         // [ // they decided that a part of the project is out of control, but the part of it that doesn't needs to calm it down, and trust.
-
         //     /*
         //     The part of the AI controlling the player is outsourcing the player control to real humans that think they are playing a video game.
         //          this means the player can use console commands to change the way the game works

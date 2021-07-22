@@ -12,9 +12,9 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(30)
+            // level.difficultyIncrease(60) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("perfect diamagnetism")
+            // m.setField("wormhole")
             // b.giveGuns("spores")
             // tech.giveTech("CPT reversal")
             // tech.giveTech("causality bombs")
@@ -640,10 +640,10 @@ const level = {
                     this.isUp = true;
                 } else {
                     if (this.isUp === true) {
-                        const list = Matter.Query.region(body, this)
+                        const list = Matter.Query.region(body, this) //are any blocks colliding with this
                         if (list.length > 0) {
-                            if (list[0].bounds.max.x - list[0].bounds.min.x < 150 && list[0].bounds.max.y - list[0].bounds.min.y < 150) {
-                                Matter.Body.setPosition(list[0], {
+                            if (list[0].bounds.max.x - list[0].bounds.min.x < 150 && list[0].bounds.max.y - list[0].bounds.min.y < 150) { //not too big of a block
+                                Matter.Body.setPosition(list[0], { //teleport block to the center of the button
                                     x: this.min.x + width / 2,
                                     y: list[0].position.y
                                 })
@@ -2195,7 +2195,9 @@ const level = {
         spawn.mapRect(475, -25, 25, 50); //edge shelf
     },
     testing() {
-        // const button = level.button(200, -700)
+        const button = level.button(1000, 0)
+        spawn.bodyRect(1000, -50, 50, 50);
+
         // const toggle = level.toggle(200, -700)
         level.custom = () => {
             // button.draw();
@@ -2206,7 +2208,8 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            // toggle.query();
+            button.query();
+            button.draw();
         };
 
         level.setPosToSpawn(0, -450); //normal spawn
@@ -2253,8 +2256,8 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        spawn.starter(1900, -500, 200) //big boy
-        spawn.starter(1900, -500)
+        // spawn.starter(1900, -500, 200) //big boy
+        spawn.buffBossCulture(1900, -500)
 
         // spawn.pulsarBoss(1900, -500)
         // spawn.shieldingBoss(1900, -500)
@@ -2268,7 +2271,7 @@ const level = {
         // spawn.bomberBoss(1400, -500)
         // spawn.hopBoss(1800, -120)
         // spawn.streamBoss(1600, -500)
-        // spawn.orbitalBoss(1600, -500)
+        // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1600, -500)
         // spawn.grenadier(1200, -500)
@@ -7056,7 +7059,7 @@ const level = {
         spawn.randomGroup(2000, -5700, 0.6);
 
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss"];
+        let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss", "buffBossCulture"];
         let abc = Math.random();
         if (simulation.difficulty > 3) {
             if (abc < 0.6) {

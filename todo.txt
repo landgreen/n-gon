@@ -1,58 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-2 more lore chapters (5 total now)
-entering testing mode makes a sound now
+buffBoss:  group of mobs that buff their group after they die
+  this boss maybe unbalanced in some situations, let me know
+  (get them all low on health before you start killing them)
 
-reduced the requirements and frequency for many tech so that they may show up in "less optimal" situations
-  I hope this will increase build variety and also give more value to making good tech choices
-countless bug fixes and wording fixes
+complex spin-statistics gives 1.5/7 harm immunity (was 1/7)
+  also tech frequency was halved
 
-mobs have a new trait mob[i].damageReduction
+tech fermions is now on by default: thrown blocks can collide with intangible mobs
+  pilot wave uses 5% more energy for balance
 
 ******************************************************** TODO ********************************************************
-  
 
+try out making the player's "eye" a bigger circle
 
 perfect diamagnetism field stays when you aren't holding field
   good for perfect because it doesn't use energy
   holding field moves it the player
-
-level with mobs that follow a genetic algorithm
-  mobs have genes
-  the last mob that did damage saves it's genes to local storage
-  new mobs have the saved genes, but with some random mutations
-  mutations need to be balanced to prevent a gene from moving towards infinity
-    total genome must equal 1   (100%)
-    binary genes have a flat cost
-      example: phasing through walls might cost 0.2
-    spectrum genes have a rate
-      example: acceleration cost 0.01 per 0.001
-  possible genes
-    genes should only effect it's ability to touch the player
-      so not damage?
-    genome: spectrum
-      acceleration
-      top speed / air friction
-      damageReduction
-      duration?
-        health decreases naturally?
-        or they just go away like bullets?
-      spawn rate
-      look frequency / memory?
-    genome: binary
-      go through walls
-      blink/teleport (like striker)
-      grow when near target
-      split into two
-      shielded
-  occurs in a specialized level
-    named: gene lab, gene factory, genetic lab, genome facility
-    in the level sequence after lab and before gauntlet?
-    level ends after a period of time
-      exit is hidden until time is up and it appears
-      the level tests player durability/evasion
-        this is a nice contrast to the final level that tests damage output, and the gauntlet which tests AoE damage
-
 
 scrolling console history in pause menu?
   also make tech, guns scrolling?
@@ -261,7 +225,41 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** LEVELS ********************************************************
 
-try out making the player's "eye" a bigger circle
+level with mobs that follow a genetic algorithm
+  mobs have genes
+  the last mob that did damage saves it's genes to local storage
+  new mobs have the saved genes, but with some random mutations
+  mutations need to be balanced to prevent a gene from moving towards infinity
+    total genome must equal 1   (100%)
+    binary genes have a flat cost
+      example: phasing through walls might cost 0.2
+    spectrum genes have a rate
+      example: acceleration cost 0.01 per 0.001
+  possible genes
+    genes should only effect it's ability to touch the player
+      so not damage?
+    genome: spectrum
+      acceleration
+      top speed / air friction
+      damageReduction
+      duration?
+        health decreases naturally?
+        or they just go away like bullets?
+      spawn rate
+      look frequency / memory?
+    genome: binary
+      go through walls
+      blink/teleport (like striker)
+      grow when near target
+      split into two
+      shielded
+  occurs in a specialized level
+    named: gene lab, gene factory, genetic lab, genome facility
+    in the level sequence after lab and before gauntlet?
+    level ends after a period of time
+      exit is hidden until time is up and it appears
+      the level tests player durability/evasion
+        this is a nice contrast to the final level that tests damage output, and the gauntlet which tests AoE damage
 
 rename intro level to something lore related
 
@@ -314,12 +312,6 @@ map: observatory
   button opens the dome
 
 ******************************************************** MOBS ********************************************************
-
-mobs that buff the stats of mobs when they die
-  nearby mobs
-  boss is a group of mobs, they buff each other
-  give the buff a ramp up time
-    so there is an advantage to kill them all at once
 
 mob that spawns eggs after they die
   eggs don't attack but grow back into a mob after about 10s

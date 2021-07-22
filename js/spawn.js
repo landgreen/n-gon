@@ -84,7 +84,8 @@ const spawn = {
             }
         }
     },
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss"]) {
+    nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "buffBossCulture"],
+    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "buffBossCulture"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -706,7 +707,6 @@ const spawn = {
         me.memory = 60;
         me.seeAtDistance2 = 1400000 //1200 vision range
         Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
-
         me.do = function() {
             this.seePlayerByLookingAt();
             this.attraction();
@@ -812,7 +812,6 @@ const spawn = {
         me.frictionAir = 0.012
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 200000 //1400000;
-        me.cellMassMax = 70
         me.stroke = "transparent"
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
         // Matter.Body.setDensity(me, 0.0014) // normal density is 0.001
@@ -828,11 +827,6 @@ const spawn = {
                 this.checkStatus();
                 this.attraction();
 
-                // if (this.seePlayer.recall && this.mass < this.cellMassMax) { //grow cell radius
-                //     const scale = 1 + 0.0002 * this.cellMassMax / this.mass;
-                //     Matter.Body.scale(this, scale, scale);
-                //     this.radius = Math.sqrt(this.mass * k / Math.PI)
-                // }
                 if (!(simulation.cycle % this.seePlayerFreq)) { //move away from other mobs
                     const repelRange = 40
                     const attractRange = 240
@@ -885,6 +879,88 @@ const spawn = {
                 });
             }
 
+        }
+    },
+    buffBossCulture(x, y, radius = 17, nodes = 12 + Math.min(10, simulation.difficulty * 0.27)) {
+        const buffID = Math.random()
+        const sideLength = 200 + 50 * Math.sqrt(nodes) // distance between each node mob
+        const targets = []
+        for (let i = 0; i < nodes; ++i) {
+            const angle = 2 * Math.PI * Math.random()
+            spawn.buffBoss(x + sideLength * Math.cos(angle) * Math.random(), y + sideLength * Math.sin(angle) * Math.random(), radius, buffID);
+            // spawn.buffBoss(x + sideLength * nodes * (Math.random() - 0.5), y + sideLength * nodes * (Math.random() - 0.5), radius, buffID);
+            targets.push(mob[mob.length - 1].id) //track who is in the group, for shields
+
+        }
+        const attachmentStiffness = 0.0001
+        spawn.constrain2AdjacentMobs(nodes, attachmentStiffness, false); //loop mobs together
+        // if (simulation.difficulty > 15) this.groupShield(targets, x, y, sideLength + radius * 2);
+    },
+    buffBoss(x, y, radius, buffID) {
+        mobs.spawn(x + Math.random(), y + Math.random(), 6, radius, "hsl(144, 15%, 50%)") //);
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        me.damageReduction = 0.25;
+        me.isBuffBoss = true;
+        me.buffID = buffID
+        me.memory = Infinity;
+        // me.showHealthBar = false;
+        me.isVerticesChange = true
+        me.frictionAir = 0.012
+        me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
+        me.seeAtDistance2 = 200000 //1400000;
+        me.stroke = "transparent"
+        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
+
+        me.buffCount = 0
+        me.accelMag = 0.0001 //* simulation.accelScale;
+        me.setBuffed = function() {
+            this.buffCount++
+            this.accelMag += 0.00005 //* Math.sqrt(simulation.accelScale)
+            // Matter.Body.setDensity(this, 0.001 + 0.0003 * this.buffCount) // normal density is 0.001   //+ 0.0005 * Math.sqrt(simulation.difficulty)
+            this.fill = `hsl(144, ${5+10*this.buffCount}%, 50%)`
+            const scale = 1.14;
+            Matter.Body.scale(this, scale, scale);
+            this.radius *= scale;
+            // this.health += 0.03
+            // if (this.health > 1) this.health = 1
+        }
+        me.onDeath = function() {
+            this.isBuffBoss = false;
+            let count = 0 //count other cells by id
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isBuffBoss && mob[i].buffID === this.buffID) {
+                    count++
+                    mob[i].setBuffed()
+                }
+            }
+            if (count < 1) { //only drop a power up if this is the last cell
+                powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            } else {
+                this.leaveBody = false;
+                // this.isDropPowerUp = false; //these guys can still drop power ups since they are hard to kill
+            }
+        }
+        me.do = function() {
+            this.alwaysSeePlayer();
+            this.checkStatus();
+            this.attraction();
+
+            // if (!(simulation.cycle % this.seePlayerFreq)) { //move away from other mobs
+            //     const repelRange = 100 + 4 * this.radius
+            //     const attractRange = 240
+            //     for (let i = 0, len = mob.length; i < len; i++) {
+            //         if (mob[i].isBuffBoss && mob[i].id !== this.id) {
+            //             const sub = Vector.sub(this.position, mob[i].position)
+            //             const dist = Vector.magnitude(sub)
+            //             if (dist < repelRange) {
+            //                 this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.002)
+            //             } else if (dist > attractRange) {
+            //                 this.force = Vector.mult(Vector.normalise(sub), -this.mass * 0.002)
+            //             }
+            //         }
+            //     }
+            // }
         }
     },
     powerUpBoss(x, y, vertices = 9, radius = 130) {
@@ -1585,7 +1661,7 @@ const spawn = {
     },
     historyBoss(x, y, radius = 30) {
         if (tech.dynamoBotCount > 0) {
-            spawn.randomLevelBoss(x, y, ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture"])
+            spawn.randomLevelBoss(x, y, spawn.nonCollideBossList)
             return
         }
         mobs.spawn(x, y, 0, radius, "transparent");
@@ -2929,7 +3005,7 @@ const spawn = {
         };
         Matter.Body.setDensity(me, 0.00005); //normal is 0.001
         me.timeLeft = 240;
-        me.g = 0.001; //required if using 'gravity'
+        me.g = 0.0005; //required if using 'gravity'
         me.frictionAir = 0;
         me.restitution = 0;
         me.leaveBody = false;
@@ -2939,6 +3015,7 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.do = function() {
+            this.gravity();
             this.timeLimit();
             if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 3) {
                 this.isDropPowerUp = false;

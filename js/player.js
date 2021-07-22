@@ -1135,7 +1135,7 @@ const m = {
                     b.pulse(50 * Math.pow(m.holdingTarget.mass, 0.25), m.angle)
                 } else { //normal throw
                     //bullet-like collisions
-                    m.holdingTarget.collisionFilter.category = tech.isBlockBullets ? cat.bullet : cat.body;
+                    m.holdingTarget.collisionFilter.category = cat.bullet
                     m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
                     //check every second to see if player is away from thrown body, and make solid
                     const solid = function(that) {
@@ -2322,7 +2322,7 @@ const m = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong class='color-block'>blocks</strong> with your mouse<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong><br><strong class='color-f'>energy</strong> drain scales with <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to push <strong class='color-block'>blocks</strong> with your mouse<br><strong class='color-block'>blocks</strong> can <strong>collide</strong> with <strong>intangible</strong> mobs<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
             effect: () => {
                 m.fieldPhase = 0;
                 m.fieldPosition = {
@@ -2431,7 +2431,7 @@ const m = {
 
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.000013 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
+                                        const DRAIN = speed * body[i].mass * 0.000015 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
                                         if (m.energy > DRAIN) {
                                             m.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
@@ -2442,7 +2442,7 @@ const m = {
                                             const unit = Vector.mult(Vector.normalise(sub), body[i].mass * tech.pilotForce * Vector.magnitude(sub))
                                             body[i].force.x += unit.x
                                             body[i].force.y += unit.y - body[i].mass * simulation.g //remove gravity effects
-                                            if (tech.isBlockBullets && body[i].collisionFilter.category !== cat.bullet) body[i].collisionFilter.category = cat.bullet;
+                                            if (body[i].collisionFilter.category !== cat.bullet) body[i].collisionFilter.category = cat.bullet;
                                         } else {
                                             m.fieldCDcycle = m.cycle + 120;
                                             m.fieldOn = false
