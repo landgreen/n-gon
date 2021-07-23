@@ -19,9 +19,7 @@ const mobs = {
             ctx.beginPath();
             const vertices = mob[i].vertices;
             ctx.moveTo(vertices[0].x, vertices[0].y);
-            for (let j = 1, len = vertices.length; j < len; ++j) {
-                ctx.lineTo(vertices[j].x, vertices[j].y);
-            }
+            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
             ctx.lineTo(vertices[0].x, vertices[0].y);
             ctx.fillStyle = mob[i].fill;
             ctx.strokeStyle = mob[i].stroke;
@@ -49,9 +47,7 @@ const mobs = {
         if (tech.isAoESlow) {
             const range2 = (180 + 170 * Math.random()) ** 2
             for (let i = 0, len = mob.length; i < len; i++) {
-                if (who !== mob[i] && Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range2 + mob[i].radius) {
-                    applySlow(mob[i])
-                }
+                if (who !== mob[i] && Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range2 + mob[i].radius) applySlow(mob[i])
             }
             simulation.drawList.push({
                 x: who.position.x,
@@ -745,7 +741,7 @@ const mobs = {
                     this.force.y += force.y;
                 }
             },
-            repulsionRange: 500000,
+            repulsionRange: 500000, //squared
             repulsion() {
                 //accelerate towards the player
                 if (this.seePlayer.recall && this.distanceToPlayer2() < this.repulsionRange) {

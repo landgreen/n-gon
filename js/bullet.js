@@ -2071,7 +2071,7 @@ const b = {
                 mobs.statusSlow(who, 180)
                 this.endCycle = simulation.cycle
                 // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
-                if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
+                if (m.immuneCycle < m.cycle && tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
                     setTimeout(function() {
                         if (!who.alive) {
                             m.energy += tech.iceEnergy * 0.8
@@ -2908,7 +2908,7 @@ const b = {
 
                 //check for damage
                 if (!m.isBodiesAsleep) {
-                    if (!((m.cycle + this.phase) % 30)) { //twice a second
+                    if (m.immuneCycle < m.cycle && !((m.cycle + this.phase) % 30)) { //twice a second
                         if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
@@ -4843,7 +4843,7 @@ const b = {
 
                 if (tech.isCapacitor) {
                     if ((m.energy > 0.16 || tech.isRailEnergyGain)) { //&& m.immuneCycle < m.cycle
-                        m.energy += 0.16 * (tech.isRailEnergyGain ? 6 : -1)
+                        if (m.immuneCycle < m.cycle) m.energy += 0.16 * (tech.isRailEnergyGain ? 6 : -1)
                         m.fireCDcycle = m.cycle + Math.floor(30 * b.fireCDscale);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 60, 14, {
@@ -4970,7 +4970,7 @@ const b = {
                     bullet[me].charge = 0;
                     bullet[me].do = function() {
                         if (m.energy < 0.005 && !tech.isRailEnergyGain) {
-                            m.energy += 0.05 + this.charge * 0.3
+                            if (m.immuneCycle < m.cycle) m.energy += 0.05 + this.charge * 0.3
                             m.fireCDcycle = m.cycle + 120; // cool down if out of energy
                             this.endCycle = 0;
                             return

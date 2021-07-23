@@ -5,7 +5,7 @@ const powerUps = {
     lastTechIndex: null,
     do() {},
     setDo() {
-        if (tech.duplicationChance() > 0) {
+        if (tech.duplicationChance() > 0 || tech.isAnthropicTech) {
             if (tech.isPowerUpsVanish) {
                 powerUps.do = powerUps.doDuplicatesVanish
             } else if (tech.isPowerUpsAttract) {
@@ -676,7 +676,7 @@ const powerUps = {
     onPickUp(who) {
         powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
-        if (tech.isMassEnergy) m.energy += 2;
+        if (tech.isMassEnergy && m.immuneCycle < m.cycle) m.energy += 2;
         if (tech.isMineDrop) {
             if (tech.isLaserMine) {
                 b.laserMine(who.position)

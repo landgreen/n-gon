@@ -798,7 +798,7 @@ const simulation = {
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
             if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
                 if (tech.isFlipFlopOn) {
-                    m.energy += 0.22;
+                    if (m.immuneCycle < m.cycle) m.energy += 0.22;
                 } else {
                     m.energy -= 0.041;
                     if (m.energy < 0) m.energy = 0
@@ -848,7 +848,7 @@ const simulation = {
             // }
 
             if (m.lastKillCycle + 300 > simulation.cycle) { //effects active for 5 seconds after killing a mob
-                if (tech.isEnergyRecovery) m.energy += m.maxEnergy * 0.05
+                if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
                 if (tech.isHealthRecovery) m.addHealth(0.01 * m.maxHealth)
             }
 

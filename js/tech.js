@@ -141,18 +141,24 @@
             }
         },
         haveGunCheck(name) {
-            if (
-                !build.isExperimentSelection &&
-                b.inventory.length > 2 &&
-                name !== b.guns[b.activeGun].name &&
-                Math.random() > 2 - b.inventory.length * 0.5
-            ) {
-                return false
+            // if (
+            //     !build.isExperimentSelection &&
+            //     b.inventory.length > 2 &&
+            //     name !== b.guns[b.activeGun].name &&
+            //     Math.random() > 2 - b.inventory.length * 0.5
+            // ) {
+            //     return false
+            // }
+            // for (i = 0, len = b.inventory.length; i < len; i++) {
+            //     if (b.guns[b.inventory[i]].name === name) return true
+            // }
+            // return false
+            if (build.isExperimentSelection) {
+                for (i = 0, len = b.inventory.length; i < len; i++) {
+                    if (b.guns[b.inventory[i]].name === name) return true
+                }
             }
-            for (i = 0, len = b.inventory.length; i < len; i++) {
-                if (b.guns[b.inventory[i]].name === name) return true
-            }
-            return false
+            return b.inventory.length > 0 && b.guns[b.activeGun].name === name
         },
         damageFromTech() {
             let dmg = 1 //m.fieldDamage
@@ -182,12 +188,12 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.05 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate
+            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.05 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
-                const range = 700
+                const range = 600
                 spawn.randomLevelBoss(m.pos.x + range, m.pos.y, spawn.nonCollideBossList);
                 spawn.randomLevelBoss(m.pos.x, m.pos.y + range, spawn.nonCollideBossList);
                 spawn.randomLevelBoss(m.pos.x - range, m.pos.y, spawn.nonCollideBossList);
@@ -1597,7 +1603,7 @@
             },
             {
                 name: "Pauli exclusion",
-                description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for an extra <strong>0.75</strong> seconds`,
+                description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1</strong> extra second`,
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -1607,7 +1613,7 @@
                 },
                 requires: "",
                 effect() {
-                    tech.collisionImmuneCycles += 45;
+                    tech.collisionImmuneCycles += 60;
                     if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                 },
                 remove() {
@@ -2598,8 +2604,28 @@
                 }
             },
             {
+                name: "weak anthropic principle",
+                description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>add <strong>50%</strong> <strong class='color-dup'>duplication</strong> chance for that level",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return tech.isDeathAvoid
+                },
+                requires: "anthropic principle",
+                effect() {
+                    tech.isAnthropicTech = true
+                    powerUps.setDo(); //needed after adjusting duplication chance
+                },
+                remove() {
+                    tech.isAnthropicTech = false
+                    powerUps.setDo(); //needed after adjusting duplication chance
+                }
+            },
+            {
                 name: "strong anthropic principle",
-                description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>increase <strong class='color-d'>damage</strong> by <strong>137.03599%</strong> on that level",
+                description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>increase <strong class='color-d'>damage</strong> by <strong>137.03599%</strong> for that level",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -7527,5 +7553,6 @@
         isFieldHarmReduction: null,
         isFastTime: null,
         isDroneTeleport: null,
-        isSporeWorm: null
+        isSporeWorm: null,
+        isAnthropicTech: null
     }

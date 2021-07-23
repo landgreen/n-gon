@@ -513,7 +513,8 @@ const m = {
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
-            const immunityCycle = m.cycle + 90
+            const immunityDuration = 65
+            const immunityCycle = m.cycle + immunityDuration + 10
             if (m.immuneCycle < immunityCycle) m.immuneCycle = immunityCycle; //player is immune to damage until after grenades might explode...
 
             for (let i = 1, len = Math.floor(4 + steps / 40); i < len; i++) {
@@ -525,7 +526,7 @@ const m = {
                         y: who.velocity.y * 0.5
                     });
                 } else if (tech.isRPG) {
-                    who.endCycle = (who.endCycle - simulation.cycle) * 0.2 + simulation.cycle + 10 * Math.random()
+                    who.endCycle = simulation.cycle + 10
                 } else if (tech.isNeutronBomb) {
                     Matter.Body.setVelocity(who, {
                         x: who.velocity.x * 0.3,
@@ -536,7 +537,7 @@ const m = {
                         x: who.velocity.x * 0.5,
                         y: who.velocity.y * 0.5
                     });
-                    who.endCycle = (who.endCycle - simulation.cycle) * 0.5 + simulation.cycle + 10 * Math.random()
+                    who.endCycle = simulation.cycle + immunityDuration
                 }
             }
         }
@@ -570,7 +571,7 @@ const m = {
                 });
             }
         }
-        m.energy = Math.max(m.energy - steps / 136, 0.01)
+        m.energy = Math.max(m.energy - steps / 150, 0.01)
         if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
 
         let isDrawPlayer = true
@@ -619,8 +620,8 @@ const m = {
         }
     },
     damage(dmg) {
-        if (tech.isRewindAvoidDeath && m.energy > 0.66) {
-            const steps = Math.floor(Math.min(299, 137 * m.energy))
+        if (tech.isRewindAvoidDeath && m.energy > 0.6) {
+            const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
             m.rewind(steps)
             return
@@ -640,7 +641,7 @@ const m = {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy
                     if (m.immuneCycle < m.cycle + 360) m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
@@ -670,7 +671,7 @@ const m = {
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "heal", false);
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     if (m.immuneCycle < m.cycle + 360) m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -982,7 +983,7 @@ const m = {
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
         if (m.energy < m.maxEnergy) {
-            m.energy += m.fieldRegen;
+            if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
             if (m.energy < 0) m.energy = 0
             ctx.fillStyle = bgColor;
             const xOff = m.pos.x - m.radius * m.maxEnergy
@@ -1124,7 +1125,7 @@ const m = {
                     m.throwCharge = 0;
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
                     m.definePlayerMass() //return to normal player mass
-                    m.energy += 3 * Math.sqrt(m.holdingTarget.mass)
+                    if (m.immuneCycle < m.cycle) m.energy += 2.5 * Math.sqrt(m.holdingTarget.mass)
                     //remove block before pulse, so it doesn't get in the way
                     for (let i = 0; i < body.length; i++) {
                         if (body[i] === m.holdingTarget) {
@@ -1869,7 +1870,7 @@ const m = {
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
-                    m.energy += m.fieldRegen;
+                    if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
                     m.drawFieldMeter()
                 }
             }
@@ -2160,7 +2161,7 @@ const m = {
                     }
 
                     if (m.energy < m.maxEnergy) { // replaces m.drawFieldMeter() with custom code
-                        m.energy += m.fieldRegen;
+                        if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
                         if (m.energy < 0) m.energy = 0
                         const xOff = m.pos.x - m.radius * m.maxEnergy
                         const yOff = m.pos.y - 50
@@ -2601,7 +2602,7 @@ const m = {
                                                 Matter.World.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
-                                                if (tech.isWormholeEnergy) m.energy += 0.63
+                                                if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
                                                 if (tech.isWormSpores) { //pandimensionalspermia
                                                     for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         if (tech.isSporeWorm) {
@@ -2635,7 +2636,7 @@ const m = {
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                            if (tech.isWormholeEnergy) m.energy += 0.63
+                                            if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
                                             if (tech.isWormSpores) { //pandimensionalspermia
                                                 for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                     if (tech.isSporeWorm) {

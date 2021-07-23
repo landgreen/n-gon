@@ -57,7 +57,7 @@ const level = {
             // lore.techCount = 6
 
             // simulation.isCheating = false //true;
-            // localSettings.loreCount = 4; //this sets what conversation is heard
+            // localSettings.loreCount = 3; //this sets what conversation is heard
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
@@ -2257,7 +2257,7 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.buffBossCulture(1900, -500)
+        spawn.growBossCulture(1900, -500)
 
         // spawn.pulsarBoss(1900, -500)
         // spawn.shieldingBoss(1900, -500)
@@ -5880,6 +5880,7 @@ const level = {
         }
     },
     perplex() { //by Oranger from discord
+        document.body.style.backgroundColor = "#dcdcde";
         level.setPosToSpawn(-600, 400);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 550;
@@ -7059,7 +7060,7 @@ const level = {
         spawn.randomGroup(2000, -5700, 0.6);
 
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-        let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss", "buffBossCulture"];
+        let bosses = ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "laserBoss", "growBossCulture"];
         let abc = Math.random();
         if (simulation.difficulty > 3) {
             if (abc < 0.6) {

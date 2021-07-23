@@ -1,5 +1,10 @@
 //main object for spawning things in a level
 const spawn = {
+    nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"],
+    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture"]) {
+        // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
+        spawn[options[Math.floor(Math.random() * options.length)]](x, y)
+    },
     pickList: ["starter", "starter"],
     fullPickList: [
         "hopper", "hopper", "hopper",
@@ -83,11 +88,6 @@ const spawn = {
                 }
             }
         }
-    },
-    nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "buffBossCulture"],
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "buffBossCulture"]) {
-        // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
-        spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
     secondaryBossChance(x, y) {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
@@ -698,18 +698,20 @@ const spawn = {
             }
         }
     },
-    starter(x, y, radius = Math.floor(20 + 20 * Math.random())) {
+    starter(x, y, radius = Math.floor(15 + 20 * Math.random())) {
         //easy mob for on level 1
         mobs.spawn(x, y, 8, radius, "#9ccdc6");
         let me = mob[mob.length - 1];
         // console.log(`mass=${me.mass}, radius = ${radius}`)
-        me.accelMag = 0.0005 * simulation.accelScale;
-        me.memory = 60;
-        me.seeAtDistance2 = 1400000 //1200 vision range
+        me.accelMag = 0.0002
+        me.repulsionRange = 100000; //squared
+        // me.memory = 120;
+        me.seeAtDistance2 = 2000000 //1400 vision range
         Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
         me.do = function() {
             this.seePlayerByLookingAt();
             this.attraction();
+            this.repulsion();
             this.checkStatus();
         };
     },
@@ -881,22 +883,17 @@ const spawn = {
 
         }
     },
-    buffBossCulture(x, y, radius = 17, nodes = 12 + Math.min(10, simulation.difficulty * 0.27)) {
+    growBossCulture(x, y, radius = 17, nodes = 12 + Math.min(10, simulation.difficulty * 0.25)) {
         const buffID = Math.random()
         const sideLength = 200 + 50 * Math.sqrt(nodes) // distance between each node mob
-        const targets = []
         for (let i = 0; i < nodes; ++i) {
             const angle = 2 * Math.PI * Math.random()
-            spawn.buffBoss(x + sideLength * Math.cos(angle) * Math.random(), y + sideLength * Math.sin(angle) * Math.random(), radius, buffID);
-            // spawn.buffBoss(x + sideLength * nodes * (Math.random() - 0.5), y + sideLength * nodes * (Math.random() - 0.5), radius, buffID);
-            targets.push(mob[mob.length - 1].id) //track who is in the group, for shields
-
+            const mag = Math.max(radius, sideLength * (1 - Math.pow(Math.random(), 1.5))) //working on a distribution that is circular, random, but not too focused in the center
+            spawn.growBoss(x + mag * Math.cos(angle), y + mag * Math.sin(angle), radius, buffID);
         }
-        const attachmentStiffness = 0.0001
-        spawn.constrain2AdjacentMobs(nodes, attachmentStiffness, false); //loop mobs together
-        // if (simulation.difficulty > 15) this.groupShield(targets, x, y, sideLength + radius * 2);
+        spawn.constrain2AdjacentMobs(nodes, 0.0001, false); //loop mobs together
     },
-    buffBoss(x, y, radius, buffID) {
+    growBoss(x, y, radius, buffID) {
         mobs.spawn(x + Math.random(), y + Math.random(), 6, radius, "hsl(144, 15%, 50%)") //);
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -913,13 +910,13 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
 
         me.buffCount = 0
-        me.accelMag = 0.0001 //* simulation.accelScale;
+        me.accelMag = 0.00006 //* simulation.accelScale;
         me.setBuffed = function() {
             this.buffCount++
-            this.accelMag += 0.00005 //* Math.sqrt(simulation.accelScale)
+            this.accelMag += 0.000035 //* Math.sqrt(simulation.accelScale)
             // Matter.Body.setDensity(this, 0.001 + 0.0003 * this.buffCount) // normal density is 0.001   //+ 0.0005 * Math.sqrt(simulation.difficulty)
             this.fill = `hsl(144, ${5+10*this.buffCount}%, 50%)`
-            const scale = 1.14;
+            const scale = 1.13;
             Matter.Body.scale(this, scale, scale);
             this.radius *= scale;
             // this.health += 0.03
@@ -938,7 +935,7 @@ const spawn = {
                 powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             } else {
                 this.leaveBody = false;
-                // this.isDropPowerUp = false; //these guys can still drop power ups since they are hard to kill
+                if (!count % 2) powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // higher then normal chance to drop heals and ammo
             }
         }
         me.do = function() {
@@ -2521,8 +2518,8 @@ const spawn = {
     sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 25)) {
         mobs.spawn(x, y, 5, radius, "transparent");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
-        me.accelMag = 0.0011 * simulation.accelScale;
+        Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
+        me.accelMag = 0.0012 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
         me.g = 0.0002; //required if using 'gravity'
         me.stroke = "transparent"; //used for drawSneaker
