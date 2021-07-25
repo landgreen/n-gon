@@ -12,10 +12,15 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(60) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("spores")
+            // b.giveGuns("shotgun")
+            // b.giveGuns("foam")
+            // tech.isNeedleShot = true
+            // tech.isIceShot = true
+            // tech.isFoamShot = true
+            // tech.isWormShot = true
             // tech.giveTech("CPT reversal")
             // tech.giveTech("causality bombs")
             // b.giveGuns("wave beam")
@@ -966,12 +971,14 @@ const level = {
                     ctx.fillRect(this.min.x, this.min.y + offset, this.width, this.height - offset)
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
-                        const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
-                        if (m.energy > DRAIN) {
-                            m.energy -= DRAIN
-                            m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
-                        } else {
-                            m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1))
+                        if (m.immuneCycle < m.cycle) {
+                            const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
+                            if (m.energy > DRAIN) {
+                                m.energy -= DRAIN
+                                m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
+                            } else {
+                                m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1))
+                            }
                         }
                         //float
                         if (player.velocity.y > 5) player.force.y -= 0.95 * player.mass * simulation.g
@@ -1621,8 +1628,10 @@ const level = {
                             ctx.lineWidth = 2;
                             if (Vector.magnitudeSquared(Vector.sub(m.pos, powerUp1.position)) < 90000) { //zone radius is 300
                                 //damage player and drain energy
-                                if (m.immuneCycle < m.cycle) m.damage(0.01);
-                                if (m.energy > 0.1) m.energy -= 0.02
+                                if (m.immuneCycle < m.cycle) {
+                                    m.damage(0.01);
+                                    if (m.energy > 0.1) m.energy -= 0.02
+                                }
                                 //draw electricity going towards player
                                 const unit = Vector.normalise(Vector.sub(m.pos, powerUp1.position))
                                 let xElec = powerUp1.position.x + 40 * unit.x;
@@ -2256,10 +2265,10 @@ const level = {
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
-        // spawn.starter(1900, -500, 200) //big boy
-        spawn.growBossCulture(1900, -500)
+        spawn.starter(1900, -500, 200) //big boy
+        // spawn.growBossCulture(1900, -500)
 
-        // spawn.pulsarBoss(1900, -500)
+        // spawn.snakeBoss(1900, -500)
         // spawn.shieldingBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
 

@@ -1,25 +1,31 @@
 ******************************************************** NEXT PATCH ********************************************************
-tech: weak anthropic principle - after anthropic principle prevents your death, gain 50% duplication for that level
-anthropic principle now correctly gives 6 seconds of harm immunity after preventing your death
 
-almost all energy regen is disabled while immune to harm
-  you aren't immune very often so you may not notice, but it will limit some builds that let you get almost constant immunity
-  Pauli exclusion gives 1 s of harm immunity (was .75 s)
-  CPT reversal requires 10% less energy (min energy is 60% to activate)
-    CPT grenades gives many more bombs
-    CPT bots gives many more bots
+shotgun techs:
+  (I haven't done enough testing so let me know if these different shotgun modes aren't balanced)
+  worm shot
+  ice-IX shot
+  foam shot
+  needle shot
 
-growBoss balance: a bit smaller and slower, and a extra high chance to drop a random power up when you kill one
-sneaker mobs are a bit slower, and have much lower health
-starter mobs are no longer aggressive
+foam lasts much longer on shielded mobs
+  overall foam damage is reduced about 8%
 
-gun tech will now only show up for your active gun
-set CSS max width of the update element to match other elements
+attacks that drain energy don't work when the player is immune to harm
+  slime, radiation fields, black holes
+energy regen that consumes something (ammo, blocks, power ups) now works when immune to harm
+  but passive energy regen is still stopped while you are immune to harm
+
+pilot wave field can no longer hit intangible mobs with blocks
+  it was too annoying that you can't use blocks to move around so I reverted it back
 
 ******************************************************** TODO ********************************************************
 
+snake boss tail should shrink in size
 
-CPT reversal should drain less energy?
+mob that grows or gets a shield when player is near
+  and charges when player is near
+    charge triggers an escape mode 
+      mob wonders and drops eggs that hatch into seekers if no player around
 
 pink seeker boss is cool as heck, make an alt version of it
 

@@ -329,7 +329,7 @@ const b = {
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
                 const DRAIN = (tech.isExplosionHarm ? 0.5 : 0.25) * (tech.isRadioactiveResistance ? 0.25 : 1)
                 // * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1) 
-                m.energy -= DRAIN
+                if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
                     m.damage(0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
@@ -1036,7 +1036,7 @@ const b = {
                         if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
                             const DRAIN = tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025
                             if (m.energy > DRAIN) {
-                                m.energy -= DRAIN
+                                if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                             } else {
                                 m.energy = 0;
                                 m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
@@ -1861,7 +1861,7 @@ const b = {
                 },
                 onEnd() {
                     if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                        m.health += 0.005
+                        m.health += 0.005 + 0.005 * tech.isSporeWorm
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -1919,7 +1919,7 @@ const b = {
             });
             World.add(engine.world, bullet[bIndex]); //add bullet to world
             if (tech.isMutualism && m.health > 0.02) {
-                m.health -= 0.005
+                m.health -= 0.005 - 0.005 * tech.isSporeWorm
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
             }
@@ -1957,7 +1957,7 @@ const b = {
                 },
                 onEnd() {
                     if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                        m.health += 0.005
+                        m.health += 0.005 + 0.005 * tech.isSporeWorm
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -2040,7 +2040,7 @@ const b = {
             World.add(engine.world, bullet[bIndex]); //add bullet to world
 
             if (tech.isMutualism && m.health > 0.02) {
-                m.health -= 0.005
+                m.health -= 0.005 - 0.005 * tech.isSporeWorm
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
             }
@@ -2048,17 +2048,18 @@ const b = {
     },
     iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }) {
         const me = bullet.length;
-        const THRUST = 0.004
+        const THRUST = 0.0006
         const RADIUS = 18
+        const SCALE = 1 - 0.08 / tech.isBulletsLastLonger
         bullet[me] = Bodies.polygon(where.x, where.y, 3, RADIUS, {
             angle: dir - Math.PI,
             inertia: Infinity,
             friction: 0,
-            frictionAir: 0.10,
-            restitution: 0.3,
-            dmg: 0.42, //damage done in addition to the damage from momentum
+            frictionAir: 0.023,
+            restitution: 0.9,
+            dmg: 0.5, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
-            endCycle: simulation.cycle + 140 * tech.isBulletsLastLonger,
+            endCycle: simulation.cycle + 150 * tech.isBulletsLastLonger + Math.floor(25 * Math.random()),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -2071,13 +2072,8 @@ const b = {
                 mobs.statusSlow(who, 180)
                 this.endCycle = simulation.cycle
                 // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
-                if (m.immuneCycle < m.cycle && tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
-                    setTimeout(function() {
-                        if (!who.alive) {
-                            m.energy += tech.iceEnergy * 0.8
-                            // m.addHealth(tech.iceEnergy * 0.04)
-                        }
-                    }, 10);
+                if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
+                    setTimeout(() => { if (!who.alive) m.energy += tech.iceEnergy * 0.8 }, 10);
                 }
             },
             onEnd() {},
@@ -2085,8 +2081,7 @@ const b = {
                 // this.force.y += this.mass * 0.0002;
                 //find mob targets
                 if (!(simulation.cycle % this.lookFrequency)) {
-                    const scale = 1 - 0.08 / tech.isBulletsLastLonger //0.9 * tech.isBulletsLastLonger;
-                    Matter.Body.scale(this, scale, scale);
+                    Matter.Body.scale(this, SCALE, SCALE);
                     this.lockedOn = null;
                     let closeDist = Infinity;
                     for (let i = 0, len = mob.length; i < len; ++i) {
@@ -2380,7 +2375,7 @@ const b = {
                 if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radioRadius) {
                     const DRAIN = tech.isRadioactiveResistance ? 0.0023 * 0.25 : 0.0023
                     if (m.energy > DRAIN) {
-                        m.energy -= DRAIN
+                        if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
                         m.energy = 0;
                         m.damage(tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) //0.00015
@@ -2543,14 +2538,11 @@ const b = {
         // radius *= Math.sqrt(tech.bulletSize)
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
-            // angle: 0,
             density: 0.000001, //  0.001 is normal density
             inertia: Infinity,
             frictionAir: 0.003,
-            // friction: 0.2,
-            // restitution: 0.2,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.048 : 0.012) * (tech.isFoamTeleport ? 1.66 : 1), //damage done over time
+            damage: (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.66 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.6 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -2610,9 +2602,6 @@ const b = {
                         this.radius *= this.scale;
                         if (this.radius < 8) this.endCycle = 0;
                     }
-
-
-
                     if (this.target && this.target.alive) { //if stuck to a target
                         const rotate = Vector.rotate(this.targetRelativePosition, this.target.angle) //add in the mob's new angle to the relative position vector
                         if (this.target.isVerticesChange) {
@@ -2622,12 +2611,10 @@ const b = {
                         }
                         Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.9))
                         Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
-
                         // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
                         if (this.target.isShielded) {
                             this.target.damage(b.dmgScale * this.damage, true); //shield damage bypass
-                            //shrink if mob is shielded
-                            const SCALE = 1 - 0.01 / tech.isBulletsLastLonger
+                            const SCALE = 1 - 0.004 / tech.isBulletsLastLonger //shrink if mob is shielded
                             Matter.Body.scale(this, SCALE, SCALE);
                             this.radius *= SCALE;
                         } else {
@@ -2641,9 +2628,7 @@ const b = {
                             let targets = []
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                                if (dist < 1000000) {
-                                    targets.push(mob[i])
-                                }
+                                if (dist < 1000000) targets.push(mob[i])
                             }
                             const radius = Math.min(this.radius * 0.5, 10)
                             const len = bullet.length < 100 ? 2 : 1
@@ -2682,7 +2667,6 @@ const b = {
                         this.radius *= SCALE;
                     } else {
                         this.force.y += this.mass * tech.foamGravity; //gravity
-
                         if (tech.isFoamAttract) {
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 if (!mob[i].isBadTarget && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < 375 && mob[i].alive && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
@@ -2767,6 +2751,71 @@ const b = {
             }
         };
         bullet[me].do = function() {};
+    },
+    needle(angle = m.angle) {
+        const me = bullet.length;
+        bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75, 0.75, b.fireAttributes(angle));
+        bullet[me].collisionFilter.mask = tech.isNeedleShieldPierce ? cat.body : cat.body | cat.mobShield
+        Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
+        bullet[me].endCycle = simulation.cycle + 180;
+        bullet[me].immuneList = []
+        bullet[me].do = function() {
+            const whom = Matter.Query.collides(this, mob)
+            if (whom.length && this.speed > 20) { //if touching a mob 
+                for (let i = 0, len = whom.length; i < len; i++) {
+                    who = whom[i].bodyA
+                    if (who && who.mob) {
+                        let immune = false
+                        for (let i = 0; i < this.immuneList.length; i++) { //check if this needle has hit this mob already
+                            if (this.immuneList[i] === who.id) {
+                                immune = true
+                                break
+                            }
+                        }
+                        if (!immune) {
+                            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
+                                b.explosion(this.position, 220 + 50 * Math.random()); //makes bullet do explosive damage at end
+                            }
+                            this.immuneList.push(who.id) //remember that this needle has hit this mob once already
+                            who.foundPlayer();
+                            if (tech.isNailRadiation) {
+                                mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
+                            } else {
+                                let dmg = b.dmgScale * 5.5
+                                if (tech.isCrit && who.isStunned) dmg *= 4
+                                who.damage(dmg, tech.isNeedleShieldPierce);
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    color: simulation.playerDmgColor,
+                                    time: simulation.drawTime
+                                });
+                            }
+                        }
+                    }
+                }
+            } else if (Matter.Query.collides(this, map).length) { //stick in walls
+                this.collisionFilter.mask = 0;
+                Matter.Body.setAngularVelocity(this, 0)
+                Matter.Body.setVelocity(this, {
+                    x: 0,
+                    y: 0
+                });
+                this.do = function() {
+                    if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
+                }
+            } else if (this.speed < 30) {
+                this.force.y += this.mass * 0.001; //no gravity until it slows down to improve aiming
+            }
+        };
+        const SPEED = 90
+        Matter.Body.setVelocity(bullet[me], {
+            x: m.Vx / 2 + SPEED * Math.cos(angle),
+            y: m.Vy / 2 + SPEED * Math.sin(angle)
+        });
+        // Matter.Body.setDensity(bullet[me], 0.00001);
+        World.add(engine.world, bullet[me]); //add bullet to world
     },
     // **************************************************************************************************
     // **************************************************************************************************
@@ -3629,91 +3678,19 @@ const b = {
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
             },
             fireNeedles() {
-                function makeNeedle(angle = m.angle) {
-                    const me = bullet.length;
-                    bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75, 0.75, b.fireAttributes(angle));
-                    bullet[me].collisionFilter.mask = tech.isNeedleShieldPierce ? cat.body : cat.body | cat.mobShield
-                    Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
-                    bullet[me].endCycle = simulation.cycle + 180;
-                    bullet[me].immuneList = []
-                    bullet[me].do = function() {
-                        const whom = Matter.Query.collides(this, mob)
-                        if (whom.length && this.speed > 20) { //if touching a mob 
-                            for (let i = 0, len = whom.length; i < len; i++) {
-                                who = whom[i].bodyA
-                                if (who && who.mob) {
-                                    let immune = false
-                                    for (let i = 0; i < this.immuneList.length; i++) { //check if this needle has hit this mob already
-                                        if (this.immuneList[i] === who.id) {
-                                            immune = true
-                                            break
-                                        }
-                                    }
-                                    if (!immune) {
-                                        if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
-                                            b.explosion(this.position, 220 + 50 * Math.random()); //makes bullet do explosive damage at end
-                                        }
-                                        this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                                        who.foundPlayer();
-                                        if (tech.isNailRadiation) {
-                                            mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
-                                        } else {
-                                            let dmg = b.dmgScale * 5.5
-                                            if (tech.isCrit && who.isStunned) dmg *= 4
-                                            who.damage(dmg, tech.isNeedleShieldPierce);
-                                            simulation.drawList.push({ //add dmg to draw queue
-                                                x: this.position.x,
-                                                y: this.position.y,
-                                                radius: Math.log(2 * dmg + 1.1) * 40,
-                                                color: simulation.playerDmgColor,
-                                                time: simulation.drawTime
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                        } else if (Matter.Query.collides(this, map).length) { //stick in walls
-                            this.collisionFilter.mask = 0;
-                            Matter.Body.setAngularVelocity(this, 0)
-                            Matter.Body.setVelocity(this, {
-                                x: 0,
-                                y: 0
-                            });
-                            this.do = function() {
-                                if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
-                            }
-                        } else if (this.speed < 30) {
-                            this.force.y += this.mass * 0.001; //no gravity until it slows down to improve aiming
-                        }
-                    };
-                    const SPEED = 90
-                    Matter.Body.setVelocity(bullet[me], {
-                        x: m.Vx / 2 + SPEED * Math.cos(angle),
-                        y: m.Vy / 2 + SPEED * Math.sin(angle)
-                    });
-                    // Matter.Body.setDensity(bullet[me], 0.00001);
-                    World.add(engine.world, bullet[me]); //add bullet to world
-                }
-
                 if (m.crouch) {
                     m.fireCDcycle = m.cycle + 45 * b.fireCDscale; // cool down
-                    makeNeedle()
+                    b.needle()
                     for (let i = 1; i < 4; i++) { //4 total needles
-                        setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
+                        setTimeout(() => { if (!simulation.paused) b.needle() }, 60 * i);
                     }
                 } else {
                     m.fireCDcycle = m.cycle + 25 * b.fireCDscale; // cool down
-                    makeNeedle()
+                    b.needle()
                     for (let i = 1; i < 3; i++) { //3 total needles
-                        setTimeout(() => { if (!simulation.paused) makeNeedle() }, 60 * i);
+                        setTimeout(() => { if (!simulation.paused) b.needle() }, 60 * i);
                     }
                 }
-
-
-                // const spread = (m.crouch ? 0.013 : 0.06)
-                // makeNeedle(m.angle + spread)
-                // makeNeedle()
-                // makeNeedle(m.angle - spread)
             },
             fireRivets() {
                 m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 17) * b.fireCDscale); // cool down
@@ -3806,11 +3783,11 @@ const b = {
                 let knock, spread
                 if (m.crouch) {
                     spread = 0.65
-                    m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCDscale); //player is immune to damage for 30 cycles
                     knock = 0.01
                 } else {
-                    m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCDscale); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
@@ -3900,7 +3877,7 @@ const b = {
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.6 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 160 * (tech.isShotgunReversed ? 1.6 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -3910,7 +3887,7 @@ const b = {
                     }
                 } else if (tech.isNailShot) {
                     spread *= 0.65
-                    const dmg = 1.4 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const dmg = 2 * (tech.isShotgunReversed ? 1.6 : 1)
                     if (m.crouch) {
                         for (let i = 0; i < 17; i++) {
                             speed = 38 + 15 * Math.random()
@@ -3937,6 +3914,49 @@ const b = {
                                 y: speed * Math.sin(dir)
                             }, dmg)
                         }
+                    }
+                } else if (tech.isWormShot) {
+                    const unit = {
+                        x: Math.cos(m.angle),
+                        y: Math.sin(m.angle)
+                    }
+                    const where = {
+                        x: m.pos.x + 35 * unit.x,
+                        y: m.pos.y + 35 * unit.y
+                    }
+                    for (let i = 0, len = 3 * (tech.isShotgunReversed ? 1.6 : 1) + Math.random(); i < len; i++) {
+                        b.worm(where)
+                        const SPEED = 14 + 6 * Math.random() + 20 * m.crouch;
+                        Matter.Body.setVelocity(bullet[bullet.length - 1], {
+                            x: SPEED * unit.x,
+                            y: SPEED * unit.y
+                        });
+                    }
+                } else if (tech.isIceShot) {
+                    const spread = (m.crouch ? 0.6 : 1.6)
+                    for (let i = 0, len = 16 * (tech.isShotgunReversed ? 1.6 : 1); i < len; i++) {
+                        //     iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }) {
+                        b.iceIX(14 + 30 * Math.random(), m.angle + spread * (Math.random() - 0.5))
+                    }
+                } else if (tech.isFoamShot) {
+                    const spread = (m.crouch ? 0.35 : 0.7)
+                    const where = {
+                        x: m.pos.x + 25 * Math.cos(m.angle),
+                        y: m.pos.y + 25 * Math.sin(m.angle)
+                    }
+                    const number = 14 * (tech.isShotgunReversed ? 1.6 : 1)
+                    for (let i = 0; i < number; i++) {
+                        const SPEED = 25 + 12 * Math.random();
+                        const angle = m.angle + spread * (Math.random() - 0.5)
+                        b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 5 + 8 * Math.random())
+                    }
+                } else if (tech.isNeedleShot) {
+                    const number = 12 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const spread = (m.crouch ? 0.04 : 0.08)
+                    let angle = m.angle - (number - 1) * spread * 0.5
+                    for (let i = 0; i < number; i++) {
+                        b.needle(angle)
+                        angle += spread
                     }
                 } else {
                     const side = 22
@@ -4843,7 +4863,7 @@ const b = {
 
                 if (tech.isCapacitor) {
                     if ((m.energy > 0.16 || tech.isRailEnergyGain)) { //&& m.immuneCycle < m.cycle
-                        if (m.immuneCycle < m.cycle) m.energy += 0.16 * (tech.isRailEnergyGain ? 6 : -1)
+                        m.energy += 0.16 * (tech.isRailEnergyGain ? 4.5 : -1)
                         m.fireCDcycle = m.cycle + Math.floor(30 * b.fireCDscale);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 60, 14, {
@@ -4970,7 +4990,7 @@ const b = {
                     bullet[me].charge = 0;
                     bullet[me].do = function() {
                         if (m.energy < 0.005 && !tech.isRailEnergyGain) {
-                            if (m.immuneCycle < m.cycle) m.energy += 0.05 + this.charge * 0.3
+                            m.energy += 0.05 + this.charge * 0.2
                             m.fireCDcycle = m.cycle + 120; // cool down if out of energy
                             this.endCycle = 0;
                             return
@@ -5019,7 +5039,7 @@ const b = {
                             let smoothRate = 0.98 * (m.crouch ? 0.99 : 1) * (0.98 + 0.02 * b.fireCDscale) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
                             this.charge = this.charge * smoothRate + 1 * (1 - smoothRate)
                             if (tech.isRailEnergyGain) {
-                                if (m.immuneCycle < m.cycle) m.energy += (this.charge - previousCharge) * 2 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
+                                m.energy += (this.charge - previousCharge) * 1.5 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             } else {
                                 m.energy -= (this.charge - previousCharge) * 0.33 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             }

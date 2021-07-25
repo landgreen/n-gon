@@ -682,7 +682,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.relayIce || tech.blockingIce > 1
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.blockingIce > 1
                 },
                 requires: "drones, spores, missiles, foam, wave beam, neutron bomb, ice IX",
                 effect() {
@@ -865,9 +865,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot
+                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot
                 },
-                requires: "super balls, shotgun, drones, not irradiated drones",
+                requires: "super balls, basic or slug shotgun, drones, not irradiated drones",
                 effect() {
                     tech.isIncendiary = true
                 },
@@ -1812,7 +1812,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
                 },
                 requires: "a localized freeze effect, no other mob death tech",
                 effect() {
@@ -1830,7 +1830,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath
+                    return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "ice IX",
                 effect() {
@@ -1848,7 +1848,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1 || tech.iceIXOnDeath
+                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "a localized freeze effect",
                 effect() {
@@ -1866,7 +1866,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath
+                    return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "a freezing or stunning effect",
                 effect() {
@@ -3461,9 +3461,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isNeedles && !tech.isNailRadiation
+                    return (tech.isNeedles || tech.isNeedleShot) && !tech.isNailRadiation
                 },
-                requires: "needle gun, not irradiated nails",
+                requires: "needle gun, needle-shot, not irradiated nails",
                 effect() {
                     tech.isNeedleShieldPierce = true
                 },
@@ -3730,44 +3730,6 @@
                 }
             },
             {
-                name: "nailshot",
-                description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot
-                },
-                requires: "shotgun, not slug, incendiary",
-                effect() {
-                    tech.isNailShot = true;
-                },
-                remove() {
-                    tech.isNailShot = false;
-                }
-            },
-            {
-                name: "shotgun slug",
-                description: "the <strong>shotgun</strong> fires 1 large <strong>bullet</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("shotgun") && !tech.isNailShot
-                },
-                requires: "shotgun, not nailshot",
-                effect() {
-                    tech.isSlugShot = true;
-                },
-                remove() {
-                    tech.isSlugShot = false;
-                }
-            },
-            {
                 name: "Newton's 3rd law",
                 description: "<strong>shotgun</strong> <strong>recoil</strong> is increased<br>decrease <strong>shotgun</strong> <strong><em>delay</em></strong> after firing by <strong>66%</strong>",
                 isGunTech: true,
@@ -3803,6 +3765,120 @@
                 },
                 remove() {
                     tech.isShotgunReversed = false;
+                }
+            },
+            {
+                name: "shotgun slug",
+                description: "the <strong>shotgun</strong> fires a huge dense <strong>bullet</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
+                },
+                requires: "shotgun, not nail-shot, foam-shot, worm-shot, ice-shot",
+                effect() {
+                    tech.isSlugShot = true;
+                },
+                remove() {
+                    tech.isSlugShot = false;
+                }
+            },
+            {
+                name: "nail-shot",
+                description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
+                },
+                requires: "shotgun, not incendiary, slug, foam-shot, worm-shot, ice-shot",
+                effect() {
+                    tech.isNailShot = true;
+                },
+                remove() {
+                    tech.isNailShot = false;
+                }
+            },
+            {
+                name: "worm-shot",
+                description: "the <strong>shotgun</strong> fires <strong>3-4</strong> <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedleShot
+                },
+                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, ice-shot",
+                effect() {
+                    tech.isWormShot = true;
+                },
+                remove() {
+                    tech.isWormShot = false;
+                }
+            },
+            {
+                name: "foam-shot",
+                description: "the <strong>shotgun</strong> fires <strong>14</strong> <strong>foam</strong> bubbles",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isIceShot && !tech.isWormShot && !tech.isNeedleShot
+                },
+                requires: "shotgun, not incendiary, nail-shot, slug, worm-shot, ice-shot",
+                effect() {
+                    tech.isFoamShot = true;
+                },
+                remove() {
+                    tech.isFoamShot = false;
+                }
+            },
+            {
+                name: "ice-shot",
+                description: "the <strong>shotgun</strong> fires <strong>16</strong> <strong class='color-s'>ice IX</strong> crystals",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
+                },
+                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, worm-shot",
+                effect() {
+                    tech.isIceShot = true;
+                },
+                remove() {
+                    tech.isIceShot = false;
+                }
+            },
+            {
+                name: "needle-shot",
+                description: "the <strong>shotgun</strong> fires <strong>12</strong> mob piercing <strong>needles</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isFoamShot && !tech.isWormShot && !tech.isIceShot
+                },
+                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, worm-shot, ice-shot",
+                effect() {
+                    tech.isNeedleShot = true;
+                },
+                remove() {
+                    tech.isNeedleShot = false;
                 }
             },
             {
@@ -4318,9 +4394,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
+                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormShot
                 },
-                requires: "spores",
+                requires: "spores or worms",
                 effect() {
                     tech.isSporeFreeze = true
                 },
@@ -4337,14 +4413,33 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
+                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormShot
                 },
-                requires: "spores",
+                requires: "spores or worms",
                 effect() {
                     tech.isSporeFollow = true
                 },
                 remove() {
                     tech.isSporeFollow = false
+                }
+            },
+            {
+                name: "mutualism",
+                description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField) && !tech.isEnergyHealth || tech.isWormShot
+                },
+                requires: "spores, worms, not mass-energy",
+                effect() {
+                    tech.isMutualism = true
+                },
+                remove() {
+                    tech.isMutualism = false
                 }
             },
             {
@@ -4364,25 +4459,6 @@
                 },
                 remove() {
                     tech.isSporeWorm = false
-                }
-            },
-            {
-                name: "mutualism",
-                description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField) && !tech.isEnergyHealth
-                },
-                requires: "spores, not mass-energy",
-                effect() {
-                    tech.isMutualism = true
-                },
-                remove() {
-                    tech.isMutualism = false
                 }
             },
             {
@@ -4544,6 +4620,25 @@
                 }
             },
             {
+                name: "electrostatic induction",
+                description: "<strong>foam</strong> bubbles are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return !tech.isFoamTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)
+                },
+                requires: "foam, not uncertainty",
+                effect() {
+                    tech.isFoamAttract = true
+                },
+                remove() {
+                    tech.isFoamAttract = false
+                }
+            },
+            {
                 name: "uncertainty principle",
                 description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>66%</strong>",
                 isGunTech: true,
@@ -4552,7 +4647,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1)
+                    return !tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)
                 },
                 requires: "foam, not electrostatic induction",
                 effect() {
@@ -4571,7 +4666,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("foam") || tech.foamBotCount > 1
+                    return tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot
                 },
                 requires: "foam",
                 effect() {
@@ -4590,7 +4685,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("foam") || tech.foamBotCount > 1
+                    return tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot
                 },
                 requires: "foam",
                 effect() {
@@ -4638,25 +4733,6 @@
                 },
                 remove() {
                     tech.isAmmoFoamSize = false;
-                }
-            },
-            {
-                name: "electrostatic induction",
-                description: "<strong>foam</strong> bubbles are electrically charged<br>causing <strong>attraction</strong> to nearby <strong>mobs</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return !tech.isFoamTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1)
-                },
-                requires: "foam, not uncertainty",
-                effect() {
-                    tech.isFoamAttract = true
-                },
-                remove() {
-                    tech.isFoamAttract = false
                 }
             },
             {
@@ -7553,6 +7629,10 @@
         isFieldHarmReduction: null,
         isFastTime: null,
         isDroneTeleport: null,
+        isAnthropicTech: null,
         isSporeWorm: null,
-        isAnthropicTech: null
+        isWormShot: null,
+        isFoamShot: null,
+        isIceShot: null,
+        isNeedleShot: null
     }

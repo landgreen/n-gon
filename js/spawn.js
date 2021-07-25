@@ -188,7 +188,7 @@ const spawn = {
             if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius) {
                 const DRAIN = tech.isRadioactiveResistance ? 0.07 * 0.25 : 0.07
                 if (m.energy > DRAIN) {
-                    m.energy -= DRAIN
+                    if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 } else {
                     m.energy = 0;
                     m.damage((tech.isRadioactiveResistance ? 0.007 * 0.25 : 0.007) * simulation.dmgScale)
@@ -504,9 +504,9 @@ const spawn = {
             ctx.fill();
             //when player is inside event horizon
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                if (m.energy > 0) m.energy -= 0.01
-                if (m.energy < 0.15 && m.immuneCycle < m.cycle) {
-                    m.damage(0.0004 * simulation.dmgScale);
+                if (m.immuneCycle < m.cycle) {
+                    if (m.energy > 0) m.energy -= 0.01
+                    if (m.energy < 0.15 && m.immuneCycle < m.cycle) m.damage(0.0004 * simulation.dmgScale);
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                 player.force.x -= 0.0017 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -704,7 +704,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         // console.log(`mass=${me.mass}, radius = ${radius}`)
         me.accelMag = 0.0002
-        me.repulsionRange = 100000; //squared
+        me.repulsionRange = 100000 + radius * radius; //squared
         // me.memory = 120;
         me.seeAtDistance2 = 2000000 //1400 vision range
         Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
@@ -1338,9 +1338,9 @@ const spawn = {
 
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                    if (m.energy > 0) m.energy -= 0.004
-                    if (m.energy < 0.1 && m.immuneCycle < m.cycle) {
-                        m.damage(0.00015 * simulation.dmgScale);
+                    if (m.immuneCycle < m.cycle) {
+                        if (m.energy > 0) m.energy -= 0.004
+                        if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                     player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
@@ -1447,9 +1447,9 @@ const spawn = {
                 ctx.fill();
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                    if (m.energy > 0) m.energy -= 0.006
-                    if (m.energy < 0.1 && m.immuneCycle < m.cycle) {
-                        m.damage(0.0002 * simulation.dmgScale);
+                    if (m.immuneCycle < m.cycle) {
+                        if (m.energy > 0) m.energy -= 0.006
+                        if (m.energy < 0.1) m.damage(0.0002 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                     player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -1703,10 +1703,12 @@ const spawn = {
             ctx.setLineDash([125 * Math.random(), 125 * Math.random()]); //the dashed effect is not set back to normal, because it looks neat for how the player is drawn
             // ctx.lineDashOffset = 6*(simulation.cycle % 215);
             if (this.distanceToPlayer() < this.laserRange) {
-                if (m.energy > 0.002) {
-                    m.energy -= 0.0035
-                } else if (m.immuneCycle < m.cycle) {
-                    m.damage(0.0003 * simulation.dmgScale)
+                if (m.immuneCycle < m.cycle) {
+                    if (m.energy > 0.002) {
+                        m.energy -= 0.0035
+                    } else {
+                        m.damage(0.0003 * simulation.dmgScale)
+                    }
                 }
                 ctx.beginPath();
                 ctx.moveTo(eye.x, eye.y);
@@ -3551,7 +3553,8 @@ const spawn = {
         };
     },
     snakeBoss(x, y, radius = 75) { //snake boss with a laser head
-        mobs.spawn(x, y, 8, radius, "rgb(55,170,170)");
+        const color1 = "#f27"
+        mobs.spawn(x, y, 8, radius, color1); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.damageReduction = 0.25;
@@ -3579,6 +3582,14 @@ const spawn = {
         //snake tail
         const nodes = Math.min(8 + Math.ceil(0.5 * simulation.difficulty), 40)
         spawn.lineGroup(x + 105, y, "snakeBody", nodes);
+
+        for (let i = mob.length - 1, len = i - nodes; i > len; i--) { //set alternating colors
+            if (i % 2) {
+                mob[i].fill = "#333"
+            } else {
+                mob[i].fill = color1
+            }
+        }
         //constraint with first 3 mobs in line
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes],
@@ -3598,7 +3609,7 @@ const spawn = {
             stiffness: 0.05
         });
         World.add(engine.world, consBB[consBB.length - 1]);
-        spawn.shield(me, x, y, 1);
+        // spawn.shield(me, x, y, 1);
     },
     snakeBody(x, y, radius = 10) {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
@@ -3610,6 +3621,8 @@ const spawn = {
         me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
         me.accelMag = 0.0004 * simulation.accelScale;
         me.leaveBody = false;
+        me.showHealthBar = false;
+        // Matter.Body.setDensity(me, 0.00004); //normal is 0.001
         me.frictionAir = 0.02;
         me.isSnakeTail = true;
         me.stroke = "transparent"

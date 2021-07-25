@@ -635,7 +635,7 @@ const m = {
         }
 
         if (tech.isEnergyHealth) {
-            m.energy -= dmg * 1.15;
+            m.energy -= dmg * 1.1;
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -2443,7 +2443,9 @@ const m = {
                                             const unit = Vector.mult(Vector.normalise(sub), body[i].mass * tech.pilotForce * Vector.magnitude(sub))
                                             body[i].force.x += unit.x
                                             body[i].force.y += unit.y - body[i].mass * simulation.g //remove gravity effects
-                                            if (body[i].collisionFilter.category !== cat.bullet) body[i].collisionFilter.category = cat.bullet;
+                                            // if (body[i].collisionFilter.category !== cat.bullet) {
+                                            //     body[i].collisionFilter.category = cat.bullet;
+                                            // }
                                         } else {
                                             m.fieldCDcycle = m.cycle + 120;
                                             m.fieldOn = false
@@ -2602,7 +2604,7 @@ const m = {
                                                 Matter.World.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
-                                                if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
+                                                if (tech.isWormholeEnergy) m.energy += 0.63
                                                 if (tech.isWormSpores) { //pandimensionalspermia
                                                     for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         if (tech.isSporeWorm) {
