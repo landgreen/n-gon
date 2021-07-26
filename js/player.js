@@ -643,7 +643,7 @@ const m = {
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                     for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy
-                    if (m.immuneCycle < m.cycle + 360) m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
+                    if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -672,7 +672,7 @@ const m = {
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
                     for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
-                    if (m.immuneCycle < m.cycle + 360) m.immuneCycle = m.cycle + 360 //disable this.immuneCycle bonus seconds
+                    if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);

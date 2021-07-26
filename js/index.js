@@ -264,13 +264,13 @@ const build = {
         el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
-        if (countTech > 5 || b.inventory.length > 6) {
-            document.body.style.overflowY = "scroll";
-            document.body.style.overflowX = "hidden";
-        }
+        // if (countTech > 5 || b.inventory.length > 6) {
+        //     document.body.style.overflowY = "scroll";
+        //     document.body.style.overflowX = "hidden";
+        // }
     },
     unPauseGrid() {
-        document.body.style.overflow = "hidden"
+        // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
         window.scrollTo(0, 0);

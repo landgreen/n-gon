@@ -5,7 +5,7 @@
 body {
     font-family: "Helvetica", "Arial", sans-serif;
     margin: 0;
-    /* overflow: hidden; */
+    overflow: hidden;
     background-color: #fff;
     user-select: none;
     cursor: auto;
@@ -123,19 +123,6 @@ summary {
     z-index: 12;
 }
 
-#choose-background {
-    position: absolute;
-    z-index: 3;
-    width: 100%;
-    height: 100%;
-    background-color: #ccc;
-    /* opacity: 0.6; */
-    /* display: none; */
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.25s linear;
-}
-
 #construct {
     display: none;
     position: absolute;
@@ -150,6 +137,19 @@ summary {
     white-space: pre;
     padding: 3px;
     border: 1px #333 solid;
+}
+
+#choose-background {
+    position: absolute;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    background-color: #ccc;
+    /* opacity: 0.6; */
+    /* display: none; */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.25s linear;
 }
 
 #choose-grid {
@@ -172,6 +172,9 @@ summary {
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.25s linear;
+    align-content: start;
+    max-height: 100vh;
+    overflow: auto;
 }
 
 .choose-grid-module {
@@ -207,7 +210,8 @@ summary {
     /* grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); */
     grid-auto-rows: minmax(auto, auto);
     grid-gap: 0px;
-    align-content: space-between;
+    align-content: start;
+    /* align-content: space-between; */
 
     z-index: 2;
     font-size: 1.3em;
@@ -216,11 +220,15 @@ summary {
 #pause-grid-right {
     justify-content: end;
     position: relative;
+    overflow: auto;
+    max-height: 100vh;
 }
 
 #pause-grid-left {
     justify-content: start;
     position: relative;
+    overflow: auto;
+    max-height: 100vh;
 }
 
 .pause-grid-module {

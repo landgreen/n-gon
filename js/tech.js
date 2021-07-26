@@ -82,7 +82,7 @@
             if (index === 'random') {
                 let options = [];
                 for (let i = 0; i < tech.tech.length; i++) {
-                    if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk && !tech.tech[i].isLore) options.push(i);
+                    if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk && !tech.tech[i].isLore && !tech.tech[i].isBadRandomOption) options.push(i);
                 }
                 // give a random tech from the tech I don't have
                 if (options.length > 0) {
@@ -3826,7 +3826,7 @@
             },
             {
                 name: "foam-shot",
-                description: "the <strong>shotgun</strong> fires <strong>14</strong> <strong>foam</strong> bubbles",
+                description: "the <strong>shotgun</strong> fires <strong>13</strong> <strong>foam</strong> bubbles",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3845,7 +3845,7 @@
             },
             {
                 name: "ice-shot",
-                description: "the <strong>shotgun</strong> fires <strong>16</strong> <strong class='color-s'>ice IX</strong> crystals",
+                description: "the <strong>shotgun</strong> fires <strong>18</strong> <strong class='color-s'>ice IX</strong> crystals",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,

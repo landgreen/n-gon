@@ -160,10 +160,10 @@ const powerUps = {
             document.getElementById("choose-grid").style.transitionDuration = "0s";
         }, 500);
 
-        if (tech.isExtraChoice) {
-            document.body.style.overflowY = "scroll";
-            document.body.style.overflowX = "hidden";
-        }
+        // if (tech.isExtraChoice) {
+        //     document.body.style.overflowY = "scroll";
+        //     document.body.style.overflowX = "hidden";
+        // }
         simulation.paused = true;
         simulation.isChoosing = true; //stops p from un pausing on key down
         build.pauseGrid(true)
@@ -206,7 +206,7 @@ const powerUps = {
         document.getElementById("choose-background").style.opacity = "0"
 
         document.body.style.cursor = "none";
-        document.body.style.overflow = "hidden"
+        // document.body.style.overflow = "hidden"
         simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
         if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles

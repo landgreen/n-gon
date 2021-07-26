@@ -25,10 +25,10 @@ const level = {
             // tech.giveTech("causality bombs")
             // b.giveGuns("wave beam")
             // tech.giveTech("phonon")
-            // tech.giveTech("bound state")
+            // tech.giveTech("cardinality")
             // tech.giveTech("isotropic radiator")
-            // for (let i = 0; i < 9; i++) tech.giveTech("spherical harmonics")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
+            // for (let i = 0; i < 4; i++) tech.giveTech()
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing

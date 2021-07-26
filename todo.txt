@@ -1,26 +1,15 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-shotgun techs:
-  (I haven't done enough testing so let me know if these different shotgun modes aren't balanced)
-  worm shot
-  ice-IX shot
-  foam shot
-  needle shot
+shotgun balance
+  ice-shot: less spread, higher damage, more crystals
+  needle-shot: more needles, higher damage, less spread
+  foam-shot: 1 more bubble
 
-foam lasts much longer on shielded mobs
-  overall foam damage is reduced about 8%
-
-attacks that drain energy don't work when the player is immune to harm
-  slime, radiation fields, black holes
-energy regen that consumes something (ammo, blocks, power ups) now works when immune to harm
-  but passive energy regen is still stopped while you are immune to harm
-
-pilot wave field can no longer hit intangible mobs with blocks
-  it was too annoying that you can't use blocks to move around so I reverted it back
+power up selection and pause menu elements scroll individually now
+  it looks great on my computer, but different operating systems and browsers are unpredictable
+  let me know if text is hidden or if it doesn't scroll for you and what OS and browser you're on
 
 ******************************************************** TODO ********************************************************
-
-snake boss tail should shrink in size
 
 mob that grows or gets a shield when player is near
   and charges when player is near

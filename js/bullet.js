@@ -2057,7 +2057,7 @@ const b = {
             friction: 0,
             frictionAir: 0.023,
             restitution: 0.9,
-            dmg: 0.5, //damage done in addition to the damage from momentum
+            dmg: 0.55, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 150 * tech.isBulletsLastLonger + Math.floor(25 * Math.random()),
             classType: "bullet",
@@ -2781,7 +2781,7 @@ const b = {
                             if (tech.isNailRadiation) {
                                 mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                             } else {
-                                let dmg = b.dmgScale * 5.5
+                                let dmg = b.dmgScale * 6
                                 if (tech.isCrit && who.isStunned) dmg *= 4
                                 who.damage(dmg, tech.isNeedleShieldPierce);
                                 simulation.drawList.push({ //add dmg to draw queue
@@ -3775,8 +3775,8 @@ const b = {
             name: "shotgun",
             description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
-            ammoPack: 5,
-            defaultAmmoPack: 5,
+            ammoPack: 4.5,
+            defaultAmmoPack: 4.5,
             have: false,
             do() {},
             fire() {
@@ -3933,10 +3933,10 @@ const b = {
                         });
                     }
                 } else if (tech.isIceShot) {
-                    const spread = (m.crouch ? 0.6 : 1.6)
-                    for (let i = 0, len = 16 * (tech.isShotgunReversed ? 1.6 : 1); i < len; i++) {
+                    const spread = (m.crouch ? 0.7 : 1.2)
+                    for (let i = 0, len = 18 * (tech.isShotgunReversed ? 1.6 : 1); i < len; i++) {
                         //     iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }) {
-                        b.iceIX(14 + 30 * Math.random(), m.angle + spread * (Math.random() - 0.5))
+                        b.iceIX(25 + 32 * Math.random(), m.angle + spread * (Math.random() - 0.5))
                     }
                 } else if (tech.isFoamShot) {
                     const spread = (m.crouch ? 0.35 : 0.7)
@@ -3944,7 +3944,7 @@ const b = {
                         x: m.pos.x + 25 * Math.cos(m.angle),
                         y: m.pos.y + 25 * Math.sin(m.angle)
                     }
-                    const number = 14 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const number = 13 * (tech.isShotgunReversed ? 1.6 : 1)
                     for (let i = 0; i < number; i++) {
                         const SPEED = 25 + 12 * Math.random();
                         const angle = m.angle + spread * (Math.random() - 0.5)
@@ -3952,7 +3952,7 @@ const b = {
                     }
                 } else if (tech.isNeedleShot) {
                     const number = 12 * (tech.isShotgunReversed ? 1.6 : 1)
-                    const spread = (m.crouch ? 0.04 : 0.08)
+                    const spread = (m.crouch ? 0.03 : 0.05)
                     let angle = m.angle - (number - 1) * spread * 0.5
                     for (let i = 0; i < number; i++) {
                         b.needle(angle)
