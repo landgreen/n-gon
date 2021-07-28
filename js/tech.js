@@ -1018,6 +1018,7 @@
                 maxCount: 3,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBotTech: true,
                 allowed() {
                     return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.isExplodeMob && !tech.isMobBlockFling && !tech.iceIXOnDeath
@@ -1036,6 +1037,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBotTech: true,
                 allowed() {
                     return tech.botSpawner
@@ -1054,6 +1056,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1078,6 +1081,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.nailBotCount > 1 && !b.hasBotUpgrade()
@@ -1103,6 +1107,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1127,6 +1132,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.foamBotCount > 1 && !b.hasBotUpgrade()
@@ -1152,6 +1158,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1176,6 +1183,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.boomBotCount > 1 && !b.hasBotUpgrade()
@@ -1201,6 +1209,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1225,6 +1234,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.laserBotCount > 1 && !b.hasBotUpgrade()
@@ -1250,7 +1260,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
-
+                frequencyDefault: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1275,6 +1285,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.orbitBotCount > 1 && !b.hasBotUpgrade()
@@ -1310,6 +1321,7 @@
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -1334,6 +1346,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return tech.dynamoBotCount > 1 && !b.hasBotUpgrade()
@@ -1359,6 +1372,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return powerUps.research.count > 2 || build.isExperimentSelection
@@ -1379,6 +1393,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
+                frequencyDefault: 1,
                 isBotTech: true,
                 allowed() {
                     return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
@@ -1407,6 +1422,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return b.totalBots() > 3 && !tech.isEnergyHealth
@@ -1425,6 +1441,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
                     return b.totalBots() > 3
@@ -1443,6 +1460,7 @@
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
+                frequencyDefault: 2,
                 isBotTech: true,
                 // isNonRefundable: true,
                 isBadRandomOption: true,
@@ -3454,7 +3472,7 @@
             },
             {
                 name: "ceramic needles",
-                description: `your <strong>needles</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
+                description: `<strong>needles</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3506,7 +3524,7 @@
             },
             {
                 name: "rivet diameter",
-                description: `your <strong>rivets</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
+                description: `<strong>rivets</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -3769,7 +3787,7 @@
             },
             {
                 name: "shotgun slug",
-                description: "the <strong>shotgun</strong> fires a huge dense <strong>bullet</strong>",
+                description: "<strong>shotgun</strong> lobs <strong>1</strong> huge <strong>bullet</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3788,7 +3806,7 @@
             },
             {
                 name: "nail-shot",
-                description: "the <strong>shotgun</strong> fires a burst of <strong>nails</strong>",
+                description: "<strong>shotgun</strong> fires <strong>17</strong> <strong>nails</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3807,7 +3825,7 @@
             },
             {
                 name: "worm-shot",
-                description: "the <strong>shotgun</strong> fires <strong>3-4</strong> <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
+                description: "<strong>shotgun</strong> hatches <strong>3-4</strong> mob seeking <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3826,7 +3844,7 @@
             },
             {
                 name: "foam-shot",
-                description: "the <strong>shotgun</strong> fires <strong>13</strong> <strong>foam</strong> bubbles",
+                description: "<strong>shotgun</strong> sprays <strong>13</strong> sticky <strong>foam</strong> bubbles",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3845,7 +3863,7 @@
             },
             {
                 name: "ice-shot",
-                description: "the <strong>shotgun</strong> fires <strong>18</strong> <strong class='color-s'>ice IX</strong> crystals",
+                description: "<strong>shotgun</strong> grows <strong>18</strong> freezing <strong class='color-s'>ice IX</strong> crystals",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3864,7 +3882,7 @@
             },
             {
                 name: "needle-shot",
-                description: "the <strong>shotgun</strong> fires <strong>12</strong> mob piercing <strong>needles</strong>",
+                description: "<strong>shotgun</strong> propels <strong>12</strong> mob piercing <strong>needles</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3956,7 +3974,7 @@
             },
             {
                 name: "super sized",
-                description: `your <strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
+                description: `<strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4569,7 +4587,7 @@
             },
             {
                 name: "irradiated drones",
-                description: "<strong class='color-p'>irradiate</strong> the space around your <strong>drones</strong><br>reduce <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>75%</strong>",
+                description: "the space around <strong>drones</strong> is <strong class='color-p'>irradiated</strong><br>reduce <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>75%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4880,7 +4898,7 @@
             },
             {
                 name: "diffraction grating",
-                description: `your <strong class='color-laser'>laser</strong> gains a <strong>diverging</strong> beam`,
+                description: `<strong class='color-laser'>laser</strong> gains a <strong>diverging</strong> beam`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5048,8 +5066,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
                 },
@@ -5193,8 +5211,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "negative mass field") && (build.isExperimentSelection || powerUps.research.count > 3)
                 },
@@ -5508,7 +5526,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -5613,8 +5632,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "time dilation" && (build.isExperimentSelection || powerUps.research.count > 2)
                 },
@@ -5699,8 +5718,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 0)
                 },
@@ -5802,8 +5821,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 2) && tech.duplicationChance() < 1
                 },

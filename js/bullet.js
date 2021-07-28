@@ -3205,7 +3205,7 @@ const b = {
             range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             drain: (0.56 - 0.42 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
-            laserDamage: 0.6 + 0.43 * tech.isLaserBotUpgrade,
+            laserDamage: 0.7 + 0.5 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -3916,21 +3916,21 @@ const b = {
                         }
                     }
                 } else if (tech.isWormShot) {
-                    const unit = {
-                        x: Math.cos(m.angle),
-                        y: Math.sin(m.angle)
-                    }
                     const where = {
-                        x: m.pos.x + 35 * unit.x,
-                        y: m.pos.y + 35 * unit.y
+                        x: m.pos.x + 35 * Math.cos(m.angle),
+                        y: m.pos.y + 35 * Math.sin(m.angle)
                     }
-                    for (let i = 0, len = 3 * (tech.isShotgunReversed ? 1.6 : 1) + Math.random(); i < len; i++) {
+                    const spread = (m.crouch ? 0.04 : 0.08)
+                    const number = 3 * (tech.isShotgunReversed ? 1.6 : 1) + Math.random()
+                    let angle = m.angle - (number - 1) * spread * 0.5
+                    for (let i = 0; i < number; i++) {
                         b.worm(where)
-                        const SPEED = 14 + 6 * Math.random() + 20 * m.crouch;
+                        const SPEED = (16 + 20 * m.crouch) * (1 + 0.15 * Math.random())
                         Matter.Body.setVelocity(bullet[bullet.length - 1], {
-                            x: SPEED * unit.x,
-                            y: SPEED * unit.y
+                            x: SPEED * Math.cos(angle),
+                            y: SPEED * Math.sin(angle)
                         });
+                        angle += spread
                     }
                 } else if (tech.isIceShot) {
                     const spread = (m.crouch ? 0.7 : 1.2)
@@ -4131,7 +4131,7 @@ const b = {
                 ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
-                const end = 750 * Math.sqrt(tech.isBulletsLastLonger) / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
+                const end = 700 * Math.sqrt(tech.isBulletsLastLonger) / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
                 const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
@@ -4213,7 +4213,7 @@ const b = {
                 ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
-                const end = 1250 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
+                const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
                 const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {

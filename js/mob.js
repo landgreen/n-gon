@@ -284,7 +284,7 @@ const mobs = {
             },
             memory: 120, //default time to remember player's location
             locatePlayer() { // updates mob's memory of player location
-                this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
+                this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
                 this.seePlayer.position.x = player.position.x;
                 this.seePlayer.position.y = player.position.y;
             },
@@ -309,12 +309,38 @@ const mobs = {
             //         this.seePlayer.position.y = player.position.y;
             //     }
             // },
+            seePlayerByHistory(depth = 30) { //depth max 60?  limit of history
+                if (!(simulation.cycle % this.seePlayerFreq)) {
+                    if (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && !m.isCloak) {
+                        this.foundPlayer();
+                    } else if (this.seePlayer.recall) {
+                        this.lostPlayer();
+                        for (let i = 0; i < depth; i++) { //if lost player lock onto a player location in history
+                            let history = m.history[(m.cycle - 10 * i) % 600]
+                            if (Matter.Query.ray(map, this.position, history.position).length === 0) {
+                                this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
+                                this.seePlayer.position.x = history.position.x;
+                                this.seePlayer.position.y = history.position.y;
+                                this.seePlayer.yes = true;
+                                //draw the history location found for testing purposes
+                                // ctx.beginPath();
+                                // ctx.moveTo(this.position.x, this.position.y);
+                                // ctx.lineTo(history.position.x, history.position.y);
+                                // ctx.lineWidth = 5;
+                                // ctx.strokeStyle = "#000";
+                                // ctx.stroke();
+                                break
+                            }
+                        }
+                    }
+                }
+            },
             seePlayerCheck() {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
-                        Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
-                        // Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+                        Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                        // Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0 &&
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -335,7 +361,7 @@ const mobs = {
             seePlayerByDistOrLOS() {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
-                        (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 && Matter.Query.ray(body, this.position, this.mPosRange()).length === 0)) &&
+                        (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0)) &&
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -366,8 +392,8 @@ const mobs = {
                 if (!(simulation.cycle % this.seePlayerFreq) && (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange))) {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
-                        Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 &&
-                        // Matter.Query.ray(body, this.position, this.mPosRange()).length === 0 &&
+                        Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                        // Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0 &&
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -387,7 +413,7 @@ const mobs = {
                     ctx.fill();
                 }
             },
-            mPosRange() {
+            playerPosRandomY() {
                 return {
                     x: player.position.x, // + (Math.random() - 0.5) * 50,
                     y: player.position.y + (Math.random() - 0.5) * 110
@@ -412,7 +438,7 @@ const mobs = {
             //     this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
             //   }
             // },
-            laserBeam() {
+            harmZone() {
                 if (this.seePlayer.yes) {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
@@ -879,8 +905,8 @@ const mobs = {
                 if (
                     !(simulation.cycle % this.fireFreq) &&
                     Math.abs(this.position.x - this.seePlayer.position.x) < 400 && //above player
-                    Matter.Query.ray(map, this.position, this.mPosRange()).length === 0 && //see player
-                    Matter.Query.ray(body, this.position, this.mPosRange()).length === 0
+                    Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && //see player
+                    Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
                 ) {
                     spawn.bomb(this.position.x, this.position.y + this.radius * 0.7, 9 + Math.ceil(this.radius / 15), 5);
                     //add spin and speed

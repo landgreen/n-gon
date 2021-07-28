@@ -1462,7 +1462,8 @@ const m = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            description: "regen <strong>6</strong> <strong class='color-f'>energy</strong> per second<br>use it to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong><br><strong class='color-f'>energy</strong> regen disabled if immune to <strong class='color-harm'>harm</strong>",
+            // description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>regen <strong>6</strong> <strong class='color-f'>energy</strong>/s, when not immune to <strong class='color-harm'>harm</strong>",
             effect: () => {
                 m.hold = function() {
                     if (m.isHolding) {

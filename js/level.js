@@ -16,7 +16,6 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
             // b.giveGuns("shotgun")
-            // b.giveGuns("foam")
             // tech.isNeedleShot = true
             // tech.isIceShot = true
             // tech.isFoamShot = true
@@ -2264,15 +2263,21 @@ const level = {
         spawn.mapRect(6400, -200, 400, 300); //right wall
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
-
-        spawn.starter(1900, -500, 200) //big boy
+        //place to hide
+        spawn.mapRect(4650, -300, 1150, 50);
+        spawn.mapRect(5750, -300, 50, 200);
+        spawn.mapRect(5575, -100, 50, 125);
+        spawn.mapRect(5300, -275, 50, 175);
+        spawn.mapRect(5050, -100, 50, 150);
+        spawn.mapRect(4850, -275, 50, 175);
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.growBossCulture(1900, -500)
 
+        // spawn.blinkBoss(1900, -500)
         // spawn.snakeBoss(1900, -500)
-        // spawn.shieldingBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
 
-        // spawn.shieldingBoss(1900, -500)
+        spawn.sneaker(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.focuser(1600, -500)
@@ -2327,6 +2332,8 @@ const level = {
             ctx.fillRect(5400, -550, 300, 350)
         };
 
+        spawn.powerUpBoss(0, 0)
+        spawn.powerUpBoss(0, 0)
         level.setPosToSpawn(0, -250); //normal spawn
         spawn.mapRect(5500, -330 + 20, 100, 20); //spawn this because the real exit is in the wrong spot
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -2364,7 +2371,7 @@ const level = {
         spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         spawn.mapRect(5425, -650, 375, 450); //blocking exit
-        spawn.secondaryBossChance(4800, -500)
+        // spawn.secondaryBossChance(4800, -500) //no bonus bosses on final level
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3229,7 +3236,7 @@ const level = {
         spawn.randomGroup(1600, -100, 0);
         spawn.randomGroup(5000, -3900, -0.3);
         if (simulation.difficulty > 3) {
-            if (Math.random() < 0.2) {
+            if (Math.random() < 0.25) {
                 spawn.randomLevelBoss(2800, -1400);
             } else if (Math.random() < 0.25) {
                 spawn.laserBoss(2900 + 300 * Math.random(), -2950 + 150 * Math.random());
@@ -3606,7 +3613,7 @@ const level = {
         spawn.randomMob(3975, -3900, 0.5);
         spawn.randomMob(1725, 125, 0.5);
         if (simulation.difficulty > 3) {
-            if (Math.random() < 0.25) {
+            if (Math.random() < 0.33) {
                 spawn.randomLevelBoss(4250, -250);
                 spawn.debris(-250, 50, 1650, 2); //16 debris per level
                 spawn.debris(2475, 0, 750, 2); //16 debris per level
@@ -4349,7 +4356,7 @@ const level = {
         spawn.randomSmallMob(-900, 825);
 
         if (simulation.difficulty > 3) {
-            if (Math.random() < 0.25) {
+            if (Math.random() < 0.33) {
                 spawn.randomLevelBoss(-800, -1300)
             } else {
                 spawn.snakeBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head

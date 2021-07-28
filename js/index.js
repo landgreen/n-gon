@@ -30,11 +30,11 @@ function shuffle(array) {
     return array;
 }
 
-// shrink power up selection menu to find window height
-if (screen.height < 800) {
-    document.getElementById("choose-grid").style.fontSize = "1em"; //1.3em is normal
-    if (screen.height < 600) document.getElementById("choose-grid").style.fontSize = "0.8em"; //1.3em is normal
-}
+// shrink power up selection menu
+// if (screen.height < 800) {
+//     document.getElementById("choose-grid").style.fontSize = "1em"; //1.3em is normal
+//     if (screen.height < 600) document.getElementById("choose-grid").style.fontSize = "0.8em"; //1.3em is normal
+// }
 
 
 //**********************************************************************
