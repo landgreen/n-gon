@@ -2384,7 +2384,7 @@ const b = {
                 //aoe damage to mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
-                        let dmg = b.dmgScale * 0.1 * tech.droneRadioDamage //neutron bombs  dmg = 0.09
+                        let dmg = 0.11 * b.dmgScale * tech.droneRadioDamage //neutron bombs  dmg = 0.09
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                         if (mob[i].shield) dmg *= 3 // to make up for the /5 that shields normally take
                         mob[i].damage(dmg);
@@ -2884,14 +2884,14 @@ const b = {
             }
         }
     },
-    randomBot(where = player.position, isKeep = true, isAll = true) {
-        if (Math.random() < 0.167 && isAll) {
-            b.dynamoBot(where)
-            if (isKeep) tech.dynamoBotCount++;
-        } else if (Math.random() < 0.25 && isAll) {
+    randomBot(where = player.position, isKeep = true, isLaser = true) {
+        if (Math.random() < 0.166 && isLaser) {
             b.laserBot(where)
             if (isKeep) tech.laserBotCount++;
-        } else if (Math.random() < 0.25 && isAll) {
+        } else if (Math.random() < 0.2) {
+            b.dynamoBot(where)
+            if (isKeep) tech.dynamoBotCount++;
+        } else if (Math.random() < 0.25) {
             b.orbitBot(where);
             if (isKeep) tech.orbitBotCount++;
         } else if (Math.random() < 0.33) {
@@ -2961,7 +2961,7 @@ const b = {
                         if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
-                                m.energy += 0.1
+                                m.energy += 0.08
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,

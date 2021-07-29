@@ -2332,8 +2332,6 @@ const level = {
             ctx.fillRect(5400, -550, 300, 350)
         };
 
-        spawn.powerUpBoss(0, 0)
-        spawn.powerUpBoss(0, 0)
         level.setPosToSpawn(0, -250); //normal spawn
         spawn.mapRect(5500, -330 + 20, 100, 20); //spawn this because the real exit is in the wrong spot
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);

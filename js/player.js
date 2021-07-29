@@ -627,7 +627,7 @@ const m = {
             return
         }
         m.lastHarmCycle = m.cycle
-        if (tech.isDroneOnDamage) { //chance to build a drone on damage  from tech
+        if (tech.isDroneOnDamage && bullet.length < 150) { //chance to build a drone on damage  from tech
             const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40) / tech.droneEnergyReduction
             for (let i = 0; i < len; i++) {
                 if (Math.random() < 0.5) b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 100 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 100 * (Math.random() - 0.5) }) //spawn drone
@@ -1138,6 +1138,7 @@ const m = {
                     //bullet-like collisions
                     m.holdingTarget.collisionFilter.category = cat.bullet
                     m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
+                    if (tech.isBlockRestitution) m.holdingTarget.restitution = 0.999 //extra bouncy
                     //check every second to see if player is away from thrown body, and make solid
                     const solid = function(that) {
                         const dx = that.position.x - player.position.x;
@@ -1588,8 +1589,9 @@ const m = {
         },
         {
             name: "perfect diamagnetism",
-            // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
             description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br><strong>deflecting</strong> has <strong>90%</strong> less <strong>recoil</strong>",
+            // description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> doesn't drain <strong class='color-f'>energy</strong><br>thrown <strong class='color-block'>blocks</strong> have",
+            // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
             effect: () => {
                 m.fieldShieldingScale = 0;
                 m.fieldBlockCD = 4;
@@ -1659,7 +1661,7 @@ const m = {
         },
         {
             name: "negative mass field",
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br><strong class='color-block'>blocks</strong> held by the field have a lower <strong>mass</strong>",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
@@ -1847,7 +1849,7 @@ const m = {
                             m.energy -= 0.04;
                             b.iceIX(1)
                         } else if (tech.isDroneRadioactive) {
-                            m.energy -= 0.9;
+                            m.energy -= 0.85;
                             b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;

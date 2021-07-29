@@ -204,6 +204,37 @@
                 spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, spawn.nonCollideBossList);
             }
         },
+        setTechFrequency(name, frequency) {
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].name === name) tech.tech[i].frequency = frequency
+            }
+        },
+        setBotTechFrequency(f = 0) {
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].isBotTech) {
+                    switch (tech.tech[i].name) {
+                        case "dynamo-bot":
+                            tech.tech[i].frequency = f
+                            break;
+                        case "orbital-bot":
+                            tech.tech[i].frequency = f
+                            break;
+                        case "laser-bot":
+                            tech.tech[i].frequency = f
+                            break;
+                        case "boom-bot":
+                            tech.tech[i].frequency = f
+                            break;
+                        case "foam-bot":
+                            tech.tech[i].frequency = f
+                            break;
+                        case "nail-bot":
+                            tech.tech[i].frequency = f
+                            break;
+                    }
+                }
+            }
+        },
         tech: [{
                 name: "integrated armament",
                 description: `increase <strong class='color-d'>damage</strong> by <strong>30%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
@@ -1093,12 +1124,17 @@
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'nail') bullet[i].isUpgraded = true
                     }
+                    tech.setBotTechFrequency()
+                    tech.setTechFrequency("nail-bot", 5)
                 },
                 remove() {
-                    tech.isNailBotUpgrade = false
-                    for (let i = 0; i < bullet.length; i++) {
-                        if (bullet[i].botType === 'nail') bullet[i].isUpgraded = false
+                    if (this.count) {
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType === 'nail') bullet[i].isUpgraded = false
+                        }
+                        tech.setBotTechFrequency(1)
                     }
+                    tech.isNailBotUpgrade = false
                 }
             },
             {
@@ -1144,12 +1180,17 @@
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'foam') bullet[i].isUpgraded = true
                     }
+                    tech.setBotTechFrequency()
+                    tech.setTechFrequency("foam-bot", 5)
                 },
                 remove() {
-                    tech.isFoamBotUpgrade = false
-                    for (let i = 0; i < bullet.length; i++) {
-                        if (bullet[i].botType === 'foam') bullet[i].isUpgraded = false
+                    if (this.count) {
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType === 'foam') bullet[i].isUpgraded = false
+                        }
+                        tech.setBotTechFrequency(1)
                     }
+                    tech.isFoamBotUpgrade = false
                 }
             },
             {
@@ -1195,12 +1236,17 @@
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'boom') bullet[i].isUpgraded = true
                     }
+                    tech.setBotTechFrequency()
+                    tech.setTechFrequency("boom-bot", 5)
                 },
                 remove() {
-                    tech.isBoomBotUpgrade = false
-                    for (let i = 0; i < bullet.length; i++) {
-                        if (bullet[i].botType === 'boom') bullet[i].isUpgraded = false
+                    if (this.count) {
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType === 'boom') bullet[i].isUpgraded = false
+                        }
+                        tech.setBotTechFrequency(1)
                     }
+                    tech.isBoomBotUpgrade = false
                 }
             },
             {
@@ -1246,12 +1292,17 @@
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'laser') bullet[i].isUpgraded = true
                     }
+                    tech.setBotTechFrequency()
+                    tech.setTechFrequency("laser-bot", 5)
                 },
                 remove() {
-                    tech.isLaserBotUpgrade = false
-                    for (let i = 0; i < bullet.length; i++) {
-                        if (bullet[i].botType === 'laser') bullet[i].isUpgraded = false
+                    if (this.count) {
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType === 'laser') bullet[i].isUpgraded = false
+                        }
+                        tech.setBotTechFrequency(1)
                     }
+                    tech.isLaserBotUpgrade = false
                 }
             },
             {
@@ -1302,17 +1353,21 @@
                             bullet[i].orbitalSpeed = Math.sqrt(0.25 / range)
                         }
                     }
-
+                    tech.setBotTechFrequency()
+                    tech.setTechFrequency("orbital-bot", 5)
                 },
                 remove() {
-                    tech.isOrbitBotUpgrade = false
-                    const range = 190 + 100 * tech.isOrbitBotUpgrade
-                    for (let i = 0; i < bullet.length; i++) {
-                        if (bullet[i].botType === 'orbit') {
-                            bullet[i].range = range
-                            bullet[i].orbitalSpeed = Math.sqrt(0.25 / range)
+                    if (this.count) {
+                        const range = 190 + 100 * tech.isOrbitBotUpgrade
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType === 'orbit') {
+                                bullet[i].range = range
+                                bullet[i].orbitalSpeed = Math.sqrt(0.25 / range)
+                            }
                         }
+                        tech.setBotTechFrequency(1)
                     }
+                    tech.isOrbitBotUpgrade = false
                 }
             },
             {
@@ -1342,7 +1397,7 @@
             },
             {
                 name: "dynamo-bot upgrade",
-                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>20</strong> <strong class='color-f'>energy</strong> per second",
+                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>16</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1358,12 +1413,17 @@
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = true
                     }
+                    tech.setBotTechFrequency()
+                    tech.setTechFrequency("dynamo-bot", 5)
                 },
                 remove() {
-                    tech.isDynamoBotUpgrade = false
-                    for (let i = 0; i < bullet.length; i++) {
-                        if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = false
+                    if (this.count) {
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType === 'dynamo') bullet[i].isUpgraded = false
+                        }
+                        tech.setBotTechFrequency(1)
                     }
+                    tech.isDynamoBotUpgrade = false
                 }
             },
             {
@@ -1456,7 +1516,7 @@
             },
             {
                 name: "ersatz bots",
-                description: "<strong>double</strong> your permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your <strong class='color-g'>guns</strong>",
+                description: "<strong>double</strong> your current permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your current <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1531,7 +1591,7 @@
             },
             {
                 name: "flywheel",
-                description: "after a mob <strong>dies</strong> its <strong class='color-block'>block</strong> is <strong>flung</strong> at mobs<br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong>",
+                description: "after a mob <strong>dies</strong> its <strong class='color-block'>block</strong> is <strong>flung</strong> at mobs<br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1545,6 +1605,24 @@
                 },
                 remove() {
                     tech.isMobBlockFling = false
+                }
+            },
+            {
+                name: "restitution",
+                description: "throwing a <strong class='color-block'>block</strong> makes it very <strong>bouncy</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+                },
+                requires: "mass driver, not pilot wave not tokamak",
+                effect() {
+                    tech.isBlockRestitution = true
+                },
+                remove() {
+                    tech.isBlockRestitution = false
                 }
             },
             // {
@@ -1566,6 +1644,24 @@
             //     }
             // },
             {
+                name: "inelastic collision",
+                description: "<strong>holding</strong> a <strong class='color-block'>block</strong> reduces <strong class='color-harm'>harm</strong> by <strong>85%</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
+                },
+                requires: "mass driver, a field that can hold things, not mass-energy",
+                effect() {
+                    tech.isBlockHarm = true
+                },
+                remove() {
+                    tech.isBlockHarm = false
+                }
+            },
+            {
                 name: "inflation",
                 description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
                 maxCount: 1,
@@ -1573,9 +1669,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave"
+                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
                 },
-                requires: "mass driver, not pilot wave",
+                requires: "mass driver, not pilot wave not tokamak",
                 effect() {
                     tech.isAddBlockMass = true
                 },
@@ -1584,7 +1680,7 @@
                 }
             },
             {
-                name: "restitution",
+                name: "buckling",
                 description: "if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>1</strong> <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1599,24 +1695,6 @@
                 },
                 remove() {
                     tech.isBlockPowerUps = false
-                }
-            },
-            {
-                name: "inelastic collision",
-                description: "<strong>holding</strong> a <strong class='color-block'>block</strong> reduces <strong class='color-harm'>harm</strong> by <strong>85%</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>100%</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
-                allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
-                },
-                requires: "mass driver, a field that can hold things, not mass-energy",
-                effect() {
-                    tech.isBlockHarm = true
-                },
-                remove() {
-                    tech.isBlockHarm = false
                 }
             },
             {
@@ -2629,9 +2707,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.isDeathAvoid
+                    return tech.isDeathAvoid && tech.duplicationChance() < 0.66
                 },
-                requires: "anthropic principle",
+                requires: "anthropic principle, below 66% duplication chance",
                 effect() {
                     tech.isAnthropicTech = true
                     powerUps.setDo(); //needed after adjusting duplication chance
@@ -3825,7 +3903,7 @@
             },
             {
                 name: "worm-shot",
-                description: "<strong>shotgun</strong> hatches <strong>3-4</strong> mob seeking <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
+                description: "<strong>shotgun</strong> hatches <strong>3-4</strong> mob seeking <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><em>worms benefit from spore technology</em>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -7653,5 +7731,6 @@
         isWormShot: null,
         isFoamShot: null,
         isIceShot: null,
-        isNeedleShot: null
+        isNeedleShot: null,
+        isBlockRestitution: null
     }

@@ -1,7 +1,23 @@
 ******************************************************** NEXT PATCH ********************************************************
 
+tech: restitution: thrown blocks are bouncy and blocks do 150% more damage
+  the tech previously named restitution is now named buckling
+
+after getting a bot upgrade, future bot tech will be for the upgraded bot type
+  (doesn't effect tech that gives random bots)
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
+
+using worming makes you immune to harm and drains energy until you run out
+  disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
+
+pink seeker boss is cool as heck, make an alt version of it
+
+perfect diamagnetism field stays when you aren't holding field
+  good for perfect because it doesn't use energy
+  holding field moves it the player
 
 block shattering
  get code from planetesimals
@@ -12,16 +28,10 @@ mob that grows or gets a shield when player is near
     charge triggers an escape mode 
       mob wonders and drops eggs that hatch into seekers if no player around
 
-pink seeker boss is cool as heck, make an alt version of it
-
-perfect diamagnetism field stays when you aren't holding field
-  good for perfect because it doesn't use energy
-  holding field moves it the player
-
 scrolling console history in pause menu?
-  also make tech, guns scrolling?
-in testing mode console log the body you click on
 pause should at least show the last in game console message
+
+in testing mode console log the body you click on
 
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
