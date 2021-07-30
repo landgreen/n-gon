@@ -1,23 +1,21 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: restitution: thrown blocks are bouncy and blocks do 150% more damage
-  the tech previously named restitution is now named buckling
-
-after getting a bot upgrade, future bot tech will be for the upgraded bot type
-  (doesn't effect tech that gives random bots)
-
-bug fixes
+tech: Lenz's law -perfect diamagnetism field stays when you aren't holding field
+tech: Zeno's paradox - every 5s lose 10% of your current health, but get 84% harm reduction
 
 ******************************************************** TODO ********************************************************
 
-using worming makes you immune to harm and drains energy until you run out
+remove cooldown on perfect diamagnetism?
+  make another var that tracks cooldown for other stuff?
+    like damage effects
+
+is lab gun room always backwards?
+
+using wormhole makes you immune to harm and drains energy until you run out
   disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
 
 pink seeker boss is cool as heck, make an alt version of it
 
-perfect diamagnetism field stays when you aren't holding field
-  good for perfect because it doesn't use energy
-  holding field moves it the player
 
 block shattering
  get code from planetesimals

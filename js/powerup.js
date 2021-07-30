@@ -723,7 +723,7 @@ const powerUps = {
             powerUps.spawn(x, y, "tech");
             return;
         }
-        if (Math.random() < 0.006) {
+        if (Math.random() < 0.003) {
             powerUps.spawn(x, y, "field");
             return;
         }

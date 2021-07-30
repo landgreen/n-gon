@@ -14,7 +14,8 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("wormhole")
+            // tech.isFieldFree = true
+            // m.setField("perfect diamagnetism")
             // b.giveGuns("shotgun")
             // tech.isNeedleShot = true
             // tech.isIceShot = true
@@ -2270,14 +2271,12 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.growBossCulture(1900, -500)
-
         // spawn.blinkBoss(1900, -500)
         // spawn.snakeBoss(1900, -500)
         // spawn.grenadierBoss(1900, -500)
-
-        spawn.sneaker(1900, -500)
+        // spawn.sneaker(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.focuser(1600, -500)

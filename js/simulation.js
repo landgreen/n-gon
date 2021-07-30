@@ -853,7 +853,10 @@ const simulation = {
             }
 
             if (!(simulation.cycle % 420)) { //once every 7 seconds
-
+                if (tech.isZeno) {
+                    m.health *= 0.9
+                    m.displayHealth();
+                }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
                 fallCheck = function(who, save = false) {

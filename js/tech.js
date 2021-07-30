@@ -1590,6 +1590,42 @@
                 }
             },
             {
+                name: "inflation",
+                description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+                },
+                requires: "mass driver, not pilot wave not tokamak",
+                effect() {
+                    tech.isAddBlockMass = true
+                },
+                remove() {
+                    tech.isAddBlockMass = false
+                }
+            },
+            {
+                name: "restitution",
+                description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> makes it very <strong>bouncy</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+                },
+                requires: "mass driver, not pilot wave not tokamak",
+                effect() {
+                    tech.isBlockRestitution = true
+                },
+                remove() {
+                    tech.isBlockRestitution = false
+                }
+            },
+            {
                 name: "flywheel",
                 description: "after a mob <strong>dies</strong> its <strong class='color-block'>block</strong> is <strong>flung</strong> at mobs<br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
                 maxCount: 1,
@@ -1605,24 +1641,6 @@
                 },
                 remove() {
                     tech.isMobBlockFling = false
-                }
-            },
-            {
-                name: "restitution",
-                description: "throwing a <strong class='color-block'>block</strong> makes it very <strong>bouncy</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
-                allowed() {
-                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
-                },
-                requires: "mass driver, not pilot wave not tokamak",
-                effect() {
-                    tech.isBlockRestitution = true
-                },
-                remove() {
-                    tech.isBlockRestitution = false
                 }
             },
             // {
@@ -1659,24 +1677,6 @@
                 },
                 remove() {
                     tech.isBlockHarm = false
-                }
-            },
-            {
-                name: "inflation",
-                description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
-                allowed() {
-                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
-                },
-                requires: "mass driver, not pilot wave not tokamak",
-                effect() {
-                    tech.isAddBlockMass = true
-                },
-                remove() {
-                    tech.isAddBlockMass = false
                 }
             },
             {
@@ -2171,7 +2171,7 @@
                 allowed() {
                     return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isBlockExplosion) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
                 },
-                requires: "a way to regen extra energy, but not time crystals",
+                requires: "a way to regen extra energy, not time crystals",
                 effect: () => {
                     tech.energyRegen = 0;
                     m.fieldRegen = tech.energyRegen;
@@ -2186,12 +2186,12 @@
                 description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return !tech.isAmmoFromHealth && !tech.isNoHeals && !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth && !tech.isTechDamage
+                    return !tech.isZeno && !tech.isAmmoFromHealth && !tech.isNoHeals && !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth && !tech.isTechDamage
                 },
-                requires: "not exothermic process, piezoelectricity, CPT, 1st law, negative mass , ...",
+                requires: "not exothermic, Zeno, piezoelectricity, CPT, 1st law, negative mass, ...",
                 effect: () => {
                     m.health = 0
                     document.getElementById("health").style.display = "none"
@@ -2216,8 +2216,8 @@
                 description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>6</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isEnergyHealth && !tech.isNoHeals
                 },
@@ -2497,6 +2497,25 @@
                 },
                 remove() {
                     tech.isHarmReduceAfterKill = false;
+                }
+            },
+            {
+                name: "Zeno's paradox",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>84%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/10</strong> of your current <strong class='color-h'>health</strong>",
+                // description: "every <strong>5</strong> seconds remove <strong>1/10</strong> of your <strong class='color-h'>health</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return !tech.isEnergyHealth
+                },
+                requires: "not mass-energy",
+                effect() {
+                    tech.isZeno = true;
+                },
+                remove() {
+                    tech.isZeno = false;
                 }
             },
             {
@@ -3059,7 +3078,7 @@
             },
             {
                 name: "metastability",
-                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second half-life",
+                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -5281,6 +5300,25 @@
                 },
                 remove() {
                     tech.isPerfectBrake = false;
+                }
+            },
+            {
+                name: "Lenz's law",
+                description: "after deactivation <strong>perfect diamagnetism</strong><br>maintains at the <strong>location</strong> you left it",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+                },
+                requires: "perfect diamagnetism",
+                effect() {
+                    tech.isFieldFree = true;
+                },
+                remove() {
+                    tech.isFieldFree = false;
                 }
             },
             {
@@ -7732,5 +7770,7 @@
         isFoamShot: null,
         isIceShot: null,
         isNeedleShot: null,
-        isBlockRestitution: null
+        isBlockRestitution: null,
+        isZeno: null,
+        isFieldFree: null
     }
