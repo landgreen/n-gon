@@ -333,9 +333,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isDamageForGuns || tech.isFireRateForGuns) && (b.inventory.length + 5) < b.guns.length
+                    return (tech.isDamageForGuns || tech.isFireRateForGuns) && b.inventory.length + 5 < b.guns.length
                 },
-                requires: "arsenal or active cooling",
+                requires: "arsenal or active cooling and less than 7 guns",
                 effect() {
                     tech.isGunCycle = true;
                     for (let i = 0; i < 8; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "gun");
@@ -447,9 +447,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isEnergyHealth && !tech.isEnergyNoAmmo
+                    return !tech.isEnergyNoAmmo
                 },
-                requires: "not mass-energy equivalence or exciton-lattice",
+                requires: "exciton-lattice",
                 effect: () => {
                     tech.isAmmoFromHealth = true;
                 },
@@ -2189,9 +2189,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isZeno && !tech.isAmmoFromHealth && !tech.isNoHeals && !tech.isEnergyLoss && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isSpeedHarm && m.fieldUpgrades[m.fieldMode].name !== "negative mass field" && !tech.isHealLowHealth && !tech.isTechDamage
+                    return !tech.isZeno && !tech.isNoHeals && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isTechDamage && !tech.isMutualism
                 },
-                requires: "not exothermic, Zeno, piezoelectricity, CPT, 1st law, negative mass, ...",
+                requires: "not Zeno, ergodicity, piezoelectricity, CPT, rewind gun, antiscience, mutualism",
                 effect: () => {
                     m.health = 0
                     document.getElementById("health").style.display = "none"
@@ -2202,13 +2202,15 @@
                     m.displayHealth();
                 },
                 remove() {
-                    tech.isEnergyHealth = false;
-                    document.getElementById("health").style.display = "inline"
-                    document.getElementById("health-bg").style.display = "inline"
-                    document.getElementById("dmg").style.backgroundColor = "#f67";
-                    m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
-                    simulation.mobDmgColor = "rgba(255,0,0,0.7)"
-                    m.displayHealth();
+                    if (tech.isEnergyHealth) {
+                        tech.isEnergyHealth = false;
+                        document.getElementById("health").style.display = "inline"
+                        document.getElementById("health-bg").style.display = "inline"
+                        document.getElementById("dmg").style.backgroundColor = "#f67";
+                        m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
+                        simulation.mobDmgColor = "rgba(255,0,0,0.7)"
+                        m.displayHealth();
+                    }
                 }
             },
             {
@@ -2219,9 +2221,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isEnergyHealth && !tech.isNoHeals
+                    return tech.isEnergyHealth
                 },
-                requires: "mass-energy equivalence, not ergodicity",
+                requires: "mass-energy equivalence",
                 effect() {
                     tech.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up
                     powerUps.heal.color = "#0ae"
@@ -2282,9 +2284,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return true //m.maxEnergy > 1 || tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isBlockExplosion
+                    return true
                 },
-                requires: "", //"increased energy regen or max energy",
+                requires: "",
                 effect: () => {
                     tech.isEnergyDamage = true
                 },
@@ -2300,9 +2302,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return true //(tech.haveGunCheck("nail gun") && tech.isIceCrystals) || tech.haveGunCheck("laser") || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return true
                 },
-                requires: "", //"energy based damage",
+                requires: "",
                 effect() {
                     tech.isEnergyNoAmmo = true;
                 },
@@ -2318,9 +2320,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isEnergyHealth
+                    return true
                 },
-                requires: "not mass-energy equivalence",
+                requires: "",
                 effect() {
                     tech.isEnergyLoss = true;
                 },
@@ -2400,11 +2402,11 @@
                 },
                 requires: "a source of overfilled energy",
                 effect() {
-                    tech.overfillDrain = 0.87 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
+                    tech.overfillDrain = 0.85 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
                     tech.addJunkTechToPool(18)
                 },
                 remove() {
-                    tech.overfillDrain = 0.75
+                    tech.overfillDrain = 0.7
                     if (this.count > 0) tech.removeJunkTechFromPool(18)
                 }
             },
@@ -2453,9 +2455,9 @@
                 frequencyDefault: 1,
                 isHealTech: true,
                 allowed() {
-                    return !tech.isEnergyHealth && !tech.isNoHeals
+                    return !tech.isEnergyHealth
                 },
-                requires: "not mass-energy equivalence, ergodicity",
+                requires: "not mass-energy equivalence",
                 effect() {
                     tech.isHealthRecovery = true;
                 },
@@ -2556,16 +2558,16 @@
             },
             {
                 name: "entropy exchange",
-                description: "<strong class='color-h'>heal</strong> for <strong>3%</strong> of <strong class='color-d'>damage</strong> done<br>take <strong>8%</strong> more <strong class='color-harm'>harm</strong>",
+                description: "<strong class='color-h'>heal</strong> for <strong>3%</strong> of <strong class='color-d'>damage</strong> done<br>take <strong>10%</strong> more <strong class='color-harm'>harm</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 isHealTech: true,
                 allowed() {
-                    return !tech.isEnergyHealth && !tech.isNoHeals
+                    return !tech.isEnergyHealth
                 },
-                requires: "not mass-energy equivalence, ergodicity",
+                requires: "not mass-energy equivalence",
                 effect() {
                     tech.healthDrain += 0.03;
                 },
@@ -2599,9 +2601,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isEnergyHealth && !tech.isNoHeals
+                    return !tech.isEnergyHealth
                 },
-                requires: "not mass-energy equivalence, ergodicity",
+                requires: "not mass-energy equivalence",
                 effect() {
                     tech.isFallingDamage = true;
                     m.setMaxHealth();
@@ -2678,9 +2680,9 @@
                 isNonRefundable: true,
                 isBadRandomOption: true,
                 allowed() {
-                    return !tech.isNoHeals
+                    return true
                 },
-                requires: "not ergodicity",
+                requires: "",
                 effect() {
                     for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -3451,15 +3453,15 @@
             },
             {
                 name: "ergodicity",
-                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>all <strong class='color-h'>healing</strong> has <strong>no</strong> effect",
+                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br><strong class='color-h'>heal</strong> power ups have <strong>no</strong> effect",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return level.onLevel > 1 && m.health > m.maxHealth - 0.1 && !tech.isEnergyHealth
+                    return level.onLevel > 1 && !tech.isEnergyHealth
                 },
-                requires: "past levels 1, full health, not mass-energy",
+                requires: "past levels 1, not mass-energy",
                 effect() {
                     tech.isNoHeals = true;
                     level.difficultyDecrease(simulation.difficultyMode * 2)

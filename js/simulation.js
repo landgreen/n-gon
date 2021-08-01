@@ -538,10 +538,11 @@ const simulation = {
         } else {
             level.levels = shuffle(level.levels); //shuffles order of maps
         }
-        level.levels.unshift("intro"); //add level to the start of the randomized levels list
-        level.levels.push("labs"); //add level to the end of the randomized levels list
-        level.levels.push("gauntlet"); //add level to the end of the randomized levels list
-        level.levels.push("final"); //add level to the end of the randomized levels list
+        if (!build.isExperimentSelection) { //experimental mode is endless
+            level.levels.unshift("intro"); //add level to the start of the randomized levels list
+            level.levels.push("gauntlet"); //add level to the end of the randomized levels list
+            level.levels.push("final"); //add level to the end of the randomized levels list
+        }
 
         input.endKeySensing();
         b.removeAllGuns();

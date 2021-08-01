@@ -1973,18 +1973,18 @@ const spawn = {
         mobs.spawn(x, y, 5, 50, "rgb(215,80,190)"); //"rgb(221,102,119)"
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, Math.PI * 0.1);
-        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         me.damageReduction = 0.25;
         me.frictionStatic = 0;
         me.friction = 0;
         me.memory = 240
         me.seePlayerFreq = 60
-        me.delay = 20 + 20 * simulation.CDScale;
+        me.delay = 16 + 30 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         me.blinkRange = 235
-        me.grenadeDelay = 30 + 50 * simulation.CDScale
-        me.pulseRadius = 2 * Math.min(550, 250 + simulation.difficulty * 3)
+        me.grenadeDelay = 30 + 60 * simulation.CDScale
+        me.pulseRadius = 2 * Math.min(550, 220 + simulation.difficulty * 4)
         spawn.shield(me, x, y, 1);
         me.onDamage = function() {
             // this.cd = simulation.cycle + this.delay;
@@ -2001,6 +2001,7 @@ const spawn = {
                     y: speed * Math.sin(angle)
                 });
             }
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         }
         me.do = function() {
             this.seePlayerByHistory()
@@ -3310,8 +3311,8 @@ const spawn = {
         };
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
-        // me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
-        me.collisionFilter.mask = 0
+        me.collisionFilter.mask = cat.map | cat.body
+        // me.collisionFilter.mask = 0
         me.do = function() {
             this.timeLimit();
             ctx.beginPath(); //draw explosion outline

@@ -1,21 +1,24 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: Lenz's law -perfect diamagnetism field stays when you aren't holding field
-tech: Zeno's paradox - every 5s lose 10% of your current health, but get 84% harm reduction
+"labs" is now in the normal map rotation
+experimental mode is now endless  (no gauntlet, finalBoss, ...)
+fixed a bug that was giving experimental mode full life at the start
+
+perfect diamagnetism field has a 10% larger radius and arc
+the 1/15 second cooldown after blocking with perfect diamagnetism no longer stops you from blocking
+  it still disables field damage effects and player recoil after blocking  (for 1/15 of a second)
+
+mass-energy now works with catabolism by removing max energy to make ammo
+ergodicity - now reduces difficulty by 2 levels and prevent healing from heal power ups (was all healing)
+Noether violation gives even more forward recoil
+blinkBoss has more health, but it's much slower at easy difficulty
 
 ******************************************************** TODO ********************************************************
-
-remove cooldown on perfect diamagnetism?
-  make another var that tracks cooldown for other stuff?
-    like damage effects
-
-is lab gun room always backwards?
 
 using wormhole makes you immune to harm and drains energy until you run out
   disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
 
 pink seeker boss is cool as heck, make an alt version of it
-
 
 block shattering
  get code from planetesimals
@@ -196,6 +199,10 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
+sharing builds as html doesn't work for long lists...
+  it shouldn't be sharing undefined at all
+  probably some other problems too
+
 blocks on buttons teleport into the button endlessly if they are being slowly floated away
   maybe add a cooldown?
   can't reproduce
@@ -229,6 +236,11 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** LEVELS ********************************************************
+
+level element that goes away after touching player (also bullets?)
+  returns after a set time,  or doesn't
+  applications:
+    doors, quick jumping platforming, secrets, 
 
 level with mobs that follow a genetic algorithm
   mobs have genes
@@ -317,6 +329,10 @@ map: observatory
   button opens the dome
 
 ******************************************************** MOBS ********************************************************
+
+mob that charges up and then fires many bullets at once in a connect
+
+mob that draws a lin from it to the player, and past.  then it charges across that line
 
 mob that spawns eggs after they die
   eggs don't attack but grow back into a mob after about 10s

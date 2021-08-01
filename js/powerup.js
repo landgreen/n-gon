@@ -322,7 +322,7 @@ const powerUps = {
             //         }
             //     }
             // }
-            if (!tech.isEnergyHealth && m.alive) {
+            if (!tech.isEnergyHealth && m.alive && !tech.isNoHeals) {
                 const heal = powerUps.heal.calculateHeal(this.size)
                 if (heal > 0) {
                     const overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal

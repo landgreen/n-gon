@@ -95,18 +95,21 @@ const b = {
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
-        m.fireCDcycle = m.cycle + 30; //fire cooldown        
-        if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
-            tech.extraMaxHealth -= 0.01 //decrease max health
-            m.setMaxHealth();
+        m.fireCDcycle = m.cycle + 30; //fire cooldown       
+        if (tech.isAmmoFromHealth) {
+            if (tech.isEnergyHealth) {
+                tech.healMaxEnergyBonus -= 0.01
+                m.setMaxEnergy();
+            } else if (m.maxHealth > 0.01) {
+                tech.extraMaxHealth -= 0.01 //decrease max health
+                m.setMaxHealth();
+            }
             for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
-            // if (m.health > 0.03) {
-            //     m.damage(0.03 / m.harmReduction()); //  /m.harmReduction() undoes  damage increase from difficulty
-            //     if (!(tech.isRewindAvoidDeath && m.energy > 0.66)) { //don't give ammo if CPT triggered
-            //         
-            //     }
-            // }
         }
+        // if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
+        //     tech.extraMaxHealth -= 0.01 //decrease max health
+        //     m.setMaxHealth();
+        // }
     },
     giveGuns(gun = "random", ammoPacks = 10) {
         if (tech.isOneGun) b.removeAllGuns();
@@ -3794,8 +3797,8 @@ const b = {
                 }
 
                 if (tech.isShotgunReversed) {
-                    player.force.x += 2 * knock * Math.cos(m.angle)
-                    player.force.y += 2 * knock * Math.sin(m.angle) - 6 * player.mass * simulation.g
+                    player.force.x += 4 * knock * Math.cos(m.angle)
+                    player.force.y += 4 * knock * Math.sin(m.angle) - 6 * player.mass * simulation.g
                 } else if (tech.isShotgunRecoil) {
                     m.fireCDcycle -= 0.66 * (45 * b.fireCDscale)
                     player.force.x -= 2 * knock * Math.cos(m.angle)

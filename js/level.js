@@ -7,7 +7,7 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    playableLevels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
+    playableLevels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "labs"],
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
@@ -17,16 +17,9 @@ const level = {
             // tech.isFieldFree = true
             // m.setField("perfect diamagnetism")
             // b.giveGuns("shotgun")
-            // tech.isNeedleShot = true
-            // tech.isIceShot = true
-            // tech.isFoamShot = true
-            // tech.isWormShot = true
-            // tech.giveTech("CPT reversal")
-            // tech.giveTech("causality bombs")
+            // tech.giveTech("Noether violation")
             // b.giveGuns("wave beam")
-            // tech.giveTech("phonon")
-            // tech.giveTech("cardinality")
-            // tech.giveTech("isotropic radiator")
+            // tech.giveTech("Lenz's law")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
             // for (let i = 0; i < 4; i++) tech.giveTech()
 
@@ -233,6 +226,9 @@ const level = {
         player.force.y = 0;
         Matter.Body.setPosition(player, m.spawnPos);
         Matter.Body.setVelocity(player, m.spawnVel);
+        //makes perfect diamagnetism tech: Lenz's law show up in the right spot at the start of a level
+        m.fieldPosition = { x: m.pos.x, y: m.pos.y }
+        m.fieldAngle = m.angle
     },
     enter: {
         x: 0,
@@ -1082,6 +1078,7 @@ const level = {
         doCustom = []
         doCustomTopLayer = []
         offset = { x: 0, y: 0 }
+        const mobSpawnChance = 0 // Math.random() < chance + 0.07 * simulation.difficulty
         enterOptions = [
             (x = offset.x, y = offset.y) => { //lasers
                 level.setPosToSpawn(x + 1750, y - 800);
@@ -1127,12 +1124,12 @@ const level = {
                         hazard4.opticalQuery();
                         if (!isSpawnedMobs && !toggle.isOn) {
                             isSpawnedMobs = true
-                            spawn.randomMob(x + 150, y + -1100, Infinity);
-                            spawn.randomMob(x + 175, y + -775, Infinity);
-                            spawn.randomMob(x + 150, y + -350, Infinity);
-                            spawn.randomMob(x + 150, y + -75, Infinity);
-                            spawn.randomMob(x + 650, y + -125, Infinity);
-                            spawn.randomMob(x + 1200, y + -75, Infinity);
+                            spawn.randomMob(x + 150, y + -1100, mobSpawnChance);
+                            spawn.randomMob(x + 175, y + -775, mobSpawnChance);
+                            spawn.randomMob(x + 150, y + -350, mobSpawnChance);
+                            spawn.randomMob(x + 150, y + -75, mobSpawnChance);
+                            spawn.randomMob(x + 650, y + -125, mobSpawnChance);
+                            spawn.randomMob(x + 1200, y + -75, mobSpawnChance);
                         }
                     }
                 )
@@ -1168,11 +1165,11 @@ const level = {
                     () => {
                         if (!isInRoom && m.pos.x > x - 100 && m.pos.x < x + 2700 && m.pos.y > y - 1300 && m.pos.y < y) { //check if player is in this room and run code once
                             isInRoom = true
-                            spawn.randomMob(x + 1175, y - 725, Infinity);
-                            spawn.randomMob(x + 1450, y - 725, Infinity);
-                            spawn.randomMob(x + 425, y - 100, Infinity);
-                            spawn.randomMob(x + 1200, y - 125, Infinity);
-                            spawn.randomMob(x + 1300, y - 375, Infinity);
+                            spawn.randomMob(x + 1175, y - 725, mobSpawnChance);
+                            spawn.randomMob(x + 1450, y - 725, mobSpawnChance);
+                            spawn.randomMob(x + 425, y - 100, mobSpawnChance);
+                            spawn.randomMob(x + 1200, y - 125, mobSpawnChance);
+                            spawn.randomMob(x + 1300, y - 375, mobSpawnChance);
                         }
                         ctx.fillStyle = "#d4f4f4"
                         ctx.fillRect(x + 1550, y - 1300, 450, 350)
@@ -1237,11 +1234,11 @@ const level = {
                     () => {
                         if (!isInRoom && m.pos.x > x - 100 && m.pos.x < x + 2700 && m.pos.y > y - 1300 && m.pos.y < y) { //check if player is in this room and run code once
                             isInRoom = true
-                            spawn.randomMob(x + 1175, y - 725, Infinity);
-                            spawn.randomMob(x + 1450, y - 725, Infinity);
-                            spawn.randomMob(x + 425, y - 100, Infinity);
-                            spawn.randomMob(x + 1200, y - 125, Infinity);
-                            spawn.randomMob(x + 1300, y - 375, Infinity);
+                            spawn.randomMob(x + 1175, y - 725, mobSpawnChance);
+                            spawn.randomMob(x + 1450, y - 725, mobSpawnChance);
+                            spawn.randomMob(x + 425, y - 100, mobSpawnChance);
+                            spawn.randomMob(x + 1200, y - 125, mobSpawnChance);
+                            spawn.randomMob(x + 1300, y - 375, mobSpawnChance);
                         }
                         ctx.fillStyle = "#d4f4f4"
                         ctx.fillRect(x + 1600, y - 1300, 400, 350)
@@ -1290,11 +1287,11 @@ const level = {
                             }
                         }
                     )
-                    spawn.randomMob(x + 2000 - 1600, y + -425, Infinity);
-                    spawn.randomMob(x + 2000 - 1725, y + -1250, Infinity);
-                    spawn.randomMob(x + 2000 - 1250, y + -1200, Infinity);
-                    spawn.randomMob(x + 2000 - 300, y + -1200, Infinity);
-                    spawn.randomMob(x + 2000 - 800, y + -125, Infinity);
+                    spawn.randomMob(x + 2000 - 1600, y + -425, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 1725, y + -1250, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 1250, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 300, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
                     spawn.secondaryBossChance(x + 2000 - 650, y + -875)
@@ -1322,11 +1319,11 @@ const level = {
                             }
                         }
                     )
-                    spawn.randomMob(x + 1600, y + -425, Infinity);
-                    spawn.randomMob(x + 1725, y + -1250, Infinity);
-                    spawn.randomMob(x + 1250, y + -1200, Infinity);
-                    spawn.randomMob(x + 300, y + -1200, Infinity);
-                    spawn.randomMob(x + 800, y + -125, Infinity);
+                    spawn.randomMob(x + 1600, y + -425, mobSpawnChance);
+                    spawn.randomMob(x + 1725, y + -1250, mobSpawnChance);
+                    spawn.randomMob(x + 1250, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 300, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
                     spawn.secondaryBossChance(x + 650, y + -875)
@@ -1382,11 +1379,11 @@ const level = {
                             }
                         }
                     )
-                    spawn.randomMob(x + 2000 - 1600, y + -425, Infinity);
-                    spawn.randomMob(x + 2000 - 1725, y + -1250, Infinity);
-                    spawn.randomMob(x + 2000 - 1250, y + -1200, Infinity);
-                    spawn.randomMob(x + 2000 - 300, y + -1200, Infinity);
-                    spawn.randomMob(x + 2000 - 800, y + -125, Infinity);
+                    spawn.randomMob(x + 2000 - 1600, y + -425, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 1725, y + -1250, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 1250, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 300, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
                     spawn.secondaryBossChance(x + 650, y + -875)
@@ -1439,11 +1436,11 @@ const level = {
                             }
                         }
                     )
-                    spawn.randomMob(x + 1600, y + -425, Infinity);
-                    spawn.randomMob(x + 1725, y + -1250, Infinity);
-                    spawn.randomMob(x + 1250, y + -1200, Infinity);
-                    spawn.randomMob(x + 300, y + -1200, Infinity);
-                    spawn.randomMob(x + 800, y + -125, Infinity);
+                    spawn.randomMob(x + 1600, y + -425, mobSpawnChance);
+                    spawn.randomMob(x + 1725, y + -1250, mobSpawnChance);
+                    spawn.randomMob(x + 1250, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 300, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
                     spawn.secondaryBossChance(x + 650, y - 875)
@@ -1510,11 +1507,11 @@ const level = {
                             }
                         }
                     )
-                    spawn.randomMob(x + 2000 - 1600, y + -425, Infinity);
-                    spawn.randomMob(x + 2000 - 1725, y + -1250, Infinity);
-                    spawn.randomMob(x + 2000 - 1250, y + -1200, Infinity);
-                    spawn.randomMob(x + 2000 - 300, y + -1200, Infinity);
-                    spawn.randomMob(x + 2000 - 800, y + -125, Infinity);
+                    spawn.randomMob(x + 2000 - 1600, y + -425, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 1725, y + -1250, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 1250, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 300, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 2000 - 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
                     spawn.secondaryBossChance(x + 650, y - 875)
@@ -1578,11 +1575,11 @@ const level = {
                             }
                         }
                     )
-                    spawn.randomMob(x + 1600, y + -425, Infinity);
-                    spawn.randomMob(x + 1725, y + -1250, Infinity);
-                    spawn.randomMob(x + 1250, y + -1200, Infinity);
-                    spawn.randomMob(x + 300, y + -1200, Infinity);
-                    spawn.randomMob(x + 800, y + -125, Infinity);
+                    spawn.randomMob(x + 1600, y + -425, mobSpawnChance);
+                    spawn.randomMob(x + 1725, y + -1250, mobSpawnChance);
+                    spawn.randomMob(x + 1250, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 300, y + -1200, mobSpawnChance);
+                    spawn.randomMob(x + 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
                     spawn.secondaryBossChance(x + 650, y - 875)
@@ -1678,17 +1675,17 @@ const level = {
                         } else if (!isSpawnedMobs) {
                             isSpawnedMobs = true
                             if (chamberY === -650) { //lower chamber
-                                spawn.randomGroup(x + 275, y + -1050, Infinity);
-                                spawn.randomGroup(x + 675, y + -975, Infinity);
+                                spawn.randomMob(x + 250, y + -650, mobSpawnChance);
+                                spawn.randomMob(x + 1825, y + -600, mobSpawnChance);
+                                spawn.randomGroup(x + 275, y + -1050, mobSpawnChance);
+                                spawn.randomGroup(x + 675, y + -975, mobSpawnChance);
                                 spawn.randomGroup(x + 1225, y + -975, Infinity);
-                                spawn.randomMob(x + 250, y + -650, Infinity);
-                                spawn.randomMob(x + 1825, y + -600, Infinity);
                             } else { //upper chamber
-                                spawn.randomGroup(x + 300, y + -300, Infinity);
-                                spawn.randomGroup(x + 650, y + -275, Infinity);
+                                spawn.randomMob(x + 250, y + -650, mobSpawnChance);
+                                spawn.randomMob(x + 1800, y + -625, mobSpawnChance);
+                                spawn.randomGroup(x + 300, y + -300, mobSpawnChance);
+                                spawn.randomGroup(x + 650, y + -275, mobSpawnChance);
                                 spawn.randomGroup(x + 1125, y + -300, Infinity);
-                                spawn.randomMob(x + 250, y + -650, Infinity);
-                                spawn.randomMob(x + 1800, y + -625, Infinity);
                             }
                         }
                     }
@@ -1797,12 +1794,12 @@ const level = {
             //                 simulation.draw.setPaths() //update map graphics
             //             }
             //         })
-            //     spawn.randomMob(x + 225, y + -1025, Infinity);
-            //     spawn.randomMob(x + 200, y + -675, Infinity);
-            //     spawn.randomMob(x + 225, y + -200, Infinity);
-            //     spawn.randomMob(x + 1750, y + -1075, Infinity);
-            //     spawn.randomMob(x + 1700, y + -650, Infinity);
-            //     spawn.randomMob(x + 1675, y + -175, Infinity);
+            //     spawn.randomMob(x + 225, y + -1025, mobSpawnChance);
+            //     spawn.randomMob(x + 200, y + -675, mobSpawnChance);
+            //     spawn.randomMob(x + 225, y + -200, mobSpawnChance);
+            //     spawn.randomMob(x + 1750, y + -1075, mobSpawnChance);
+            //     spawn.randomMob(x + 1700, y + -650, mobSpawnChance);
+            //     spawn.randomMob(x + 1675, y + -175, mobSpawnChance);
 
             //     spawn.randomGroup(x + 300, y + -2200);
             //     spawn.randomGroup(x + 1625, y + -2200);
@@ -1847,12 +1844,12 @@ const level = {
 
                                 const numberOfMapElementsAdded = 12
                                 for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
-                                spawn.randomMob(x + 225, y + -1775, Infinity);
-                                spawn.randomMob(x + 700, y + -1750, Infinity);
-                                spawn.randomMob(x + 1175, y + -1725, Infinity);
-                                spawn.randomMob(x + 1700, y + -1700, Infinity);
-                                spawn.randomMob(x + 1750, y + -250, Infinity);
-                                spawn.randomMob(x + 125, y + -250, Infinity);
+                                spawn.randomMob(x + 225, y + -1775, mobSpawnChance);
+                                spawn.randomMob(x + 700, y + -1750, mobSpawnChance);
+                                spawn.randomMob(x + 1175, y + -1725, mobSpawnChance);
+                                spawn.randomMob(x + 1700, y + -1700, mobSpawnChance);
+                                spawn.randomMob(x + 1750, y + -250, mobSpawnChance);
+                                spawn.randomMob(x + 125, y + -250, mobSpawnChance);
                             } else {
                                 spawn.mapVertex(x + 775, y + -260, hexagon);
                                 spawn.mapVertex(x + 1225, y + -260, hexagon);
@@ -1873,12 +1870,12 @@ const level = {
                                 const numberOfMapElementsAdded = 12
                                 for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
 
-                                spawn.randomMob(x + 225, y + -1025, Infinity);
-                                spawn.randomMob(x + 200, y + -675, Infinity);
-                                spawn.randomMob(x + 225, y + -200, Infinity);
-                                spawn.randomMob(x + 1750, y + -1075, Infinity);
-                                spawn.randomMob(x + 1700, y + -650, Infinity);
-                                spawn.randomMob(x + 1675, y + -175, Infinity);
+                                spawn.randomMob(x + 225, y + -1025, mobSpawnChance);
+                                spawn.randomMob(x + 200, y + -675, mobSpawnChance);
+                                spawn.randomMob(x + 225, y + -200, mobSpawnChance);
+                                spawn.randomMob(x + 1750, y + -1075, mobSpawnChance);
+                                spawn.randomMob(x + 1700, y + -650, mobSpawnChance);
+                                spawn.randomMob(x + 1675, y + -175, mobSpawnChance);
                             }
                             simulation.draw.setPaths() //update map graphics
                             spawn.randomGroup(x + 300, y + -2200);
@@ -1940,15 +1937,15 @@ const level = {
                             const numberOfMapElementsAdded = 13
                             for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
 
-                            spawn.randomMob(x + 1075, y + -1500, Infinity);
-                            spawn.randomMob(x + 325, y + -550, Infinity);
-                            spawn.randomMob(x + 800, y + -925, Infinity);
-                            spawn.randomMob(x + 1400, y + -1250, Infinity);
-                            spawn.randomMob(x + 1350, y + -1725, Infinity);
-                            spawn.randomMob(x + 575, y + -1375, Infinity);
-                            spawn.randomMob(x + 225, y + -2275, Infinity);
-                            spawn.randomMob(x + 875, y + -2450, Infinity);
-                            spawn.randomMob(x + 1550, y + -2525, Infinity);
+                            spawn.randomMob(x + 1075, y + -1500, mobSpawnChance);
+                            spawn.randomMob(x + 325, y + -550, mobSpawnChance);
+                            spawn.randomMob(x + 800, y + -925, mobSpawnChance);
+                            spawn.randomMob(x + 1400, y + -1250, mobSpawnChance);
+                            spawn.randomMob(x + 1350, y + -1725, mobSpawnChance);
+                            spawn.randomMob(x + 575, y + -1375, mobSpawnChance);
+                            spawn.randomMob(x + 225, y + -2275, mobSpawnChance);
+                            spawn.randomMob(x + 875, y + -2450, mobSpawnChance);
+                            spawn.randomMob(x + 1550, y + -2525, mobSpawnChance);
                             if (simulation.difficulty > 3) spawn.randomLevelBoss(x + 1075, y + -1500);
                             simulation.draw.setPaths() //update map graphics
                         }

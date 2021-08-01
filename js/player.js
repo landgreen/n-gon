@@ -470,7 +470,7 @@ const m = {
         }
     },
     addHealth(heal) {
-        if (!tech.isEnergyHealth && !tech.isNoHeals) {
+        if (!tech.isEnergyHealth) {
             m.health += heal * simulation.healScale;
             if (m.health > m.maxHealth) m.health = m.maxHealth;
             m.displayHealth();
@@ -495,7 +495,7 @@ const m = {
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
         if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.33 : 1.15
-        if (tech.healthDrain) dmg *= 1 + 2.667 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
+        if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
@@ -1611,59 +1611,63 @@ const m = {
                             Matter.Query.ray(map, mob[i].position, m.fieldPosition).length === 0
                         ) {
                             mob[i].locatePlayer();
-                            m.fieldCDcycle = m.cycle + m.fieldBlockCD;
-                            if (tech.blockingIce) {
-                                for (let i = 0; i < tech.blockingIce; i++) b.iceIX(10, m.fieldAngle + Math.random() - 0.5, m.fieldPosition)
-                            }
+
                             const unit = Vector.normalise(Vector.sub(m.fieldPosition, mob[i].position))
-                            if (tech.blockDmg) {
-                                mob[i].damage(tech.blockDmg * b.dmgScale)
-                                //draw electricity
-                                const step = 40
-                                ctx.beginPath();
-                                for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
-                                    let x = m.fieldPosition.x - 20 * unit.x;
-                                    let y = m.fieldPosition.y - 20 * unit.y;
-                                    ctx.moveTo(x, y);
-                                    for (let i = 0; i < 8; i++) {
-                                        x += step * (-unit.x + 1.5 * (Math.random() - 0.5))
-                                        y += step * (-unit.y + 1.5 * (Math.random() - 0.5))
-                                        ctx.lineTo(x, y);
-                                    }
+                            if (m.fieldCDcycle < m.cycle) {
+                                m.fieldCDcycle = m.cycle + m.fieldBlockCD;
+                                if (tech.blockingIce) {
+                                    for (let i = 0; i < tech.blockingIce; i++) b.iceIX(10, m.fieldAngle + Math.random() - 0.5, m.fieldPosition)
                                 }
-                                ctx.lineWidth = 3;
-                                ctx.strokeStyle = "#f0f";
-                                ctx.stroke();
-                            } else if (!isFree) {
-                                //when blocking draw this graphic
-                                const eye = 15;
-                                const len = mob[i].vertices.length - 1;
-                                ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
-                                ctx.lineWidth = 1;
-                                ctx.strokeStyle = "#000";
-                                ctx.beginPath();
-                                ctx.moveTo(m.fieldPosition.x + eye * Math.cos(m.fieldAngle), m.fieldPosition.y + eye * Math.sin(m.fieldAngle));
-                                ctx.lineTo(mob[i].vertices[len].x, mob[i].vertices[len].y);
-                                ctx.lineTo(mob[i].vertices[0].x, mob[i].vertices[0].y);
-                                ctx.fill();
-                                ctx.stroke();
-                                for (let j = 0; j < len; j++) {
+                                if (tech.blockDmg) {
+                                    mob[i].damage(tech.blockDmg * b.dmgScale)
+                                    //draw electricity
+                                    const step = 40
+                                    ctx.beginPath();
+                                    for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
+                                        let x = m.fieldPosition.x - 20 * unit.x;
+                                        let y = m.fieldPosition.y - 20 * unit.y;
+                                        ctx.moveTo(x, y);
+                                        for (let i = 0; i < 8; i++) {
+                                            x += step * (-unit.x + 1.5 * (Math.random() - 0.5))
+                                            y += step * (-unit.y + 1.5 * (Math.random() - 0.5))
+                                            ctx.lineTo(x, y);
+                                        }
+                                    }
+                                    ctx.lineWidth = 3;
+                                    ctx.strokeStyle = "#f0f";
+                                    ctx.stroke();
+                                } else if (!isFree) {
+                                    //when blocking draw this graphic
+                                    const eye = 15;
+                                    const len = mob[i].vertices.length - 1;
+                                    ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeStyle = "#000";
                                     ctx.beginPath();
                                     ctx.moveTo(m.fieldPosition.x + eye * Math.cos(m.fieldAngle), m.fieldPosition.y + eye * Math.sin(m.fieldAngle));
-                                    ctx.lineTo(mob[i].vertices[j].x, mob[i].vertices[j].y);
-                                    ctx.lineTo(mob[i].vertices[j + 1].x, mob[i].vertices[j + 1].y);
+                                    ctx.lineTo(mob[i].vertices[len].x, mob[i].vertices[len].y);
+                                    ctx.lineTo(mob[i].vertices[0].x, mob[i].vertices[0].y);
                                     ctx.fill();
                                     ctx.stroke();
+                                    for (let j = 0; j < len; j++) {
+                                        ctx.beginPath();
+                                        ctx.moveTo(m.fieldPosition.x + eye * Math.cos(m.fieldAngle), m.fieldPosition.y + eye * Math.sin(m.fieldAngle));
+                                        ctx.lineTo(mob[i].vertices[j].x, mob[i].vertices[j].y);
+                                        ctx.lineTo(mob[i].vertices[j + 1].x, mob[i].vertices[j + 1].y);
+                                        ctx.fill();
+                                        ctx.stroke();
+                                    }
                                 }
+                                if (tech.isStunField) mobs.statusStun(mob[i], tech.isStunField)
+                                //knock backs
+                                const massRoot = Math.sqrt(Math.max(0.15, mob[i].mass)); // masses above 12 can start to overcome the push back
+                                Matter.Body.setVelocity(mob[i], {
+                                    x: player.velocity.x - (20 * unit.x) / massRoot,
+                                    y: player.velocity.y - (20 * unit.y) / massRoot
+                                });
+                                if (mob[i].isOrbital) Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
                             }
-                            if (tech.isStunField) mobs.statusStun(mob[i], tech.isStunField)
-                            //knock backs
-                            const massRoot = Math.sqrt(Math.max(0.15, mob[i].mass)); // masses above 12 can start to overcome the push back
-                            Matter.Body.setVelocity(mob[i], {
-                                x: player.velocity.x - (20 * unit.x) / massRoot,
-                                y: player.velocity.y - (20 * unit.y) / massRoot
-                            });
-                            if (mob[i].isOrbital) Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+
                             if (isFree) {
 
                             } else {
@@ -1682,14 +1686,14 @@ const m = {
 
                 m.hold = function() {
                     const wave = Math.sin(m.cycle * 0.022);
-                    m.fieldRange = 170 + 12 * wave
-                    m.fieldArc = 0.33 + 0.045 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+                    m.fieldRange = 190 + 12 * wave
+                    m.fieldArc = 0.36 + 0.04 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
                     m.calculateFieldThreshold();
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
                         m.throwBlock();
-                    } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
+                    } else if (input.field) { //not hold but field button is pressed
                         m.grabPowerUp();
                         m.lookForPickUp();
                         m.fieldPosition = { x: m.pos.x, y: m.pos.y }
@@ -1724,7 +1728,7 @@ const m = {
                         m.pickUp();
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                        if (tech.isFieldFree && !input.field && m.fieldCDcycle < m.cycle) {
+                        if (tech.isFieldFree && !input.field) {
                             //draw field free of player
                             ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
                             ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"

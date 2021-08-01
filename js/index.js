@@ -106,7 +106,7 @@ window.addEventListener('load', () => {
                 simulation.difficultyMode = Number(set[property])
                 document.getElementById("difficulty-select-experiment").value = Number(set[property])
             }
-            if (property === "level") document.getElementById("starting-level").value = Number(set[property])
+            if (property === "level") document.getElementById("starting-level").value = Math.max(Number(set[property]) - 1, 0)
             if (property === "noPower") document.getElementById("no-power-ups").checked = Number(set[property])
         }
     }
@@ -275,7 +275,7 @@ const build = {
         document.getElementById("pause-grid-right").style.display = "none"
         window.scrollTo(0, 0);
     },
-    isExperimentSelection: true,
+    isExperimentSelection: false,
     choosePowerUp(who, index, type, isAllowed = false) {
         if (type === "gun") {
             let isDeselect = false
@@ -413,7 +413,7 @@ const build = {
     </svg>
   </div>
   <div style="align-items: center; text-align:center; font-size: 1.00em; line-height: 190%;background-color:var(--build-bg-color);">
-    <div>starting level: <input id='starting-level' type="number" step="1" value="0" min="0" max="99"></div>
+    <div>starting level: <input id='starting-level' type="number" step="1" value="1" min="0" max="99"></div>
     <div>
     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
       <select name="difficulty-select" id="difficulty-select-experiment">
@@ -466,7 +466,7 @@ const build = {
     },
     reset() {
         simulation.startGame(true); //starts game, but pauses it
-        build.isExperimentSelection = true;
+        build.isExperimentSelection = false;
         simulation.paused = true;
         m.setField(0)
         b.inventory = []; //removes guns and ammo  
@@ -537,7 +537,7 @@ const build = {
         }
         for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
         bullet = []; //remove any bullets that might have spawned from tech
-        const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value))
+        const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value) - 1)
         level.difficultyIncrease(Math.min(99, levelsCleared * simulation.difficultyMode)) //increase difficulty based on modes
         level.levelsCleared += levelsCleared;
         simulation.isNoPowerUps = document.getElementById("no-power-ups").checked
@@ -573,6 +573,7 @@ function openExperimentMenu() {
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
+    build.isExperimentSelection = true
     build.reset();
 }
 
