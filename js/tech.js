@@ -172,7 +172,7 @@
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
             if (tech.isMaxEnergyTech) dmg *= 1.5
             if (tech.isEnergyNoAmmo) dmg *= 1.6
-            if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
+            if (tech.isDamageForGuns) dmg *= 1 + 0.14 * b.inventory.length
             if (tech.isLowHealthDmg) dmg *= 1 + 0.5 * Math.max(0, 1 - m.health)
             if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
             if (tech.isEnergyLoss) dmg *= 1.55;
@@ -181,7 +181,7 @@
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
             if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
-            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.3
+            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.23
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
@@ -237,7 +237,7 @@
         },
         tech: [{
                 name: "integrated armament",
-                description: `increase <strong class='color-d'>damage</strong> by <strong>30%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
+                description: `increase <strong class='color-d'>damage</strong> by <strong>23%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -289,7 +289,7 @@
             },
             {
                 name: "arsenal",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>13%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>14%</strong><br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -307,7 +307,7 @@
             },
             {
                 name: "active cooling",
-                description: "<strong>15%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
+                description: "<strong>18%</strong> decreased <strong><em>delay</em></strong> after firing<br>for each <strong class='color-g'>gun</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -330,8 +330,8 @@
                 description: "spawn <strong>8</strong> <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return (tech.isDamageForGuns || tech.isFireRateForGuns) && b.inventory.length + 5 < b.guns.length
                 },
@@ -1597,7 +1597,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isBlockExplosion
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -1615,7 +1615,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isBlockExplosion
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -1669,7 +1669,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
                 },
                 requires: "mass driver, a field that can hold things, not mass-energy",
                 effect() {
@@ -1687,7 +1687,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isBlockExplosion
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -3539,7 +3539,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isRivets
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets
                 },
                 requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
                 effect() {
@@ -3597,7 +3597,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailFireRate && !tech.isIceCrystals && !tech.isNeedles
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isNeedles
                 },
                 requires: "nail gun, not ice crystal, needles, or pneumatic actuator",
                 effect() {
@@ -3649,7 +3649,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isRivets && !tech.isNeedles && !tech.isNailRadiation && !tech.isNailCrit
+                    return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles // && !tech.isNailRadiation && !tech.isNailCrit
                 },
                 requires: "nail gun, not powder-actuated, rivets, needles, irradiated, or fission",
                 effect() {
@@ -3680,7 +3680,7 @@
             },
             {
                 name: "pneumatic actuator",
-                description: "<strong>nail gun</strong> takes <strong>45%</strong> less time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
+                description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3690,33 +3690,6 @@
                     return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles
                 },
                 requires: "nail gun, not rivets or needles",
-                effect() {
-                    tech.nailFireRate = true
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
-                    }
-                },
-                remove() {
-                    if (tech.nailFireRate) {
-                        tech.nailFireRate = false
-                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                            if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
-                        }
-                    }
-                }
-            },
-            {
-                name: "powder-actuated",
-                description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("nail gun") && tech.nailFireRate && !tech.isIceCrystals
-                },
-                requires: "nail gun and pneumatic actuator not ice crystal nucleation",
                 effect() {
                     tech.nailInstantFireRate = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3732,6 +3705,33 @@
                     }
                 }
             },
+            // {
+            //     name: "powder-actuated",
+            //     description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
+            //     isGunTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return tech.haveGunCheck("nail gun") && tech.nailFireRate && !tech.isIceCrystals
+            //     },
+            //     requires: "nail gun and pneumatic actuator not ice crystal nucleation",
+            //     effect() {
+            //         tech.nailInstantFireRate = true
+            //         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            //             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+            //         }
+            //     },
+            //     remove() {
+            //         if (tech.nailInstantFireRate) {
+            //             tech.nailInstantFireRate = false
+            //             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            //                 if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+            //             }
+            //         }
+            //     }
+            // },
             {
                 name: "supercritical fission",
                 description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
@@ -3741,9 +3741,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isNailShot || tech.nailBotCount > 1 || tech.haveGunCheck("nail gun")) && !tech.isIceCrystals
+                    return (tech.isNailShot || tech.isNeedleShot || tech.nailBotCount > 1 || tech.haveGunCheck("nail gun"))
                 },
-                requires: "nails, not ice crystal nucleation",
+                requires: "nails",
                 effect() {
                     tech.isNailCrit = true
                 },
@@ -3753,14 +3753,14 @@
             },
             {
                 name: "irradiated nails",
-                description: "<strong>nails</strong> and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
+                description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + tech.isNailShot + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce)) * 2 > 1) && !tech.isIceCrystals
+                    return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce) + tech.isNeedleShot + tech.isNailShot) * 2 > 1
                 },
                 requires: "nails, rivets, not ceramic needles, not ice crystals",
                 effect() {
@@ -3923,6 +3923,25 @@
                 }
             },
             {
+                name: "needle-shot",
+                description: "<strong>shotgun</strong> propels <strong>12</strong> mob piercing <strong>needles</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isFoamShot && !tech.isWormShot && !tech.isIceShot
+                },
+                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, worm-shot, ice-shot",
+                effect() {
+                    tech.isNeedleShot = true;
+                },
+                remove() {
+                    tech.isNeedleShot = false;
+                }
+            },
+            {
                 name: "worm-shot",
                 description: "<strong>shotgun</strong> hatches <strong>3-4</strong> mob seeking <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><em>worms benefit from spore technology</em>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
                 isGunTech: true,
@@ -3977,25 +3996,6 @@
                 },
                 remove() {
                     tech.isIceShot = false;
-                }
-            },
-            {
-                name: "needle-shot",
-                description: "<strong>shotgun</strong> propels <strong>12</strong> mob piercing <strong>needles</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isFoamShot && !tech.isWormShot && !tech.isIceShot
-                },
-                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, worm-shot, ice-shot",
-                effect() {
-                    tech.isNeedleShot = true;
-                },
-                remove() {
-                    tech.isNeedleShot = false;
                 }
             },
             {
@@ -4568,7 +4568,7 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormSpores
+                    return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormholeSpores
                 },
                 requires: "spores",
                 effect() {
@@ -4576,6 +4576,25 @@
                 },
                 remove() {
                     tech.isSporeWorm = false
+                }
+            },
+            {
+                name: "decomposer",
+                description: "if <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> <strong>kill</strong> their target<br>they reset their <strong>lifespan</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return tech.isSporeWorm || tech.isWormShot
+                },
+                requires: "worms",
+                effect() {
+                    tech.wormSurviveDmg = true
+                },
+                remove() {
+                    tech.wormSurviveDmg = false
                 }
             },
             {
@@ -4757,7 +4776,7 @@
             },
             {
                 name: "uncertainty principle",
-                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>66%</strong>",
+                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>60%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4795,7 +4814,7 @@
             },
             {
                 name: "aerogel",
-                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>40%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>300%</strong>",
+                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>300%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4807,7 +4826,7 @@
                 requires: "foam",
                 effect() {
                     tech.isFastFoam = true
-                    tech.foamGravity = -0.0002
+                    tech.foamGravity = -0.0003
                 },
                 remove() {
                     tech.isFastFoam = false;
@@ -4816,7 +4835,7 @@
             },
             {
                 name: "quantum foam",
-                description: "<strong>foam</strong> gun fires <strong>0.30</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>90%</strong>",
+                description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>70%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5990,10 +6009,10 @@
                 },
                 requires: "wormhole",
                 effect() {
-                    tech.isWormSpores = true
+                    tech.isWormholeSpores = true
                 },
                 remove() {
-                    tech.isWormSpores = false
+                    tech.isWormholeSpores = false
                 }
             },
             {
@@ -7660,7 +7679,7 @@
         isWormholeDamage: null,
         isNailCrit: null,
         isFlechetteExplode: null,
-        isWormSpores: null,
+        isWormholeSpores: null,
         isWormBullets: null,
         isWideLaser: null,
         wideLaser: null,
@@ -7774,5 +7793,6 @@
         isNeedleShot: null,
         isBlockRestitution: null,
         isZeno: null,
-        isFieldFree: null
+        isFieldFree: null,
+        wormSurviveDmg: null
     }

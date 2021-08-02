@@ -1277,11 +1277,7 @@ const m = {
             if (m.energy < 0) m.energy = 0;
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
             if (tech.blockingIce) {
-                if (m.fieldShieldingScale) {
-                    for (let i = 0; i < fieldBlockCost * 35 * tech.blockingIce; i++) b.iceIX(3, m.angle + Math.random() - 0.5, m.pos)
-                } else {
-                    for (let i = 0; i < tech.blockingIce; i++) b.iceIX(10, m.angle + Math.random() - 0.5, m.pos)
-                }
+                for (let i = 0; i < fieldBlockCost * 35 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
@@ -1309,41 +1305,23 @@ const m = {
             if (tech.isStunField) mobs.statusStun(who, tech.isStunField)
             // m.holdingTarget = null
             //knock backs
-            if (m.fieldShieldingScale > 0) {
-                const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
-                Matter.Body.setVelocity(who, {
-                    x: player.velocity.x - (15 * unit.x) / massRoot,
-                    y: player.velocity.y - (15 * unit.y) / massRoot
-                });
-                if (who.isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
+            const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
+            Matter.Body.setVelocity(who, {
+                x: player.velocity.x - (15 * unit.x) / massRoot,
+                y: player.velocity.y - (15 * unit.y) / massRoot
+            });
+            if (who.isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
 
-                if (m.crouch) {
-                    Matter.Body.setVelocity(player, {
-                        x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot,
-                        y: player.velocity.y + 0.1 * m.blockingRecoil * unit.y * massRoot
-                    });
-                } else {
-                    Matter.Body.setVelocity(player, {
-                        x: player.velocity.x + m.blockingRecoil * unit.x * massRoot,
-                        y: player.velocity.y + m.blockingRecoil * unit.y * massRoot
-                    });
-                }
+            if (m.crouch) {
+                Matter.Body.setVelocity(player, {
+                    x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot,
+                    y: player.velocity.y + 0.1 * m.blockingRecoil * unit.y * massRoot
+                });
             } else {
-                // mobs.statusSlow(who, tech.isStunField)
-                const massRoot = Math.sqrt(Math.max(0.15, who.mass)); // masses above 12 can start to overcome the push back
-                Matter.Body.setVelocity(who, {
-                    x: player.velocity.x - (20 * unit.x) / massRoot,
-                    y: player.velocity.y - (20 * unit.y) / massRoot
+                Matter.Body.setVelocity(player, {
+                    x: player.velocity.x + m.blockingRecoil * unit.x * massRoot,
+                    y: player.velocity.y + m.blockingRecoil * unit.y * massRoot
                 });
-                if (who.isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
-
-                if (who.isDropPowerUp && player.speed < 12) {
-                    const massRootCap = Math.sqrt(Math.min(10, Math.max(0.4, who.mass))); // masses above 12 can start to overcome the push back
-                    Matter.Body.setVelocity(player, {
-                        x: 0.9 * player.velocity.x + 0.6 * unit.x * massRootCap,
-                        y: 0.9 * player.velocity.y + 0.6 * unit.y * massRootCap
-                    });
-                }
             }
         }
     },
@@ -1616,7 +1594,10 @@ const m = {
                             if (m.fieldCDcycle < m.cycle) {
                                 m.fieldCDcycle = m.cycle + m.fieldBlockCD;
                                 if (tech.blockingIce) {
-                                    for (let i = 0; i < tech.blockingIce; i++) b.iceIX(10, m.fieldAngle + Math.random() - 0.5, m.fieldPosition)
+                                    for (let i = 0; i < tech.blockingIce; i++) {
+                                        const angle = m.fieldAngle + 1.55 * (Math.random() - 0.5)
+                                        b.iceIX(10, angle, Vector.add(m.fieldPosition, { x: m.fieldRange * Math.cos(angle), y: m.fieldRange * Math.sin(angle) }))
+                                    }
                                 }
                                 if (tech.blockDmg) {
                                     mob[i].damage(tech.blockDmg * b.dmgScale)
@@ -2714,7 +2695,7 @@ const m = {
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
                                                 if (tech.isWormholeEnergy) m.energy += 0.63
-                                                if (tech.isWormSpores) { //pandimensionalspermia
+                                                if (tech.isWormholeSpores) { //pandimensionalspermia
                                                     for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         if (tech.isSporeWorm) {
                                                             b.worm(Vector.add(m.hole.pos2, Vector.rotate({
@@ -2748,7 +2729,7 @@ const m = {
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
                                             if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
-                                            if (tech.isWormSpores) { //pandimensionalspermia
+                                            if (tech.isWormholeSpores) { //pandimensionalspermia
                                                 for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                     if (tech.isSporeWorm) {
                                                         b.worm(Vector.add(m.hole.pos1, Vector.rotate({

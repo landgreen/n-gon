@@ -1148,17 +1148,17 @@ const level = {
                 spawn.bodyRect(x + 500, y - 100, 125, 100, 0.25);
                 spawn.bodyRect(x + 200, y - 150, 100, 150, 0.25);
                 spawn.bodyRect(x + 1075, y - 1075, 100, 125, 0.25);
-                const density = 0.0015 + (simulation.difficultyMode < 3 ? 0.003 : 0)
-                const angle = 0
-                const variance = Math.PI
-                const frictionAir = 0
-                const angularVelocity = 0.01
-                const spinVariance = 0.02
-                balance1 = level.spinner(x + 225, y - 565, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5)) //    spinner(x, y, width, height, density = 0.001, angle=0,frictionAir=0.001,angularVelocity=0) {
-                balance2 = level.spinner(x + 300, y - 1000, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
-                balance3 = level.spinner(x + 650, y - 750, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
-                balance4 = level.spinner(x + 800, y - 1150, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
-                balance5 = level.spinner(x + 1250, y - 1150, 25, 410, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
+                const density = 0.0015 //+ (simulation.difficultyMode < 5 ? 0.0035 : 0)
+                const angle = Math.PI / 2
+                const variance = 0 //Math.PI
+                const frictionAir = 0.03
+                const angularVelocity = 0 //0.01
+                const spinVariance = 0 //0.02
+                balance1 = level.spinner(x + 200, y - 500, 25, 350, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5)) //    spinner(x, y, width, height, density = 0.001, angle=0,frictionAir=0.001,angularVelocity=0) {
+                balance2 = level.spinner(x + 200, y - 950, 25, 350, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
+                balance3 = level.spinner(x + 650, y - 650, 25, 350, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
+                balance4 = level.spinner(x + 750, y - 1050, 25, 350, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
+                balance5 = level.spinner(x + 1250, y - 1100, 25, 350, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
 
                 let isInRoom = false
                 doCustom.push(
@@ -1205,10 +1205,10 @@ const level = {
                 spawn.bodyRect(x + 1025, y + -50, 50, 50);
 
                 if (Math.random() > 0.5) {
-                    const density = 0.0012 + (simulation.difficultyMode < 3 ? 0.002 : 0)
+                    const density = 0.0012 //+ (simulation.difficultyMode < 5 ? 0.003 : 0)
                     const angle = Math.PI / 2
                     const variance = 0.2 //Math.PI
-                    const frictionAir = 0.012
+                    const frictionAir = 0.015
                     const height = 35
                     balance1 = level.spinner(x + 1300, y - 450, height, 410, density, angle + variance * (Math.random() - 0.5), frictionAir) //    spinner(x, y, width, height, density = 0.001, angle=0,frictionAir=0.001,angularVelocity=0) {
                     balance3 = level.spinner(x + 750, y - 600, height, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
@@ -1216,10 +1216,10 @@ const level = {
                     balance4 = level.spinner(x + 850, y - 1100, height, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
                     balance5 = level.spinner(x + 1300, y - 1145, height, 410, density, angle + variance * (Math.random() - 0.5), frictionAir)
                 } else {
-                    const density = 0.001 + (simulation.difficultyMode < 3 ? 0.002 : 0)
+                    const density = 0.001 //+ (simulation.difficultyMode < 5 ? 0.003 : 0)
                     const angle = Math.PI / 2
                     const variance = Math.PI
-                    const frictionAir = 0
+                    const frictionAir = 0.015
                     const width = 200
                     const height = 200
                     const spinVariance = 0.05

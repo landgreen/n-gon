@@ -466,7 +466,7 @@ const build = {
     },
     reset() {
         simulation.startGame(true); //starts game, but pauses it
-        build.isExperimentSelection = false;
+        build.isExperimentSelection = true;
         simulation.paused = true;
         m.setField(0)
         b.inventory = []; //removes guns and ammo  
@@ -527,7 +527,7 @@ const build = {
         });
 
     },
-    startExperiment() {
+    startExperiment() { //start playing the game after exiting the experiment menu
         build.isExperimentSelection = false;
         spawn.setSpawnList(); //gives random mobs,  not starter mobs
         spawn.setSpawnList();
@@ -573,7 +573,6 @@ function openExperimentMenu() {
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
-    build.isExperimentSelection = true
     build.reset();
 }
 

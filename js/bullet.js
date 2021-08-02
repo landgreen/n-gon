@@ -230,7 +230,7 @@ const b = {
     setFireCD() {
         b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage
         if (tech.isFastTime) b.fireCDscale *= 0.5
-        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.85, b.inventory.length)
+        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.82, b.inventory.length)
         if (tech.isFireMoveLock) b.fireCDscale *= 0.5
     },
     fireAttributes(dir, rotate = true) {
@@ -1859,7 +1859,11 @@ const b = {
                     y: 100 * (Math.random() - 0.5)
                 },
                 beforeDmg(who) {
-                    this.endCycle = 0; //bullet ends cycle after doing damage 
+                    if (tech.wormSurviveDmg && who.alive) {
+                        this.endCycle = simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger); //bullet ends cycle resets
+                    } else {
+                        this.endCycle = 0; //bullet ends cycle after doing damage 
+                    }
                     if (this.isFreeze) mobs.statusSlow(who, 90)
                 },
                 onEnd() {
@@ -2545,8 +2549,8 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.66 : 1), //damage done over time
-            scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.6 : 1),
+            damage: (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1), //damage done over time
+            scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -2749,7 +2753,7 @@ const b = {
         bullet[me].dmg = tech.isNailRadiation ? 0 : dmg
         bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
             if (tech.isNailRadiation) mobs.statusDoT(who, dmg * (tech.isFastRadiation ? 2.6 : 0.65), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
-            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
+            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                 b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
             }
         };
@@ -2776,25 +2780,25 @@ const b = {
                             }
                         }
                         if (!immune) {
-                            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
+                            if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                                 b.explosion(this.position, 220 + 50 * Math.random()); //makes bullet do explosive damage at end
                             }
                             this.immuneList.push(who.id) //remember that this needle has hit this mob once already
                             who.foundPlayer();
+                            let dmg = b.dmgScale * 6
                             if (tech.isNailRadiation) {
                                 mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
-                            } else {
-                                let dmg = b.dmgScale * 6
-                                if (tech.isCrit && who.isStunned) dmg *= 4
-                                who.damage(dmg, tech.isNeedleShieldPierce);
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: this.position.x,
-                                    y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40,
-                                    color: simulation.playerDmgColor,
-                                    time: simulation.drawTime
-                                });
+                                dmg *= 0.25
                             }
+                            if (tech.isCrit && who.isStunned) dmg *= 4
+                            who.damage(dmg, tech.isNeedleShieldPierce);
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: this.position.x,
+                                y: this.position.y,
+                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                color: simulation.playerDmgColor,
+                                time: simulation.drawTime
+                            });
                         }
                     }
                 }
@@ -3661,9 +3665,9 @@ const b = {
                 } else if (tech.isNeedles) {
                     this.fire = this.fireNeedles
                 } else if (tech.nailInstantFireRate) {
-                    this.fire = this.fireNailFireRate
-                } else if (tech.nailFireRate) {
-                    this.fire = this.fireNailFireRate
+                    this.fire = this.fireInstantFireRate
+                    // } else if (tech.nailFireRate) {
+                    // this.fire = this.fireNailFireRate
                 } else {
                     this.fire = this.fireNormal
                 }
@@ -3711,7 +3715,7 @@ const b = {
                 });
                 bullet[me].endCycle = simulation.cycle + 180
                 bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
-                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
+                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                         b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 1.4 : 0.35), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
@@ -3738,20 +3742,20 @@ const b = {
                 };
                 b.muzzleFlash(30);
             },
-            fireNailFireRate() {
-                if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-                const CD = Math.max(7.5 - 0.06 * (m.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
-                this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
+            // fireNailFireRate() {
+            //     if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
+            //     const CD = Math.max(7.5 - 0.06 * (m.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+            //     this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
-                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
-                this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
-            },
+            //     m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
+            //     this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / CD)
+            // },
             fireInstantFireRate() {
                 m.fireCDcycle = m.cycle + Math.floor(2 * b.fireCDscale); // cool down
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (m.crouch ? 1.35 : 3.2) / 2)
             },
             baseFire(angle) {
-                const speed = 30 + 6 * Math.random() + 9 * tech.nailInstantFireRate
+                const speed = 30 + 6 * Math.random()
                 b.nail({
                     x: m.pos.x + 30 * Math.cos(m.angle),
                     y: m.pos.y + 30 * Math.sin(m.angle)
@@ -3762,14 +3766,14 @@ const b = {
                 if (tech.isIceCrystals) {
                     bullet[bullet.length - 1].beforeDmg = function(who) {
                         mobs.statusSlow(who, 60)
-                        if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.975) {
+                        if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                             b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
                         }
                     };
                     if (m.energy < 0.01) {
                         m.fireCDcycle = m.cycle + 60; // cool down
                     } else {
-                        m.energy -= m.fieldRegen + 0.01
+                        m.energy -= m.fieldRegen + 0.009
                     }
                 }
             },
@@ -3778,8 +3782,8 @@ const b = {
             name: "shotgun",
             description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
-            ammoPack: 4.5,
-            defaultAmmoPack: 4.5,
+            ammoPack: 4.3,
+            defaultAmmoPack: 4.3,
             have: false,
             do() {},
             fire() {
@@ -4803,9 +4807,10 @@ const b = {
                     setTimeout(() => {
                         if (!simulation.paused) {
                             b.foam(position, Vector.rotate(velocity, spread), radius)
-                            bullet[bullet.length - 1].damage = (1 + 0.9 * tech.foamFutureFire) * (tech.isFastFoam ? 0.048 : 0.012) //double damage
+                            // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1)
+                            bullet[bullet.length - 1].damage *= (1 + 0.75 * tech.foamFutureFire)
                         }
-                    }, 300 * tech.foamFutureFire);
+                    }, 250 * tech.foamFutureFire);
                 } else {
                     b.foam(position, Vector.rotate(velocity, spread), radius)
                 }
