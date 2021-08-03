@@ -494,8 +494,10 @@ const build = {
         count = 0;
         for (let i = 0; i < tech.tech.length; i++) {
             for (let j = 0; j < tech.tech[i].count; j++) {
-                url += `&tech${count}=${encodeURIComponent(tech.tech[i].name.trim())}`
-                count++
+                if (!tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isNonRefundable && !tech.tech[i].isExperimentHide) {
+                    url += `&tech${count}=${encodeURIComponent(tech.tech[i].name.trim())}`
+                    count++
+                }
             }
         }
         url += `&field=${encodeURIComponent(m.fieldUpgrades[m.fieldMode].name.trim())}`

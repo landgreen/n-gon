@@ -11,13 +11,14 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
+            // localSettings.levelsClearedLastGame = 10
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
-            // m.setField("perfect diamagnetism")
-            // b.giveGuns("shotgun")
-            // tech.giveTech("Noether violation")
+            // m.setField("time dilation")
+            // b.giveGuns("nail gun")
+            // tech.giveTech("needle gun")
             // b.giveGuns("wave beam")
             // tech.giveTech("Lenz's law")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -2105,6 +2106,7 @@ const level = {
         }
 
         // const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
+        level.isHazardRise = false //this is set to true to make the slime rise up
         const hazardSlime = level.hazard(-1800, -800, 3600, 1600, 0.004, "hsla(160, 100%, 35%,0.75)")
         hazardSlime.height -= 950
         hazardSlime.min.y += 950
@@ -2454,6 +2456,39 @@ const level = {
         }
     },
     intro() {
+        if (level.levelsCleared === 0) { //if this is the 1st level of the game
+            // powerUps.spawn(2500, -50, "research", false);
+            powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false);
+            powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 25, "heal", false);
+            powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 75, "heal", false);
+            powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
+            if (localSettings.levelsClearedLastGame < 3) {
+                if (!simulation.isCheating && !m.isShipMode) {
+                    spawn.wireFoot();
+                    spawn.wireFootLeft();
+                    spawn.wireKnee();
+                    spawn.wireKneeLeft();
+                    spawn.wireHead();
+                    // for (let i = 0; i < 3; i++) powerUps.spawn(2095, -1220 - 50 * i, "tech", false); //unavailable tech spawns
+                    // spawn.mapRect(2000, -1025, 200, 25);
+                }
+            } else {
+                simulation.trails()
+                //bonus power ups for clearing runs in the last game
+                if (!simulation.isCheating && localSettings.levelsClearedLastGame > 1) {
+                    for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) powerUps.spawn(2095 + 2 * Math.random(), -1270 - 50 * i, "tech", false); //spawn a tech for levels cleared in last game
+                    simulation.makeTextLog(`for (let i <span class='color-symbol'>=</span> 0; i <span class='color-symbol'><</span> localSettings.levelsClearedLastGame <span class='color-symbol'>/</span> 3; i<span class='color-symbol'>++</span>)`);
+                    simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") <em>//simulation superposition</em>}`);
+                    localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
+                    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                }
+            }
+        } else {
+            for (let i = 0; i < 60; i++) {
+                setTimeout(() => { spawn.sneaker(2100, -1500 - 50 * i); }, 2000 + 500 * i);
+            }
+        }
+
         level.custom = () => {
             //draw binary number
             const binary = (localSettings.runCount >>> 0).toString(2)
@@ -2611,6 +2646,11 @@ const level = {
             //exit room glow
             ctx.fillStyle = "rgba(0,255,255,0.05)"
             ctx.fillRect(2600, -600, 400, 300)
+            //draw shade for ceiling tech
+            ctx.fillStyle = "rgba(68, 68, 68,0.95)"
+            ctx.fillRect(2030, -2800, 150, 1800);
+            ctx.fillStyle = "rgba(68, 68, 68,0.95)"
+            ctx.fillRect(2030, 0, 150, 1800);
         };
 
         level.setPosToSpawn(460, -100); //normal spawn
@@ -2623,10 +2663,26 @@ const level = {
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = "#e1e1e1";
 
-        spawn.mapRect(-250, 0, 3600, 1800); //ground
         spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
         spawn.mapRect(3000, -2800, 2600, 4600); //right wall
-        spawn.mapRect(-250, -2800, 3600, 1800); //roof
+
+        // spawn.mapRect(-250, 0, 3600, 1800); //ground
+        spawn.mapRect(-250, 0, 2300, 1800); //split roof        
+        spawn.mapRect(2150, 0, 1200, 1800); //split roof
+        spawn.mapRect(2025, -3, 25, 15); //lip on power up chamber
+        spawn.mapRect(2150, -3, 25, 15); //lip on power up chamber
+        spawn.mapRect(2025, 0, 150, 50);
+
+        // spawn.mapRect(-250, -2800, 3600, 1800); //roof
+        spawn.mapRect(-250, -2800, 2300, 1800); //split roof        
+        map[map.length - 1].friction = 0
+        map[map.length - 1].frictionStatic = 0
+        spawn.mapRect(2150, -2800, 1200, 1800); //split roof
+        map[map.length - 1].friction = 0
+        map[map.length - 1].frictionStatic = 0
+        spawn.mapRect(2025, -1010, 25, 13); //lip on power up chamber
+        spawn.mapRect(2150, -1010, 25, 13); //lip on power up chamber
+
         spawn.mapRect(2600, -300, 500, 500); //exit shelf
         spawn.mapRect(2600, -1200, 500, 600); //exit roof
         spawn.mapRect(-95, -1100, 80, 110); //wire source
@@ -2635,25 +2691,6 @@ const level = {
         spawn.bodyRect(2425, -120, 70, 50);
         spawn.bodyRect(2400, -100, 100, 60);
         spawn.bodyRect(2500, -150, 100, 150); //exit step
-
-        // localSettings.levelsClearedLastGame = 20
-        if (level.levelsCleared === 0) {
-            // powerUps.spawn(2500, -50, "research", false);
-            powerUps.spawn(1900, -50, "heal", false);
-            powerUps.spawn(2050, -50, "heal", false);
-            if (localSettings.levelsClearedLastGame < 6) {
-                if (!simulation.isCheating && !m.isShipMode) {
-                    spawn.wireFoot();
-                    spawn.wireFootLeft();
-                    spawn.wireKnee();
-                    spawn.wireKneeLeft();
-                    spawn.wireHead();
-                }
-            } else {
-                simulation.trails()
-            }
-        }
-        powerUps.spawnStartingPowerUps(2300, -50);
     },
     testChamber() {
         level.setPosToSpawn(0, -50); //lower start

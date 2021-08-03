@@ -1054,7 +1054,9 @@ const mobs = {
                     this.health -= dmg
                     //this.fill = this.color + this.health + ')';
                     this.onDamage(dmg); //custom damage effects
-                    if (this.health < 0.05 && this.alive) this.death();
+                    if (this.health < 0.05 && this.alive) {
+                        this.death();
+                    }
                 }
             },
             onDamage() {

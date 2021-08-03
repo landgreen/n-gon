@@ -1,28 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-decomposers - worms reset their lifespan if they kill their target
+tech: chain reaction now requires vacuum bomb, but it increases grenade radius and damage 33%
+  (and makes blocks explode)
 
-nail tech tree reworked a bit
-  removed powder actuated, nail gun  ramps up to full fire rate with just pneumatic actuator
-  needles and ice crystal nucleation can get supercritical fission and irradiated nails now
-  supercritical fission crits easier
-
-labs exit platforming is a much easier since it's in the general rotation now
-
-bug fixes
+needle gun fires with more regular timing
+needles despawn 1.5s faster, for performance reasons
+intro level power ups are relocated
+tech: decomposers renamed necrophage
+if mobs are one shotted before they see you, they no longer alert nearby mobs
+clicking on a mob in testing will log that mob in console
 
 ******************************************************** TODO ********************************************************
-
-make 
-
-buff nail gun
 
 buff missiles?
   maybe they can release grenades after they explode, like CPT grenades?
 
-move the bonus tech on intro to the right so players don't have to backtrack as much
-  maybe draw something in the background to explain where the tech is coming from
-
+make the player get a buff after using wormhole
+  while energy lasts: drain energy and give damage buff
 using wormhole makes you immune to harm and drains energy until you run out
   disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
 
@@ -36,9 +30,6 @@ scrolling console history in pause menu?
 pause should at least show the last in game console message
 
 in testing mode console log the body you click on
-
-make the player get a buff after using wormhole
-  while energy lasts: drain energy and give damage buff
 
 tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
   draw 1,2,3 levels of the field based on energy?

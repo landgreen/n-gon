@@ -175,7 +175,7 @@ const powerUps = {
                 tech.maxDuplicationEvent()
             }
             if (tech.isCancelRerolls) {
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 9; i++) {
                     let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
                     if (Math.random() < 0.33) {
                         spawnType = "heal"
@@ -780,15 +780,6 @@ const powerUps = {
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
         if (level.levelsCleared < 4) { //runs 4 times on all difficulty levels
             if (level.levelsCleared > 1) powerUps.spawn(x, y, "tech")
-
-            //bonus power ups for clearing runs in the last game
-            if (level.levelsCleared === 0 && !simulation.isCheating && localSettings.levelsClearedLastGame > 1) {
-                for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) powerUps.spawn(m.pos.x, m.pos.y, "tech", false); //spawn a tech for levels cleared in last game
-                simulation.makeTextLog(`for (let i <span class='color-symbol'>=</span> 0; i <span class='color-symbol'><</span> localSettings.levelsClearedLastGame <span class='color-symbol'>/</span> 3; i<span class='color-symbol'>++</span>)`);
-                simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") <em>//simulation superposition</em>}`);
-                localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
-                localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-            }
             if (b.inventory.length === 0) {
                 powerUps.spawn(x, y, "gun", false); //first gun
             } else if (tech.totalCount === 0) { //first tech
@@ -886,9 +877,7 @@ const powerUps = {
             name: target.name,
             size: size
         });
-        if (mode) {
-            powerUp[index].mode = mode
-        }
+        if (mode) powerUp[index].mode = mode
         if (moving) {
             Matter.Body.setVelocity(powerUp[index], {
                 x: (Math.random() - 0.5) * 15,

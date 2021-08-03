@@ -180,7 +180,7 @@
             if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
-            if (tech.isRerollDamage) dmg *= 1 + 0.042 * powerUps.research.count
+            if (tech.isRerollDamage) dmg *= 1 + 0.04 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.23
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
@@ -188,12 +188,12 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.05 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
+            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.048 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
-                const range = 600
+                const range = 450
                 spawn.randomLevelBoss(m.pos.x + range, m.pos.y, spawn.nonCollideBossList);
                 spawn.randomLevelBoss(m.pos.x, m.pos.y + range, spawn.nonCollideBossList);
                 spawn.randomLevelBoss(m.pos.x - range, m.pos.y, spawn.nonCollideBossList);
@@ -767,7 +767,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isBlockExplode && tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
                 effect: () => {
@@ -785,7 +785,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -803,7 +803,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -821,7 +821,7 @@
                 frequency: 2,
                 isBadRandomOption: true,
                 allowed() {
-                    return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.isBlockExplosion)
+                    return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not causality bombs",
                 effect: () => {
@@ -829,25 +829,6 @@
                 },
                 remove() {
                     tech.isExplosionHarm = false;
-                }
-            },
-            {
-                name: "chain reaction",
-                description: "<strong class='color-block'>blocks</strong> caught in <strong class='color-e'>explosions</strong> also <strong class='color-e'>explode</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
-                },
-                requires: "an explosive damage source, not iridium-192",
-                effect() {
-                    tech.isBlockExplode = true;
-                },
-                remove() {
-                    tech.isBlockExplode = false;
                 }
             },
             {
@@ -859,7 +840,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect() {
@@ -878,7 +859,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion)
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -2915,7 +2896,7 @@
             },
             {
                 name: "Bayesian statistics",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>4.2%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -3038,7 +3019,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+18</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+30</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -3055,7 +3036,7 @@
                 remove() {
                     tech.duplicateChance = 0
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    if (this.count > 1) tech.removeJunkTechFromPool(18)
+                    if (this.count > 1) tech.removeJunkTechFromPool(30)
                 }
             },
             {
@@ -3100,7 +3081,7 @@
             },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.8%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3122,7 +3103,7 @@
             },
             {
                 name: "commodities exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>10</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>9</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3651,7 +3632,7 @@
                 allowed() {
                     return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles // && !tech.isNailRadiation && !tech.isNailCrit
                 },
-                requires: "nail gun, not powder-actuated, rivets, needles, irradiated, or fission",
+                requires: "nail gun, not rivets, needles",
                 effect() {
                     tech.isIceCrystals = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3762,7 +3743,7 @@
                 allowed() {
                     return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce) + tech.isNeedleShot + tech.isNailShot) * 2 > 1
                 },
-                requires: "nails, rivets, not ceramic needles, not ice crystals",
+                requires: "nails, rivets, not ceramic needles",
                 effect() {
                     tech.isNailRadiation = true;
                 },
@@ -3924,7 +3905,7 @@
             },
             {
                 name: "needle-shot",
-                description: "<strong>shotgun</strong> propels <strong>12</strong> mob piercing <strong>needles</strong>",
+                description: "<strong>shotgun</strong> propels <strong>11</strong> mob piercing <strong>needles</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4346,6 +4327,25 @@
                 }
             },
             {
+                name: "chain reaction",
+                description: "increase <strong>grenade</strong> radius and <strong class='color-d'>damage</strong> <strong>33%</strong><br><strong class='color-block'>blocks</strong> caught in <strong class='color-e'>explosions</strong> also <strong class='color-e'>explode</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return tech.isVacuumBomb && !tech.isExplodeRadio
+                },
+                requires: "vacuum bomb && not iridium-192",
+                effect() {
+                    tech.isBlockExplode = true; //chain reaction
+                },
+                remove() {
+                    tech.isBlockExplode = false;
+                }
+            },
+            {
                 name: "neutron bomb",
                 description: "<strong>grenades</strong> are <strong class='color-p'>irradiated</strong> with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-d'>damage</strong>, <strong class='color-harm'>harm</strong>, and drains <strong class='color-f'>energy</strong>",
                 isGunTech: true,
@@ -4579,7 +4579,7 @@
                 }
             },
             {
-                name: "decomposer",
+                name: "necrophage",
                 description: "if <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> <strong>kill</strong> their target<br>they reset their <strong>lifespan</strong>",
                 isGunTech: true,
                 maxCount: 1,

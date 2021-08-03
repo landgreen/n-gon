@@ -177,8 +177,8 @@ function collisionChecks(event) {
                             obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
                             let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                             if (tech.isCrit && mob[k].isStunned) dmg *= 4
-                            mob[k].foundPlayer();
                             mob[k].damage(dmg);
+                            if (mob[k].alive) mob[k].foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: pairs[i].activeContacts[0].vertex.x,
                                 y: pairs[i].activeContacts[0].vertex.y,
@@ -207,7 +207,7 @@ function collisionChecks(event) {
 
                                 const stunTime = dmg / Math.sqrt(obj.mass)
                                 if (stunTime > 0.5) mobs.statusStun(mob[k], 60 + 60 * Math.sqrt(stunTime))
-                                if (mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
+                                if (mob[k].alive && mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
                                 if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
                                     obj.hasFragmented = true;
                                     b.targetedNail(obj.position, tech.fragments * 4)

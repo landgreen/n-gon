@@ -774,7 +774,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0005);
-            bullet[me].explodeRad = 350 + Math.floor(Math.random() * 50);;
+            bullet[me].explodeRad = 333 + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
@@ -850,7 +850,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 20, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0003);
-            bullet[me].explodeRad = 325 + Math.floor(Math.random() * 50);;
+            bullet[me].explodeRad = 333 + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 6)
@@ -1260,7 +1260,7 @@ const b = {
                                 Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
                                 let dmg = this.dmg / Math.min(10, q[i].mass)
                                 q[i].damage(dmg);
-                                q[i].foundPlayer();
+                                if (q[i].alive) q[i].foundPlayer();
                                 //removed to improve performance
                                 // simulation.drawList.push({ //add dmg to draw queue
                                 //     x: this.position.x,
@@ -2764,7 +2764,7 @@ const b = {
         bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75, 0.75, b.fireAttributes(angle));
         bullet[me].collisionFilter.mask = tech.isNeedleShieldPierce ? cat.body : cat.body | cat.mobShield
         Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
-        bullet[me].endCycle = simulation.cycle + 180;
+        bullet[me].endCycle = simulation.cycle + 100;
         bullet[me].immuneList = []
         bullet[me].do = function() {
             const whom = Matter.Query.collides(this, mob)
@@ -2784,7 +2784,6 @@ const b = {
                                 b.explosion(this.position, 220 + 50 * Math.random()); //makes bullet do explosive damage at end
                             }
                             this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                            who.foundPlayer();
                             let dmg = b.dmgScale * 6
                             if (tech.isNailRadiation) {
                                 mobs.statusDoT(who, tech.isFastRadiation ? 12 : 3, tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
@@ -2792,6 +2791,7 @@ const b = {
                             }
                             if (tech.isCrit && who.isStunned) dmg *= 4
                             who.damage(dmg, tech.isNeedleShieldPierce);
+                            if (who.alive) who.foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
@@ -3008,7 +3008,7 @@ const b = {
                                 // const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 2.5 : 1)
                                 const dmg = 0.5 * b.dmgScale
                                 q[i].damage(dmg);
-                                q[i].foundPlayer();
+                                if (q[i].alive) q[i].foundPlayer();
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
@@ -3606,7 +3606,7 @@ const b = {
                             mobs.statusStun(q[i], 180)
                             const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3.5 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
-                            q[i].foundPlayer();
+                            if (q[i].alive) q[i].foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
@@ -3686,24 +3686,38 @@ const b = {
             },
             fireNeedles() {
                 if (m.crouch) {
-                    m.fireCDcycle = m.cycle + 45 * b.fireCDscale; // cool down
+                    m.fireCDcycle = m.cycle + 38 * b.fireCDscale; // cool down
                     b.needle()
-                    for (let i = 1; i < 4; i++) { //4 total needles
-                        setTimeout(() => { if (!simulation.paused) b.needle() }, 60 * i);
+
+                    function cycle() {
+                        if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                            count++
+                            if (count % 2) b.needle()
+                            if (count < 5 && m.alive) requestAnimationFrame(cycle);
+                        }
                     }
+                    let count = -1
+                    requestAnimationFrame(cycle);
                 } else {
-                    m.fireCDcycle = m.cycle + 25 * b.fireCDscale; // cool down
+                    m.fireCDcycle = m.cycle + 28 * b.fireCDscale; // cool down
                     b.needle()
-                    for (let i = 1; i < 3; i++) { //3 total needles
-                        setTimeout(() => { if (!simulation.paused) b.needle() }, 60 * i);
+
+                    function cycle() {
+                        if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                            count++
+                            if (count % 2) b.needle()
+                            if (count < 3 && m.alive) requestAnimationFrame(cycle);
+                        }
                     }
+                    let count = -1
+                    requestAnimationFrame(cycle);
                 }
             },
             fireRivets() {
                 m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 25 : 17) * b.fireCDscale); // cool down
 
                 const me = bullet.length;
-                const size = tech.rivetSize * 7.5
+                const size = tech.rivetSize * 8
                 bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
@@ -3958,7 +3972,7 @@ const b = {
                         b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 5 + 8 * Math.random())
                     }
                 } else if (tech.isNeedleShot) {
-                    const number = 12 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const number = 11 * (tech.isShotgunReversed ? 1.6 : 1)
                     const spread = (m.crouch ? 0.03 : 0.05)
                     let angle = m.angle - (number - 1) * spread * 0.5
                     for (let i = 0; i < number; i++) {
@@ -4351,7 +4365,7 @@ const b = {
                         for (let i = 0; i < q.length; i++) {
                             let dmg = this.dmg // / Math.min(10, q[i].mass)
                             q[i].damage(dmg);
-                            q[i].foundPlayer();
+                            if (q[i].alive) q[i].foundPlayer();
                             Matter.Body.setVelocity(q[i], Vector.mult(q[i].velocity, 0.9))
 
                             this.endCycle = 0; //bullet ends cycle after doing damage
@@ -4417,7 +4431,7 @@ const b = {
             name: "missiles",
             description: "launch <strong>homing</strong> missiles that <strong class='color-e'>explode</strong><br>crouch to <strong>rapidly</strong> launch smaller missiles",
             ammo: 0,
-            ammoPack: 3.5,
+            ammoPack: 4,
             have: false,
             fireCycle: 0,
             ammoLoaded: 0,
