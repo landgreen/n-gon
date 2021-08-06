@@ -157,8 +157,10 @@
                 for (i = 0, len = b.inventory.length; i < len; i++) {
                     if (b.guns[b.inventory[i]].name === name) return true
                 }
+                return false
+            } else {
+                return b.inventory.length > 0 && b.guns[b.activeGun].name === name
             }
-            return b.inventory.length > 0 && b.guns[b.activeGun].name === name
         },
         damageFromTech() {
             let dmg = 1 //m.fieldDamage
@@ -178,9 +180,9 @@
             if (tech.isEnergyLoss) dmg *= 1.55;
             if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
             if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
-            if (tech.isEnergyDamage) dmg *= 1 + m.energy / 9;
+            if (tech.isEnergyDamage) dmg *= 1 + m.energy / 11;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
-            if (tech.isRerollDamage) dmg *= 1 + 0.04 * powerUps.research.count
+            if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.23
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
@@ -193,15 +195,21 @@
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
-                const range = 450
-                spawn.randomLevelBoss(m.pos.x + range, m.pos.y, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x, m.pos.y + range, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x - range, m.pos.y, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x, m.pos.y - range, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x + range, m.pos.y + range, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x + range, m.pos.y - range, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x - range, m.pos.y + range, spawn.nonCollideBossList);
-                spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, spawn.nonCollideBossList);
+
+                const range = 550
+                for (let i = 0, len = 8; i < len; i++) {
+                    const angle = 2 * Math.PI * i / len
+                    spawn.randomLevelBoss(m.pos.x + range * Math.cos(angle), m.pos.y + range * Math.sin(angle), spawn.nonCollideBossList);
+                }
+
+                // spawn.randomLevelBoss(m.pos.x + range, m.pos.y, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x, m.pos.y + range, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x - range, m.pos.y, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x, m.pos.y - range, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x + range, m.pos.y + range, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x + range, m.pos.y - range, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x - range, m.pos.y + range, spawn.nonCollideBossList);
+                // spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, spawn.nonCollideBossList);
             }
         },
         setTechFrequency(name, frequency) {
@@ -1409,16 +1417,16 @@
             },
             {
                 name: "bot fabrication",
-                description: "anytime you collect <strong>3</strong> <strong class='color-r'>research</strong><br>use them to build a random <strong class='color-bot'>bot</strong>",
+                description: "anytime you collect <strong>4</strong> <strong class='color-r'>research</strong><br>use them to build a random <strong class='color-bot'>bot</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
-                    return powerUps.research.count > 2 || build.isExperimentSelection
+                    return powerUps.research.count > 3 || build.isExperimentSelection
                 },
-                requires: "at least 3 research",
+                requires: "at least 4 research",
                 effect() {
                     tech.isRerollBots = true;
                     powerUps.research.changeRerolls(0)
@@ -2259,7 +2267,7 @@
             },
             {
                 name: "electrolytes",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>11</strong> stored <strong class='color-f'>energy</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2758,26 +2766,8 @@
                 }
             },
             {
-                name: "many-worlds",
-                description: "each <strong>level</strong> is an <strong class='alt'>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return !tech.isResearchReality && !tech.isCollisionRealitySwitch
-                },
-                requires: "not Ψ(t) collapse, non-unitary",
-                effect() {
-                    tech.isSwitchReality = true;
-                },
-                remove() {
-                    tech.isSwitchReality = false;
-                }
-            },
-            {
                 name: "non-unitary operator",
-                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
+                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>, but<br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2795,6 +2785,25 @@
                     if (this.count > 0) {
                         level.difficultyIncrease(simulation.difficultyMode * 2)
                     }
+                }
+            },
+            {
+                name: "many-worlds",
+                // description: "each <strong>level</strong> is an <strong class='alt'>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
+                description: "on each new <strong>level</strong> use <strong>1</strong> <strong class='color-r'>research</strong> to enter an<br><strong class='alt'>alternate reality</strong> and spawn a <strong class='color-m'>tech</strong> power up",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return !tech.isResearchReality && !tech.isCollisionRealitySwitch
+                },
+                requires: "not Ψ(t) collapse, non-unitary",
+                effect() {
+                    tech.isSwitchReality = true;
+                },
+                remove() {
+                    tech.isSwitchReality = false;
                 }
             },
             {
@@ -2818,7 +2827,7 @@
             },
             {
                 name: "decoherence",
-                description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>5</strong> <strong class='color-r'>research</strong>",
+                description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>9</strong> <strong class='color-r'>research</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2829,7 +2838,7 @@
                 requires: "not determinism, at least 3 research",
                 effect() {
                     tech.isBanish = true
-                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research", false);
+                    for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research", false);
                 },
                 remove() {
                     tech.isBanish = false
@@ -2896,7 +2905,7 @@
             },
             {
                 name: "Bayesian statistics",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>4%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>3.7%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2945,7 +2954,7 @@
                 requires: "more than 6 tech",
                 effect: () => {
                     //remove active bullets  //to get rid of bots
-                    for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+                    for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
                     bullet = [];
                     let count = 1 //count tech
                     for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
@@ -3409,7 +3418,7 @@
             },
             {
                 name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br><strong>+21</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br><strong>+31</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3427,7 +3436,7 @@
                 },
                 remove() {
                     if (this.count > 0) {
-                        tech.removeJunkTechFromPool(21)
+                        tech.removeJunkTechFromPool(31)
                         level.difficultyIncrease(simulation.difficultyMode)
                     }
                 }
@@ -4444,7 +4453,7 @@
             },
             {
                 name: "booby trap",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+13</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+23</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -4456,7 +4465,7 @@
                 effect() {
                     tech.isMineDrop = true;
                     if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
-                    tech.addJunkTechToPool(13)
+                    tech.addJunkTechToPool(23)
                 },
                 remove() {
                     tech.isMineDrop = false;
@@ -5954,7 +5963,7 @@
             },
             {
                 name: "virtual particles",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to exploit your <strong>wormhole</strong> for a<br><strong>19%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
+                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to exploit your <strong>wormhole</strong> for a<br><strong>17%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5965,7 +5974,7 @@
                 },
                 requires: "wormhole,below 100% duplication chance",
                 effect() {
-                    tech.wormDuplicate = 0.19
+                    tech.wormDuplicate = 0.17
                     powerUps.setDo(); //needed after adjusting duplication chance
                     for (let i = 0; i < 3; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -6940,7 +6949,7 @@
                             body[index].collisionFilter.category = cat.body;
                             body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                             body[index].classType = "body";
-                            World.add(engine.world, body[index]); //add to world
+                            Composite.add(engine.world, body[index]); //add to world
                         }, i * 100);
                     }
 

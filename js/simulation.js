@@ -526,7 +526,7 @@ const simulation = {
             m.spawn(); //spawns the player
             m.look = m.lookDefault
         } else {
-            World.add(engine.world, [player])
+            Composite.add(engine.world, [player])
         }
 
         simulation.isHorizontalFlipped = (Math.random() < 0.5) ? true : false //if true, some maps are flipped horizontally
@@ -735,7 +735,8 @@ const simulation = {
         simulation.drawList = [];
 
         function removeAll(array) {
-            for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
+            // for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
+            for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
         }
         removeAll(map);
         map = [];
@@ -882,7 +883,7 @@ const simulation = {
                                     y: level.exit.y + 30 * (Math.random() - 0.5)
                                 });
                             } else {
-                                Matter.World.remove(engine.world, who[i]);
+                                Matter.Composite.remove(engine.world, who[i]);
                                 who.splice(i, 1);
                             }
                         }
@@ -998,11 +999,8 @@ const simulation = {
                 simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
             }
         },
-        mapFill: "#444",
-        bodyFill: "rgba(140,140,140,0.85)", //"#999",
-        bodyStroke: "#222",
         drawMapPath() {
-            ctx.fillStyle = simulation.draw.mapFill;
+            ctx.fillStyle = color.map;
             ctx.fill(simulation.draw.mapPath);
         },
         body() {
@@ -1016,9 +1014,9 @@ const simulation = {
                 ctx.lineTo(vertices[0].x, vertices[0].y);
             }
             ctx.lineWidth = 2;
-            ctx.fillStyle = simulation.draw.bodyFill;
+            ctx.fillStyle = color.block;
             ctx.fill();
-            ctx.strokeStyle = simulation.draw.bodyStroke;
+            ctx.strokeStyle = color.blockS;
             ctx.stroke();
         },
         cons() {
@@ -1194,7 +1192,7 @@ const simulation = {
                         map[len].collisionFilter.category = cat.map;
                         map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                         Matter.Body.setStatic(map[len], true); //make static
-                        World.add(engine.world, map[len]); //add to world
+                        Composite.add(engine.world, map[len]); //add to world
                         simulation.draw.setPaths() //update map graphics
 
                     } else if (e.which === 3) { //add body
@@ -1209,7 +1207,7 @@ const simulation = {
                         len = body.length - 1
                         body[len].collisionFilter.category = cat.body;
                         body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-                        World.add(engine.world, body[len]); //add to world
+                        Composite.add(engine.world, body[len]); //add to world
                         body[len].classType = "body"
                     }
                 }
@@ -1230,12 +1228,12 @@ const simulation = {
             if (simulation.testing && e.keyCode === 90 && simulation.constructMapString.length) {
                 if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'm') { //remove map from current level
                     const index = map.length - 1
-                    Matter.World.remove(engine.world, map[index]);
+                    Matter.Composite.remove(engine.world, map[index]);
                     map.splice(index, 1);
                     simulation.draw.setPaths() //update map graphics  
                 } else if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'b') { //remove body from current level
                     const index = body.length - 1
-                    Matter.World.remove(engine.world, body[index]);
+                    Matter.Composite.remove(engine.world, body[index]);
                     body.splice(index, 1);
                 }
                 simulation.constructMapString.pop();

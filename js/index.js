@@ -13,6 +13,28 @@ const cat = {
     phased: 0x100000000,
 }
 
+const color = { //light
+    background: "#ddd",
+    block: "rgba(140,140,140,0.85)",
+    blockS: "#222",
+    map: "#444",
+}
+
+// const color = { //dark
+//     background: "#333",
+//     block: "#444",
+//     blockS: "#aab",
+//     map: "#556",
+//     bullet: "#fff"
+// }
+
+// const color = { //dark
+//     background: "#999",
+//     block: "#888",
+//     blockS: "#111",
+//     map: "#444",
+// }
+
 function shuffle(array) {
     var currentIndex = array.length,
         temporaryValue,
@@ -170,7 +192,7 @@ const build = {
     //                 level.onLevel++
     //             }
     //         }
-    //         for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+    //         for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
     //         bullet = []; //remove any bullets that might have spawned from tech
     //         if (b.inventory.length > 0) {
     //             b.activeGun = b.inventory[0] //set first gun to active gun
@@ -342,6 +364,7 @@ const build = {
             const techID = document.getElementById("tech-" + i)
             if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
+                    // console.log(tech.tech[i].name, isAllowed, tech.tech[i].count, tech.haveGunCheck("nail gun"))
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
                     if (tech.tech[i].isFieldTech) {
@@ -537,7 +560,7 @@ const build = {
             b.activeGun = b.inventory[0] //set first gun to active gun
             simulation.makeGunHUD();
         }
-        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
         bullet = []; //remove any bullets that might have spawned from tech
         const levelsCleared = Math.abs(Number(document.getElementById("starting-level").value) - 1)
         level.difficultyIncrease(Math.min(99, levelsCleared * simulation.difficultyMode)) //increase difficulty based on modes
@@ -547,7 +570,7 @@ const build = {
             function removeOne() { //recursive remove one at a time to avoid array problems
                 for (let i = 0; i < powerUp.length; i++) {
                     if (powerUp[i].name === "tech" || powerUp[i].name === "gun" || powerUp[i].name === "field") {
-                        Matter.World.remove(engine.world, powerUp[i]);
+                        Matter.Composite.remove(engine.world, powerUp[i]);
                         powerUp.splice(i, 1);
                         removeOne();
                         break
@@ -928,7 +951,7 @@ window.addEventListener("keydown", function(event) {
                 body[index].collisionFilter.category = cat.body;
                 body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                 body[index].classType = "body";
-                World.add(engine.world, body[index]); //add to world
+                Composite.add(engine.world, body[index]); //add to world
                 break
             case "7":
                 const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];

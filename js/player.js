@@ -39,7 +39,7 @@ const m = {
             }
         });
         Matter.Body.setMass(player, m.mass);
-        World.add(engine.world, [player]);
+        Composite.add(engine.world, [player]);
     },
     cycle: 600, //starts at 600 cycles instead of 0 to prevent bugs with m.history
     lastKillCycle: 0,
@@ -331,7 +331,7 @@ const m = {
         const randomBotCount = b.totalBots()
         b.zeroBotCount()
         //remove all bullets, respawn bots
-        for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
+        for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
         bullet = [];
 
         //randomize health
@@ -437,7 +437,7 @@ const m = {
             document.getElementById("fade-out").style.opacity = 1; //slowly fades out
             // build.shareURL(false)
             setTimeout(function() {
-                World.clear(engine.world);
+                Composite.clear(engine.world);
                 Engine.clear(engine);
                 simulation.splashReturn();
             }, 3000);
@@ -650,6 +650,7 @@ const m = {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     setTimeout(function() {
+                        tech.maxDuplicationEvent()
                         simulation.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
@@ -679,6 +680,7 @@ const m = {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     setTimeout(function() {
+                        tech.maxDuplicationEvent()
                         simulation.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
@@ -1130,7 +1132,7 @@ const m = {
                     //remove block before pulse, so it doesn't get in the way
                     for (let i = 0; i < body.length; i++) {
                         if (body[i] === m.holdingTarget) {
-                            Matter.World.remove(engine.world, body[i]);
+                            Matter.Composite.remove(engine.world, body[i]);
                             body.splice(i, 1);
                         }
                     }
@@ -1264,7 +1266,7 @@ const m = {
                         y: player.velocity.y + powerUp[i].velocity.y / player.mass * 5
                     });
                     powerUp[i].effect();
-                    Matter.World.remove(engine.world, powerUp[i]);
+                    Matter.Composite.remove(engine.world, powerUp[i]);
                     powerUp.splice(i, 1);
                     return; //because the array order is messed up after splice
                 }
@@ -2495,7 +2497,7 @@ const m = {
                                     ) { //use power up if it is close enough
                                         powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();
-                                        Matter.World.remove(engine.world, powerUp[i]);
+                                        Matter.Composite.remove(engine.world, powerUp[i]);
                                         powerUp.splice(i, 1);
                                         // m.fieldRadius += 50
                                         break; //because the array order is messed up after splice
@@ -2605,9 +2607,9 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>9%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
-                m.duplicateChance = 0.11
+                m.duplicateChance = 0.09
                 powerUps.setDo(); //needed after adjusting duplication chance
 
                 m.hold = function() {
@@ -2667,7 +2669,7 @@ const m = {
                                     m.fieldRange *= 0.8
                                     powerUps.onPickUp(powerUp[i]);
                                     powerUp[i].effect();
-                                    Matter.World.remove(engine.world, powerUp[i]);
+                                    Matter.Composite.remove(engine.world, powerUp[i]);
                                     powerUp.splice(i, 1);
                                     break; //because the array order is messed up after splice
                                 }
@@ -2691,7 +2693,7 @@ const m = {
                                         if (Vector.magnitude(Vector.sub(m.hole.pos1, body[i].position)) < shrinkRange) {
                                             Matter.Body.scale(body[i], shrinkScale, shrinkScale);
                                             if (body[i].mass < 0.05) {
-                                                Matter.World.remove(engine.world, body[i]);
+                                                Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
                                                 if (tech.isWormholeEnergy) m.energy += 0.63
@@ -2724,7 +2726,7 @@ const m = {
                                     if (Vector.magnitude(Vector.sub(m.hole.pos2, body[i].position)) < shrinkRange) {
                                         Matter.Body.scale(body[i], shrinkScale, shrinkScale);
                                         if (body[i].mass < 0.05) {
-                                            Matter.World.remove(engine.world, body[i]);
+                                            Matter.Composite.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
@@ -2911,7 +2913,7 @@ const m = {
             //                     if (dxP * dxP + dyP * dyP < 50000 && !simulation.isChoosing && !(m.health === m.maxHealth && powerUp[i].name === "heal")) {
             //                         powerUps.onPickUp(player.position);
             //                         powerUp[i].effect();
-            //                         Matter.World.remove(engine.world, powerUp[i]);
+            //                         Matter.Composite.remove(engine.world, powerUp[i]);
             //                         powerUp.splice(i, 1);
             //                         const shortPause = function() {
             //                             if (m.defaultFPSCycle < m.cycle) { //back to default values

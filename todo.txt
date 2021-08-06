@@ -1,19 +1,57 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: chain reaction now requires vacuum bomb, but it increases grenade radius and damage 33%
-  (and makes blocks explode)
+Matter.World has been replaced with Matter.Composite
+  matter.js deprecated World
+  could cause problems merging your old code
+    (replace World with Composite in your code)
 
-needle gun fires with more regular timing
-needles despawn 1.5s faster, for performance reasons
-intro level power ups are relocated
-tech: decomposers renamed necrophage
-if mobs are one shotted before they see you, they no longer alert nearby mobs
-clicking on a mob in testing will log that mob in console
+tech: many worlds - now costs 1 research at the start of each level to activate
+  a nerf, but also a buff because if you like a build you can freeze it by not getting research
+
+mine gun has 25% less ammo and 33% more damage
+
+railgun now gets 50% more ammo, but it fires slower
+fixed rail gun ammo drain on misfire bug
+
+fixed experiment gun display bug
 
 ******************************************************** TODO ********************************************************
 
+dark mode
+  build color pallets in a photo editor by redrawing in game screenshots
+  what about just starting with setting the background to be a dark grey?
+  const color = {
+    map:
+    blocks:
+    background:
+    shadows: (0,0,0,0.1)?
+    bullets:
+    mob:
+    heal powerUps:
+    tech powerUps:
+    field powerUps:
+    gun powerUps:
+    damage circle:
+    harm circle:
+  }
+
+re-word the "reduce difficulty" text, so it's more clear what you get
+
+tech: Standing Wave: Shockwave. Use FIELD button to shrink your shield and charge up, release to unleash a Shockwave.
+
+make an area that prevents mob vision, like a bush you can hide in
+  a static block with non collide on most things?
+
+it would be helpful if there was a mechanism to recover mobs that fly off the map
+  add a ceiling system and a left/right walls system similar to the floor checks but only for mobs
+make non moving bosses not move after getting hit
+  shooter, shielding, 
+
 buff missiles?
   maybe they can release grenades after they explode, like CPT grenades?
+  make the crouch rapid fire a tech, and make the missiles fire faster, and use less ammo?
+buff railgun
+buff mines
 
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
@@ -193,9 +231,25 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
+map elements from labs not getting removed from matter.js, but they are removed from map[]
+  seems to always be the top right room near the center.  why???
+    these 1-2 elements are probalby the last elements added to the engine
+  floor in labs loot room, showed up on warehouse map once,  invisible
+  button floor and shelf that drops blocks from labs showed up invisible on next levels
+  2 thin floors in loot room, rectangles
+  2 of the 5 elements were not rectangles
+  is labs too big?
+    add a delay for loading maps?
+
+Matter.World module has now been replaced by Matter.Composite  (is this a possible fix?)
+  // for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
+  for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
+
+
 sharing builds as html doesn't work for long lists...
   it shouldn't be sharing undefined at all
   probably some other problems too
+  (might be fixed...)
 
 blocks on buttons teleport into the button endlessly if they are being slowly floated away
   maybe add a cooldown?
@@ -203,7 +257,7 @@ blocks on buttons teleport into the button endlessly if they are being slowly fl
 
 ants marching outline doesn't sync right on safari anymore.
 
-door to exit in vats does nothing
+door to exit in level: vats does nothing
   did I do that?
 
 death while in power up selection menu doesn't reset properly

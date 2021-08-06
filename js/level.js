@@ -13,12 +13,12 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // localSettings.levelsClearedLastGame = 10
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(10) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
             // m.setField("time dilation")
-            // b.giveGuns("nail gun")
-            // tech.giveTech("needle gun")
+            // b.giveGuns("rail gun")
+            // tech.giveTech("half-wave rectifier")
             // b.giveGuns("wave beam")
             // tech.giveTech("Lenz's law")
             // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
@@ -86,7 +86,8 @@ const level = {
             if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
             simulation.switchGun();
         }
-        if (tech.isSwitchReality) {
+        if (tech.isSwitchReality && powerUps.research.count > 0) {
+            powerUps.research.changeRerolls(-1);
             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
             simulation.trails()
@@ -266,13 +267,13 @@ const level = {
                 body[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
             }
             body[i].classType = "body";
-            World.add(engine.world, body[i]); //add to world
+            Composite.add(engine.world, body[i]); //add to world
         }
         for (let i = 0; i < map.length; i++) {
             map[i].collisionFilter.category = cat.map;
             map[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
             Matter.Body.setStatic(map[i], true); //make static
-            World.add(engine.world, map[i]); //add to world
+            Composite.add(engine.world, map[i]); //add to world
         }
     },
     spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
@@ -303,7 +304,7 @@ const level = {
             stiffness: 1,
             damping: 1
         });
-        World.add(engine.world, constraint);
+        Composite.add(engine.world, constraint);
         return constraint
     },
     boost(x, y, height = 1000) { //height is how high the player will be flung above y
@@ -445,10 +446,10 @@ const level = {
                     stiffness: 0.01,
                     damping: 0.3
                 });
-                World.add(engine.world, this.constraint);
+                Composite.add(engine.world, this.constraint);
             },
             removeConstraint() {
-                World.remove(engine.world, this.constraint, true)
+                Composite.remove(engine.world, this.constraint, true)
             },
             drawTrack() {
                 ctx.fillStyle = "#ccc"
@@ -483,7 +484,7 @@ const level = {
             stiffness: 0.1,
             damping: 0.3
         });
-        World.add(engine.world, constraint);
+        Composite.add(engine.world, constraint);
         constraint.plat = {
             position: who.position,
             speed: speed,
@@ -516,7 +517,7 @@ const level = {
             x: x,
             y: y
         });
-        World.add(engine.world, [rotor]);
+        Composite.add(engine.world, [rotor]);
         body[body.length] = rotor1
         body[body.length] = rotor2
 
@@ -532,7 +533,7 @@ const level = {
             },
             bodyB: rotor
         });
-        World.add(engine.world, constraint);
+        Composite.add(engine.world, constraint);
 
         if (rotate) {
             rotor.rotate = function() {
@@ -580,7 +581,7 @@ const level = {
             stiffness: 1,
             length: 0
         });
-        World.add(engine.world, [cons[cons.length - 1]]);
+        Composite.add(engine.world, [cons[cons.length - 1]]);
 
         return {
             flip: flip,
@@ -609,7 +610,7 @@ const level = {
                     ctx.fillStyle = "#3df"
                     ctx.fill();
                     ctx.lineWidth = 1;
-                    ctx.strokeStyle = simulation.draw.bodyStroke;
+                    ctx.strokeStyle = color.blockS;
                     ctx.stroke();
                 }
             },
@@ -795,7 +796,7 @@ const level = {
                         if (body[i].isInPortal === this) body[i].isInPortal = null
                     } else if (body[i].isInPortal !== this) { //touching this portal, but for the first time
                         if (isRemoveBlocks) {
-                            Matter.World.remove(engine.world, body[i]);
+                            Matter.Composite.remove(engine.world, body[i]);
                             body.splice(i, 1);
                             break
                         }
@@ -829,7 +830,7 @@ const level = {
             //         if (body[j] === touching[i].bodyB) {
             //           body.splice(j, 1);
             //           len--
-            //           Matter.World.remove(engine.world, touching[i].bodyB);
+            //           Matter.Composite.remove(engine.world, touching[i].bodyB);
             //           break;
             //         }
             //       }
@@ -846,7 +847,7 @@ const level = {
             //       }
             //     }
             //   }
-            //   Matter.World.remove(engine.world, touching[0].bodyB);
+            //   Matter.Composite.remove(engine.world, touching[0].bodyB);
             // }
         }
 
@@ -869,13 +870,13 @@ const level = {
             },
             unit: unitA,
             angle: angleA,
-            color: simulation.draw.mapFill,
+            color: color.map,
             draw: draw,
             query: query,
             lastPortalCycle: 0
         });
         Matter.Body.setStatic(mapA, true); //make static
-        World.add(engine.world, mapA); //add to world
+        Composite.add(engine.world, mapA); //add to world
 
         const mapB = composite[composite.length] = Bodies.rectangle(centerB.x - 0.5 * unitB.x * mapWidth, centerB.y - 0.5 * unitB.y * mapWidth, mapWidth, height + 10, {
             collisionFilter: {
@@ -884,13 +885,13 @@ const level = {
             },
             unit: unitB,
             angle: angleB,
-            color: simulation.draw.mapFill,
+            color: color.map,
             draw: draw,
             query: query,
             lastPortalCycle: 0,
         });
         Matter.Body.setStatic(mapB, true); //make static
-        World.add(engine.world, mapB); //add to world
+        Composite.add(engine.world, mapB); //add to world
 
         mapA.portal = portalA
         mapB.portal = portalB
@@ -1041,7 +1042,7 @@ const level = {
                 stiffness: stiffness,
                 damping: damping
             });
-            World.add(engine.world, consBB[consBB.length - 1]);
+            Composite.add(engine.world, consBB[consBB.length - 1]);
         }
         cons[cons.length] = Constraint.create({ //pin first block to a point in space
             pointA: {
@@ -1052,7 +1053,7 @@ const level = {
             stiffness: 1,
             damping: damping
         });
-        World.add(engine.world, cons[cons.length - 1]);
+        Composite.add(engine.world, cons[cons.length - 1]);
         if (isAttached) {
             cons[cons.length] = Constraint.create({ //pin last block to a point in space
                 pointA: {
@@ -1063,7 +1064,7 @@ const level = {
                 stiffness: 1,
                 damping: damping
             });
-            World.add(engine.world, cons[cons.length - 1]);
+            Composite.add(engine.world, cons[cons.length - 1]);
         }
     },
     //******************************************************************************************************************
@@ -1074,7 +1075,7 @@ const level = {
         level.isProcedural = true //used in generating text itn he level builder
         level.defaultZoom = 1700
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#dcdcdf";
+        document.body.style.backgroundColor = "#d9d9de" //"#d3d3db" //"#dcdcdf";
         let isDoorLeft, isDoorRight, x, y
         doCustom = []
         doCustomTopLayer = []
@@ -1361,11 +1362,11 @@ const level = {
                                     body[index].collisionFilter.category = cat.body;
                                     body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                                     body[index].classType = "body";
-                                    World.add(engine.world, body[index]); //add to world
+                                    Composite.add(engine.world, body[index]); //add to world
                                     setTimeout(() => { //remove block
                                         for (let i = 0; i < body.length; i++) {
                                             if (body[i] === bodyBullet) {
-                                                Matter.World.remove(engine.world, body[i]);
+                                                Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                             }
                                         }
@@ -1418,11 +1419,11 @@ const level = {
                                     body[index].collisionFilter.category = cat.body;
                                     body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                                     body[index].classType = "body";
-                                    World.add(engine.world, body[index]); //add to world
+                                    Composite.add(engine.world, body[index]); //add to world
                                     setTimeout(() => { //remove block
                                         for (let i = 0; i < body.length; i++) {
                                             if (body[i] === bodyBullet) {
-                                                Matter.World.remove(engine.world, body[i]);
+                                                Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                             }
                                         }
@@ -1787,7 +1788,7 @@ const level = {
             //                     who.collisionFilter.category = cat.map;
             //                     who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
             //                     Matter.Body.setStatic(who, true); //make static
-            //                     World.add(engine.world, who); //add to world
+            //                     Composite.add(engine.world, who); //add to world
             //                 }
             //                 const numberOfMapElementsAdded = 0
             //                 for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
@@ -1821,7 +1822,7 @@ const level = {
                                 who.collisionFilter.category = cat.map;
                                 who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                 Matter.Body.setStatic(who, true); //make static
-                                World.add(engine.world, who); //add to world
+                                Composite.add(engine.world, who); //add to world
                             }
                             let r = 150
                             let hexagon = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0     ${r*Math.cos(2.0944)} ${r*Math.sin(2.0944)}      ${r*Math.cos(1.0472)} ${r*Math.sin(1.0472)}  `
@@ -1908,7 +1909,7 @@ const level = {
                                 who.collisionFilter.category = cat.map;
                                 who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                 Matter.Body.setStatic(who, true); //make static
-                                World.add(engine.world, who); //add to world
+                                Composite.add(engine.world, who); //add to world
                             }
                             //right side hexagons
                             let r = 300
@@ -2040,7 +2041,7 @@ const level = {
             }
         }
 
-        let rows = [
+        let columns = [
             () => {
                 offset.y = 0
                 outlineUpDown()
@@ -2065,7 +2066,7 @@ const level = {
                 rooms[3]()
             },
         ]
-        rows = shuffle(rows) //********************************* RUN THIS LINE IN THE FINAL VERSION ***************************************
+        columns = shuffle(columns) //********************************* RUN THIS LINE IN THE FINAL VERSION ***************************************
         for (let i = 0; i < 3; i++) {
             if (i === 0) {
                 isDoorLeft = false
@@ -2078,7 +2079,7 @@ const level = {
                 isDoorRight = false
             }
             offset.x = i * 2100
-            rows[i]()
+            columns[i]()
         }
         level.custom = () => {
             for (let i = 0, len = doCustom.length; i < len; i++) doCustom[i]() //runs all the active code from each room
@@ -2187,7 +2188,7 @@ const level = {
         level.setPosToSpawn(0, -50); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 25, 100, 10);
         level.exit.x = 0;
-        level.exit.y = 400;
+        level.exit.y = 40000;
         level.defaultZoom = 1000
         simulation.zoomTransition(level.defaultZoom)
         // document.body.style.backgroundColor = "#aaa";
@@ -2230,7 +2231,7 @@ const level = {
         spawn.setSpawnList();
         level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#ddd";
+        document.body.style.backgroundColor = color.background //"#ddd";
         // simulation.draw.mapFill = "#444"
         // simulation.draw.bodyFill = "rgba(140,140,140,0.85)"
         // simulation.draw.bodyStroke = "#222"
@@ -2241,7 +2242,7 @@ const level = {
         spawn.mapRect(-950, -1800, 8200, 800); //roof
         spawn.mapRect(-250, -400, 1000, 600); // shelf
         spawn.mapRect(-250, -1200, 1000, 550); // shelf roof
-        // powerUps.spawnStartingPowerUps(600, -800);
+        powerUps.spawnStartingPowerUps(600, -800);
         // for (let i = 0; i < 50; ++i) powerUps.spawn(550, -800, "research", false);
         // powerUps.spawn(350, -800, "gun", false);
 
@@ -2270,11 +2271,11 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.growBossCulture(1900, -500)
         // spawn.blinkBoss(1900, -500)
         // spawn.snakeBoss(1900, -500)
-        // spawn.grenadierBoss(1900, -500)
+        // spawn.growBossCulture(1900, -500)
         // spawn.sneaker(1900, -500)
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
@@ -2285,7 +2286,7 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        // spawn.shieldingBoss(1600, -500)
+        spawn.shieldingBoss(1600, -500)
         // spawn.grenadier(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
@@ -2718,7 +2719,7 @@ const level = {
             if (!(m.cycle % 60)) { //so much work to catch blocks caught at the bottom of the vertical portals
                 let touching = Matter.Query.collides(map[removeIndex1], body)
                 if (touching.length) {
-                    Matter.World.remove(engine.world, touching[0].bodyB);
+                    Matter.Composite.remove(engine.world, touching[0].bodyB);
                     for (let i = 0, len = body.length; i < len; i++) {
                         if (body[i].id === touching[0].bodyB.id) {
                             body.splice(i, 1);
@@ -2728,7 +2729,7 @@ const level = {
                 }
                 touching = Matter.Query.collides(map[removeIndex2], body)
                 if (touching.length) {
-                    Matter.World.remove(engine.world, touching[0].bodyB);
+                    Matter.Composite.remove(engine.world, touching[0].bodyB);
                     for (let i = 0, len = body.length; i < len; i++) {
                         if (body[i].id === touching[0].bodyB.id) {
                             body.splice(i, 1);
@@ -3981,7 +3982,7 @@ const level = {
         powerUps.spawn(-4200, -700, "ammo");
         powerUps.spawn(-4000, -700, "ammo");
         spawn.mapRect(-4450, -1000, 100, 500);
-        spawn.bodyRect(-3500, -750, 150, 150);
+        spawn.bodyRect(-3300, -750, 150, 150);
 
         //building 1
         spawn.bodyRect(-1000, -675, 25, 25);
@@ -4317,7 +4318,7 @@ const level = {
                 stiffness: 0.0001815,
                 length: 1
             });
-            World.add(engine.world, cons[cons.length - 1]);
+            Composite.add(engine.world, cons[cons.length - 1]);
 
             spawn.bodyRect(600, 525, 125, 125, 1, spawn.propsSlide); //weight
             spawn.bodyRect(800, 600, 300, 100, 1, spawn.propsHoist); //hoist
@@ -4330,7 +4331,7 @@ const level = {
                 stiffness: 0.0001815,
                 length: 1
             });
-            World.add(engine.world, cons[cons.length - 1]);
+            Composite.add(engine.world, cons[cons.length - 1]);
 
             spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
             spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
@@ -4344,7 +4345,7 @@ const level = {
                 stiffness: 0.0005,
                 length: 566
             });
-            World.add(engine.world, cons[cons.length - 1]);
+            Composite.add(engine.world, cons[cons.length - 1]);
         }
         //blocks
         spawn.bodyRect(-165, -150, 30, 35, 1);
@@ -4569,7 +4570,7 @@ const level = {
             bodyB: map[map.length - 1],
             stiffness: 1
         });
-        World.add(engine.world, consBB[consBB.length - 1]);
+        Composite.add(engine.world, consBB[consBB.length - 1]);
         spawn.mapRect(-600 + 300, -2000 * 0.75, 1900, 50); //3rd floor
         spawn.mapRect(-600 + 2000 * 0.7, -2000 * 0.74, 50, 375); //center wall
         spawn.bodyRect(-600 + 2000 * 0.7, -2000 * 0.5 - 106, 50, 106); //center block under wall
@@ -4757,7 +4758,7 @@ const level = {
             stiffness: 0.0002, //1217,
             length: 200
         });
-        World.add(engine.world, cons[cons.length - 1]);
+        Composite.add(engine.world, cons[cons.length - 1]);
 
         spawn.bodyRect(2799, -870, 310, 290); //Gros bloc angle toit
         spawn.mapRect(4000, -1750, 50, 400); //Right Wall Cuve
@@ -4806,7 +4807,7 @@ const level = {
             bodyB: map[map.length - 1],
             stiffness: 1
         });
-        World.add(engine.world, consBB[consBB.length - 1]);
+        Composite.add(engine.world, consBB[consBB.length - 1]);
         spawn.bodyRect(650, 50, 70, 50);
         spawn.bodyRect(300, 0, 100, 60);
         spawn.bodyRect(400, 0, 100, 150);
@@ -4996,7 +4997,7 @@ const level = {
                 stiffness: 0.00014,
                 length: 120
             });
-            World.add(engine.world, cons[cons.length - 1]);
+            Composite.add(engine.world, cons[cons.length - 1]);
             spawn.bodyRect(0, -1250, 240, 190) //Fat cube ascenseur
         } else { /// Reversed spawn
             spawn.bodyRect(0, -650, 225, 175);
@@ -5199,7 +5200,7 @@ const level = {
             map[len].collisionFilter.category = cat.map;
             map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
             Matter.Body.setStatic(map[len], true); //make static
-            World.add(engine.world, map[len]); //add to world
+            Composite.add(engine.world, map[len]); //add to world
             simulation.draw.setPaths() //update map graphics
         }
 
@@ -5208,7 +5209,7 @@ const level = {
             len = body.length - 1
             body[len].collisionFilter.category = cat.body;
             body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-            World.add(engine.world, body[len]); //add to world
+            Composite.add(engine.world, body[len]); //add to world
             body[len].classType = "body"
         }
 
@@ -5656,8 +5657,8 @@ const level = {
         chair2 = Body.create({
             parts: [part4, part5, part6],
         });
-        World.add(engine.world, [chair]);
-        World.add(engine.world, [chair2]);
+        Composite.add(engine.world, [chair]);
+        Composite.add(engine.world, [chair2]);
         composite[composite.length] = chair;
         composite[composite.length] = chair2;
         body[body.length] = part1;
@@ -5712,7 +5713,7 @@ const level = {
                 rightLowerLeg, leftUpperLeg, rightUpperLeg
             ],
         });
-        World.add(engine.world, [person]);
+        Composite.add(engine.world, [person]);
         composite[composite.length] = person
         body[body.length] = chest
         body[body.length] = head
@@ -5773,7 +5774,7 @@ const level = {
             bodyB: map[map.length - 1],
             stiffness: 1
         });
-        World.add(engine.world, consBB[consBB.length - 1]);
+        Composite.add(engine.world, consBB[consBB.length - 1]);
 
         //table + chaises
         spawn.mapRect(4025, -850, 50, 175);
@@ -6371,23 +6372,23 @@ const level = {
 
         //Boss Spawning
         if (simulation.difficulty > 10) {
-            spawn.pulsarBoss(-400, -200);
+            spawn.pulsarBoss(3600, -400);
             powerUps.chooseRandomPowerUp(4006, 400);
             powerUps.chooseRandomPowerUp(4407, 400);
             powerUps.spawnStartingPowerUps(4400, 400);
             if (simulation.difficulty > 30) {
                 powerUps.chooseRandomPowerUp(4002, 400);
                 powerUps.chooseRandomPowerUp(4004, 400);
-                spawn.pulsarBoss(3600, -400);
+                spawn.pulsarBoss(4200, 1000);
                 if (simulation.difficulty > 60) {
                     powerUps.chooseRandomPowerUp(4409, 400);
-                    spawn.pulsarBoss(4200, 1000);
+                    spawn.pulsarBoss(5800, -1200);
                     if (simulation.difficulty > 80) {
-                        spawn.pulsarBoss(5800, -1200);
+                        spawn.pulsarBoss(-400, -200);
                         if (simulation.difficulty > 100) {
-                            spawn.pulsarBoss(-400, -200);
+                            spawn.pulsarBoss(3600, -400);
                             if (simulation.difficulty > 120) {
-                                spawn.pulsarBoss(3600, -400);
+                                spawn.pulsarBoss(-400, -200);
                             }
                         }
                     }
@@ -6541,7 +6542,7 @@ const level = {
             stiffness: 0.005,
             length: 700
         });
-        World.add(engine.world, [cons[cons.length - 2], cons[cons.length - 1]]);
+        Composite.add(engine.world, [cons[cons.length - 2], cons[cons.length - 1]]);
 
         spawn.bodyRect(5225, -2525, 300, 75);
         spawn.bodyRect(4700, -2525, 100, 75, 0.5);
@@ -6649,7 +6650,7 @@ const level = {
                 stiffness: 0.002,
                 length: 1000
             });
-            World.add(engine.world, [cons[cons.length - 1], cons[cons.length - 2]])
+            Composite.add(engine.world, [cons[cons.length - 1], cons[cons.length - 2]])
         }
         const boost1 = level.boost(4400, -1385, 1200)
 
@@ -6663,7 +6664,7 @@ const level = {
 
             if (!buttonGreen.isUp) {
                 if (!g) {
-                    Matter.World.remove(engine.world, cons[1])
+                    Matter.Composite.remove(engine.world, cons[1])
                     cons.splice(1, 2)
                 }
                 g = true;
@@ -6715,7 +6716,7 @@ const level = {
                 body[len] = Matter.Bodies.polygon(Math.floor(Math.random() * 1700) + 1050, 100, Math.floor(Math.random() * 11) + 10, Math.floor(Math.random() * 20) + 15)
                 body[len].collisionFilter.category = cat.body;
                 body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-                World.add(engine.world, body[len])
+                Composite.add(engine.world, body[len])
                 nextBlockSpawn = simulation.cycle + Math.floor(Math.random() * 60 + 30)
             }
 
@@ -6738,7 +6739,7 @@ const level = {
                         y: slowY * body[i].velocity.y
                     });
                     if (body[i].mass < 0.05) {
-                        Matter.World.remove(engine.world, body[i])
+                        Matter.Composite.remove(engine.world, body[i])
                         body.splice(i, 1)
                         break
                     }
@@ -7169,7 +7170,7 @@ const level = {
                 const compoundParts = Body.create({
                     parts: [part1, part2, part3],
                 });
-                World.add(engine.world, [compoundParts]);
+                Composite.add(engine.world, [compoundParts]);
                 needGravity[needGravity.length] = compoundParts;
                 composite[composite.length] = compoundParts;
                 body[body.length] = part1;
@@ -7198,7 +7199,7 @@ const level = {
                     },
                     stiffness: stiff
                 });
-                World.add(engine.world, cons[cons.length - 1]);
+                Composite.add(engine.world, cons[cons.length - 1]);
             }
 
             //I SINCERELY APOLOGIZE FOR THE ILLEGIBLE BLOCKS OF STRING CONCATENATION

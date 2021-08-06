@@ -222,7 +222,6 @@ const mobs = {
             alive: true,
             index: i,
             health: tech.mobSpawnWithHealth,
-            damageReduction: 1,
             showHealthBar: true,
             accelMag: 0.001 * simulation.accelScale,
             cd: 0, //game cycle when cooldown will be over
@@ -1042,8 +1041,10 @@ const mobs = {
                     if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
                     // if (this.shield) dmg *= 0.075
                     // if (this.isBoss) dmg *= 0.25
-                    dmg *= this.damageReduction
-
+                    if (this.damageReduction < 1) { //only used for bosses with this.armor()  or shields
+                        this.damageReductionGoal += dmg * this.damageReductionScale //reduce damageReductionGoal
+                        dmg *= this.damageReduction
+                    }
                     //energy and heal drain should be calculated after damage boosts
                     if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
                     if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp) {
@@ -1066,6 +1067,20 @@ const mobs = {
             onDeath() {
                 // a placeholder for custom effects on mob death
                 // to use declare custom method in mob spawn
+            },
+            damageReduction: 1,
+            damageReductionGoal: 0.001, //must add this to boss set up:   me.damageReduction = me.damageReductionGoal
+            damageReductionScale: 0.004, //for bosses in this.onDamage  determines the impact of dmg on damageReductionGoal
+            armor() { //slowly reduce damage reduction, for bosses
+                if (this.seePlayer.recall) {
+                    if (this.damageReductionGoal > 0.24) {
+                        this.damageReductionGoal = 0.25
+                    } else {
+                        this.damageReductionGoal = this.damageReductionGoal * 0.999 + 0.001 * 0.25 //smooth the goal towards 0.25 damage reduction
+                    }
+                    this.damageReduction = this.damageReduction * 0.995 + 0.005 * this.damageReductionGoal //smooth damage reduction towards the goal
+                    // console.log(`damageReduction = ${this.damageReduction.toFixed(4)}`, `damageReductionGoal = ${this.damageReductionGoal.toFixed(4)}`)
+                }
             },
             leaveBody: true,
             isDropPowerUp: true,
@@ -1217,7 +1232,7 @@ const mobs = {
                     //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
                     // }
                     body[len].classType = "body";
-                    World.add(engine.world, body[len]); //add to world
+                    Composite.add(engine.world, body[len]); //add to world
 
                     //large mobs shrink so they don't block paths
                     if (body[len].mass > 9) {
@@ -1230,7 +1245,7 @@ const mobs = {
                         };
                         shrink(body[len], 7 + 4 * Math.random())
                     }
-                    Matter.World.remove(engine.world, this);
+                    Matter.Composite.remove(engine.world, this);
                     mob.splice(i, 1);
                     if (tech.isMobBlockFling) {
                         const who = body[body.length - 1]
@@ -1238,12 +1253,12 @@ const mobs = {
                         Matter.Body.setAngularVelocity(who, (0.5 + 0.2 * Math.random()) * (Math.random() < 0.5 ? -1 : 1));
                     }
                 } else {
-                    Matter.World.remove(engine.world, this);
+                    Matter.Composite.remove(engine.world, this);
                     mob.splice(i, 1);
                 }
             }
         });
         mob[i].alertRange2 = Math.pow(mob[i].radius * 3 + 550, 2);
-        World.add(engine.world, mob[i]); //add to world
+        Composite.add(engine.world, mob[i]); //add to world
     }
 };

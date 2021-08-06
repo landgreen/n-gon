@@ -83,7 +83,7 @@ const powerUps = {
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             if (powerUp[i].isDuplicated && Math.random() < 0.004) { //  (1-0.004)^150 = chance to be removed after 3 seconds
                 b.explosion(powerUp[i].position, 150 + (10 + 3 * Math.random()) * powerUp[i].size);
-                Matter.World.remove(engine.world, powerUp[i]);
+                Matter.Composite.remove(engine.world, powerUp[i]);
                 powerUp.splice(i, 1);
                 break
             }
@@ -209,7 +209,7 @@ const powerUps = {
         // document.body.style.overflow = "hidden"
         simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
-        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+        if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
         build.unPauseGrid()
         requestAnimationFrame(cycle);
         if (m.holdingTarget) m.drop();
@@ -234,7 +234,7 @@ const powerUps = {
                 }
             }
             if (tech.isRerollBots) {
-                for (const cost = 3; powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
+                for (const cost = 4; powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
                     b.randomBot()
                     if (tech.renormalization) {
                         for (let i = 0; i < cost; i++) {
@@ -373,7 +373,7 @@ const powerUps = {
             if (tech.isAmmoForGun && b.inventory.length > 0 && b.activeGun) {
                 const target = b.guns[b.activeGun]
                 if (target.ammo !== Infinity) {
-                    const ammoAdded = Math.ceil((0.82 * Math.random() + 0.8 * Math.random()) * target.ammoPack)
+                    const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack)
                     target.ammo += ammoAdded
                     simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                 }
@@ -884,7 +884,7 @@ const powerUps = {
                 y: Math.random() * -9 - 3
             });
         }
-        World.add(engine.world, powerUp[index]); //add to world
+        Composite.add(engine.world, powerUp[index]); //add to world
     },
     spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
         if (

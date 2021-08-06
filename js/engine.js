@@ -1,7 +1,6 @@
 //matter.js ***********************************************************
 // module aliases
 const Engine = Matter.Engine,
-    World = Matter.World,
     Events = Matter.Events,
     Composites = Matter.Composites,
     Composite = Matter.Composite,
