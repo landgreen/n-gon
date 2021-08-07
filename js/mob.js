@@ -1041,10 +1041,11 @@ const mobs = {
                     if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
                     // if (this.shield) dmg *= 0.075
                     // if (this.isBoss) dmg *= 0.25
-                    if (this.damageReduction < 1) { //only used for bosses with this.armor()  or shields
-                        this.damageReductionGoal += dmg * this.damageReductionScale //reduce damageReductionGoal
-                        dmg *= this.damageReduction
-                    }
+                    // if (this.damageReduction < 1) { //only used for bosses with this.armor()  or shields
+                    //     this.damageReductionGoal += dmg * this.damageReductionScale //reduce damageReductionGoal
+                    //     dmg *= this.damageReduction
+                    // }
+                    dmg *= this.damageReduction
                     //energy and heal drain should be calculated after damage boosts
                     if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
                     if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp) {
@@ -1069,19 +1070,32 @@ const mobs = {
                 // to use declare custom method in mob spawn
             },
             damageReduction: 1,
-            damageReductionGoal: 0.001, //must add this to boss set up:   me.damageReduction = me.damageReductionGoal
-            damageReductionScale: 0.004, //for bosses in this.onDamage  determines the impact of dmg on damageReductionGoal
-            armor() { //slowly reduce damage reduction, for bosses
-                if (this.seePlayer.recall) {
-                    if (this.damageReductionGoal > 0.24) {
-                        this.damageReductionGoal = 0.25
-                    } else {
-                        this.damageReductionGoal = this.damageReductionGoal * 0.999 + 0.001 * 0.25 //smooth the goal towards 0.25 damage reduction
-                    }
-                    this.damageReduction = this.damageReduction * 0.995 + 0.005 * this.damageReductionGoal //smooth damage reduction towards the goal
-                    // console.log(`damageReduction = ${this.damageReduction.toFixed(4)}`, `damageReductionGoal = ${this.damageReductionGoal.toFixed(4)}`)
-                }
-            },
+            // damageReductionGoal: 0.001, //must add this to boss set up:   me.damageReduction = 0.25
+            // damageReductionScale: 0.004, //for bosses in this.onDamage  determines the impact of dmg on damageReductionGoal
+            // armor() { //slowly reduce damage reduction, for bosses
+            //     if (this.seePlayer.recall) {
+            //         if (this.damageReductionGoal > 0.24) {
+            //             this.damageReductionGoal = 0.25
+            //         } else {
+            //             this.damageReductionGoal = this.damageReductionGoal * 0.999 + 0.001 * 0.25 //smooth the goal towards 0.25 damage reduction
+            //         }
+            //         this.damageReduction = this.damageReduction * 0.995 + 0.005 * this.damageReductionGoal //smooth damage reduction towards the goal
+            //         // console.log(`damageReduction = ${this.damageReduction.toFixed(4)}`, `damageReductionGoal = ${this.damageReductionGoal.toFixed(4)}`)
+            //     }
+            //     //draw armor
+            //     //draw body
+            //     ctx.beginPath();
+            //     const vertices = this.vertices;
+            //     ctx.moveTo(vertices[0].x, vertices[0].y);
+            //     for (let j = 1, len = vertices.length; j < len; ++j) {
+            //         ctx.lineTo(vertices[j].x, vertices[j].y);
+            //     }
+            //     ctx.lineTo(vertices[0].x, vertices[0].y);
+            //     console.log(this.damageReduction, this.damageReductionGoal)
+            //     ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
+            //     ctx.strokeStyle = `rgba(255,255,255,${4.1*(0.25 - this.damageReductionGoal)})` //"rgba(150,150,225,0.5)";
+            //     ctx.stroke();
+            // },
             leaveBody: true,
             isDropPowerUp: true,
             death() {

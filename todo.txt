@@ -1,19 +1,11 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-Matter.World has been replaced with Matter.Composite
-  matter.js deprecated World
-  could cause problems merging your old code
-    (replace World with Composite in your code)
+missile-bot tech now removes your missile gun, but missile bot fires much faster
+  missile-bot now benefits from all missile tech
 
-tech: many worlds - now costs 1 research at the start of each level to activate
-  a nerf, but also a buff because if you like a build you can freeze it by not getting research
-
-mine gun has 25% less ammo and 33% more damage
-
-railgun now gets 50% more ammo, but it fires slower
-fixed rail gun ammo drain on misfire bug
-
-fixed experiment gun display bug
+rail gun has a bit less ammo and fires a bit faster
+  in between how it is was in the last two patches
+rail gun gets less energy from half-wave rectifier
 
 ******************************************************** TODO ********************************************************
 
@@ -48,6 +40,7 @@ make non moving bosses not move after getting hit
   shooter, shielding, 
 
 buff missiles?
+  do more with the missile bot
   maybe they can release grenades after they explode, like CPT grenades?
   make the crouch rapid fire a tech, and make the missiles fire faster, and use less ammo?
 buff railgun

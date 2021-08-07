@@ -1123,7 +1123,7 @@ const m = {
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
 
-                if (tech.isBlockExplosion && m.throwCharge > 5) { //remove the block body and pulse  in the direction you are facing
+                if (tech.isTokamak && m.throwCharge > 5) { //remove the block body and pulse  in the direction you are facing
                     //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
                     m.throwCharge = 0;
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds

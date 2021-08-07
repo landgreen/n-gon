@@ -754,9 +754,9 @@ const spawn = {
         me.onDamage = function(dmg) {
             if (Math.random() < 0.33 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
         }
-        me.damageReduction = 0.25
+        me.damageReduction = 0.2 //me.damageReductionGoal
         me.do = function() {
-            // this.armor();
+            // // this.armor();
             if (!m.isBodiesAsleep) {
                 this.seePlayerByDistOrLOS();
                 this.checkStatus();
@@ -1488,12 +1488,12 @@ const spawn = {
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.0035); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0032); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
 
         targets.push(me.id) //add to shield protection
         me.friction = 0;
-        me.frictionAir = 0.0065;
+        me.frictionAir = 0.0067;
         me.lookTorque = 0.0000008; //controls spin while looking for player
         me.g = 0.0002; //required if using 'gravity'
         me.seePlayerFreq = Math.round((30 + 20 * Math.random()) * simulation.lookFreqScale);
@@ -1679,7 +1679,7 @@ const spawn = {
         }
         mobs.spawn(x, y, 0, radius, "transparent");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.20); //extra dense //normal is 0.001
+        Matter.Body.setDensity(me, 0.21); //extra dense //normal is 0.001
         me.laserRange = 300;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
@@ -1693,7 +1693,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 // me.damageReductionGoal
         me.awake = function() {
             // this.armor();
             this.checkStatus();
@@ -3138,7 +3138,7 @@ const spawn = {
             }
         };
     },
-    launcherBoss(x, y, radius = 85) {
+    launcherBoss(x, y, radius = 90) {
         mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -3153,7 +3153,7 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.002 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
@@ -3925,7 +3925,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
 
-        Matter.Body.setDensity(me, 0.002 + 0.00025 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0017 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 2000000;

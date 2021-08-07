@@ -162,6 +162,9 @@
                 return b.inventory.length > 0 && b.guns[b.activeGun].name === name
             }
         },
+        hasExplosiveDamageCheck() {
+            return tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount > 0 || tech.boomBotCount > 1 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
+        },
         damageFromTech() {
             let dmg = 1 //m.fieldDamage
             if (tech.isCloakingDamage) dmg *= 1.35
@@ -658,24 +661,7 @@
                     b.setFireCD();
                 }
             },
-            // if (tech.isOneBullet && bullet.length - b.totalBots() === 1) dmg *= 2 //3 / Math.sqrt(bullet.length + 1) //testing this tech out, seems to have too many negatives though ...
-            // {
-            //     name: "1-body problem",
-            //     description: "if there is exactly <strong>1</strong> active <strong>bullet</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong>",
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     allowed() {
-            //         return !tech.foamBotCount && !tech.nailBotCount && m.fieldUpgrades[m.fieldMode].name !== "nano-scale manufacturing" && ((tech.haveGunCheck("missiles") && tech.missileCount === 1) || tech.haveGunCheck("rail gun") || tech.haveGunCheck("grenades") || tech.isRivets || tech.isSlugShot || tech.oneSuperBall)
-            //     },
-            //     requires: "missiles, rail gun, grenades, rivets, slugs, super ball, no foam/nail bots, nano-scale",
-            //     effect() {
-            //         tech.isOneBullet = true
-            //     },
-            //     remove() {
-            //         tech.isOneBullet = false
-            //     }
-            // },
+
             {
                 name: "fracture analysis",
                 description: "bullet impacts do <strong>400%</strong> <strong class='color-d'>damage</strong><br>to <strong>stunned</strong> mobs",
@@ -775,7 +761,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isBlockExplode && tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isTokamak)
                 },
                 requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
                 effect: () => {
@@ -793,7 +779,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -811,7 +797,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -829,9 +815,9 @@
                 frequency: 2,
                 isBadRandomOption: true,
                 allowed() {
-                    return !tech.isRewindGrenade && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.isBlockExplosion)
+                    return tech.hasExplosiveDamageCheck()
                 },
-                requires: "an explosive damage source, not causality bombs",
+                requires: "an explosive damage source",
                 effect: () => {
                     tech.isExplosionHarm = true;
                 },
@@ -848,7 +834,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect() {
@@ -867,7 +853,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isMissileField || tech.isExplodeMob || tech.isPulseLaser || tech.isBlockExplosion)
+                    return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -903,7 +889,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
+                    return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
                 },
                 requires: "grenades, missiles, rail gun, shotgun slugs, or mass driver",
                 effect() {
@@ -915,15 +901,15 @@
             },
             {
                 name: "thermal runaway",
-                description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong><br><em>be careful</em>",
+                description: "mobs <strong class='color-e'>explode</strong> when they <strong>die</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("vacuum bomb") || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isBlockExplosion) && !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
+                    return !tech.sporesOnDeath && !tech.nailsDeathMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
-                requires: "an explosive damage source, no other mob death tech",
+                requires: "no other mob death tech",
                 effect: () => {
                     tech.isExplodeMob = true;
                 },
@@ -936,8 +922,8 @@
                 description: "mobs release a <strong>nail</strong> when they <strong>die</strong><br><em>nails target nearby mobs</em>",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
@@ -954,8 +940,8 @@
                 description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>11%</strong> chance",
                 maxCount: 9,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.nailsDeathMob && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.iceIXOnDeath
                 },
@@ -978,8 +964,8 @@
                 description: "mobs spawn with <strong>11%</strong> less <strong>health</strong>",
                 maxCount: 3,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return tech.nailsDeathMob || tech.sporesOnDeath || tech.isExplodeMob || tech.botSpawner || tech.isMobBlockFling || tech.iceIXOnDeath
                 },
@@ -1586,7 +1572,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isBlockExplosion
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -1604,7 +1590,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isBlockExplosion
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -1640,7 +1626,7 @@
             //     frequency: 2,
             //     frequencyDefault: 2,
             //     allowed() {
-            //         return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isBlockExplosion
+            //         return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isTokamak
             //     },
             //     requires: "mass driver or pilot wave, not tokamak",
             //     effect() {
@@ -1676,7 +1662,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isBlockExplosion
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -2158,7 +2144,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isBlockExplosion) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
+                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isTokamak) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
                 },
                 requires: "a way to regen extra energy, not time crystals",
                 effect: () => {
@@ -2387,7 +2373,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy || tech.isBlockExplosion
+                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy || tech.isTokamak
                 },
                 requires: "a source of overfilled energy",
                 effect() {
@@ -4240,7 +4226,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("missiles") || tech.isMissileField
+                    return tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount
                 },
                 requires: "missiles",
                 effect() {
@@ -4259,7 +4245,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("missiles")
+                    return tech.haveGunCheck("missiles") || tech.missileBotCount
                 },
                 requires: "missiles",
                 effect() {
@@ -4271,12 +4257,12 @@
             },
             {
                 name: "missile-bot",
-                description: "a <strong class='color-bot'>bot</strong> fires <strong>missiles</strong> at far away mobs",
+                description: "remove your <strong>missile gun</strong><br>gain a <strong class='color-bot'>bot</strong> that fires <strong>missiles</strong> at mobs",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
@@ -4286,11 +4272,15 @@
                 effect() {
                     tech.missileBotCount++;
                     b.missileBot();
+                    if (tech.haveGunCheck("missiles")) b.removeGun("missiles") //remove your last gun
                 },
                 remove() {
-                    tech.missileBotCount = 0;
-                    b.clearPermanentBots();
-                    b.respawnBots();
+                    if (this.count) {
+                        tech.missileBotCount = 0;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                        if (!tech.haveGunCheck("missiles")) b.giveGuns("missiles")
+                    }
                 }
             },
             {
@@ -5726,10 +5716,10 @@
                 },
                 requires: "plasma torch",
                 effect() {
-                    tech.isBlockExplosion = true;
+                    tech.isTokamak = true;
                 },
                 remove() {
-                    tech.isBlockExplosion = false;
+                    tech.isTokamak = false;
                 }
             },
             {
@@ -7773,7 +7763,7 @@
         isFallingDamage: null,
         harmonics: null,
         isStandingWaveExpand: null,
-        isBlockExplosion: null,
+        isTokamak: null,
         superBallDelay: null,
         isBlockExplode: null,
         isOverHeal: null,

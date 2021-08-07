@@ -1117,6 +1117,7 @@ const b = {
         }
     },
     missile(where, angle, speed, size = 1) {
+        if (tech.missileSize) size *= 1.5
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(where.x, where.y, 30 * size, 4 * size, {
             angle: angle,
@@ -1131,7 +1132,7 @@ const b = {
             },
             minDmgSpeed: 10,
             lookFrequency: Math.floor(10 + Math.random() * 3),
-            explodeRad: 180 + 60 * Math.random(),
+            explodeRad: 180 * (tech.missileSize ? 1.5 : 1) + 60 * Math.random(),
             density: 0.02, //0.001 is normal
             beforeDmg() {
                 Matter.Body.setDensity(this, 0.0001); //reduce density to normal
@@ -3106,7 +3107,7 @@ const b = {
             restitution: 0.7,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 70,
+            lookFrequency: 27 + Math.ceil(6 * Math.random()),
             cd: 0,
             delay: 80,
             range: 70 + 3 * b.totalBots(),
@@ -3135,7 +3136,25 @@ const b = {
                                 // Matter.Body.setAngularVelocity(this, 0.025)
                                 this.torque += this.inertia * 0.00004 * (Math.round(Math.random()) ? 1 : -1)
                                 this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), this.mass * 0.02)
-                                b.missile(this.position, angle, -8, 0.7 * (tech.missileSize ? 1.5 : 1))
+
+                                if (tech.missileCount > 1) {
+                                    const countReduction = Math.pow(0.93, tech.missileCount)
+                                    const size = 0.9 * Math.sqrt(countReduction)
+                                    const direction = {
+                                        x: Math.cos(angle),
+                                        y: Math.sin(angle)
+                                    }
+                                    const push = Vector.mult(Vector.perp(direction), 0.015 * countReduction / Math.sqrt(tech.missileCount))
+                                    for (let i = 0; i < tech.missileCount; i++) {
+                                        setTimeout(() => {
+                                            b.missile(this.position, angle, -8, size)
+                                            bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
+                                            bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
+                                        }, 40 * tech.missileCount * Math.random());
+                                    }
+                                } else {
+                                    b.missile(this.position, angle, -8, 0.9)
+                                }
                                 break;
                             }
                         }
@@ -4466,7 +4485,7 @@ const b = {
                                     x: m.pos.x,
                                     y: m.pos.y - 40
                                 }
-                                b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
+                                b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction) * (tech.missileSize ? 1.5 : 1))
                                 bullet[bullet.length - 1].force.x += 0.025 * countReduction * (i - (tech.missileCount - 1) / 2);
                             }, 20 * tech.missileCount * Math.random());
                         }
@@ -4846,7 +4865,7 @@ const b = {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
-            ammoPack: 5,
+            ammoPack: 4.1,
             have: false,
             do() {},
             fire() {
@@ -4898,7 +4917,7 @@ const b = {
 
                 if (tech.isCapacitor) {
                     if ((m.energy > 0.16 || tech.isRailEnergyGain)) { //&& m.immuneCycle < m.cycle
-                        m.energy += 0.16 * (tech.isRailEnergyGain ? 4.5 : -1)
+                        m.energy += 0.16 * (tech.isRailEnergyGain ? 2.5 : -1)
                         m.fireCDcycle = m.cycle + Math.floor(40 * b.fireCDscale);
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 60, 14, {
@@ -5070,13 +5089,9 @@ const b = {
 
                             m.fireCDcycle = Infinity //can't fire until mouse is released
                             const previousCharge = this.charge
-                            let smoothRate = (m.crouch ? 0.98 : 0.99) * (0.98 + 0.02 * b.fireCDscale) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
-                            this.charge = this.charge * smoothRate + 1 * (1 - smoothRate)
-                            if (tech.isRailEnergyGain) {
-                                m.energy += (this.charge - previousCharge) * 1.5 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
-                            } else {
-                                m.energy -= (this.charge - previousCharge) * 0.33 //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
-                            }
+                            let smoothRate = (m.crouch ? 0.98 : 0.985) * (0.98 + 0.02 * b.fireCDscale) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
+                            this.charge = this.charge * smoothRate + 1 - smoothRate
+                            m.energy -= (this.charge - previousCharge) * (tech.isRailEnergyGain ? 1 : 0.33) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             //draw targeting
                             let best;
                             let range = 3000

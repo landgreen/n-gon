@@ -18,10 +18,12 @@ const level = {
             // tech.isFieldFree = true
             // m.setField("time dilation")
             // b.giveGuns("rail gun")
+            // tech.missileBotCount++;
+            // b.missileBot();
             // tech.giveTech("half-wave rectifier")
-            // b.giveGuns("wave beam")
+            // b.giveGuns("nail gun")
             // tech.giveTech("Lenz's law")
-            // for (let i = 0; i < 3; i++) tech.giveTech("packet length")
+            // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
             // for (let i = 0; i < 4; i++) tech.giveTech()
 
             level.intro(); //starting level
@@ -2286,8 +2288,8 @@ const level = {
         // spawn.streamBoss(1600, -500)
         // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
-        spawn.shieldingBoss(1600, -500)
-        // spawn.grenadier(1200, -500)
+        // spawn.laserTargetingBoss(1600, -500)
+        spawn.grenadierBoss(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "grenadier")
