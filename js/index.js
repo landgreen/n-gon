@@ -18,6 +18,7 @@ const color = { //light
     block: "rgba(140,140,140,0.85)",
     blockS: "#222",
     map: "#444",
+    bullet: "#000"
 }
 
 // const color = { //dark

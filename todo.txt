@@ -1,49 +1,26 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-missile-bot tech now removes your missile gun, but missile bot fires much faster
-  missile-bot now benefits from all missile tech
+new boss snakeSpitBoss - it's just snake boss but it shoots little pink seekers
 
-rail gun has a bit less ammo and fires a bit faster
-  in between how it is was in the last two patches
-rail gun gets less energy from half-wave rectifier
+tech: cross disciplinary - get an extra gun or field option in tech menu
+  now that you can scroll the selection menu can be longer
+
+unified field theory - now gives 6 research, in addition to letting you switch fields when paused
+cardinality renamed emergence - and gives some JUNK
+
+bug fix where game crashes if you beat the boss
 
 ******************************************************** TODO ********************************************************
 
-dark mode
-  build color pallets in a photo editor by redrawing in game screenshots
-  what about just starting with setting the background to be a dark grey?
-  const color = {
-    map:
-    blocks:
-    background:
-    shadows: (0,0,0,0.1)?
-    bullets:
-    mob:
-    heal powerUps:
-    tech powerUps:
-    field powerUps:
-    gun powerUps:
-    damage circle:
-    harm circle:
-  }
-
-re-word the "reduce difficulty" text, so it's more clear what you get
-
-tech: Standing Wave: Shockwave. Use FIELD button to shrink your shield and charge up, release to unleash a Shockwave.
-
-make an area that prevents mob vision, like a bush you can hide in
-  a static block with non collide on most things?
+drones can combine with other drones to get bigger?
+drones that grab powers ups can grab more then one and get even bigger each time
 
 it would be helpful if there was a mechanism to recover mobs that fly off the map
   add a ceiling system and a left/right walls system similar to the floor checks but only for mobs
 make non moving bosses not move after getting hit
   shooter, shielding, 
 
-buff missiles?
-  do more with the missile bot
-  maybe they can release grenades after they explode, like CPT grenades?
-  make the crouch rapid fire a tech, and make the missiles fire faster, and use less ammo?
-buff railgun
+buff rail gun
 buff mines
 
 make the player get a buff after using wormhole
@@ -52,6 +29,7 @@ using wormhole makes you immune to harm and drains energy until you run out
   disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
 
 pink seeker boss is cool as heck, make an alt version of it
+snake tail is cool, make an alt version of it
 
 block shattering
  get code from planetesimals
@@ -61,6 +39,8 @@ scrolling console history in pause menu?
 pause should at least show the last in game console message
 
 in testing mode console log the body you click on
+
+tech: Standing Wave: Shockwave. Use FIELD button to shrink your shield and charge up, release to unleash a Shockwave.
 
 tech: quantized shields - harmonic standing wave field can only lose 33 energy per hit
   draw 1,2,3 levels of the field based on energy?
@@ -80,27 +60,13 @@ tech plasma : plasma length increases then decreases as you hold down the field 
   extra energy is drained when field is longer
 
 energy conservation 6% damage recovered as energy
-  there is space for a negative effect in the text
-
-Weak Anthropic Principle: you get a second chance at life, but ....
+  there is space for a negative effect in the text...
   
 tech: use the ability for power ups to have custom code
   (note: this code is half way done, it just needs to be completed)
   attracted to player
   attracted to other power ups
     explode if they touch?
-
-consider executables:
-  press F to do things
-  ideas:
-
-nail-gun, or ....
-  1s after being fired your bullets turn:
-    towards the nearest mob
-    in your mouse direction
-    back towards the player
-      current location or location when fired?
-  explode when turning back
 
 apply the new gun.do functions to other guns
   rail gun

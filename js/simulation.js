@@ -680,47 +680,49 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
-        if (tech.isLongitudinal) {
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                if (b.guns[i].name === "wave beam") {
-                    b.guns[i].waves = []; //empty array of wave bullets
-                    break;
+        if (m.alive) {
+            if (tech.isLongitudinal) {
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
+                    if (b.guns[i].name === "wave beam") {
+                        b.guns[i].waves = []; //empty array of wave bullets
+                        break;
+                    }
                 }
             }
-        }
-        if (tech.isMineAmmoBack) {
-            let count = 0;
-            for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
-                if (bullet[i].bulletType === "mine") count++
-            }
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
-                if (b.guns[i].name === "mine") {
-                    if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
-                    b.guns[i].ammo += count
-                    simulation.updateGunHUD();
-                    break;
+            if (tech.isMineAmmoBack) {
+                let count = 0;
+                for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
+                    if (bullet[i].bulletType === "mine") count++
+                }
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
+                    if (b.guns[i].name === "mine") {
+                        if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
+                        b.guns[i].ammo += count
+                        simulation.updateGunHUD();
+                        break;
+                    }
                 }
             }
-        }
-        if (tech.isMutualism && !tech.isEnergyHealth) {
-            for (let i = 0; i < bullet.length; i++) {
-                if (bullet[i].isMutualismActive) {
-                    m.health += 0.005 + 0.005 * tech.isSporeWorm
-                    if (m.health > m.maxHealth) m.health = m.maxHealth;
-                    m.displayHealth();
+            if (tech.isMutualism && !tech.isEnergyHealth) {
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].isMutualismActive) {
+                        m.health += 0.005 + 0.005 * tech.isSporeWorm
+                        if (m.health > m.maxHealth) m.health = m.maxHealth;
+                        m.displayHealth();
+                    }
                 }
             }
-        }
-        if (tech.isEndLevelPowerUp) {
-            for (let i = 0; i < powerUp.length; i++) {
-                if (powerUp[i].name === "tech") {
-                    tech.giveTech()
-                } else if (powerUp[i].name === "gun") {
-                    if (!tech.isOneGun) b.giveGuns("random")
-                } else if (powerUp[i].name === "field") {
-                    if (m.fieldMode === 0) m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1))) //pick a random field, but not field 0
-                } else {
-                    powerUp[i].effect();
+            if (tech.isEndLevelPowerUp) {
+                for (let i = 0; i < powerUp.length; i++) {
+                    if (powerUp[i].name === "tech") {
+                        tech.giveTech()
+                    } else if (powerUp[i].name === "gun") {
+                        if (!tech.isOneGun) b.giveGuns("random")
+                    } else if (powerUp[i].name === "field") {
+                        if (m.fieldMode === 0) m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1))) //pick a random field, but not field 0
+                    } else {
+                        powerUp[i].effect();
+                    }
                 }
             }
         }
@@ -755,7 +757,7 @@ const simulation = {
         removeAll(composite);
         composite = [];
         // if player was holding something this makes a new copy to hold
-        if (holdTarget) {
+        if (holdTarget && m.alive) {
             len = body.length;
             body[len] = Matter.Bodies.fromVertices(0, 0, holdTarget.vertices, {
                 friction: holdTarget.friction,

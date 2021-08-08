@@ -193,7 +193,7 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.2 : 0) + (tech.isStimulatedEmission ? 0.22 : 0) + tech.cancelCount * 0.048 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
+            return (tech.isPowerUpsVanish ? 0.17 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.048 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -458,9 +458,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isEnergyNoAmmo
+                    return !tech.isEnergyNoAmmo && !tech.isEnergyHealth
                 },
-                requires: "exciton-lattice",
+                requires: "exciton-lattice, not mass-energy",
                 effect: () => {
                     tech.isAmmoFromHealth = true;
                 },
@@ -773,7 +773,7 @@
             },
             {
                 name: "ammonium nitrate",
-                description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>25%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>25%</strong>",
+                description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>30%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>30%</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
@@ -783,7 +783,7 @@
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
-                    tech.explosiveRadius += 0.25;
+                    tech.explosiveRadius += 0.3;
                 },
                 remove() {
                     tech.explosiveRadius = 1;
@@ -809,7 +809,7 @@
             },
             {
                 name: "acetone peroxide",
-                description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>400%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+                description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>300%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2824,11 +2824,14 @@
                 requires: "not determinism, at least 3 research",
                 effect() {
                     tech.isBanish = true
-                    for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research", false);
+                    for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
                 },
                 remove() {
-                    tech.isBanish = false
-                    powerUps.tech.banishLog = [] //reset banish log
+                    if (tech.isBanish) {
+                        tech.isBanish = false
+                        powerUps.tech.banishLog = [] //reset banish log
+                        powerUps.research.changeRerolls(-10)
+                    }
                 }
             },
             {
@@ -3036,7 +3039,7 @@
             },
             {
                 name: "stimulated emission",
-                description: "<strong>22%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
+                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3056,7 +3059,7 @@
             },
             {
                 name: "metastability",
-                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
+                description: "<strong>17%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3244,24 +3247,6 @@
                 remove() {}
             },
             {
-                name: "unified field theory",
-                description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
-                maxCount: 1,
-                count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
-                allowed() {
-                    return !tech.isSuperDeterminism
-                },
-                requires: "not superdeterminism",
-                effect() {
-                    tech.isGunSwitchField = true;
-                },
-                remove() {
-                    tech.isGunSwitchField = false;
-                }
-            },
-            {
                 name: "vector fields",
                 description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
                 maxCount: 1,
@@ -3339,21 +3324,67 @@
                 remove() {}
             },
             {
-                name: "cardinality",
-                description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong>",
+                name: "unified field theory",
+                description: `spawn <strong>6</strong> <strong class='color-r'>research</strong>, and when <strong>paused</strong><br><strong>clicking</strong> the <strong class='color-f'>field</strong> box switches your <strong class='color-f'>field</strong>`,
+                // description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return !tech.isSuperDeterminism
+                },
+                requires: "not superdeterminism",
+                effect() {
+                    tech.isGunSwitchField = true;
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+                },
+                remove() {
+                    if (tech.isGunSwitchField) {
+                        tech.isGunSwitchField = false;
+                        powerUps.research.changeRerolls(-6)
+                    }
+                }
+            },
+            {
+                name: "cross disciplinary",
+                description: "<strong class='color-m'>tech</strong> have an extra <strong class='color-f'>field</strong> or <strong class='color-g'>gun</strong> <strong>choice</strong>", //<br><strong>+7</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool  //<br>spawn <strong>2</strong> <strong class='color-r'>research</strong>
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return !tech.isDeterminism
+                },
+                requires: "not determinism",
+                effect: () => {
+                    tech.isExtraGunField = true;
+                    // for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+
+                },
+                remove() {
+                    tech.isExtraGunField = false;
+                    // if (this.count > 0) powerUps.research.changeRerolls(-2)
+                }
+            },
+            {
+                name: "emergence",
+                description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong><br><strong>+5</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isDeterminism
                 },
                 requires: "not determinism",
                 effect: () => {
                     tech.isExtraChoice = true;
+                    tech.addJunkTechToPool(5)
                 },
                 remove() {
                     tech.isExtraChoice = false;
+                    if (this.count > 0) tech.removeJunkTechFromPool(5)
                 }
             },
             {
@@ -3367,7 +3398,7 @@
                 allowed() {
                     return !tech.isExtraChoice && !tech.isCancelDuplication && !tech.isCancelRerolls
                 },
-                requires: "not cardinality, not futures or commodities exchanges",
+                requires: "not emergence, not futures or commodities exchanges",
                 effect: () => {
                     tech.isDeterminism = true;
                     //if you change the number spawned also change it in Born rule
@@ -4560,7 +4591,7 @@
             },
             {
                 name: "nematodes",
-                description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> develop into <strong>1/2</strong> as many <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> do <strong>200%</strong> more <strong class='color-d'>damage</strong>",
+                description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> develop into <strong>1/2</strong> as many <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> do <strong>250%</strong> more <strong class='color-d'>damage</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -7365,7 +7396,7 @@
             },
             {
                 name: "re-arm",
-                description: "<strong>eject</strong> all your <strong class='color-g'>guns</strong>",
+                description: "remove all your <strong class='color-g'>guns</strong>,<br>and <strong>spawn</strong> new ones",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -7405,7 +7436,7 @@
                 },
                 requires: "at least 4 research",
                 effect() {
-                    for (let i = 0; i < powerUps.research.count; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "research");
+                    for (let i = 0; i < powerUps.research.count; i++) powerUps.directSpawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "research");
                     powerUps.research.count = 0
                 },
                 remove() {}
@@ -7793,5 +7824,6 @@
         isBlockRestitution: null,
         isZeno: null,
         isFieldFree: null,
-        wormSurviveDmg: null
+        wormSurviveDmg: null,
+        isExtraGunField: null
     }

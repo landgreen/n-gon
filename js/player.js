@@ -2607,9 +2607,9 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>9%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
-                m.duplicateChance = 0.09
+                m.duplicateChance = 0.08
                 powerUps.setDo(); //needed after adjusting duplication chance
 
                 m.hold = function() {

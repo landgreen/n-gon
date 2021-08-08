@@ -13,7 +13,7 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // localSettings.levelsClearedLastGame = 10
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(10) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
             // m.setField("time dilation")
@@ -1298,7 +1298,6 @@ const level = {
                     spawn.randomMob(x + 2000 - 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
-                    spawn.secondaryBossChance(x + 2000 - 650, y + -875)
                 } else {
                     powerUps.spawnStartingPowerUps(x + 1650, y + -400);
                     spawn.mapRect(x + 1575, y + -625, 25, 375); //wall on top of wall
@@ -1330,7 +1329,6 @@ const level = {
                     spawn.randomMob(x + 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
-                    spawn.secondaryBossChance(x + 650, y + -875)
                 }
             },
             (x = offset.x, y = offset.y) => { //spawn block and fire it
@@ -1390,7 +1388,6 @@ const level = {
                     spawn.randomMob(x + 2000 - 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
-                    spawn.secondaryBossChance(x + 650, y + -875)
                 } else {
                     powerUps.spawnStartingPowerUps(x + 1650, y + -400);
                     spawn.mapRect(x + 1575, y + -625, 25, 375); //wall on top of wall
@@ -1447,7 +1444,6 @@ const level = {
                     spawn.randomMob(x + 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
-                    spawn.secondaryBossChance(x + 650, y - 875)
                 }
             },
             (x = offset.x, y = offset.y) => { //fire an "ammo clip" of blocks
@@ -1518,7 +1514,6 @@ const level = {
                     spawn.randomMob(x + 2000 - 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 2000 - 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
-                    spawn.secondaryBossChance(x + 650, y - 875)
                 } else {
                     powerUps.spawnStartingPowerUps(x + 1650, y + -400);
                     spawn.mapRect(x + 1575, y + -625, 25, 375); //wall on top of wall
@@ -1586,7 +1581,6 @@ const level = {
                     spawn.randomMob(x + 800, y + -125, mobSpawnChance);
                     let pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                     spawn[pick](x + 1275, y + -150, 90 + Math.random() * 40); //one extra large mob
-                    spawn.secondaryBossChance(x + 650, y - 875)
                 }
             }
         ]
@@ -1884,7 +1878,8 @@ const level = {
                             simulation.draw.setPaths() //update map graphics
                             spawn.randomGroup(x + 300, y + -2200);
                             spawn.randomGroup(x + 1625, y + -2200);
-                            spawn.randomLevelBoss(x + 950, y + -2200);
+                            spawn.randomLevelBoss(x + 700, y + -2300);
+                            spawn.secondaryBossChance(x + 1250, y + -2300)
                         }
                     }
                 )
@@ -1950,7 +1945,8 @@ const level = {
                             spawn.randomMob(x + 225, y + -2275, mobSpawnChance);
                             spawn.randomMob(x + 875, y + -2450, mobSpawnChance);
                             spawn.randomMob(x + 1550, y + -2525, mobSpawnChance);
-                            if (simulation.difficulty > 3) spawn.randomLevelBoss(x + 1075, y + -1500);
+                            spawn.randomLevelBoss(x + 1075, y + -1500);
+                            spawn.secondaryBossChance(x + 1200, y + -1000)
                             simulation.draw.setPaths() //update map graphics
                         }
                     }
@@ -2276,7 +2272,7 @@ const level = {
         // spawn.starter(1900, -500, 200) //big boy
         // spawn.growBossCulture(1900, -500)
         // spawn.blinkBoss(1900, -500)
-        // spawn.snakeBoss(1900, -500)
+        spawn.snakeSpitBoss(1900, -500)
         // spawn.growBossCulture(1900, -500)
         // spawn.sneaker(1900, -500)
         // spawn.historyBoss(1200, -500)
@@ -2285,11 +2281,11 @@ const level = {
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.hopBoss(1800, -120)
-        // spawn.streamBoss(1600, -500)
+        spawn.streamBoss(1600, -500)
         // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
-        spawn.grenadierBoss(1200, -500)
+        // spawn.grenadierBoss(1200, -500)
         // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "grenadier")

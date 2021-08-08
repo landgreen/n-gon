@@ -397,33 +397,32 @@ const powerUps = {
         size() {
             return 45;
         },
-        choiceLog: [], //records all previous choice options
-        effect() {
-            function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
-                let options = [];
-                for (let i = 1; i < who.length; i++) {
-                    if (i !== m.fieldMode && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
-                }
-                //remove repeats from last selection
-                const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
-                if (powerUps.field.choiceLog.length > totalChoices || powerUps.field.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
-                    for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
-                        if (options.length > totalChoices) {
-                            for (let j = 0, len = options.length; j < len; j++) {
-                                if (powerUps.field.choiceLog[powerUps.field.choiceLog.length - 1 - i] === options[j]) {
-                                    options.splice(j, 1) //remove previous choice from option pool
-                                    break
-                                }
+        pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
+            let options = [];
+            for (let i = 1; i < who.length; i++) {
+                if (i !== m.fieldMode && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) options.push(i);
+            }
+            //remove repeats from last selection
+            const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
+            if (powerUps.field.choiceLog.length > totalChoices || powerUps.field.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+                for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+                    if (options.length > totalChoices) {
+                        for (let j = 0, len = options.length; j < len; j++) {
+                            if (powerUps.field.choiceLog[powerUps.field.choiceLog.length - 1 - i] === options[j]) {
+                                options.splice(j, 1) //remove previous choice from option pool
+                                break
                             }
                         }
                     }
                 }
-                if (options.length > 0) {
-                    return options[Math.floor(Math.random() * options.length)]
-                }
             }
-
-            let choice1 = pick(m.fieldUpgrades)
+            if (options.length > 0) {
+                return options[Math.floor(Math.random() * options.length)]
+            }
+        },
+        choiceLog: [], //records all previous choice options
+        effect() {
+            let choice1 = powerUps.field.pick(m.fieldUpgrades)
             let choice2 = -1
             let choice3 = -1
             if (choice1 > -1) {
@@ -432,15 +431,15 @@ const powerUps = {
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>field</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice1].name}</div> ${m.fieldUpgrades[choice1].description}</div>`
                 if (!tech.isDeterminism) {
-                    choice2 = pick(m.fieldUpgrades, choice1)
+                    choice2 = powerUps.field.pick(m.fieldUpgrades, choice1)
                     if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice2})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice2].name}</div> ${m.fieldUpgrades[choice2].description}</div>`
-                    choice3 = pick(m.fieldUpgrades, choice1, choice2)
+                    choice3 = powerUps.field.pick(m.fieldUpgrades, choice1, choice2)
                     if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice3})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice3].name}</div> ${m.fieldUpgrades[choice3].description}</div>`
                 }
                 if (tech.isExtraChoice) {
-                    let choice4 = pick(m.fieldUpgrades, choice1, choice2, choice3)
+                    let choice4 = powerUps.field.pick(m.fieldUpgrades, choice1, choice2, choice3)
                     if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice4})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice4].name}</div> ${m.fieldUpgrades[choice4].description}</div>`
-                    let choice5 = pick(m.fieldUpgrades, choice1, choice2, choice3, choice4)
+                    let choice5 = powerUps.field.pick(m.fieldUpgrades, choice1, choice2, choice3, choice4)
                     if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice5})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice5].name}</div> ${m.fieldUpgrades[choice5].description}</div>`
                     powerUps.field.choiceLog.push(choice4)
                     powerUps.field.choiceLog.push(choice5)
@@ -540,6 +539,7 @@ const powerUps = {
                         return choose
                     }
                 }
+
                 let text = ""
                 if (!tech.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>tech</h3>`
@@ -565,6 +565,21 @@ const powerUps = {
                     powerUps.tech.choiceLog.push(choice2)
                     powerUps.tech.choiceLog.push(choice3)
                     // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
+
+                    if (tech.isExtraGunField) {
+                        if (Math.random() > 0.5) {
+                            //bonus gun in tech menu
+                            let choiceGun = powerUps.gun.pick(b.guns)
+                            powerUps.gun.choiceLog.push(choiceGun)
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choiceGun})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choiceGun].name}</div> ${b.guns[choiceGun].description}</div>`
+                        } else {
+                            //bonus field in tech menu
+                            let choiceField = powerUps.field.pick(m.fieldUpgrades)
+                            powerUps.field.choiceLog.push(choiceField)
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choiceField})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choiceField].name}</div> ${m.fieldUpgrades[choiceField].description}</div>`
+                        }
+                    }
+
 
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                         tech.junkResearchNumber = Math.floor(5 * Math.random())
@@ -598,36 +613,35 @@ const powerUps = {
         size() {
             return 35;
         },
-        choiceLog: [], //records all previous choice options
-        effect() {
-            function pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
-                let options = [];
-                for (let i = 0; i < who.length; i++) {
-                    if (!who[i].have && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) {
-                        options.push(i);
-                    }
+        pick(who, skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
+            let options = [];
+            for (let i = 0; i < who.length; i++) {
+                if (!who[i].have && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4) {
+                    options.push(i);
                 }
+            }
 
-                //remove repeats from last selection
-                const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
-                if (powerUps.gun.choiceLog.length > totalChoices || powerUps.gun.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
-                    for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
-                        if (options.length > totalChoices) {
-                            for (let j = 0, len = options.length; j < len; j++) {
-                                if (powerUps.gun.choiceLog[powerUps.gun.choiceLog.length - 1 - i] === options[j]) {
-                                    options.splice(j, 1) //remove previous choice from option pool
-                                    break
-                                }
+            //remove repeats from last selection
+            const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
+            if (powerUps.gun.choiceLog.length > totalChoices || powerUps.gun.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+                for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+                    if (options.length > totalChoices) {
+                        for (let j = 0, len = options.length; j < len; j++) {
+                            if (powerUps.gun.choiceLog[powerUps.gun.choiceLog.length - 1 - i] === options[j]) {
+                                options.splice(j, 1) //remove previous choice from option pool
+                                break
                             }
                         }
                     }
                 }
-                if (options.length > 0) {
-                    return options[Math.floor(Math.random() * options.length)]
-                }
             }
-
-            let choice1 = pick(b.guns)
+            if (options.length > 0) {
+                return options[Math.floor(Math.random() * options.length)]
+            }
+        },
+        choiceLog: [], //records all previous choice options
+        effect() {
+            let choice1 = powerUps.gun.pick(b.guns)
             let choice2 = -1
             let choice3 = -1
             if (choice1 > -1) {
@@ -636,15 +650,15 @@ const powerUps = {
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>gun</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
                 if (!tech.isDeterminism) {
-                    choice2 = pick(b.guns, choice1)
+                    choice2 = powerUps.gun.pick(b.guns, choice1)
                     if (choice2 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice2})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice2].name}</div> ${b.guns[choice2].description}</div>`
-                    choice3 = pick(b.guns, choice1, choice2)
+                    choice3 = powerUps.gun.pick(b.guns, choice1, choice2)
                     if (choice3 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice3})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice3].name}</div> ${b.guns[choice3].description}</div>`
                 }
                 if (tech.isExtraChoice) {
-                    let choice4 = pick(b.guns, choice1, choice2, choice3)
+                    let choice4 = powerUps.gun.pick(b.guns, choice1, choice2, choice3)
                     if (choice4 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice4})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice4].name}</div> ${b.guns[choice4].description}</div>`
-                    let choice5 = pick(b.guns, choice1, choice2, choice3, choice4)
+                    let choice5 = powerUps.gun.pick(b.guns, choice1, choice2, choice3, choice4)
                     if (choice5 > -1) text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice5})">
           <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice5].name}</div> ${b.guns[choice5].description}</div>`
                     powerUps.gun.choiceLog.push(choice4)
@@ -714,7 +728,7 @@ const powerUps = {
             powerUps.spawn(x, y, "ammo");
             return;
         }
-        if (Math.random() < 0.001 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
+        if (Math.random() < 0.0007 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
             powerUps.spawn(x, y, "gun");
             return;
         }
@@ -723,7 +737,7 @@ const powerUps = {
             powerUps.spawn(x, y, "tech");
             return;
         }
-        if (Math.random() < 0.003) {
+        if (Math.random() < 0.0015) {
             powerUps.spawn(x, y, "field");
             return;
         }

@@ -96,20 +96,11 @@ const b = {
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown       
-        if (tech.isAmmoFromHealth) {
-            if (tech.isEnergyHealth) {
-                tech.healMaxEnergyBonus -= 0.01
-                m.setMaxEnergy();
-            } else if (m.maxHealth > 0.01) {
-                tech.extraMaxHealth -= 0.01 //decrease max health
-                m.setMaxHealth();
-            }
+        if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
+            tech.extraMaxHealth -= 0.01 //decrease max health
+            m.setMaxHealth();
             for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
         }
-        // if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
-        //     tech.extraMaxHealth -= 0.01 //decrease max health
-        //     m.setMaxHealth();
-        // }
     },
     refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to  (like a rail gun misfire)
         if (tech.isCrouchAmmo && m.crouch) {
@@ -342,7 +333,7 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const DRAIN = (tech.isExplosionHarm ? 0.5 : 0.25) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                const DRAIN = (tech.isExplosionHarm ? 0.7 : 0.25) * (tech.isRadioactiveResistance ? 0.25 : 1)
                 // * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1) 
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
@@ -392,7 +383,7 @@ const b = {
                 if (dist < radius) {
                     if (tech.isImmuneExplosion) {
                         const mitigate = Math.min(1, Math.max(1 - m.energy * 0.7, 0))
-                        m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                        m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0003 : 0.0001));
                     } else {
                         m.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
                     }
@@ -1859,7 +1850,7 @@ const b = {
                 friction: 0,
                 frictionAir: 0.025,
                 thrust: (tech.isFastSpores ? 0.001 : 0.0005) * (1 + 0.5 * (Math.random() - 0.5)),
-                dmg: (tech.isMutualism ? 16.8 : 7) * 3, //bonus damage from tech.isMutualism //3 is extra damage as worm
+                dmg: (tech.isMutualism ? 16.8 : 7) * 2.5, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
                 lookFrequency: 100 + Math.floor(37 * Math.random()),
                 classType: "bullet",
                 collisionFilter: {
