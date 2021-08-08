@@ -1,14 +1,7 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-new boss snakeSpitBoss - it's just snake boss but it shoots little pink seekers
-
-tech: cross disciplinary - get an extra gun or field option in tech menu
-  now that you can scroll the selection menu can be longer
-
-unified field theory - now gives 6 research, in addition to letting you switch fields when paused
-cardinality renamed emergence - and gives some JUNK
-
-bug fix where game crashes if you beat the boss
+cloaking field no longer gets smaller when you are low on energy
+invisible map element bug fixed
 
 ******************************************************** TODO ********************************************************
 
@@ -189,16 +182,6 @@ n-gon outreach ideas
   twitch - lets play
 
 ******************************************************** BUGS ********************************************************
-
-map elements from labs not getting removed from matter.js, but they are removed from map[]
-  seems to always be the top right room near the center.  why???
-    these 1-2 elements are probalby the last elements added to the engine
-  floor in labs loot room, showed up on warehouse map once,  invisible
-  button floor and shelf that drops blocks from labs showed up invisible on next levels
-  2 thin floors in loot room, rectangles
-  2 of the 5 elements were not rectangles
-  is labs too big?
-    add a delay for loading maps?
 
 Matter.World module has now been replaced by Matter.Composite  (is this a possible fix?)
   // for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);

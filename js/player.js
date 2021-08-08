@@ -2204,7 +2204,7 @@ const m = {
                     }
 
                     function drawField() {
-                        m.fieldPhase += 0.007 + 0.07 * (1 - energy)
+                        m.fieldPhase += 0.007
                         const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
                         ctx.beginPath();
                         ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
@@ -2220,15 +2220,15 @@ const m = {
                         ctx.clip();
                     }
 
-                    const energy = Math.max(0.01, Math.min(m.energy, 1))
+                    // const energy = Math.max(0.01, Math.min(m.energy, 1))
                     if (m.isCloak) {
                         this.fieldRange = this.fieldRange * 0.9 + 0.1 * drawRadius
-                        m.fieldDrawRadius = this.fieldRange * Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                        m.fieldDrawRadius = this.fieldRange * 0.9 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         drawField()
                     } else {
                         if (this.fieldRange < 3000) {
                             this.fieldRange += 200
-                            m.fieldDrawRadius = this.fieldRange * Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                            m.fieldDrawRadius = this.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                             drawField()
                         }
                     }

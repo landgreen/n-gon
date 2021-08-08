@@ -7,12 +7,12 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    playableLevels: ["skyscrapers", "rooftops", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "labs"],
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // localSettings.levelsClearedLastGame = 10
-            // simulation.enableConstructMode() //used to build maps in testing mode
+
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
@@ -56,6 +56,7 @@ const level = {
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
+            simulation.enableConstructMode() //used to build maps in testing mode
 
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 3; //this sets what conversation is heard
@@ -1933,7 +1934,7 @@ const level = {
                             spawn.mapVertex(x + 250, y + -1700, hexagon150);
                             spawn.mapVertex(x + 725, y + -1950, hexagon150);
                             spawn.mapVertex(x + 1200, y + -2200, hexagon150);
-                            const numberOfMapElementsAdded = 13
+                            const numberOfMapElementsAdded = 11
                             for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
 
                             spawn.randomMob(x + 1075, y + -1500, mobSpawnChance);
@@ -1986,7 +1987,7 @@ const level = {
         empty = emptyOptions[Math.floor(Math.random() * emptyOptions.length)];
         loot = lootOptions[Math.floor(Math.random() * lootOptions.length)];
         upDown = upDownOptions[Math.floor(Math.random() * upDownOptions.length)];
-        // upDown = upDownOptions[0] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
+        // upDown = upDownOptions[1] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
         //3x2:  4 short rooms (3000x1500),  1 double tall room (3000x3000)
         //rooms
         let rooms = ["loot", "enter", "empty", "exit"]
