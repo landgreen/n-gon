@@ -16,7 +16,7 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
-            // m.setField("time dilation")
+            // m.setField("perfect diamagnetism")
             // b.giveGuns("rail gun")
             // tech.missileBotCount++;
             // b.missileBot();
@@ -56,7 +56,7 @@ const level = {
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
-            simulation.enableConstructMode() //used to build maps in testing mode
+            // simulation.enableConstructMode() //used to build maps in testing mode
 
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 3; //this sets what conversation is heard
@@ -2270,10 +2270,11 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         // spawn.starter(1900, -500, 200) //big boy
-        // spawn.growBossCulture(1900, -500)
+        spawn.growBossCulture(1900, -500)
         // spawn.blinkBoss(1900, -500)
-        spawn.snakeSpitBoss(1900, -500)
+        // spawn.snakeSpitBoss(1900, -500)
         // spawn.growBossCulture(1900, -500)
         // spawn.sneaker(1900, -500)
         // spawn.historyBoss(1200, -500)
@@ -2281,8 +2282,8 @@ const level = {
         // spawn.focuser(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.hopBoss(1800, -120)
-        spawn.streamBoss(1600, -500)
+        // spawn.beamer(1800, -120)
+        // spawn.orbitalBoss(1600, -500)
         // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)

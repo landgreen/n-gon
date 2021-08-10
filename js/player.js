@@ -1578,7 +1578,7 @@ const m = {
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
             effect: () => {
                 m.fieldShieldingScale = 0;
-                m.fieldBlockCD = 4;
+                m.fieldBlockCD = 3;
                 m.grabPowerUpRange2 = 10000000
                 m.fieldPosition = { x: m.pos.x, y: m.pos.y }
                 m.fieldAngle = m.angle
@@ -1619,7 +1619,45 @@ const m = {
                                     ctx.lineWidth = 3;
                                     ctx.strokeStyle = "#f0f";
                                     ctx.stroke();
-                                } else if (!isFree) {
+                                } else if (isFree) {
+                                    //when blocking draw this graphic
+                                    // const len = mob[i].vertices.length - 1;
+                                    ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeStyle = "#000";
+                                    // const angleOff = m.fieldAngle + 2 * m.fieldArc * (Math.random() - 0.5)
+                                    // const off = {
+                                    //     x: m.fieldRange * Math.cos(angleOff),
+                                    //     y: m.fieldRange * Math.sin(angleOff),
+                                    // }
+                                    // const where = Vector.add(m.fieldPosition, off)
+                                    // ctx.beginPath();
+                                    // ctx.moveTo(where.x, where.y);
+                                    // ctx.lineTo(mob[i].vertices[len].x, mob[i].vertices[len].y);
+                                    // ctx.lineTo(mob[i].vertices[0].x, mob[i].vertices[0].y);
+                                    // ctx.fill();
+                                    // ctx.stroke();
+                                    // for (let j = 0; j < len; j++) {
+                                    //     ctx.beginPath();
+                                    //     ctx.moveTo(where.x, where.y);
+                                    //     ctx.lineTo(mob[i].vertices[j].x, mob[i].vertices[j].y);
+                                    //     ctx.lineTo(mob[i].vertices[j + 1].x, mob[i].vertices[j + 1].y);
+                                    //     ctx.fill();
+                                    //     ctx.stroke();
+                                    // }
+
+
+                                    const len = mob[i].vertices.length - 1;
+                                    const mag = mob[i].radius
+                                    ctx.beginPath();
+                                    ctx.moveTo(mob[i].vertices[len].x + mag * (Math.random() - 0.5), mob[i].vertices[len].y + mag * (Math.random() - 0.5))
+                                    for (let j = 0; j < len; j++) {
+                                        ctx.lineTo(mob[i].vertices[j].x + mag * (Math.random() - 0.5), mob[i].vertices[j].y + mag * (Math.random() - 0.5));
+                                    }
+                                    ctx.lineTo(mob[i].vertices[len].x + mag * (Math.random() - 0.5), mob[i].vertices[len].y + mag * (Math.random() - 0.5))
+                                    ctx.fill();
+                                    ctx.stroke();
+                                } else {
                                     //when blocking draw this graphic
                                     const eye = 15;
                                     const len = mob[i].vertices.length - 1;
@@ -1643,7 +1681,7 @@ const m = {
                                 }
                                 if (tech.isStunField) mobs.statusStun(mob[i], tech.isStunField)
                                 //knock backs
-                                const massRoot = Math.sqrt(Math.max(0.15, mob[i].mass)); // masses above 12 can start to overcome the push back
+                                const massRoot = Math.sqrt(Math.max(0.15, mob[i].mass));
                                 Matter.Body.setVelocity(mob[i], {
                                     x: player.velocity.x - (20 * unit.x) / massRoot,
                                     y: player.velocity.y - (20 * unit.y) / massRoot
@@ -1655,7 +1693,7 @@ const m = {
 
                             } else {
                                 if (mob[i].isDropPowerUp && player.speed < 12) {
-                                    const massRootCap = Math.sqrt(Math.min(10, Math.max(0.4, mob[i].mass))); // masses above 12 can start to overcome the push back
+                                    const massRootCap = Math.sqrt(Math.min(10, Math.max(0.2, mob[i].mass)));
                                     Matter.Body.setVelocity(player, {
                                         x: 0.9 * player.velocity.x + 0.6 * unit.x * massRootCap,
                                         y: 0.9 * player.velocity.y + 0.6 * unit.y * massRootCap
@@ -2155,7 +2193,7 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
 
-                    //shooting (or using field) enable cloak
+                    //not shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
                     if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
                         if (!m.isCloak) {

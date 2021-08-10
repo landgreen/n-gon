@@ -458,7 +458,6 @@ const mobs = {
                         ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
                         ctx.fillStyle = "rgba(255,0,170,0.15)";
                         ctx.fill();
-
                     }
                     ctx.beginPath();
                     ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);

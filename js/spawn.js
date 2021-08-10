@@ -4041,7 +4041,7 @@ const spawn = {
     },
     orbitalBoss(x, y, radius = 88) {
         const nodeBalance = Math.random()
-        const nodes = Math.min(15, Math.floor(1 + 5 * nodeBalance + 0.75 * Math.sqrt(simulation.difficulty)))
+        const nodes = Math.min(15, Math.floor(2 + 4 * nodeBalance + 0.75 * Math.sqrt(simulation.difficulty)))
         mobs.spawn(x, y, nodes, radius, "rgb(255,0,150)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -4051,8 +4051,8 @@ const spawn = {
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 2000000;
         me.memory = Infinity;
-        me.frictionAir = 0.02;
-        me.accelMag = 0.00015 * Math.sqrt(simulation.accelScale)
+        me.frictionAir = 0.04;
+        me.accelMag = 0.0003 * simulation.accelScale
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         spawn.shield(me, x, y, 1);
 

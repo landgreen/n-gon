@@ -1,9 +1,14 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-cloaking field no longer gets smaller when you are low on energy
-invisible map element bug fixed
+tech: ambush - cloaking damage effect is increase from 300% to 500%
+
+several bug fixes
+
 
 ******************************************************** TODO ********************************************************
+
+laser damage seems low based on 2 runs
+  history is low damage
 
 drones can combine with other drones to get bigger?
 drones that grab powers ups can grab more then one and get even bigger each time

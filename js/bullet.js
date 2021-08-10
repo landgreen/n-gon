@@ -1873,7 +1873,7 @@ const b = {
                 },
                 onEnd() {
                     if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                        m.health += 0.005 + 0.005 * tech.isSporeWorm
+                        m.health += 0.01
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -1931,7 +1931,7 @@ const b = {
             });
             Composite.add(engine.world, bullet[bIndex]); //add bullet to world
             if (tech.isMutualism && m.health > 0.02) {
-                m.health -= 0.005 - 0.005 * tech.isSporeWorm
+                m.health -= 0.01
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
             }
@@ -1969,7 +1969,7 @@ const b = {
                 },
                 onEnd() {
                     if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                        m.health += 0.005 + 0.005 * tech.isSporeWorm
+                        m.health += 0.005
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -2051,8 +2051,8 @@ const b = {
             });
             Composite.add(engine.world, bullet[bIndex]); //add bullet to world
 
-            if (tech.isMutualism && m.health > 0.02) {
-                m.health -= 0.005 - 0.005 * tech.isSporeWorm
+            if (tech.isMutualism && m.health > 0.01) {
+                m.health -= 0.005 
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
             }
@@ -5083,7 +5083,7 @@ const b = {
                             const previousCharge = this.charge
                             let smoothRate = (m.crouch ? 0.98 : 0.985) * (0.98 + 0.02 * b.fireCDscale) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
                             this.charge = this.charge * smoothRate + 1 - smoothRate
-                            m.energy -= (this.charge - previousCharge) * (tech.isRailEnergyGain ? 1 : 0.33) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
+                            m.energy += (this.charge - previousCharge) * (tech.isRailEnergyGain ? 1 : -0.33) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             //draw targeting
                             let best;
                             let range = 3000

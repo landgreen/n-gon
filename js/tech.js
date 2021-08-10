@@ -171,7 +171,7 @@
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 2 : 0.66
-            if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= 4
+            if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
             if (tech.isTechDamage) dmg *= 1.9
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
             if (tech.isLowEnergyDamage) dmg *= 1 + Math.max(0, 1 - m.energy) * 0.5
@@ -341,8 +341,8 @@
                 description: "spawn <strong>8</strong> <strong class='color-g'>guns</strong>, but you can't <strong>switch</strong> <strong class='color-g'>guns</strong><br><strong class='color-g'>guns</strong> cycle automatically with each new level",
                 maxCount: 1,
                 count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return (tech.isDamageForGuns || tech.isFireRateForGuns) && b.inventory.length + 5 < b.guns.length
                 },
@@ -365,7 +365,7 @@
                 description: "spawn a <strong class='color-g'>gun</strong> and </strong>double</strong> the <strong class='flicker'>frequency</strong><br>of finding  <strong class='color-m'>tech</strong> for your <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isNonRefundable: true,
                 // isExperimentHide: true,
                 isBadRandomOption: true,
@@ -383,17 +383,17 @@
                 remove() {}
             },
             {
-                name: "specialist",
+                name: "ad hoc",
                 description: "for every <strong class='color-g'>gun</strong> in your inventory spawn a<br><strong class='color-h'>heal</strong>, <strong class='color-r'>research</strong>, <strong class='color-f'>field</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-m'>tech</strong>",
                 maxCount: 1, //random power up
                 count: 0,
-                frequency: 2,
+                frequency: 1,
                 isNonRefundable: true,
                 // isExperimentHide: true,
                 allowed() {
-                    return b.inventory.length > 3
+                    return b.inventory.length > 1
                 },
-                requires: "at least 4 guns",
+                requires: "at least 2 guns",
                 effect() {
                     for (let i = 0; i < b.inventory.length; i++) {
                         if (Math.random() < 0.2) {
@@ -2582,7 +2582,7 @@
                 effect() {
                     tech.isFallingDamage = true;
                     m.setMaxHealth();
-                    m.addHealth(1)
+                    m.addHealth(1 / simulation.healScale)
                 },
                 remove() {
                     tech.isFallingDamage = false;
@@ -2800,9 +2800,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isSwitchReality && !tech.isCollisionRealitySwitch
+                    return !tech.isSwitchReality && !tech.isCollisionRealitySwitch && !tech.isJunkResearch
                 },
-                requires: "many-worlds, non-unitary",
+                requires: "many-worlds, non-unitary, not pseudoscience",
                 effect() {
                     tech.isResearchReality = true;
                     for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
@@ -2918,9 +2918,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return tech.isResearchBoss || tech.isMetaAnalysis || tech.isRerollBots || tech.isDeathAvoid || tech.isRerollDamage || build.isExperimentSelection
+                    return !tech.isResearchReality //tech.isResearchBoss || tech.isMetaAnalysis || tech.isRerollBots || tech.isDeathAvoid || tech.isRerollDamage || build.isExperimentSelection
                 },
-                requires: "abiogenesis, meta-analysis, bot fabrication, anthropic principle, or Bayesian statistics",
+                requires: "not Ψ(t) collapse", //"abiogenesis, meta-analysis, bot fabrication, anthropic principle, or Bayesian statistics, not Ψ(t) collapse",
                 effect() {
                     tech.isJunkResearch = true;
                 },
@@ -3029,7 +3029,7 @@
                 effect() {
                     tech.duplicateChance += 0.1
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    tech.addJunkTechToPool(18)
+                    tech.addJunkTechToPool(30)
                 },
                 remove() {
                     tech.duplicateChance = 0
@@ -4269,7 +4269,7 @@
             },
             {
                 name: "MIRV",
-                description: "launch <strong>+1</strong> <strong>missile</strong> at a time<br>decrease <strong>size</strong> and <strong>fire rate</strong> by <strong>10%</strong>",
+                description: "missile <strong class='color-g'>gun</strong> and <strong>bot</strong> launch <strong>+1</strong> <strong>missile</strong><br>decrease <strong>size</strong> and <strong>fire rate</strong> by <strong>10%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5880,6 +5880,25 @@
                 }
             },
             {
+                name: "ambush",
+                description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>300%</span> to <strong>500%</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+                },
+                requires: "metamaterial cloaking",
+                effect() {
+                    tech.sneakAttackDmg = 6
+                },
+                remove() {
+                    tech.sneakAttackDmg = 4
+                }
+            },
+            {
                 name: "dynamical systems",
                 description: "use <strong>1</strong> <strong class='color-r'>research</strong><br>increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>",
                 isFieldTech: true,
@@ -7443,7 +7462,7 @@
             },
             {
                 name: "quantum black hole",
-                description: "use your <strong class='color-f'>energy</strong> and <strong>1</strong> <strong class='color-r'>research</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
+                description: "use your <strong class='color-f'>energy</strong> and <strong>4</strong> <strong class='color-r'>research</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -7451,13 +7470,13 @@
                 isExperimentHide: true,
                 isJunk: true,
                 allowed() {
-                    return powerUps.research.count > 0
+                    return powerUps.research.count > 3
                 },
-                requires: "at least 1 research",
+                requires: "at least 4 research",
                 effect() {
                     m.energy = 0
                     spawn.suckerBoss(m.pos.x, m.pos.y - 700)
-                    powerUps.research.changeRerolls(-1)
+                    powerUps.research.changeRerolls(-4)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                 },
                 remove() {}
