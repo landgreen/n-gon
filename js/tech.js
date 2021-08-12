@@ -871,9 +871,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot
+                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot
                 },
-                requires: "super balls, basic or slug shotgun, drones, not irradiated drones",
+                requires: "super balls, basic or slug shotgun, drones, not irradiated drones or burst drones",
                 effect() {
                     tech.isIncendiary = true
                 },
@@ -3448,7 +3448,7 @@
                     level.difficultyDecrease(simulation.difficultyMode)
                     // simulation.difficulty<span class='color-symbol'>-=</span>
                     simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode)`)
-                    tech.addJunkTechToPool(21)
+                    tech.addJunkTechToPool(31)
                     // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
                 },
                 remove() {
@@ -4614,8 +4614,8 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isSporeWorm || tech.isWormShot
                 },
@@ -4655,25 +4655,6 @@
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "drones") b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
                     }
-                }
-            },
-            {
-                name: "brushless motor",
-                description: "<strong>drones</strong> accelerate <strong>50%</strong> faster",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
-                },
-                requires: "drones",
-                effect() {
-                    tech.isFastDrones = true
-                },
-                remove() {
-                    tech.isFastDrones = false
                 }
             },
             {
@@ -4723,14 +4704,33 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("drones") && !tech.isDroneRadioactive
+                    return tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isIncendiary
                 },
-                requires: "drone gun, not irradiated drones",
+                requires: "drone gun, not irradiated drones, incendiary",
                 effect() {
                     tech.isDroneTeleport = true
                 },
                 remove() {
                     tech.isDroneTeleport = false
+                }
+            },
+            {
+                name: "brushless motor",
+                description: "<strong>drones</strong> can <strong>rush</strong> <strong>66%</strong> more often<br>increase <strong>drone</strong> collision <strong class='color-d'>damage</strong> by <strong>44%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isDroneTeleport
+                },
+                requires: "torque bursts",
+                effect() {
+                    tech.isDroneFastLook = true
+                },
+                remove() {
+                    tech.isDroneFastLook = false
                 }
             },
             {
@@ -4783,6 +4783,25 @@
                 },
                 remove() {
                     tech.droneRadioDamage = 1
+                }
+            },
+            {
+                name: "orthocyclic winding",
+                description: "<strong>drones</strong> accelerate <strong>66%</strong> faster<br>increase <strong class='color-p'>radiation</strong> <strong class='color-d'>damage</strong> by <strong>33%</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isDroneRadioactive
+                },
+                requires: "irradiated drones",
+                effect() {
+                    tech.isFastDrones = true
+                },
+                remove() {
+                    tech.isFastDrones = false
                 }
             },
             {
@@ -5881,7 +5900,7 @@
             },
             {
                 name: "ambush",
-                description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>300%</span> to <strong>500%</strong>",
+                description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>300%</span> to <strong>600%</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5892,7 +5911,7 @@
                 },
                 requires: "metamaterial cloaking",
                 effect() {
-                    tech.sneakAttackDmg = 6
+                    tech.sneakAttackDmg = 7
                 },
                 remove() {
                     tech.sneakAttackDmg = 4
@@ -7819,6 +7838,8 @@
         isOverHeal: null,
         isDroneRadioactive: null,
         droneRadioDamage: null,
+        isDroneTeleport: null,
+        isDroneFastLook: null,
         isFoamTeleport: null,
         isResearchBoss: null,
         isJunkResearch: null,
@@ -7833,7 +7854,6 @@
         harmonicEnergy: null,
         isFieldHarmReduction: null,
         isFastTime: null,
-        isDroneTeleport: null,
         isAnthropicTech: null,
         isSporeWorm: null,
         isWormShot: null,

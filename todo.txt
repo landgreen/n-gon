@@ -1,14 +1,34 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: ambush - cloaking damage effect is increase from 300% to 500%
+tech: brushless motor - drones rush more often and do 44% more damage
+  requires torque bursts
+tech: orthocyclic winding - irradiated drones are faster and do more damage
+  requires irradiated drones 
 
-several bug fixes
+automatic aiming systems (bots, drones, missiles) will ignore the pink seeking mob bullets
 
+safari is super buggy, I'm guessing no one that reports bugs uses it.
+  fixed scroll bar covering up pause right side text on safari and firefox
+  fixed issue with ctx.setLineDash sometimes making the player dashed on safari
+
+various other bug fixes
 
 ******************************************************** TODO ********************************************************
 
+mob: spawning seekers on death
+
+"Lazer pulser Boss"
+Basically the blue lazer boss, but it has another color
+Instead of shooting one current stream of lasers, the laser is completely harmless
+If the boss focused the Lazer on the player for a certain amount of time, it'll glow brightly and send a fast, explosive pulse down the Lazer beam
+The harmless lazer beam serves like a sniper's lazer scope
+
 laser damage seems low based on 2 runs
   history is low damage
+
+buff laser push tech
+  push like plasma?
+  push harder
 
 drones can combine with other drones to get bigger?
 drones that grab powers ups can grab more then one and get even bigger each time
@@ -188,15 +208,25 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
-Matter.World module has now been replaced by Matter.Composite  (is this a possible fix?)
-  // for (let i = 0; i < array.length; ++i) Matter.World.remove(engine.world, array[i]);
-  for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
-
+safari issues
+  once: can't pick up blocks
+    fixed on new map
+    cloaking field
+  once: after damage, locked into slow time mode
+    fixed on damage
+  3 times player head graphics not rotating
+    left/right leg flip broke
+    walk leg direction,  legs are walking backwards
+    happened maybe after power up selection menu??
+    cloaking field(at least once)
+    aiming still works
+    fixed on new map, although flip still broken (is flip a separate issue?)
+      flip fixed on new game
 
 sharing builds as html doesn't work for long lists...
   it shouldn't be sharing undefined at all
   probably some other problems too
-  (might be fixed...)
+  (this might be fixed...)
 
 blocks on buttons teleport into the button endlessly if they are being slowly floated away
   maybe add a cooldown?

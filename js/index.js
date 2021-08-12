@@ -202,6 +202,7 @@ const build = {
     //     }
     // },
     pauseGrid() {
+        //right side
         let botText = ""
         if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
         if (tech.orbitBotCount) botText += `<br>orbital-bots: ${tech.orbitBotCount}`
@@ -243,13 +244,13 @@ const build = {
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[b.inventory[i]].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
         }
-
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
+
+        //left side
         text = "";
         text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
-        let countTech = 0
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
@@ -274,23 +275,13 @@ const build = {
                 } else {
                     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
-                countTech++
             } else if (tech.tech[i].isLost) {
                 text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div></div>`
             }
         }
-
-        //show in game console with scroll bar?
-        // text +=``
-
-
         el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
-        // if (countTech > 5 || b.inventory.length > 6) {
-        //     document.body.style.overflowY = "scroll";
-        //     document.body.style.overflowX = "hidden";
-        // }
     },
     unPauseGrid() {
         // document.body.style.overflow = "hidden"

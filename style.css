@@ -218,14 +218,12 @@ summary {
 }
 
 #pause-grid-right {
-    justify-content: end;
     position: relative;
     overflow: auto;
     max-height: 100vh;
 }
 
 #pause-grid-left {
-    justify-content: start;
     position: relative;
     overflow: auto;
     max-height: 100vh;

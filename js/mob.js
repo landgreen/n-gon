@@ -314,21 +314,23 @@ const mobs = {
                         this.foundPlayer();
                     } else if (this.seePlayer.recall) {
                         this.lostPlayer();
-                        for (let i = 0; i < depth; i++) { //if lost player lock onto a player location in history
-                            let history = m.history[(m.cycle - 10 * i) % 600]
-                            if (Matter.Query.ray(map, this.position, history.position).length === 0) {
-                                this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
-                                this.seePlayer.position.x = history.position.x;
-                                this.seePlayer.position.y = history.position.y;
-                                this.seePlayer.yes = true;
-                                //draw the history location found for testing purposes
-                                // ctx.beginPath();
-                                // ctx.moveTo(this.position.x, this.position.y);
-                                // ctx.lineTo(history.position.x, history.position.y);
-                                // ctx.lineWidth = 5;
-                                // ctx.strokeStyle = "#000";
-                                // ctx.stroke();
-                                break
+                        if (!m.isCloak) {
+                            for (let i = 0; i < depth; i++) { //if lost player lock onto a player location in history
+                                let history = m.history[(m.cycle - 10 * i) % 600]
+                                if (Matter.Query.ray(map, this.position, history.position).length === 0) {
+                                    this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
+                                    this.seePlayer.position.x = history.position.x;
+                                    this.seePlayer.position.y = history.position.y;
+                                    this.seePlayer.yes = true;
+                                    //draw the history location found for testing purposes
+                                    // ctx.beginPath();
+                                    // ctx.moveTo(this.position.x, this.position.y);
+                                    // ctx.lineTo(history.position.x, history.position.y);
+                                    // ctx.lineWidth = 5;
+                                    // ctx.strokeStyle = "#000";
+                                    // ctx.stroke();
+                                    break
+                                }
                             }
                         }
                     }
@@ -552,7 +554,7 @@ const mobs = {
                     ctx.lineWidth = 1;
                     ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
                     ctx.stroke(); // Draw it
-                    ctx.setLineDash([0, 0]);
+                    ctx.setLineDash([]);
                 }
             },
             searchSpring() {

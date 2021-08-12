@@ -1589,7 +1589,7 @@ const b = {
                 ctx.stroke();
                 ctx.globalAlpha *= reflectivity; //reflections are less intense
             }
-            ctx.setLineDash([0, 0]);
+            ctx.setLineDash([]);
             ctx.globalAlpha = 1;
         }
     },
@@ -2052,7 +2052,7 @@ const b = {
             Composite.add(engine.world, bullet[bIndex]); //add bullet to world
 
             if (tech.isMutualism && m.health > 0.01) {
-                m.health -= 0.005 
+                m.health -= 0.005
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
             }
@@ -2132,7 +2132,7 @@ const b = {
     },
     drone(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
         const me = bullet.length;
-        const THRUST = tech.isFastDrones ? 0.0023 : 0.0015
+        const THRUST = 0.0015
         // const FRICTION = tech.isFastDrones ? 0.008 : 0.0005
         const dir = m.angle + 0.4 * (Math.random() - 0.5);
         const RADIUS = (4.5 + 3 * Math.random())
@@ -2142,8 +2142,10 @@ const b = {
             friction: 0.05,
             frictionAir: 0,
             restitution: 1,
-            dmg: 0.24 + 0.12 * tech.isDroneTeleport, //damage done in addition to the damage from momentum
-            lookFrequency: 70 + Math.floor(17 * Math.random()),
+            density: 0.0005, //  0.001 is normal density
+            //total 0.24 + 0.3 average
+            dmg: 0.34 + 0.12 * tech.isDroneTeleport + 0.15 * tech.isDroneFastLook, //damage done in addition to the damage from momentum
+            lookFrequency: (tech.isDroneFastLook ? 20 : 70) + Math.floor(17 * Math.random()),
             endCycle: simulation.cycle + Math.floor((950 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 140 + RADIUS * 5,
             classType: "bullet",
             collisionFilter: {
@@ -2331,7 +2333,7 @@ const b = {
     },
     droneRadioactive(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
         const me = bullet.length;
-        const THRUST = tech.isFastDrones ? 0.002 : 0.0012 + 0.0004 * (Math.random() - 0.5)
+        const THRUST = (tech.isFastDrones ? 0.003 : 0.0012) + 0.0005 * (Math.random() - 0.5)
         const dir = m.angle + 0.4 * (Math.random() - 0.5);
         const RADIUS = 3
         bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
@@ -2357,12 +2359,13 @@ const b = {
             radioRadius: 0,
             maxRadioRadius: 300 + Math.floor(100 * Math.random()),
             beforeDmg(who) {
-                const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
-                Matter.Body.setVelocity(this, {
-                    x: unit.x,
-                    y: unit.y
-                });
-                this.lockedOn = null
+                // const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
+                // Matter.Body.setVelocity(this, {
+                //     x: unit.x,
+                //     y: unit.y
+                // });
+                // this.lockedOn = null
+
                 // if (this.endCycle > simulation.cycle + this.deathCycles) {
                 // this.endCycle -= 60
                 // if (simulation.cycle + this.deathCycles > this.endCycle) this.endCycle = simulation.cycle + this.deathCycles
@@ -2396,7 +2399,7 @@ const b = {
                 //aoe damage to mobs
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
-                        let dmg = 0.11 * b.dmgScale * tech.droneRadioDamage //neutron bombs  dmg = 0.09
+                        let dmg = (0.12 + 0.04 * tech.isFastDrones) * b.dmgScale * tech.droneRadioDamage //neutron bombs  dmg = 0.09
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                         if (mob[i].shield) dmg *= 3 // to make up for the /5 that shields normally take
                         mob[i].damage(dmg);
@@ -5165,7 +5168,7 @@ const b = {
                             ctx.lineWidth = this.charge * 1
                             ctx.setLineDash([10, 20]);
                             ctx.stroke();
-                            ctx.setLineDash([0, 0]);
+                            ctx.setLineDash([]);
 
                             //draw magnetic field
                             const X = m.pos.x

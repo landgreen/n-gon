@@ -670,6 +670,7 @@ const m = {
                 if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
                     tech.isDeathAvoidedThisLevel = true
                     m.health = 0.05
+                    m.displayHealth();
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
@@ -687,11 +688,11 @@ const m = {
                     }, 3000);
                 } else {
                     m.health = 0;
+                    m.displayHealth();
                     m.death();
                     return;
                 }
             }
-            m.displayHealth();
             document.getElementById("dmg").style.transition = "opacity 0s";
             document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
         }

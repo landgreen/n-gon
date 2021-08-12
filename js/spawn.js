@@ -563,7 +563,7 @@ const spawn = {
                 ctx.lineWidth = 1.5 * scale;
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
                 ctx.stroke(); // Draw it
-                ctx.setLineDash([0, 0]);
+                ctx.setLineDash([]);
                 ctx.lineWidth = 20;
                 ctx.strokeStyle = `rgba(80,0,255,${0.07*scale})`;
                 ctx.stroke(); // Draw it
@@ -579,7 +579,7 @@ const spawn = {
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
                 ctx.stroke(); // Draw it
-                ctx.setLineDash([0, 0]);
+                ctx.setLineDash([]);
                 ctx.lineWidth = 20;
                 ctx.strokeStyle = "rgba(80,0,255,0.07)";
                 ctx.stroke(); // Draw it
@@ -1319,7 +1319,7 @@ const spawn = {
             }
             // this.seePlayerCheckByDistance()
             if (!(simulation.cycle % this.seePlayerFreq)) {
-                if (this.distanceToPlayer2() < this.seeAtDistance2) { //&& !m.isCloak   ignore cloak for black holes
+                if (this.distanceToPlayer2() < this.seeAtDistance2) { //   ignore cloak for black holes
                     this.locatePlayer();
                     if (!this.seePlayer.yes) this.seePlayer.yes = true;
                 } else if (this.seePlayer.recall) {
@@ -1987,7 +1987,7 @@ const spawn = {
                 ctx.lineWidth = 3;
                 ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
                 ctx.stroke();
-                ctx.setLineDash([0, 0]);
+                ctx.setLineDash([]);
             }
         };
     },
@@ -2143,7 +2143,7 @@ const spawn = {
                             ctx.lineWidth = 2;
                             ctx.strokeStyle = "rgba(120,0,255,0.3)";
                             ctx.stroke();
-                            ctx.setLineDash([0, 0]);
+                            ctx.setLineDash([]);
                         }
                     } else { //aim at player
                         this.fireCycle++
@@ -2266,7 +2266,7 @@ const spawn = {
                             ctx.lineWidth = 2;
                             ctx.strokeStyle = "rgba(255,0,100,0.3)";
                             ctx.stroke();
-                            ctx.setLineDash([0, 0]);
+                            ctx.setLineDash([]);
                         }
                     } else { //aim at player
                         this.fireCycle++
@@ -2382,7 +2382,7 @@ const spawn = {
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
                 ctx.stroke(); // Draw it
-                ctx.setLineDash([0, 0]);
+                ctx.setLineDash([]);
                 ctx.lineWidth = 20;
                 ctx.strokeStyle = "rgba(80,0,255,0.07)";
                 ctx.stroke(); // Draw it
@@ -3524,6 +3524,7 @@ const spawn = {
         me.restitution = 0.5;
         me.leaveBody = false;
         me.isDropPowerUp = false;
+        me.isBadTarget = true;
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
@@ -3648,7 +3649,7 @@ const spawn = {
         let angle = Math.PI
         let mag = 300
 
-        const color1 = "rgb(245,180,255)"
+        const color1 = "rgb(235,180,255)"
         mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, color1); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
