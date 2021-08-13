@@ -1,17 +1,10 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-tech: brushless motor - drones rush more often and do 44% more damage
-  requires torque bursts
-tech: orthocyclic winding - irradiated drones are faster and do more damage
-  requires irradiated drones 
+new laserBombingBoss
+  I didn't do any difficulty testing, so maybe let me know if it's too easy
 
-automatic aiming systems (bots, drones, missiles) will ignore the pink seeking mob bullets
-
-safari is super buggy, I'm guessing no one that reports bugs uses it.
-  fixed scroll bar covering up pause right side text on safari and firefox
-  fixed issue with ctx.setLineDash sometimes making the player dashed on safari
-
-various other bug fixes
+laser and plasma bots will target mobs bullets
+non updating health bar bug fix
 
 ******************************************************** TODO ********************************************************
 

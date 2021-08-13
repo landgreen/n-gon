@@ -4701,8 +4701,8 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
                     return tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isIncendiary
                 },

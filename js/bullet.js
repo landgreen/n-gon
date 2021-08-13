@@ -3269,6 +3269,7 @@ const b = {
                             const DIST = Vector.magnitude(Vector.sub(this.vertices[0], mob[i].position));
                             if (DIST - mob[i].radius < closeDist &&
                                 !mob[i].isShielded &&
+                                (!mob[i].isBadTarget || mob[i].isMobBullet) &&
                                 Matter.Query.ray(map, this.vertices[0], mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.vertices[0], mob[i].position).length === 0) {
                                 closeDist = DIST;
@@ -3429,7 +3430,7 @@ const b = {
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
                             if (DIST < closeDist &&
-                                !mob[i].isBadTarget &&
+                                (!mob[i].isBadTarget || mob[i].isMobBullet) &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
                                 closeDist = DIST;

@@ -12,14 +12,12 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // localSettings.levelsClearedLastGame = 10
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(10) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
             // m.setField("perfect diamagnetism")
             // b.giveGuns("drones")
-            // tech.missileBotCount++;
-            // b.missileBot();
-            // tech.giveTech("half-wave rectifier")
+            // tech.giveTech("laser-bot")
             // b.giveGuns("nail gun")
             // tech.giveTech("Lenz's law")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
@@ -2269,9 +2267,9 @@ const level = {
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.growBossCulture(1900, -500)
-        // spawn.blinkBoss(1900, -500)
+        spawn.laserBombingBoss(1900, -500)
         // spawn.snakeSpitBoss(1900, -500)
         // spawn.growBossCulture(1900, -500)
         // spawn.sneaker(1900, -500)
