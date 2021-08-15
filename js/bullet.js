@@ -957,23 +957,16 @@ const b = {
             bullet[me].beforeDmg = function() {};
             bullet[me].stuck = function() {};
             bullet[me].do = function() {
-                function onCollide(that) {
-                    that.collisionFilter.mask = 0; //non collide with everything
-                    Matter.Body.setVelocity(that, {
-                        x: 0,
-                        y: 0
-                    });
-                    if (tech.isRPG) that.thrust = {
-                        x: 0,
-                        y: 0
-                    }
-                    that.do = that.radiationMode;
-                    // if (collides(that, map).length || Matter.Query.collides(that, body).length || Matter.Query.collides(that, mob).length) {
+                const onCollide = () => {
+                    this.collisionFilter.mask = 0; //non collide with everything
+                    Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                    if (tech.isRPG) this.thrust = { x: 0, y: 0 }
+                    this.do = this.radiationMode;
                 }
 
                 const mobCollisions = Matter.Query.collides(this, mob)
                 if (mobCollisions.length) {
-                    onCollide(this)
+                    onCollide()
                     this.stuckTo = mobCollisions[0].bodyA
                     mobs.statusDoT(this.stuckTo, 0.5, 360) //apply radiation damage status effect on direct hits
 
@@ -1002,7 +995,7 @@ const b = {
                     const bodyCollisions = Matter.Query.collides(this, body)
                     if (bodyCollisions.length) {
                         if (!bodyCollisions[0].bodyA.isNotHoldable) {
-                            onCollide(this)
+                            onCollide()
                             this.stuckTo = bodyCollisions[0].bodyA
                             //find the relative position for when the mob is at angle zero by undoing the mobs rotation
                             this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
@@ -1020,7 +1013,7 @@ const b = {
                         }
                     } else {
                         if (Matter.Query.collides(this, map).length) {
-                            onCollide(this)
+                            onCollide()
                         } else if (tech.isRPG) { //if colliding with nothing
                             this.force.x += this.thrust.x;
                             this.force.y += this.thrust.y;
@@ -1142,7 +1135,7 @@ const b = {
                 // const futurePos = this.lockedOn ? :Vector.add(this.position, Vector.mult(this.velocity, 50))
                 for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
-                        mob[i].alive && !mob[i].isBadTarget && !mob[i].isBadTarget &&
+                        mob[i].alive && !mob[i].isBadTarget &&
                         Matter.Query.ray(map, this.position, mob[i].position).length === 0
                         // && Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     ) {
@@ -1525,7 +1518,8 @@ const b = {
                 });
                 if (tech.isLaserPush) { //push mobs away
                     const index = path.length - 1
-                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.0035 * push * Math.min(6, best.who.mass))
+                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.94, y: best.who.velocity.y * 0.94 });
+                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.006 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                 }
             }
@@ -3123,7 +3117,11 @@ const b = {
                     if (this.cd < simulation.cycle && !(simulation.cycle % this.lookFrequency) && !m.isCloak) {
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                            if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 && dist2 > 250000) {
+                            if (
+                                mob[i].alive && !mob[i].isBadTarget &&
+                                dist2 > 250000 &&
+                                Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                            ) {
                                 this.cd = simulation.cycle + this.delay;
                                 const angle = Vector.angle(this.position, mob[i].position)
                                 Matter.Body.setAngle(this, angle)
@@ -4750,48 +4748,30 @@ const b = {
             name: "drones",
             description: "deploy drones that <strong>crash</strong> into mobs<br>crashes reduce their <strong>lifespan</strong> by 1 second",
             ammo: 0,
-            ammoPack: 14,
-            defaultAmmoPack: 14,
+            ammoPack: 14.5,
+            defaultAmmoPack: 14.5,
             have: false,
             do() {},
             fire() {
                 if (tech.isDroneRadioactive) {
                     if (m.crouch) {
                         b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
-                        m.fireCDcycle = m.cycle + Math.floor(5 * 13 * b.fireCDscale); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(50 * b.fireCDscale); // cool down
                     } else {
                         b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 10)
-                        m.fireCDcycle = m.cycle + Math.floor(5 * 6 * b.fireCDscale); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(25 * b.fireCDscale); // cool down
                     }
                 } else {
                     if (m.crouch) {
-                        b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 45)
-                        m.fireCDcycle = m.cycle + Math.floor(13 * b.fireCDscale); // cool down
+                        b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 55)
+                        m.fireCDcycle = m.cycle + Math.floor(10 * b.fireCDscale); // cool down
                     } else {
-                        b.drone()
-                        m.fireCDcycle = m.cycle + Math.floor(6 * b.fireCDscale); // cool down
+                        b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 20)
+                        m.fireCDcycle = m.cycle + Math.floor(5 * b.fireCDscale); // cool down
                     }
                 }
             }
         },
-        // {
-        //     name: "ice IX",
-        //     description: "synthesize <strong>short-lived</strong> ice crystals<br>crystals <strong>seek</strong> out and <strong class='color-s'>freeze</strong> mobs",
-        //     ammo: 0,
-        //     ammoPack: 64,
-        //     have: false,
-        //     do() {},
-        //     fire() {
-        //         if (m.crouch) {
-        //             b.iceIX(10, 0.3)
-        //             m.fireCDcycle = m.cycle + Math.floor(8 * b.fireCDscale); // cool down
-        //         } else {
-        //             b.iceIX(2)
-        //             m.fireCDcycle = m.cycle + Math.floor(3 * b.fireCDscale); // cool down
-        //         }
-
-        //     }
-        // },
         {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
@@ -4812,7 +4792,36 @@ const b = {
 
                     if (this.isDischarge) {
                         this.charge--
-                        this.fireFoam()
+                        const spread = (m.crouch ? 0.05 : 0.6) * (Math.random() - 0.5)
+                        const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                        const SPEED = 18 - radius * 0.4;
+                        const dir = m.angle + 0.15 * (Math.random() - 0.5)
+                        const velocity = {
+                            x: SPEED * Math.cos(dir),
+                            y: SPEED * Math.sin(dir)
+                        }
+                        const position = {
+                            x: m.pos.x + 30 * Math.cos(m.angle),
+                            y: m.pos.y + 30 * Math.sin(m.angle)
+                        }
+                        if (tech.foamFutureFire) {
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: position.x,
+                                y: position.y,
+                                radius: 5,
+                                color: "rgba(0,50,50,0.3)",
+                                time: 15 * tech.foamFutureFire
+                            });
+                            setTimeout(() => {
+                                if (!simulation.paused) {
+                                    b.foam(position, Vector.rotate(velocity, spread), radius)
+                                    // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1)
+                                    bullet[bullet.length - 1].damage *= (1 + 0.75 * tech.foamFutureFire)
+                                }
+                            }, 250 * tech.foamFutureFire);
+                        } else {
+                            b.foam(position, Vector.rotate(velocity, spread), radius)
+                        }
                         m.fireCDcycle = m.cycle + 1; //disable firing and adding more charge
                     } else if (!input.fire) {
                         this.isDischarge = true;
@@ -4825,38 +4834,6 @@ const b = {
                 this.charge++
                 m.fireCDcycle = m.cycle + Math.floor((1 + 0.35 * this.charge) * b.fireCDscale);
             },
-            fireFoam() {
-                const spread = (m.crouch ? 0.05 : 0.6) * (Math.random() - 0.5)
-                const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                const SPEED = 18 - radius * 0.4;
-                const dir = m.angle + 0.15 * (Math.random() - 0.5)
-                const velocity = {
-                    x: SPEED * Math.cos(dir),
-                    y: SPEED * Math.sin(dir)
-                }
-                const position = {
-                    x: m.pos.x + 30 * Math.cos(m.angle),
-                    y: m.pos.y + 30 * Math.sin(m.angle)
-                }
-                if (tech.foamFutureFire) {
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: position.x,
-                        y: position.y,
-                        radius: 5,
-                        color: "rgba(0,50,50,0.3)",
-                        time: 15 * tech.foamFutureFire
-                    });
-                    setTimeout(() => {
-                        if (!simulation.paused) {
-                            b.foam(position, Vector.rotate(velocity, spread), radius)
-                            // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1)
-                            bullet[bullet.length - 1].damage *= (1 + 0.75 * tech.foamFutureFire)
-                        }
-                    }, 250 * tech.foamFutureFire);
-                } else {
-                    b.foam(position, Vector.rotate(velocity, spread), radius)
-                }
-            }
         }, {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",

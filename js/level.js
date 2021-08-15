@@ -12,7 +12,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // localSettings.levelsClearedLastGame = 10
-            // level.difficultyIncrease(10) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
             // m.setField("perfect diamagnetism")
@@ -2267,12 +2267,16 @@ const level = {
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
+        // spawn.spiderBoss(1900, -500)
+        // spawn.laserBombingBoss(1900, -500)
+        // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
+
         // spawn.growBossCulture(1900, -500)
-        spawn.laserBombingBoss(1900, -500)
-        // spawn.snakeSpitBoss(1900, -500)
-        // spawn.growBossCulture(1900, -500)
-        // spawn.sneaker(1900, -500)
+        spawn.sneaker(1900, -500)
+        spawn.sneaker(1900, -500)
+        spawn.shield(mob[mob.length - 1], 1900, -500, 1);
+        // mob[mob.length - 1].isShielded = true
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.focuser(1600, -500)
@@ -2284,7 +2288,6 @@ const level = {
         // spawn.cellBossCulture(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
         // spawn.grenadierBoss(1200, -500)
-        // spawn.shield(mob[mob.length - 1], 1800, -120, 1);
 
         // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.snakeBoss(1200, -500)

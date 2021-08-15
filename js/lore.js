@@ -305,7 +305,7 @@ const lore = {
                 lore.talkingColor = "#dff"
                 level.isHazardRise = true
                 //remove all bullets, so they can't get endless energy
-                for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
+                for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = [];
                 setTimeout(() => { lore.anand.text("I'm actually surprised you haven't been attacked by the adversarial network this time.") }, 500);
             },

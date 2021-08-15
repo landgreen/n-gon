@@ -1,27 +1,15 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-new laserBombingBoss
-  I didn't do any difficulty testing, so maybe let me know if it's too easy
+relativistic momentum: laser pushes harder and slows mobs a bit to give a more predictable effect
+laserBombingBoss targets faster at higher levels
+you can now block shielded mobs, but your shield gets disabled for a bit
 
-laser and plasma bots will target mobs bullets
-non updating health bar bug fix
+fixed bug that made perfect diamagnetism have trouble blocking too many things at once
+and more small bug fixes, of course
 
 ******************************************************** TODO ********************************************************
 
 mob: spawning seekers on death
-
-"Lazer pulser Boss"
-Basically the blue lazer boss, but it has another color
-Instead of shooting one current stream of lasers, the laser is completely harmless
-If the boss focused the Lazer on the player for a certain amount of time, it'll glow brightly and send a fast, explosive pulse down the Lazer beam
-The harmless lazer beam serves like a sniper's lazer scope
-
-laser damage seems low based on 2 runs
-  history is low damage
-
-buff laser push tech
-  push like plasma?
-  push harder
 
 drones can combine with other drones to get bigger?
 drones that grab powers ups can grab more then one and get even bigger each time

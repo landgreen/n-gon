@@ -812,13 +812,13 @@ const simulation = {
                 if (tech.isFlipFlopOn) {
                     if (m.immuneCycle < m.cycle) m.energy += 0.22;
                 } else {
-                    m.energy -= 0.041;
+                    m.energy -= 0.022;
                     if (m.energy < 0) m.energy = 0
                 }
             }
             if (tech.relayIce && tech.isFlipFlopOn) {
                 for (let j = 0; j < tech.relayIce; j++) {
-                    for (let i = 0, len = Math.ceil(8 * Math.random()); i < len; i++) b.iceIX(2)
+                    for (let i = 0, len = Math.ceil(9 * Math.random()); i < len; i++) b.iceIX(2)
                 }
             }
 

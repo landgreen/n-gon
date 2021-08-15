@@ -110,6 +110,7 @@ const spawn = {
         me.isShielded = true; //makes it immune to damage
         me.leaveBody = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.collisionFilter.category = 0;
@@ -166,6 +167,7 @@ const spawn = {
         me.isShielded = true; //makes it immune to damage
         me.leaveBody = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.collisionFilter.category = 0;
@@ -1998,19 +2000,19 @@ const spawn = {
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0005 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.00055 * Math.sqrt(simulation.accelScale);
         me.seePlayerFreq = Math.floor(30 * simulation.lookFreqScale);
         me.memory = 420;
         me.restitution = 1;
         me.frictionAir = 0.05;
         me.frictionStatic = 0;
         me.friction = 0;
-        me.lookTorque = 0.000005 * (Math.random() > 0.5 ? -1 : 1);
+        me.lookTorque = 0.0000055 * (Math.random() > 0.5 ? -1 : 1) * (1 + 0.1 * Math.sqrt(simulation.difficulty))
         me.fireDir = {
             x: 0,
             y: 0
         }
-        Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random())
         me.onHit = function() {};
@@ -2019,7 +2021,7 @@ const spawn = {
         };
         me.damageReduction = 0.25
         me.targetingCount = 0;
-        me.targetingTime = 60 - Math.min(55, 2 * simulation.difficulty)
+        me.targetingTime = 60 - Math.min(58, 3 * simulation.difficulty)
         me.do = function() {
             // this.armor();
             this.seePlayerByLookingAt();
@@ -2103,7 +2105,7 @@ const spawn = {
                         this.targetingCount -= 10;
                         const sub = Vector.sub(player.position, this.position)
                         const dist = Vector.magnitude(sub)
-                        const speed = 30
+                        const speed = Math.min(55, 5 + 20 * simulation.accelScale)
                         const velocity = Vector.mult(Vector.normalise(sub), speed)
                         spawn.grenade(this.vertices[1].x, this.vertices[1].y, dist / speed, Math.min(550, 250 + simulation.difficulty * 3), 6); //    grenade(x, y, lifeSpan = 90 + Math.ceil(60 / simulation.accelScale), pulseRadius = Math.min(550, 250 + simulation.difficulty * 3), size = 4) {
                         Matter.Body.setVelocity(mob[mob.length - 1], velocity);
@@ -2125,15 +2127,15 @@ const spawn = {
                 ctx.moveTo(this.vertices[1].x, this.vertices[1].y);
                 ctx.lineTo(best.x, best.y);
                 ctx.strokeStyle = "rgba(0,235,255,1)";
-                ctx.lineWidth = 2
+                ctx.lineWidth = 3
                 ctx.stroke();
                 if (this.targetingCount / this.targetingTime > 0.33) {
-                    ctx.strokeStyle = "rgba(0,235,255,0.4)";
-                    ctx.lineWidth = 8
+                    ctx.strokeStyle = "rgba(0,235,255,0.45)";
+                    ctx.lineWidth = 10
                     ctx.stroke();
                     if (this.targetingCount / this.targetingTime > 0.66) {
-                        ctx.strokeStyle = "rgba(0,235,255,0.2)";
-                        ctx.lineWidth = 25
+                        ctx.strokeStyle = "rgba(0,235,255,0.25)";
+                        ctx.lineWidth = 30
                         ctx.stroke();
                     }
                 }
@@ -2144,20 +2146,20 @@ const spawn = {
         };
     },
     blinkBoss(x, y) {
-        mobs.spawn(x, y, 5, 50, "rgb(215,80,190)"); //"rgb(221,102,119)"
+        mobs.spawn(x, y, 5, 50, "rgb(0,235,255)"); //"rgb(221,102,119)"
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, Math.PI * 0.1);
-        Matter.Body.setDensity(me, 0.02); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.018); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
 
         me.frictionStatic = 0;
         me.friction = 0;
         me.memory = 240
         me.seePlayerFreq = 60
-        me.delay = 20 + 30 * simulation.CDScale;
+        me.delay = 25 + 30 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         me.blinkRange = 235
-        me.grenadeDelay = 30 + 60 * simulation.CDScale
+        me.grenadeDelay = 35 + 60 * simulation.CDScale
         me.pulseRadius = 2 * Math.min(550, 220 + simulation.difficulty * 4)
         spawn.shield(me, x, y, 1);
         me.onDamage = function() {
@@ -3185,7 +3187,7 @@ const spawn = {
                     } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
                         //fire
                         spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 15), 4);
-                        const v = 20 * simulation.accelScale;
+                        const v = 10 + 15 * simulation.accelScale;
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: this.velocity.x + this.fireDir.x * v + Math.random(),
                             y: this.velocity.y + this.fireDir.y * v + Math.random()
@@ -3246,8 +3248,8 @@ const spawn = {
             this.explode(this.mass * 20);
         };
         Matter.Body.setDensity(me, 0.00005); //normal is 0.001
-        me.timeLeft = 240;
-        me.g = 0.0005; //required if using 'gravity'
+        me.timeLeft = 120;
+        // me.g = 0.0005; //required if using 'gravity'
         me.frictionAir = 0;
         me.restitution = 0;
         me.leaveBody = false;
@@ -3258,7 +3260,7 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.do = function() {
-            this.gravity();
+            // this.gravity();
             this.timeLimit();
             if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 3) {
                 this.isDropPowerUp = false;
@@ -3339,7 +3341,7 @@ const spawn = {
         };
     },
     grenadierBoss(x, y, radius = 95) {
-        mobs.spawn(x, y, 6, radius, "rgb(215,80,190)");
+        mobs.spawn(x, y, 6, radius, "rgb(0,235,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
 
@@ -3391,7 +3393,7 @@ const spawn = {
         };
     },
     grenadier(x, y, radius = 35 + Math.ceil(Math.random() * 20)) {
-        mobs.spawn(x, y, 3, radius, "rgb(215,80,190)"); //rgb(255,100,200)
+        mobs.spawn(x, y, 3, radius, "rgb(0,235,255)"); //rgb(255,100,200)
         let me = mob[mob.length - 1];
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
@@ -4063,6 +4065,7 @@ const spawn = {
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.shield = true;
             me.damageReduction = 0.075
+            me.isUnblockable = true
             me.isExtraShield = isExtraShield //this prevents spamming with tech.isShieldAmmo
             me.collisionFilter.category = cat.mobShield
             me.collisionFilter.mask = cat.bullet;
@@ -4162,6 +4165,7 @@ const spawn = {
         me.leaveBody = false;
         me.isDropPowerUp = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
         me.showHealthBar = false;
         me.isOrbital = true;
         // me.isShielded = true
@@ -4393,6 +4397,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
 
         me.do = function() {
             let wireX = -50;
@@ -4461,6 +4466,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
 
         me.do = function() {
             let wireX = -50 - 20;
@@ -4512,6 +4518,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
 
         me.do = function() {
             let wireX = -50 - 35;
@@ -4562,6 +4569,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
 
         me.do = function() {
             let wireX = -50 + 16;
@@ -4612,6 +4620,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.isBadTarget = true;
+        me.isUnblockable = true;
 
         me.do = function() {
             let wireX = -50 + 26;

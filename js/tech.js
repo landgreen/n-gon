@@ -168,7 +168,7 @@
         damageFromTech() {
             let dmg = 1 //m.fieldDamage
             if (tech.isCloakingDamage) dmg *= 1.35
-            if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.45
+            if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.5
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
             if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 2 : 0.66
             if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
@@ -1805,7 +1805,7 @@
             },
             {
                 name: "thermocouple",
-                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-7</strong> <strong class='color-s'>ice IX</strong> crystals every second",
+                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-9</strong> <strong class='color-s'>ice IX</strong> crystals every second",
                 maxCount: 9,
                 count: 0,
                 frequency: 4,
@@ -1823,7 +1823,7 @@
             },
             {
                 name: "NAND gate",
-                description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>45%</strong> more <strong class='color-d'>damage</strong>",
+                description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>50%</strong> more <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -1841,7 +1841,7 @@
             },
             {
                 name: "transistor",
-                description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>4.1</strong> <strong class='color-f'>energy</strong> per second",
+                description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>2.2</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -7536,7 +7536,8 @@
                 description: `<strong class="lore-text">this</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
+                frequency: 3,
+                frequencyDefault: 3,
                 isLore: true,
                 // isNonRefundable: true,
                 isExperimentHide: true,
