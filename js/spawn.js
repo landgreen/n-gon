@@ -98,6 +98,7 @@ const spawn = {
             } else {
                 tech.addJunkTechToPool(49)
             }
+            console.log('hi')
             spawn.randomLevelBoss(x, y);
         }
     },

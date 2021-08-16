@@ -1577,7 +1577,7 @@ const m = {
         },
         {
             name: "perfect diamagnetism",
-            description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br><strong>deflecting</strong> has <strong>90%</strong> less <strong>recoil</strong>",
+            description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br>maintains <strong>functionality</strong> while <strong>inactive</strong>",
             // description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> doesn't drain <strong class='color-f'>energy</strong><br>thrown <strong class='color-block'>blocks</strong> have",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
             effect: () => {
@@ -1681,8 +1681,8 @@ const m = {
                 }
                 m.hold = function() {
                     const wave = Math.sin(m.cycle * 0.022);
-                    m.fieldRange = 190 + 12 * wave
-                    m.fieldArc = 0.36 + 0.04 * wave //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+                    m.fieldRange = 160 + 12 * wave + 100 * tech.isBigField
+                    m.fieldArc = 0.34 + 0.04 * wave + 0.065 * tech.isBigField //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
                     m.calculateFieldThreshold();
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -1722,7 +1722,7 @@ const m = {
                         m.pickUp();
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                        if (!input.field) { //tech.isFieldFre
+                        if (!input.field) { //&& tech.isFieldFree
                             //draw field free of player
                             ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
                             ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"

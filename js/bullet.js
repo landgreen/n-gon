@@ -1211,7 +1211,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0007 + m.fieldRegen
+        const DRAIN = 0.0008 + m.fieldRegen
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -1230,7 +1230,7 @@ const b = {
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: b.dmgScale * 1.4, //damage also changes when you divide by mob.mass on in .do()
+                dmg: b.dmgScale * 1.8, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -3403,7 +3403,7 @@ const b = {
             cd: 0,
             acceleration: 0.009,
             endCycle: Infinity,
-            drainThreshold: tech.isEnergyHealth ? 0.5 : 0.33,
+            drainThreshold: tech.isEnergyHealth ? 0.5 : 0.05,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -3443,7 +3443,7 @@ const b = {
                     const DIST = Vector.magnitude(sub);
                     const unit = Vector.normalise(sub)
                     if (DIST < tech.isPlasmaRange * 450 && m.energy > this.drainThreshold) {
-                        m.energy -= 0.005;
+                        m.energy -= 0.0003 + m.fieldRegen //0.004; //normal plasma field is 0.00008 + m.fieldRegen = 0.00108
                         // if (m.energy < 0) {
                         //     m.fieldCDcycle = m.cycle + 120;
                         //     m.energy = 0;
@@ -3518,7 +3518,7 @@ const b = {
                                 y: best.y
                             };
                             if (best.who.alive) {
-                                const dmg = 0.6 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                                const dmg = 0.65 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
                                 //push mobs away

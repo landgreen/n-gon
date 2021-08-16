@@ -5373,8 +5373,8 @@
                 }
             },
             {
-                name: "Lenz's law",
-                description: "after deactivation <strong>perfect diamagnetism</strong><br>maintains at the <strong>location</strong> you left it",
+                name: "Meissner effect",
+                description: "increase <strong>perfect diamagnetism</strong> field<br><strong>radius</strong> by <strong>55%</strong> and circular <strong>arc</strong> by <strong>22°</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5385,10 +5385,10 @@
                 },
                 requires: "perfect diamagnetism",
                 effect() {
-                    tech.isFieldFree = true;
+                    tech.isBigField = true;
                 },
                 remove() {
-                    tech.isFieldFree = false;
+                    tech.isBigField = false;
                 }
             },
             {
@@ -5708,7 +5708,7 @@
             // },
             {
                 name: "plasma-bot",
-                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
+                description: "remove your <strong>field</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5717,40 +5717,52 @@
                 isBot: true,
                 isBotTech: true,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && (build.isExperimentSelection || powerUps.research.count > 0)
+                    return !tech.isExtruder && m.fieldUpgrades[m.fieldMode].name === "plasma torch" && (build.isExperimentSelection || powerUps.research.count > 0)
                 },
-                requires: "plasma torch",
+                requires: "plasma torch, not micro-extruder",
                 effect() {
                     tech.plasmaBotCount++;
                     b.plasmaBot();
-                    for (let i = 0; i < 1; i++) {
-                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    if (build.isExperimentSelection) {
+                        document.getElementById("field-" + m.fieldMode).classList.remove("build-field-selected");
+                        document.getElementById("field-0").classList.add("build-field-selected");
                     }
+                    m.setField("field emitter")
                 },
                 remove() {
-                    tech.plasmaBotCount = 0;
-                    b.clearPermanentBots();
-                    b.respawnBots();
-                    if (this.count > 0) powerUps.research.changeRerolls(1)
+                    if (this.count > 0) {
+                        tech.plasmaBotCount = 0;
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                        if (m.fieldMode === 0) {
+                            m.setField("plasma torch")
+                            if (build.isExperimentSelection) {
+                                document.getElementById("field-0").classList.remove("build-field-selected");
+                                document.getElementById("field-" + m.fieldMode).classList.add("build-field-selected");
+                            }
+                        }
+                    }
                 }
             },
             {
                 name: "plasma jet",
-                description: "increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>30%</strong>",
+                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to <br>increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>50%</strong>",
                 isFieldTech: true,
-                maxCount: 9,
+                maxCount: 3,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder
+                    return (tech.plasmaBotCount || (m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder)) && (build.isExperimentSelection || powerUps.research.count > 0)
                 },
                 requires: "plasma torch, not micro-extruder",
                 effect() {
-                    tech.isPlasmaRange += 0.3;
+                    tech.isPlasmaRange += 0.5;
+                    if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                 },
                 remove() {
                     tech.isPlasmaRange = 1;
+                    if (this.count > 0) powerUps.research.changeRerolls(this.count)
                 }
             },
             {
@@ -5781,9 +5793,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaRange === 1
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaRange === 1 && tech.plasmaBotCount === 0
                 },
-                requires: "plasma torch, not plasma jet",
+                requires: "plasma torch, not plasma jet, plasma-bot",
                 effect() {
                     tech.isExtruder = true;
                 },
@@ -7865,5 +7877,6 @@
         isZeno: null,
         isFieldFree: null,
         wormSurviveDmg: null,
-        isExtraGunField: null
+        isExtraGunField: null,
+        isBigField: null
     }

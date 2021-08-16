@@ -17,7 +17,7 @@ const level = {
             // tech.isFieldFree = true
             // m.setField("perfect diamagnetism")
             // b.giveGuns("drones")
-            // tech.giveTech("laser-bot")
+            // tech.giveTech("Meissner effect")
             // b.giveGuns("nail gun")
             // tech.giveTech("Lenz's law")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
@@ -2316,7 +2316,7 @@ const level = {
         // spawn.randomSmallMob(1300, -70);
         // spawn.randomMob(2650, -975, 0.8);
         // spawn.randomGroup(1700, -900, 0.4);
-        // if (simulation.difficulty > 3) spawn.randomLevelBoss(2200, -1300);
+        // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     final() {
@@ -3091,7 +3091,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss"]);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss"]);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(7725, 2275)
 
@@ -3266,7 +3266,7 @@ const level = {
         spawn.randomGroup(2700, -1600, 0.1);
         spawn.randomGroup(1600, -100, 0);
         spawn.randomGroup(5000, -3900, -0.3);
-        if (simulation.difficulty > 3) {
+        if (simulation.difficulty > 1) {
             if (Math.random() < 0.25) {
                 spawn.randomLevelBoss(2800, -1400);
             } else if (Math.random() < 0.25) {
@@ -3449,7 +3449,7 @@ const level = {
         spawn.randomGroup(600, -1575, 0);
         spawn.randomGroup(2225, -1325, 0.4);
         spawn.randomGroup(4900, -1200, 0);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(3200, -1900);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(3200, -1900);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(2175, -2425)
 
@@ -3643,7 +3643,7 @@ const level = {
         spawn.randomMob(3575, -2425, 0.5);
         spawn.randomMob(3975, -3900, 0.5);
         spawn.randomMob(1725, 125, 0.5);
-        if (simulation.difficulty > 3) {
+        if (simulation.difficulty > 1) {
             if (Math.random() < 0.33) {
                 spawn.randomLevelBoss(4250, -250);
                 spawn.debris(-250, 50, 1650, 2); //16 debris per level
@@ -3834,7 +3834,7 @@ const level = {
         spawn.randomMob(-100, -1700, -0.2);
         spawn.randomGroup(3700, -1500, 0.4);
         spawn.randomGroup(1700, -900, 0.4);
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(2600, -2300);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(2600, -2300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(3075, -2050)
 
@@ -4076,7 +4076,7 @@ const level = {
         spawn.randomGroup(-3250, -2700, 0.2);
         spawn.randomGroup(-2450, -1100, 0);
 
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(-2400, -2650);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(-2400, -2650);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(-1825, -1975)
 
@@ -4386,7 +4386,7 @@ const level = {
         spawn.randomSmallMob(-2325, 800);
         spawn.randomSmallMob(-900, 825);
 
-        if (simulation.difficulty > 3) {
+        if (simulation.difficulty > 1) {
             if (Math.random() < 0.33) {
                 spawn.randomLevelBoss(-800, -1300)
             } else {
@@ -4615,7 +4615,7 @@ const level = {
         spawn.randomMob(950, -1150, -0.1);
         spawn.randomGroup(1800, -800, -0.2);
         spawn.randomGroup(4150, -1000, 0.6);
-        if (simulation.difficulty > 3) {
+        if (simulation.difficulty > 1) {
             if (Math.random() < 0.5) {
                 spawn.tetherBoss(2850, -80, { x: 2500, y: -500 })
                 //chance to spawn a ring of exploding mobs around this boss
@@ -4836,7 +4836,9 @@ const level = {
         spawn.randomGroup(2350, -850, 1);
         spawn.randomGroup(100, -450, 0.9);
 
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(1850, -1400);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(1850, -1400);
+        spawn.secondaryBossChance(1850, -1400)
+
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     basement() { // player made level  by    Francois 👑 from discord
@@ -5063,22 +5065,22 @@ const level = {
         spawn.mapRect(2050, -1225, 75, 100); //Plateforme over acid
         // MOBS
         if (isLevelReversed === false) { ///Normal spawn
-            if (simulation.difficulty > 2) {
+            if (simulation.difficulty > 1) {
                 if (Math.random() < 0.2) {
                     // tether ball
                     spawn.tetherBoss(7000, -3300, { x: 7300, y: -3300 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(7000, -3300, "spawns", 8, 20, 105);
-                } else if (simulation.difficulty > 3) {
+                } else {
                     spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "pulsarBoss"]);
                 }
             }
         } else { /// Reversed spawn
-            if (simulation.difficulty > 2) {
+            if (simulation.difficulty > 1) {
                 if (Math.random() < 0.2) {
                     // tether ball
                     spawn.tetherBoss(2300, -1300, { x: 2300, y: -1750 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(2350, -1300, "spawns", 8, 20, 105);
-                } else if (simulation.difficulty > 3) {
+                } else {
                     spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss", "pulsarBoss"]);
                 }
             }
@@ -5136,8 +5138,9 @@ const level = {
         spawn.mapRect(3300, 1075, 1500, 1800); //Mur droite salle trésor
         // tether ball
         spawn.tetherBoss(2330, 1850, { x: 2330, y: 1425 })
+        spawn.secondaryBossChance(2330, 1850)
         //chance to spawn a ring of exploding mobs around this boss
-        if (simulation.difficulty > 4) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
+        if (simulation.difficulty > 1) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
         powerUps.chooseRandomPowerUp(3100, 1630);
     },
     detours() { //by Francois from discord
@@ -5419,6 +5422,7 @@ const level = {
             //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
             // } else {
             spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss", "pulsarBoss"]);
+            spawn.secondaryBossChance(8000, 630)
             //find level boss index
             let me
             for (let i = 0, len = mob.length; i < len; i++) {
@@ -5918,6 +5922,7 @@ const level = {
         spawn.randomGroup(630, -1300, -0.1);
         spawn.randomGroup(3450, -2880, -0.2)
         if (simulation.difficulty > 3) {
+            spawn.secondaryBossChance(3380, -1775)
             if (Math.random() < 0.16) {
                 spawn.tetherBoss(3380, -1775, { x: 3775, y: -1775 })
                 if (simulation.difficulty > 4) spawn.nodeGroup(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss

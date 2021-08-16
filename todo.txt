@@ -1,13 +1,22 @@
 ******************************************************** NEXT PATCH ********************************************************
 
-relativistic momentum: laser pushes harder and slows mobs a bit to give a more predictable effect
-laserBombingBoss targets faster at higher levels
-you can now block shielded mobs, but your shield gets disabled for a bit
+perfect diamagnetism can maintain after you deactivate the field with out tech: Lenz's law
+  starting perfect diamagnetism is a bit smaller
+tech: Meissner effect - makes perfect diamagnetism much bigger
 
-fixed bug that made perfect diamagnetism have trouble blocking too many things at once
-and more small bug fixes, of course
+plasma-bot removes plasma field
+  plasma-bot uses much less energy and does a bit more damage
+plasma jet requires 1 research, increases range 50% (was 30%)
+tech microextruder does 30% more damage and uses 10% more energy
 
 ******************************************************** TODO ********************************************************
+
+plasma bot removes your field
+  buff plasma bot? (not sure you need to)
+  spawn a field power up?
+    no need it will show up on next boss
+  requires not plasma wire tech
+  can tokamak work outside plasma field?
 
 mob: spawning seekers on death
 
