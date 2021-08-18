@@ -15,9 +15,9 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // tech.isFieldFree = true
-            // m.setField("perfect diamagnetism")
-            // b.giveGuns("drones")
-            // tech.giveTech("Meissner effect")
+            // m.setField("time dilation")
+            // b.giveGuns("mine")
+            // tech.giveTech("laser-mines")
             // b.giveGuns("nail gun")
             // tech.giveTech("Lenz's law")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
@@ -113,24 +113,24 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.915; //damage done by player decreases each level
+            b.dmgScale *= 0.914; //damage done by player decreases each level
             if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.39 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.915; //damage done by player decreases each level
+            b.dmgScale /= 0.914; //damage done by player decreases each level
             if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
             if (simulation.lookFreqScale < 5) simulation.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.39 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },

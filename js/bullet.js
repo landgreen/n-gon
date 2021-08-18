@@ -717,7 +717,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0005);
-            bullet[me].explodeRad = 275;
+            bullet[me].explodeRad = 300;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
@@ -742,7 +742,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0005);
-            bullet[me].explodeRad = 300;
+            bullet[me].explodeRad = 305;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
@@ -777,7 +777,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0005);
-            bullet[me].explodeRad = 333 + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
+            bullet[me].explodeRad = 350 + Math.floor(Math.random() * 50) + tech.isBlockExplode * 110
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 4)
@@ -853,7 +853,7 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 20, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0003);
-            bullet[me].explodeRad = 333 + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
+            bullet[me].explodeRad = 350 + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 6)
@@ -1044,7 +1044,7 @@ const b = {
                         //aoe damage to mobs
                         for (let i = 0, len = mob.length; i < len; i++) {
                             if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
-                                let dmg = b.dmgScale * 0.09
+                                let dmg = b.dmgScale * 0.1
                                 if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                                 if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
                                 mob[i].damage(dmg);
@@ -1587,6 +1587,20 @@ const b = {
             ctx.globalAlpha = 1;
         }
     },
+    AoEStunEffect(where, range, cycles = 100 + 80 * Math.random()) {
+        for (let i = 0, len = mob.length; i < len; ++i) {
+            if (mob[i].alive && !mob[i].isShielded && !mob[i].shield && !mob[i].isBadTarget) {
+                if (Vector.magnitude(Vector.sub(where, mob[i].position)) - mob[i].radius < range) mobs.statusStun(mob[i], cycles)
+            }
+        }
+        simulation.drawList.push({
+            x: where.x,
+            y: where.y,
+            radius: range,
+            color: "rgba(0,0,0,0.1)",
+            time: 15
+        });
+    },
     laserMine(position, velocity = { x: 0, y: -8 }) {
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 3, 25, {
@@ -1624,15 +1638,17 @@ const b = {
                 if (!(simulation.cycle % this.lookFrequency) && m.energy > this.drain) { //find mob targets
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (
-                            Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 2000000 &&
+                            Vector.magnitude(Vector.sub(this.position, mob[i].position)) < 1300 &&
                             !mob[i].isBadTarget &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
+                            b.AoEStunEffect(this.position, 1300);
                             this.do = this.laserSpin
                             this.endCycle = simulation.cycle + 360
                             // if (this.angularSpeed < 0.01) this.torque += this.inertia * this.torqueMagnitude * 5 //spin
                             this.isArmed = true
+                            break
                         }
                     }
                 }
@@ -1708,11 +1724,7 @@ const b = {
                                         });
                                         Matter.Body.setAngularVelocity(this, 0)
                                     }
-                                    if (tech.isMineSentry) {
-                                        this.sentry();
-                                    } else {
-                                        this.arm();
-                                    }
+                                    this.arm();
 
                                     //sometimes the mine can't attach to map and it just needs to be reset
                                     const that = this
@@ -1736,41 +1748,47 @@ const b = {
                         this.stillCount++
                     }
                 }
-                if (this.stillCount > 25) {
-                    if (tech.isMineSentry) {
-                        this.sentry();
-                    } else {
-                        this.arm();
-                    }
-                }
+                if (this.stillCount > 25) this.arm();
             },
-            sentry() {
-                this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet //can now collide with other bullets
-                this.lookFrequency = simulation.cycle + 60
-                this.endCycle = simulation.cycle + 1620
-                this.do = function() { //overwrite the do method for this bullet
-                    this.force.y += this.mass * 0.002; //extra gravity
-                    if (simulation.cycle > this.lookFrequency) {
-                        this.lookFrequency = 8 + Math.floor(3 * Math.random())
-                        this.do = function() { //overwrite the do method for this bullet
-                            this.force.y += this.mass * 0.002; //extra gravity
-                            if (!(simulation.cycle % this.lookFrequency) && !m.isBodiesAsleep) { //find mob targets
-                                this.endCycle -= 8
-                                b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, false, 2) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
-                                if (!(simulation.cycle % (this.lookFrequency * 6))) {
-                                    simulation.drawList.push({
-                                        x: this.position.x,
-                                        y: this.position.y,
-                                        radius: 8,
-                                        color: "#fe0",
-                                        time: 4
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+            // sentry() {
+            //     this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet //can now collide with other bullets
+            //     this.lookFrequency = simulation.cycle + 60
+            //     this.do = function() { //overwrite the do method for this bullet
+            //         this.force.y += this.mass * 0.002; //extra gravity
+            //         if (simulation.cycle > this.lookFrequency) {
+            //             const random = 300 * Math.random
+            //             for (let i = 0, len = mob.length; i < len; ++i) {
+            //                 if (
+            //                     !mob[i].isBadTarget &&
+            //                     Vector.magnitude(Vector.sub(this.position, mob[i].position)) < 700 + mob[i].radius + random &&
+            //                     Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+            //                     Matter.Query.ray(body, this.position, mob[i].position).length === 0
+            //                 ) {
+
+            //                     this.lookFrequency = 8 + Math.floor(3 * Math.random())
+            //                     this.endCycle = simulation.cycle + 900
+            //                     this.do = function() { //overwrite the do method for this bullet
+            //                         this.force.y += this.mass * 0.002; //extra gravity
+            //                         if (!(simulation.cycle % this.lookFrequency) && !m.isBodiesAsleep) { //find mob targets
+            //                             // this.endCycle -= 8
+            //                             b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, false, 2) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
+            //                             if (!(simulation.cycle % (this.lookFrequency * 6))) {
+            //                                 simulation.drawList.push({
+            //                                     x: this.position.x,
+            //                                     y: this.position.y,
+            //                                     radius: 8,
+            //                                     color: "#fe0",
+            //                                     time: 4
+            //                                 });
+            //                             }
+            //                         }
+            //                     }
+
+            //                 }
+            //             }
+            //         }
+            //     }
+            // },
             arm() {
                 this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet //can now collide with other bullets
                 this.lookFrequency = simulation.cycle + 60
@@ -1789,13 +1807,41 @@ const b = {
                         this.do = function() { //overwrite the do method for this bullet
                             this.force.y += this.mass * 0.002; //extra gravity
                             if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
+                                const random = 300 * Math.random()
                                 for (let i = 0, len = mob.length; i < len; ++i) {
-                                    if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 &&
+                                    if (
                                         !mob[i].isBadTarget &&
+                                        Vector.magnitude(Vector.sub(this.position, mob[i].position)) < 700 + mob[i].radius + random &&
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-                                        this.endCycle = 0 //end life if mob is near and visible
-                                        if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back after detonation
+                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                                    ) {
+                                        b.AoEStunEffect(this.position, 700 + mob[i].radius + random);
+                                        if (tech.isMineSentry) {
+                                            this.lookFrequency = 8 + Math.floor(3 * Math.random())
+                                            this.endCycle = simulation.cycle + 900
+                                            this.do = function() { //overwrite the do method for this bullet
+                                                this.force.y += this.mass * 0.002; //extra gravity
+                                                if (!(simulation.cycle % this.lookFrequency) && !m.isBodiesAsleep) { //find mob targets
+                                                    b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, false, 2) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
+                                                    if (!(simulation.cycle % (this.lookFrequency * 6))) {
+                                                        simulation.drawList.push({
+                                                            x: this.position.x,
+                                                            y: this.position.y,
+                                                            radius: 8,
+                                                            color: "#fe0",
+                                                            time: 4
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                            break
+                                        } else {
+                                            this.endCycle = 0 //end life if mob is near and visible
+                                            if (Math.random() < 0.8) isAmmoBack = false; //20% chance to get ammo back after detonation
+                                            break
+                                        }
+
+
                                     }
                                 }
                             }
@@ -1805,8 +1851,7 @@ const b = {
             },
             onEnd() {
                 if (this.isArmed) {
-                    b.targetedNail(this.position, 22, 40 + 10 * Math.random(), 1200, true, 1.9) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
-
+                    b.targetedNail(this.position, tech.isMineSentry ? 7 : 22, 40 + 10 * Math.random(), 1200, true, 1.9) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
                 }
                 if (tech.isMineAmmoBack && (!this.isArmed || Math.random() < 0.2)) { //get ammo back from tech.isMineAmmoBack
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
@@ -2382,7 +2427,7 @@ const b = {
                 this.radioRadius = this.radioRadius * 0.993 + 0.007 * this.maxRadioRadius //smooth radius towards max
                 //aoe damage to player
                 if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radioRadius) {
-                    const DRAIN = tech.isRadioactiveResistance ? 0.0023 * 0.25 : 0.0023
+                    const DRAIN = tech.isRadioactiveResistance ? 0.002 * 0.25 : 0.002
                     if (m.energy > DRAIN) {
                         if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
@@ -2724,7 +2769,12 @@ const b = {
         const targets = [] //target nearby mobs
         for (let i = 0, len = mob.length; i < len; i++) {
             const dist = Vector.magnitude(Vector.sub(position, mob[i].position));
-            if (dist < range && Matter.Query.ray(map, position, mob[i].position).length === 0 && Matter.Query.ray(body, position, mob[i].position).length === 0) {
+            if (
+                dist < range + mob[i].radius &&
+                (!mob[i].isBadTarget) && //|| mob[i].isMobBullet
+                Matter.Query.ray(map, position, mob[i].position).length === 0 &&
+                Matter.Query.ray(body, position, mob[i].position).length === 0
+            ) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
             }
         }
@@ -3830,11 +3880,11 @@ const b = {
                 let knock, spread
                 if (m.crouch) {
                     spread = 0.65
-                    m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale) // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(58 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(58 * b.fireCDscale); //player is immune to damage for 30 cycles
+                    m.fireCDcycle = m.cycle + Math.floor(60 * b.fireCDscale) // cool down
+                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(60 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(60 * b.fireCDscale); //player is immune to damage for 30 cycles
                     knock = 0.01
                 } else {
-                    m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCDscale) // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(47 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
@@ -4198,8 +4248,8 @@ const b = {
                                 }
                                 if (!mob[j].isShielded) {
                                     Matter.Body.setVelocity(mob[j], { //friction
-                                        x: mob[j].velocity.x * 0.93,
-                                        y: mob[j].velocity.y * 0.93
+                                        x: mob[j].velocity.x * 0.95,
+                                        y: mob[j].velocity.y * 0.95
                                     });
                                     //draw vibes
                                     let vertices = mob[j].vertices;
@@ -4585,20 +4635,37 @@ const b = {
             name: "mine",
             description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>fires <strong>nails</strong> at mobs within range",
             ammo: 0,
-            ammoPack: 1.5,
+            ammoPack: 1.4,
             have: false,
             do() {},
             fire() {
-                if (tech.isLaserMine) { //laser mine
-                    const speed = m.crouch ? 50 : 20
-                    const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
-                    b.laserMine(m.pos, velocity)
-                } else { //normal mines
+
+                if (m.crouch) {
+                    if (tech.isLaserMine) {
+                        const speed = 40
+                        const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
+                        b.laserMine(m.pos, velocity)
+                    } else {
+                        const pos = {
+                            x: m.pos.x + 30 * Math.cos(m.angle),
+                            y: m.pos.y + 30 * Math.sin(m.angle)
+                        }
+                        let speed = 36
+                        if (Matter.Query.point(map, pos).length > 0) { //don't fire if mine will spawn inside map
+                            speed = -2
+                        }
+                        b.mine(pos, {
+                            x: speed * Math.cos(m.angle),
+                            y: speed * Math.sin(m.angle)
+                        }, 0, tech.isMineAmmoBack)
+                    }
+                    m.fireCDcycle = m.cycle + Math.floor(50 * b.fireCDscale); // cool down
+                } else {
                     const pos = {
                         x: m.pos.x + 30 * Math.cos(m.angle),
                         y: m.pos.y + 30 * Math.sin(m.angle)
                     }
-                    let speed = m.crouch ? 36 : 22
+                    let speed = 23
                     if (Matter.Query.point(map, pos).length > 0) { //don't fire if mine will spawn inside map
                         speed = -2
                     }
@@ -4606,8 +4673,8 @@ const b = {
                         x: speed * Math.cos(m.angle),
                         y: speed * Math.sin(m.angle)
                     }, 0, tech.isMineAmmoBack)
+                    m.fireCDcycle = m.cycle + Math.floor(25 * b.fireCDscale); // cool down
                 }
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 50 : 25) * b.fireCDscale); // cool down
             }
         }, {
             name: "spores",
@@ -4838,7 +4905,7 @@ const b = {
             name: "rail gun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
-            ammoPack: 4.1,
+            ammoPack: 3.5,
             have: false,
             do() {},
             fire() {

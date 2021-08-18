@@ -490,7 +490,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
-        if (tech.isZeno) dmg *= 0.16
+        if (tech.isZeno) dmg *= 0.17
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
@@ -1949,7 +1949,7 @@ const m = {
                             m.energy -= 0.04;
                             b.iceIX(1)
                         } else if (tech.isDroneRadioactive) {
-                            m.energy -= 0.85;
+                            m.energy -= 0.8;
                             b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
                         } else {
                             m.energy -= 0.45 * tech.droneEnergyReduction;
@@ -2038,6 +2038,7 @@ const m = {
                 // m.fieldMeterColor = "#000"
                 m.fieldFire = true;
                 m.isBodiesAsleep = false;
+                m.drain = 0.0005
                 m.hold = function() {
                     if (m.isHolding) {
                         m.wakeCheck();
@@ -2048,10 +2049,10 @@ const m = {
                         m.grabPowerUp();
                         m.lookForPickUp(180);
 
-                        const DRAIN = 0.0013
-                        if (m.energy > DRAIN) {
-                            m.energy -= DRAIN;
-                            if (m.energy < DRAIN) {
+                        m.drain += 0.0000025
+                        if (m.energy > m.drain) {
+                            m.energy -= m.drain;
+                            if (m.energy < m.drain) {
                                 m.fieldCDcycle = m.cycle + 120;
                                 m.energy = 0;
                                 m.wakeCheck();
@@ -2076,19 +2077,6 @@ const m = {
                             sleep(mob);
                             sleep(body);
                             sleep(bullet);
-                            // for (let i = 0, len = cons.length; i < len; i++) {
-                            //     Matter.Body.setVelocity(cons[i].bodyB, {
-                            //         x: 0,
-                            //         y: 0
-                            //     });
-                            // }
-                            //doesn't really work, just slows down constraints
-                            // for (let i = 0, len = cons.length; i < len; i++) {
-                            //     if (cons[i].stiffness !== 0) {
-                            //         cons[i].storeStiffness = cons[i].stiffness;
-                            //         cons[i].stiffness = 0;
-                            //     }
-                            // }
 
                             simulation.cycle--; //pause all functions that depend on game cycle increasing
                             if (tech.isTimeSkip) {
@@ -2097,32 +2085,17 @@ const m = {
                                 m.cycle++;
                                 simulation.gravity();
                                 if (tech.isFireMoveLock && input.fire) {
-                                    // Matter.Body.setVelocity(player, {
-                                    //     x: 0,
-                                    //     y: -55 * player.mass * simulation.g //undo gravity before it is added
-                                    // });
                                     player.force.x = 0
                                     player.force.y = 0
                                 }
                                 Engine.update(engine, simulation.delta);
                                 m.move();
                                 simulation.checks();
-                                // mobs.loop();
-                                // m.draw();
                                 m.walk_cycle += m.flipLegs * m.Vx;
-                                // m.hold();
-                                // m.energy += DRAIN; // 1 to undo the energy drain from time speed up, 0.5 to cut energy drain in half
-
                                 b.fire();
-                                // b.bulletRemove();
                                 b.bulletDo();
                                 simulation.isTimeSkipping = false;
                             }
-                            // simulation.cycle--; //pause all functions that depend on game cycle increasing
-                            // if (tech.isTimeSkip && !simulation.isTimeSkipping) { //speed up the rate of time
-                            //   simulation.timeSkip(1)
-                            //   m.energy += 1.5 * DRAIN; //x1 to undo the energy drain from time speed up, x1.5 to cut energy drain in half
-                            // }
                         } else { //holding, but field button is released
                             m.wakeCheck();
                         }
@@ -2130,9 +2103,11 @@ const m = {
                         m.wakeCheck();
                         m.pickUp();
                     } else {
+                        if (m.drain > 0.0005) m.drain -= 0.000005 //return drain to base level
                         m.wakeCheck();
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
+                    // console.log(m.drain.toFixed(6))
                     m.drawFieldMeter()
                 }
             }

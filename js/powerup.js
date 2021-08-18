@@ -568,7 +568,7 @@ const powerUps = {
                     // if (powerUps.research.count) text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"><div class="circle-grid research"></div> &nbsp; research <span class="research-select">${powerUps.research.count}</span></div></div>`
 
                     if (tech.isExtraGunField) {
-                        if (Math.random() > 0.5) {
+                        if (Math.random() > 0.5 && b.inventory.length < b.guns.length) {
                             //bonus gun in tech menu
                             let choiceGun = powerUps.gun.pick(b.guns)
                             powerUps.gun.choiceLog.push(choiceGun)
@@ -693,8 +693,8 @@ const powerUps = {
         powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
         if (tech.isMassEnergy) m.energy += 2;
-        if (tech.isMineDrop) {
-            if (tech.isLaserMine) {
+        if (tech.isMineDrop && b.length < 150) {
+            if (tech.isLaserMine && m.crouch) {
                 b.laserMine(who.position)
             } else {
                 b.mine(who.position, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)

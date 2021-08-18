@@ -1,22 +1,24 @@
-******************************************************** NEXT PATCH ********************************************************
+******************************************************** NEXT PATCH **************************************************
+tech: blast mines - mines stun when they activate
 
-perfect diamagnetism can maintain after you deactivate the field with out tech: Lenz's law
-  starting perfect diamagnetism is a bit smaller
-tech: Meissner effect - makes perfect diamagnetism much bigger
+laser mines only fire if crouching  (so you can fire normal mines when energy is low)
+mines now includes the radius of the mob when calculating mobs in range
+  so it will detonate from the final boss from farther away
+mines have a small random chance to detonate from targets up to 40% father away
 
-plasma-bot removes plasma field
-  plasma-bot uses much less energy and does a bit more damage
-plasma jet requires 1 research, increases range 50% (was 30%)
-tech microextruder does 30% more damage and uses 10% more energy
+time dilation field drains less energy for the first few seconds, but linearly ramps up energy drain as you stay frozen in time
+  unfreezing time returns you the normal drain rate in half the time to ramp up
+  this should be a buff for all situations, except someone who has a huge external source of energy
+
+360 wave beam has reduced mob slow effect
 
 ******************************************************** TODO ********************************************************
 
-plasma bot removes your field
-  buff plasma bot? (not sure you need to)
-  spawn a field power up?
-    no need it will show up on next boss
-  requires not plasma wire tech
-  can tokamak work outside plasma field?
+look into 360 wave beam lag
+
+mines stun mobs in range
+
+tech: shrapnel - nails have an larger randomized 3 point shape triangle shape and they do more damage
 
 mob: spawning seekers on death
 
@@ -35,9 +37,6 @@ make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
 using wormhole makes you immune to harm and drains energy until you run out
   disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
-
-pink seeker boss is cool as heck, make an alt version of it
-snake tail is cool, make an alt version of it
 
 block shattering
  get code from planetesimals

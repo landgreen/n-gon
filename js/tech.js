@@ -2,9 +2,9 @@
         totalCount: null,
         setupAllTech() {
             for (let i = 0, len = tech.tech.length; i < len; i++) {
-                tech.tech[i].remove();
-                tech.tech[i].isLost = false
                 tech.tech[i].count = 0
+                tech.tech[i].isLost = false
+                tech.tech[i].remove();
                 if (tech.tech[i].isJunk) {
                     tech.tech[i].frequency = 0
                 } else if (tech.tech[i].frequencyDefault) {
@@ -670,7 +670,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isExplosionStun
+                    return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isExplosionStun || tech.isMineStun
                 },
                 requires: "a stun effect",
                 effect() {
@@ -1937,7 +1937,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isStunField || tech.isExplosionStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
+                    return tech.isStunField || tech.isExplosionStun || tech.isMineStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "a freezing or stunning effect",
                 effect() {
@@ -2478,7 +2478,7 @@
             },
             {
                 name: "Zeno's paradox",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>84%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/10</strong> of your current <strong class='color-h'>health</strong>",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>83%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/10</strong> of your current <strong class='color-h'>health</strong>",
                 // description: "every <strong>5</strong> seconds remove <strong>1/10</strong> of your <strong class='color-h'>health</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong>",
                 maxCount: 1,
                 count: 0,
@@ -4417,16 +4417,16 @@
             },
             {
                 name: "laser-mines",
-                description: "<strong>mines</strong> hover in place until <strong>mobs</strong> get in range<br><strong>mines</strong> use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong class='color-laser'>lasers</strong>",
+                description: "<strong>mines</strong> laid while you are <strong>crouched</strong><br>use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong class='color-laser'>lasers</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("mine") || tech.isMineDrop) && !tech.isMineSentry
+                    return tech.haveGunCheck("mine")
                 },
-                requires: "mines, not sentry",
+                requires: "mines",
                 effect() {
                     tech.isLaserMine = true;
                 },
@@ -4443,9 +4443,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("mine") && !tech.isMineSentry
+                    return tech.haveGunCheck("mine") && !tech.isMineDrop
                 },
-                requires: "mine, not sentry",
+                requires: "mine, not bobby trap",
                 effect() {
                     tech.isMineAmmoBack = true;
                 },
@@ -4455,16 +4455,16 @@
             },
             {
                 name: "sentry",
-                description: "<strong>mines</strong> <strong>target</strong> mobs with nails over time<br>mines last about <strong>14</strong> seconds",
+                description: "instead of detonating, <strong>mines</strong> <strong>target</strong> mobs<br>with a stream of nails for about <strong>14</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("mine") || tech.isMineDrop) && !tech.isMineAmmoBack && !tech.isLaserMine
+                    return tech.haveGunCheck("mine")
                 },
-                requires: "mines, not mine reclamation, laser-mines",
+                requires: "mines",
                 effect() {
                     tech.isMineSentry = true;
                 },
@@ -4473,24 +4473,43 @@
                 }
             },
             {
-                name: "booby trap",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+23</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                name: "blast mines",
+                description: "when a <strong>mine</strong> <strong>activates</strong><br>it <strong>stuns</strong> nearby mobs for up to <strong>3</strong> seconds",
+                isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isMineSentry === true || tech.isLaserMine === true || tech.isMineAmmoBack === true
+                    return tech.haveGunCheck("mine")
                 },
-                requires: "some mine tech",
+                requires: "mines",
+                effect() {
+                    tech.isMineStun = true;
+                },
+                remove() {
+                    tech.isMineStun = false;
+                }
+            },
+            {
+                name: "booby trap",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+30</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("mine") && !tech.isMineAmmoBack
+                },
+                requires: "mines, not mine reclamation",
                 effect() {
                     tech.isMineDrop = true;
                     if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
-                    tech.addJunkTechToPool(23)
+                    tech.addJunkTechToPool(30)
                 },
                 remove() {
                     tech.isMineDrop = false;
-                    if (this.count > 0) tech.removeJunkTechFromPool(13)
+                    if (this.count > 0) tech.removeJunkTechFromPool(30)
                 }
             },
             {
@@ -7878,5 +7897,6 @@
         isFieldFree: null,
         wormSurviveDmg: null,
         isExtraGunField: null,
-        isBigField: null
+        isBigField: null,
+        isMineStun: null
     }
