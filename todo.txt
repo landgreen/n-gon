@@ -1,22 +1,12 @@
 ******************************************************** NEXT PATCH **************************************************
-tech: blast mines - mines stun when they activate
 
-laser mines only fire if crouching  (so you can fire normal mines when energy is low)
-mines now includes the radius of the mob when calculating mobs in range
-  so it will detonate from the final boss from farther away
-mines have a small random chance to detonate from targets up to 40% father away
-
-time dilation field drains less energy for the first few seconds, but linearly ramps up energy drain as you stay frozen in time
-  unfreezing time returns you the normal drain rate in half the time to ramp up
-  this should be a buff for all situations, except someone who has a huge external source of energy
-
-360 wave beam has reduced mob slow effect
+20% damage for all mine modes
 
 ******************************************************** TODO ********************************************************
 
 look into 360 wave beam lag
 
-mines stun mobs in range
+aoe effect pushes mobs away,  then rapidly pulls them in
 
 tech: shrapnel - nails have an larger randomized 3 point shape triangle shape and they do more damage
 
@@ -31,7 +21,6 @@ make non moving bosses not move after getting hit
   shooter, shielding, 
 
 buff rail gun
-buff mines
 
 make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff

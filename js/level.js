@@ -14,12 +14,11 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // tech.isFieldFree = true
-            // m.setField("time dilation")
             // b.giveGuns("mine")
-            // tech.giveTech("laser-mines")
             // b.giveGuns("nail gun")
-            // tech.giveTech("Lenz's law")
+            // m.setField("wormhole")
+            // tech.giveTech("ice crystal nucleation")
+            // tech.giveTech("irradiated nails")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
 
             level.intro(); //starting level
@@ -2272,10 +2271,10 @@ const level = {
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        // spawn.growBossCulture(1900, -500)
-        spawn.sneaker(1900, -500)
-        spawn.sneaker(1900, -500)
-        spawn.shield(mob[mob.length - 1], 1900, -500, 1);
+        spawn.sniper(1900, -500)
+        spawn.grenadier(1900, -500)
+        // spawn.sneaker(1900, -500)
+        // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.historyBoss(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)

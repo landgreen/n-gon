@@ -610,6 +610,8 @@ const simulation = {
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
 
+        document.getElementById("health").style.display = "inline"
+        document.getElementById("health-bg").style.display = "inline"
         m.alive = true;
         m.setMaxHealth()
         m.health = 0;

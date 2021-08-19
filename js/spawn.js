@@ -91,6 +91,7 @@ const spawn = {
     secondaryBossChance(x, y) {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
             spawn.randomLevelBoss(x, y);
+            return true
         } else if (tech.isResearchBoss) {
             if (powerUps.research.count > 3) {
                 powerUps.research.changeRerolls(-4)
@@ -98,9 +99,10 @@ const spawn = {
             } else {
                 tech.addJunkTechToPool(49)
             }
-            console.log('hi')
             spawn.randomLevelBoss(x, y);
+            return true
         }
+        return false
     },
     //mob templates *********************************************************************************************
     //***********************************************************************************************************
