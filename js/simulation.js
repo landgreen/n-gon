@@ -501,6 +501,52 @@ const simulation = {
     },
     fpsInterval: 0, //set in startGame
     then: null,
+    introPlayer() { //not work, but trying to show player in the intro screen
+        setTimeout(() => {
+            document.getElementById("info").style.display = "none";
+            document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
+
+            simulation.clearMap()
+            m.draw = m.drawDefault //set the play draw to normal, undoing some junk tech
+            m.spawn(); //spawns the player
+            m.look = m.lookDefault
+
+
+            //level
+
+            level.testing(); //not in rotation, used for testing
+
+
+            //load level
+            simulation.setZoom();
+            level.addToWorld(); //add bodies to game engine
+            simulation.draw.setPaths();
+
+            function cycle() {
+                simulation.gravity();
+                Engine.update(engine, simulation.delta);
+                simulation.wipe();
+                if (m.onGround) {
+                    m.groundControl()
+                } else {
+                    m.airControl()
+                }
+                m.move();
+                // m.look();
+                // simulation.camera();
+                m.draw();
+                m.hold();
+                simulation.draw.drawMapPath();
+                ctx.restore();
+                if (simulation.onTitlePage) requestAnimationFrame(cycle);
+            }
+            requestAnimationFrame(cycle)
+
+
+
+
+        }, 1000);
+    },
     startGame(isBuildRun = false) {
         simulation.clearMap()
         if (!isBuildRun) { //if a build run logic flow returns to "experiment-button").addEventListener

@@ -470,7 +470,7 @@
             },
             {
                 name: "desublimated ammunition",
-                description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong>",
+                description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong><<br>strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -481,11 +481,32 @@
                 requires: "",
                 effect() {
                     tech.isCrouchAmmo = true
+                    tech.addJunkTechToPool(6)
                 },
                 remove() {
                     tech.isCrouchAmmo = false;
+                    if (this.count > 0) tech.removeJunkTechFromPool(6)
                 }
             },
+            // <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+            //     maxCount: 9,
+            //     count: 0,
+            //     frequency: 1,
+            //     frequencyDefault: 1,
+            //     allowed() {
+            //         return true
+            //     },
+            //     requires: "",
+            //     effect() {
+            //         tech.bonusEnergy += 0.6
+            //         m.setMaxEnergy()
+            //         tech.addJunkTechToPool(10)
+            //     },
+            //     remove() {
+            //         tech.bonusEnergy = 0;
+            //         m.setMaxEnergy()
+            //         if (this.count > 0) tech.removeJunkTechFromPool(10)
+            //     }
             {
                 name: "gun turret",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong> when <strong>crouching</strong>",
@@ -3155,23 +3176,54 @@
             },
             {
                 name: "apomixis",
-                description: "after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong> chance<br>immediately spawn <strong>8 bosses</strong>",
+                description: "use <strong>11</strong> <strong class='color-r'>research</strong> to spawn <strong>8 bosses</strong><br>immediately after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong>",
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 3,
+                frequencyDefault: 3,
                 allowed() {
-                    return tech.duplicationChance() > 0.6
+                    return tech.duplicationChance() > 0.6 && powerUps.research.count > 10
                 },
                 requires: "duplication chance above 60%",
                 effect() {
                     tech.is100Duplicate = true;
                     tech.maxDuplicationEvent()
+                    for (let i = 0; i < 11; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
                 },
                 remove() {
-                    tech.is100Duplicate = false;
+                    if (tech.is100Duplicate) {
+                        tech.is100Duplicate = false;
+                        if (this.count > 0) powerUps.research.changeRerolls(11)
+                    }
                 }
             },
+            // {
+            //     name: "zero point energy",
+            //     description: "use <strong>2</strong> <strong class='color-r'>research</strong> to<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>",
+            //     isFieldTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 3,
+            //     frequencyDefault: 3,
+            //     allowed() {
+            //         return (m.fieldUpgrades[m.fieldMode].name === "standing wave harmonics" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
+            //     },
+            //     requires: "standing wave harmonics or pilot wave",
+            //     effect() {
+            //         tech.harmonicEnergy = 0.74
+            //         m.setMaxEnergy()
+            //         for (let i = 0; i < 2; i++) {
+            //             if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+            //         }
+            //     },
+            //     remove() {
+            //         tech.harmonicEnergy = 0;
+            //         m.setMaxEnergy()
+            //         if (this.count > 0) powerUps.research.changeRerolls(2)
+            //     }
+            // },
             {
                 name: "exchange symmetry",
                 description: "convert <strong>1</strong> random <strong class='color-m'>tech</strong> into <strong>3</strong> new <strong class='color-g'>guns</strong><br><em>recursive tech lose all stacks</em>",
@@ -3835,6 +3887,7 @@
                         if (b.guns[i].name === "shotgun") {
                             b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.5);
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.5
+                            simulation.makeGunHUD();
                             break;
                         }
                     }
@@ -3847,6 +3900,7 @@
                             if (b.guns[i].name === "shotgun") {
                                 b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
                                 b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 2);
+                                simulation.makeGunHUD();
                                 break;
                             }
                         }
@@ -4455,7 +4509,7 @@
             },
             {
                 name: "sentry",
-                description: "instead of detonating, <strong>mines</strong> <strong>target</strong> mobs<br>with a stream of nails for about <strong>15</strong> seconds",
+                description: "instead of detonating, <strong>mines</strong> <strong>target</strong> mobs<br>with a stream of nails for about <strong>17</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4771,6 +4825,7 @@
                         if (b.guns[i].name === "drones") {
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.25
                             b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.25)
+                            simulation.makeGunHUD();
                         }
                     }
                 },
@@ -4781,6 +4836,7 @@
                             if (b.guns[i].name === "drones") {
                                 b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
                                 b.guns[i].ammo = b.guns[i].ammo * 4
+                                simulation.makeGunHUD();
                             }
                         }
                     }
@@ -4845,7 +4901,7 @@
             },
             {
                 name: "uncertainty principle",
-                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>60%</strong>",
+                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>55%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4883,7 +4939,7 @@
             },
             {
                 name: "aerogel",
-                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>300%</strong>",
+                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>260%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4904,7 +4960,7 @@
             },
             {
                 name: "quantum foam",
-                description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>70%</strong>",
+                description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>66%</strong>",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,

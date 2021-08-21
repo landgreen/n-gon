@@ -17,7 +17,7 @@ const level = {
             // b.giveGuns("mine")
             // b.giveGuns("nail gun")
             // m.setField("wormhole")
-            // tech.giveTech("ice crystal nucleation")
+            // tech.giveTech("laser-mines")
             // tech.giveTech("irradiated nails")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
 
@@ -2271,8 +2271,8 @@ const level = {
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        spawn.sniper(1900, -500)
-        spawn.grenadier(1900, -500)
+        // spawn.sniper(1900, -500)
+        // spawn.grenadier(1900, -500)
         // spawn.sneaker(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true

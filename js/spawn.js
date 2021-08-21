@@ -1496,7 +1496,7 @@ const spawn = {
         let targets = [] //track who is in the node boss, for shields
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.0032); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0032); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
         me.isBoss = true;
 
         targets.push(me.id) //add to shield protection
@@ -1538,7 +1538,7 @@ const spawn = {
         Composite.add(engine.world, cons[cons.length - 1]);
         cons[len2].length = 100 + 1.5 * radius;
         me.cons2 = cons[len2];
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 //normal is 1,  most bosses have 0.25
         me.do = function() {
             // this.armor();
             this.gravity();
@@ -1694,7 +1694,7 @@ const spawn = {
 
         me.showHealthBar = false; //drawn in this.awake
         me.delayLimit = 60 + Math.floor(30 * Math.random());
-        me.followDelay = 600 - Math.floor(60 * Math.random())
+        me.followDelay = 600 - Math.floor(90 * Math.random())
         me.stroke = "transparent"; //used for drawGhost
         me.collisionFilter.mask = cat.bullet | cat.body
         me.memory = Infinity
@@ -1772,7 +1772,7 @@ const spawn = {
             // ctx.fillStyle = "rgba(150,0,255,0.03)";
             // ctx.fill();
             if (!m.isBodiesAsleep && !this.isStunned && !this.isSlowed) {
-                if (this.followDelay > this.delayLimit) this.followDelay -= 0.2;
+                if (this.followDelay > this.delayLimit) this.followDelay -= 0.15;
                 let history = m.history[(m.cycle - Math.floor(this.followDelay)) % 600]
                 Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }

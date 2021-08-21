@@ -1607,12 +1607,12 @@ const b = {
             bulletType: "mine",
             angle: m.angle,
             friction: 0,
-            frictionAir: 0.05,
+            frictionAir: 0.025,
             restitution: 0.5,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 67 + Math.floor(7 * Math.random()),
-            drain: 0.45 * tech.isLaserDiode * tech.laserFieldDrain,
+            drain: 0.5 * tech.isLaserDiode * tech.laserFieldDrain,
             isArmed: false,
             torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
             range: 1500,
@@ -1645,6 +1645,7 @@ const b = {
                         ) {
                             if (tech.isMineStun) b.AoEStunEffect(this.position, 1300);
                             this.do = this.laserSpin
+                            if (this.angularSpeed < 0.5) this.torque += this.inertia * this.torqueMagnitude * 200 //spin
                             this.endCycle = simulation.cycle + 360 + 120
                             // if (this.angularSpeed < 0.01) this.torque += this.inertia * this.torqueMagnitude * 5 //spin
                             this.isArmed = true
@@ -1658,7 +1659,7 @@ const b = {
                 //drain energy
                 if (m.energy > this.drain) {
                     m.energy -= this.drain
-                    if (this.angularSpeed < 0.02) this.torque += this.inertia * this.torqueMagnitude //spin
+                    if (this.angularSpeed < 0.05) this.torque += this.inertia * this.torqueMagnitude //spin
 
                     //fire lasers
                     ctx.strokeStyle = tech.laserColor;
@@ -1791,6 +1792,15 @@ const b = {
             //     }
             // },
             arm() {
+                //false alert
+                // for (let i = 0, len = mob.length; i < len; i++) {
+                //     if (!mob[i].seePlayer.recall && Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 4000000) { //2000 range
+                //         mob[i].seePlayer.recall = 240; //cycles before mob falls a sleep
+                //         mob[i].seePlayer.position.x = this.position.x;
+                //         mob[i].seePlayer.position.y = this.position.y;
+                //     }
+                // }
+
                 this.collisionFilter.mask = cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.bullet //can now collide with other bullets
                 this.lookFrequency = simulation.cycle + 60
                 this.do = function() { //overwrite the do method for this bullet
@@ -1819,7 +1829,7 @@ const b = {
                                         if (tech.isMineStun) b.AoEStunEffect(this.position, 700 + mob[i].radius + random);
                                         if (tech.isMineSentry) {
                                             this.lookFrequency = 8 + Math.floor(3 * Math.random())
-                                            this.endCycle = simulation.cycle + 960
+                                            this.endCycle = simulation.cycle + 1020
                                             this.do = function() { //overwrite the do method for this bullet
                                                 this.force.y += this.mass * 0.002; //extra gravity
                                                 if (!(simulation.cycle % this.lookFrequency) && !m.isBodiesAsleep) { //find mob targets
@@ -2597,7 +2607,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1), //damage done over time
+            damage: (tech.isFastFoam ? 0.039 : 0.011) * (tech.isFoamTeleport ? 1.55 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -3874,8 +3884,8 @@ const b = {
             name: "shotgun",
             description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
-            ammoPack: 4.3,
-            defaultAmmoPack: 4.3,
+            ammoPack: 4,
+            defaultAmmoPack: 4,
             have: false,
             do() {},
             fire() {
@@ -4641,10 +4651,9 @@ const b = {
             have: false,
             do() {},
             fire() {
-
                 if (m.crouch) {
                     if (tech.isLaserMine) {
-                        const speed = 40
+                        const speed = 30
                         const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
                         b.laserMine(m.pos, velocity)
                     } else {
@@ -4885,7 +4894,7 @@ const b = {
                                 if (!simulation.paused) {
                                     b.foam(position, Vector.rotate(velocity, spread), radius)
                                     // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1)
-                                    bullet[bullet.length - 1].damage *= (1 + 0.75 * tech.foamFutureFire)
+                                    bullet[bullet.length - 1].damage *= (1 + 0.7 * tech.foamFutureFire)
                                 }
                             }, 250 * tech.foamFutureFire);
                         } else {

@@ -1,8 +1,35 @@
 ******************************************************** NEXT PATCH **************************************************
 
 20% damage for all mine modes
+laser mines spin super fast when it first finds a target, and a bit faster overall
+mine sentry lasts 17 seconds (2 more seconds)
 
+desublimated ammunition comes with 7 JUNK tech
+several foam tech do 5% less damage
+shotgun has 1/9 less ammo
+apomixis now requires 11 research
+historyBoss takes 25% longer to reach it's minimum follow distance
+
+bug fixes
 ******************************************************** TODO ********************************************************
+
+work on necroBoss from TheShwarma
+  make spawned blocks in the direction of the player
+  make it search the level for blocks, but also kinda avoid the player
+
+falling particle rain
+  what causes it?
+    after taking damage
+    mines
+    grenades
+    mines and grenades
+    once a second you just eject rain upwards
+    after collecting a power up
+  basically spores with no guidance
+  lag if too many particles?
+
+wormhole show where you would go on mouse down
+  trigger teleport on release
 
 look into 360 wave beam lag
 
